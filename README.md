@@ -1,5 +1,4 @@
 
-
 ![weidentity-logo.jpeg](docs/images/weidentity-logo.png)
 
 ---
@@ -52,22 +51,21 @@ WeIdentity DID秉承以下设计理念：
 
 ### 可验证数字凭证 (WeIdentity Credential)
 
-现实世界中存在着各种各样用于描述实体身份、实体间关系的数据，如身份证、行驶证、存款证明、处方、毕业证、房产证、信用报告等。WeIdentity Credential提供了一整套基于W3C VC规范的解决方案，旨在对这一类数据进行标准化、电子化，生成可验证、可交换的「凭证」（Credential）。
+现实世界中存在着各种各样用于描述实体身份、实体间关系的数据，如身份证、行驶证、存款证明、处方、毕业证、房产证、信用报告等。WeIdentity Credential提供了一整套基于[W3C VC规范](https://w3c.github.io/vc-data-model/)的解决方案，旨在对这一类数据进行标准化、电子化，生成可验证、可交换的「凭证」（Credential）。
 
 WeIdentity支持认证机构自行注册标准化凭证模板，共同丰富公众联盟链的生态。
 
 ### 更多
 
-* [案例及场景](docs/use-cases.md)
-* [WeIdentity规范文档](docs/weidentity-spec.md)
+* [案例及场景](docs/use-cases.rst)
+* [WeIdentity规范文档](https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-spec.html)
 
 ## 开始使用
 
 WeIdentity目前支持基于FISCO-BCOS运行，并提供JAVA SDK供调用。具体的规范文档、安装部署和SDK使用指引请参考如下文档：
 
-* [安装部署文档](docs/weidentity-installation.md)
-
-* [SDK使用文档](docs/weidentity-java-sdk-doc.md)
+* [安装部署文档](https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-installation.html)
+* [SDK使用文档](https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-java-sdk-doc.html)
 
 ## 联系我们
 邮箱：weidentity@webank.com

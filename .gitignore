@@ -1,1 +1,6 @@
 *pdf
+
+_build
+_templates
+
+.vscode/
