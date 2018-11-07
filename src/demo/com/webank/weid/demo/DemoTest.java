@@ -28,7 +28,7 @@ import com.webank.weid.util.DateUtils;
 import org.springframework.stereotype.Component;
 
 /**
- * weId demo
+ * WeIdentity DID demo
  *
  * @author v_wbgyang
  */
@@ -59,7 +59,7 @@ public class DemoTest extends DemoBase {
         CreateWeIdDataResult createWeId = demo.createWeId();
         BeanUtil.print(createWeId);
 
-        // set weId
+        // set WeIdentity DID
         demo.setPublicKey(createWeId, "secp256k1");
         demo.setService(createWeId, "drivingCardService", "https://weidentity.webank.com/endpoint/8377464");
         demo.setAuthenticate(createWeId, "RsaSignatureAuthentication2018");

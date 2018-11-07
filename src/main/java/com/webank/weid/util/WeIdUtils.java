@@ -50,7 +50,7 @@ public final class WeIdUtils {
      * Convert an account address to WeIdentity DID.
      *
      * @param address the address
-     * @return a related weId, or empty string if the input is illegal.
+     * @return a related WeIdentity DID, or empty string if the input is illegal.
      */
     public static String convertAddressToWeId(String address) {
         if (StringUtils.isEmpty(address)) {

@@ -53,7 +53,7 @@ public interface WeIdService {
      * Query WeIdentity DID document.
      *
      * @param weId the WeIdentity DID
-     * @return weId document in json type
+     * @return WeIdentity document in json type
      */
     ResponseData<String> getWeIdDocumentJson(String weId);
 

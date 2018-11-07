@@ -31,7 +31,7 @@ import lombok.Data;
 public class SetServiceArgs {
 
     /**
-     * Required: user's weId.
+     * Required: user's WeIdentity DID.
      */
     private String weId;
 

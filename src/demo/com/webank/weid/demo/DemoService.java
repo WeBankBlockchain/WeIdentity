@@ -58,11 +58,11 @@ public class DemoService {
     WeIdService weIdService;
 
     /**
-     * create Weid
+     * create WeIdentity DID
      */
     public CreateWeIdDataResult createWeId() {
 
-        // create weId,publicKey,privateKey
+        // create WeIdentity DID,publicKey,privateKey
         ResponseData<CreateWeIdDataResult> responseCreate = weIdService.createWeId();
         // check result is success
         if (responseCreate.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
@@ -96,7 +96,7 @@ public class DemoService {
     public void setService(
         CreateWeIdDataResult createResult, String serviceType, String serviceEnpoint) {
 
-        // setService for this weId
+        // setService for this WeIdentity DID
         SetServiceArgs setServiceArgs = new SetServiceArgs();
         setServiceArgs.setWeId(createResult.getWeId());
         setServiceArgs.setType(serviceType);
@@ -115,7 +115,7 @@ public class DemoService {
      */
     public void setAuthenticate(CreateWeIdDataResult createResult, String authType) {
 
-        // setAuthenticate for this weId
+        // setAuthenticate for this WeIdentity DID
         SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
         setAuthenticationArgs.setWeId(createResult.getWeId());
         setAuthenticationArgs.setType(authType);
