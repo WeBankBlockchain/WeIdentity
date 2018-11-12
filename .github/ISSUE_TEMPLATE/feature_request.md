@@ -4,17 +4,17 @@ about: Suggest an idea for this project
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
+#### Summary
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-**Describe the solution you would like**
+#### Expectation
 A clear and concise description of what you want to happen.
 
-**Describe the basic design/architecture of your solution**
+#### Design (Optional)
 A clear and concise description of what does your solution look like. Rich text and diagrams are preferred.
 
-**Describe the development plan you've considered**
+#### Planning (Optional)
 A clear and concise description of the plan to make the solution ready. It can include a development timeline, resource estimation, and other related things.
 
-**Additional context**
+#### Additional context (Optional)
 Add any other context or screenshots about the feature request here.
