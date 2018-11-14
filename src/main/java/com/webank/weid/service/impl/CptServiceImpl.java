@@ -19,7 +19,12 @@
 
 package com.webank.weid.service.impl;
 
-import com.google.common.base.Splitter;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -39,11 +44,8 @@ import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.JsonSchemaValidatorUtils;
 import com.webank.weid.util.SignatureUtils;
 import com.webank.weid.util.WeIdUtils;
-import java.math.BigInteger;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
+import com.google.common.base.Splitter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
@@ -54,8 +56,6 @@ import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.crypto.Credentials;
-import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
@@ -92,12 +92,8 @@ public class CptServiceImpl extends BaseService implements CptService {
     }
 
     private static void reloadContract(String privateKey) {
-        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-
-        Credentials credentials = Credentials.create(keyPair);
-
         cptController =
-            (CptController) reloadContract(cptControllerAddress, credentials, CptController.class);
+            (CptController) reloadContract(cptControllerAddress, privateKey, CptController.class);
     }
 
     /**
@@ -204,7 +200,7 @@ public class CptServiceImpl extends BaseService implements CptService {
                 responseData = new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
                 return responseData;
             }
-          
+
             typeList = cptController.queryCpt(DataTypetUtils.intToUint256(cptId)).get();
 
             if (typeList != null) {
@@ -216,7 +212,8 @@ public class CptServiceImpl extends BaseService implements CptService {
                 Cpt cpt = new Cpt();
                 cpt.setCptId(cptId);
 
-                cpt.setCptPublisher(WeIdUtils.convertAddressToWeId(((Address) typeList.get(0)).toString()));
+                cpt.setCptPublisher(
+                    WeIdUtils.convertAddressToWeId(((Address) typeList.get(0)).toString()));
 
                 long[] longArray = DataTypetUtils.int256DynamicArrayToLongArray(
                     (DynamicArray<Int256>) typeList.get(1)
@@ -404,30 +401,33 @@ public class CptServiceImpl extends BaseService implements CptService {
             responseData = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
             return responseData;
         }
-        
-        if (!validatePrivateKeyWeIdMatches(args.getCptPublisherPrivateKey(), args.getCptPublisher())) {
+
+        if (!validatePrivateKeyWeIdMatches(args.getCptPublisherPrivateKey(),
+            args.getCptPublisher())) {
             responseData = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
 
         return responseData;
     }
-    
-    private boolean validatePrivateKeyWeIdMatches(WeIdPrivateKey cptPublisherPrivateKey, String cptPublisher) {
-      boolean isMatch = false;
-      
-      try {
-          BigInteger publicKey = SignatureUtils.publicKeyFromPrivate(new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-          String address1 = "0x" + Keys.getAddress(publicKey);
-          String address2 = WeIdUtils.convertWeIdToAddress(cptPublisher);
-          if(address1.equals(address2)) {
-            isMatch = true;
-          }
-      } catch (Exception e) {
-          logger.error("Validate private key We Id matches failed. Error message :{}", e);
-          return isMatch;
-      }  
-      
-      return isMatch;
+
+    private boolean validatePrivateKeyWeIdMatches(WeIdPrivateKey cptPublisherPrivateKey,
+        String cptPublisher) {
+        boolean isMatch = false;
+
+        try {
+            BigInteger publicKey = SignatureUtils
+                .publicKeyFromPrivate(new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
+            String address1 = "0x" + Keys.getAddress(publicKey);
+            String address2 = WeIdUtils.convertWeIdToAddress(cptPublisher);
+            if (address1.equals(address2)) {
+                isMatch = true;
+            }
+        } catch (Exception e) {
+            logger.error("Validate private key We Id matches failed. Error message :{}", e);
+            return isMatch;
+        }
+
+        return isMatch;
     }
 
     private ResponseData<CptBaseInfo> validateUpdateCptArgs(
@@ -460,8 +460,9 @@ public class CptServiceImpl extends BaseService implements CptService {
             responseData = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
             return responseData;
         }
-        
-        if (!validatePrivateKeyWeIdMatches(args.getCptPublisherPrivateKey(), args.getCptPublisher())) {
+
+        if (!validatePrivateKeyWeIdMatches(args.getCptPublisherPrivateKey(),
+            args.getCptPublisher())) {
             responseData = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
 

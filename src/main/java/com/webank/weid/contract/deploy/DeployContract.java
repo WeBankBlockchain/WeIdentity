@@ -19,6 +19,13 @@
 
 package com.webank.weid.contract.deploy;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.AuthorityIssuerController;
 import com.webank.weid.contract.AuthorityIssuerData;
@@ -28,13 +35,7 @@ import com.webank.weid.contract.CptController;
 import com.webank.weid.contract.CptData;
 import com.webank.weid.contract.RoleController;
 import com.webank.weid.contract.WeIdContract;
-import com.webank.weid.service.BaseService;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.contract.tools.ToolConf;
@@ -58,7 +59,7 @@ public class DeployContract {
     /**
      * log4j
      */
-    private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DeployContract.class);
 
     /**
      * The Constant for default deploy contracts timeout.

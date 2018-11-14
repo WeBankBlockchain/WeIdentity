@@ -19,12 +19,19 @@
 
 package com.webank.weid.service;
 
-import com.webank.weid.constant.WeIdConstant;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.InitWeb3jException;
+import com.webank.weid.exception.LoadContractException;
+import com.webank.weid.exception.PrivateKeyIllegalException;
+
 import org.bcos.channel.client.Service;
 import org.bcos.contract.tools.ToolConf;
 import org.bcos.web3j.crypto.Credentials;
+import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.GenCredential;
 import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.channel.ChannelEthereumService;
@@ -59,7 +66,6 @@ public abstract class BaseService {
      * @return true, if successful
      */
     static boolean loadConfig() {
-
         return (initWeb3j() && initCredentials());
     }
 
@@ -69,6 +75,7 @@ public abstract class BaseService {
             service.run();
         } catch (Exception e) {
             logger.error("[BaseService] Service init failed. ", e);
+            throw new InitWeb3jException(e);
         }
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setChannelService(service);
@@ -87,7 +94,6 @@ public abstract class BaseService {
      */
     private static boolean initCredentials() {
         ToolConf toolConf = context.getBean(ToolConf.class);
-
         logger.info("begin init credentials");
         credentials = GenCredential.create(toolConf.getPrivKey());
 
@@ -104,56 +110,73 @@ public abstract class BaseService {
      * @return the web3j
      */
     protected static Web3j getWeb3j() {
-        if (null == web3j) {
-            initWeb3j();
+        if (null == web3j || !initWeb3j()) {
+            throw new InitWeb3jException();
         }
         return web3j;
+    }
+
+    private static Object loadContract(
+        String contractAddress,
+        Credentials credentials,
+        Class<?> cls) throws NoSuchMethodException, IllegalAccessException,
+        InvocationTargetException {
+        Object contract;
+        Method method = cls.getMethod(
+            "load",
+            String.class,
+            Web3j.class,
+            Credentials.class,
+            BigInteger.class,
+            BigInteger.class
+        );
+
+        contract = method.invoke(
+            null,
+            contractAddress,
+            web3j,
+            credentials,
+            WeIdConstant.GAS_PRICE,
+            WeIdConstant.GAS_LIMIT
+        );
+        return contract;
     }
 
     /**
      * Reload contract.
      *
      * @param contractAddress the contract address
-     * @param credentials the credentials
      * @param cls the class
      * @return the contract
      */
     protected static Contract reloadContract(
-        String contractAddress, Credentials credentials, Class<?> cls) {
+        String contractAddress,
+        String privateKey,
+        Class<?> cls) {
+        Credentials credentials;
+        try {
+            ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+            credentials = Credentials.create(keyPair);
+        } catch (Exception e) {
+            throw new PrivateKeyIllegalException(e);
+        }
 
         Object contract = null;
-        if (null == web3j) {
-            initWeb3j();
+        if (null == web3j || !initWeb3j()) {
+            throw new InitWeb3jException();
         }
         try {
             // load contract
-            Method method =
-                cls.getMethod(
-                    "load",
-                    String.class,
-                    Web3j.class,
-                    Credentials.class,
-                    BigInteger.class,
-                    BigInteger.class);
-
-            contract =
-                method.invoke(
-                    null,
-                    contractAddress,
-                    web3j,
-                    credentials,
-                    WeIdConstant.GAS_PRICE,
-                    WeIdConstant.GAS_LIMIT);
-
+            contract = loadContract(contractAddress, credentials, cls);
             logger.info(cls.getSimpleName() + " init succ");
-
         } catch (Exception e) {
-            logger.error("load contract :{} failed. Error message is :{}", cls.getSimpleName(), e);
-            throw new RuntimeException("load contract failed." + e.getMessage());
+            logger.error("load contract :{} failed. Error message is :{}",
+                cls.getSimpleName(), e);
+            throw new LoadContractException();
         }
 
         if (contract == null) {
-            throw new RuntimeException(cls.getSimpleName() + " init fail");
+            throw new LoadContractException();
         }
         return (Contract) contract;
     }
@@ -173,33 +196,17 @@ public abstract class BaseService {
         }
         try {
             // load contract
-            Method method =
-                cls.getMethod(
-                    "load",
-                    String.class,
-                    Web3j.class,
-                    Credentials.class,
-                    BigInteger.class,
-                    BigInteger.class);
-
-            contract = method.invoke(
-                null,
-                contractAddress,
-                web3j,
-                credentials,
-                WeIdConstant.GAS_PRICE,
-                WeIdConstant.GAS_LIMIT
-            );
-
+            contract = loadContract(contractAddress, credentials, cls);
             logger.info(cls.getSimpleName() + " init succ");
 
         } catch (Exception e) {
-            logger.error("load contract :{} failed. Error message is :{}", cls.getSimpleName(), e);
-            throw new RuntimeException("load contract failed." + e.getMessage());
+            logger.error("load contract :{} failed. Error message is :{}",
+                cls.getSimpleName(), e);
+            throw new LoadContractException();
         }
 
         if (contract == null) {
-            throw new RuntimeException(cls.getSimpleName() + " init fail");
+            throw new LoadContractException();
         }
         return (Contract) contract;
     }

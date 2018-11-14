@@ -34,10 +34,10 @@ public interface AuthorityIssuerService {
     /**
      * Register a new Authority Issuer on Chain.
      *
-     * <p>The input argument actually includes: WeIdentity DID, Name, CreateDate, and Accumulator Value. They
-     * will be stored into the 3 fields on the chain: the Bytes32 field (Name); the Int field
-     * (create date); the Dynamic Bytes field (accValue). The data Read and Write sequence is fixed
-     * in the above mentioned order.
+     * <p>The input argument actually includes: WeIdentity DID, Name, CreateDate, and Accumulator
+     * Value. They will be stored into the 3 fields on the chain: the Bytes32 field (Name); the Int
+     * field (create date); the Dynamic Bytes field (accValue). The data Read and Write sequence is
+     * fixed in the above mentioned order.
      *
      * @param args the args
      * @return true if succeeds, false otherwise

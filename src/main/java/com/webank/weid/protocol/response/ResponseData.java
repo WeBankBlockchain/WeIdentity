@@ -20,6 +20,7 @@
 package com.webank.weid.protocol.response;
 
 import com.webank.weid.constant.ErrorCode;
+
 import lombok.Data;
 
 /**
