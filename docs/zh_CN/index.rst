@@ -13,13 +13,10 @@ WeIdentity文档
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents:
 
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 =======
    README.md
    docs/terminologies.rst
@@ -27,3 +24,4 @@ WeIdentity文档
    docs/weidentity-installation.rst
    docs/weidentity-spec.rst
    docs/weidentity-java-sdk-doc.rst
+   docs/faq.md
