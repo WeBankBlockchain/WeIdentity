@@ -34,7 +34,7 @@ public class VerifyCredentialArgs {
     /**
      * Required: The Credential content.
      */
-    Credential credential;
+    private Credential credential;
 
     /**
      * Optional: The public key passed in.

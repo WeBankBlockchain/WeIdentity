@@ -34,15 +34,15 @@ public class RsvSignature {
     /**
      * The v value.
      */
-    Uint8 v;
+    private Uint8 v;
 
     /**
      * The r value.
      */
-    Bytes32 r;
+    private Bytes32 r;
 
     /**
      * The s value.
      */
-    Bytes32 s;
+    private Bytes32 s;
 }
