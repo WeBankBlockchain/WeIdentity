@@ -15,7 +15,7 @@
 import os
 import sys
 import shlex
-# sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../zh_CN'))
 
 import recommonmark
 from recommonmark.parser import CommonMarkParser
@@ -74,7 +74,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = 'zh_CN'
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -196,7 +196,7 @@ html_show_sourcelink = True
 #   'da', 'de', 'en', 'es', 'fi', 'fr', 'hu', 'it', 'ja'
 #   'nl', 'no', 'pt', 'ro', 'ru', 'sv', 'tr'
 #html_search_language = 'en'
-html_search_language = 'zh'
+html_search_language = 'en'
 
 # A dictionary with options for the search language support, empty by default.
 # Now only 'ja' uses this config value
@@ -328,11 +328,12 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 #     app.add_transform(AutoStructify)
 
 
-# workaround: text in table cell not to wrap 
+# workaround: text in table cell not to wrap
 html_static_path = ['_static']
 
 html_context = {
     'css_files': [
         '_static/theme_overrides.css',  # override wide tables in RTD theme
+        '_static/index.css',  # table css
         ],
      }

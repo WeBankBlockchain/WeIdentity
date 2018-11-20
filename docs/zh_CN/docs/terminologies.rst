@@ -19,7 +19,7 @@
    * - Public Key
      - 公钥，详见：\ `Public Key Wiki定义 <https://en.wikipedia.org/wiki/Public-key_cryptography>`_
    * - Private Key
-     - 私钥，详见(内容描述中包含Private Key)：\ `Public Key Wiki定义 <https://en.wikipedia.org/wiki/Public-key_cryptography>`_
+     - 私钥，详见（内容描述中包含Private Key）：\ `Public Key Wiki定义 <https://en.wikipedia.org/wiki/Public-key_cryptography>`_
    * - Signature
      - 数字签名，详见：\ `Digital Signature Wiki定义 <https://en.wikipedia.org/wiki/Digital_signature>`_
    * - DID
@@ -66,4 +66,3 @@
      - 用户私钥托管机构，例如某个用户身份管理APP。依据业务场景需求，可以是云端保存机制的，也可以是客服端本地保存机制的
    * - Publisher
      - 发布一个新的CPT的角色，被称为Publisher
-
