@@ -386,7 +386,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
     }
 
     private ResponseData<List<String>> queryAllAuthorityIssuerWeIds() {
-        // TODO Add startPos, requestCount as param
         ResponseData<List<String>> responseData = new ResponseData<List<String>>();
         try {
             List<Address> addressList = authorityIssuerController

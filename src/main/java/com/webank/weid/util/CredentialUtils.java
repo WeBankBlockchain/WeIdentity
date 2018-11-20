@@ -39,7 +39,10 @@ public final class CredentialUtils {
      * @return Hash value in String.
      */
     public static String getCredentialFields(Credential arg) {
-        if (arg == null) {
+        if (arg == null
+            || arg.getCptId() == null
+            || arg.getIssuranceDate() == null
+            || arg.getExpirationDate() == null) {
             return StringUtils.EMPTY;
         }
         String rawData =
