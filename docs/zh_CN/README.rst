@@ -1,9 +1,8 @@
-中文版本 | `English Version <./README-en.rst>`_
 
-.. image:: docs/zh_CN/docs/images/weidentity-logo.png
-   :target: docs/zh_CN/docs/images/weidentity-logo.png
+
+.. image:: docs/images/weidentity-logo.png
+   :target: docs/images/weidentity-logo.png
    :alt: weidentity-logo.jpeg
-
 
 ----
 
@@ -28,7 +27,7 @@ WeIdentity DID秉承以下设计理念：
 .. raw:: html
 
     <embed>
-      <table style="width:100%;border-collapse:collapse">
+      <table border='1' style="width:100%;border-collapse:collapse class='tables'">
          <tr>
             <th width="100">目标</th>
             <th>说明</th>
@@ -89,7 +88,7 @@ WeIdentity目前支持基于FISCO-BCOS运行，并提供JAVA SDK供调用。具�
 .. raw:: html
 
     <embed>
-      <table style="border-collapse:collapse">
+      <table border='1' style="border-collapse:collapse" class='tables'>
          <tr>
             <th width="20%">集成方法</th>
             <th width="30%">文档入口</th>
@@ -110,7 +109,6 @@ WeIdentity目前支持基于FISCO-BCOS运行，并提供JAVA SDK供调用。具�
       </table>
       <br />
     </embed>
-
 
 联系我们
 --------
