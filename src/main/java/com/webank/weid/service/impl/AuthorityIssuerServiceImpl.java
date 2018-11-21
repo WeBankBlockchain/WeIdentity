@@ -19,6 +19,14 @@
 
 package com.webank.weid.service.impl;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -33,13 +41,7 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.WeIdUtils;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.Bool;
@@ -48,8 +50,6 @@ import org.bcos.web3j.abi.datatypes.DynamicBytes;
 import org.bcos.web3j.abi.datatypes.Type;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.crypto.Credentials;
-import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,12 +93,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
      * @param privateKey the private key
      */
     private static void reloadContract(String privateKey) {
-        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-
-        Credentials credentials = Credentials.create(keyPair);
         authorityIssuerController = (AuthorityIssuerController) reloadContract(
             authorityIssuerControllerAddress,
-            credentials,
+            privateKey,
             AuthorityIssuerController.class
         );
     }
@@ -337,7 +334,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL);
         }
         // Need an extra check for the existence of WeIdentity DID on chain, in Register Case.
-        ResponseData<Boolean> innerResponseData = weIdService.isWeIdExist(args.getAuthorityIssuer().getWeId());
+        ResponseData<Boolean> innerResponseData = weIdService
+            .isWeIdExist(args.getAuthorityIssuer().getWeId());
         if (!innerResponseData.getResult()) {
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }

@@ -19,9 +19,11 @@
 
 package com.webank.weid.util;
 
+import java.math.BigInteger;
+
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
-import java.math.BigInteger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
@@ -102,7 +104,7 @@ public final class WeIdUtils {
         try {
             ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
             return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);
-        }catch(Exception e){
+        } catch (Exception e) {
             return false;
         }
     }

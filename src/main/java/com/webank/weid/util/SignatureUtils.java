@@ -20,6 +20,7 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;

@@ -17,42 +17,26 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.request;
+package com.webank.weid.exception;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-
-import lombok.Data;
+import com.webank.weid.constant.ErrorCode;
 
 /**
- * The Arguments when setting Public Key for WeIdentity DID.
- *
- * @author tonychen 2018.9.29
+ * @author tonychen
  */
-@Data
-public class SetPublicKeyArgs {
+@SuppressWarnings("serial")
+public class InitWeb3jException extends WeIdBaseException {
 
-    /**
-     * Required: The WeIdentity DID.
-     */
-    private String weId;
+    public InitWeb3jException(Throwable cause) {
+        super(ErrorCode.LOAD_WEB3J_FAILED.getCodeDesc(), cause);
+    }
 
-    /**
-     * Required: The type.
-     */
-    private String type = "Secp256k1";
+    public InitWeb3jException() {
+        super(ErrorCode.LOAD_WEB3J_FAILED.getCodeDesc());
+    }
 
-    /**
-     * Required: The owner.
-     */
-    private String owner;
-
-    /**
-     * Required: The public key.
-     */
-    private String publicKey;
-
-    /**
-     * Required: The WeIdentity DID private key.
-     */
-    private WeIdPrivateKey userWeIdPrivateKey;
+    @Override
+    public ErrorCode getErrorCode() {
+        return ErrorCode.LOAD_WEB3J_FAILED;
+    }
 }

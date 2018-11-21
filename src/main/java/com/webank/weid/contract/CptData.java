@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Future;
+
 import org.bcos.channel.client.TransactionSucCallback;
 import org.bcos.web3j.abi.FunctionEncoder;
 import org.bcos.web3j.abi.TypeReference;
@@ -24,10 +25,9 @@ import org.bcos.web3j.tx.Contract;
 import org.bcos.web3j.tx.TransactionManager;
 
 /**
- * Auto generated code.<br>
- * <strong>Do not modify!</strong><br>
- * Please use the <a href="https://docs.web3j.io/command_line.html">web3j command line tools</a>, or
- * {@link org.bcos.web3j.codegen.SolidityFunctionWrapperGenerator} to update.
+ * Auto generated code.<br> <strong>Do not modify!</strong><br> Please use the <a
+ * href="https://docs.web3j.io/command_line.html">web3j command line tools</a>, or {@link
+ * org.bcos.web3j.codegen.SolidityFunctionWrapperGenerator} to update.
  *
  * <p>Generated with web3j version none.
  */

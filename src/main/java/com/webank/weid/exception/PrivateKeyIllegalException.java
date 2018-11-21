@@ -17,42 +17,26 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.request;
+package com.webank.weid.exception;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-
-import lombok.Data;
+import com.webank.weid.constant.ErrorCode;
 
 /**
- * The Arguments when setting Public Key for WeIdentity DID.
- *
- * @author tonychen 2018.9.29
+ * @author tonychen
  */
-@Data
-public class SetPublicKeyArgs {
+@SuppressWarnings("serial")
+public class PrivateKeyIllegalException extends WeIdBaseException {
 
-    /**
-     * Required: The WeIdentity DID.
-     */
-    private String weId;
+    public PrivateKeyIllegalException(Throwable cause) {
+        super(ErrorCode.WEID_PRIVATEKEY_INVALID.getCodeDesc(), cause);
+    }
 
-    /**
-     * Required: The type.
-     */
-    private String type = "Secp256k1";
+    public PrivateKeyIllegalException() {
+        super(ErrorCode.WEID_PRIVATEKEY_INVALID.getCodeDesc());
+    }
 
-    /**
-     * Required: The owner.
-     */
-    private String owner;
-
-    /**
-     * Required: The public key.
-     */
-    private String publicKey;
-
-    /**
-     * Required: The WeIdentity DID private key.
-     */
-    private WeIdPrivateKey userWeIdPrivateKey;
+    @Override
+    public ErrorCode getErrorCode() {
+        return ErrorCode.WEID_PRIVATEKEY_INVALID;
+    }
 }
