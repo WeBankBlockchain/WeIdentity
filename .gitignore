@@ -186,3 +186,8 @@ javadoc/
 # for specific project
 doc/bak/
 /bin/
+
+# for eclipse
+.settings/
+.project
+.classpath
