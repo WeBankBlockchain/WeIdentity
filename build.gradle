@@ -1,14 +1,30 @@
+buildscript {
+    repositories {
+        maven {
+            url "http://maven.aliyun.com/nexus/content/groups/public/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.5"
+    }
+}
+
+plugins {
+    id "com.github.spotbugs" version "1.6.5"
+}
+
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'checkstyle'
+apply plugin: "com.github.spotbugs"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
-
 // In this section you declare where to find the dependencies of your project
 repositories {
     maven {
@@ -52,11 +68,15 @@ List apache_commons = [
         "commons-cli:commons-cli:1.3.1"
 ]
 
+List jmockit = [
+        "org.jmockit:jmockit:1.9"
+]
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compile logger, spring, lombok, apache_commons
     runtime logger, spring, lombok, apache_commons
-    testCompile logger, spring, lombok, junit
+    testCompile logger, spring, lombok, junit, jmockit
 
     compile "com.fasterxml.jackson.core:jackson-databind:2.8.8.1"
     runtime "com.fasterxml.jackson.core:jackson-databind:2.8.8.1"
@@ -93,7 +113,7 @@ sourceSets {
             srcDirs = ["src/test/java"]
         }
         resources {
-            srcDirs = ['src/main/resources','src/test/resources']
+            srcDirs = ['src/main/resources', 'src/test/resources']
         }
     }
 }
@@ -117,5 +137,38 @@ jar {
             from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
             into 'dist'
         }
+    }
+}
+
+checkstyle {
+    showViolations true
+    toolVersion '8.12'
+}
+
+tasks.withType(Checkstyle) {
+    include '**/*.java'
+    exclude '**/contract/*.java'
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+
+spotbugs {
+    ignoreFailures = false
+    showProgress = true
+    toolVersion = "3.1.8"
+    effort = "max"
+    reportLevel = "low"
+}
+
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    // configure automatically generated tasks
+    include '**/*.java'
+    exclude '**/contract/*.java'
+    reports {
+        xml.enabled false
+        html.enabled true
+        html.stylesheet resources.text.fromFile('config/spotbugs.xsl')
     }
 }
