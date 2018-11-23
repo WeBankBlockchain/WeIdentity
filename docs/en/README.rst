@@ -104,7 +104,7 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
                </ul>
             </td>
             <td>
-            <a href="https://app.codacy.com/app/webankadmin/weidentity-java-sdk?utm_source=github.com&utm_medium=referral&utm_content=webankopen/weidentity-java-sdk&utm_campaign=Badge_Grade_Dashboard"><img src="https://api.codacy.com/project/badge/Grade/9fc044b36fff4985bd69f1232380d5ee" /></a>  <a href="https://www.codefactor.io/repository/github/webankopen/weidentity-java-sdk"><img src="https://www.codefactor.io/repository/github/webankopen/weidentity-java-sdk/badge" /></a>
+            <a href="https://app.codacy.com/app/webankadmin/weidentity-java-sdk?utm_source=github.com&utm_medium=referral&utm_content=webankopen/weidentity-java-sdk&utm_campaign=Badge_Grade_Dashboard"><img src="https://api.codacy.com/project/badge/Grade/9fc044b36fff4985bd69f1232380d5ee" /></a>  <a href="https://www.codefactor.io/repository/github/webankopen/weidentity-java-sdk"><img src="https://www.codefactor.io/repository/github/webankopen/weidentity-java-sdk/badge" /></a> <a href="https://www.gnu.org/licenses/lgpl-3.0"><img src="https://img.shields.io/badge/License-LGPL%20v3-blue.svg" /></a>
             </td>
          </tr>
       </table>
