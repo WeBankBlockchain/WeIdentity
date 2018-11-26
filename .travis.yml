@@ -1,0 +1,18 @@
+sudo: false
+dist: trusty
+
+language: java
+jdk:
+  - oraclejdk8
+  
+before_install:
+  - gradle wrapper
+  
+script: 
+  - chmod +x ci/script/build-ci.sh
+  - ci/script/build-ci.sh
+  - travis_wait 30 ./gradlew check
+  - ./gradlew jacocoTestReport
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

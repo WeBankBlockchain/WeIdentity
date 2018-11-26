@@ -30,9 +30,9 @@
     id="appConfig">
     <property name="properties">
       <props>
-        <prop key="weId.contractaddress">WEID_ADDRESS</prop>
-        <prop key="cpt.contractaddress">CPT_ADDRESS</prop>
-        <prop key="issuer.contractaddress">ISSUER_ADDRESS</prop>
+        <prop key="weId.contractaddress">${WEID_ADDRESS}</prop>
+        <prop key="cpt.contractaddress">${CPT_ADDRESS}</prop>
+        <prop key="issuer.contractaddress">${ISSUER_ADDRESS}</prop>
       </props>
     </property>
     <!--  <property name="location" value="classpath:application.properties" />-->
@@ -82,7 +82,7 @@
             <property name="clientCertPassWord" value="123456"/>
             <property name="connectionsStr">
               <list>
-                BLOCKCHIAN_NODE_INFO
+                ${BLOCKCHIAN_NODE_INFO}
               </list>
             </property>
           </bean>
