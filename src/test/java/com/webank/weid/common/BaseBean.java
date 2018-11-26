@@ -29,26 +29,31 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * debug class for output object information.
+ * @author v_wbgyang
+ *
+ */
 public class BaseBean {
 
-    public static SimpleDateFormat getFormat(){
+    public static SimpleDateFormat getFormat() {
         return new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     }
 
+    /**
+     * printSimpe Bean.
+     * @param obj  required
+     */
     public static void printSimpleBean(Object obj) {
         Field[] f = obj.getClass().getDeclaredFields();
         for (int i = 0; (f != null) && (i < f.length); i++) {
             try {
                 if (f[i].getModifiers() == 2) {
-                    Method m =
-                        obj.getClass()
-                            .getMethod(
-                                "get"
-                                    + f[i].getName().substring(0, 1).toUpperCase()
-                                    + f[i].getName().substring(1),
-                                    new Class[0]);
+                    Method m = obj.getClass().getMethod("get"
+                        + f[i].getName().substring(0, 1).toUpperCase()
+                        + f[i].getName().substring(1), new Class[0]);
                     if (m != null) {
-                        System.out.println(f[i].getName() + ": " + m.invoke(obj, new Object[]{}));
+                        System.out.println(f[i].getName() + ": " + m.invoke(obj, new Object[] {}));
                     }
                 }
             } catch (NoSuchMethodException ex) {
@@ -59,6 +64,10 @@ public class BaseBean {
         }
     }
 
+    /**
+     * printSimple Collection.
+     * @param c this is object of Collection
+     */
     public static void printSimpleCollection(Collection<?> c) {
         if (c == null) {
             return;
@@ -71,7 +80,11 @@ public class BaseBean {
         }
     }
 
-    public static void printSimpleMap(Map<?,?> map) {
+    /**
+     * printSimple Map.
+     * @param map this is map
+     */
+    public static void printSimpleMap(Map<?, ?> map) {
         if (map == null) {
             return;
         }
@@ -105,17 +118,13 @@ public class BaseBean {
         for (int i = 0; (f != null) && (i < f.length); i++) {
             try {
                 if (f[i].getModifiers() == 2) {
-                    Method m =
-                        obj.getClass()
-                            .getMethod(
-                                "get"
-                                    + f[i].getName().substring(0, 1).toUpperCase()
-                                    + f[i].getName().substring(1),
-                                new Class[0]);
+                    Method m = obj.getClass().getMethod("get"
+                        + f[i].getName().substring(0, 1).toUpperCase()
+                        + f[i].getName().substring(1), new Class[0]);
 
                     if (m != null) {
                         Object left = f[i].getName();
-                        Object right = m.invoke(obj, new Object[]{});
+                        Object right = m.invoke(obj, new Object[] {});
                         printByType(blank, left, right);
                     }
                 }
@@ -147,7 +156,7 @@ public class BaseBean {
         }
     }
 
-    private static void printMap(String blank, Map<?,?> map) {
+    private static void printMap(String blank, Map<?, ?> map) {
         if (map == null) {
             return;
         }
@@ -199,7 +208,7 @@ public class BaseBean {
             printCollection(blank + "   ", (Collection<?>) right);
         } else if ((right instanceof Map)) {
             System.out.println(blank + left + ":(" + clazz.getName() + ")");
-            printMap(blank + "   ", (Map<?,?>) right);
+            printMap(blank + "   ", (Map<?, ?>) right);
         } else {
             System.out.println(blank + left + ":(" + clazz.getName() + ")");
             printBean(blank + "   ", right);
@@ -213,12 +222,16 @@ public class BaseBean {
         if ((obj instanceof Collection)) {
             printCollection(blank, (Collection<?>) obj);
         } else if ((obj instanceof Map)) {
-            printMap(blank, (Map<?,?>) obj);
+            printMap(blank, (Map<?, ?>) obj);
         } else {
             printBean(blank, obj);
         }
     }
 
+    /**
+     *  print object.
+     * @param obj this object for print
+     */
     public static void print(Object obj) {
         if (obj == null) {
             return;
@@ -226,7 +239,7 @@ public class BaseBean {
         if ((obj instanceof Collection)) {
             printCollection("", (Collection<?>) obj);
         } else if ((obj instanceof Map)) {
-            printMap("", (Map<?,?>) obj);
+            printMap("", (Map<?, ?>) obj);
         } else {
             printBean("", obj);
         }

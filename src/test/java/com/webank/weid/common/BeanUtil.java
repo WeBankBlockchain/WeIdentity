@@ -27,21 +27,21 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * Object util
+ * Object util.
  *
  * @author v_wbgyang
  */
 public class BeanUtil extends BaseBean {
 
     /**
-     * print Object with log
+     * print Object with log.
      */
     public static void print(Object obj) {
         BaseBean.print(obj);
     }
 
     /**
-     * check whether the two objects are the same
+     * check whether the two objects are the same.
      */
     public static boolean equals(Object left, Object right) {
         // if obj1 == obj2 then return true
@@ -61,11 +61,12 @@ public class BeanUtil extends BaseBean {
         try {
             if ((left instanceof Collection)) {
                 return equalsCollection((Collection<?>) left, (Collection<?>) right);
-            } else if ((left instanceof Map)) {
-                return equalsMap((Map<?,?>) left, (Map<?,?>) right);
-            } else {
-                return equalsObject(left, right);
             }
+            if ((left instanceof Map)) {
+                return equalsMap((Map<?, ?>) left, (Map<?, ?>) right);
+            }
+            return equalsObject(left, right);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -80,11 +81,11 @@ public class BeanUtil extends BaseBean {
             return Arrays.equals((String[]) left, (String[]) right);
         }
 
-        Field[] fL = left.getClass().getDeclaredFields();
+        Field[] fieldLeft = left.getClass().getDeclaredFields();
         Class<?> clsR = right.getClass();
-        for (int i = 0; (fL != null) && (i < fL.length); i++) {
+        for (int i = 0; (fieldLeft != null) && (i < fieldLeft.length); i++) {
             try {
-                Field fieldL = fL[i];
+                Field fieldL = fieldLeft[i];
                 Field fieldR = clsR.getDeclaredField(fieldL.getName());
                 if (fieldL.getType() != fieldR.getType()) {
                     return false;
@@ -103,32 +104,33 @@ public class BeanUtil extends BaseBean {
         return true;
     }
 
-    private static boolean equalsMap(Map<?,?> left, Map<?,?> right) throws Exception {
+    private static boolean equalsMap(Map<?, ?> left, Map<?, ?> right) throws Exception {
         if (right.size() != left.size()) {
             return false;
         }
         Iterator<?> itL = right.keySet().iterator();
         Iterator<?> itR = left.keySet().iterator();
         while (itL.hasNext()) {
-            Object left_ = left.get(itL.next());
-            Object right_ = right.get(itR.next());
-            if (!equals(left_, right_)) {
+            Object leftObj = left.get(itL.next());
+            Object rightObj = right.get(itR.next());
+            if (!equals(leftObj, rightObj)) {
                 return false;
             }
         }
         return true;
     }
 
-    private static boolean equalsCollection(Collection<?> left, Collection<?> right) throws Exception {
+    private static boolean equalsCollection(Collection<?> left, Collection<?> right)
+        throws Exception {
         if (left.size() != right.size()) {
             return false;
         }
         Iterator<?> itL = left.iterator();
         Iterator<?> itR = right.iterator();
         while (itL.hasNext()) {
-            Object left_ = itL.next();
-            Object right_ = itR.next();
-            if (!equals(left_, right_)) {
+            Object leftObj = itL.next();
+            Object rightObj = itR.next();
+            if (!equals(leftObj, rightObj)) {
                 return false;
             }
         }

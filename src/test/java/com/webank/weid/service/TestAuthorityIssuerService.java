@@ -21,82 +21,87 @@ package com.webank.weid.service;
 
 import com.webank.weid.BaseTest;
 import com.webank.weid.common.BeanUtil;
-import com.webank.weid.common.RequestUtil;
+import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AuthorityIssuerService;
+import java.util.Date;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * test AuthorityIssuerService
+ * test AuthorityIssuerService.
  *
  * @author v_wbgyang
  */
 @SuppressWarnings("all")
-public class TestAuthorityIssuerService extends BaseTest<AuthorityIssuerService> {
-
-    @Override
-    public Class<AuthorityIssuerService> initService() {
-
-        return AuthorityIssuerService.class;
-    }
+public class TestAuthorityIssuerService extends BaseTest {
 
     /**
-     * test AuthorityIssuerService.registerAuthorityIssuer
+     * test AuthorityIssuerService.registerAuthorityIssuer.
      */
     @Test
     public void testRegisterAuthorityIssuer() throws Exception {
 
-        int scene = 1;
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = new RegisterAuthorityIssuerArgs();
+        registerAuthorityIssuerArgs.setWeIdPrivateKey(new WeIdPrivateKey());
+        registerAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey(TestBaseUtil.privKey);
 
-        RegisterAuthorityIssuerArgs args = RequestUtil.registerAuthorityIssuer(scene);
+        AuthorityIssuer authorityIssuer = new AuthorityIssuer();
+        registerAuthorityIssuerArgs.setAuthorityIssuer(authorityIssuer);
 
-        ResponseData<Boolean> response = service.registerAuthorityIssuer(args);
+        authorityIssuer.setWeId("did:weid:0x0518f2b92fad9da7807a78b58af64db8997357db");
+        authorityIssuer.setCreated(new Date().getTime());
+        authorityIssuer.setName("webank1");
+        authorityIssuer.setAccValue("0");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         BeanUtil.print(response);
     }
 
     /**
-     * test AuthorityIssuerService.removeAuthorityIssuer
+     * test AuthorityIssuerService.removeAuthorityIssuer.
      */
     @Test
     public void testRemoveAuthorityIssuer() throws Exception {
 
-        int scene = 1;
+        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs = new RemoveAuthorityIssuerArgs();
+        removeAuthorityIssuerArgs.setWeIdPrivateKey(new WeIdPrivateKey());
+        removeAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey(TestBaseUtil.privKey);
 
-        RemoveAuthorityIssuerArgs args = RequestUtil.removeAuthorityIssuer(scene);
+        removeAuthorityIssuerArgs.setWeId("did:weid:0x0518f2b92fad9da7807a78b58af64db8997357db");
 
-        ResponseData<Boolean> response = service.removeAuthorityIssuer(args);
+        ResponseData<Boolean> response =
+            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
         BeanUtil.print(response);
     }
 
     /**
-     * test AuthorityIssuerService.isAuthorityIssuer
+     * test AuthorityIssuerService.isAuthorityIssuer.
      */
     @Test
     public void testIsAuthorityIssuer() throws Exception {
 
-        int scene = 1;
+        String weId = "did:weid:0x0518f2b92fad9da7807a78b58af64db8997357db";
 
-        String args = RequestUtil.isAuthorityIssuer(scene);
-
-        ResponseData<Boolean> response = service.isAuthorityIssuer(args);
+        ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer(weId);
         BeanUtil.print(response);
     }
 
     /**
-     * test AuthorityIssuerService.queryAuthorityIssuerInfo
+     * test AuthorityIssuerService.queryAuthorityIssuerInfo.
      */
     @Test
     public void testQueryAuthorityIssuerInfo() throws Exception {
 
-        int scene = 1;
+        String weId = "did:weid:0x0518f2b92fad9da7807a78b58af64db8997357db";
 
-        String args = RequestUtil.queryAuthorityIssuerInfo(scene);
-
-        ResponseData<AuthorityIssuer> response = service.queryAuthorityIssuerInfo(args);
+        ResponseData<AuthorityIssuer> response =
+            authorityIssuerService.queryAuthorityIssuerInfo(weId);
         BeanUtil.print(response);
     }
 }

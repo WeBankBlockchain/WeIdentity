@@ -46,21 +46,21 @@ import org.springframework.stereotype.Component;
 public class DemoService {
 
     @Autowired
-    AuthorityIssuerService authorityIssuerService;
+    private AuthorityIssuerService authorityIssuerService;
 
     @Autowired
-    CptService cptService;
+    private CptService cptService;
 
     @Autowired
-    CredentialService credentialService;
+    private CredentialService credentialService;
 
     @Autowired
-    WeIdService weIdService;
+    private WeIdService weIdService;
 
     /**
-     * create WeIdentity DID
+     * create WeIdentity DID.
      */
-    public CreateWeIdDataResult createWeId() {
+    public CreateWeIdDataResult createWeId() throws RuntimeException {
 
         // create WeIdentity DID,publicKey,privateKey
         ResponseData<CreateWeIdDataResult> responseCreate = weIdService.createWeId();
@@ -72,9 +72,10 @@ public class DemoService {
     }
 
     /**
-     * setPublicKey
+     * setPublicKey.
      */
-    public void setPublicKey(CreateWeIdDataResult createResult, String keyType) {
+    public void setPublicKey(CreateWeIdDataResult createResult, String keyType)
+        throws RuntimeException {
 
         // setPublicKey for this WeId
         SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
@@ -91,10 +92,13 @@ public class DemoService {
     }
 
     /**
-     * setService
+     * setService.
      */
     public void setService(
-        CreateWeIdDataResult createResult, String serviceType, String serviceEnpoint) {
+        CreateWeIdDataResult createResult,
+        String serviceType,
+        String serviceEnpoint)
+        throws RuntimeException {
 
         // setService for this WeIdentity DID
         SetServiceArgs setServiceArgs = new SetServiceArgs();
@@ -111,9 +115,10 @@ public class DemoService {
     }
 
     /**
-     * setAuthenticate
+     * setAuthenticate.
      */
-    public void setAuthenticate(CreateWeIdDataResult createResult, String authType) {
+    public void setAuthenticate(CreateWeIdDataResult createResult, String authType)
+        throws RuntimeException {
 
         // setAuthenticate for this WeIdentity DID
         SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
@@ -121,8 +126,8 @@ public class DemoService {
         setAuthenticationArgs.setType(authType);
         setAuthenticationArgs.setPublicKey(createResult.getUserWeIdPublicKey().getPublicKey());
         setAuthenticationArgs.setUserWeIdPrivateKey(createResult.getUserWeIdPrivateKey());
-        ResponseData<Boolean> responseSetAuth = weIdService
-            .setAuthentication(setAuthenticationArgs);
+        ResponseData<Boolean> responseSetAuth =
+            weIdService.setAuthentication(setAuthenticationArgs);
         // check is success
         if (responseSetAuth.getErrorCode() != ErrorCode.SUCCESS.getCode()
             || !responseSetAuth.getResult()) {
@@ -131,9 +136,9 @@ public class DemoService {
     }
 
     /**
-     * getWeIdDom
+     * getWeIdDom.
      */
-    public WeIdDocument getWeIdDom(String weId) {
+    public WeIdDocument getWeIdDom(String weId) throws RuntimeException {
 
         // get weIdDom
         ResponseData<WeIdDocument> responseResult = weIdService.getWeIdDocument(weId);
@@ -146,9 +151,10 @@ public class DemoService {
     }
 
     /**
-     * regist cpt
+     * regist cpt.
      */
-    public CptBaseInfo registCpt(CreateWeIdDataResult weIdResult, String cptJsonSchema) {
+    public CptBaseInfo registCpt(CreateWeIdDataResult weIdResult, String cptJsonSchema)
+        throws RuntimeException {
 
         RegisterCptArgs registerCptArgs = new RegisterCptArgs();
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
@@ -166,10 +172,13 @@ public class DemoService {
     }
 
     /**
-     * regist authority issuer
+     * regist authority issuer.
      */
     public void registerAuthorityIssuer(
-        CreateWeIdDataResult weIdResult, String name, String accValue) {
+        CreateWeIdDataResult weIdResult,
+        String name,
+        String accValue)
+        throws RuntimeException {
 
         AuthorityIssuer authorityIssuerResult = new AuthorityIssuer();
         authorityIssuerResult.setWeId(weIdResult.getWeId());
@@ -193,10 +202,13 @@ public class DemoService {
     }
 
     /**
-     * create Credentia
+     * create Credential.
      */
     public Credential createCredential(
-        CreateWeIdDataResult weIdResult, Integer cptId, String claim, long expirationDate)
+        CreateWeIdDataResult weIdResult,
+        Integer cptId,
+        String claim,
+        long expirationDate)
         throws Exception {
 
         CreateCredentialArgs args = new CreateCredentialArgs();
@@ -217,9 +229,9 @@ public class DemoService {
     }
 
     /**
-     * verifyCredential
+     * verifyCredential.
      */
-    public boolean verifyCredential(Credential credential) {
+    public boolean verifyCredential(Credential credential) throws RuntimeException {
         ResponseData<Boolean> response = credentialService.verifyCredential(credential);
         // check is success
         if (response.getErrorCode() != ErrorCode.SUCCESS.getCode()) {

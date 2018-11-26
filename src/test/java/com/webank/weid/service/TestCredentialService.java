@@ -21,73 +21,95 @@ package com.webank.weid.service;
 
 import com.webank.weid.BaseTest;
 import com.webank.weid.common.BeanUtil;
-import com.webank.weid.common.RequestUtil;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.VerifyCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.CredentialService;
+import com.webank.weid.util.DateUtils;
+import java.text.ParseException;
 import org.junit.Test;
 
 /**
- * test CredentialService
+ * test CredentialService.
  *
  * @author v_wbgyang
  */
-public class TestCredentialService extends BaseTest<CredentialService> {
+public class TestCredentialService extends BaseTest {
 
-    @Override
-    public Class<CredentialService> initService() {
-
-        return CredentialService.class;
-    }
+    /**claimData for register.*/
+    private static String schemaData =
+         "{\"/\":{\"device\":\"/dev/sda1\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
 
     /**
-     * test CredentialService.createCredential
+     * test CredentialService.createCredential.
      */
     @Test
     public void testcreateCredential() throws Exception {
 
-        int scene = 1;
+        CreateCredentialArgs createCredentialArgs = buildCreateCredentialArgs();
 
-        CreateCredentialArgs args = RequestUtil.createCredential(scene);
-
-        ResponseData<Credential> response = service.createCredential(args);
+        ResponseData<Credential> response =
+            credentialService.createCredential(createCredentialArgs);
         BeanUtil.print(response);
     }
 
     /**
-     * test CredentialService.verifyCredential
+     * test CredentialService.verifyCredential.
      */
     @Test
     public void testVerifyCredential() throws Exception {
 
-        int scene = 1;
-
+        CreateCredentialArgs createCredentialArgs = buildCreateCredentialArgs();
         ResponseData<Credential> ctresponse =
-            service.createCredential(RequestUtil.createCredential(scene));
+            credentialService.createCredential(createCredentialArgs);
 
-        VerifyCredentialArgs args = RequestUtil.verifyCredential(scene, ctresponse.getResult());
-
-        ResponseData<Boolean> response = service.verifyCredential(args.getCredential());
+        ResponseData<Boolean> response = credentialService.verifyCredential(ctresponse.getResult());
         BeanUtil.print(response);
     }
 
     /**
-     * test CredentialService.verifyCredentialWithSpecifiedPubKey
+     * test CredentialService.verifyCredentialWithSpecifiedPubKey.
      */
     @Test
     public void testVerifyCredentialWithPublicKey() throws Exception {
 
-        int scene = 1;
-
+        CreateCredentialArgs createCredentialArgs = buildCreateCredentialArgs();
         ResponseData<Credential> ctresponse =
-            service.createCredential(RequestUtil.createCredential(scene));
+            credentialService.createCredential(createCredentialArgs);
 
-        VerifyCredentialArgs args =
-            RequestUtil.verifyCredentialWithSpecifiedPubKey(scene, ctresponse.getResult());
+        VerifyCredentialArgs verifyCredentialArgs = new VerifyCredentialArgs();
+        verifyCredentialArgs.setWeIdPublicKey(new WeIdPublicKey());
+        verifyCredentialArgs.getWeIdPublicKey().setPublicKey(
+            "13018259646160420136476747261062739427107399118741098594421740627408250832097563679915569899249860162658726497802275511046279230970892819141376414047446393");
 
-        ResponseData<Boolean> response = service.verifyCredentialWithSpecifiedPubKey(args);
+        verifyCredentialArgs.setCredential(ctresponse.getResult());
+
+        ResponseData<Boolean> response =
+            credentialService.verifyCredentialWithSpecifiedPubKey(verifyCredentialArgs);
         BeanUtil.print(response);
+    }
+
+    /**
+     * buildCreateCredentialArgs.
+     * 
+     * @return CreateCredentialArgs CreateCredentialArgs Object
+     * @throws ParseException may be throw ParseException
+     */
+    private CreateCredentialArgs buildCreateCredentialArgs() throws ParseException {
+
+        CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+        createCredentialArgs.setWeIdPrivateKey(new WeIdPrivateKey());
+        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(
+            "38847998560426504802666437193681088212587743543930619195304160132018773764799");
+
+        createCredentialArgs.setClaim(schemaData);
+        createCredentialArgs.setCptId(2000682);
+        createCredentialArgs
+            .setExpirationDate(DateUtils.convertStringToDate("2019-10-11T18:09:42Z").getTime());
+        createCredentialArgs.setIssuer("did:weid:0x0518f2b92fad9da7807a78b58af64db8997357db1");
+
+        return createCredentialArgs;
     }
 }

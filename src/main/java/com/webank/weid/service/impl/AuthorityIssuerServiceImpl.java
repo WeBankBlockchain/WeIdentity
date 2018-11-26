@@ -432,18 +432,11 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         String[] nameArray = new String[16];
         // Each String item is Bytes32, so automatically compute how many indices will be used
         int maxLength = WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH / 32;
-        int i;
+        int i = 0;
         if (name.length() < maxLength * 32) {
             maxLength = (int) Math.ceil((double) name.length() / 32.0);
         }
-        for (i = 0; i < maxLength - 1; i++) {
-            nameArray[i] = name.substring(i * 32, (i + 1) * 32);
-        }
-        if (name.length() > (i + 1) * 32) {
-            nameArray[i] = name.substring(i * 32, (i + 1) * 32);
-        } else {
-            nameArray[i] = name.substring(i * 32, name.length());
-        }
+        nameArray[i] = name.substring(i * 32, name.length());
         return nameArray;
     }
 

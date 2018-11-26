@@ -19,15 +19,14 @@
 
 package com.webank.weid.full.cpt;
 
-import java.io.IOException;
-import org.junit.Assert;
-import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.contract.CptController;
+import com.webank.weid.contract.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.full.TestData;
@@ -36,23 +35,47 @@ import com.webank.weid.protocol.request.RegisterCptArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.WeIdUtils;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.StaticArray;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.junit.Assert;
+import org.junit.Test;
 
+/**
+ * registerCpt method for testing CptService.
+ * 
+ * @author v_wbgyang
+ *
+ */
 public class TestRegisterCpt extends TestBaseServcie {
 
-    /**
-     * is register issuer
-     */
-    private boolean isRegisterAuthorityIssuer = false;
+    private static CreateWeIdDataResult createWeId = null;
 
-    @Test
-    /** case： cpt register success */
-    public void testRegisterCptCase1() {
+    @Override
+    public void testInit() throws Exception {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
+        super.testInit();
+        if (createWeId == null) {
+            createWeId = super.createWeId();
             super.registerAuthorityIssuer(createWeId);
         }
+    }
+
+    /** 
+     * case： cpt register success.
+     */
+    @Test
+    public void testRegisterCptCase1() {
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
 
@@ -64,29 +87,25 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNotNull(response.getResult());
     }
 
+    /** 
+     * case： registerCptArgs is null.
+     */
     @Test
-    /** case： registerCptArgs is null */
     public void testRegisterCptCase2() {
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(null);
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.ILLEGAL_INPUT.getCode(), 
-            response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptJsonSchema is null.
+     */
     @Test
-    /** case： cptJsonSchema is null */
     public void testRegisterCptCase3() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.setCptJsonSchema(null);
@@ -95,20 +114,16 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptJsonSchema is invalid.
+     */
     @Test
-    /** case： cptJsonSchema is invalid */
     public void testRegisterCptCase4() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.setCptJsonSchema("xxxxxxxxx");
@@ -121,15 +136,11 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptJsonSchema too long.
+     */
     @Test
-    /** case： cptJsonSchema too long */
     public void testRegisterCptCase5() throws JsonProcessingException, IOException {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
 
@@ -150,20 +161,16 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptPublisher is blank.
+     */
     @Test
-    /** case： cptPublisher is blank */
     public void testRegisterCptCase6() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.setCptPublisher(null);
@@ -176,15 +183,11 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptPublisher is invalid.
+     */
     @Test
-    /** case： cptPublisher is invalid */
     public void testRegisterCptCase7() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.setCptPublisher("di:weid:0xaaaaaaaaaaaaaaaa");
@@ -197,15 +200,11 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptPublisher is not exists and the private key does not match.
+     */
     @Test
-    /** case： cptPublisher is not exists and the private key does not match */
     public void testRegisterCptCase8() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.setCptPublisher("did:weid:0xaaaaaaaaaaaaaaaa");
@@ -214,20 +213,16 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cpt register again.
+     */
     @Test
-    /** case： cpt register again */
     public void testRegisterCptCase9() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
 
@@ -246,15 +241,11 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNotNull(response.getResult());
     }
 
+    /** 
+     * case： cptPublisherPrivateKey is null.
+     */
     @Test
-    /** case： cptPublisherPrivateKey is null */
     public void testRegisterCptCase10() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.setCptPublisherPrivateKey(null);
@@ -263,20 +254,16 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey is null.
+     */
     @Test
-    /** case： privateKey is null */
     public void testRegisterCptCase11() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(null);
@@ -285,20 +272,16 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey is invalid.
+     */
     @Test
-    /** case： privateKey is invalid */
     public void testRegisterCptCase12() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.getCptPublisherPrivateKey().setPrivateKey("1231325456468789");
@@ -307,20 +290,18 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /**
+     * case： privateKey is new privateKey.
+     * 
+     * @throws Exception may be throw Exception
+     */
     @Test
-    /** case： privateKey is new privateKey */
     public void testRegisterCptCase13() throws Exception {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.getCptPublisherPrivateKey()
@@ -330,20 +311,16 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey is SDK privateKey.
+     */
     @Test
-    /** case： privateKey is sdk privateKey */
     public void testRegisterCptCase14() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(TestBaseUtil.privKey);
@@ -352,19 +329,16 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey is xxxxxxxxx.
+     */
     @Test
-    /** case： privateKey is xxxxxxxxx */
     public void testRegisterCptCase15() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.getCptPublisherPrivateKey().setPrivateKey("xxxxxxxxxx");
@@ -373,23 +347,22 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
-    
+
+    /** 
+     * case： cptPublisher is not exists and the private key does match.
+     * 
+     * @throws Exception may be throw Exception
+     */
     @Test
-    /** case： cptPublisher is not exists and the private key does match */
     public void testRegisterCptCase16() throws Exception {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        if (isRegisterAuthorityIssuer) {
-            super.registerAuthorityIssuer(createWeId);
-        }
 
         String[] pk = TestBaseUtil.createEcKeyPair();
         String weId = WeIdUtils.convertPublicKeyToWeId(pk[0]);
-        
+
         RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
         registerCptArgs.setCptPublisher(weId);
         registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(pk[1]);
@@ -398,8 +371,122 @@ public class TestRegisterCpt extends TestBaseServcie {
         System.out.println("\nregisterCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /** 
+     * case： mock an InterruptedException.
+     */
+    @Test
+    public void testRegisterCptCase17() {
+
+        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+
+        final MockUp<Future<TransactionReceipt>> mockFuture =
+            new MockUp<Future<TransactionReceipt>>() {
+                @Mock
+                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
+                    throws Exception {
+                    throw new InterruptedException();
+                }
+            };
+
+        MockUp<CptController> mockTest = new MockUp<CptController>() {
+            @Mock
+            public Future<TransactionReceipt> registerCpt(
+                Address publisher,
+                StaticArray<Int256> intArray,
+                StaticArray<Bytes32> bytes32Array,
+                StaticArray<Bytes32> jsonSchemaArray,
+                Uint8 v,
+                Bytes32 r,
+                Bytes32 s)
+                throws Exception {
+                return mockFuture.getMockInstance();
+            }
+        };
+
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        System.out.println("\nregisterCpt result:");
+        BeanUtil.print(response);
+
+        mockTest.tearDown();
+        mockFuture.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /** 
+     * case： mock an TimeoutException.
+     */
+    @Test
+    public void testRegisterCptCase18() {
+
+        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+
+        final MockUp<Future<TransactionReceipt>> mockFuture =
+            new MockUp<Future<TransactionReceipt>>() {
+                @Mock
+                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
+                    throws Exception {
+                    throw new TimeoutException();
+                }
+            };
+
+        MockUp<CptController> mockTest = new MockUp<CptController>() {
+            @Mock
+            public Future<TransactionReceipt> registerCpt(
+                Address publisher,
+                StaticArray<Int256> intArray,
+                StaticArray<Bytes32> bytes32Array,
+                StaticArray<Bytes32> jsonSchemaArray,
+                Uint8 v,
+                Bytes32 r,
+                Bytes32 s)
+                throws Exception {
+                return mockFuture.getMockInstance();
+            }
+        };
+
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        System.out.println("\nregisterCpt result:");
+        BeanUtil.print(response);
+
+        mockTest.tearDown();
+        mockFuture.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /** 
+     * case： mock returns null.
+     */
+    @Test
+    public void testRegisterCptCase19() {
+
+        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+
+        MockUp<CptController> mockTest = new MockUp<CptController>() {
+            @Mock
+            public List<RegisterCptRetLogEventResponse> getRegisterCptRetLogEvents(
+                TransactionReceipt transactionReceipt) {
+                return null;
+            }
+        };
+
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        System.out.println("\nregisterCpt result:");
+        BeanUtil.print(response);
+
+        mockTest.tearDown();
+
+        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 }

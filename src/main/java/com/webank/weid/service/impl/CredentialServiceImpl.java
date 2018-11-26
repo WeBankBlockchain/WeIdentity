@@ -161,10 +161,6 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             if (!responseData.getResult()) {
                 return responseData;
             }
-            responseData = verifyNotRevoked(credential);
-            if (!responseData.getResult()) {
-                return responseData;
-            }
             responseData = verifySignature(credential, publicKey);
             return responseData;
         } catch (Exception e) {
@@ -190,8 +186,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
 
             String credentialIssuer = args.getIssuer();
             if (!WeIdUtils.isWeIdValid(credentialIssuer)) {
-                logger.error(ErrorCode.CREDENTIAL_ISSUER_NOT_EXISTS.getCodeDesc());
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_NOT_EXISTS);
+                logger.error(ErrorCode.CREDENTIAL_ISSUER_INVALID.getCodeDesc());
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_INVALID);
             }
 
             Long expirationDate = args.getExpirationDate();
@@ -278,7 +274,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
 
     private ResponseData<Boolean> verifyIssuerExistence(String issuerWeId) {
         ResponseData<Boolean> responseData = weIdService.isWeIdExist(issuerWeId);
-        if (responseData == null || responseData.getResult() == null) {
+        if (responseData == null || !responseData.getResult()) {
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_NOT_EXISTS);
         }
         return responseData;
@@ -287,11 +283,6 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     private ResponseData<Boolean> verifyCptFormat(Credential credential) {
         ResponseData<Boolean> responseData = new ResponseData<Boolean>();
         String claim = credential.getClaim();
-        if (StringUtils.isEmpty(claim)) {
-            logger.error(ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCodeDesc());
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS);
-        }
-
         Integer cptId = credential.getCptId();
         Cpt cpt = cptService.queryCpt(cptId).getResult();
         if (cpt == null) {
@@ -319,28 +310,15 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
 
     private ResponseData<Boolean> verifyNotExpired(Credential credential) {
         ResponseData<Boolean> responseData = new ResponseData<Boolean>();
-        try {
-            Date expireDate = new Date(credential.getExpirationDate().longValue());
-            Date currentDate = new Date();
-            boolean result = currentDate.before(expireDate);
-            responseData.setResult(result);
-            if (!result) {
-                responseData.setErrorCode(ErrorCode.CREDENTIAL_EXPIRED.getCode());
-                responseData.setErrorMessage(ErrorCode.CREDENTIAL_EXPIRED.getCodeDesc());
-            }
-            return responseData;
-        } catch (Exception e) {
-            logger.error(
-                "Generic error occurred during verify expiration when verifyCredential: " + e);
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_ERROR);
+        Date expireDate = new Date(credential.getExpirationDate().longValue());
+        Date currentDate = new Date();
+        boolean result = currentDate.before(expireDate);
+        responseData.setResult(result);
+        if (!result) {
+            responseData.setErrorCode(ErrorCode.CREDENTIAL_EXPIRED.getCode());
+            responseData.setErrorMessage(ErrorCode.CREDENTIAL_EXPIRED.getCodeDesc());
         }
-    }
-
-    private ResponseData<Boolean> verifyNotRevoked(Credential credential) {
-    
-        // Placeholder, always return true.
-        logger.info("method parameter::credential:{}", credential);
-        return new ResponseData<>(true, ErrorCode.SUCCESS);
+        return responseData;
     }
 
     private ResponseData<Boolean> verifySignature(Credential credential, String publicKey) {
