@@ -19,6 +19,9 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'checkstyle'
 apply plugin: "com.github.spotbugs"
+apply plugin: 'jacoco'
+
+version = "1.0.0"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -73,31 +76,37 @@ List jmockit = [
 ]
 
 // In this section you declare the dependencies for your production and test code
-dependencies {
-    compile logger, spring, lombok, apache_commons
-    runtime logger, spring, lombok, apache_commons
-    testCompile logger, spring, lombok, junit, jmockit
+List jackson = [
+        "com.fasterxml.jackson.core:jackson-databind:2.8.8.1",
+        'io.netty:netty-all:4.1.15.Final',
+		'io.netty:netty-tcnative:2.0.0.Final',
+		'com.google.guava:guava:19.0',
+		'com.github.fge:json-schema-validator:2.2.6',
+		'org.apache.httpcomponents:httpclient:4.5.2',
+		'org.bouncycastle:bcprov-jdk15on:1.54',
+        'com.lambdaworks:scrypt:1.4.0',
+        'com.squareup:javapoet:1.7.0',
+        'io.reactivex:rxjava:1.2.4',
+        'com.github.jnr:jnr-unixsocket:0.15'
+]
 
-    compile "com.fasterxml.jackson.core:jackson-databind:2.8.8.1"
-    runtime "com.fasterxml.jackson.core:jackson-databind:2.8.8.1"
-    compile 'io.netty:netty-all:4.1.15.Final'
-    runtime 'io.netty:netty-all:4.1.15.Final'
-    compile 'io.netty:netty-tcnative:2.0.0.Final'
-    runtime 'io.netty:netty-tcnative:2.0.0.Final'
-    compile 'com.google.guava:guava:19.0'
-    runtime 'com.google.guava:guava:19.0'
-    compile 'com.github.fge:json-schema-validator:2.2.6'
-    runtime 'com.github.fge:json-schema-validator:2.2.6'
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    compile logger, spring, lombok, apache_commons, jackson
+    runtime logger, spring, lombok, apache_commons, jackson
+    testCompile logger, spring, lombok, junit
     compile files('lib/web3sdk.jar')
     runtime files('lib/web3sdk.jar')
-    // web3j dependency
-    compile 'org.apache.httpcomponents:httpclient:4.5.2',
-            'org.bouncycastle:bcprov-jdk15on:1.54',
-            'com.lambdaworks:scrypt:1.4.0',
-            'com.squareup:javapoet:1.7.0',
-            'io.reactivex:rxjava:1.2.4',
-            'com.github.jnr:jnr-unixsocket:0.15'
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled false
+    }
+}
+
+check.dependsOn jacocoTestReport
 
 sourceSets {
     main {
@@ -120,7 +129,8 @@ sourceSets {
 
 jar {
     destinationDir file('dist/app')
-    archiveName project.name + '.jar'
+    archiveName project.name +'-'+version+'.jar'
+	
     exclude '**/*.xml'
     exclude '**/*.properties'
 
