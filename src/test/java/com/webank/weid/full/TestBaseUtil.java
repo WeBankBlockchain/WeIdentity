@@ -44,21 +44,27 @@ import java.util.Date;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 
+/**
+ * testing basic entity object building classes.
+ * @author v_wbgyang
+ *
+ */
 public class TestBaseUtil {
 
-   /**
+    /**
     * the private key of sdk is a BigInteger,which needs to be used
-    * when registering authority
+    * when registering authority.
     * 
     */
     public static String privKey;
 
     /**
-     * build VerifyCredentialArgs
+     * build VerifyCredentialArgs.
      */
     public static VerifyCredentialArgs buildVerifyCredentialArgs(
-        Credential credential, String publicKey) {
-        
+        Credential credential,
+        String publicKey) {
+
         VerifyCredentialArgs verifyCredentialArgs = new VerifyCredentialArgs();
         verifyCredentialArgs.setCredential(credential);
         verifyCredentialArgs.setWeIdPublicKey(new WeIdPublicKey());
@@ -66,61 +72,70 @@ public class TestBaseUtil {
         return verifyCredentialArgs;
     }
 
-    /** build CreateCredentialArgs no cptId */
+    /** 
+     * build CreateCredentialArgs no cptId.
+     */
     public static CreateCredentialArgs buildCreateCredentialArgs(CreateWeIdDataResult createWeId) {
 
         CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
         createCredentialArgs.setIssuer(createWeId.getWeId());
         createCredentialArgs.setExpirationDate(System.currentTimeMillis() + (1000 * 60 * 60 * 24));
         createCredentialArgs.setWeIdPrivateKey(new WeIdPrivateKey());
-        createCredentialArgs
-            .getWeIdPrivateKey()
+        createCredentialArgs.getWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
         createCredentialArgs.setClaim(TestData.schemaData);
 
         return createCredentialArgs;
     }
 
-    /** build default CreateCredentialArgs */
+    /** 
+     * build default CreateCredentialArgs. 
+     */
     public static CreateCredentialArgs buildCreateCredentialArgs(
-        CreateWeIdDataResult createWeId, CptBaseInfo cptBaseInfo) {
+        CreateWeIdDataResult createWeId,
+        CptBaseInfo cptBaseInfo) {
 
         CreateCredentialArgs createCredentialArgs = buildCreateCredentialArgs(createWeId);
         createCredentialArgs.setCptId(cptBaseInfo.getCptId());
         return createCredentialArgs;
     }
 
-    /** build default UpdateCptArgs */
+    /** 
+     * build default UpdateCptArgs.
+     */
     public static UpdateCptArgs buildUpdateCptArgs(
-        CreateWeIdDataResult createWeId, CptBaseInfo cptBaseInfo) {
+        CreateWeIdDataResult createWeId,
+        CptBaseInfo cptBaseInfo) {
 
         UpdateCptArgs updateCptArgs = new UpdateCptArgs();
         updateCptArgs.setCptJsonSchema(TestData.schema);
         updateCptArgs.setCptPublisher(createWeId.getWeId());
         updateCptArgs.setCptPublisherPrivateKey(new WeIdPrivateKey());
-        updateCptArgs
-            .getCptPublisherPrivateKey()
+        updateCptArgs.getCptPublisherPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
         updateCptArgs.setCptId(cptBaseInfo.getCptId());
 
         return updateCptArgs;
     }
 
-    /** build default RegisterCptArgs */
+    /** 
+     * build default RegisterCptArgs.
+     */
     public static RegisterCptArgs buildRegisterCptArgs(CreateWeIdDataResult createWeId) {
 
         RegisterCptArgs registerCptArgs = new RegisterCptArgs();
         registerCptArgs.setCptJsonSchema(TestData.schema);
         registerCptArgs.setCptPublisher(createWeId.getWeId());
         registerCptArgs.setCptPublisherPrivateKey(new WeIdPrivateKey());
-        registerCptArgs
-            .getCptPublisherPrivateKey()
+        registerCptArgs.getCptPublisherPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
 
         return registerCptArgs;
     }
 
-    /** build default RegisterAuthorityIssuerArgs */
+    /** 
+     * build default RegisterAuthorityIssuerArgs.
+     */
     public static RegisterAuthorityIssuerArgs buildRegisterAuthorityIssuerArgs(
         CreateWeIdDataResult createWeId) {
 
@@ -138,7 +153,9 @@ public class TestBaseUtil {
         return registerAuthorityIssuerArgs;
     }
 
-    /** build default CreateWeIdArgs */
+    /** 
+     * build default CreateWeIdArgs.
+     */
     public static CreateWeIdArgs buildCreateWeIdArgs() throws Exception {
         CreateWeIdArgs args = new CreateWeIdArgs();
         String[] pk = createEcKeyPair();
@@ -152,7 +169,9 @@ public class TestBaseUtil {
         return args;
     }
 
-    /** buildSetPublicKeyArgs */
+    /** 
+     * buildSetPublicKeyArgs.
+     */
     public static SetAuthenticationArgs buildSetAuthenticationArgs(CreateWeIdDataResult createWeId)
         throws Exception {
 
@@ -161,14 +180,15 @@ public class TestBaseUtil {
         setAuthenticationArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
         setAuthenticationArgs.setType(TestData.authenticationType);
         setAuthenticationArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
-        setAuthenticationArgs
-            .getUserWeIdPrivateKey()
+        setAuthenticationArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
 
         return setAuthenticationArgs;
     }
 
-    /** buildSetPublicKeyArgs */
+    /** 
+     * buildSetPublicKeyArgs.
+     */
     public static SetPublicKeyArgs buildSetPublicKeyArgs(CreateWeIdDataResult createWeId)
         throws Exception {
 
@@ -177,14 +197,15 @@ public class TestBaseUtil {
         setPublicKeyArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
         setPublicKeyArgs.setType(TestData.publicKeyType);
         setPublicKeyArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
-        setPublicKeyArgs
-            .getUserWeIdPrivateKey()
+        setPublicKeyArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
 
         return setPublicKeyArgs;
     }
 
-    /** buildSetPublicKeyArgs */
+    /** 
+     * buildSetPublicKeyArgs.
+     */
     public static SetServiceArgs buildSetServiceArgs(CreateWeIdDataResult createWeId)
         throws Exception {
 
@@ -193,14 +214,15 @@ public class TestBaseUtil {
         setServiceArgs.setType(TestData.serviceType);
         setServiceArgs.setServiceEndpoint(TestData.serviceEndpoint);
         setServiceArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
-        setServiceArgs
-            .getUserWeIdPrivateKey()
+        setServiceArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
 
         return setServiceArgs;
     }
 
-    /** buildRemoveAuthorityIssuerArgs */
+    /** 
+     * buildRemoveAuthorityIssuerArgs.
+     */
     public static RemoveAuthorityIssuerArgs buildRemoveAuthorityIssuerArgs(
         CreateWeIdDataResult createWeId) {
 
@@ -212,21 +234,23 @@ public class TestBaseUtil {
         return removeAuthorityIssuerArgs;
     }
 
-    /** create a new public key - private key */
+    /** 
+     * create a new public key - private key.
+     */
     public static String[] createEcKeyPair() throws Exception {
         ECKeyPair keyPair = Keys.createEcKeyPair();
         String publicKey = String.valueOf(keyPair.getPublicKey());
         String privateKey = String.valueOf(keyPair.getPrivateKey());
-        String[] pk = new String[]{publicKey, privateKey};
+        String[] pk = new String[] {publicKey, privateKey};
         System.out.println();
         BeanUtil.print(pk);
         return pk;
     }
 
     /**
-     *  to test the public and private key from the file
+     *  to test the public and private key from the file.
      *  
-     * @param fileName
+     * @param fileName fileName
      * @return
      */
     public static String[] resolvePk(String fileName) {
@@ -239,7 +263,7 @@ public class TestBaseUtil {
             String privateKey = br.readLine().split(":")[1]; // read privateKey
             System.out.println("publicKey:" + publicKey);
             System.out.println("privateKey:" + privateKey);
-            return new String[]{publicKey, privateKey};
+            return new String[] {publicKey, privateKey};
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

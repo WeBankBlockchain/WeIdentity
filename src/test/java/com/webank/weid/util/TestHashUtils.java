@@ -21,10 +21,17 @@ package com.webank.weid.util;
 
 import org.junit.Test;
 
+/**
+ * test HashUtils.
+ * 
+ * @author v_wbjnzhang
+ *
+ */
 public class TestHashUtils {
 
     @Test
     public void testHashUtils() throws Exception {
+        
         String rawString = "hello world.";
         byte[] rawBytes = rawString.getBytes();
         System.out.println("String: " + rawString + ", Bytes: " + new String(rawBytes));

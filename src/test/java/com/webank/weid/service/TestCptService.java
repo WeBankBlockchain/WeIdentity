@@ -21,71 +21,72 @@ package com.webank.weid.service;
 
 import com.webank.weid.BaseTest;
 import com.webank.weid.common.BeanUtil;
-import com.webank.weid.common.RequestUtil;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterCptArgs;
 import com.webank.weid.protocol.request.UpdateCptArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.CptService;
 import org.junit.Test;
 
 /**
- * test CptService
+ * test CptService.
  *
  * @author v_wbgyang
  */
-public class TestCptService extends BaseTest<CptService> {
+public class TestCptService extends BaseTest {
 
-    @Override
-    public Class<CptService> initService() {
-
-        return CptService.class;
-    }
+    /**jsonSchema for register.*/
+    private static String schema =
+        "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"title\":\"/etc/fstab\",\"description\":\"JSON representation of /etc/fstab\",\"type\":\"object\",\"properties\":{\"swap\":{\"$ref\":\"#/definitions/mntent\"}},\"patternProperties\":{\"^/([^/]+(/[^/]+)*)?$\":{\"$ref\":\"#/definitions/mntent\"}},\"required\":[\"/\",\"swap\"],\"additionalProperties\":false,\"definitions\":{\"mntent\":{\"title\":\"mntent\",\"description\":\"An fstab entry\",\"type\":\"object\",\"properties\":{\"device\":{\"type\":\"string\"},\"fstype\":{\"type\":\"string\"},\"options\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"string\"}},\"dump\":{\"type\":\"integer\",\"minimum\":0},\"fsck\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"device\",\"fstype\"],\"additionalItems\":false}}}";
 
     /**
-     * test CptService.registerCpt
+     * test CptService.registerCpt.
      */
     @Test
     public void testRegisterCpt() throws Exception {
 
-        int scene = 1;
+        RegisterCptArgs registerCptArgs = new RegisterCptArgs();
+        registerCptArgs.setCptPublisherPrivateKey(new WeIdPrivateKey());
+        registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(
+            "38847998560426504802666437193681088212587743543930619195304160132018773764799");
 
-        RegisterCptArgs args = RequestUtil.registerCpt(scene);
+        registerCptArgs.setCptJsonSchema(schema);
+        registerCptArgs.setCptPublisher("did:weid:0x0518f2b92fad9da7807a78b58af64db8997357db");
 
-        ResponseData<CptBaseInfo> response = service.registerCpt(args);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
         BeanUtil.print(response);
     }
 
     /**
-     * test CptService.queryCpt
+     * test CptService.queryCpt.
      */
     @Test
     public void testQueryCpt() throws Exception {
 
-        int scene = 1;
+        Integer cptId = new Integer(2000682);
 
-        Integer cptId = RequestUtil.queryCpt(scene);
-
-        ResponseData<Cpt> response = service.queryCpt(cptId);
+        ResponseData<Cpt> response = cptService.queryCpt(cptId);
         BeanUtil.print(response);
     }
 
     /**
-     * test CptService.updateCpt
+     * test CptService.updateCpt.
      */
     @Test
     public void testUpdateCpt() throws Exception {
 
-        int scene = 1;
+        UpdateCptArgs updateCptArgs = new UpdateCptArgs();
+        updateCptArgs.setCptPublisherPrivateKey(new WeIdPrivateKey());
+        updateCptArgs.getCptPublisherPrivateKey().setPrivateKey(
+            "38847998560426504802666437193681088212587743543930619195304160132018773764799");
 
-        UpdateCptArgs args = RequestUtil.updateCpt(scene);
+        updateCptArgs.setCptJsonSchema(schema);
+        updateCptArgs.setCptPublisher("did:weid:0x0518f2b92fad9da7807a78b58af64db8997357db");
+        Integer cptId = new Integer(2000682);
+        updateCptArgs.setCptId(cptId);
 
-        Integer cptId = RequestUtil.queryCpt(scene);
-        ResponseData<Cpt> query = service.queryCpt(cptId);
-
-        args.setCptId(query.getResult().getCptId());
-        ResponseData<CptBaseInfo> response = service.updateCpt(args);
+        ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         BeanUtil.print(response);
     }
 }

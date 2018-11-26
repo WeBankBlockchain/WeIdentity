@@ -19,42 +19,84 @@
 
 package com.webank.weid;
 
+import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.rpc.AuthorityIssuerService;
+import com.webank.weid.rpc.CptService;
+import com.webank.weid.rpc.CredentialService;
+import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
+import java.math.BigInteger;
+import org.bcos.contract.tools.ToolConf;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+/**
+ * Test base class.
+ * 
+ * @author v_wbgyang
+ */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(
     locations = {"classpath:SpringApplicationContext-test.xml", "classpath:applicationContext.xml"})
-public abstract class BaseTest<T> extends BaseService implements ApplicationContextAware {
+public abstract class BaseTest extends BaseService {
 
-    protected T service;
+    @Autowired
+    protected AuthorityIssuerService authorityIssuerService;
 
-    protected ApplicationContext context;
+    @Autowired
+    protected CptService cptService;
 
+    @Autowired
+    protected WeIdService weIdService;
+
+    @Autowired
+    protected CredentialService credentialService;
+
+    @Autowired
+    protected ToolConf toolConf;
+
+    /**
+     *  initialization some for test.
+     *  
+     * @throws Exception may be throw Exception
+     */
     @Before
     public void setUp() throws Exception {
-        // get service instance
-        service = (T) context.getBean(initService());
+
+        TestBaseUtil.privKey = new BigInteger(toolConf.getPrivKey(), 16).toString();
+
+        testInit();
     }
 
+    /**
+     *  tearDown some for test.
+     *  
+     * @throws Exception may be throw Exception
+     */
     @After
-    public void tearDown() {
-        service = null;
+    public void tearDown() throws Exception {
+
+        authorityIssuerService = null;
+        cptService = null;
+        weIdService = null;
+        credentialService = null;
+        toolConf = null;
+
+        testFinalize();
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.context = applicationContext;
+    public void testInit() throws Exception {
+        Assert.assertTrue(true);
     }
 
-    public abstract Class<T> initService();
+    public void testFinalize() throws Exception {
+        Assert.assertTrue(true);
+    }
 
     public int getBlockNumber() throws Exception {
         return super.getWeb3j().ethBlockNumber().send().getBlockNumber().intValue();

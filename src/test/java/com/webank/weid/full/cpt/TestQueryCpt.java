@@ -21,30 +21,44 @@ package com.webank.weid.full.cpt;
 
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.contract.CptController;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.request.UpdateCptArgs;
-import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import java.util.List;
+import java.util.concurrent.Future;
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.abi.datatypes.Type;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * queryCpt method for testing CptService.
+ * 
+ * @author v_wbgyang
+ *
+ */
 public class TestQueryCpt extends TestBaseServcie {
 
-    /**
-     * is register issuer
+    @Override
+    public void testInit() throws Exception {
+
+        super.testInit();
+        if (cptBaseInfo == null) {
+            cptBaseInfo = super.registerCpt(createWeIdWithSetAttr);
+        }
+    }
+
+    /** 
+     * case： cpt query success .
      */
-    private boolean isRegisterAuthorityIssuer = false;
-
     @Test
-    /** case： cpt query success */
     public void testQueryCptCase1() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
         System.out.println("\nqueryCpt result:");
@@ -54,8 +68,10 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertNotNull(response.getResult());
     }
 
+    /** 
+     * case： cptId is null.
+     */
     @Test
-    /** case： cptId is null */
     public void testQueryCptCase2() {
 
         ResponseData<Cpt> response = cptService.queryCpt(null);
@@ -66,8 +82,10 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptId is minus number.
+     */
     @Test
-    /** case： cptId is minus number  */
     public void testQueryCptCase3() {
 
         ResponseData<Cpt> response = cptService.queryCpt(-1);
@@ -78,8 +96,10 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptId is not exists.
+     */
     @Test
-    /** case： cptId is not exists */
     public void testQueryCptCase4() {
 
         ResponseData<Cpt> response = cptService.queryCpt(100000);
@@ -90,13 +110,11 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： query after updateCpt.
+     */
     @Test
-    /** case： query after updateCpt */
     public void testQueryCptCase5() {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
         System.out.println("\nqueryCpt result:");
@@ -104,8 +122,6 @@ public class TestQueryCpt extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
-
-        CreateWeIdDataResult createWeIdNew = super.createWeIdWithSetAttr();
 
         UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeIdNew, cptBaseInfo);
 
@@ -122,5 +138,60 @@ public class TestQueryCpt extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseQ.getErrorCode().intValue());
         Assert.assertNotNull(responseQ.getResult());
+    }
+
+    /**
+     * case: mock an InterruptedException.
+     */
+    @Test
+    public void testQueryCptCase6() {
+
+        final MockUp<Future<List<Type<?>>>> mockFuture = new MockUp<Future<List<Type<?>>>>() {
+            @Mock
+            public Future<List<Type<?>>> get() throws Exception {
+                throw new InterruptedException();
+            }
+        };
+
+        MockUp<CptController> mockTest = new MockUp<CptController>() {
+            @Mock
+            public Future<List<Type<?>>> queryCpt(Uint256 cptId) throws Exception {
+                return mockFuture.getMockInstance();
+            }
+        };
+
+        ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
+        System.out.println("\nqueryCpt result:");
+        BeanUtil.print(response);
+
+        mockTest.tearDown();
+        mockFuture.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /**
+     * case: mock returns null.
+     */
+    @Test
+    public void testQueryCptCase7() {
+
+        MockUp<CptController> mockTest = new MockUp<CptController>() {
+            @Mock
+            public Future<List<Type<?>>> queryCpt(Uint256 cptId) throws Exception {
+                return null;
+            }
+        };
+
+        ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
+        System.out.println("\nqueryCpt result:");
+        BeanUtil.print(response);
+
+        mockTest.tearDown();
+
+        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
     }
 }
