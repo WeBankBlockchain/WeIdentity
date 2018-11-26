@@ -110,10 +110,10 @@ sourceSets {
     }
     test {
         java {
-            srcDirs = ["src/test/java"]
+            srcDirs = ['src/test/java']
         }
         resources {
-            srcDirs = ['src/main/resources', 'src/test/resources']
+            srcDirs = ['src/test/resources']
         }
     }
 }

@@ -28,27 +28,23 @@ import com.webank.weid.util.DateUtils;
 import org.springframework.stereotype.Component;
 
 /**
- * WeIdentity DID demo
+ * WeIdentity DID demo.
  *
  * @author v_wbgyang
  */
 @Component
 public class DemoTest extends DemoBase {
 
-    /**
-     * jsonSchema
-     */
-    static String schema =
+    /** jsonSchema. */
+    private static String schema =
         "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"title\":\"/etc/fstab\",\"description\":\"JSON representation of /etc/fstab\",\"type\":\"object\",\"properties\":{\"swap\":{\"$ref\":\"#/definitions/mntent\"}},\"patternProperties\":{\"^/([^/]+(/[^/]+)*)?$\":{\"$ref\":\"#/definitions/mntent\"}},\"required\":[\"/\",\"swap\"],\"additionalProperties\":false,\"definitions\":{\"mntent\":{\"title\":\"mntent\",\"description\":\"An fstab entry\",\"type\":\"object\",\"properties\":{\"device\":{\"type\":\"string\"},\"fstype\":{\"type\":\"string\"},\"options\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"string\"}},\"dump\":{\"type\":\"integer\",\"minimum\":0},\"fsck\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"device\",\"fstype\"],\"additionalItems\":false}}}";
 
-    /**
-     * claim
-     */
-    static String schemaData =
+    /** claim. */
+    private static String schemaData =
         "{\"/\":{\"device\":\"/dev/sda2\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
 
     /**
-     * main of demo
+     * main of demo.
      */
     public static void main(String[] args) throws Exception {
 
@@ -61,7 +57,9 @@ public class DemoTest extends DemoBase {
 
         // set WeIdentity DID
         demo.setPublicKey(createWeId, "secp256k1");
-        demo.setService(createWeId, "drivingCardService", "https://weidentity.webank.com/endpoint/8377464");
+        demo.setService(createWeId,
+            "drivingCardService",
+            "https://weidentity.webank.com/endpoint/8377464");
         demo.setAuthenticate(createWeId, "RsaSignatureAuthentication2018");
 
         // get WeId Dom
@@ -78,12 +76,10 @@ public class DemoTest extends DemoBase {
         BeanUtil.print(cptResult);
 
         // create Credential
-        Credential credential =
-            demo.createCredential(
-                createWeId,
-                cptResult.getCptId(),
-                schemaData,
-                DateUtils.convertStringToDate("2019-10-11T18:09:42Z").getTime());
+        Credential credential = demo.createCredential(createWeId,
+            cptResult.getCptId(),
+            schemaData,
+            DateUtils.convertStringToDate("2019-10-11T18:09:42Z").getTime());
         System.out.println("----------------------");
         BeanUtil.print(credential);
 

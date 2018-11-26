@@ -137,6 +137,11 @@ public enum ErrorCode {
      * The credential issuer does not have a valid WeIdentity DID document.
      */
     CREDENTIAL_WEID_DOCUMENT_ILLEGAL(100417, "weid document illegal"),
+    
+    /**
+     * The credential issuer is invalid.
+     */
+    CREDENTIAL_ISSUER_INVALID(100418, "credential issuer invalid"),
 
     /**
      * Authority issuer main error code.

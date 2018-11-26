@@ -21,32 +21,35 @@ package com.webank.weid.full.weid;
 
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.full.TestBaseServcie;
-import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.protocol.request.CreateWeIdArgs;
-import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.Bool;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * isWeIdExist method for testing WeIdService.
+ * 
+ * @author v_wbgyang
+ *
+ */
 public class TestIsWeIdExist extends TestBaseServcie {
 
-    @Test
     /**
-     * case: weIdentity DID is Exist
+     * case: weIdentity DID is Exist.
      *
-     * @throws Exception
+     * @throws Exception  may be throw Exception
      */
+    @Test
     public void testIsWeIdExistCase1() {
 
-        ResponseData<CreateWeIdDataResult> response = service.createWeId();
-        System.out.println("\ncreateWeId result:");
-        BeanUtil.print(response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
-
-        ResponseData<Boolean> response1 = service.isWeIdExist(response.getResult().getWeId());
+        ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeId.getWeId());
         System.out.println("\nisWeIdExist result:");
         BeanUtil.print(response1);
 
@@ -54,15 +57,15 @@ public class TestIsWeIdExist extends TestBaseServcie {
         Assert.assertEquals(true, response1.getResult());
     }
 
-    @Test
     /**
-     * case: weIdentity DID is empty
+     * case: weIdentity DID is empty.
      *
-     * @throws Exception
+     * @throws Exception may be throw Exception
      */
+    @Test
     public void testIsWeIdExistCase2() {
 
-        ResponseData<Boolean> response1 = service.isWeIdExist(null);
+        ResponseData<Boolean> response1 = weIdService.isWeIdExist(null);
         System.out.println("\nisWeIdExist result:");
         BeanUtil.print(response1);
 
@@ -70,15 +73,15 @@ public class TestIsWeIdExist extends TestBaseServcie {
         Assert.assertEquals(false, response1.getResult());
     }
 
-    @Test
     /**
-     * case: weIdentity DID is invalid
+     * case: weIdentity DID is invalid.
      *
-     * @throws Exception
+     * @throws Exception may be throw Exception
      */
+    @Test
     public void testIsWeIdExistCase3() {
 
-        ResponseData<Boolean> response1 = service.isWeIdExist("xxxxxx");
+        ResponseData<Boolean> response1 = weIdService.isWeIdExist("xxxxxx");
         System.out.println("\nisWeIdExist result:");
         BeanUtil.print(response1);
 
@@ -86,15 +89,15 @@ public class TestIsWeIdExist extends TestBaseServcie {
         Assert.assertEquals(false, response1.getResult());
     }
 
-    @Test
     /**
-     * case: weIdentity DID is not exist
+     * case: weIdentity DID is not exist.
      *
-     * @throws Exception
+     * @throws Exception may be throw Exception
      */
+    @Test
     public void testIsWeIdExistCase4() {
 
-        ResponseData<Boolean> response1 = service.isWeIdExist("did:weid:xxxxxx");
+        ResponseData<Boolean> response1 = weIdService.isWeIdExist("did:weid:xxxxxx");
         System.out.println("\nisWeIdExist result:");
         BeanUtil.print(response1);
 
@@ -102,28 +105,99 @@ public class TestIsWeIdExist extends TestBaseServcie {
         Assert.assertEquals(false, response1.getResult());
     }
 
-    @Test
     /**
-     * case: weIdentity DID is Exist
+     * case: weIdentity DID is Exist.
      *
-     * @throws Exception
+     * @throws Exception may be throw Exception
      */
+    @Test
     public void testIsWeIdExistCase5() throws Exception {
 
-        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
-
-        ResponseData<String> response = service.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
-        BeanUtil.print(response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
-
-        ResponseData<Boolean> response1 = service.isWeIdExist(response.getResult());
+        ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeId.getWeId());
         System.out.println("\nisWeIdExist result:");
         BeanUtil.print(response1);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(true, response1.getResult());
+    }
+
+    /**
+     * case: Simulation throws an TimeoutException when calling the isIdentityExist
+     *       method.
+     *
+     * @throws Exception may be throw Exception
+     */
+    @Test
+    public void testIsWeIdExistCase6() {
+
+        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
+            @Mock
+            public Future<Bool> isIdentityExist(Address identity) throws Exception {
+                throw new TimeoutException();
+            }
+        };
+
+        ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeId.getWeId());
+        System.out.println("\nisWeIdExist result:");
+        BeanUtil.print(response1);
+
+        mockTest.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
+    }
+
+    /**
+     * case: Simulation throws an InterruptedException when calling the isIdentityExist
+     *       method.
+     *
+     * @throws Exception may be throw Exception
+     */
+    @Test
+    public void testIsWeIdExistCase7() {
+
+        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
+            @Mock
+            public Future<Bool> isIdentityExist(Address identity) throws Exception {
+                throw new InterruptedException();
+            }
+        };
+
+        ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeId.getWeId());
+        System.out.println("\nisWeIdExist result:");
+        BeanUtil.print(response1);
+
+        mockTest.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
+    }
+
+    /**
+     * case: Simulation throws an NullPointerException when calling the isIdentityExist
+     *       method.
+     *
+     * @throws Exception may be throw Exception
+     */
+    @Test
+    public void testIsWeIdExistCase8() {
+
+        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
+            @Mock
+            public Future<Bool> isIdentityExist(Address identity) throws Exception {
+                throw new NullPointerException();
+            }
+        };
+
+        ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeId.getWeId());
+        System.out.println("\nisWeIdExist result:");
+        BeanUtil.print(response1);
+
+        mockTest.tearDown();
+
+        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
     }
 }

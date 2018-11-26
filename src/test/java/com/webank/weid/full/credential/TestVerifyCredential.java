@@ -25,32 +25,46 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.full.TestData;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
-import com.webank.weid.protocol.request.RegisterCptArgs;
-import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.service.impl.WeIdServiceImpl;
+import com.webank.weid.util.CredentialUtils;
+import mockit.Mock;
+import mockit.MockUp;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * verifyCredential method for testing CredentialService.
+ * 
+ * @author v_wbgyang
+ *
+ */
 public class TestVerifyCredential extends TestBaseServcie {
 
-    CreateWeIdDataResult createWeId;
-    RegisterCptArgs registerCptArgs;
-    CreateCredentialArgs createCredentialArgs;
-    /**
-     * is register issuer
-     */
-    private boolean isRegisterAuthorityIssuer = true;
+    private String[] pk = null;
 
+    @Override
+    public void testInit() throws Exception {
+
+        super.testInit();
+        pk = TestBaseUtil.createEcKeyPair();
+        if (createCredentialArgs == null) {
+            registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeIdWithSetAttr);
+            createCredentialArgs = TestBaseUtil.buildCreateCredentialArgs(createWeIdWithSetAttr);
+            cptBaseInfo = this.registerCpt(createWeIdWithSetAttr, registerCptArgs);
+            createCredentialArgs.setCptId(cptBaseInfo.getCptId());
+        }
+    }
+
+    /** 
+     * case: verifyCredential success.
+     */
     @Test
-    /** case: verifyCredential success */
     public void testVerifyCredentialCase1() throws Exception {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
@@ -58,271 +72,240 @@ public class TestVerifyCredential extends TestBaseServcie {
         Assert.assertEquals(true, response.getResult());
     }
 
+    /** 
+     * case: context is null.
+     */
     @Test
-    /** case: context is null */
     public void testVerifyCredentialCase2() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setContext(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: context is other string.
+     */
     @Test
-    /** case: context is other string */
     public void testVerifyCredentialCase3() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setContext("xxx");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: cptId is null.
+     */
     @Test
-    /** case: cptId is null */
     public void testVerifyCredentialCase4() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setCptId(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: cptId is minus number.
+     */
     @Test
-    /** case: cptId is minus number */
     public void testVerifyCredentialCase5() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setCptId(-1);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: cptId is not exists.
+     */
     @Test
-    /** case: cptId is not exists */
     public void testVerifyCredentialCase6() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setCptId(10000);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: cptId is another.
+     */
     @Test
-    /** case: cptId is another */
     public void testVerifyCredentialCase7() {
 
-        preVerify();
+        Credential credential = super.createCredential(createCredentialArgs);
 
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
-
-        CptBaseInfo cpt = super.registerCpt(createWeId, registerCptArgs, false);
+        CptBaseInfo cpt = super.registerCpt(createWeIdWithSetAttr, registerCptArgs);
         credential.setCptId(cpt.getCptId());
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: id is null.
+     */
     @Test
-    /** case: id is null */
     public void testVerifyCredentialCase8() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setId(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: id is another.
+     */
     @Test
-    /** case: id is another */
     public void testVerifyCredentialCase9() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setId("xxxxxxxxx");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: issuer is null.
+     */
     @Test
-    /** case: issuer is null */
     public void testVerifyCredentialCase10() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setIssuer(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: issuer is xxxxx.
+     */
     @Test
-    /** case: issuer is xxxxx */
     public void testVerifyCredentialCase11() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setIssuer("xxxxxxxxxxx");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: issuer is another.
+     */
     @Test
-    /** case: issuer is another */
     public void testVerifyCredentialCase12() {
 
-        preVerify();
+        Credential credential = super.createCredential(createCredentialArgs);
 
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
-
-        CreateWeIdDataResult createWeIdNew = super.createWeId();
         credential.setIssuer(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: issuranceDate < = 0.
+     */
     @Test
-    /** case: issuranceDate < = 0 */
     public void testVerifyCredentialCase13() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
-        credential.setIssuranceDate(-1l);
+        Credential credential = super.createCredential(createCredentialArgs);
+        credential.setIssuranceDate(-1L);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: issuranceDate > now.
+     */
     @Test
-    /** case: issuranceDate > now */
     public void testVerifyCredentialCase14() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setIssuranceDate(System.currentTimeMillis() + 100000);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: expirationDate <= 0.
+     */
     @Test
-    /** case: expirationDate <= 0 */
     public void testVerifyCredentialCase15() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
-        credential.setExpirationDate(-1l);
+        Credential credential = super.createCredential(createCredentialArgs);
+        credential.setExpirationDate(-1L);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: expirationDate <= now.
+     */
     @Test
-    /** case: expirationDate <= now */
     public void testVerifyCredentialCase16() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setExpirationDate(System.currentTimeMillis() - 10000);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
@@ -332,182 +315,174 @@ public class TestVerifyCredential extends TestBaseServcie {
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: expirationDate is null.
+     */
     @Test
-    /** case: expirationDate is null */
     public void testVerifyCredentialCase17() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setExpirationDate(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: issuranceDate is null.
+     */
     @Test
-    /** case: issuranceDate is null */
     public void testVerifyCredentialCase18() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setIssuranceDate(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: claim is null.
+     */
     @Test
-    /** case: claim is null */
     public void testVerifyCredentialCase19() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setClaim(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: claim is xxxxxxxxxx.
+     */
     @Test
-    /** case: claim is xxxxxxxxxx */
     public void testVerifyCredentialCase20() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setClaim("xxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert
-            .assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: claim does not match jsonSchema.
+     */
     @Test
-    /** case: claim does not match jsonSchema */
     public void testVerifyCredentialCase21() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setClaim(TestData.schemaDataInvalid);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: signature is null.
+     */
     @Test
-    /** case: signature is null */
     public void testVerifyCredentialCase22() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setSignature(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: signature is xxxxxxxxxxxxxxxxxxx.
+     */
     @Test
-    /** case: signature is xxxxxxxxxxxxxxxxxxx */
     public void testVerifyCredentialCase23() {
 
-        preVerify();
-
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
         credential.setSignature("xxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert
-            .assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: signature by 122324324324.
+     */
     @Test
-    /** case: signature by 122324324324 */
     public void testVerifyCredentialCase24() throws Exception {
 
-        preVerify();
+        CreateCredentialArgs createCredentialArgs =
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdWithSetAttr);
+        createCredentialArgs.setCptId(cptBaseInfo.getCptId());
 
         createCredentialArgs.getWeIdPrivateKey().setPrivateKey("122324324324");
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+
+        Credential credential = super.createCredential(createCredentialArgs);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: signature by non weIdentity DId publickeys.
+     */
     @Test
-    /** case: signature by non weIdentity DId publickeys */
     public void testVerifyCredentialCase25() throws Exception {
 
-        preVerify();
+        CreateCredentialArgs createCredentialArgs =
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdWithSetAttr);
+        createCredentialArgs.setCptId(cptBaseInfo.getCptId());
 
-        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(TestBaseUtil.createEcKeyPair()[1]);
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(pk[1]);
+        Credential credential = super.createCredential(createCredentialArgs);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
+    /** 
+     * case: Sing through another private key in publickeys of weIdentity dId.
+     */
     @Test
-    /** case: Sing through another private key in publickeys of weIdentity DId */
     public void testVerifyCredentialCase26() throws Exception {
 
-        preVerify();
+        super.setPublicKey(createWeIdWithSetAttr, pk[0], createWeIdWithSetAttr.getWeId());
+        super.setAuthentication(createWeIdWithSetAttr, pk[0], createWeIdWithSetAttr.getWeId());
 
-        String[] pk = TestBaseUtil.createEcKeyPair();
-        super.setPublicKey(createWeId, pk[0], createWeId.getWeId());
-        super.setAuthentication(createWeId, pk[0], createWeId.getWeId());
+        CreateCredentialArgs createCredentialArgs =
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdWithSetAttr);
+        createCredentialArgs.setCptId(cptBaseInfo.getCptId());
 
         createCredentialArgs.getWeIdPrivateKey().setPrivateKey(pk[1]);
-        Credential credential =
-            super.createCredential(
-                createWeId, registerCptArgs, createCredentialArgs, isRegisterAuthorityIssuer);
+        Credential credential = super.createCredential(createCredentialArgs);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
@@ -515,12 +490,88 @@ public class TestVerifyCredential extends TestBaseServcie {
         Assert.assertEquals(true, response.getResult());
     }
 
-    private void preVerify() {
+    /** 
+     * case: issuranceDate < now && expirationDate < now  && issuranceDate < expirationDate.
+     */
+    @Test
+    public void testVerifyCredentialCase27() {
 
-        createWeId = super.createWeIdWithSetAttr();
+        Credential credential = super.createCredential(createCredentialArgs);
+        credential.setIssuranceDate(System.currentTimeMillis() - 12000);
+        credential.setExpirationDate(System.currentTimeMillis() - 10000);
 
-        registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+        ResponseData<Boolean> response = super.verifyCredential(credential);
 
-        createCredentialArgs = TestBaseUtil.buildCreateCredentialArgs(createWeId);
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /** 
+     * case: mock CREDENTIAL_WEID_DOCUMENT_ILLEGAL.
+     */
+    @Test
+    public void testVerifyCredentialCase28() {
+
+        Credential credential = super.createCredential(createCredentialArgs);
+
+        MockUp<WeIdServiceImpl> mockTest = new MockUp<WeIdServiceImpl>() {
+            @Mock
+            public ResponseData<WeIdDocument> getWeIdDocument(String weId) throws Exception {
+                ResponseData<WeIdDocument> response = new ResponseData<WeIdDocument>();
+                response.setErrorCode(ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL.getCode());
+                return response;
+            }
+        };
+
+        ResponseData<Boolean> response = super.verifyCredential(credential);
+
+        mockTest.tearDown();
+
+        Assert.assertEquals(ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /** 
+     * case: mock NullPointerException.
+     */
+    @Test
+    public void testVerifyCredentialCase29() {
+
+        Credential credential = super.createCredential(createCredentialArgs);
+        credential.setIssuranceDate(System.currentTimeMillis() - 12000);
+        credential.setExpirationDate(System.currentTimeMillis() - 10000);
+
+        MockUp<CredentialUtils> mockTest = new MockUp<CredentialUtils>() {
+            @Mock
+            public CreateCredentialArgs extractCredentialMetadata(Credential arg) throws Exception {
+                throw new NullPointerException();
+            }
+        };
+
+        ResponseData<Boolean> response = super.verifyCredential(credential);
+
+        mockTest.tearDown();
+
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /** 
+     * case: issuer is not exists.
+     */
+    @Test
+    public void testVerifyCredentialCase30() {
+
+        Credential credential = super.createCredential(createCredentialArgs);
+        credential.setIssuer("did:weid:0x111111111111111");
+
+        ResponseData<Boolean> response = super.verifyCredential(credential);
+
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
     }
 }
