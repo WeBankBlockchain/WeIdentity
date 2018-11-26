@@ -25,6 +25,25 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.DynamicArray;
+import org.bcos.web3j.abi.datatypes.StaticArray;
+import org.bcos.web3j.abi.datatypes.Type;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.bcos.web3j.crypto.Keys;
+import org.bcos.web3j.crypto.Sign;
+import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.google.common.base.Splitter;
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -44,25 +63,6 @@ import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.JsonSchemaValidatorUtils;
 import com.webank.weid.util.SignatureUtils;
 import com.webank.weid.util.WeIdUtils;
-
-import com.google.common.base.Splitter;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.StaticArray;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.crypto.Sign;
-import org.bcos.web3j.crypto.Sign.SignatureData;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * Service implementation for operation on CPT (Claim Protocol Type).
@@ -372,24 +372,26 @@ public class CptServiceImpl extends BaseService implements CptService {
     }
 
     private ResponseData<CptBaseInfo> validateRegisterCptArgs(
-        RegisterCptArgs args, ResponseData<CptBaseInfo> responseData) throws Exception {
+        RegisterCptArgs args, 
+        ResponseData<CptBaseInfo> responseData) throws Exception {
 
+        ResponseData<CptBaseInfo> responseDataReq = responseData;
         if (args == null) {
             logger.error("input RegisterCptArgs is null");
-            responseData = new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
-            return responseData;
+            responseDataReq = new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            return responseDataReq;
         }
 
         if (!WeIdUtils.isWeIdValid(args.getCptPublisher())) {
             logger.error("Input cpt publisher : {} is invalid.", args.getCptPublisher());
-            responseData = new ResponseData<>(null, ErrorCode.WEID_INVALID);
-            return responseData;
+            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_INVALID);
+            return responseDataReq;
         }
 
         if (!JsonSchemaValidatorUtils.isCptJsonSchemaValid(args.getCptJsonSchema())) {
             logger.error("Input cpt json schema : {} is invalid.", args.getCptJsonSchema());
-            responseData = new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
-            return responseData;
+            responseDataReq = new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
+            return responseDataReq;
         }
 
         if (null == args.getCptPublisherPrivateKey()
@@ -398,16 +400,16 @@ public class CptServiceImpl extends BaseService implements CptService {
                 "Input cpt publisher private key : {} is in valid.",
                 args.getCptPublisherPrivateKey()
             );
-            responseData = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
-            return responseData;
+            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
+            return responseDataReq;
         }
 
         if (!validatePrivateKeyWeIdMatches(args.getCptPublisherPrivateKey(),
             args.getCptPublisher())) {
-            responseData = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
 
-        return responseData;
+        return responseDataReq;
     }
 
     private boolean validatePrivateKeyWeIdMatches(WeIdPrivateKey cptPublisherPrivateKey,
@@ -433,22 +435,23 @@ public class CptServiceImpl extends BaseService implements CptService {
     private ResponseData<CptBaseInfo> validateUpdateCptArgs(
         UpdateCptArgs args, ResponseData<CptBaseInfo> responseData) throws Exception {
 
+    	ResponseData<CptBaseInfo> responseDataReq = responseData;
         if (args == null) {
             logger.error("input UpdateCptArgs is null");
-            responseData = new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
-            return responseData;
+            responseDataReq = new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            return responseDataReq;
         }
 
         if (!WeIdUtils.isWeIdValid(args.getCptPublisher())) {
             logger.error("Input cpt publisher : {} is invalid.", args.getCptPublisher());
-            responseData = new ResponseData<>(null, ErrorCode.WEID_INVALID);
-            return responseData;
+            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_INVALID);
+            return responseDataReq;
         }
 
         if (!JsonSchemaValidatorUtils.isCptJsonSchemaValid(args.getCptJsonSchema())) {
             logger.error("Input cpt json schema : {} is in valid.", args.getCptJsonSchema());
-            responseData = new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
-            return responseData;
+            responseDataReq = new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
+            return responseDataReq;
         }
 
         if (null == args.getCptPublisherPrivateKey()
@@ -457,15 +460,15 @@ public class CptServiceImpl extends BaseService implements CptService {
                 "Input cpt publisher private key : {} is in valid.",
                 args.getCptPublisherPrivateKey()
             );
-            responseData = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
-            return responseData;
+            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
+            return responseDataReq;
         }
 
         if (!validatePrivateKeyWeIdMatches(args.getCptPublisherPrivateKey(),
             args.getCptPublisher())) {
-            responseData = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
 
-        return responseData;
+        return responseDataReq;
     }
 }

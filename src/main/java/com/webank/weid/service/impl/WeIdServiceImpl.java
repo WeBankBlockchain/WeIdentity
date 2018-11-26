@@ -29,6 +29,30 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.EventEncoder;
+import org.bcos.web3j.abi.TypeReference;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.Bool;
+import org.bcos.web3j.abi.datatypes.DynamicBytes;
+import org.bcos.web3j.abi.datatypes.Event;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.bcos.web3j.crypto.ECKeyPair;
+import org.bcos.web3j.crypto.Keys;
+import org.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
+import org.bcos.web3j.protocol.core.methods.response.EthBlock;
+import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.bcos.web3j.protocol.core.methods.response.Log;
+import org.bcos.web3j.protocol.core.methods.response.Transaction;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -54,30 +78,6 @@ import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.EventEncoder;
-import org.bcos.web3j.abi.TypeReference;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.Bool;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.Event;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
-import org.bcos.web3j.protocol.core.methods.response.EthBlock;
-import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
-import org.bcos.web3j.protocol.core.methods.response.Log;
-import org.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 /**
  * Service implementations for operations on WeIdentity DID.
  *
@@ -92,12 +92,12 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceImpl.class);
 
     /**
-     * WeIdentity DID contract object, for calling weIdentity DID contract
+     * WeIdentity DID contract object, for calling weIdentity DID contract.
      */
     private static WeIdContract weIdContract;
 
     /**
-     * WeIdentity DID contract address
+     * WeIdentity DID contract address.
      */
     private static String weIdContractAddress;
 
@@ -184,6 +184,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     private static void buildWeIdPublicKeys(String value, String weId, WeIdDocument result) {
 
+        logger.info("method buildWeIdPublicKeys() parameter::value:{}, weId:{}, "
+                    + "result:{}", value, weId, result);
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
         for (PublicKeyProperty pr : pubkeyList) {
             if (StringUtils.contains(value, pr.getPublicKey())) {
@@ -208,7 +210,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     }
 
     private static void buildWeIdAuthentication(String value, String weId, WeIdDocument result) {
-
+        
+        logger.info("method buildWeIdAuthentication() parameter::value:{}, weId:{}, "
+                + "result:{}", value, weId, result);
         AuthenticationProperty auth = new AuthenticationProperty();
         List<PublicKeyProperty> keys = result.getPublicKey();
         List<AuthenticationProperty> authList = result.getAuthentication();
@@ -228,6 +232,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     private static void buildWeIdService(String key, String value, String weId,
         WeIdDocument result) {
+        
+        logger.info("method buildWeIdService() parameter::key{}, value:{}, weId:{}, "
+                + "result:{}", key, value, weId, result);
         String service = StringUtils.splitByWholeSeparator(key, "/")[2];
         List<ServiceProperty> serviceList = result.getService();
         for (ServiceProperty sr : serviceList) {
@@ -244,9 +251,14 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private static void buildWeIdAttributeDefault(
         String key, String value, String weId, WeIdDocument result) {
 
+        logger.info("method buildWeIdAttributeDefault() parameter::key{}, value:{}, weId:{}, "
+                    + "result:{}", key, value, weId, result);
         switch (key) {
             case WeIdConstant.WEID_DOC_CREATED:
                 result.setCreated(Long.valueOf(value));
+                break;
+            default:
+                break;
         }
     }
 
@@ -599,13 +611,12 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     }
 
     private boolean verifySetPublicKeyArgs(SetPublicKeyArgs setPublicKeyArgs) {
-        if (null == setPublicKeyArgs
-            || null == setPublicKeyArgs.getType()
-            || null == setPublicKeyArgs.getUserWeIdPrivateKey()
-            || null == setPublicKeyArgs.getPublicKey()) {
-            return false;
-        }
-        return true;
+
+        return !(null == setPublicKeyArgs
+                || null == setPublicKeyArgs.getType()
+                || null == setPublicKeyArgs.getUserWeIdPrivateKey()
+                || null == setPublicKeyArgs.getPublicKey()
+                );
     }
 
     /**
@@ -667,13 +678,12 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     }
 
     private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
-        if (null == setServiceArgs
-            || null == setServiceArgs.getType()
-            || null == setServiceArgs.getUserWeIdPrivateKey()
-            || null == setServiceArgs.getServiceEndpoint()) {
-            return false;
-        }
-        return true;
+
+        return !(null == setServiceArgs
+                || null == setServiceArgs.getType()
+                || null == setServiceArgs.getUserWeIdPrivateKey()
+                || null == setServiceArgs.getServiceEndpoint()
+                );
     }
 
     /**
@@ -749,13 +759,12 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     }
 
     private boolean verifySetAuthenticationArgs(SetAuthenticationArgs setAuthenticationArgs) {
-        if (null == setAuthenticationArgs
-            || null == setAuthenticationArgs.getType()
-            || null == setAuthenticationArgs.getUserWeIdPrivateKey()
-            || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey())) {
-            return false;
-        }
-        return true;
+
+        return !(null == setAuthenticationArgs
+                || null == setAuthenticationArgs.getType()
+                || null == setAuthenticationArgs.getUserWeIdPrivateKey()
+                || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey())
+                );
     }
 
     /**

@@ -1,15 +1,14 @@
 #!/bin/bash
 
-web3j_dir=
-SOLC=`which fisco-solc`
+SOLC=$(which fisco-solc)
 WEB3J="../bin/web3sdk.sh"
 java_source_code_dir=$2
-temp_file=`date +%s`".temp"
+temp_file=$(date +%s)".temp"
 config_file=${java_source_code_dir}dist/bin/run.config
 app_xml_config=${java_source_code_dir}dist/conf/applicationContext.xml
 
 cd $2
-APP_HOME=`pwd`
+APP_HOME=$(pwd)
 cd -
 CLASSPATH=$APP_HOME/dist/conf
 
@@ -56,10 +55,10 @@ function compile_contract()
     package="com.webank.weid.contract"
     output_dir="${java_source_code_dir}dist/output"
     echo "output_dir is $output_dir"
-    local files=`ls *.sol`
+    local files=$(ls ./*.sol)
     for itemfile in ${files}
     do
-        local item=`basename ${itemfile} ".sol"`
+        local item=$(basename ${itemfile} ".sol")
         ${SOLC} --abi --bin -o ${output_dir} ${itemfile}
         echo "${output_dir}/${item}.bin, ${output_dir}, ${package} "
         ${WEB3J} solidity generate  ${output_dir}"/"${item}".bin" ${output_dir}"/"${item}".abi" -o ${output_dir} -p ${package} 
@@ -79,11 +78,11 @@ function modify_config()
 {
     echo "begin to modify sdk config..."
     cd ${java_source_code_dir}dist
-    weid_address=`grep "WeIDContract" $temp_file |awk -F"=" '{print $2}'`
+    weid_address=$(grep "WeIDContract" $temp_file |awk -F"=" '{print $2}')
     sed -i "s/WEID_ADDRESS/$weid_address/g" $app_xml_config
-    cpt_address=`grep "CptController" $temp_file |awk -F"=" '{print $2}'`
+    cpt_address=$(grep "CptController" $temp_file |awk -F"=" '{print $2}')
     sed -i "s/CPT_ADDRESS/$cpt_address/g" $app_xml_config
-    issuer_address=`grep "authorityIssuerController" $temp_file |awk -F"=" '{print $2}'`
+    issuer_address=$(grep "authorityIssuerController" $temp_file |awk -F"=" '{print $2}')
     sed -i "s/ISSUER_ADDRESS/$issuer_address/g" $app_xml_config
     
     rm -f $temp_file
@@ -120,7 +119,7 @@ function deploy_contract()
     echo "begin to deploy contract..."
     cd ${java_source_code_dir}dist
     
-    node_addr=`grep "blockchain.node.address" $config_file |awk -F"=" '{print $2}'`
+    node_addr=$(grep "blockchain.node.address" $config_file |awk -F"=" '{print $2}')
     OLD_IFS="$IFS"
     IFS=","
     array=($node_addr)

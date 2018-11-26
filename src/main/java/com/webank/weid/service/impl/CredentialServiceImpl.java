@@ -25,6 +25,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.crypto.Sign;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.Cpt;
@@ -43,13 +50,6 @@ import com.webank.weid.util.JsonSchemaValidatorUtils;
 import com.webank.weid.util.SignatureUtils;
 import com.webank.weid.util.WeIdUtils;
 
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 /**
  * Service implementations for operations on Credential.
  *
@@ -66,17 +66,6 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     @Autowired
     private WeIdService weIdService;
 
-    /**
-     * Instantiates a new credential service impl.
-     *
-     * @throws Exception the exception
-     */
-    public CredentialServiceImpl() throws Exception {
-        init();
-    }
-
-    private static void init() throws Exception {
-    }
 
     /**
      * Generate a credential.
@@ -219,11 +208,10 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS);
             }
 
-            if (privateKeyRequired) {
-                if (StringUtils.isEmpty(args.getWeIdPrivateKey().getPrivateKey())) {
-                    logger.error(ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCodeDesc());
-                    return new ResponseData<>(false, ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
-                }
+            if (privateKeyRequired 
+                && StringUtils.isEmpty(args.getWeIdPrivateKey().getPrivateKey())) {
+                logger.error(ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCodeDesc());
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
             }
 
             responseData.setResult(true);
@@ -349,11 +337,14 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     }
 
     private ResponseData<Boolean> verifyNotRevoked(Credential credential) {
+    
         // Placeholder, always return true.
+        logger.info("method parameter::credential:{}", credential);
         return new ResponseData<>(true, ErrorCode.SUCCESS);
     }
 
     private ResponseData<Boolean> verifySignature(Credential credential, String publicKey) {
+    
         ResponseData<Boolean> responseData = new ResponseData<Boolean>();
         try {
             String hashedRawData = CredentialUtils.getCredentialFields(credential);

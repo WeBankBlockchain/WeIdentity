@@ -20,12 +20,25 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.Bool;
+import org.bcos.web3j.abi.datatypes.DynamicArray;
+import org.bcos.web3j.abi.datatypes.DynamicBytes;
+import org.bcos.web3j.abi.datatypes.Type;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
@@ -41,20 +54,6 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.WeIdUtils;
-
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.Bool;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Service implementations for operations on Authority Issuer.
@@ -380,32 +379,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL);
         }
         responseData.setResult(true);
-        return responseData;
-    }
-
-    private ResponseData<List<String>> queryAllAuthorityIssuerWeIds() {
-        ResponseData<List<String>> responseData = new ResponseData<List<String>>();
-        try {
-            List<Address> addressList = authorityIssuerController
-                .getAllAuthorityIssuerAddress()
-                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
-                .getValue();
-
-            List<String> weIdList = new ArrayList<String>();
-            for (Address addr : addressList) {
-                weIdList.add(WeIdUtils.convertAddressToWeId(addr.toString()));
-            }
-            responseData.setResult(weIdList);
-        } catch (TimeoutException e) {
-            logger.error("query authority issuer failed due to system timeout. ", e);
-            return new ResponseData<List<String>>(null, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("query authority issuer failed due to transaction error. ", e);
-            return new ResponseData<List<String>>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (Exception e) {
-            logger.error("query authority issuer failed.", e);
-            return new ResponseData<List<String>>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
-        }
         return responseData;
     }
 
