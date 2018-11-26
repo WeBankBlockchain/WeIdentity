@@ -22,21 +22,19 @@ package com.webank.weid.performance;
 import com.webank.weid.BaseTest;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.request.SetAuthenticationArgs;
-import com.webank.weid.protocol.request.SetPublicKeyArgs;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.WeIdService;
 import org.junit.Test;
 
-public class TestWeIdPerformance extends BaseTest<WeIdService> {
-
-    @Override
-    public Class<WeIdService> initService() {
-
-        return WeIdService.class;
-    }
+/**
+ * performance testing.
+ * 
+ * @author v_wbgyang
+ *
+ */
+public class TestWeIdPerformance extends BaseTest {
 
     @Test
     public void testGetWeIdDom() throws Exception {
@@ -48,7 +46,9 @@ public class TestWeIdPerformance extends BaseTest<WeIdService> {
 
         int count = 1;
         for (int i = 0; i < count; i++) {
-            this.setService(weIdResult, "driving" + i, "https://weidentity.webank.com/endpoint/8377464" + i);
+            this.setService(weIdResult,
+                "driving" + i,
+                "https://weidentity.webank.com/endpoint/8377464" + i);
             System.out.println("------" + i);
         }
         System.out.println("blockNumber:" + this.getBlockNumber());
@@ -63,12 +63,12 @@ public class TestWeIdPerformance extends BaseTest<WeIdService> {
     }
 
     /**
-     * create weIdentity DID
+     * create weIdentity DID.
      */
-    public CreateWeIdDataResult createWeId() {
+    public CreateWeIdDataResult createWeId() throws RuntimeException {
 
         // create weIdentity DID,publicKey,privateKey
-        ResponseData<CreateWeIdDataResult> responseCreate = service.createWeId();
+        ResponseData<CreateWeIdDataResult> responseCreate = weIdService.createWeId();
         // check result is success
         if (responseCreate.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             throw new RuntimeException(responseCreate.getErrorMessage());
@@ -77,35 +77,23 @@ public class TestWeIdPerformance extends BaseTest<WeIdService> {
     }
 
     /**
-     * setPublicKey
-     */
-    public void setPublicKey(CreateWeIdDataResult createResult, String keyType) {
-
-        // setPublicKey for this WeId
-        SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
-        setPublicKeyArgs.setWeId(createResult.getWeId());
-        setPublicKeyArgs.setPublicKey(createResult.getUserWeIdPublicKey().getPublicKey());
-        setPublicKeyArgs.setType(keyType);
-        ResponseData<Boolean> responseSetPub = service.setPublicKey(setPublicKeyArgs);
-        // check is success
-        if (responseSetPub.getErrorCode() != ErrorCode.SUCCESS.getCode()
-            || !responseSetPub.getResult()) {
-            throw new RuntimeException(responseSetPub.getErrorMessage());
-        }
-    }
-
-    /**
-     * setService
+     * setService.
      */
     public void setService(
-        CreateWeIdDataResult createResult, String serviceType, String serviceEnpoint) {
+        CreateWeIdDataResult createResult,
+        String serviceType,
+        String serviceEnpoint)
+        throws RuntimeException {
 
         // setService for this weIdentity DID
         SetServiceArgs setServiceArgs = new SetServiceArgs();
         setServiceArgs.setWeId(createResult.getWeId());
         setServiceArgs.setType(serviceType);
         setServiceArgs.setServiceEndpoint(serviceEnpoint);
-        ResponseData<Boolean> responseSetSer = service.setService(setServiceArgs);
+        setServiceArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
+        setServiceArgs.getUserWeIdPrivateKey()
+            .setPrivateKey(createResult.getUserWeIdPrivateKey().getPrivateKey());
+        ResponseData<Boolean> responseSetSer = weIdService.setService(setServiceArgs);
         // check is success
         if (responseSetSer.getErrorCode() != ErrorCode.SUCCESS.getCode()
             || !responseSetSer.getResult()) {
@@ -114,30 +102,12 @@ public class TestWeIdPerformance extends BaseTest<WeIdService> {
     }
 
     /**
-     * setAuthenticate
+     * getWeIdDom.
      */
-    public void setAuthenticate(CreateWeIdDataResult createResult, String authType) {
-
-        // setAuthenticate for this weIdentity DID
-        SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
-        setAuthenticationArgs.setWeId(createResult.getWeId());
-        setAuthenticationArgs.setType(authType);
-        setAuthenticationArgs.setPublicKey(createResult.getUserWeIdPublicKey().getPublicKey());
-        ResponseData<Boolean> responseSetAuth = service.setAuthentication(setAuthenticationArgs);
-        // check is success
-        if (responseSetAuth.getErrorCode() != ErrorCode.SUCCESS.getCode()
-            || !responseSetAuth.getResult()) {
-            throw new RuntimeException(responseSetAuth.getErrorMessage());
-        }
-    }
-
-    /**
-     * getWeIdDom
-     */
-    public WeIdDocument getWeIdDom(String weId) {
+    public WeIdDocument getWeIdDom(String weId) throws RuntimeException {
 
         // get weIdDom
-        ResponseData<WeIdDocument> responseResult = service.getWeIdDocument(weId);
+        ResponseData<WeIdDocument> responseResult = weIdService.getWeIdDocument(weId);
         // check result
         if (responseResult.getErrorCode() != ErrorCode.SUCCESS.getCode()
             || responseResult.getResult() == null) {

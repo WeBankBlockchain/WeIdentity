@@ -19,27 +19,6 @@
 
 package com.webank.weid.util;
 
-import com.webank.weid.full.TestBaseUtil;
-import java.math.BigInteger;
-import org.junit.Test;
+public class TestDateUtils {
 
-/**
- * the role of this class is to handle the private key required 
- * in the testing process.
- * 
- * @author v_wbgyang
- *
- */
-public class TestBuildPrivateKey {
-
-    /** 
-     * extract the private key in org1.txt and transform it into 16 binary system 
-     */
-    @Test
-    public void testBuildPrivateKey() {
-        String[] pk = TestBaseUtil.resolvePk("org1.txt");
-        BigInteger bigInter1 = new BigInteger(pk[1], 10);
-        String str1 = bigInter1.toString(16);
-        System.out.println("\nprivate key:" + str1);
-    }
 }

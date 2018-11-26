@@ -21,41 +21,39 @@ package com.webank.weid.full.weid;
 
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * getWeIdDocument method for testing WeIdService.
+ * 
+ * @author v_wbgyang
+ *
+ */
 public class TestGetWeIdDocument extends TestBaseServcie {
 
-    @Test
     /**
-     * case: set many times and get the weIdDom
+     * case: set and get weIdDom.
      *
-     * @throws Exception
+     * @throws Exception may be throw Exception
      */
+    @Test
     public void testGetWeIdDocumentCase1() throws Exception {
 
-        CreateWeIdDataResult createWeIdNew = super.createWeId();
-
-        CreateWeIdDataResult createWeId = super.createWeId();
-
-        super.setPublicKey(
-            createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(), createWeId.getWeId());
-        super.setPublicKey(createWeId, TestBaseUtil.createEcKeyPair()[0], createWeIdNew.getWeId());
-
-        super.setAuthentication(
-            createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(), createWeIdNew.getWeId());
-        super
-            .setAuthentication(createWeId, TestBaseUtil.createEcKeyPair()[0], createWeId.getWeId());
-
-        super.setService(createWeId, "drivingCardService", "https://weidentity.webank.com/endpoint/8377464");
-        super.setService(createWeId, "drivingCardServic1", "https://weidentity.webank.com/endpoint/8377465");
-
-        ResponseData<WeIdDocument> weIdDoc = service.getWeIdDocument(createWeId.getWeId());
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         System.out.println("\ngetWeIdDocument result:");
         BeanUtil.print(weIdDoc);
 
@@ -63,23 +61,26 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         Assert.assertNotNull(weIdDoc.getResult());
     }
 
-    @Test
     /**
-     * case: set and get weIdDom
+     * case: set many times and get the weIdDom.
      *
-     * @throws Exception
+     * @throws Exception   may be throw Exception
      */
+    @Test
     public void testGetWeIdDocumentCase2() throws Exception {
 
-        CreateWeIdDataResult createWeId = super.createWeId();
+        super.setPublicKey(createWeIdForGetDoc,
+            TestBaseUtil.createEcKeyPair()[0],
+            createWeIdNew.getWeId());
+        super.setAuthentication(createWeIdForGetDoc,
+            TestBaseUtil.createEcKeyPair()[0],
+            createWeIdForGetDoc.getWeId());
+        super.setService(createWeIdForGetDoc,
+            "drivingCardServic1",
+            "https://weidentity.webank.com/endpoint/8377465");
 
-        super.setPublicKey(
-            createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(), createWeId.getWeId());
-        super.setAuthentication(
-            createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(), createWeId.getWeId());
-        super.setService(createWeId, "drivingCardService", "https://weidentity.webank.com/endpoint/8377464");
-
-        ResponseData<WeIdDocument> weIdDoc = service.getWeIdDocument(createWeId.getWeId());
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         System.out.println("\ngetWeIdDocument result:");
         BeanUtil.print(weIdDoc);
 
@@ -87,52 +88,124 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         Assert.assertNotNull(weIdDoc.getResult());
     }
 
-    @Test
     /**
-     * case: weIdentity DID is invalid 
-     * TODO return code is WEID_INVALID and result is not null
+     * case: weIdentity DID is invalid.
      * 
-     * @throws Exception
+     * @throws Exception   may be throw Exception
      */
+    @Test
     public void testGetWeIdDocumentCase3() throws Exception {
 
-        ResponseData<WeIdDocument> weIdDoc = service.getWeIdDocument("xxxxxxxxxx");
+        ResponseData<WeIdDocument> weIdDoc = weIdService.getWeIdDocument("xxxxxxxxxx");
         System.out.println("\ngetWeIdDocument result:");
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertNull(weIdDoc.getResult());
     }
 
-    @Test
     /**
-     * case: weIdentity DID is null 
-     * TODO return code is WEID_INVALID and result is not null
+     * case: weIdentity DID is null.
      *
-     * @throws Exception
+     * @throws Exception   may be throw Exception
      */
+    @Test
     public void testGetWeIdDocumentCase4() throws Exception {
 
-        ResponseData<WeIdDocument> weIdDoc = service.getWeIdDocument(null);
+        ResponseData<WeIdDocument> weIdDoc = weIdService.getWeIdDocument(null);
         System.out.println("\ngetWeIdDocument result:");
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertNull(weIdDoc.getResult());
     }
 
-    @Test
     /**
-     * case: weIdentity DID is not exists
-     *
-     * @throws Exception
+     * case: weIdentity DID is not exists.
+     * 
+     * @throws Exception   may be throw Exception
      */
+    @Test
     public void testGetWeIdDocumentCase5() throws Exception {
 
         ResponseData<WeIdDocument> weIdDoc =
-            service.getWeIdDocument("did:weid:0xa1c93e93622c6a0b2f52c90741e0b98ab77385a9");
+            weIdService.getWeIdDocument("did:weid:0xa1c93e93622c6a0b2f52c90741e0b98ab77385a9");
         System.out.println("\ngetWeIdDocument result:");
         BeanUtil.print(weIdDoc);
 
-        Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
+            weIdDoc.getErrorCode().intValue());
+        Assert.assertNull(weIdDoc.getResult());
+    }
+
+    /**
+     * case: Simulation throws an InterruptedException when calling the getLatestRelatedBlock 
+     *       method.
+     * 
+     * @throws Exception   may be throw Exception
+     */
+    @Test
+    public void testGetWeIdDocumentCase6() throws Exception {
+
+        final MockUp<Future<Uint256>> mockFuture = new MockUp<Future<Uint256>>() {
+            @Mock
+            public Future<Uint256> get(long timeout, TimeUnit unit) throws Exception {
+                throw new InterruptedException();
+            }
+        };
+
+        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
+            @Mock
+            public Future<Uint256> getLatestRelatedBlock(Address identity) throws Exception {
+                return mockFuture.getMockInstance();
+            }
+        };
+
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
+        System.out.println("\ngetWeIdDocument result:");
+        BeanUtil.print(weIdDoc);
+
+        mockTest.tearDown();
+        mockFuture.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            weIdDoc.getErrorCode().intValue());
+        Assert.assertNull(weIdDoc.getResult());
+    }
+
+    /**
+     * case: Simulation throws an TimeoutException when calling the getLatestRelatedBlock method.
+     * 
+     * @throws Exception   may be throw Exception
+     */
+    @Test
+    public void testGetWeIdDocumentCase7() throws Exception {
+
+        final MockUp<Future<Uint256>> mockFuture = new MockUp<Future<Uint256>>() {
+            @Mock
+            public Future<Uint256> get(long timeout, TimeUnit unit) throws Exception {
+                throw new TimeoutException();
+            }
+        };
+
+        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
+            @Mock
+            public Future<Uint256> getLatestRelatedBlock(Address identity) throws Exception {
+                return mockFuture.getMockInstance();
+            }
+        };
+
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
+        System.out.println("\ngetWeIdDocument result:");
+        BeanUtil.print(weIdDoc);
+
+        mockTest.tearDown();
+        mockFuture.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
+            weIdDoc.getErrorCode().intValue());
         Assert.assertNull(weIdDoc.getResult());
     }
 }

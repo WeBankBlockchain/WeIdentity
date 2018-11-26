@@ -19,15 +19,13 @@
 
 package com.webank.weid.full.cpt;
 
-import java.io.IOException;
-import org.junit.Assert;
-import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.contract.CptController;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.full.TestData;
@@ -37,21 +35,48 @@ import com.webank.weid.protocol.request.UpdateCptArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.WeIdUtils;
+import java.io.IOException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.StaticArray;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.junit.Assert;
+import org.junit.Test;
 
+/**
+ * updateCpt method for testing CptService.
+ * 
+ * @author v_wbgyang
+ *
+ */
 public class TestUpdateCpt extends TestBaseServcie {
 
-    /**
-     * is register issuer
-     */
-    private boolean isRegisterAuthorityIssuer = false;
+    @Override
+    public void testInit() throws Exception {
 
+        super.testInit();
+        if (cptBaseInfo == null) {
+            cptBaseInfo = super.registerCpt(createWeIdWithSetAttr);
+        }
+    }
+
+    /** 
+     * case： cpt updateCpt success.
+     */
     @Test
-    /** case： cpt updateCpt success */
     public void testUpdateCptCase1() {
 
         CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
 
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
+        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId);
 
         UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
 
@@ -63,29 +88,28 @@ public class TestUpdateCpt extends TestBaseServcie {
         Assert.assertNotNull(response.getResult());
     }
 
+    /** 
+     * case： updateCptArgs is null.
+     */
     @Test
-    /** case： updateCptArgs is null */
     public void testUpdateCptCase2() {
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(null);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.ILLEGAL_INPUT.getCode(), 
-            response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptId is null.
+     */
     @Test
-    /** case： cptId is null */
     public void testUpdateCptCase3() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptId(null);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
@@ -96,15 +120,14 @@ public class TestUpdateCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptId is minus number.
+     */
     @Test
-    /** case： cptId is minus number */
     public void testUpdateCptCase4() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptId(-1);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
@@ -115,15 +138,14 @@ public class TestUpdateCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptId is not exists.
+     */
     @Test
-    /** case： cptId is not exists */
     public void testUpdateCptCase5() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptId(10000);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
@@ -134,35 +156,33 @@ public class TestUpdateCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptJsonSchema is null.
+     */
     @Test
-    /** case： cptJsonSchema is null */
     public void testUpdateCptCase6() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptJsonSchema(null);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptJsonSchema is invalid.
+     */
     @Test
-    /** case： cptJsonSchema is invalid */
     public void testUpdateCptCase7() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptJsonSchema("xxxxxxxxx");
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
@@ -173,15 +193,14 @@ public class TestUpdateCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptJsonSchema too long.
+     */
     @Test
-    /** case： cptJsonSchema too long */
     public void testUpdateCptCase8() throws JsonProcessingException, IOException {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
 
         StringBuffer value = new StringBuffer("");
         for (int i = 0; i < 5000; i++) {
@@ -200,20 +219,19 @@ public class TestUpdateCpt extends TestBaseServcie {
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptPublisher is blank.
+     */
     @Test
-    /** case： cptPublisher is blank */
     public void testUpdateCptCase9() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptPublisher(null);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
@@ -224,15 +242,14 @@ public class TestUpdateCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptPublisher is invalid.
+     */
     @Test
-    /** case： cptPublisher is invalid */
     public void testUpdateCptCase10() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptPublisher("di:weid:0xaaaaaaaaaaaaaaaa");
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
@@ -243,23 +260,22 @@ public class TestUpdateCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： cptPublisher is not exists and the private key does not match.
+     */
     @Test
-    /** case： cptPublisher is not exists and the private key does not match */
     public void testUpdateCptCase11() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptPublisher("did:weid:0xaaaaaaaaaaaaaa");
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
 
         ResponseData<Cpt> responseCpt = cptService.queryCpt(cptBaseInfo.getCptId());
@@ -267,141 +283,127 @@ public class TestUpdateCpt extends TestBaseServcie {
         BeanUtil.print(responseCpt);
     }
 
+    /** 
+     * case： cptPublisherPrivateKey is null.
+     */
     @Test
-    /** case： cptPublisherPrivateKey is null */
     public void testUpdateCptCase12() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptPublisherPrivateKey(null);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： private Key is null.
+     */
     @Test
-    /** case： private Key is null */
     public void testUpdateCptCase13() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.getCptPublisherPrivateKey().setPrivateKey(null);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey is invalid.
+     */
     @Test
-    /** case： privateKey is invalid */
     public void testUpdateCptCase14() {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.getCptPublisherPrivateKey().setPrivateKey("123132545646878901");
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey is new privateKey.
+     */
     @Test
-    /** case： privateKey is new privateKey */
     public void testUpdateCptCase15() throws Exception {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.getCptPublisherPrivateKey().setPrivateKey(TestBaseUtil.createEcKeyPair()[1]);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey belongs to SDK.
+     */
     @Test
-    /** case： privateKey belongs to sdk */
     public void testUpdateCptCase16() throws Exception {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.getCptPublisherPrivateKey().setPrivateKey(TestBaseUtil.privKey);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey belongs to new weIdentity dId.
+     */
     @Test
-    /** case： privateKey belongs to new weIdentity DId */
     public void testUpdateCptCase17() throws Exception {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CreateWeIdDataResult createWeIdNew = super.createWeId();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptPublisherPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
-    @Test
     /** 
-     * case： privateKey belongs to new weIdentity DId , cptPublisher is a new WeId 
-     * TODO update success,we will deal with the two issue
+     * case： privateKey belongs to new weIdentity DId , cptPublisher is a new WeId.
+     * [TIP] update success,we will deal with the two issue.
      *  
      */
+    @Test
     public void testUpdateCptCase18() throws Exception {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CreateWeIdDataResult createWeIdNew = super.createWeId();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
 
         UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
         updateCptArgs.setCptPublisher(createWeIdNew.getWeId());
@@ -411,42 +413,40 @@ public class TestUpdateCpt extends TestBaseServcie {
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
     }
 
+    /** 
+     * case： privateKey is xxxxxxx.
+     */
     @Test
-    /** case： privateKey is xxxxxxx  */
     public void testUpdateCptCase19() throws Exception {
 
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
-
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.getCptPublisherPrivateKey().setPrivateKey("xxxxxxxxxx");
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
-    
+
+    /** 
+     * case： cptPublisher is not exists , but private key matching.
+     */
     @Test
-    /** case： cptPublisher is not exists , but private key matching */
     public void testUpdateCptCase20() throws Exception {
-
-        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
-
-        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId, isRegisterAuthorityIssuer);
 
         String[] pk = TestBaseUtil.createEcKeyPair();
         String weId = WeIdUtils.convertPublicKeyToWeId(pk[0]);
-        
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeId, cptBaseInfo);
+
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
         updateCptArgs.setCptPublisher(weId);
         updateCptArgs.getCptPublisherPrivateKey().setPrivateKey(pk[1]);
 
@@ -454,12 +454,104 @@ public class TestUpdateCpt extends TestBaseServcie {
         System.out.println("\nupdateCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(
-            ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
 
         ResponseData<Cpt> responseCpt = cptService.queryCpt(cptBaseInfo.getCptId());
         System.out.println("\nqueryCpt result:");
         BeanUtil.print(responseCpt);
+    }
+
+    /** 
+     * case： mock an InterruptedException.
+     */
+    @Test
+    public void testUpdateCptCase21() {
+
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
+
+        final MockUp<Future<TransactionReceipt>> mockFuture =
+            new MockUp<Future<TransactionReceipt>>() {
+                @Mock
+                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
+                    throws Exception {
+                    throw new InterruptedException();
+                }
+            };
+
+        MockUp<CptController> mockTest = new MockUp<CptController>() {
+            @Mock
+            public Future<TransactionReceipt> updateCpt(
+                Uint256 cptId,
+                Address publisher,
+                StaticArray<Int256> intArray,
+                StaticArray<Bytes32> bytes32Array,
+                StaticArray<Bytes32> jsonSchemaArray,
+                Uint8 v,
+                Bytes32 r,
+                Bytes32 s)
+                throws Exception {
+                return mockFuture.getMockInstance();
+            }
+        };
+
+        ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
+        System.out.println("\nupdateCpt result:");
+        BeanUtil.print(response);
+
+        mockTest.tearDown();
+        mockFuture.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /** 
+     * case： mock an TimeoutException.
+     */
+    @Test
+    public void testUpdateCptCase22() {
+
+        UpdateCptArgs updateCptArgs =
+            TestBaseUtil.buildUpdateCptArgs(createWeIdWithSetAttr, cptBaseInfo);
+
+        final MockUp<Future<TransactionReceipt>> mockFuture =
+            new MockUp<Future<TransactionReceipt>>() {
+                @Mock
+                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
+                    throws Exception {
+                    throw new TimeoutException();
+                }
+            };
+
+        MockUp<CptController> mockTest = new MockUp<CptController>() {
+            @Mock
+            public Future<TransactionReceipt> updateCpt(
+                Uint256 cptId,
+                Address publisher,
+                StaticArray<Int256> intArray,
+                StaticArray<Bytes32> bytes32Array,
+                StaticArray<Bytes32> jsonSchemaArray,
+                Uint8 v,
+                Bytes32 r,
+                Bytes32 s)
+                throws Exception {
+                return mockFuture.getMockInstance();
+            }
+        };
+
+        ResponseData<CptBaseInfo> response = cptService.updateCpt(updateCptArgs);
+        System.out.println("\nupdateCpt result:");
+        BeanUtil.print(response);
+
+        mockTest.tearDown();
+        mockFuture.tearDown();
+
+        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
     }
 }
