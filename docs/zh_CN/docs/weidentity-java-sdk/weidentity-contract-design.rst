@@ -1,7 +1,7 @@
 .. role:: raw-html-m2r(raw)
    :format: html
 
-.. _weidentity-contract:
+.. _weidentity-contract-design:
 
 WeIdentity智能合约设计文档
 ===============================
@@ -50,8 +50,8 @@ Linked Event的核心实现思路是借助Solidity的事件（Event）机制，�
 
 这一流程图可见于：
 
-.. image:: images/linked-events.png
-   :target: images/linked-events.png
+.. image:: ../images/linked-events.png
+   :target: ../images/linked-events.png
    :alt: linked-events.png
 
 性能评估
@@ -151,8 +151,8 @@ WeIdentity采用分层设计模式，即将合约分为逻辑合约、数据合�
 
 上述架构图如下：
 
-.. image:: images/authority-contract-arch.png
-   :target: images/authority-contract-arch.png
+.. image:: ../images/authority-contract-arch.png
+   :target: ../images/authority-contract-arch.png
    :alt: authority-contract-arch.png
 
 权限与安全管理
