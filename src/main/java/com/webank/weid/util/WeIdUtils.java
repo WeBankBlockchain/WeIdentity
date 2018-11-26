@@ -21,12 +21,12 @@ package com.webank.weid.util;
 
 import java.math.BigInteger;
 
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
+
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 
 /**
  * The WeIdentity DID Utils.
@@ -70,7 +70,8 @@ public final class WeIdUtils {
     public static boolean isWeIdValid(String weId) {
         return (StringUtils.isNotEmpty(weId)
             && StringUtils.startsWith(weId, WeIdConstant.WEID_PREFIX)
-            && StringUtils.isNotEmpty((weId = StringUtils.splitByWholeSeparator(weId, ":")[2])));
+            && StringUtils.isNotEmpty(StringUtils.splitByWholeSeparator(weId, ":")[2])
+            );
     }
 
     /**

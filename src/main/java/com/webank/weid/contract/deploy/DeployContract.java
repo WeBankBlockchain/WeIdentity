@@ -26,16 +26,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.AuthorityIssuerController;
-import com.webank.weid.contract.AuthorityIssuerData;
-import com.webank.weid.contract.CommitteeMemberController;
-import com.webank.weid.contract.CommitteeMemberData;
-import com.webank.weid.contract.CptController;
-import com.webank.weid.contract.CptData;
-import com.webank.weid.contract.RoleController;
-import com.webank.weid.contract.WeIdContract;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.contract.tools.ToolConf;
@@ -49,6 +39,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.AuthorityIssuerController;
+import com.webank.weid.contract.AuthorityIssuerData;
+import com.webank.weid.contract.CommitteeMemberController;
+import com.webank.weid.contract.CommitteeMemberData;
+import com.webank.weid.contract.CptController;
+import com.webank.weid.contract.CptData;
+import com.webank.weid.contract.RoleController;
+import com.webank.weid.contract.WeIdContract;
+
 /**
  * The Class DeployContract.
  *
@@ -57,7 +57,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class DeployContract {
 
     /**
-     * log4j
+     * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(DeployContract.class);
 
@@ -77,12 +77,12 @@ public class DeployContract {
     protected static Credentials credentials;
 
     /**
-     * web3j object
+     * web3j object.
      */
     private static Web3j web3j;
 
     /**
-     * contract address
+     * contract address.
      */
     private static String filePath;
 
@@ -113,7 +113,7 @@ public class DeployContract {
      *
      * @return true, if successful
      */
-    static boolean loadConfig() {
+    private static boolean loadConfig() {
 
         Service service = context.getBean(Service.class);
         try {
@@ -174,9 +174,9 @@ public class DeployContract {
                 WeIdConstant.INILITIAL_VALUE);
 
         try {
-            WeIdContract weIDContract =
+            WeIdContract weIdContract =
                 f.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-            String contractAddress = weIDContract.getContractAddress();
+            String contractAddress = weIdContract.getContractAddress();
             writeAddressToFile("WeIDContract", contractAddress);
             return contractAddress;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -231,7 +231,6 @@ public class DeployContract {
 
         // Step 1: Deploy RoleController sol => [addr1]
         String authorityIssuerDataAddress = StringUtils.EMPTY;
-
         Future<RoleController> f1 =
             RoleController.deploy(
                 web3j,
@@ -239,77 +238,95 @@ public class DeployContract {
                 WeIdConstant.GAS_PRICE,
                 WeIdConstant.GAS_LIMIT,
                 WeIdConstant.INILITIAL_VALUE);
+        
+        // Step 2: Deploy CommitteeMemberData sol => [addr1]
+        Future<CommitteeMemberData> f2 = null;
+        String roleControllerAddress = StringUtils.EMPTY;
         try {
             RoleController roleController =
                 f1.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-            String roleControllerAddress = roleController.getContractAddress();
-            Future<CommitteeMemberData> f2 =
-                CommitteeMemberData.deploy(
+            roleControllerAddress = roleController.getContractAddress();
+            f2 = CommitteeMemberData.deploy(
                     web3j,
                     credentials,
                     WeIdConstant.GAS_PRICE,
                     WeIdConstant.GAS_LIMIT,
                     WeIdConstant.INILITIAL_VALUE,
                     new Address(roleControllerAddress));
-            try {
-                CommitteeMemberData committeeMemberData =
-                    f2.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-                String committeeMemberDataAddress = committeeMemberData.getContractAddress();
-                Future<CommitteeMemberController> f3 =
-                    CommitteeMemberController.deploy(
-                        web3j,
-                        credentials,
-                        WeIdConstant.GAS_PRICE,
-                        WeIdConstant.GAS_LIMIT,
-                        WeIdConstant.INILITIAL_VALUE,
-                        new Address(committeeMemberDataAddress),
-                        new Address(roleControllerAddress));
-                try {
-                    Future<AuthorityIssuerData> f4 =
-                        AuthorityIssuerData.deploy(
-                            web3j,
-                            credentials,
-                            WeIdConstant.GAS_PRICE,
-                            WeIdConstant.GAS_LIMIT,
-                            WeIdConstant.INILITIAL_VALUE,
-                            new Address(roleControllerAddress));
-                    try {
-                        AuthorityIssuerData authorityIssuerData =
-                            f4.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-                        authorityIssuerDataAddress = authorityIssuerData.getContractAddress();
-                        Future<AuthorityIssuerController> f5 =
-                            AuthorityIssuerController.deploy(
-                                web3j,
-                                credentials,
-                                WeIdConstant.GAS_PRICE,
-                                WeIdConstant.GAS_LIMIT,
-                                WeIdConstant.INILITIAL_VALUE,
-                                new Address(authorityIssuerDataAddress),
-                                new Address(roleControllerAddress));
-                        try {
-                            AuthorityIssuerController authorityIssuerController =
-                                f5.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS,
-                                    TimeUnit.SECONDS);
-                            String authorityIssuerControllerAddress =
-                                authorityIssuerController.getContractAddress();
-                            writeAddressToFile("authorityIssuerController",
-                                authorityIssuerControllerAddress);
-                            return authorityIssuerControllerAddress;
-                        } catch (Exception e) {
-                            logger.error(
-                                "AuthorityIssuerController deployment error:" + e.toString());
-                        }
-                    } catch (Exception e) {
-                        logger.error("AuthorityIssuerData deployment error:" + e.toString());
-                    }
-                } catch (Exception e) {
-                    logger.error("CommitteeMemberController deployment error:" + e.toString());
-                }
-            } catch (Exception e) {
-                logger.error("CommitteeMemberData deployment error:" + e.toString());
-            }
+            
         } catch (Exception e) {
             logger.error("RoleController deployment error:" + e.toString());
+            return authorityIssuerDataAddress;
+        }
+        
+        // Step 3: Deploy CommitteeMemberController sol => [addr1]
+        try {
+            CommitteeMemberData committeeMemberData =
+                f2.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+            String committeeMemberDataAddress = committeeMemberData.getContractAddress();
+            
+            CommitteeMemberController.deploy(
+                web3j,
+                credentials,
+                WeIdConstant.GAS_PRICE,
+                WeIdConstant.GAS_LIMIT,
+                WeIdConstant.INILITIAL_VALUE,
+                new Address(committeeMemberDataAddress),
+                new Address(roleControllerAddress));
+            
+        } catch (Exception e) {
+            logger.error("CommitteeMemberData deployment error:" + e.toString());
+            return authorityIssuerDataAddress;
+        }
+        
+        // Step 4: Deploy AuthorityIssuerData sol => [addr1]
+        Future<AuthorityIssuerData> f4 = null;
+        try {
+            f4 = AuthorityIssuerData.deploy(
+                    web3j,
+                    credentials,
+                    WeIdConstant.GAS_PRICE,
+                    WeIdConstant.GAS_LIMIT,
+                    WeIdConstant.INILITIAL_VALUE,
+                    new Address(roleControllerAddress));
+            
+        } catch (Exception e) {
+            logger.error("CommitteeMemberController deployment error:" + e.toString());
+            return authorityIssuerDataAddress;
+        }
+        
+        // Step 5: Deploy AuthorityIssuerController sol => [addr1]
+        Future<AuthorityIssuerController> f5 = null;
+        try {
+            AuthorityIssuerData authorityIssuerData =
+                f4.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+            authorityIssuerDataAddress = authorityIssuerData.getContractAddress();
+            f5 = AuthorityIssuerController.deploy(
+                    web3j,
+                    credentials,
+                    WeIdConstant.GAS_PRICE,
+                    WeIdConstant.GAS_LIMIT,
+                    WeIdConstant.INILITIAL_VALUE,
+                    new Address(authorityIssuerDataAddress),
+                    new Address(roleControllerAddress));
+            
+        } catch (Exception e) {
+            logger.error("AuthorityIssuerData deployment error:" + e.toString());
+            return authorityIssuerDataAddress;
+        }
+        
+        // Step 6: Write [addrress] Into File
+        try {
+            AuthorityIssuerController authorityIssuerController =
+                f5.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS,
+                    TimeUnit.SECONDS);
+            String authorityIssuerControllerAddress =
+                authorityIssuerController.getContractAddress();
+            writeAddressToFile("authorityIssuerController",
+                authorityIssuerControllerAddress);
+            return authorityIssuerControllerAddress;
+        } catch (Exception e) {
+            logger.error("AuthorityIssuerController deployment error:" + e.toString());
         }
         return authorityIssuerDataAddress;
     }

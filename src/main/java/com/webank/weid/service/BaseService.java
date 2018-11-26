@@ -23,11 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.exception.InitWeb3jException;
-import com.webank.weid.exception.LoadContractException;
-import com.webank.weid.exception.PrivateKeyIllegalException;
-
 import org.bcos.channel.client.Service;
 import org.bcos.contract.tools.ToolConf;
 import org.bcos.web3j.crypto.Credentials;
@@ -40,6 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.InitWeb3jException;
+import com.webank.weid.exception.LoadContractException;
+import com.webank.weid.exception.PrivateKeyIllegalException;
 
 /**
  * The BaseService for other RPC classes.
@@ -65,7 +65,7 @@ public abstract class BaseService {
      *
      * @return true, if successful
      */
-    static boolean loadConfig() {
+    private static boolean loadConfig() {
         return (initWeb3j() && initCredentials());
     }
 
