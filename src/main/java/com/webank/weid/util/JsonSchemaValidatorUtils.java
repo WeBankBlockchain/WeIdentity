@@ -22,8 +22,6 @@ package com.webank.weid.util;
 import java.io.IOException;
 import java.util.Iterator;
 
-import com.webank.weid.constant.WeIdConstant;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
@@ -34,6 +32,8 @@ import com.github.fge.jsonschema.processors.syntax.SyntaxValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.WeIdConstant;
 
 /**
  * Json Schema Validator Util class. Based on com.github.fge.json-schema-validator versioned 2.2.6.
@@ -75,11 +75,11 @@ public class JsonSchemaValidatorUtils {
             return true;
         } else {
             Iterator<ProcessingMessage> it = report.iterator();
-            String errorMsg = "";
+            StringBuffer errorMsg = new StringBuffer();
             while (it.hasNext()) {
-                errorMsg += it.next().getMessage();
+                errorMsg.append(it.next().getMessage());
             }
-            logger.error("Json Schema Validator failed, error: " + errorMsg);
+            logger.error("Json schema validator failed, error: {}", errorMsg.toString());
             return false;
         }
     }

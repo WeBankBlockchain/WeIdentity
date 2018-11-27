@@ -4,5 +4,13 @@
     "https://checkstyle.org/dtds/suppressions_1_2.dtd">
 
 <suppressions>
-
+	<suppress checks="[a-zA-Z0-9]*" files="AuthorityIssuerController.java"/>
+	<suppress checks="[a-zA-Z0-9]*" files="AuthorityIssuerData.java"/>
+	<suppress checks="[a-zA-Z0-9]*" files="CommitteeMemberController.java"/>
+	<suppress checks="[a-zA-Z0-9]*" files="CommitteeMemberData.java"/>
+	<suppress checks="[a-zA-Z0-9]*" files="CptController.java"/>
+	<suppress checks="[a-zA-Z0-9]*" files="CptData.java"/>
+	<suppress checks="[a-zA-Z0-9]*" files="RoleController.java"/>
+	<suppress checks="[a-zA-Z0-9]*" files="WeIdContract.java"/>
+	<suppress checks="MemberNameCheck" files="RsvSignature.java"/>
 </suppressions>

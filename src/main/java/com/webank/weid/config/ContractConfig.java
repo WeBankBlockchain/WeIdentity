@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
+ * contract address config.
  * @author tonychen 2018.9.29
  */
 @Component("ContractConfig")

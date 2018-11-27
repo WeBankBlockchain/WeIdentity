@@ -19,6 +19,7 @@
 
 package com.webank.weid.util;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -29,6 +30,8 @@ import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bouncycastle.util.encoders.Base64;
+
+import com.webank.weid.constant.WeIdConstant;
 
 /**
  * The Signature related Utils class. Based on ECDSA Asymmetric Encryption + SHA256 Hash Algorithm.
@@ -64,8 +67,9 @@ public class SignatureUtils {
      * @param keyPair the key pair
      * @return SignatureData
      */
-    public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair) {
-        return Sign.signMessage(HashUtils.sha3(message.getBytes()), keyPair);
+    public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair)
+        throws UnsupportedEncodingException {
+        return Sign.signMessage(HashUtils.sha3(message.getBytes(WeIdConstant.UTF_8)), keyPair);
     }
 
     /**
@@ -76,10 +80,14 @@ public class SignatureUtils {
      * @param privateKeyString the private key string
      * @return SignatureData
      */
-    public static Sign.SignatureData signMessage(String message, String privateKeyString) {
+    public static Sign.SignatureData signMessage(
+        String message,
+        String privateKeyString)
+        throws UnsupportedEncodingException {
+
         BigInteger privateKey = new BigInteger(privateKeyString);
         ECKeyPair keyPair = new ECKeyPair(privateKey, publicKeyFromPrivate(privateKey));
-        return Sign.signMessage(HashUtils.sha3(message.getBytes()), keyPair);
+        return Sign.signMessage(HashUtils.sha3(message.getBytes(WeIdConstant.UTF_8)), keyPair);
     }
 
     /**
@@ -89,9 +97,13 @@ public class SignatureUtils {
      * @param signatureData the signature data
      * @return publicKey
      */
-    public static BigInteger signatureToPublicKey(String message, Sign.SignatureData signatureData)
-        throws SignatureException {
-        return Sign.signedMessageToKey(HashUtils.sha3(message.getBytes()), signatureData);
+    public static BigInteger signatureToPublicKey(
+        String message,
+        Sign.SignatureData signatureData)
+        throws SignatureException, UnsupportedEncodingException {
+
+        return Sign.signedMessageToKey(HashUtils.sha3(message.getBytes(WeIdConstant.UTF_8)),
+                signatureData);
     }
 
     /**
@@ -99,14 +111,15 @@ public class SignatureUtils {
      *
      * @param message This should be from the same plain-text source with the signature Data.
      * @param signatureData This must be in SignatureData. Caller should call
-     * simpleSignatureDeserialization.
+     *      impleSignatureDeserialization.
      * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
      * @return true if yes, false otherwise
      */
     public static boolean verifySignature(
         String message, 
         Sign.SignatureData signatureData, 
-        BigInteger publicKey) throws SignatureException {
+        BigInteger publicKey)
+        throws SignatureException, UnsupportedEncodingException {
         
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
@@ -230,7 +243,7 @@ public class SignatureUtils {
      * @return the sign. signature data
      */
     public static Sign.SignatureData rawSignatureDeserialization(int v, byte[] r, byte[] s) {
-        byte vByte = (byte) v;
-        return new Sign.SignatureData(vByte, r, s);
+        byte valueByte = (byte) v;
+        return new Sign.SignatureData(valueByte, r, s);
     }
 }

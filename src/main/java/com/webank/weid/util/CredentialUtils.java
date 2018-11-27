@@ -19,12 +19,12 @@
 
 package com.webank.weid.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.VerifyCredentialArgs;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The Class CredentialUtils.

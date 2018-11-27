@@ -28,6 +28,7 @@ import org.bcos.web3j.crypto.Keys;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 
+
 /**
  * The WeIdentity DID Utils.
  *
@@ -99,7 +100,7 @@ public final class WeIdUtils {
     }
 
     /**
-     * check if the public key matchs the private key
+     * check if the public key matchs the private key.
      */
     public static boolean isKeypairMatch(String privateKey, String publicKey) {
         try {
