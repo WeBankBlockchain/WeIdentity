@@ -19,6 +19,7 @@
 
 package com.webank.weid.contract.deploy;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -81,11 +82,6 @@ public class DeployContract {
      */
     private static Web3j web3j;
 
-    /**
-     * contract address.
-     */
-    private static String filePath;
-
     static {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
     }
@@ -96,13 +92,6 @@ public class DeployContract {
      * @param args the arguments
      */
     public static void main(String[] args) {
-
-        if (args.length < 1) {
-            System.out.println("Plese input your file path.");
-            System.exit(0);
-        }
-
-        filePath = args[0];
 
         deployContract();
         System.exit(0);
@@ -177,7 +166,7 @@ public class DeployContract {
             WeIdContract weIdContract =
                 f.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String contractAddress = weIdContract.getContractAddress();
-            writeAddressToFile("WeIDContract", contractAddress);
+            writeAddressToFile("WeIDContract", contractAddress,"weIdContract.address");
             return contractAddress;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
@@ -216,7 +205,7 @@ public class DeployContract {
             CptController cptController =
                 f2.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String cptControllerAddress = cptController.getContractAddress();
-            writeAddressToFile("CptController", cptControllerAddress);
+            writeAddressToFile("CptController", cptControllerAddress,"cptController.address");
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
         }
@@ -323,7 +312,7 @@ public class DeployContract {
             String authorityIssuerControllerAddress =
                 authorityIssuerController.getContractAddress();
             writeAddressToFile("authorityIssuerController",
-                authorityIssuerControllerAddress);
+                authorityIssuerControllerAddress,"authorityIssuer.address");
             return authorityIssuerControllerAddress;
         } catch (Exception e) {
             logger.error("AuthorityIssuerController deployment error:" + e.toString());
@@ -331,19 +320,16 @@ public class DeployContract {
         return authorityIssuerDataAddress;
     }
 
-    private static void writeAddressToFile(String contractName, String contractAddress) {
+    private static void writeAddressToFile(String contractName, String contractAddress, String fileName) {
 
         FileWriter fileWritter = null;
         try {
-
-            fileWritter = new FileWriter(filePath, true);
-            String content =
-                new StringBuffer()
-                    .append(contractName)
-                    .append("=")
-                    .append(contractAddress)
-                    .append("\r\n")
-                    .toString();
+            File file = new File(fileName);
+            if(file.exists()) {
+                file.delete();
+            }
+            fileWritter = new FileWriter(fileName, true);
+            String content = new StringBuffer().append(contractAddress).toString();
             fileWritter.write(content);
             fileWritter.close();
         } catch (IOException e) {

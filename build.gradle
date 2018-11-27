@@ -94,7 +94,7 @@ List jackson = [
 dependencies {
     compile logger, spring, lombok, apache_commons, jackson
     runtime logger, spring, lombok, apache_commons, jackson
-    testCompile logger, spring, lombok, junit
+    testCompile logger, spring, lombok, junit, jmockit
     compile files('lib/web3sdk.jar')
     runtime files('lib/web3sdk.jar')
 }
