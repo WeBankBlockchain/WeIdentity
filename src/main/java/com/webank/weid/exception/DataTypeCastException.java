@@ -22,22 +22,27 @@ package com.webank.weid.exception;
 import com.webank.weid.constant.ErrorCode;
 
 /**
- * InitWeb3sdk Exception.
+ * WeIdBase Exception.
+ * Base Exception for WeIdentity Project.
  * @author tonychen
  */
 @SuppressWarnings("serial")
-public class InitWeb3jException extends WeIdBaseException {
+public class DataTypeCastException extends WeIdBaseException {
 
-    public InitWeb3jException(Throwable cause) {
-        super(ErrorCode.LOAD_WEB3J_FAILED.getCodeDesc(), cause);
+
+    /**
+     * constructor.
+     *
+     * @param cause Throwable
+     */
+    public DataTypeCastException(Throwable cause) {
+        super(ErrorCode.DATA_TYPE_CASE_ERROR.getCodeDesc(), cause);
     }
 
-    public InitWeb3jException() {
-        super(ErrorCode.LOAD_WEB3J_FAILED.getCodeDesc());
-    }
-
-    @Override
+    /**
+     * get associated error code.
+     */
     public ErrorCode getErrorCode() {
-        return ErrorCode.LOAD_WEB3J_FAILED;
+        return ErrorCode.DATA_TYPE_CASE_ERROR;
     }
 }

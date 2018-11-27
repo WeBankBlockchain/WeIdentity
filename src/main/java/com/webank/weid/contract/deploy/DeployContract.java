@@ -20,8 +20,9 @@
 package com.webank.weid.contract.deploy;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -70,12 +71,12 @@ public class DeployContract {
     /**
      * The context.
      */
-    protected static ApplicationContext context;
+    protected static final ApplicationContext context;
 
     /**
      * The credentials.
      */
-    protected static Credentials credentials;
+    private static Credentials credentials;
 
     /**
      * web3j object.
@@ -145,12 +146,12 @@ public class DeployContract {
     }
 
     private static void deployContract() {
-        String weIdContractAddress = deployWeIDContract();
+        String weIdContractAddress = deployWeIdContract();
         String authorityIssuerDataAddress = deployAuthorityIssuerContracts();
         deployCptContracts(authorityIssuerDataAddress, weIdContractAddress);
     }
 
-    private static String deployWeIDContract() {
+    private static String deployWeIdContract() {
         if (null == web3j) {
             loadConfig();
         }
@@ -169,7 +170,7 @@ public class DeployContract {
             writeAddressToFile(contractAddress,"weIdContract.address");
             return contractAddress;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-           logger.error("WeIdContract deploy exception", e);
+            logger.error("WeIdContract deploy exception", e);
         }
         return StringUtils.EMPTY;
     }
@@ -191,6 +192,7 @@ public class DeployContract {
                     new Address(authorityIssuerDataAddress));
             CptData cptData = f1.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String cptDataAddress = cptData.getContractAddress();
+            //        writeAddressToFile("CptData", cptDataAddress);
 
             Future<CptController> f2 =
                 CptController.deploy(
@@ -208,6 +210,7 @@ public class DeployContract {
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("CptController deploy exception", e);
         }
+
         return StringUtils.EMPTY;
     }
 
@@ -215,7 +218,7 @@ public class DeployContract {
         if (null == web3j) {
             loadConfig();
         }
-        
+
         // Step 1: Deploy RoleController sol => [addr1]
         String authorityIssuerDataAddress = StringUtils.EMPTY;
         Future<RoleController> f1 =
@@ -225,7 +228,7 @@ public class DeployContract {
                 WeIdConstant.GAS_PRICE,
                 WeIdConstant.GAS_LIMIT,
                 WeIdConstant.INILITIAL_VALUE);
-        
+
         // Step 2: Deploy CommitteeMemberData sol => [addr1]
         Future<CommitteeMemberData> f2 = null;
         String roleControllerAddress = StringUtils.EMPTY;
@@ -234,24 +237,24 @@ public class DeployContract {
                 f1.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             roleControllerAddress = roleController.getContractAddress();
             f2 = CommitteeMemberData.deploy(
-                    web3j,
-                    credentials,
-                    WeIdConstant.GAS_PRICE,
-                    WeIdConstant.GAS_LIMIT,
-                    WeIdConstant.INILITIAL_VALUE,
-                    new Address(roleControllerAddress));
-            
+                web3j,
+                credentials,
+                WeIdConstant.GAS_PRICE,
+                WeIdConstant.GAS_LIMIT,
+                WeIdConstant.INILITIAL_VALUE,
+                new Address(roleControllerAddress));
+
         } catch (Exception e) {
             logger.error("RoleController deployment error:", e);
             return authorityIssuerDataAddress;
         }
-        
+
         // Step 3: Deploy CommitteeMemberController sol => [addr1]
         try {
             CommitteeMemberData committeeMemberData =
                 f2.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String committeeMemberDataAddress = committeeMemberData.getContractAddress();
-            
+
             CommitteeMemberController.deploy(
                 web3j,
                 credentials,
@@ -260,28 +263,28 @@ public class DeployContract {
                 WeIdConstant.INILITIAL_VALUE,
                 new Address(committeeMemberDataAddress),
                 new Address(roleControllerAddress));
-            
+
         } catch (Exception e) {
             logger.error("CommitteeMemberData deployment error:", e);
             return authorityIssuerDataAddress;
         }
-        
+
         // Step 4: Deploy AuthorityIssuerData sol => [addr1]
         Future<AuthorityIssuerData> f4 = null;
         try {
             f4 = AuthorityIssuerData.deploy(
-                    web3j,
-                    credentials,
-                    WeIdConstant.GAS_PRICE,
-                    WeIdConstant.GAS_LIMIT,
-                    WeIdConstant.INILITIAL_VALUE,
-                    new Address(roleControllerAddress));
-            
+                web3j,
+                credentials,
+                WeIdConstant.GAS_PRICE,
+                WeIdConstant.GAS_LIMIT,
+                WeIdConstant.INILITIAL_VALUE,
+                new Address(roleControllerAddress));
+
         } catch (Exception e) {
             logger.error("CommitteeMemberController deployment error:", e);
             return authorityIssuerDataAddress;
         }
-        
+
         // Step 5: Deploy AuthorityIssuerController sol => [addr1]
         Future<AuthorityIssuerController> f5 = null;
         try {
@@ -289,19 +292,19 @@ public class DeployContract {
                 f4.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             authorityIssuerDataAddress = authorityIssuerData.getContractAddress();
             f5 = AuthorityIssuerController.deploy(
-                    web3j,
-                    credentials,
-                    WeIdConstant.GAS_PRICE,
-                    WeIdConstant.GAS_LIMIT,
-                    WeIdConstant.INILITIAL_VALUE,
-                    new Address(authorityIssuerDataAddress),
-                    new Address(roleControllerAddress));
-            
+                web3j,
+                credentials,
+                WeIdConstant.GAS_PRICE,
+                WeIdConstant.GAS_LIMIT,
+                WeIdConstant.INILITIAL_VALUE,
+                new Address(authorityIssuerDataAddress),
+                new Address(roleControllerAddress));
+
         } catch (Exception e) {
             logger.error("AuthorityIssuerData deployment error:", e);
             return authorityIssuerDataAddress;
         }
-        
+
         // Step 6: Write [addrress] Into File
         try {
             AuthorityIssuerController authorityIssuerController =
@@ -317,24 +320,32 @@ public class DeployContract {
         return authorityIssuerDataAddress;
     }
 
-    private static void writeAddressToFile(String contractAddress, String fileName) {
 
-        FileWriter fileWritter = null;
+    private static void writeAddressToFile(
+        String contractAddress,
+        String fileName) {
+
+        OutputStreamWriter ow = null;
         try {
+            boolean flag = true;
             File file = new File(fileName);
-            if(file.exists()) {
-                file.delete();
+            if (file.exists()) {
+                flag = file.delete();
             }
-            fileWritter = new FileWriter(fileName, true);
+            if (!flag) {
+                logger.error("writeAddressToFile() delete file is fail.");
+                return;
+            }
+            ow = new OutputStreamWriter(new FileOutputStream(fileName, true), WeIdConstant.UTF_8);
             String content = new StringBuffer().append(contractAddress).toString();
-            fileWritter.write(content);
-            fileWritter.close();
+            ow.write(content);
+            ow.close();
         } catch (IOException e) {
             logger.error("writer file exception", e);
         } finally {
-            if (null != fileWritter) {
+            if (null != ow) {
                 try {
-                    fileWritter.close();
+                    ow.close();
                 } catch (IOException e) {
                     logger.error("io close exception", e);
                 }
