@@ -110,8 +110,10 @@ public abstract class BaseService {
      * @return the web3j
      */
     protected static Web3j getWeb3j() {
-        if (null == web3j && !initWeb3j()) {
-            throw new InitWeb3jException();
+        if (null == web3j) {
+            if (!initWeb3j()) {
+                throw new InitWeb3jException();
+            }
         }
         return web3j;
     }

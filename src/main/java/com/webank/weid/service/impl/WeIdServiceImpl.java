@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.EventEncoder;
@@ -52,7 +53,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -185,7 +185,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private static void buildWeIdPublicKeys(String value, String weId, WeIdDocument result) {
 
         logger.info("method buildWeIdPublicKeys() parameter::value:{}, weId:{}, "
-                    + "result:{}", value, weId, result);
+            + "result:{}", value, weId, result);
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
         for (PublicKeyProperty pr : pubkeyList) {
             if (StringUtils.contains(value, pr.getPublicKey())) {
@@ -210,9 +210,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     }
 
     private static void buildWeIdAuthentication(String value, String weId, WeIdDocument result) {
-        
+
         logger.info("method buildWeIdAuthentication() parameter::value:{}, weId:{}, "
-                + "result:{}", value, weId, result);
+            + "result:{}", value, weId, result);
         AuthenticationProperty auth = new AuthenticationProperty();
         List<PublicKeyProperty> keys = result.getPublicKey();
         List<AuthenticationProperty> authList = result.getAuthentication();
@@ -232,9 +232,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     private static void buildWeIdService(String key, String value, String weId,
         WeIdDocument result) {
-        
+
         logger.info("method buildWeIdService() parameter::key{}, value:{}, weId:{}, "
-                + "result:{}", key, value, weId, result);
+            + "result:{}", key, value, weId, result);
         String service = StringUtils.splitByWholeSeparator(key, "/")[2];
         List<ServiceProperty> serviceList = result.getService();
         for (ServiceProperty sr : serviceList) {
@@ -252,7 +252,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         String key, String value, String weId, WeIdDocument result) {
 
         logger.info("method buildWeIdAttributeDefault() parameter::key{}, value:{}, weId:{}, "
-                    + "result:{}", key, value, weId, result);
+            + "result:{}", key, value, weId, result);
         switch (key) {
             case WeIdConstant.WEID_DOC_CREATED:
                 result.setCreated(Long.valueOf(value));
@@ -358,8 +358,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         result.setWeId(weId);
         responseData.setResult(result);
 
-        weIdContract =
-            (WeIdContract) reloadContract(weIdContractAddress, privateKey, WeIdContract.class);
+        WeIdContract weIdContract = (WeIdContract) reloadContract(
+            weIdContractAddress,
+            privateKey,
+            WeIdContract.class);
         Future<TransactionReceipt> future =
             weIdContract.setAttribute(
                 new Address(WeIdUtils.convertWeIdToAddress(weId)),
@@ -420,7 +422,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             }
             responseData.setResult(weId);
             try {
-                weIdContract = (WeIdContract) reloadContract(weIdContractAddress, privateKey,
+                WeIdContract weIdContract = (WeIdContract) reloadContract(
+                    weIdContractAddress,
+                    privateKey,
                     WeIdContract.class);
                 Future<TransactionReceipt> future =
                     weIdContract.setAttribute(
@@ -579,7 +583,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 .toString();
         String privateKey = setPublicKeyArgs.getUserWeIdPrivateKey().getPrivateKey();
         try {
-            weIdContract = (WeIdContract) reloadContract(weIdContractAddress, privateKey,
+            WeIdContract weIdContract = (WeIdContract) reloadContract(
+                weIdContractAddress,
+                privateKey,
                 WeIdContract.class);
             Future<TransactionReceipt> future =
                 weIdContract.setAttribute(
@@ -613,10 +619,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private boolean verifySetPublicKeyArgs(SetPublicKeyArgs setPublicKeyArgs) {
 
         return !(null == setPublicKeyArgs
-                || null == setPublicKeyArgs.getType()
-                || null == setPublicKeyArgs.getUserWeIdPrivateKey()
-                || null == setPublicKeyArgs.getPublicKey()
-                );
+            || null == setPublicKeyArgs.getType()
+            || null == setPublicKeyArgs.getUserWeIdPrivateKey()
+            || null == setPublicKeyArgs.getPublicKey()
+        );
     }
 
     /**
@@ -642,7 +648,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (WeIdUtils.isWeIdValid(weId)) {
             String privateKey = setServiceArgs.getUserWeIdPrivateKey().getPrivateKey();
             try {
-                weIdContract = (WeIdContract) reloadContract(weIdContractAddress, privateKey,
+                WeIdContract weIdContract = (WeIdContract) reloadContract(
+                    weIdContractAddress,
+                    privateKey,
                     WeIdContract.class);
                 Future<TransactionReceipt> future =
                     weIdContract.setAttribute(
@@ -680,10 +688,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
 
         return !(null == setServiceArgs
-                || null == setServiceArgs.getType()
-                || null == setServiceArgs.getUserWeIdPrivateKey()
-                || null == setServiceArgs.getServiceEndpoint()
-                );
+            || null == setServiceArgs.getType()
+            || null == setServiceArgs.getUserWeIdPrivateKey()
+            || null == setServiceArgs.getServiceEndpoint()
+        );
     }
 
     /**
@@ -720,7 +728,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             }
             String privateKey = setAuthenticationArgs.getUserWeIdPrivateKey().getPrivateKey();
             try {
-                weIdContract = (WeIdContract) reloadContract(weIdContractAddress, privateKey,
+                WeIdContract weIdContract = (WeIdContract) reloadContract(
+                    weIdContractAddress,
+                    privateKey,
                     WeIdContract.class);
                 Future<TransactionReceipt> future =
                     weIdContract.setAttribute(
@@ -761,10 +771,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private boolean verifySetAuthenticationArgs(SetAuthenticationArgs setAuthenticationArgs) {
 
         return !(null == setAuthenticationArgs
-                || null == setAuthenticationArgs.getType()
-                || null == setAuthenticationArgs.getUserWeIdPrivateKey()
-                || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey())
-                );
+            || null == setAuthenticationArgs.getType()
+            || null == setAuthenticationArgs.getUserWeIdPrivateKey()
+            || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey())
+        );
     }
 
     /**
