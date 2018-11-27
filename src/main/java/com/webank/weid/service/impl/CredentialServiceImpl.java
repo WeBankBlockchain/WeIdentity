@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.Credential;
@@ -46,6 +47,7 @@ import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
+import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.JsonSchemaValidatorUtils;
 import com.webank.weid.util.SignatureUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -91,8 +93,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setId(UUID.randomUUID().toString());
             result.setCptId(args.getCptId());
             result.setIssuer(args.getIssuer());
-            result.setIssuranceDate(new Long(System.currentTimeMillis()));
-            result.setExpirationDate(new Long(args.getExpirationDate()));
+            result.setIssuranceDate(DateUtils.getCurrentTimeStamp());
+            result.setExpirationDate(args.getExpirationDate());
             result.setClaim(args.getClaim());
             String rawData = CredentialUtils.getCredentialFields(result);
             String privateKey = args.getWeIdPrivateKey().getPrivateKey();
@@ -100,7 +102,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setSignature(
                 new String(
                     SignatureUtils
-                        .base64Encode(SignatureUtils.simpleSignatureSerialization(sigData))));
+                        .base64Encode(SignatureUtils.simpleSignatureSerialization(sigData)),
+                        WeIdConstant.UTF_8));
             responseData.setResult(result);
         } catch (Exception e) {
             logger.error("Generate Credential failed due to system error. ", e);
@@ -139,7 +142,6 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     }
 
     private ResponseData<Boolean> verifyCredentialContent(Credential credential, String publicKey) {
-        ResponseData<Boolean> responseData = new ResponseData<Boolean>();
 
         try {
             ResponseData<Boolean> innerResponse = checkCredentialArgsValidity(credential);
@@ -149,7 +151,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     false, innerResponse.getErrorCode(), innerResponse.getErrorMessage());
             }
 
-            responseData = verifyIssuerExistence(credential.getIssuer());
+            ResponseData<Boolean> responseData = verifyIssuerExistence(credential.getIssuer());
             if (!responseData.getResult()) {
                 return responseData;
             }
@@ -328,7 +330,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             String hashedRawData = CredentialUtils.getCredentialFields(credential);
             Sign.SignatureData signatureData =
                 SignatureUtils.simpleSignatureDeserialization(
-                    SignatureUtils.base64Decode(credential.getSignature().getBytes()));
+                    SignatureUtils.base64Decode(
+                            credential.getSignature().getBytes(WeIdConstant.UTF_8)));
 
             if (StringUtils.isEmpty(publicKey)) {
                 // Fetch public key from chain

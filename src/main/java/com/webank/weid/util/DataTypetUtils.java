@@ -19,6 +19,7 @@
 
 package com.webank.weid.util;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,11 @@ import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.DataTypeCastException;
 
 /**
  * Data type conversion utilities between solidity data type and java data type.
@@ -39,6 +45,8 @@ import org.bcos.web3j.abi.datatypes.generated.Uint8;
  */
 public final class DataTypetUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(DataTypetUtils.class);
+
     /**
      * Bytes array to bytes 32.
      *
@@ -46,6 +54,7 @@ public final class DataTypetUtils {
      * @return the bytes 32
      */
     public static Bytes32 bytesArrayToBytes32(byte[] byteValue) {
+
         byte[] byteValueLen32 = new byte[32];
         System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
         return new Bytes32(byteValueLen32);
@@ -58,9 +67,15 @@ public final class DataTypetUtils {
      * @return the bytes 32
      */
     public static Bytes32 stringToBytes32(String string) {
-        byte[] byteValue = string.getBytes();
+
         byte[] byteValueLen32 = new byte[32];
-        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
+        try {
+            byte[] byteValue = string.getBytes(WeIdConstant.UTF_8);
+            System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
+        } catch (UnsupportedEncodingException e) {
+            logger.error("stringToBytes32 is exception", e);
+            throw new DataTypeCastException(e.getCause());
+        }
         return new Bytes32(byteValueLen32);
     }
 
@@ -71,6 +86,7 @@ public final class DataTypetUtils {
      * @return the byte[]
      */
     public static byte[] bytes32ToBytesArray(Bytes32 bytes32) {
+
         byte[] bytesArray = new byte[32];
         byte[] bytes32Value = bytes32.getValue();
         System.arraycopy(bytes32Value, 0, bytesArray, 0, 32);
@@ -86,8 +102,14 @@ public final class DataTypetUtils {
      * @return String
      */
     public static String bytes32ToString(Bytes32 bytes32) {
-        byte[] strs = bytes32.getValue();
-        String str = new String(strs);
+
+        String str = null;
+        try {
+            str = new String(bytes32.getValue(), WeIdConstant.UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            logger.error("bytes32ToString is exception", e);
+            throw new DataTypeCastException(e.getCause());
+        }
         return str.trim();
     }
 
@@ -98,8 +120,15 @@ public final class DataTypetUtils {
      * @return the string
      */
     public static String bytes32ToStringWithoutTrim(Bytes32 bytes32) {
+
         byte[] strs = bytes32.getValue();
-        String str = new String(strs);
+        String str = null;
+        try {
+            str = new String(strs, WeIdConstant.UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            logger.error("bytes32ToStringWithoutTrim is exception", e);
+            throw new DataTypeCastException(e.getCause());
+        }
         return str;
     }
 
@@ -130,7 +159,15 @@ public final class DataTypetUtils {
      * @return the dynamic bytes
      */
     public static DynamicBytes stringToDynamicBytes(String input) {
-        return new DynamicBytes(input.getBytes());
+
+        DynamicBytes dynamicBytes = null;
+        try {
+            dynamicBytes = new DynamicBytes(input.getBytes(WeIdConstant.UTF_8));
+        } catch (UnsupportedEncodingException e) {
+            logger.error("stringToDynamicBytes is exception", e);
+            throw new DataTypeCastException(e.getCause());
+        }
+        return dynamicBytes;
     }
 
     /**
@@ -140,7 +177,15 @@ public final class DataTypetUtils {
      * @return the string
      */
     public static String dynamicBytesToString(DynamicBytes input) {
-        return new String(input.getValue());
+
+        String str = null;
+        try {
+            str = new String(input.getValue(), WeIdConstant.UTF_8);
+        } catch (UnsupportedEncodingException e) {
+            logger.error("dynamicBytesToString is exception", e);
+            throw new DataTypeCastException(e.getCause());
+        }
+        return str;
     }
 
     /**
@@ -225,6 +270,7 @@ public final class DataTypetUtils {
      * @return the static array
      */
     public static StaticArray<Bytes32> stringArrayToBytes32StaticArray(String[] stringArray) {
+
         List<Bytes32> bytes32List = new ArrayList<Bytes32>();
         for (int i = 0; i < stringArray.length; i++) {
             if (StringUtils.isNotEmpty(stringArray[i])) {
@@ -244,6 +290,7 @@ public final class DataTypetUtils {
      * @return the string[]
      */
     public static String[] bytes32DynamicArrayToStringArrayWithoutTrim(
+
         DynamicArray<Bytes32> bytes32DynamicArray) {
         List<Bytes32> bytes32List = bytes32DynamicArray.getValue();
         String[] stringArray = new String[bytes32List.size()];
@@ -260,6 +307,7 @@ public final class DataTypetUtils {
      * @return the long[]
      */
     public static long[] int256DynamicArrayToLongArray(DynamicArray<Int256> int256DynamicArray) {
+
         List<Int256> int256list = int256DynamicArray.getValue();
         long[] longArray = new long[int256list.size()];
         for (int i = 0; i < int256list.size(); i++) {

@@ -60,23 +60,23 @@ public class TestDateUtils {
     @Test
     public void testGetIso8601Timestamp() {
         
-        String dateString = DateUtils.getISO8601Timestamp(now);
+        String dateString = DateUtils.getTimestamp(now);
         Assert.assertEquals(df.format(now), dateString);
         
-        dateString = DateUtils.getISO8601Timestamp(now.getTime());
+        dateString = DateUtils.getTimestamp(now.getTime());
         Assert.assertEquals(df.format(now), dateString);
     }
     
     @Test
     public void testConvertStringToDate() throws ParseException {
         
-        String dateString = DateUtils.getISO8601Timestamp(now);
+        String dateString = DateUtils.getTimestamp(now);
         Date date = DateUtils.convertStringToDate(dateString);
-        Assert.assertEquals(DateUtils.getISO8601Timestamp(date), dateString);
+        Assert.assertEquals(DateUtils.getTimestamp(date), dateString);
         
-        dateString = DateUtils.getISO8601Timestamp(now);
+        dateString = DateUtils.getTimestamp(now);
         date = DateUtils.convertLongStringToDate(String.valueOf(now.getTime()));
-        Assert.assertEquals(DateUtils.getISO8601Timestamp(date), dateString);
+        Assert.assertEquals(DateUtils.getTimestamp(date), dateString);
     }
     
     @Test
@@ -90,11 +90,11 @@ public class TestDateUtils {
     @Test
     public void testIsValidUtcDateString() {
         
-        String dateString = DateUtils.getISO8601Timestamp(now);
-        boolean isValid = DateUtils.isValidUTCDateString(dateString);
+        String dateString = DateUtils.getTimestamp(now);
+        boolean isValid = DateUtils.isValidDateString(dateString);
         Assert.assertTrue(isValid);
         
-        isValid = DateUtils.isValidUTCDateString("2018-12-20 11:40:06");
+        isValid = DateUtils.isValidDateString("2018-12-20 11:40:06");
         Assert.assertFalse(isValid);
     }
 
