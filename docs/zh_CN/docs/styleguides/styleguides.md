@@ -111,6 +111,22 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
     ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
     ```
 
+* import 顺序
+
+分成几个section，每个section之间空行分割，section内部按字母序排列。
+
+    ```java
+    import java.*
+    import javax.*
+
+    import thirdparty-libraries
+
+    //import 当前库的class 和 interface等，
+    import com.webank.weid.*
+
+    import static *
+    ```
+
 * 以上面列出的规范优先，其余遵守 [Google JAVA 代码规范](https://google.github.io/styleguide/javaguide.html)。
 
 ---
