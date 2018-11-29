@@ -4,7 +4,7 @@
 
 ### 前提条件
 
-单元测试的运行需要提前安装部署好WeIdentity JAVA SDK，请参考 [WeIdentity JAVA SDK 安装部署文档](https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-installation.html#)安装部署WeIdentity。
+单元测试的运行需要提前安装部署好WeIdentity JAVA SDK，请参考 [WeIdentity JAVA SDK 安装部署文档](https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-installation.html#)安装部署WeIdentity。
   
 ### 流程
 
@@ -23,7 +23,7 @@ cp applicationContext.xml  ../../src/test/resources/
 ```
 
 3, 将生成好的 `ca.crt` 和 `client.keystore` 复制到 `src/test/resources` 目录,
-     这两个证书是 WeIdentity 运行所需要的 SDK 证书
+     这两个证书是 WeIdentity 运行所需要的 SDK 证书。
 
 ```shell
 cp ca.crt client.keystore  ../../src/test/resources/

@@ -20,7 +20,7 @@ WeIdentity规范文档
      - 添加选择性披露，Notification机制
      - 张俊麒
    * - V0.3.1
-     - 补充WeIdentity Docment，增加CPT字段定义
+     - 补充WeIdentity Document，增加CPT字段定义
      - 陈浩
    * - V0.3.2
      - 描述修改
@@ -109,7 +109,7 @@ WeIdentity DID与WeIdentity Credential的关系
 如何生成WeIdentity DID
 ^^^^^^^^^^^^^^^^^^^^^^
 
-WeIdentity DID = did:weid:1:net-id:bs-specific-string
+WeIdentity DID = did:weid:net-id:bs-specific-string
 
 
 .. image:: images/weidentity-did-format1.png

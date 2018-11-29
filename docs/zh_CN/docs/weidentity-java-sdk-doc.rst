@@ -2039,7 +2039,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    接口定义:ResponseData<String> getWeIdDocumentJson(String weId)
    接口详细描述: 传入WeIdentity DID，检查其有效性：不能为null,并且包含did:weid:
    解析WeIdentity DID的公钥地址（16进制的hash地址），根据公钥地址，去查找最后的区块数据，并且递归去查找全部数据并解析
-   成WeIdentity docment,将WeIdentity docment格式化为json字符串
+   成WeIdentity Document,将WeIdentity Document格式化为json字符串
 
 **接口入参**\ :   String
 
@@ -2145,7 +2145,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
 
 ----
 
-4. getWeIDDocment
+4. getWeIDDocument
 ~~~~~~~~~~~~~~~~~
 
 **基本信息**
@@ -2156,7 +2156,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    接口定义:ResponseData<WeIdDocument> getWeIdDocument(String weId)
    接口详细描述: 传入WeIdentity DID，检查其有效性：不能为null,并且包含did:weid:
    解析WeIdentity DID的公钥地址（16进制的hash地址），根据公钥地址，去查找最后的区块数据，并且递归去查找全部数据并解析
-   成WeIdentity docment对象
+   成WeIdentity Document对象
 
 **接口入参**\ :  String
 
