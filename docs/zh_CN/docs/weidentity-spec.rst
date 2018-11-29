@@ -14,7 +14,7 @@ WeIdentity规范文档
      - 完成整体协议框架
      - 张俊麒
    * - V0.2.0
-     - 完善流程,ER等
+     - 完善流程，ER等
      - 张俊麒
    * - V0.3.0
      - 添加选择性披露，Notification机制
@@ -25,6 +25,9 @@ WeIdentity规范文档
    * - V0.3.2
      - 描述修改
      - 张俊麒
+   * - V0.3.3
+     - 补充图解及撤销部分实现
+     - 张俊麒，胡朝新
 
 
 1. 设计目标
@@ -83,6 +86,7 @@ WeIdentity DID与WeIdentity Credential的关系
    :target: images/weidentity-er.png
    :alt: weidentity-er.png
 
+从图中可见，WeIdentity DID与WeIdentity Credential的关系并非单纯的一对多：从设计目标上看，WeIdentity DID用来描述实体（人或物），WeIdentity Credential用来描述实体的身份、属性和实体间关系。因此，一个WeIdentity DID可以持有多个WeIdentity Credential；而一个WeIdentity Credential则会包含至少一个所描述的WeIdentity DID，可能会有多个。最后，每个WeIdentity DID都有一个WeIdentity Document，用来存储此DID的认证方式（如公钥、密钥套件）等信息，与WeIdentity Credential无关。
 
 总体流程
 ^^^^^^^^
@@ -92,6 +96,15 @@ WeIdentity DID与WeIdentity Credential的关系
    :target: images/overall-flow@2x.png
    :alt: overall-flow.png
 
+一般来说，WeIdentity解决方案的基本流程如下：
+
+   #. 用户根据业务需求，选择是否需要进行KYC认证。
+   #. 用户生成WeIdentity DID。
+   #. 用户向相关业务方申请Credential。
+   #. 相关业务方扮演Issuer的角色，发行Credential交给用户。
+   #. 用户成为了Credential的Holder。
+   #. 用户出示Credential，以完成业务需求。
+   #. 相关业务方扮演Verifier的角色，验证Credential有效性。
 
 如何生成WeIdentity DID
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -235,6 +248,21 @@ WeIdentity DID支持操作
    :target: images/roles-relation.png
    :alt: roles-relation.png
 
+如图所示在WeIdentity生态中，存在着以下角色：
+
+   .. list-table::
+      :header-rows: 1
+
+      * - 角色
+        - 说明
+      * - User (Subject)
+        - 用户（实体）。会注册属于自己的WeIdentity DID，申请Credential，并通过出示给相关业务方来使用之。
+      * - Issuer
+        - Credential的发行者。会首先验证实体对WeIdentity DID的所有权，其次发行Credential交给实体。
+      * - Verifier
+        - Credential的使用者。会首先验证实体对WeIdentity DID的所有权，其次验证Credential的有效性。
+      * - User Agent / Credential Repository
+        - 用户（实体）在此生成WeIdentity DID。为了便于使用，实体也可将自己的私钥、持有的Credential托管于此。
 
 场景
 ^^^^
@@ -244,6 +272,15 @@ WeIdentity DID支持操作
    :target: images/scenario.png
    :alt: scenario.png
 
+上图展示了五个WeIdentity生态下Credential在不同角色间流转的场景：
+
+#. 身份证明机构作为Issuer向用户发行「实名认证Credential」，政府机构作为Verifier在办理公共事务时对其进行验证。
+#. 学校作为Issuer向用户发行「学历证明Credential」，公司作为Verifier在对候选人进行背景调查时对其进行验证。
+#. 出入境机构作为Issuer向用户发行「签证Credential」，海关作为Verifier在出入境时对其进行验证。
+#. 公司作为Issuer向用户发行「收入证明Credential」，银行作为Verifier在发放贷款时对其进行验证。
+#. 商户作为Issuer向用户发行「优惠券Credential」，商户自己作为Verifier在对优惠券核销时对其进行验证。
+
+更多使用场景，可见： \ :ref:`使用场景文档 <use-cases>`。
 
 Credential结构
 ^^^^^^^^^^^^^^
@@ -394,11 +431,12 @@ Claim Protocol Type（CPT）注册机制
    :target: images/cpt-er.png
    :alt: cpt-er.png
 
+其中CPT为模板类，定义了Claim包含的数据字段及各字段属性要求。Claim为CPT的实例。Issuer将Claim进行签名，即可生成Credential。
 
 Claim示例参考：
 ^^^^^^^^^^^^^^^
 
-:ref:`Claim模板 <cpt-templates>`
+:ref:`Claim实例 <cpt-templates>`
 
 Credential操作
 ^^^^^^^^^^^^^^
