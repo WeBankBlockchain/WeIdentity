@@ -1,24 +1,7 @@
-buildscript {
-    repositories {
-        maven {
-            url "http://maven.aliyun.com/nexus/content/groups/public/"
-        }
-    }
-    dependencies {
-        classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.5"
-    }
-}
-
-plugins {
-    id "com.github.spotbugs" version "1.6.5"
-}
-
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'checkstyle'
-apply plugin: "com.github.spotbugs"
 apply plugin: 'jacoco'
 
 version = "1.0.0"
@@ -150,35 +133,3 @@ jar {
     }
 }
 
-checkstyle {
-    showViolations true
-    toolVersion '8.12'
-}
-
-tasks.withType(Checkstyle) {
-    include '**/*.java'
-    exclude '**/contract/*.java'
-    reports {
-        xml.enabled false
-        html.enabled true
-    }
-}
-
-spotbugs {
-    ignoreFailures = false
-    showProgress = true
-    toolVersion = "3.1.8"
-    effort = "max"
-    reportLevel = "low"
-}
-
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
-    // configure automatically generated tasks
-    include '**/*.java'
-    exclude '**/contract/*.java'
-    reports {
-        xml.enabled false
-        html.enabled true
-        html.stylesheet resources.text.fromFile('config/spotbugs.xsl')
-    }
-}
