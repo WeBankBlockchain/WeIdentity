@@ -52,12 +52,12 @@ WeIdentity DID时序
    :alt: WeIdentity
 
 
-获取WeIdentity docment
+获取WeIdentity Document
 ^^^^^^^^^^^^^^^^^^^^^^
 
 
-.. image:: ./pictures/docment.png
-   :target: ./pictures/docment.png
+.. image:: ./pictures/document.png
+   :target: ./pictures/document.png
    :alt: WeIdentity
 
 
