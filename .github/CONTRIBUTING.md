@@ -2,13 +2,13 @@
 
 ---
 
-非常感谢你对 WeIdentity 有兴趣。欢迎提交 Pull Request ，参与 bug 修复，文档优化，或者任何优化意见。
+非常感谢您对 WeIdentity 有兴趣。欢迎提交 Pull Request ，参与 bug 修复，文档优化，或者任何优化意见。
 
 ---
 
 ## 1. 发现 bug
 
-使用过程中遇到的任何问题，可以查看 [FAQ](docs/zh_CN/docs/faq.md) ，或者给我们提 [issue](https://github.com/webankopen/WeIdentity/issues)。
+使用过程中遇到的任何问题，可以查看 [FAQ](../docs/zh_CN/docs/faq.md) ，或者给我们提 [issue](https://github.com/webankopen/WeIdentity/issues)。
 
 ## 2. 优化建议
 
@@ -29,11 +29,11 @@
 
 #### 代码规范
 
-建议先浏览 [WeIdentity 代码规范](docs/styleguides.md)。
+建议先浏览 [WeIdentity 代码规范](../docs/zh_CN/docs/styleguides/styleguides.md)。
 
 #### 测试
 
-所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以在修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](https://weidentity.readthedocs.io/zh_CN/stable/docs/how-to-run-unit-test.html)”。
+所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以在修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](https://weidentity.readthedocs.io/zh_CN/develop/docs/how-to-run-unit-test.html)”。
 
 #### Commit Messages
 
@@ -69,6 +69,6 @@ data & logic contracts.
 
 5. Push 这个分支 `feature/verfiy-logic-bug-fix` 到自己的 repository。
 
-6. 提交 Pull Request 到 repository 的 `develop` 分支， 并描述你的修改。例如描述修复的 bug，或者描述新增的功能（如果是较大的修改，建议在代码实现前提交一个[优化建议issue](https://github.com/webankopen/WeIdentity/issues)，提前描述自己的设计）。并标记任意一个 maintainer 进行 review。
+6. 提交 Pull Request 到 repository 的 `develop` 分支， 并描述您的修改。例如描述修复的 bug，或者描述新增的功能（如果是较大的修改，建议在代码实现前提交一个[优化建议issue](https://github.com/webankopen/WeIdentity/issues)，提前描述自己的设计）。并标记任意一个 maintainer 进行 review。
 
-7. maintainer 完成review，合并你的 Pull Request 到 develop 分支，然后我们会在下一个发布时间点将其合并到 `master` 分支。感谢你的贡献。
+7. maintainer 完成review，合并您的 Pull Request 到 develop 分支，然后我们会在下一个发布时间点将其合并到 `master` 分支。感谢您的贡献。

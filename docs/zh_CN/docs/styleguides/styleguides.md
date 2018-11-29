@@ -61,7 +61,7 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
 对 acronym，则在命名中所有字母都保留大写，而对 abbreviation 则在驼峰命名中可以使用 Id 或者 id（位于单词最前面）。
 
 例如类名：HelperHTTPRequest，对应的实例化变量：helperHTTPRequest。
-一般建议不要把 acronym 放在变量命名单词的最前面，否则这个变量的第一个字母就不是小写了。例如有个变量你可以取名为 niceHTTPRequest，而不是叫 HTTPRequest（看起来就不像是变量名了）。
+一般建议不要把 acronym 放在变量命名单词的最前面，否则这个变量的第一个字母就不是小写了。例如有个变量您可以取名为 niceHTTPRequest，而不是叫 HTTPRequest（看起来就不像是变量名了）。
 
 * **统一的变量命名**
 
