@@ -1,7 +1,7 @@
 #!/bin/bash
 
 current_path=$(pwd)
-source_code_dir=$current_path"/../../"
+source_code_dir=$current_path"/../.."
 echo $source_code_dir
 chmod 755 web3sdk.sh
 cd $source_code_dir
