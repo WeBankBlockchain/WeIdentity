@@ -109,7 +109,7 @@ WeIdentity DID与WeIdentity Credential的关系
 如何生成WeIdentity DID
 ^^^^^^^^^^^^^^^^^^^^^^
 
-WeIdentity DID = did:weid:1::net-id:bs-specific-string
+WeIdentity DID = did:weid:1:net-id:bs-specific-string
 
 
 .. image:: images/weidentity-did-format1.png
