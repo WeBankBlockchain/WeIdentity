@@ -35,7 +35,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 #. 查询DID属性：调用WeIdService的getWeIdDocumentJson()查阅生成的WeIdentity DID数据；
 #. 注册授权机构：通过AuthorityIssuerService的registerAuthorityIssuer()把生成的WeIdentity DID注册成一个授权机构；
 #. 查询授权机构：调用AuthorityIssuerService的queryAuthorityIssuerInfo()查阅生成的授权机构数据；
-#. 注册CPT：通过CptService的registerCpt()，通过之前生成的WeIdentity DID身份创建一个你喜欢的CPT模板；
+#. 注册CPT：通过CptService的registerCpt()，通过之前生成的WeIdentity DID身份创建一个您喜欢的CPT模板；
 #. 查询CPT：调用CptService的queryCpt()查阅生成的CPT模板；
 #. 生成凭证：通过CredentialService的CreateCredential()，根据CPT模板，生成一份Credential；
 #. 查询凭证：调用CredentialService的VerifyCredential()，验证此Credential是否合法。
