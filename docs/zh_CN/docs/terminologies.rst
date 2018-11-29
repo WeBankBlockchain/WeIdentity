@@ -35,7 +35,7 @@
    * - WeIdentity DID
      - 
      - 分布式身份标识，WeIdentity的分布式多中心的ID注册机制下生成的实体的ID。符合W3C DID规范
-   * - WeIdentity Docment
+   * - WeIdentity Document
      - 
      - 描述如何使用DID，至少包含了3个字段：披露的公钥列表；Authentication描述如何Authenticate；Service Endpoint
    * - Claim

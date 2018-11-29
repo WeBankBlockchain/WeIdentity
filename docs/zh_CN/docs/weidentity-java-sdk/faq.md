@@ -19,7 +19,7 @@ WeIdentity 智能合约是按分层设计的，分为：*数据层，逻辑层�
 
 三种方式可以查看 SDK 的版本号：  
 
-1. 下载的jar包会带有版本号，例如：`weidentity-java-sdk-1.0.1.jar`，版本号是v1.0.1。
+1. 下载的jar包会带有版本号，例如：`weidentity-java-sdk-1.0.1.jar`，版本号是v1.0.1。
 2. 通过 `MANIFEST.MF` 查看，可以运行下面的命令，查看输出项 `Manifest-Version` 显示的版本号：
 
     ```shell
@@ -31,7 +31,7 @@ WeIdentity 智能合约是按分层设计的，分为：*数据层，逻辑层�
 
 - **如何查看WeIdentity Contract（weidentity-contract）的版本号？**
 
-下载的合约源代码里面，根目录有个名为 `VERSION` 的文件。查看这个文件即可。
+下载的合约源代码里面，根目录有个名为 `VERSION` 的文件。查看这个文件即可。
 
 ---
 
