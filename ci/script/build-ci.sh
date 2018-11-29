@@ -9,15 +9,16 @@ app_xml_config_tpl=${java_source_code_dir}/src/main/resources/applicationContext
 function modify_config()
 {
     echo "begin to modify sdk config..."
-    weid_address=`grep "WeIDContract" $temp_file |awk -F"=" '{print $2}'`
-    cpt_address=`grep "CptController" $temp_file |awk -F"=" '{print $2}'`
-    issuer_address=`grep "authorityIssuerController" $temp_file |awk -F"=" '{print $2}'`
-    export WEID_ADDRESS=$weid_address
-    export CPT_ADDRESS=$cpt_address
-    export ISSUER_ADDRESS=$issuer_address
+    weid_address=$(cat weIdContract.address)
+    cpt_address=$(cat cptController.address)
+    issuer_address=$(cat authorityIssuer.address)
+    export WEID_ADDRESS=${weid_address}
+    export CPT_ADDRESS=${cpt_address}
+    export ISSUER_ADDRESS=${issuer_address}
     MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}'
-    envsubst $MYVARS < $app_xml_config_tpl >$app_xml_config
-    cat $app_xml_config
+    envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
+	cp ${app_xml_config} ${java_source_code_dir}/src/test/resources/
+    #cat $app_xml_config
     echo "modify sdk config finished..."
 }
 
@@ -32,11 +33,11 @@ function gradle_build_sdk()
     export CPT_ADDRESS="0x0"
     export ISSUER_ADDRESS="0x0"
     MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}'
-    envsubst $MYVARS < $app_xml_config_tpl >$app_xml_config
+    envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
 
     echo "Begin to compile java code......"
-    if [ -d $java_source_code_dir/dist ]; then
-	rm -rf $java_source_code_dir/dist
+    if [ -d ${java_source_code_dir}/dist ]; then
+	rm -rf ${java_source_code_dir}/dist
     fi
     gradle clean build -x test
     echo "compile java code done."
@@ -45,20 +46,19 @@ function gradle_build_sdk()
 function deploy_contract()
 {
 
-CLASSPATH=$java_source_code_dir/dist/conf
-echo "begin to deploy contract..."
-for f in $java_source_code_dir/dist/lib/*.jar
-do
-CLASSPATH=$CLASSPATH:$f
-done
+	CLASSPATH=${java_source_code_dir}/dist/conf
+	echo "begin to deploy contract..."
+	for jar_file in ${java_source_code_dir}/dist/lib/*.jar
+	do
+	CLASSPATH=${CLASSPATH}:${jar_file}
+	done
 
-for f in $java_source_code_dir/dist/app/*.jar
-do
-CLASSPATH=$CLASSPATH:$f
-done
+	for jar_file in ${java_source_code_dir}/dist/app/*.jar
+	do
+	CLASSPATH=${CLASSPATH}:${jar_file}
+	done
 
-    cat $java_source_code_dir/dist/conf/applicationContext.xml
-    java -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract ${temp_file}
+    java -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract
     echo "contract deployment done."
         
 }

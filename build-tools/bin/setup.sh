@@ -4,22 +4,16 @@ SOLC=$(which fisco-solc)
 WEB3J="../bin/web3sdk.sh"
 java_source_code_dir=$2
 temp_file=$(date +%s)".temp"
-config_file=${java_source_code_dir}dist/bin/run.config
-app_xml_config=${java_source_code_dir}dist/conf/applicationContext.xml
+config_file=${java_source_code_dir}/dist/bin/run.config
+app_xml_config_dir=${java_source_code_dir}/dist/conf/
+app_xml_config_tpl=${java_source_code_dir}/src/main/resources/applicationContext.xml.tpl
+app_xml_config=${java_source_code_dir}/src/main/resources/applicationContext.xml
 
-cd $2
-APP_HOME=$(pwd)
-cd -
-CLASSPATH=$APP_HOME/dist/conf
+CLASSPATH=${java_source_code_dir}/dist/conf
 
-for f in $APP_HOME/dist/lib/*.jar
+for jar_file in ${java_source_code_dir}/dist/lib/*.jar
 do
-CLASSPATH=$CLASSPATH:$f
-done
-
-for f in $APP_HOME/dist/app/*.jar
-do
-CLASSPATH=$CLASSPATH:$f
+CLASSPATH=${CLASSPATH}:${jar_file}
 done
 
 
@@ -32,7 +26,7 @@ function check_jdk()
             JAVACMD="$JAVA_HOME/jre/sh/java"
         else
             JAVACMD="$JAVA_HOME/bin/java"
-    fi
+		fi
     if [ ! -x "$JAVACMD" ] ; then
         echo "ERROR: JAVA_HOME is set to an invalid directory: $JAVA_HOME
              Please set the JAVA_HOME variable in your environment to match the
@@ -53,7 +47,7 @@ function compile_contract()
     cd ../contracts/
     
     package="com.webank.weid.contract"
-    output_dir="${java_source_code_dir}dist/output"
+    output_dir="${java_source_code_dir}/dist/output"
     echo "output_dir is $output_dir"
     local files=$(ls ./*.sol)
     for itemfile in ${files}
@@ -69,7 +63,7 @@ function compile_contract()
 function replace_java_contract()
 {
     #override new java contract code
-    cd ${java_source_code_dir}
+    cd ${java_source_code_dir}/
     cp -r dist/output/com src/main/java/
 
 }
@@ -77,22 +71,22 @@ function replace_java_contract()
 function modify_config()
 {
     echo "begin to modify sdk config..."
-    cd ${java_source_code_dir}dist
-    weid_address=$(grep "WeIDContract" $temp_file |awk -F"=" '{print $2}')
-    sed -i "s/WEID_ADDRESS/$weid_address/g" $app_xml_config
-    cpt_address=$(grep "CptController" $temp_file |awk -F"=" '{print $2}')
-    sed -i "s/CPT_ADDRESS/$cpt_address/g" $app_xml_config
-    issuer_address=$(grep "authorityIssuerController" $temp_file |awk -F"=" '{print $2}')
-    sed -i "s/ISSUER_ADDRESS/$issuer_address/g" $app_xml_config
-    
-    rm -f $temp_file
+    weid_address=$(cat weIdContract.address)
+    cpt_address=$(cat cptController.address)
+    issuer_address=$(cat authorityIssuer.address)
+    export WEID_ADDRESS=${weid_address}
+    export CPT_ADDRESS=${cpt_address}
+    export ISSUER_ADDRESS=${issuer_address}
+    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}'
+    envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
+    cp ${app_xml_config} ${app_xml_config_dir}
     echo "modify sdk config finished..."
 }
 
 function clean_config()
 {
     echo "begin to clean config..."
-    cd ${java_source_code_dir}dist
+    cd ${java_source_code_dir}/dist
     if [ -d bin/ ];then
     	rm -rf bin/
     fi
@@ -102,6 +96,9 @@ function clean_config()
     if [ -d output/ ];then
     	rm -rf output/
     fi
+    if [ -f ${app_xml_config} ];then
+	rm -f ${app_xml_config}
+    fi
     echo "clean finished..."
 }
 
@@ -109,7 +106,31 @@ function gradle_build_sdk()
 {
     #run gradle build
     echo "Begin to compile java code......"
-    cd ${java_source_code_dir}
+	
+	node_addr=$(grep "blockchain.node.address" $config_file |awk -F"=" '{print $2}')
+    OLD_IFS="$IFS"
+    IFS=","
+    array=($node_addr)
+    IFS="$OLD_IFS"
+	content=
+    for var in ${array[@]}
+    do
+		if [ ! -z ${content} ];then
+		content="${content}\n"
+		fi
+        content="${content}<value>WeIdentity@$var</value>"
+    done
+	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
+	export WEID_ADDRESS="0x0"
+    export CPT_ADDRESS="0x0"
+    export ISSUER_ADDRESS="0x0"
+    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}'
+    envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
+	
+    cd ${java_source_code_dir}/
+    if [ -d dist/ ];then
+	rm -rf dist/
+    fi
     gradle clean build -x test
     echo "compile java code done."
 }
@@ -117,26 +138,15 @@ function gradle_build_sdk()
 function deploy_contract()
 {
     echo "begin to deploy contract..."
-    cd ${java_source_code_dir}dist
-    
-    node_addr=$(grep "blockchain.node.address" $config_file |awk -F"=" '{print $2}')
-    OLD_IFS="$IFS"
-    IFS=","
-    array=($node_addr)
-    IFS="$OLD_IFS"
- 
-    for var in ${array[@]}
-    do
-        content="<value>WeIdentity@"$var"</value>"
-        sed -i "/BLOCKCHIAN_NODE_INFO/a${content}" $app_xml_config 
-    done
-    sed -i '/BLOCKCHIAN_NODE_INFO/d' $app_xml_config
-    #java deploy interface
-    #temp_file=`date +%s`".temp"
+
+	for jar_file in ${java_source_code_dir}/dist/app/*.jar
+	do
+	CLASSPATH=${CLASSPATH}:${jar_file}
+	done
+
     java -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract ${temp_file}
     dos2unix ${temp_file}
     echo "contract deployment done."
-        
 }
 
 function main()
