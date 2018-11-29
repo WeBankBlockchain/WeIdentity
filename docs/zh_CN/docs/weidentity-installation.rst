@@ -81,7 +81,7 @@ gradle
 
 
 *
-  将安装的FISCO-BCOS节点build\web3sdk里的客户端证书ca.crt和client.keystore复制出来。
+  将安装的FISCO-BCOS节点build/web3sdk里的客户端证书ca.crt和client.keystore复制出来。
 
 *
   进入WeIdentity JAVA SDK的resources目录:
@@ -156,7 +156,7 @@ Have fun!!!
    * - conf
      - SDK运行时的一些配置，应用集成SDK的时候，需要将次目录下的文件放到classpath下。
    * - lib
-     - 依赖的jar包
+     - 依赖的jar包。
 
 
 客户端证书ca.crt,以及client.keystore的作用：

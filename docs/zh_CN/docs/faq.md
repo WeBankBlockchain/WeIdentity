@@ -143,7 +143,7 @@ Credential的重新生成则为重新发行一个Credential ID不相同的全新
 > * [ECDSA vs RSA (可以直接看Conclusion)](https://www.ssl.com/article/comparing-ecdsa-vs-rsa/)
     
 > 注：  
-> * 如果假设量子计算机是可行的，任何 ECDSA 和 RSA 密钥都可使用Shor算法攻破。参加：[RSA key length vs. Shor's algorithm](https://security.stackexchange.com/a/37638/18064)，
+> * 如果假设量子计算机是可行的，任何 ECDSA 和 RSA 密钥都可使用Shor算法攻破。参见：[RSA key length vs. Shor's algorithm](https://security.stackexchange.com/a/37638/18064)，
 [Quantum_computing_attacks](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Quantum_computing_attacks)
 
 ---
