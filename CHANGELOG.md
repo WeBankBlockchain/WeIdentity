@@ -1,14 +1,14 @@
 ### V1.0.1 (2018-11-30)
 
 * 新增功能：
-1. 增加了对Travis CI, Maven.org仓库, 代码质量检测（codefactor.io & codacy.com）, 代码覆盖率检测（codecov.io）等工具的集成。
+1. 增加了对Travis CI（travis-ci.org）, Maven中央仓库, 代码质量检测（codefactor.io & codacy.com）, 代码覆盖率检测（codecov.io）等工具的集成。
 2. 增加了完整的Demo及单元测试的集成。
 
 * 问题修复：
-1. 修复了大量代码格式及输入参数错误。
+1. 修复了大量代码格式问题及输入参数错误问题。
 
 * Features:
-1. Added Travis CI, Maven.org repository, code quality tools (codefactor.io & codacy.com), and code coverage tools (codecov.io) integration.
+1. Added Travis CI (travis-ci.org), Maven central repository, code quality tools (codefactor.io & codacy.com), and code coverage tools (codecov.io) integration.
 2. Added extensive Demo and Unit Test integration.
 
 * Bugfixes:
