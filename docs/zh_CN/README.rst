@@ -1,7 +1,7 @@
 
 .. image:: docs/images/weidentity-logo.png
    :target: docs/images/weidentity-logo.png
-   :alt: weidentity-logo.png
+   :alt: weidentity-logo.jpeg
 
 ----
 
@@ -125,5 +125,6 @@ WeIdentity目前支持基于FISCO-BCOS运行，并提供JAVA SDK供调用。具�
 --------
 
 *
-   详见：\ `如何贡献 <https://github.com/webankopen/WeIdentity/blob/t1.0.1/.github/CONTRIBUTING.md>`_
+   `详见如何贡献 <https://github.com/webankopen/WeIdentity/blob/t1.0.1/.github/CONTRIBUTING.md>`_
+
 
