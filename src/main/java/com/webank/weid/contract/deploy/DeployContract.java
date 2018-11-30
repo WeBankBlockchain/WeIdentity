@@ -166,7 +166,7 @@ public class DeployContract {
             WeIdContract weIdContract =
                 f.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String contractAddress = weIdContract.getContractAddress();
-            writeAddressToFile("WeIDContract", contractAddress,"weIdContract.address");
+            writeAddressToFile(contractAddress,"weIdContract.address");
             return contractAddress;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
@@ -191,7 +191,6 @@ public class DeployContract {
                     new Address(authorityIssuerDataAddress));
             CptData cptData = f1.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String cptDataAddress = cptData.getContractAddress();
-            //        writeAddressToFile("CptData", cptDataAddress);
 
             Future<CptController> f2 =
                 CptController.deploy(
@@ -205,11 +204,10 @@ public class DeployContract {
             CptController cptController =
                 f2.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String cptControllerAddress = cptController.getContractAddress();
-            writeAddressToFile("CptController", cptControllerAddress,"cptController.address");
+            writeAddressToFile(cptControllerAddress,"cptController.address");
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             e.printStackTrace();
         }
-
         return StringUtils.EMPTY;
     }
 
@@ -217,7 +215,7 @@ public class DeployContract {
         if (null == web3j) {
             loadConfig();
         }
-
+        
         // Step 1: Deploy RoleController sol => [addr1]
         String authorityIssuerDataAddress = StringUtils.EMPTY;
         Future<RoleController> f1 =
@@ -311,8 +309,7 @@ public class DeployContract {
                     TimeUnit.SECONDS);
             String authorityIssuerControllerAddress =
                 authorityIssuerController.getContractAddress();
-            writeAddressToFile("authorityIssuerController",
-                authorityIssuerControllerAddress,"authorityIssuer.address");
+            writeAddressToFile(authorityIssuerControllerAddress,"authorityIssuer.address");
             return authorityIssuerControllerAddress;
         } catch (Exception e) {
             logger.error("AuthorityIssuerController deployment error:" + e.toString());
@@ -320,7 +317,7 @@ public class DeployContract {
         return authorityIssuerDataAddress;
     }
 
-    private static void writeAddressToFile(String contractName, String contractAddress, String fileName) {
+    private static void writeAddressToFile(String contractAddress, String fileName) {
 
         FileWriter fileWritter = null;
         try {

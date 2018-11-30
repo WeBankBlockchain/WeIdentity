@@ -60,15 +60,6 @@ public abstract class BaseService {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
     }
 
-    /**
-     * Load config.
-     *
-     * @return true, if successful
-     */
-    private static boolean loadConfig() {
-        return (initWeb3j() && initCredentials());
-    }
-
     private static boolean initWeb3j() {
         Service service = context.getBean(Service.class);
         try {
@@ -136,7 +127,7 @@ public abstract class BaseService {
         contract = method.invoke(
             null,
             contractAddress,
-            web3j,
+            getWeb3j(),
             credentials,
             WeIdConstant.GAS_PRICE,
             WeIdConstant.GAS_LIMIT
@@ -164,9 +155,6 @@ public abstract class BaseService {
         }
 
         Object contract = null;
-        if (null == web3j || !initWeb3j()) {
-            throw new InitWeb3jException();
-        }
         try {
             // load contract
             contract = loadContract(contractAddress, credentials, cls);
@@ -193,11 +181,11 @@ public abstract class BaseService {
     protected static Contract getContractService(String contractAddress, Class<?> cls) {
 
         Object contract = null;
-        if (null == web3j || null == credentials) {
-            loadConfig();
-        }
         try {
             // load contract
+        	if(null == credentials) {
+        		initCredentials();
+        	}
             contract = loadContract(contractAddress, credentials, cls);
             logger.info(cls.getSimpleName() + " init succ");
 
