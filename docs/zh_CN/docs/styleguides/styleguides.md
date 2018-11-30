@@ -14,7 +14,7 @@
     */
     ```
 
-* 所有英文术语的大小写敏感，并注意拼写，请按照[术语表](https://github.com/webankopen/WeIdentity/blob/master/docs/terminologies.rst)的术语定义来使用。
+* 所有英文术语的大小写敏感，并注意拼写，请按照[术语表](../terminologies.rst)的术语定义来使用。
 
 * 关于空行
   * 函数内部，一般使用空行分割不同的逻辑，例如一个函数可能流程有大概 4 步，则 4 步中的每步之间，用一行空行分割。
@@ -132,7 +132,7 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
     import static *
     ```
 
-* 以上面列出的规范优先，其余遵守 [Google JAVA 代码规范](https://google.github.io/styleguide/javaguide.html)。
+* 以上面列出的规范优先，其余遵守 [Google JAVA 代码规范](https://google.github.io/styleguide/javaguide.html)。
 
 ---
 
