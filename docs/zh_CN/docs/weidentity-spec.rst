@@ -1,4 +1,3 @@
-
 .. _weidentity-spec:
 
 WeIdentity规范文档
@@ -336,7 +335,7 @@ Credential结构
    }
 
 Claim Protocol Type（CPT）注册机制
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 不同的Issuer按业务场景需要，各自定义不同类型数据结构的Claim，所有的Claim结构都需要到CPT合约注册，以保证全网唯一。所有的CPT定义文件（JSON-LD格式）可以从CPT合约下载。
 

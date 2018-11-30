@@ -73,10 +73,10 @@ WeIdentity支持认证机构自行注册标准化凭证模板，共同丰富公�
 ^^^^
 
 *
-   `案例及场景 <docs/use-cases.html>`_
+   `案例及场景 <https://weidentity.readthedocs.io/zh_CN/stable/docs/use-cases.html>`_
 
 *
-   `WeIdentity规范文档 <docs/weidentity-spec.html>`_
+   `WeIdentity规范文档 <https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-spec.html>`_
 
 
 开始使用

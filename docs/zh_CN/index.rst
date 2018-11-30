@@ -3,20 +3,25 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+=======
 ##############################################################
 WeIdentity文档
 ##############################################################
 
+
 .. include:: README.rst
 
+
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
+   :caption: Contents:
+
 
 =======
-   README.rst
+   README.md
    docs/terminologies.rst
    docs/use-cases.rst
-   docs/weidentity-spec.rst
    docs/weidentity-installation.rst
+   docs/weidentity-spec.rst
    docs/weidentity-java-sdk-doc.rst
-   docs/faq.rst
+   docs/faq.md

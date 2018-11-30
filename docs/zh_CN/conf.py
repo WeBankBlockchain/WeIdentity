@@ -109,6 +109,12 @@ html_theme = 'alabaster'
 # html_sidebars = {}
 
 
+
+
+
+
+
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -263,6 +269,7 @@ latex_documents = [
      'Junqi Zhang', 'manual'),
 ]
 
+
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
@@ -271,6 +278,7 @@ man_pages = [
     (master_doc, 'weidentity', 'WeIdentity Documentation',
      [author], 1)
 ]
+
 
 # -- Options for Texinfo output ----------------------------------------------
 

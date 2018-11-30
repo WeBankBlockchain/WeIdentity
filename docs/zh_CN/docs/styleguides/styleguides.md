@@ -2,7 +2,7 @@
 
 ---
 
-## 基本要求：
+### 基本要求：
 
 * 所有文件必须使用 UTF-8 编码，且文件格式为 unix 文件格式，而不能使用 GBK 和 dos。
 * 所有代码请统一使用4个空格作为缩进。
@@ -34,7 +34,7 @@
 
 ---
 
-## 文件名命名规范
+### 文件名命名规范
 
 * 全小写。
 * 单词间使用破折号 `-` 进行分割，例如 ```verify-credential.md```。
@@ -42,20 +42,20 @@
 
 ---
 
-## 变量命名规范
+### 变量命名规范
 
-* **WeIdentity DID KEY**
+#### WeIdentity DID KEY
 
 SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通过 SDK 解析为地址后，在合约中使用地址作为 key，取名 weAddress。类型使用 ```address```。
 
-* **id, Id or ID?**
+#### id, Id or ID?
 
 单词中出现的 “id”，请统一使用 Id （例如变量名 weId，类名就是 WeId*，例如 WeIdUtils 等），而不是用 id，ID 等。例外情况如下：
 
     * 如果是在单词最前面，则可以使用 id（因驼峰命名法）。
     * 如果是在常量名里面，则因为全部字母都是大写，所以使用 ID。
 
-* **区分 acronym 和 abbreviation**
+#### 区分 acronym 和 abbreviation
 
 例如 HTTP 是 “Hyper Text Transport Protoco” 的 acronym，而 id 是 identity 的 abbreviation。
 对 acronym，则在命名中所有字母都保留大写，而对 abbreviation 则在驼峰命名中可以使用 Id 或者 id（位于单词最前面）。
@@ -63,7 +63,7 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
 例如类名：HelperHTTPRequest，对应的实例化变量：helperHTTPRequest。
 一般建议不要把 acronym 放在变量命名单词的最前面，否则这个变量的第一个字母就不是小写了。例如有个变量你可以取名为 niceHTTPRequest，而不是叫 HTTPRequest（看起来就不像是变量名了）。
 
-* **统一的变量命名**
+#### 统一的变量命名
 
 | Key | Type | Description |
 | :---: | :---: |:------|
@@ -74,7 +74,7 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
 | updated |int| 更新时间 |
 | logger |Logger| java 类里面的 logger 变量 |
 
-* **常见技术名词**
+#### 常见技术名词
 
 | Key | Description |
 | :---: | :------|
@@ -82,7 +82,7 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
 
 ---
 
-## JAVA 代码规范
+### JAVA 代码规范
 
 * JAVA 代码对调用者暴露的接口，请按照 javadoc 的模式注释。
 
@@ -115,13 +115,13 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
 
 ---
 
-## Solidity 代码规范
+### Solidity 代码规范
 
 * Solidity 因为在函数申明的结尾处可以有 modifier 等关键字，所以遵循 Solidity 本身的规范。
 
     注：soliditiy 因为 solidity 代码规范，所以函数的左括号是在跟 “function” 在同级，而不是放在“上一行”（这一点跟 JAVA 不一致）
 
-```javascript
+```solidity
 // solidity 的例子
 function thisFunctionNameIsReallyLong(
     address x,
@@ -137,7 +137,7 @@ function thisFunctionNameIsReallyLong(
 }
 ```
 
-```javascript
+```solidity
 //函数调用的例子
 int ret = thisFunctionCallIsReallyLong(
     longArgument1,
