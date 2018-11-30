@@ -511,7 +511,7 @@ Credential撤销机制利用了下面两点：
 #. 任意大于1的整数 a，如果 a 不是素数，则 a 可以表示为一系列素数的乘积，且这个表示是唯一的（不考虑顺序）。参见：\ `算数基本定理 <https://en.wikipedia.org/wiki/Fundamental_theorem_of_arithmetic>`_\ 
 #. 目前没有一个有效率的算法，对两个足够大的素数乘积得到的半素数（\ `semiprime <https://en.wikipedia.org/wiki/Semiprime>`_\ ）进行整数分解。参见：\ `整数分解 <https://en.wikipedia.org/wiki/Integer_factorization>`_\ 
 
-WeIdentity 会公开一个大素数的文件，每个素数会有一个 index，供所有 Issuer 使用。Issuer 发行一个 Credential 的时候，就随机从这个大素数文件中选择一个素数，这个素数的 index 会作为这个 Credential 的属性之一。并把以往所有发行的未撤销的 Credential 的素数相乘，得到一个大数 Accumulator（每个 Issuer 会维护自己的 Accumulator），并将这个 Accumulator 公开供所有接入方查询。
+WeIdentity 会公开一个大素数的文件，每个素数会有一个 index，供所有 Issuer 使用。Issuer 发行一个 Credential 的时候，就随机从这个大素数文件中选择一个素数，这个素数的 index 会作为这个 Credential 的属性之一。并把以往所有发行的未撤销的 Credential 的素数相乘，得到一个大数 Accumulator（每个 Issuer 会维护自己的 Accumulator），并将这个 Accumulator 公开供所有接入方查询。
 
 Issuer 如何撤销一个 Credential
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
