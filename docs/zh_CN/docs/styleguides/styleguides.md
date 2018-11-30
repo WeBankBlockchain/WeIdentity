@@ -93,7 +93,7 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
     private static int resolveAttributeEvent(
         String weid,
         TransactionReceipt receipt,
-        GetWeIDDocumentResult result) {
+        GetWeIDDocmentResult result) {
         // logic
     }
     ```
