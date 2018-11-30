@@ -10,7 +10,7 @@
 什么是WeIdentity？
 ========================
 
-WeIdentity是一个基于公众联盟链技术构建的实体身份认证与可信数据交换的生态体系。WeIdentity为实体对象（人或者物）的现实身份与链上身份映射、以及实体对象之间的数据授权与交换过程提供了一套分布式多中心的技术解决方案。WeIdentity由微众银行自主研发并完全开源，秉承公众联盟链整合资源、交换价值、服务公众的理念，致力于成为链接多个垂直行业领域的分布式商业基础设施，促进泛行业、跨机构、跨地域间的身份认证和数据合作。
+WeIdentity是一套分布式多中心的技术解决方案，可承载实体对象（人或者物）的现实身份与链上身份的可信映射、以及实现实体对象之间安全的访问授权与数据交换。WeIdentity由微众银行自主研发并完全开源，秉承公众联盟链整合资源、交换价值、服务公众的理念，致力于成为链接多个垂直行业领域的分布式商业基础设施，促进泛行业、跨机构、跨地域间的身份认证和数据合作。
 
 模块介绍
 --------
@@ -74,10 +74,10 @@ WeIdentity支持认证机构自行注册标准化凭证模板，共同丰富公�
 ^^^^
 
 *
-   `案例及场景 <https://weidentity.readthedocs.io/zh_CN/stable/docs/use-cases.html>`_
+   `案例及场景 <https://weidentity.readthedocs.io/zh_CN/master/docs/use-cases.html>`_
 
 *
-   `WeIdentity规范文档 <https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-spec.html>`_
+   `WeIdentity规范文档 <https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-spec.html>`_
 
 
 开始使用
@@ -99,8 +99,8 @@ WeIdentity目前支持基于FISCO-BCOS运行，并提供JAVA SDK供调用。具�
             <td>JAVA SDK</td>
             <td>
                <ul>
-                 <li><a href="https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-installation.html">安装部署文档</a></li>
-                 <li><a href="https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-java-sdk-doc.html">SDK使用文档</a></li>
+                 <li><a href="https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-installation.html">安装部署文档</a></li>
+                 <li><a href="https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-java-sdk-doc.html">SDK使用文档</a></li>
                </ul>
             </td>
             <td>

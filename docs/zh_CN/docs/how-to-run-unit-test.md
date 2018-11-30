@@ -4,7 +4,7 @@
 
 ### 前提条件
 
-单元测试的运行需要提前安装部署好WeIdentity JAVA SDK，请参考 [WeIdentity JAVA SDK 安装部署文档](https://weidentity.readthedocs.io/zh_CN/stable/docs/weidentity-installation.html#)安装部署WeIdentity。
+单元测试的运行需要提前安装部署好WeIdentity JAVA SDK，请参考 [WeIdentity JAVA SDK 安装部署文档](https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-installation.html#)安装部署WeIdentity。
   
 ### 流程
 

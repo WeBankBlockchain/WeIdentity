@@ -33,7 +33,7 @@
 
 #### 测试
 
-所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](https://weidentity.readthedocs.io/zh_CN/develop/docs/how-to-run-unit-test.html)”。
+所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](../docs/zh_CN/docs/how-to-run-unit-test.md)”。
 
 #### Commit Messages
 
@@ -71,4 +71,4 @@ data & logic contracts.
 
 6. 提交 Pull Request 到 repository 的 `develop` 分支， 并描述您的修改。例如描述修复的 bug，或者描述新增的功能（如果是较大的修改，建议在代码实现前提交一个[优化建议issue](https://github.com/webankopen/WeIdentity/issues)，提前描述自己的设计）。并标记任意一个 maintainer 进行 review。
 
-7. maintainer 完成review，合并您的 Pull Request 到 develop 分支，然后我们会在下一个发布时间点将其合并到 `master` 分支。感谢您的贡献。
+7. maintainer 完成review，合并您的 Pull Request 到 `develop` 分支，然后我们会在下一个发布时间点将其合并到 `master` 分支。感谢您的贡献。

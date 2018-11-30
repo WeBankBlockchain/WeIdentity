@@ -110,7 +110,7 @@ CPT（Claim Protocol Type，也即凭证声明类型）可以理解为各类凭�
 
 - **获取详细数据时如何进行鉴权，以确认确实是已经授权过的请求？**
 
-在可信数据交换的场景下，当某机构A需要使用用户X在机构B处存储的数据M。机构A可以获取用户的授权Credential（可以通过 [CPT101](https://weidentity.readthedocs.io/zh_CN/stable/docs/cpt-templates.html#cpt101) 来实现，也可以自行定义符合自己业务需求的 CPT ）。
+在可信数据交换的场景下，当某机构A需要使用用户X在机构B处存储的数据M。机构A可以获取用户的授权Credential（可以通过 [CPT101](cpt-templates.html#cpt101) 来实现，也可以自行定义符合自己业务需求的 CPT ）。
 
 可信数据交换规范定义了数据获取接口和数据授权提供接口的规范。
 机构B需要实现数据授权提供接口，机构A通过数据获取接口向机构B请求这个数据，请求中携带用户授权数据使用的Credential，机构B验证Credential正确后返回数据。
