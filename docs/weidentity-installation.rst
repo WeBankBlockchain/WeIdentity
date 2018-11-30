@@ -19,11 +19,11 @@ WeIdentity安装部署文档
 """"""""
 
   CentOS （7.2 64位）或Ubuntu（16.04 64位）
-　
+
 FISCO-BCOS区块链环境
 """"""""""""""""""""
 
- 您需要有一套可以运行的FISCO-BCOS区块链环境，如果没有，可以参考\ `「FISCO-BCOS节点安装方法」 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/tools/index.html>`_\ 来搭建一套区块链环境。
+ 您需要有一套可以运行的FISCO-BCOS区块链环境，如果没有，可以参考\ `“FISCO-BCOS节点安装方法” <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/getstart/index.html>`_\ 来搭建一套区块链环境。
 
 JDK
 """
@@ -33,7 +33,7 @@ JDK
 fisco-solc
 """"""""""
 
-   fisco-solc是solidity的编译器。\ `下载地址 <https://github.com/FISCO-BCOS/FISCO-BCOS/blob/master/fisco-solc>`_
+   fisco-solc是solidity的编译器。\ `下载地址 <https://github.com/FISCO-BCOS/FISCO-BCOS/blob/master/fisco-solc>`_    
 
 
 * fisco-solc安装方法：将fisco-solc拷贝到系统的/usr/bin目录下，执行命令\ ``chmod +x fisco-solc``\ 。
@@ -60,37 +60,37 @@ gradle
 * `WeIdentity 智能合约 <https://github.com/webankopen/weidentity-contract.git>`_\ :raw-html-m2r:`<br>`
   建议下载最新版本的release
 
-2.拷贝「WeIdentity智能合约」源码到特定目录
+2.拷贝“WeIdentity智能合约”源码到特定目录
 """"""""""""""""""""""""""""""""""""""""
 
-进入build_tools目录：
+进入build_tools目录：   
 
 .. code-block:: shell
 
       cd weidentity-java-sdk/build-tools/contracts/
 
-将您刚下载的「WeIdentity智能合约」源码文件放至该目录即可。
+将您刚下载的“WeIdentity智能合约”源码文件放至该目录即可。     
 
 ..
 
-    如果不需要特定版本的「WeIdentity智能合约」，可以跳过第2步，而默认使用该目录下的智能合约（当前版本WeIdentity JAVA SDK在发布时最新版本的智能合约）。
+    如果不需要特定版本的“WeIdentity智能合约”，可以跳过第2步，而默认使用该目录下的智能合约（当前版本WeIdentity JAVA SDK在发布时最新版本的智能合约）。      
 
 
 3.配置客户端证书
 """"""""""""""""
 
 
-*
-  将安装的FISCO-BCOS节点build\web3sdk里的客户端证书ca.crt和client.keystore复制出来。
+* 
+  客户端证书ca.crt,以及client.keystore的生成方法请参考：\ `FISCO-BCOS区块链操作手册的生成sdk证书 <https://github.com/FISCO-BCOS/FISCO-BCOS/tree/master/doc/manual#24-%E7%94%9F%E6%88%90sdk%E8%AF%81%E4%B9%A6>`_\ 。    
 
-*
-  进入WeIdentity JAVA SDK的resources目录:
+* 
+  证书生成后，进入resources目录:
 
   .. code-block:: shell
 
      cd ../../src/main/resources
 
-  然后将FISCO-BCOS节点的证书ca.crt和keystore文件拷贝至该目录，替换已有的证书文件:
+  然后将FISCO-BCOS节点的证书ca.crt和keystore文件拷贝至该目录，替换已有的证书文件:  
 
 4.配置SDK连接的区块链节点
 """""""""""""""""""""""""
@@ -116,7 +116,7 @@ bin目录下是运行部署打包的脚本和配置文件，您需要将FISCO-BC
 5.安装部署
 """"""""""
 
-运行下面的命令，自动完成代码编译，智能合约编译，智能合约部署和所有配置文件的配置：
+运行下面的命令，自动完成代码编译，智能合约编译，智能合约部署和所有配置文件的配置：   
 
 .. code-block:: shell
 
@@ -137,14 +137,14 @@ Have fun!!!
 查看智能合约部署结果
 """"""""""""""""""""
 
-进入dist目录
+进入dist目录   
 
 .. code-block:: shell
 
    cd ../../dist/
    ls
 
-正常情况下，dist目录包含以下目录： ``app  conf  lib``
+正常情况下，dist目录包含以下目录： ``app  conf  lib``   
 
 .. list-table::
    :header-rows: 1
@@ -163,5 +163,5 @@ Have fun!!!
 """"""""""""""""""""""""""""""""""""""""""""
 
 
-* 证书ca.crt：用来验证sdk连接节点的节点证书的合法性。
+* 证书ca.crt：用来验证sdk连接节点的节点证书的合法性。   
 * client.keystore有三种用途：(1) 用作和节点连接是sdk的身份证书，由节点的ca.crt和agency.crt来验证合法性。(2)用作和其他sdk（前置）连接的身份证书，由其他sdk的ca.crt来验证合法性。(3)用作sdk发交易的私钥证书。

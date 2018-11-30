@@ -26,53 +26,19 @@ WeIdentity规范文档
      - 张俊麒
 
 
-1. 设计目标
-------------
+1.设计目标
+----------
 
-.. raw:: html
-
-    <embed>
-      <table border='1' style="width:100%;border-collapse:collapse">
-         <tr>
-            <th width="100">目标</th>
-            <th>说明</th>
-         </tr>
-         <tr>
-            <td>多中心</td>
-            <td>分布式多中心的ID注册机制，摆脱对传统模式下单一中心ID注册的依赖</td>
-         </tr>
-         <tr>
-            <td>开源开放</td>
-            <td>技术方案完全开源，面向政府、企业、开发者服务</td>
-         </tr>
-         <tr>
-            <td>隐私保护</td>
-            <td>实体的现实身份和可验证数字凭证的内容进行链下存储。支持实体将信息最小化或者选择性披露给其他机构，同时防止任何第三方反向推测出实体在现实世界或其他场景语义中的身份</td>
-         </tr>
-         <tr>
-            <td>可移植性</td>
-            <td>基于WeIdentity规范，数据可移植至遵循同样规范的其他平台，兼容业务主流区块链底层平台</td>
-         </tr>
-         <tr>
-            <td>互操作性</td>
-            <td>提供标准化接口，支持跨链、跨平台互操作</td>
-         </tr>
-         <tr>
-            <td>可扩展性</td>
-            <td>保证操作性，可移植性或简单性的情况下，数据模型可以通过多种不同方式进行扩展</td>
-         </tr>
-      </table>
-      <br />
-    </embed>
+.. include:: design-goals.rst
 
 
-2. 相关术语
-------------
+2.相关术语
+----------
 
-详见：\ :ref:`术语表 <terminologies>`
+详见：\ :ref:`术语表 <terminologies>`  
 
-3. WeIdentity DID
-------------------
+3.WeIdentity DID
+----------------
 
 WeIdentity DID与WeIdentity Credential的关系
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -146,6 +112,8 @@ WeIdentity Document格式
      - 用于指定signature suite
    * - publicKey.owner
      - 指定控制对应私钥的Subject，遵从WeIdentity规范，如果为空，则表明owner是Document的id字段，如果是Credential类Subject，则owner一般是某用户
+   * - publicKey
+     - 
    * - authentication
      - 用于Subject证明其与当前Document的关联性
    * - authentication.type
@@ -223,8 +191,8 @@ WeIdentity DID支持操作
 
 更新WeIdentity Document的相关属性
 
-4. WeIdentity Credentials
---------------------------
+4.WeIdentity Credentials
+------------------------
 
 角色和关系
 ^^^^^^^^^^
@@ -334,7 +302,7 @@ Credential结构
      }]
    }
 
-Claim Protocol Type（CPT）注册机制
+Claim Protocol Type(CPT)注册机制
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 不同的Issuer按业务场景需要，各自定义不同类型数据结构的Claim，所有的Claim结构都需要到CPT合约注册，以保证全网唯一。所有的CPT定义文件（JSON-LD格式）可以从CPT合约下载。
@@ -478,8 +446,8 @@ Credential撤销
    :alt: after-revocation.png
 
 
-5. Authority Issuer注册
-------------------------
+5.Authority Issuer注册
+----------------------
 
 链上每个WeIdentity DID持有者（包括人，机构，或者物）都可以issue一个Claim，并打上自己的签名，但只有联盟链里面的权威机构才可以在公共合约注册成为Authority Issuer。每个注册为Authority Issuer的新成员需要联盟链内其他机构投票通过。
 
@@ -504,8 +472,8 @@ Credential撤销
      - Authority Issuer公布的自己的当前所有未撤销的credential的primeNumber字段的累加乘积
 
 
-6. Notification
-----------------
+6.Notification
+--------------
 
 通用字段如下，根据不同的type，notification的payload结构不同。
 

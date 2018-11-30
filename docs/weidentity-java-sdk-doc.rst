@@ -74,7 +74,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 
 * CptService
 
-任何凭证的签发，都需要将数据转换成已经注册的CPT（Claim Protocol Type）格式规范，也就是所谓的“标准化格式化数据”。相关机构事先需要注册好CPT，在此之后，签发机构会根据CPT提供符合格式的数据，进而进行凭证的签发。
+任何凭证的签发，都需要将数据转换成已经注册的CPT (Claim Protocol Type)格式规范，也就是所谓的“标准化格式化数据”。相关机构事先需要注册好CPT，在此之后，签发机构会根据CPT提供符合格式的数据，进而进行凭证的签发。
 
 本接口提供了对CPT的注册、更新、查询等操作。
 
@@ -152,17 +152,17 @@ com.webank.weid.protocol.base.AuthorityIssuer
      - String
      - Y
      - 授权机构WeIdentity DID
-     -
+     - 
    * - name
      - String
      - Y
      - 授权机构名称
-     -
+     - 
    * - createDate
      - Long
      - Y
      - 创建日期
-     -
+     - 
    * - accValue
      - String
      - Y
@@ -199,15 +199,15 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Boolean
      - 返回结果值
-     -
+     - 
 
 
 **此方法返回code**
@@ -352,15 +352,15 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Boolean
      - 返回结果值
-     -
+     - 
 
 
 **此方法返回code**
@@ -474,15 +474,15 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Boolean
      - 返回结果值
-     -
+     - 
 
 
 **此方法返回code**
@@ -567,11 +567,11 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - AuthorityIssuer
      - JavaBean
@@ -592,22 +592,22 @@ com.webank.weid.protocol.base.AuthorityIssuer
      - String
      - Y
      - 授权机构WeIdentity DID
-     -
+     - 
    * - name
      - String
      - Y
      - 授权机构名称
-     -
+     - 
    * - createDate
      - Long
      - Y
      - 创建日期
-     -
+     - 
    * - accValue
      - String
      - Y
      - 授权方累积判定值
-     -
+     - 
 
 
 **注意**\ ：因为Solidity 0.4.4的限制，无法正确的返回accValue，因此这里取得的accValue一定为空字符串。未来会进行修改。
@@ -736,7 +736,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - CptBaseInfo
      - JavaBean
@@ -755,11 +755,11 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - cptId
      - Integer
      - cpId编号
-     -
+     - 
    * - cptVersion
      - Integer
      - 版本号
-     -
+     - 
 
 
 **此方法返回code**
@@ -817,7 +817,7 @@ com.webank.weid.protocol.base.CptBaseInfo
         "84259158061731800175730035500197147557630375762366333000754891654353899157503")
                        .toByteArray())));
    ResponseData<RegisterCptResult> response = cptService.registerCpt(args);
-
+   
 .. code-block:: text
 
    返回数据如下：
@@ -873,7 +873,7 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Cpt
      - JavaBean
@@ -892,7 +892,7 @@ com.webank.weid.protocol.base.Cpt
    * - cptJsonSchema
      - String
      - json验证器
-     -
+     - 
    * - cptBaseInfo
      - CptBaseInfo
      - JavaBean
@@ -915,11 +915,11 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - cptId
      - Integer
      - cpId编号
-     -
+     - 
    * - cptVersion
      - Integer
      - 版本号
-     -
+     - 
 
 
 com.webank.weid.protocol.base.Cpt.MetaData
@@ -942,11 +942,11 @@ com.webank.weid.protocol.base.Cpt.MetaData
    * - updated
      - Long
      - 更新时间
-     -
+     - 
    * - created
      - Long
      - 创建日期
-     -
+     - 
 
 
 **此方法返回code**
@@ -1022,7 +1022,7 @@ com.webank.weid.protocol.base.Cpt.MetaData
      - Integer
      - Y
      - cpt编号
-     -
+     - 
    * - cptJsonSchema
      - String
      - Y
@@ -1073,7 +1073,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - CptBaseInfo
      - JavaBean
@@ -1092,11 +1092,11 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - cptId
      - Integer
      - cpId编号
-     -
+     - 
    * - cptVersion
      - Integer
      - 版本号
-     -
+     -  
 
 
 **此方法返回code**
@@ -1197,7 +1197,7 @@ CredentialService
      - Integer
      - Y
      - cpt编号
-     -
+     - 
    * - issuer
      - String
      - Y
@@ -1207,7 +1207,7 @@ CredentialService
      - String
      - Y
      - 到期日
-     -
+     - 
    * - claimData
      - String
      - Y
@@ -1249,11 +1249,11 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Credential
      - JavaBean
@@ -1279,37 +1279,37 @@ com.webank.weid.protocol.base.Credential
      - String
      - Y
      - 证书编号
-     -
+     - 
    * - cptId
      - Integer
      - Y
      - cptId
-     -
+     - 
    * - issuer
      - String
      - Y
      - WeIdentity DID
-     -
+     - 
    * - issuranceDate
      - Long
      - Y
      - 创建日期
-     -
+     - 
    * - expirationDate
      - Long
      - Y
      - 到期日期
-     -
+     - 
    * - signature
      - String
      - Y
      - 签名数据
-     -
+     - 
    * - claimData
      - String
      - Y
      - Claim数据
-     -
+     - 
 
 
 **此方法返回code**
@@ -1414,37 +1414,37 @@ com.webank.weid.protocol.base.Credential
      - String
      - Y
      - 证书编号
-     -
+     - 
    * - cptId
      - Integer
      - Y
      - cptId
-     -
+     - 
    * - issuer
      - String
      - Y
      - WeIdentity DID
-     -
+     - 
    * - issuranceDate
      - Long
      - Y
      - 创建日期
-     -
+     - 
    * - expirationDate
      - Long
      - Y
      - 到期日期
-     -
+     - 
    * - signature
      - String
      - Y
      - 签名数据
-     -
+     - 
    * - claimData
      - String
      - Y
      - Claim数据
-     -
+     - 
 
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
@@ -1459,15 +1459,15 @@ com.webank.weid.protocol.base.Credential
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Boolean
      - 返回结果值
-     -
+     - 
 
 
 **此方法返回code**
@@ -1587,12 +1587,12 @@ com.webank.weid.protocol.base.Credential
      - Credential
      - Y
      - JavaBean，见下
-     -
+     - 
    * - publicKey
      - String
      - Y
      - 公钥
-     -
+     - 
 
 
 com.webank.weid.protocol.base.Credential
@@ -1614,37 +1614,37 @@ com.webank.weid.protocol.base.Credential
      - String
      - Y
      - 证书编号
-     -
+     - 
    * - cptId
      - Integer
      - Y
      - cptId
-     -
+     - 
    * - issuer
      - String
      - Y
      - WeIdentity DID
-     -
+     - 
    * - issuranceDate
      - Long
      - Y
      - 创建日期
-     -
+     - 
    * - expirationDate
      - Long
      - Y
      - 到期日期
-     -
+     - 
    * - signature
      - String
      - Y
      - 签名数据
-     -
+     - 
    * - claimData
      - String
      - Y
      - Claim数据
-     -
+     - 
 
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
@@ -1659,15 +1659,15 @@ com.webank.weid.protocol.base.Credential
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Boolean
      - 返回结果值
-     -
+     - 
 
 
 **此方法返回code**
@@ -1796,11 +1796,11 @@ WeIDService
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - CreateWeIdDataResult
      - JavaBean
@@ -1823,11 +1823,11 @@ com.webank.weid.protocol.response.CreateWeIdDataResult
    * - userWeIdPublicKey
      - WeIdPublicKey
      - JavaBean
-     -
+     - 
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - JavaBean
-     -
+     - 
 
 
 com.webank.weid.protocol.base.WeIdPublicKey
@@ -1929,7 +1929,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - String
      - Y
      - 数字公钥
-     -
+     - 
    * - weIdPrivateKey
      - WeIdPrivateKey
      - N
@@ -1964,11 +1964,11 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - String
      - 公钥WeIdentity DID格式字符串
@@ -2055,7 +2055,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - String
      - Y
      - WeIdentity DID字符串
-     -
+     - 
 
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
@@ -2070,15 +2070,15 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - String
      - weidDocument Json
-     -
+     - 
 
 
 **此方法返回code**
@@ -2172,7 +2172,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - String
      - Y
      - WeIdentity DID字符串
-     -
+     - 
 
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<WeIdDocument>;
@@ -2187,11 +2187,11 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - WeIdDocument
      - JavaBean
@@ -2209,16 +2209,16 @@ com.webank.weid.protocol.base.WeIdDocument
      - 备注
    * - id
      - String
-     -
-     -
+     - 
+     - 
    * - created
      - String
-     -
-     -
+     - 
+     - 
    * - updated
      - String
-     -
-     -
+     - 
+     - 
    * - publicKey
      - List\ :raw-html-m2r:`<PublicKeyProperty>`
      - JavaBean
@@ -2244,8 +2244,8 @@ com.webank.weid.protocol.base.PublicKeyProperty
      - 备注
    * - id
      - String
-     -
-     -
+     - 
+     - 
    * - type
      - String
      - 类型
@@ -2253,11 +2253,11 @@ com.webank.weid.protocol.base.PublicKeyProperty
    * - owner
      - String
      - 拥有者WeIdentity DID
-     -
+     - 
    * - publicKey
      - String
      - 数字公钥
-     -
+     - 
 
 
 com.webank.weid.protocol.base.AuthenticationProperty
@@ -2275,8 +2275,8 @@ com.webank.weid.protocol.base.AuthenticationProperty
      - 默认为：Secp256k1SignatureAuthentication2018
    * - publicKey
      - String
-     -
-     -
+     - 
+     - 
 
 
 com.webank.weid.protocol.base.ServiceProperty
@@ -2291,11 +2291,11 @@ com.webank.weid.protocol.base.ServiceProperty
    * - type
      - String
      - 类型
-     -
+     - 
    * - serviceEndpoint
      - String
-     -
-     -
+     - 
+     - 
 
 
 **此方法返回code**
@@ -2396,12 +2396,12 @@ com.webank.weid.protocol.base.ServiceProperty
      - String
      - N
      - 所有者
-     -
+     - 
    * - publicKey
      - String
      - Y
      - 数字公钥
-     -
+     - 
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - N
@@ -2436,15 +2436,15 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Boolean
      - 是否set成功
-     -
+     - 
 
 
 **此方法返回code**
@@ -2570,15 +2570,15 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Boolean
      - 是否set成功
-     -
+     - 
 
 
 **此方法返回code**
@@ -2664,17 +2664,17 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - String
      - Y
      - hash类型
-     -
+     - 
    * - owner
      - String
      - N
      - 所属
-     -
+     - 
    * - publicKey
      - String
      - Y
      - 数字公钥
-     -
+     - 
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - N
@@ -2709,15 +2709,15 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - errorCode
      - Integer
      - 返回结果码
-     -
+     - 
    * - errorMessage
      - String
      - 返回结果描述
-     -
+     - 
    * - result
      - Boolean
      - 是否set成功
-     -
+     - 
 
 
 **此方法返回code**
@@ -2770,3 +2770,4 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    result: true
    errorCode: 0
    errorMessage: success
+
