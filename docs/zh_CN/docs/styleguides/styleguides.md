@@ -97,7 +97,6 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
         // logic
     }
     ```
-
 * 函数调用如果超过了 100 个字符，请按每行一个参数的方式缩进，例子如下：
 
     ```java
@@ -112,14 +111,9 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
     ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
     ```
 
-* import 顺序：按库的类型，分成多个section，每个section之间空行分割，section内部按字母序排列，见下面的例子。
+* import 顺序
 
-    ```text
-    1. import java/javax相关库
-    2. import 第三方库
-    3. import 当前库的class 和 interface等
-    4. import static
-    ```
+分成几个section，每个section之间空行分割，section内部按字母序排列。
 
     ```java
     import java.*
@@ -127,6 +121,7 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
 
     import thirdparty-libraries
 
+    //import 当前库的class 和 interface等，
     import com.webank.weid.*
 
     import static *
@@ -140,7 +135,7 @@ SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通�
 
 * Solidity 因为在函数申明的结尾处可以有 modifier 等关键字，所以遵循 Solidity 本身的规范。
 
-    注：soliditiy 因为 solidity 代码规范，所以函数的左括号是在跟 “function” 在同级，而不是放在“上一行”（这一点跟 JAVA 不一致）。
+    注：soliditiy 因为 solidity 代码规范，所以函数的左括号是在跟 “function” 在同级，而不是放在“上一行”（这一点跟 JAVA 不一致）
 
 ```javascript
 // solidity 的例子
@@ -169,8 +164,8 @@ int ret = thisFunctionCallIsReallyLong(
 
 * 以上面列出的规范优先，其余遵守 [Solidity 代码规范](https://solidity.readthedocs.io/en/latest/style-guide.html)。
 
-* 智能合约最佳实践： [smart-contract-best-practices](https://github.com/ConsenSys/smart-contract-best-practices)。
+* 智能合约最佳实践： [smart-contract-best-practices](https://github.com/ConsenSys/smart-contract-best-practices)
 
-* 智能合约静态扫描工具： [Linter-for-Solidity](https://github.com/duaraghav8/Solium)。
+* 智能合约静态扫描工具： [Linter-for-Solidity](https://github.com/duaraghav8/Solium)
 
 ---
