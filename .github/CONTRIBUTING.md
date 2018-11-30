@@ -33,7 +33,7 @@
 
 #### 测试
 
-所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以在修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](https://weidentity.readthedocs.io/zh_CN/develop/docs/how-to-run-unit-test.html)”。
+所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](https://weidentity.readthedocs.io/zh_CN/develop/docs/how-to-run-unit-test.html)”。
 
 #### Commit Messages
 
