@@ -35,7 +35,7 @@ source_parsers = {
 }
 
 # The short X.Y version
-version = '1.0.0'
+version = ''
 # The full version, including alpha/beta/rc tags
 release = version
 
