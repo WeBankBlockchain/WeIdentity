@@ -17,3 +17,7 @@
 .tables tbody tr:nth-child(odd) td{
   background:#f3f6f6;
 }
+
+.rst-content img{
+  margin:5px;
+}

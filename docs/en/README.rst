@@ -28,7 +28,7 @@ The design goals of WeIdentity DID:
 .. raw:: html
 
     <embed>
-      <table border='1' style="width:100%;border-collapse:collapse class='tables'">
+      <table border='1' style="border-collapse:collapse" class='tables'>
          <tr>
             <th width="100">Objective</th>
             <th>Description</th>
@@ -96,7 +96,7 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
             <th width="40%">Status</th>
          </tr>
          <tr>
-            <td>JAVA SDK</td>
+            <td style="text-align:center">JAVA SDK</td>
             <td>
                <ul>
                  <li><a href="https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-installation.html">Installation and Deployment Guide (Chinese Version)</a></li>
@@ -104,13 +104,13 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
                </ul>
             </td>
             <td>
+               <a href="https://travis-ci.org/webankopen/weidentity-java-sdk"><img src="https://travis-ci.org/webankopen/weidentity-java-sdk.svg?branch=master" /></a>
+               <a href="https://github.com/webankopen/weidentity-java-sdk/releases/latest"><img src="https://img.shields.io/github/release/webankopen/weidentity-java-sdk.svg" /></a>
+               <a href="https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%22weidentity-java-sdk%22"><img src="https://img.shields.io/maven-central/v/com.webank/weidentity-java-sdk.svg?label=Maven%20Central" /></a>
                <a href="https://app.codacy.com/app/webankadmin/weidentity-java-sdk?utm_source=github.com&utm_medium=referral&utm_content=webankopen/weidentity-java-sdk&utm_campaign=Badge_Grade_Dashboard"><img src="https://api.codacy.com/project/badge/Grade/9fc044b36fff4985bd69f1232380d5ee" /></a>
                <a href="https://www.codefactor.io/repository/github/webankopen/weidentity-java-sdk"><img src="https://www.codefactor.io/repository/github/webankopen/weidentity-java-sdk/badge" /></a>
-               <a href="https://www.gnu.org/licenses/lgpl-3.0"><img src="https://img.shields.io/badge/license-GNU%20LGPL%20v3.0-blue.svg" /></a>
-               <a href="https://travis-ci.org/webankopen/weidentity-java-sdk"><img src="https://travis-ci.org/webankopen/weidentity-java-sdk.svg?branch=master" /></a>
                <a href="https://codecov.io/gh/webankopen/weidentity-java-sdk"><img src="https://codecov.io/gh/webankopen/weidentity-java-sdk/branch/master/graph/badge.svg" /></a>
-               <a href="https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%22weidentity-java-sdk%22"><img src="https://img.shields.io/maven-central/v/com.webank/weidentity-java-sdk.svg?label=Maven%20Central" /></a>
-               <a href="https://github.com/webankopen/weidentity-java-sdk/releases/latest"><img src="https://img.shields.io/github/release/webankopen/weidentity-java-sdk.svg" /></a>
+               <a href="https://www.gnu.org/licenses/lgpl-3.0"><img src="https://img.shields.io/badge/license-GNU%20LGPL%20v3.0-blue.svg" /></a>
             </td>
          </tr>
       </table>
