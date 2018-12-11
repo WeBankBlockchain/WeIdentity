@@ -22,5 +22,5 @@ WeIdentity文档
    docs/use-cases.rst
    docs/weidentity-spec.rst
    docs/weidentity-installation.rst
-   docs/weidentity-java-sdk-doc.rst
+    WeIdentity JAVA SDK文档 <https://weid-java-sdk.readthedocs.io/zh_CN/latest/>
    docs/faq.md
