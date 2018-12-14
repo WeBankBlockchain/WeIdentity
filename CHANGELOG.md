@@ -1,3 +1,13 @@
+### V1.0.2 (2018-12-14)
+
+* Features:
+1. remove codecov patch check
+2. modify FISCO-BCOS sdk ca.crt and client.keystore file
+3. use correct badge url from WeBankFinTech
+
+* Bugfixes:
+1. fix issues found by codacy.
+
 ### V1.0.1 (2018-11-30)
 
 * 新增功能：
