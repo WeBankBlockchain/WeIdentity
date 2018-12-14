@@ -1,12 +1,12 @@
 # WeIdentity JAVA SDK
 
-[![Codacy](https://api.codacy.com/project/badge/Grade/9fc044b36fff4985bd69f1232380d5ee)](https://app.codacy.com/app/webankadmin/weidentity-java-sdk?utm_source=github.com&utm_medium=referral&utm_content=webankopen/weidentity-java-sdk&utm_campaign=Badge_Grade_Dashboard)
-[![CodeFactor](https://www.codefactor.io/repository/github/webankopen/weidentity-java-sdk/badge)](https://www.codefactor.io/repository/github/webankopen/weidentity-java-sdk)
+[![Codacy](https://api.codacy.com/project/badge/Grade/9fc044b36fff4985bd69f1232380d5ee)](https://app.codacy.com/project/webankadmin/weidentity-java-sdk/dashboard)
+[![CodeFactor](https://www.codefactor.io/repository/github/WeBankFinTech/weidentity-java-sdk/badge)](https://www.codefactor.io/repository/github/WeBankFinTech/weidentity-java-sdk)
 [![License](https://img.shields.io/badge/license-GNU%20LGPL%20v3.0-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
-[![Build Status](https://travis-ci.org/webankopen/weidentity-java-sdk.svg?branch=master)](https://travis-ci.org/webankopen/weidentity-java-sdk)
-[![codecov](https://codecov.io/gh/webankopen/weidentity-java-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/webankopen/weidentity-java-sdk)
+[![Build Status](https://travis-ci.org/WeBankFinTech/weidentity-java-sdk.svg?branch=master)](https://travis-ci.org/WeBankFinTech/weidentity-java-sdk)
+[![codecov](https://codecov.io/gh/WeBankFinTech/weidentity-java-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/WeBankFinTech/weidentity-java-sdk)
 [![Maven Central](https://img.shields.io/maven-central/v/com.webank/weidentity-java-sdk.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%22weidentity-java-sdk%22)
-[![Latest release](https://img.shields.io/github/release/webankopen/weidentity-java-sdk.svg)](https://github.com/webankopen/weidentity-java-sdk/releases/latest)
+[![Latest release](https://img.shields.io/github/release/WeBankFinTech/weidentity-java-sdk.svg)](https://github.com/WeBankFinTech/weidentity-java-sdk/releases/latest)
 
 ---
 
@@ -22,7 +22,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 
 ## 关于
 
-* WeIdentity Project对应的合约代码。需配合FISCO-BCOS和weidentity-java-sdk使用，更多详细信息详见: [WeIdentity Project](https://github.com/webankopen/WeIdentity)
+* WeIdentity Project对应的合约代码。需配合FISCO-BCOS和weidentity-java-sdk使用，更多详细信息详见: [WeIdentity Project](https://github.com/WeBankFinTech/WeIdentity)
 
 ## 联系我们
 
