@@ -55,7 +55,7 @@ function compile_contract()
         local item=$(basename ${itemfile} ".sol")
         ${SOLC} --abi --bin -o ${output_dir} ${itemfile}
         echo "${output_dir}/${item}.bin, ${output_dir}, ${package} "
-        ${WEB3J} solidity generate  ${output_dir}"/"${item}".bin" ${output_dir}"/"${item}".abi" -o ${output_dir} -p ${package} 
+        ${WEB3J} solidity generate  "${output_dir}/${item}.bin" "${output_dir}/${item}.abi" -o ${output_dir} -p ${package} 
     done
 }
 
