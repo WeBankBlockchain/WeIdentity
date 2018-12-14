@@ -1,6 +1,5 @@
 #!/bin/bash
-java_source_code_dir=`pwd`
-temp_file=`date +%s`".temp"
+java_source_code_dir=$(pwd)
 
 app_xml_config=${java_source_code_dir}/src/main/resources/applicationContext.xml
 app_xml_config_tpl=${java_source_code_dir}/src/main/resources/applicationContext.xml.tpl
