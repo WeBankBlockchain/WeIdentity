@@ -55,9 +55,9 @@ gradle
 """"""""""
 
 
-* `WeIdentity JAVA SDK <https://github.com/webankopen/weidentity-java-sdk.git>`_\ :raw-html-m2r:`<br>`
+* `WeIdentity JAVA SDK <https://github.com/WeBankFinTech/weidentity-java-sdk.git>`_\ :raw-html-m2r:`<br>`
   建议下载最新版本的release
-* `WeIdentity 智能合约 <https://github.com/webankopen/weidentity-contract.git>`_\ :raw-html-m2r:`<br>`
+* `WeIdentity 智能合约 <https://github.com/WeBankFinTech/weidentity-contract.git>`_\ :raw-html-m2r:`<br>`
   建议下载最新版本的release
 
 2.拷贝「WeIdentity智能合约」源码到特定目录

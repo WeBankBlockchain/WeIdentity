@@ -8,11 +8,11 @@
 
 ## 1. 发现 bug
 
-使用过程中遇到的任何问题，可以查看 [FAQ](../docs/zh_CN/docs/faq.md) ，或者给我们提 [issue](https://github.com/webankopen/WeIdentity/issues)。
+使用过程中遇到的任何问题，可以查看 [FAQ](../docs/zh_CN/docs/faq.md) ，或者给我们提 [issue](https://github.com/WeBankFinTech/WeIdentity/issues)。
 
 ## 2. 优化建议
 
-有任何优化建议，欢迎给我们提 [issue](https://github.com/webankopen/WeIdentity/issues)。
+有任何优化建议，欢迎给我们提 [issue](https://github.com/WeBankFinTech/WeIdentity/issues)。
 
 ---
 
@@ -24,8 +24,8 @@
 
 #### 分支管理
 
-代码类工程我们使用 [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) 进行分支管理。包括这些工程： [weidentity-java-sdk](https://github.com/webankopen/weidentity-java-sdk)， [weidentity-contract](https://github.com/webankopen/weidentity-contract)。  
-文档类工程我们使用 [github-flow](http://scottchacon.com/2011/08/31/github-flow.html) 进行分支管理。包括这些工程： [WeIdentity](https://github.com/webankopen/WeIdentity)。
+代码类工程我们使用 [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) 进行分支管理。包括这些工程： [weidentity-java-sdk](https://github.com/WeBankFinTech/weidentity-java-sdk)， [weidentity-contract](https://github.com/WeBankFinTech/weidentity-contract)。  
+文档类工程我们使用 [github-flow](http://scottchacon.com/2011/08/31/github-flow.html) 进行分支管理。包括这些工程： [WeIdentity](https://github.com/WeBankFinTech/WeIdentity)。
 
 #### 代码规范
 
@@ -55,7 +55,7 @@ data & logic contracts.
 
 ### 3.2 流程
 
-1. Fork 希望提交代码修改的 repository 。例如，如果想要修改 [weidentity-java-sdk](https://github.com/webankopen/weidentity-java-sdk) ，则 Fork 这个 repository。
+1. Fork 希望提交代码修改的 repository 。例如，如果想要修改 [weidentity-java-sdk](https://github.com/WeBankFinTech/weidentity-java-sdk) ，则 Fork 这个 repository。
 
 2. 创建新的分支，例如分支取名为 `feature/add-verfiy-logic` （分支名请使用 `feature/` 开头）。
 
@@ -69,6 +69,6 @@ data & logic contracts.
 
 5. Push 这个分支 `feature/verfiy-logic-bug-fix` 到自己的 repository。
 
-6. 提交 Pull Request 到 repository 的 `develop` 分支， 并描述您的修改。例如描述修复的 bug，或者描述新增的功能（如果是较大的修改，建议在代码实现前提交一个[优化建议issue](https://github.com/webankopen/WeIdentity/issues)，提前描述自己的设计）。并标记任意一个 maintainer 进行 review。
+6. 提交 Pull Request 到 repository 的 `develop` 分支， 并描述您的修改。例如描述修复的 bug，或者描述新增的功能（如果是较大的修改，建议在代码实现前提交一个[优化建议issue](https://github.com/WeBankFinTech/WeIdentity/issues)，提前描述自己的设计）。并标记任意一个 maintainer 进行 review。
 
 7. maintainer 完成review，合并您的 Pull Request 到 `develop` 分支，然后我们会在下一个发布时间点将其合并到 `master` 分支。感谢您的贡献。
