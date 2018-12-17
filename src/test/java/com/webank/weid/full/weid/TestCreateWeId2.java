@@ -19,7 +19,21 @@
 
 package com.webank.weid.full.weid;
 
+import java.util.List;
+import java.util.concurrent.Future;
+
+import mockit.Mock;
+import mockit.MockUp;
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.bcos.web3j.tx.Contract;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
@@ -29,21 +43,6 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import mockit.Mock;
-import mockit.MockUp;
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.bcos.web3j.tx.Contract;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * a parametric createWeId method for testing WeIdService.
@@ -52,18 +51,19 @@ import org.junit.Test;
  *
  */
 public class TestCreateWeId2 extends TestBaseServcie {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestCreateWeId2.class);
 
     /**
      * case: create success.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase1() throws Exception {
+    public void testCreateWeIdCase1() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -73,13 +73,12 @@ public class TestCreateWeId2 extends TestBaseServcie {
     /**
      * case: createWeIdArgs is null.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase2() throws Exception {
+    public void testCreateWeIdCase2() {
 
         ResponseData<String> response = weIdService.createWeId(null);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -89,16 +88,15 @@ public class TestCreateWeId2 extends TestBaseServcie {
     /**
      * case: publicKey is null.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase3() throws Exception {
+    public void testCreateWeIdCase3() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.setPublicKey(null);
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_INVALID.getCode(),
@@ -109,16 +107,15 @@ public class TestCreateWeId2 extends TestBaseServcie {
     /**
      * case: publicKey is Non integer string.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase4() throws Exception {
+    public void testCreateWeIdCase4() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.setPublicKey("abc");
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED.getCode(),
@@ -129,16 +126,15 @@ public class TestCreateWeId2 extends TestBaseServcie {
     /**
      * case: weIdPrivateKey is null.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase5() throws Exception {
+    public void testCreateWeIdCase5() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.setWeIdPrivateKey(null);
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
@@ -149,16 +145,15 @@ public class TestCreateWeId2 extends TestBaseServcie {
     /**
      * case: privateKey is null.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase6() throws Exception {
+    public void testCreateWeIdCase6() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.getWeIdPrivateKey().setPrivateKey(null);
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
@@ -169,16 +164,15 @@ public class TestCreateWeId2 extends TestBaseServcie {
     /**
      * case: privateKey is invalid.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase7() throws Exception {
+    public void testCreateWeIdCase7() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.getWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxx");
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED.getCode(),
@@ -189,17 +183,16 @@ public class TestCreateWeId2 extends TestBaseServcie {
     /**
      * case: privateKey and publicKey misMatch.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase8() throws Exception {
+    public void testCreateWeIdCase8() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
-        String[] pk = TestBaseUtil.createEcKeyPair();
-        createWeIdArgs.getWeIdPrivateKey().setPrivateKey(pk[1]);
+        PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
+        createWeIdArgs.getWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED.getCode(),
@@ -211,23 +204,21 @@ public class TestCreateWeId2 extends TestBaseServcie {
      * case: Simulation returns null when invoking the getWeIdAttributeChangedEvents
      *       method.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase9() throws Exception {
+    public void testCreateWeIdCase9() {
 
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt)
-                throws Exception {
+                TransactionReceipt transactionReceipt) {
                 return null;
             }
         };
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
@@ -241,82 +232,44 @@ public class TestCreateWeId2 extends TestBaseServcie {
      * case: Simulation throws an InterruptedException when calling the
      *       getWeIdAttributeChangedEvents method.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase10() throws Exception {
+    public void testCreateWeIdCase10() {
 
-        final MockUp<Future<TransactionReceipt>> mockFuture =
-            new MockUp<Future<TransactionReceipt>>() {
-                @Mock
-                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
-                    throws Exception {
-                    throw new InterruptedException();
-                }
-            };
-
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public Future<TransactionReceipt> setAttribute(
-                Address identity,
-                Bytes32 key,
-                DynamicBytes value,
-                Int256 updated)
-                throws Exception {
-                return mockFuture.getMockInstance();
-            }
-        };
-
-        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
-        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
-        BeanUtil.print(response);
-
-        mockTest.tearDown();
-        mockFuture.tearDown();
+        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
+        
+        ResponseData<String> response = createWeIdForMock(mockFuture);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
     }
 
-    /**
-     * case: Simulation throws an TimeoutException when calling the
-     *       getWeIdAttributeChangedEvents method.
-     *
-     * @throws Exception  may be throw Exception
-     */
-    @Test
-    public void testCreateWeIdCase11() throws Exception {
-
-        final MockUp<Future<TransactionReceipt>> mockFuture =
-            new MockUp<Future<TransactionReceipt>>() {
-                @Mock
-                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
-                    throws Exception {
-                    throw new TimeoutException();
-                }
-            };
-
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public Future<TransactionReceipt> setAttribute(
-                Address identity,
-                Bytes32 key,
-                DynamicBytes value,
-                Int256 updated)
-                throws Exception {
-                return mockFuture.getMockInstance();
-            }
-        };
+    private ResponseData<String> createWeIdForMock(MockUp<Future<?>> mockFuture) {
+        
+        MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
         mockFuture.tearDown();
+        return response;
+    }
+
+    /**
+     * case: Simulation throws an TimeoutException when calling the
+     *       getWeIdAttributeChangedEvents method.
+     *
+     */
+    @Test
+    public void testCreateWeIdCase11() {
+
+        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
+
+        ResponseData<String> response = createWeIdForMock(mockFuture);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -327,23 +280,23 @@ public class TestCreateWeId2 extends TestBaseServcie {
      * case: Simulation throws an NullPointerException when calling the
      *       getWeIdAttributeChangedEvents method.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase12() throws Exception {
+    public void testCreateWeIdCase12() {
 
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
                 TransactionReceipt transactionReceipt)
-                throws Exception {
+                throws NullPointerException {
+                
                 throw new NullPointerException();
             }
         };
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
@@ -356,10 +309,9 @@ public class TestCreateWeId2 extends TestBaseServcie {
      * case: Simulation throws an PrivateKeyIllegalException when calling the
      *       reloadContract method.
      *  
-     * @throws Exception   may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase13() throws Exception {
+    public void testCreateWeIdCase13() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
 
@@ -367,12 +319,13 @@ public class TestCreateWeId2 extends TestBaseServcie {
             @Mock
             public Contract reloadContract(String contractAddress, String privateKey, Class<?> cls)
                 throws PrivateKeyIllegalException {
+                
                 throw new PrivateKeyIllegalException();
             }
         };
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
@@ -385,21 +338,20 @@ public class TestCreateWeId2 extends TestBaseServcie {
     /**
      * case: create again.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testCreateWeIdCase14() throws Exception {
+    public void testCreateWeIdCase14() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
 
         ResponseData<String> response1 = weIdService.createWeId(createWeIdArgs);
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(response1);
 
         Assert.assertEquals(ErrorCode.WEID_ALREADY_EXIST.getCode(),

@@ -19,13 +19,9 @@
 
 package com.webank.weid;
 
-import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.rpc.AuthorityIssuerService;
-import com.webank.weid.rpc.CptService;
-import com.webank.weid.rpc.CredentialService;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
+import java.io.IOException;
 import java.math.BigInteger;
+
 import org.bcos.contract.tools.ToolConf;
 import org.junit.After;
 import org.junit.Assert;
@@ -34,6 +30,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import com.webank.weid.rpc.AuthorityIssuerService;
+import com.webank.weid.rpc.CptService;
+import com.webank.weid.rpc.CredentialService;
+import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.BaseService;
 
 /**
  * Test base class.
@@ -59,16 +61,22 @@ public abstract class BaseTest extends BaseService {
 
     @Autowired
     protected ToolConf toolConf;
+    
+    /**
+     * the private key of sdk is a BigInteger,which needs to be used
+     * when registering authority.
+     * 
+     */
+    protected String privateKey;
 
     /**
      *  initialization some for test.
      *  
-     * @throws Exception may be throw Exception
      */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
-        TestBaseUtil.privKey = new BigInteger(toolConf.getPrivKey(), 16).toString();
+        privateKey = new BigInteger(toolConf.getPrivKey(), 16).toString();
 
         testInit();
     }
@@ -76,10 +84,9 @@ public abstract class BaseTest extends BaseService {
     /**
      *  tearDown some for test.
      *  
-     * @throws Exception may be throw Exception
      */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
         authorityIssuerService = null;
         cptService = null;
@@ -90,15 +97,15 @@ public abstract class BaseTest extends BaseService {
         testFinalize();
     }
 
-    public void testInit() throws Exception {
+    public void testInit() {
         Assert.assertTrue(true);
     }
 
-    public void testFinalize() throws Exception {
+    public void testFinalize() {
         Assert.assertTrue(true);
     }
 
-    public int getBlockNumber() throws Exception {
+    public int getBlockNumber() throws IOException {
         return super.getWeb3j().ethBlockNumber().send().getBlockNumber().intValue();
     }
 }

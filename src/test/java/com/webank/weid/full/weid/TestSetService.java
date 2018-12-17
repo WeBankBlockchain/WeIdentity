@@ -19,7 +19,19 @@
 
 package com.webank.weid.full.weid;
 
+import java.util.List;
+import java.util.concurrent.Future;
+
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
@@ -27,19 +39,6 @@ import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * setService method for testing WeIdService.
@@ -48,19 +47,20 @@ import org.junit.Test;
  *
  */
 public class TestSetService extends TestBaseServcie {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestSetService.class);
 
     /**
      * case: set success.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase1() throws Exception {
+    public void testSetServiceCase1() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -68,18 +68,17 @@ public class TestSetService extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is blank.
+     * case: WeIdentity DID is blank.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase2() throws Exception {
+    public void testSetServiceCase2() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setWeId(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
@@ -87,18 +86,17 @@ public class TestSetService extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is bad format.
+     * case: WeIdentity DID is bad format.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase3() throws Exception {
+    public void testSetServiceCase3() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setWeId("di:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac73");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
@@ -106,18 +104,17 @@ public class TestSetService extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is not exists.
+     * case: WeIdentity DID is not exists.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase4() throws Exception {
+    public void testSetServiceCase4() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setWeId("did:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac7a");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -128,16 +125,15 @@ public class TestSetService extends TestBaseServcie {
     /**
      * case: type is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase5() throws Exception {
+    public void testSetServiceCase5() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setType(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -147,17 +143,16 @@ public class TestSetService extends TestBaseServcie {
     /**
      * case: type too long.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase6() throws Exception {
+    public void testSetServiceCase6() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs
             .setType("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
@@ -167,16 +162,15 @@ public class TestSetService extends TestBaseServcie {
     /**
      * case: serviceEndpoint is null (or " ").
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase7() throws Exception {
+    public void testSetServiceCase7() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setServiceEndpoint(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -186,16 +180,15 @@ public class TestSetService extends TestBaseServcie {
     /**
      * case: userWeIdPrivateKey is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase8() throws Exception {
+    public void testSetServiceCase8() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setUserWeIdPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -205,16 +198,15 @@ public class TestSetService extends TestBaseServcie {
     /**
      * case: privateKey is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase9() throws Exception {
+    public void testSetServiceCase9() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.getUserWeIdPrivateKey().setPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
@@ -223,19 +215,18 @@ public class TestSetService extends TestBaseServcie {
     }
 
     /**
-     * case: the private key belongs to other weIdentity DID.
+     * case: the private key belongs to other WeIdentity DID.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase10() throws Exception {
+    public void testSetServiceCase10() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
         setServiceArgs.setUserWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -246,16 +237,15 @@ public class TestSetService extends TestBaseServcie {
     /**
      * case: the private key does not match the current weId.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase11() throws Exception {
+    public void testSetServiceCase11() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.getUserWeIdPrivateKey().setPrivateKey("11111111111111");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -264,20 +254,19 @@ public class TestSetService extends TestBaseServcie {
     }
 
     /**
-     * case: privateKey and privateKey of weIdentity DID do not match.
+     * case: privateKey and privateKey of WeIdentity DID do not match.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase12() throws Exception {
+    public void testSetServiceCase12() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        String[] pk = TestBaseUtil.createEcKeyPair();
-        setServiceArgs.getUserWeIdPrivateKey().setPrivateKey(pk[1]);
+        PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
+        setServiceArgs.getUserWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -286,18 +275,17 @@ public class TestSetService extends TestBaseServcie {
     }
 
     /**
-     * case: other weIdentity DID.
+     * case: other WeIdentity DID.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase13() throws Exception {
+    public void testSetServiceCase13() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setWeId(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -309,84 +297,49 @@ public class TestSetService extends TestBaseServcie {
      * case: Simulation throws an InterruptedException when calling the
      *       setService method.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase14() throws Exception {
+    public void testSetServiceCase14() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        final MockUp<Future<TransactionReceipt>> mockFuture =
-            new MockUp<Future<TransactionReceipt>>() {
-                @Mock
-                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
-                    throws Exception {
-                    throw new InterruptedException();
-                }
-            };
+        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public Future<TransactionReceipt> setAttribute(
-                Address identity,
-                Bytes32 key,
-                DynamicBytes value,
-                Int256 updated)
-                throws Exception {
-                return mockFuture.getMockInstance();
-            }
-        };
-
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
-        BeanUtil.print(response);
-
-        mockTest.tearDown();
-        mockFuture.tearDown();
+        ResponseData<Boolean> response = setAttributeForMock(setServiceArgs, mockFuture);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
-    /**
-     * case: Simulation throws an TimeoutException when calling the
-     *       setService method.
-     *
-     * @throws Exception may be throw Exception
-     */
-    @Test
-    public void testSetServiceCase15() throws Exception {
-
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
-
-        final MockUp<Future<TransactionReceipt>> mockFuture =
-            new MockUp<Future<TransactionReceipt>>() {
-                @Mock
-                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
-                    throws Exception {
-                    throw new TimeoutException();
-                }
-            };
-
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public Future<TransactionReceipt> setAttribute(
-                Address identity,
-                Bytes32 key,
-                DynamicBytes value,
-                Int256 updated)
-                throws Exception {
-                return mockFuture.getMockInstance();
-            }
-        };
+    private ResponseData<Boolean> setAttributeForMock(
+        SetServiceArgs setServiceArgs,
+        MockUp<Future<?>> mockFuture) {
+        
+        MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
         mockFuture.tearDown();
+        return response;
+    }
+
+    /**
+     * case: Simulation throws an TimeoutException when calling the
+     *       setService method.
+     *
+     */
+    @Test
+    public void testSetServiceCase15() {
+
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+
+        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
+
+        ResponseData<Boolean> response = setAttributeForMock(setServiceArgs, mockFuture);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -397,24 +350,24 @@ public class TestSetService extends TestBaseServcie {
      * case: Simulation throws an NullPointerException when calling the
      *       setService method.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase16() throws Exception {
+    public void testSetServiceCase16() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
                 TransactionReceipt transactionReceipt)
-                throws Exception {
+                throws NullPointerException {
+                
                 throw new NullPointerException();
             }
         };
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
@@ -426,13 +379,12 @@ public class TestSetService extends TestBaseServcie {
     /**
      * case: setServiceArgs is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase17() throws Exception {
+    public void testSetServiceCase17() {
 
         ResponseData<Boolean> response = weIdService.setService(null);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -442,16 +394,15 @@ public class TestSetService extends TestBaseServcie {
     /**
      * case: private key is invalid.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetServiceCase18() throws Exception {
+    public void testSetServiceCase18() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeId);
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.getUserWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),

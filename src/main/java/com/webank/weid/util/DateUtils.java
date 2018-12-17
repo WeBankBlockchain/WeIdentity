@@ -120,22 +120,6 @@ public class DateUtils {
     }
 
     /**
-     * Checks if is valid long date string.
-     *
-     * @param dateString the date string
-     * @return true, if is valid long date string
-     */
-    public static boolean isValidLongDateString(String dateString) {
-        Long parsed;
-        try {
-            parsed = Long.parseLong(dateString);
-        } catch (Exception ex) {
-            return false;
-        }
-        return (parsed.intValue() >= 0);
-    }
-
-    /**
      * Get current timestamp in Int256 type.
      *
      * @return the current time stamp int 256

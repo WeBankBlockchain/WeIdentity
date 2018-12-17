@@ -19,9 +19,26 @@
 
 package com.webank.weid.full;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.DynamicBytes;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.BaseTest;
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -36,9 +53,6 @@ import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.WeIdUtils;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Assert;
 
 /**
  * testing basic method classes.
@@ -48,17 +62,20 @@ import org.junit.Assert;
  */
 public abstract class TestBaseServcie extends BaseTest {
 
+    /**
+     * log4j.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(TestBaseServcie.class);
+
     protected static List<String> issuerPrivateList = new ArrayList<String>();
 
     protected static boolean isInitIssuer = false;
 
-    protected static CreateWeIdDataResult createWeId = null;
+    protected static CreateWeIdDataResult createWeIdResult = null;
 
     protected static CreateWeIdDataResult createWeIdNew = null;
 
-    protected static CreateWeIdDataResult createWeIdForGetDoc = null;
-
-    protected static CreateWeIdDataResult createWeIdWithSetAttr = null;
+    protected static CreateWeIdDataResult createWeIdResultWithSetAttr = null;
 
     protected static CreateCredentialArgs createCredentialArgs = null;
 
@@ -66,44 +83,49 @@ public abstract class TestBaseServcie extends BaseTest {
 
     protected static CptBaseInfo cptBaseInfo = null;
 
-    /** 
+
+    /**
      * initializing related services.
      */
     @Override
-    public void testInit() throws Exception {
+    public void testInit() {
 
         if (!isInitIssuer) {
             try {
-                issuerPrivateList.add(TestBaseUtil.privKey);
+                issuerPrivateList.add(privateKey);
                 initIssuer("org1.txt");
                 isInitIssuer = true;
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                logger.error("initIssuer error",e);
+                Assert.assertTrue(false);
             }
         }
 
-        if (createWeId == null) {
-            createWeId = this.createWeId();
+        if (null == createWeIdResult) {
+            createWeIdResult = this.createWeId();
         }
-        if (createWeIdWithSetAttr == null) {
-            createWeIdWithSetAttr = this.createWeIdWithSetAttr();
+        if (null == createWeIdResultWithSetAttr) {
+            createWeIdResultWithSetAttr = this.createWeIdWithSetAttr();
         }
-        if (createWeIdNew == null) {
+        if (null == createWeIdNew) {
             createWeIdNew = this.createWeId();
         }
-        if (createWeIdForGetDoc == null) {
-            createWeIdForGetDoc = this.createWeIdWithSetAttr();
+        if (null == createCredentialArgs) {
+            registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeIdResultWithSetAttr);
+            createCredentialArgs =
+                TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr);
+            cptBaseInfo = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
+            createCredentialArgs.setCptId(cptBaseInfo.getCptId());
         }
     }
 
     /**
-     * according to the analysis of the private key to create weIdentity DID,and
-     * registered as an authority, and its private key is recorded.
+     * according to the analysis of the private key to create WeIdentity DID,and registered as an
+     * authority, and its private key is recorded.
      * 
      * @param fileName fileName
-     * @throws Exception  may be throw Exception
      */
-    private void initIssuer(String fileName) throws Exception {
+    private void initIssuer(String fileName) {
 
         String[] pk = TestBaseUtil.resolvePk(fileName);
 
@@ -113,7 +135,7 @@ public abstract class TestBaseServcie extends BaseTest {
         ResponseData<String> response1 = weIdService.createWeId(createWeIdArgs1);
         if (response1.getErrorCode().intValue() != ErrorCode.WEID_ALREADY_EXIST.getCode()
             && response1.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-            throw new RuntimeException(response1.getErrorMessage());
+            Assert.assertTrue(false);
         }
 
         String weId = WeIdUtils.convertPublicKeyToWeId(pk[0]);
@@ -132,21 +154,21 @@ public abstract class TestBaseServcie extends BaseTest {
         createWeId.setWeId(weId);
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        System.out.println("\nregisterAuthorityIssuer result:");
+        logger.info("registerAuthorityIssuer result:");
         BeanUtil.print(response);
 
         if (response.getErrorCode()
             .intValue() != ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST.getCode()
             && response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-            throw new RuntimeException(response1.getErrorMessage());
+            Assert.assertTrue(false);
         }
 
         issuerPrivateList.add(pk[1]);
-        System.out.println("initIssuer success");
+        logger.info("initIssuer success");
     }
 
     /**
@@ -158,7 +180,7 @@ public abstract class TestBaseServcie extends BaseTest {
     protected ResponseData<Boolean> verifyCredential(Credential credential) {
 
         ResponseData<Boolean> response = credentialService.verifyCredential(credential);
-        System.out.println("\nverifyCredentialWithSpecifiedPubKey result:");
+        logger.info("verifyCredentialWithSpecifiedPubKey result:");
         BeanUtil.print(response);
 
         return response;
@@ -174,7 +196,7 @@ public abstract class TestBaseServcie extends BaseTest {
 
         ResponseData<Credential> response =
             credentialService.createCredential(createCredentialArgs);
-        System.out.println("\ncreateCredential result:");
+        logger.info("createCredential result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -186,7 +208,7 @@ public abstract class TestBaseServcie extends BaseTest {
     /**
      * cpt register.
      * 
-     * @param createWeId  createWeId
+     * @param createWeId createWeId
      * @param registerCptArgs registerCptArgs
      * @param isRegisterAuthorityIssuer isRegisterAuthorityIssuer
      * @return
@@ -196,7 +218,7 @@ public abstract class TestBaseServcie extends BaseTest {
         RegisterCptArgs registerCptArgs) {
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
-        System.out.println("\nregisterCpt result:");
+        logger.info("registerCpt result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -222,12 +244,11 @@ public abstract class TestBaseServcie extends BaseTest {
     }
 
     /**
-     * create weIdentity DID and registerAuthorityIssuer.
+     * create WeIdentity DID and registerAuthorityIssuer.
      * 
      * @return CreateWeIdDataResult
-     * @throws Exception may be throw Exception
      */
-    protected CreateWeIdDataResult registerAuthorityIssuer() throws Exception {
+    protected CreateWeIdDataResult registerAuthorityIssuer() {
 
         CreateWeIdDataResult createWeId = this.createWeId();
 
@@ -236,17 +257,17 @@ public abstract class TestBaseServcie extends BaseTest {
         return createWeId;
     }
 
-    /** 
+    /**
      * registerAuthorityIssuer default.
      */
     protected void registerAuthorityIssuer(CreateWeIdDataResult createWeId) {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        System.out.println("\nregisterAuthorityIssuer result:");
+        logger.info("registerAuthorityIssuer result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -254,7 +275,7 @@ public abstract class TestBaseServcie extends BaseTest {
     }
 
     /**
-     * create weIdentity DID and set Attribute default.
+     * create WeIdentity DID and set Attribute default.
      *
      * @return CreateWeIdDataResult
      */
@@ -262,30 +283,23 @@ public abstract class TestBaseServcie extends BaseTest {
 
         CreateWeIdDataResult createWeId = this.createWeId();
 
-        try {
-            this.setPublicKey(createWeId,
-                createWeId.getUserWeIdPublicKey().getPublicKey(),
-                createWeId.getWeId());
-            this.setAuthentication(createWeId,
-                createWeId.getUserWeIdPublicKey().getPublicKey(),
-                createWeId.getWeId());
-            this.setService(createWeId, TestData.serviceType, TestData.serviceEndpoint);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Assert.assertEquals(false, true);
-        }
+        this.setPublicKey(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
+            createWeId.getWeId());
+        this.setAuthentication(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
+            createWeId.getWeId());
+        this.setService(createWeId, TestData.serviceType, TestData.serviceEndpoint);
         return createWeId;
     }
 
     /**
-     * create weIdentity DID without set Attribute default.
+     * create WeIdentity DID without set Attribute default.
      * 
      * @return CreateWeIdDataResult
      */
     protected CreateWeIdDataResult createWeId() {
 
         ResponseData<CreateWeIdDataResult> createWeIdDataResult = weIdService.createWeId();
-        System.out.println("\ncreateWeId result:");
+        logger.info("createWeId result:");
         BeanUtil.print(createWeIdDataResult);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
@@ -301,10 +315,11 @@ public abstract class TestBaseServcie extends BaseTest {
      * @param createResult createResult
      * @param publicKey publicKey
      * @param owner owner
-     * @throws Exception Exception
      */
-    protected void setPublicKey(CreateWeIdDataResult createResult, String publicKey, String owner)
-        throws Exception {
+    protected void setPublicKey(
+        CreateWeIdDataResult createResult, 
+        String publicKey, 
+        String owner) {
 
         // setPublicKey for this WeId
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createResult);
@@ -312,7 +327,7 @@ public abstract class TestBaseServcie extends BaseTest {
         setPublicKeyArgs.setOwner(owner);
 
         ResponseData<Boolean> responseSetPub = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(responseSetPub);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetPub.getErrorCode().intValue());
@@ -325,21 +340,19 @@ public abstract class TestBaseServcie extends BaseTest {
      * @param createResult createResult
      * @param serviceType serviceType
      * @param serviceEnpoint serviceEnpoint
-     * @throws Exception may be throw Exception
      */
     protected void setService(
-        CreateWeIdDataResult createResult,
+        CreateWeIdDataResult createResult, 
         String serviceType,
-        String serviceEnpoint)
-        throws Exception {
+        String serviceEnpoint) {
 
-        // setService for this weIdentity DID
+        // setService for this WeIdentity DID
         SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createResult);
         setServiceArgs.setType(serviceType);
         setServiceArgs.setServiceEndpoint(serviceEnpoint);
 
         ResponseData<Boolean> responseSetSer = weIdService.setService(setServiceArgs);
-        System.out.println("\nsetService result:");
+        logger.info("setService result:");
         BeanUtil.print(responseSetSer);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetSer.getErrorCode().intValue());
@@ -352,25 +365,75 @@ public abstract class TestBaseServcie extends BaseTest {
      * @param createResult createResult
      * @param publicKey publicKey
      * @param owner owner
-     * @throws Exception may be throw Exception
      */
     protected void setAuthentication(
-        CreateWeIdDataResult createResult,
+        CreateWeIdDataResult createResult, 
         String publicKey,
-        String owner)
-        throws Exception {
+        String owner) {
 
-        // setAuthenticate for this weIdentity DID
+        // setAuthenticate for this WeIdentity DID
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createResult);
         setAuthenticationArgs.setOwner(owner);
         setAuthenticationArgs.setPublicKey(publicKey);
         ResponseData<Boolean> responseSetAuth =
             weIdService.setAuthentication(setAuthenticationArgs);
-        System.out.println("\nsetAuthentication result:");
+        logger.info("setAuthentication result:");
         BeanUtil.print(responseSetAuth);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetAuth.getErrorCode().intValue());
         Assert.assertEquals(true, responseSetAuth.getResult());
     }
+    
+    protected  MockUp<Future<?>> mockTimeoutFuture() {
+        return new MockUp<Future<?>>() {
+            @Mock
+            public Future<?> get(long timeout, TimeUnit unit)
+                throws TimeoutException {
+                        
+                throw new TimeoutException();
+            }
+        };
+    }
+ 
+    protected  MockUp<Future<?>> mockInterruptedFuture() {
+        return new MockUp<Future<?>>() {
+            @Mock
+            public Future<?> get(long timeout, TimeUnit unit)
+                throws InterruptedException {
+                
+                throw new InterruptedException();
+            }
+            
+            @Mock
+            public Future<?> get()
+                throws InterruptedException {
+                
+                throw new InterruptedException();
+            }
+        };
+    }
+    
+    protected  MockUp<Future<?>> mockReturnNullFuture() {
+        return new MockUp<Future<?>>() {
+            @Mock
+            public Future<?> get(long timeout, TimeUnit unit) {
+                return null;
+            }
+        };
+    }
+    
+    protected MockUp<WeIdContract> mockSetAttribute(MockUp<Future<?>> mockFuture) {
+        return new MockUp<WeIdContract>() {
+            @Mock
+            public Future<?> setAttribute(
+                Address identity,
+                Bytes32 key,
+                DynamicBytes value,
+                Int256 updated) {
+                return mockFuture.getMockInstance();
+            }
+        };
+    }
+            
 }

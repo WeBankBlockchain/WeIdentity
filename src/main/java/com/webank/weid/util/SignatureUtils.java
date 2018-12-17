@@ -20,6 +20,10 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
 
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
@@ -45,10 +49,11 @@ public class SignatureUtils {
     /**
      * Generate a new Key-pair.
      *
-     * @return the EC key pair
-     * @throws Exception the exception
      */
-    public static ECKeyPair createKeyPair() throws Exception {
+    public static ECKeyPair createKeyPair() 
+        throws InvalidAlgorithmParameterException, 
+        NoSuchAlgorithmException, 
+        NoSuchProviderException {
         return Keys.createEcKeyPair();
     }
 
@@ -58,10 +63,8 @@ public class SignatureUtils {
      * @param message the message
      * @param keyPair the key pair
      * @return SignatureData
-     * @throws Exception the exception
      */
-    public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair)
-        throws Exception {
+    public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair) {
         return Sign.signMessage(HashUtils.sha3(message.getBytes()), keyPair);
     }
 
@@ -72,10 +75,8 @@ public class SignatureUtils {
      * @param message the message
      * @param privateKeyString the private key string
      * @return SignatureData
-     * @throws Exception the exception
      */
-    public static Sign.SignatureData signMessage(String message, String privateKeyString)
-        throws Exception {
+    public static Sign.SignatureData signMessage(String message, String privateKeyString) {
         BigInteger privateKey = new BigInteger(privateKeyString);
         ECKeyPair keyPair = new ECKeyPair(privateKey, publicKeyFromPrivate(privateKey));
         return Sign.signMessage(HashUtils.sha3(message.getBytes()), keyPair);
@@ -87,10 +88,9 @@ public class SignatureUtils {
      * @param message the message
      * @param signatureData the signature data
      * @return publicKey
-     * @throws Exception the exception
      */
     public static BigInteger signatureToPublicKey(String message, Sign.SignatureData signatureData)
-        throws Exception {
+        throws SignatureException {
         return Sign.signedMessageToKey(HashUtils.sha3(message.getBytes()), signatureData);
     }
 
@@ -102,10 +102,12 @@ public class SignatureUtils {
      * simpleSignatureDeserialization.
      * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
      * @return true if yes, false otherwise
-     * @throws Exception the exception
      */
     public static boolean verifySignature(
-        String message, Sign.SignatureData signatureData, BigInteger publicKey) throws Exception {
+        String message, 
+        Sign.SignatureData signatureData, 
+        BigInteger publicKey) throws SignatureException {
+        
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
     }
@@ -115,9 +117,8 @@ public class SignatureUtils {
      *
      * @param privateKey the private key
      * @return publicKey
-     * @throws Exception the exception
      */
-    public static BigInteger publicKeyFromPrivate(BigInteger privateKey) throws Exception {
+    public static BigInteger publicKeyFromPrivate(BigInteger privateKey) {
         return Sign.publicKeyFromPrivate(privateKey);
     }
 
@@ -126,9 +127,8 @@ public class SignatureUtils {
      *
      * @param privateKey the private key
      * @return WeIdPrivateKey
-     * @throws Exception the exception
      */
-    public static ECKeyPair createKeyPairFromPrivate(BigInteger privateKey) throws Exception {
+    public static ECKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
         return ECKeyPair.create(privateKey);
     }
 
@@ -169,7 +169,7 @@ public class SignatureUtils {
      * @return the byte[]
      * @throws Exception the exception
      */
-    public static byte[] simpleKeyPairSerialization(ECKeyPair keyPair) throws Exception {
+    public static byte[] simpleKeyPairSerialization(ECKeyPair keyPair) {
         return Keys.serialize(keyPair);
     }
 
@@ -178,9 +178,8 @@ public class SignatureUtils {
      *
      * @param nonHexedBytes the non hexed bytes
      * @return the EC key pair
-     * @throws Exception the exception
      */
-    public static ECKeyPair simpleKeyPairDeserialization(byte[] nonHexedBytes) throws Exception {
+    public static ECKeyPair simpleKeyPairDeserialization(byte[] nonHexedBytes) {
         return Keys.deserialize(nonHexedBytes);
     }
 

@@ -19,6 +19,11 @@
 
 package com.webank.weid.demo;
 
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.AuthorityIssuer;
@@ -38,9 +43,6 @@ import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.WeIdService;
-import java.util.Date;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class DemoService {
@@ -189,7 +191,7 @@ public class DemoService {
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = new RegisterAuthorityIssuerArgs();
         registerAuthorityIssuerArgs.setAuthorityIssuer(authorityIssuerResult);
         registerAuthorityIssuerArgs.setWeIdPrivateKey(new WeIdPrivateKey());
-        registerAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey(DemoBase.privKey);
+        registerAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey(DemoBase.PRIVKEY);
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
@@ -209,7 +211,7 @@ public class DemoService {
         Integer cptId,
         String claim,
         long expirationDate)
-        throws Exception {
+        throws RuntimeException {
 
         CreateCredentialArgs args = new CreateCredentialArgs();
         args.setClaim(claim);

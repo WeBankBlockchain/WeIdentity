@@ -26,10 +26,10 @@ import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.junit.Assert;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * test DataTypetUtils.
@@ -38,13 +38,15 @@ import static org.junit.Assert.assertNotNull;
  *
  */
 public class TestDataTypetUtils {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestDataTypetUtils.class);
 
     @Test
     public void testBytesArrayToBytes32() {
 
         byte[] bytes1 = new byte[32];
         Bytes32 result = DataTypetUtils.bytesArrayToBytes32(bytes1);
-        assertNotNull(result);
+        Assert.assertNotNull(result);
     }
 
     @Test
@@ -52,7 +54,7 @@ public class TestDataTypetUtils {
 
         String str = "abcdefghijklmnopqrstuvwxyzABCDEF";// length is 32
         Bytes32 result = DataTypetUtils.stringToBytes32(str);
-        assertNotNull(result);
+        Assert.assertNotNull(result);
     }
 
     @Test
@@ -61,7 +63,7 @@ public class TestDataTypetUtils {
         String str = "abcdefghijklmnopqrstuvwxyzABCDEF";
         Bytes32 bytes32 = DataTypetUtils.stringToBytes32(str);
         byte[] result = DataTypetUtils.bytes32ToBytesArray(bytes32);
-        assertNotNull(result);
+        Assert.assertNotNull(result);
     }
 
     @Test
@@ -70,17 +72,17 @@ public class TestDataTypetUtils {
         String str = "abcdefghijklmnopqrstuvwxyzABCDEF";
         Bytes32 bytes32 = DataTypetUtils.stringToBytes32(str);
         String result = DataTypetUtils.bytes32ToString(bytes32);
-        assertEquals(result, str);
+        Assert.assertEquals(result, str);
 
         str = "";
         bytes32 = DataTypetUtils.stringToBytes32(str);
         result = DataTypetUtils.bytes32ToString(bytes32);
-        assertEquals(result, str);
+        Assert.assertEquals(result, str);
 
         str = " slfjds ljlfs ";
         bytes32 = DataTypetUtils.stringToBytes32(str);
         result = DataTypetUtils.bytes32ToString(bytes32);
-        assertEquals(result, str.trim());
+        Assert.assertEquals(result, str.trim());
     }
 
     @Test
@@ -89,17 +91,17 @@ public class TestDataTypetUtils {
         String str = "abcdefghijklmnopqrstuvwxyzABCDEF";// length is 32
         Bytes32 bytes32 = DataTypetUtils.stringToBytes32(str);
         String result = DataTypetUtils.bytes32ToStringWithoutTrim(bytes32);
-        assertEquals(result, str);
+        Assert.assertEquals(result, str);
 
         str = "";
         bytes32 = DataTypetUtils.stringToBytes32(str);
         result = DataTypetUtils.bytes32ToStringWithoutTrim(bytes32);
-        assertEquals(result.length(), 32);
+        Assert.assertEquals(result.length(), 32);
 
         str = " slfjds ljlfs ";
         bytes32 = DataTypetUtils.stringToBytes32(str);
         result = DataTypetUtils.bytes32ToStringWithoutTrim(bytes32);
-        assertEquals(result.length(), 32);
+        Assert.assertEquals(result.length(), 32);
     }
 
     @Test
@@ -108,12 +110,12 @@ public class TestDataTypetUtils {
         int n = 0;
         Uint256 result = DataTypetUtils.intToUint256(n);
         int m = DataTypetUtils.uint256ToInt(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
 
         n = 9999999;
         result = DataTypetUtils.intToUint256(n);
         m = DataTypetUtils.uint256ToInt(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
     }
 
     @Test
@@ -122,17 +124,17 @@ public class TestDataTypetUtils {
         int n = 0;
         Int256 result = DataTypetUtils.intToInt256(n);
         int m = DataTypetUtils.int256ToInt(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
 
         n = 9999999;
         result = DataTypetUtils.intToInt256(n);
         m = DataTypetUtils.int256ToInt(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
 
         n = -9999999;
         result = DataTypetUtils.intToInt256(n);
         m = DataTypetUtils.int256ToInt(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
     }
 
     @Test
@@ -141,17 +143,17 @@ public class TestDataTypetUtils {
         long n = 0L;
         Int256 result = DataTypetUtils.longToInt256(n);
         long m = DataTypetUtils.int256ToLong(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
 
         n = 999999999999999L;
         result = DataTypetUtils.longToInt256(n);
         m = DataTypetUtils.int256ToLong(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
 
         n = -999999999999999L;
         result = DataTypetUtils.longToInt256(n);
         m = DataTypetUtils.int256ToLong(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
     }
 
     @Test
@@ -163,7 +165,7 @@ public class TestDataTypetUtils {
 
         long[] array1 = DataTypetUtils.int256DynamicArrayToLongArray(result1);
         for (int i = 0; i < array.length; i++) {
-            assertEquals(array[i], array1[i]);
+            Assert.assertEquals(array[i], array1[i]);
         }
     }
 
@@ -176,8 +178,9 @@ public class TestDataTypetUtils {
 
         String[] array1 = DataTypetUtils.bytes32DynamicArrayToStringArrayWithoutTrim(result1);
         for (int i = 0; i < array.length; i++) {
-            System.out.println("---" + array1[i] + "---");
+            logger.info("---" + array1[i] + "---");
         }
+        Assert.assertNotNull(array1);
     }
 
     @Test
@@ -186,11 +189,11 @@ public class TestDataTypetUtils {
         int n = 0;
         Uint8 result = DataTypetUtils.intToUnt8(n);
         int m = DataTypetUtils.uint8ToInt(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
         n = 255;
         result = DataTypetUtils.intToUnt8(n);
         m = DataTypetUtils.uint8ToInt(result);
-        assertEquals(n, m);
+        Assert.assertEquals(n, m);
     }
 
     @Test
@@ -199,21 +202,21 @@ public class TestDataTypetUtils {
         String str = "";
         DynamicBytes result = DataTypetUtils.stringToDynamicBytes(str);
         String newstr = DataTypetUtils.dynamicBytesToString(result);
-        assertEquals(str, newstr);
+        Assert.assertEquals(str, newstr);
 
         str = "dssfdsgs";
         result = DataTypetUtils.stringToDynamicBytes(str);
         newstr = DataTypetUtils.dynamicBytesToString(result);
-        assertEquals(str, newstr);
+        Assert.assertEquals(str, newstr);
 
         str = "  dssfdsdd   gs  ";
         result = DataTypetUtils.stringToDynamicBytes(str);
         newstr = DataTypetUtils.dynamicBytesToString(result);
-        assertEquals(str, newstr);
+        Assert.assertEquals(str, newstr);
 
         str = "aaaaaaaaaabbbbbbbbbbccccccccccddaaaa";
         result = DataTypetUtils.stringToDynamicBytes(str);
         newstr = DataTypetUtils.dynamicBytesToString(result);
-        assertEquals(str, newstr);
+        Assert.assertEquals(str, newstr);
     }
 }
