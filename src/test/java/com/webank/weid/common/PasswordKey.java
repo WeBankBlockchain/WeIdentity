@@ -17,30 +17,38 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.demo;
-
-import java.math.BigInteger;
-
-import org.bcos.contract.tools.ToolConf;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+package com.webank.weid.common;
 
 /**
- * Base class for demo.
- * 
+ * public and private key object class.
  * @author v_wbgyang
+ *
  */
-public abstract class DemoBase {
+public class PasswordKey {
 
-    public final static String PRIVKEY;
-    protected static ApplicationContext context;
+    /**
+     * the key of privateKey.
+     */
+    private String privateKey;
+    
+    /**
+     * the key of publicKey.
+     */
+    private String publicKey;
 
-    static {
-        context = new ClassPathXmlApplicationContext(new String[] {
-            "classpath:SpringApplicationContext-test.xml", 
-            "classpath:applicationContext.xml"});
-
-        ToolConf toolConf = context.getBean(ToolConf.class);
-        PRIVKEY = new BigInteger(toolConf.getPrivKey(), 16).toString();
+    public String getPrivateKey() {
+        return privateKey;
     }
+
+    public void setPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    } 
 }

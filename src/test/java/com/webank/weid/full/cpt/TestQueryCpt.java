@@ -19,6 +19,18 @@
 
 package com.webank.weid.full.cpt;
 
+import java.util.List;
+import java.util.concurrent.Future;
+
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.abi.datatypes.Type;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.CptController;
@@ -28,14 +40,6 @@ import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.request.UpdateCptArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import java.util.List;
-import java.util.concurrent.Future;
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * queryCpt method for testing CptService.
@@ -44,13 +48,15 @@ import org.junit.Test;
  *
  */
 public class TestQueryCpt extends TestBaseServcie {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestQueryCpt.class);
 
     @Override
-    public void testInit() throws Exception {
+    public void testInit() {
 
         super.testInit();
-        if (cptBaseInfo == null) {
-            cptBaseInfo = super.registerCpt(createWeIdWithSetAttr);
+        if (null == cptBaseInfo) {
+            cptBaseInfo = super.registerCpt(createWeIdResultWithSetAttr);
         }
     }
 
@@ -61,7 +67,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase1() {
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        System.out.println("\nqueryCpt result:");
+        logger.info("queryCpt result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -75,7 +81,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase2() {
 
         ResponseData<Cpt> response = cptService.queryCpt(null);
-        System.out.println("\nqueryCpt result:");
+        logger.info("queryCpt result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -89,7 +95,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase3() {
 
         ResponseData<Cpt> response = cptService.queryCpt(-1);
-        System.out.println("\nqueryCpt result:");
+        logger.info("queryCpt result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -103,7 +109,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase4() {
 
         ResponseData<Cpt> response = cptService.queryCpt(100000);
-        System.out.println("\nqueryCpt result:");
+        logger.info("queryCpt result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.CPT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
@@ -117,7 +123,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase5() {
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        System.out.println("\nqueryCpt result:");
+        logger.info("queryCpt result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -126,14 +132,14 @@ public class TestQueryCpt extends TestBaseServcie {
         UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeIdNew, cptBaseInfo);
 
         ResponseData<CptBaseInfo> responseUp = cptService.updateCpt(updateCptArgs);
-        System.out.println("\nupdateCpt result:");
+        logger.info("updateCpt result:");
         BeanUtil.print(responseUp);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseUp.getErrorCode().intValue());
         Assert.assertNotNull(responseUp.getResult());
 
         ResponseData<Cpt> responseQ = cptService.queryCpt(cptBaseInfo.getCptId());
-        System.out.println("\nqueryCpt result:");
+        logger.info("queryCpt result:");
         BeanUtil.print(responseQ);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseQ.getErrorCode().intValue());
@@ -146,22 +152,17 @@ public class TestQueryCpt extends TestBaseServcie {
     @Test
     public void testQueryCptCase6() {
 
-        final MockUp<Future<List<Type<?>>>> mockFuture = new MockUp<Future<List<Type<?>>>>() {
-            @Mock
-            public Future<List<Type<?>>> get() throws Exception {
-                throw new InterruptedException();
-            }
-        };
+        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
         MockUp<CptController> mockTest = new MockUp<CptController>() {
             @Mock
-            public Future<List<Type<?>>> queryCpt(Uint256 cptId) throws Exception {
+            public Future<?> queryCpt(Uint256 cptId) {
                 return mockFuture.getMockInstance();
             }
         };
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        System.out.println("\nqueryCpt result:");
+        logger.info("queryCpt result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
@@ -180,13 +181,13 @@ public class TestQueryCpt extends TestBaseServcie {
 
         MockUp<CptController> mockTest = new MockUp<CptController>() {
             @Mock
-            public Future<List<Type<?>>> queryCpt(Uint256 cptId) throws Exception {
+            public Future<List<Type<?>>> queryCpt(Uint256 cptId) {
                 return null;
             }
         };
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        System.out.println("\nqueryCpt result:");
+        logger.info("queryCpt result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();

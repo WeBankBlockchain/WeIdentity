@@ -19,10 +19,12 @@
 
 package com.webank.weid.util;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
+import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.*;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 
 /**
  * Test WeIdUtils.
@@ -31,65 +33,70 @@ import static org.junit.Assert.*;
  *
  */
 public class TestWeIdUtils {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestWeIdUtils.class);
 
     @Test
     public void testConvertWeIdToAddress() {
         String weid = null;
         String address = WeIdUtils.convertWeIdToAddress(weid);
-        assertEquals(address, "");
+        Assert.assertEquals(address, "");
 
         weid = "gdhgdrhrhjrersgfds";
         address = WeIdUtils.convertWeIdToAddress(weid);
-        assertEquals(address, "");
+        Assert.assertEquals(address, "");
 
         address = "0xce84646754976464646";
         weid = WeIdUtils.convertAddressToWeId(address);
-        System.out.println(weid);
+        logger.info(weid);
         address = WeIdUtils.convertWeIdToAddress(weid);
-        System.out.println(address);
+        logger.info(address);
     }
 
     @Test
     public void testIsWeIdValid() {
         String weid = null;
         boolean result = WeIdUtils.isWeIdValid(weid);
-        assertFalse(result);
+        Assert.assertFalse(result);
 
         weid = "gdhgdrhrhjrersgfds";
         result = WeIdUtils.isWeIdValid(weid);
-        assertFalse(result);
+        Assert.assertFalse(result);
 
         weid = "gdhgdrhrhjrersgfds:ffsf";
         result = WeIdUtils.isWeIdValid(weid);
-        assertFalse(result);
+        Assert.assertFalse(result);
 
         weid = "did:weid:0xce84646754976464646";
         result = WeIdUtils.isWeIdValid(weid);
-        assertTrue(result);
+        Assert.assertTrue(result);
     }
 
     @Test
     public void testConvertPublicKeyToWeId() {
 
         String publicKey =
-            "4152630134607745313775653941373712642376482837388159007706431164834407808290456176569372213582021586381145279900416808342958821437075568109344613716670953";
-        String weid = WeIdUtils.convertPublicKeyToWeId(publicKey);
-        System.out.println(weid);
+            "4152630134607745313775653941373712642376482837388159007706431164834407808290456176"
+            + "569372213582021586381145279900416808342958821437075568109344613716670953";
+        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
+        Assert.assertNotNull(weId);
+        logger.info(weId);
     }
 
     @Test
     public void testIsKeypairMatch() {
 
         String publicKey =
-            "4152630134607745313775653941373712642376482837388159007706431164834407808290456176569372213582021586381145279900416808342958821437075568109344613716670953";
+            "41526301346077453137756539413737126423764828373881590077064311648344078082904561"
+            + "76569372213582021586381145279900416808342958821437075568109344613716670953";
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         boolean result = WeIdUtils.isKeypairMatch(privateKey, publicKey);
-        assertTrue(result);
+        Assert.assertTrue(result);
 
         privateKey = "646467494548664";
         result = WeIdUtils.isKeypairMatch(privateKey, publicKey);
-        assertFalse(result);
+        Assert.assertFalse(result);
     }
 
     @Test
@@ -99,13 +106,13 @@ public class TestWeIdUtils {
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         WeIdPrivateKey key = new WeIdPrivateKey();
         boolean result = WeIdUtils.isPrivateKeyValid(key);
-        assertFalse(result);
+        Assert.assertFalse(result);
 
         key.setPrivateKey(privateKey);
         result = WeIdUtils.isPrivateKeyValid(key);
-        assertTrue(result);
+        Assert.assertTrue(result);
 
         result = WeIdUtils.isPrivateKeyValid(null);
-        assertFalse(result);
+        Assert.assertFalse(result);
     }
 }

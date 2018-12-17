@@ -19,7 +19,12 @@
 
 package com.webank.weid.util;
 
+import java.util.Arrays;
+
+import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * test HashUtils.
@@ -29,16 +34,20 @@ import org.junit.Test;
  */
 public class TestHashUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(TestHashUtils.class);
+
     @Test
-    public void testHashUtils() throws Exception {
-        
+    public void testHashUtils() {
+
         String rawString = "hello world.";
         byte[] rawBytes = rawString.getBytes();
-        System.out.println("String: " + rawString + ", Bytes: " + new String(rawBytes));
+        logger.info("String: " + rawString + ", Bytes: " + new String(rawBytes));
         String hashedString = HashUtils.sha3(rawString);
         byte[] hashedBytes = HashUtils.sha3(rawBytes);
         // use assert here to verify the String to be 64 bit and Bytes[] to be
         // 32 bit
-        System.out.println("After hash, String: " + hashedString + ", Bytes: " + hashedBytes);
+        logger.info(
+            "After hash, String: " + hashedString + ", Bytes: " + Arrays.toString(hashedBytes));
+        Assert.assertNotNull(hashedBytes);
     }
 }

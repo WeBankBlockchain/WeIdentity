@@ -19,6 +19,12 @@
 
 package com.webank.weid.full.credential;
 
+import mockit.Mock;
+import mockit.MockUp;
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
@@ -28,12 +34,8 @@ import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.service.impl.CredentialServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.util.CredentialUtils;
-import mockit.Mock;
-import mockit.MockUp;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * verifyCredential method for testing CredentialService.
@@ -43,26 +45,19 @@ import org.junit.Test;
  */
 public class TestVerifyCredential extends TestBaseServcie {
 
-    private String[] pk = null;
-
+    protected PasswordKey passwordKey = null;
+    
     @Override
-    public void testInit() throws Exception {
-
+    public void testInit() {
         super.testInit();
-        pk = TestBaseUtil.createEcKeyPair();
-        if (createCredentialArgs == null) {
-            registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeIdWithSetAttr);
-            createCredentialArgs = TestBaseUtil.buildCreateCredentialArgs(createWeIdWithSetAttr);
-            cptBaseInfo = this.registerCpt(createWeIdWithSetAttr, registerCptArgs);
-            createCredentialArgs.setCptId(cptBaseInfo.getCptId());
-        }
+        passwordKey = TestBaseUtil.createEcKeyPair();
     }
-
+    
     /** 
      * case: verifyCredential success.
      */
     @Test
-    public void testVerifyCredentialCase1() throws Exception {
+    public void testVerifyCredentialCase1() {
 
         Credential credential = super.createCredential(createCredentialArgs);
 
@@ -160,7 +155,7 @@ public class TestVerifyCredential extends TestBaseServcie {
 
         Credential credential = super.createCredential(createCredentialArgs);
 
-        CptBaseInfo cpt = super.registerCpt(createWeIdWithSetAttr, registerCptArgs);
+        CptBaseInfo cpt = super.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
         credential.setCptId(cpt.getCptId());
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
@@ -431,10 +426,10 @@ public class TestVerifyCredential extends TestBaseServcie {
      * case: signature by 122324324324.
      */
     @Test
-    public void testVerifyCredentialCase24() throws Exception {
+    public void testVerifyCredentialCase24() {
 
         CreateCredentialArgs createCredentialArgs =
-            TestBaseUtil.buildCreateCredentialArgs(createWeIdWithSetAttr);
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr);
         createCredentialArgs.setCptId(cptBaseInfo.getCptId());
 
         createCredentialArgs.getWeIdPrivateKey().setPrivateKey("122324324324");
@@ -449,16 +444,16 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /** 
-     * case: signature by non weIdentity DId publickeys.
+     * case: signature by non WeIdentity DID publickeys.
      */
     @Test
-    public void testVerifyCredentialCase25() throws Exception {
+    public void testVerifyCredentialCase25() {
 
         CreateCredentialArgs createCredentialArgs =
-            TestBaseUtil.buildCreateCredentialArgs(createWeIdWithSetAttr);
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr);
         createCredentialArgs.setCptId(cptBaseInfo.getCptId());
 
-        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(pk[1]);
+        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
         Credential credential = super.createCredential(createCredentialArgs);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
@@ -469,19 +464,25 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /** 
-     * case: Sing through another private key in publickeys of weIdentity dId.
+     * case: Sing through another private key in publickeys of WeIdentity DID.
      */
     @Test
-    public void testVerifyCredentialCase26() throws Exception {
+    public void testVerifyCredentialCase26() {
 
-        super.setPublicKey(createWeIdWithSetAttr, pk[0], createWeIdWithSetAttr.getWeId());
-        super.setAuthentication(createWeIdWithSetAttr, pk[0], createWeIdWithSetAttr.getWeId());
+        super.setPublicKey(
+            createWeIdResultWithSetAttr, 
+            passwordKey.getPublicKey(), 
+            createWeIdResultWithSetAttr.getWeId());
+        super.setAuthentication(
+            createWeIdResultWithSetAttr, 
+            passwordKey.getPublicKey(), 
+            createWeIdResultWithSetAttr.getWeId());
 
         CreateCredentialArgs createCredentialArgs =
-            TestBaseUtil.buildCreateCredentialArgs(createWeIdWithSetAttr);
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr);
         createCredentialArgs.setCptId(cptBaseInfo.getCptId());
 
-        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(pk[1]);
+        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
         Credential credential = super.createCredential(createCredentialArgs);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
@@ -517,7 +518,7 @@ public class TestVerifyCredential extends TestBaseServcie {
 
         MockUp<WeIdServiceImpl> mockTest = new MockUp<WeIdServiceImpl>() {
             @Mock
-            public ResponseData<WeIdDocument> getWeIdDocument(String weId) throws Exception {
+            public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
                 ResponseData<WeIdDocument> response = new ResponseData<WeIdDocument>();
                 response.setErrorCode(ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL.getCode());
                 return response;
@@ -543,10 +544,12 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setIssuranceDate(System.currentTimeMillis() - 12000);
         credential.setExpirationDate(System.currentTimeMillis() - 10000);
 
-        MockUp<CredentialUtils> mockTest = new MockUp<CredentialUtils>() {
+        MockUp<CredentialServiceImpl> mockTest = new MockUp<CredentialServiceImpl>() {
             @Mock
-            public CreateCredentialArgs extractCredentialMetadata(Credential arg) throws Exception {
-                throw new NullPointerException();
+            private ResponseData<Boolean> checkCreateCredentialArgsValidity(
+                CreateCredentialArgs args,
+                boolean privateKeyRequired) {
+                return null;
             }
         };
 

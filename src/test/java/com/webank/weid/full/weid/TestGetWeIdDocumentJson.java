@@ -21,16 +21,20 @@ package com.webank.weid.full.weid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.webank.weid.common.BeanUtil;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseServcie;
-import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.protocol.response.ResponseData;
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.webank.weid.common.BeanUtil;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
+import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * getWeIdDocumentJson method for testing WeIdService.
@@ -39,18 +43,28 @@ import org.junit.Test;
  *
  */
 public class TestGetWeIdDocumentJson extends TestBaseServcie {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestGetWeIdDocumentJson.class);
+    
+    protected static CreateWeIdDataResult createWeIdForGetJson = null;
 
+    @Override
+    public void testInit() {
+        if (null == createWeIdForGetJson) {
+            createWeIdForGetJson = super.createWeIdWithSetAttr();
+        }
+    }
+    
     /**
      * case: success.
      *
-     * @throws Exception  may be throw Exception
      */
     @Test
-    public void testGetWeIdDocumentJsonCase1() throws Exception {
+    public void testGetWeIdDocumentJsonCase1() {
 
         ResponseData<String> weIdDoc =
-            weIdService.getWeIdDocumentJson(createWeIdForGetDoc.getWeId());
-        System.out.println("\ngetWeIdDocumentJson result:");
+            weIdService.getWeIdDocumentJson(createWeIdForGetJson.getWeId());
+        logger.info("getWeIdDocumentJson result:");
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
@@ -60,24 +74,23 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
     /**
      * case: set many times.
      *
-     * @throws Exception   may be throw Exception
      */
     @Test
-    public void testGetWeIdDocumentJsonCase2() throws Exception {
+    public void testGetWeIdDocumentJsonCase2() {
 
-        super.setPublicKey(createWeIdForGetDoc,
-            TestBaseUtil.createEcKeyPair()[0],
+        super.setPublicKey(createWeIdForGetJson,
+            TestBaseUtil.createEcKeyPair().getPublicKey(),
             createWeIdNew.getWeId());
-        super.setAuthentication(createWeIdForGetDoc,
-            TestBaseUtil.createEcKeyPair()[0],
-            createWeIdForGetDoc.getWeId());
-        super.setService(createWeIdForGetDoc,
+        super.setAuthentication(createWeIdForGetJson,
+            TestBaseUtil.createEcKeyPair().getPublicKey(),
+            createWeIdForGetJson.getWeId());
+        super.setService(createWeIdForGetJson,
             "drivingCardServic1",
             "https://weidentity.webank.com/endpoint/8377465");
 
         ResponseData<String> weIdDoc =
-            weIdService.getWeIdDocumentJson(createWeIdForGetDoc.getWeId());
-        System.out.println("\ngetWeIdDocumentJson result:");
+            weIdService.getWeIdDocumentJson(createWeIdForGetJson.getWeId());
+        logger.info("getWeIdDocumentJson result:");
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
@@ -85,15 +98,14 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is invalid.
+     * case: WeIdentity DID is invalid.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testGetWeIdDocumentJsonCase3() throws Exception {
+    public void testGetWeIdDocumentJsonCase3() {
 
         ResponseData<String> weIdDoc = weIdService.getWeIdDocumentJson("xxxxxxxxxx");
-        System.out.println("\ngetWeIdDocumentJson result:");
+        logger.info("getWeIdDocumentJson result:");
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
@@ -101,15 +113,14 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is null.
+     * case: WeIdentity DID is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testGetWeIdDocumentJsonCase4() throws Exception {
+    public void testGetWeIdDocumentJsonCase4() {
 
         ResponseData<String> weIdDoc = weIdService.getWeIdDocumentJson(null);
-        System.out.println("\ngetWeIdDocumentJson result:");
+        logger.info("getWeIdDocumentJson result:");
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
@@ -117,16 +128,15 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is not exists.
+     * case: WeIdentity DID is not exists.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testGetWeIdDocumentJsonCase5() throws Exception {
+    public void testGetWeIdDocumentJsonCase5() {
 
         ResponseData<String> weIdDoc =
             weIdService.getWeIdDocumentJson("did:weid:0xa1c93e93622c6a0b2f52c90741e0b98ab77385a9");
-        System.out.println("\ngetWeIdDocumentJson result:");
+        logger.info("getWeIdDocumentJson result:");
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
@@ -138,21 +148,20 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
      * case: Simulation throws an Exception when calling the
      *       writerWithDefaultPrettyPrinter method.
      * 
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testGetWeIdDocumentJsonCase6() throws Exception {
+    public void testGetWeIdDocumentJsonCase6() {
 
         MockUp<ObjectMapper> mockTest = new MockUp<ObjectMapper>() {
             @Mock
-            public ObjectWriter writerWithDefaultPrettyPrinter() throws Exception {
-                throw new Exception("excpetion");
+            public ObjectWriter writerWithDefaultPrettyPrinter() {
+                return null;
             }
         };
 
         ResponseData<String> weIdDoc =
-            weIdService.getWeIdDocumentJson(createWeIdForGetDoc.getWeId());
-        System.out.println("\ngetWeIdDocumentJson result:");
+            weIdService.getWeIdDocumentJson(createWeIdForGetJson.getWeId());
+        logger.info("getWeIdDocumentJson result:");
         BeanUtil.print(weIdDoc);
 
         mockTest.tearDown();

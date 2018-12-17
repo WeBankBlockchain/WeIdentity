@@ -19,9 +19,13 @@
 
 package com.webank.weid.util;
 
-import com.webank.weid.full.TestBaseUtil;
 import java.math.BigInteger;
+
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.webank.weid.full.TestBaseUtil;
 
 /**
  * the role of this class is to handle the private key required 
@@ -31,6 +35,8 @@ import org.junit.Test;
  *
  */
 public class TestBuildPrivateKey {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestBuildPrivateKey.class);
 
     /** 
      * extract the private key in org1.txt and transform it into 16 binary system 
@@ -40,6 +46,6 @@ public class TestBuildPrivateKey {
         String[] pk = TestBaseUtil.resolvePk("org1.txt");
         BigInteger bigInter1 = new BigInteger(pk[1], 10);
         String str1 = bigInter1.toString(16);
-        System.out.println("\nprivate key:" + str1);
+        logger.info("private key:" + str1);
     }
 }

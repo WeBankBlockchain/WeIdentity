@@ -19,7 +19,19 @@
 
 package com.webank.weid.full.weid;
 
+import java.util.List;
+import java.util.concurrent.Future;
+
+import mockit.Mock;
+import mockit.MockUp;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
@@ -27,19 +39,6 @@ import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import java.util.List;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * setPublicKey method for testing WeIdService.
@@ -48,19 +47,20 @@ import org.junit.Test;
  *
  */
 public class TestSetPublicKey extends TestBaseServcie {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestSetPublicKey.class);
 
     /**
      * case: create success.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase1() throws Exception {
+    public void testSetPublicKeyCase1() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -68,18 +68,17 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is blank.
+     * case: WeIdentity DID is blank.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase2() throws Exception {
+    public void testSetPublicKeyCase2() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setWeId(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
@@ -87,18 +86,17 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is bad format.
+     * case: WeIdentity DID is bad format.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase3() throws Exception {
+    public void testSetPublicKeyCase3() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setWeId("di:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac73");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
@@ -106,18 +104,17 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: weIdentity DID is not exists.
+     * case: WeIdentity DID is not exists.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase4() throws Exception {
+    public void testSetPublicKeyCase4() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setWeId("did:weid:0aaaaaaaaaaaa");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -128,16 +125,15 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: type is null or other string.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase5() throws Exception {
+    public void testSetPublicKeyCase5() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setType(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -147,18 +143,17 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: publicKey is a new key.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase6() throws Exception {
+    public void testSetPublicKeyCase6() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
-        String[] pk = TestBaseUtil.createEcKeyPair();
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
+        PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
 
-        setPublicKeyArgs.setPublicKey(pk[0]);
+        setPublicKeyArgs.setPublicKey(passwordKey.getPublicKey());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -168,16 +163,15 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: publicKey is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase7() throws Exception {
+    public void testSetPublicKeyCase7() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setPublicKey(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -187,16 +181,15 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: publicKey is invalid ("xxxxxxxxxx" or "1111111111111").
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase8() throws Exception {
+    public void testSetPublicKeyCase8() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setPublicKey("xxxxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -206,16 +199,15 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: userWeIdPrivateKey is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase9() throws Exception {
+    public void testSetPublicKeyCase9() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setUserWeIdPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -225,16 +217,15 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: privateKey is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase10() throws Exception {
+    public void testSetPublicKeyCase10() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
@@ -245,16 +236,15 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: privateKey is invalid.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase11() throws Exception {
+    public void testSetPublicKeyCase11() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
@@ -263,19 +253,18 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: privateKey and privateKey of weIdentity DID does not match.
+     * case: privateKey and privateKey of WeIdentity DID does not match.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase12() throws Exception {
+    public void testSetPublicKeyCase12() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
-        String[] pk = TestBaseUtil.createEcKeyPair();
-        setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey(pk[1]);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
+        PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
+        setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -284,18 +273,17 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: the private key belongs to the private key of other weIdentity DID. 
+     * case: the private key belongs to the private key of other WeIdentity DID. 
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase13() throws Exception {
+    public void testSetPublicKeyCase13() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setUserWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -304,18 +292,17 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: other weIdentity DID.
+     * case: other WeIdentity DID.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase14() throws Exception {
+    public void testSetPublicKeyCase14() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setWeId(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -324,18 +311,17 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: owner is the weIdentity DID.
+     * case: owner is the WeIdentity DID.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase15() throws Exception {
+    public void testSetPublicKeyCase15() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setOwner(setPublicKeyArgs.getWeId());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -343,18 +329,17 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: owner is other weIdentity DID.
+     * case: owner is other WeIdentity DID.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase16() throws Exception {
+    public void testSetPublicKeyCase16() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setOwner(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -364,16 +349,15 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: owner is invalid. 
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase17() throws Exception {
+    public void testSetPublicKeyCase17() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setOwner("xxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
@@ -384,84 +368,49 @@ public class TestSetPublicKey extends TestBaseServcie {
      * case: Simulation throws an InterruptedException when calling the
      *       setPublicKey method.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase18() throws Exception {
+    public void testSetPublicKeyCase18() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
 
-        final MockUp<Future<TransactionReceipt>> mockFuture =
-            new MockUp<Future<TransactionReceipt>>() {
-                @Mock
-                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
-                    throws Exception {
-                    throw new InterruptedException();
-                }
-            };
+        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public Future<TransactionReceipt> setAttribute(
-                Address identity,
-                Bytes32 key,
-                DynamicBytes value,
-                Int256 updated)
-                throws Exception {
-                return mockFuture.getMockInstance();
-            }
-        };
-
-        ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
-        BeanUtil.print(response);
-
-        mockTest.tearDown();
-        mockFuture.tearDown();
+        ResponseData<Boolean> response = setPublicKeyForMock(setPublicKeyArgs, mockFuture);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
-    /**
-     * case: Simulation throws an TimeoutException when calling the
-     *       setAttribute method.
-     *       
-     * @throws Exception may be throw Exception
-     */
-    @Test
-    public void testSetPublicKeyCase19() throws Exception {
-
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
-
-        final MockUp<Future<TransactionReceipt>> mockFuture =
-            new MockUp<Future<TransactionReceipt>>() {
-                @Mock
-                public Future<TransactionReceipt> get(long timeout, TimeUnit unit)
-                    throws Exception {
-                    throw new TimeoutException();
-                }
-            };
-
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public Future<TransactionReceipt> setAttribute(
-                Address identity,
-                Bytes32 key,
-                DynamicBytes value,
-                Int256 updated)
-                throws Exception {
-                return mockFuture.getMockInstance();
-            }
-        };
+    private ResponseData<Boolean> setPublicKeyForMock(
+        SetPublicKeyArgs setPublicKeyArgs,
+        MockUp<Future<?>> mockFuture) {
+        
+        MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
         mockFuture.tearDown();
+        return response;
+    }
+
+    /**
+     * case: Simulation throws an TimeoutException when calling the
+     *       setAttribute method.
+     *       
+     */
+    @Test
+    public void testSetPublicKeyCase19() {
+
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
+
+        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
+
+        ResponseData<Boolean> response = setPublicKeyForMock(setPublicKeyArgs, mockFuture);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -472,24 +421,24 @@ public class TestSetPublicKey extends TestBaseServcie {
      * case: Simulation throws an InterruptedException when calling the
      *       setAttribute method.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase20() throws Exception {
+    public void testSetPublicKeyCase20() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeId);
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
 
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
                 TransactionReceipt transactionReceipt)
-                throws Exception {
+                throws NullPointerException {
+                
                 throw new NullPointerException();
             }
         };
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
@@ -501,13 +450,12 @@ public class TestSetPublicKey extends TestBaseServcie {
     /**
      * case: setAuthenticationArgs is null.
      *
-     * @throws Exception may be throw Exception
      */
     @Test
-    public void testSetPublicKeyCase21() throws Exception {
+    public void testSetPublicKeyCase21() {
 
         ResponseData<Boolean> response = weIdService.setPublicKey(null);
-        System.out.println("\nsetPublicKey result:");
+        logger.info("setPublicKey result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
