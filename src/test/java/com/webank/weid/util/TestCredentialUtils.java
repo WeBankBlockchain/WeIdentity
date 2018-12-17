@@ -19,16 +19,15 @@
 
 package com.webank.weid.util;
 
+import java.util.UUID;
+
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.VerifyCredentialArgs;
 import com.webank.weid.util.CredentialUtils;
-import java.util.UUID;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * test crentialUtils.
@@ -44,14 +43,14 @@ public class TestCredentialUtils {
         // test arg is null
         Credential arg = null;
         String result = CredentialUtils.getCredentialFields(arg);
-        assertEquals(result, "");
+        Assert.assertEquals(result, "");
     }
 
     @Test
     public void extractCredentialResultTest() {
         VerifyCredentialArgs args = null;
         Credential result = CredentialUtils.extractCredentialResult(args);
-        assertNull(result);
+        Assert.assertNull(result);
 
         Credential arg = new Credential();
         arg.setContext(CredentialUtils.getDefaultCredentialContext());
@@ -64,18 +63,18 @@ public class TestCredentialUtils {
         args = new VerifyCredentialArgs();
         args.setCredential(arg);
         result = CredentialUtils.extractCredentialResult(args);
-        assertNotNull(result);
+        Assert.assertNotNull(result);
     }
 
     @Test
     public void extractCredentialMetadataTest() {
         Credential arg = null;
         CreateCredentialArgs result = CredentialUtils.extractCredentialMetadata(arg);
-        assertNull(result);
+        Assert.assertNull(result);
 
         arg = new Credential();
         result = CredentialUtils.extractCredentialMetadata(arg);
-        assertNotNull(result);
+        Assert.assertNotNull(result);
 
         arg.setContext(CredentialUtils.getDefaultCredentialContext());
         arg.setId(UUID.randomUUID().toString());
@@ -85,6 +84,6 @@ public class TestCredentialUtils {
         arg.setExpirationDate(new Long(System.currentTimeMillis()));
         arg.setClaim("sfsfs");
         result = CredentialUtils.extractCredentialMetadata(arg);
-        assertNotNull(result);
+        Assert.assertNotNull(result);
     }
 }

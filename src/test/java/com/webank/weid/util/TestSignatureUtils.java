@@ -20,11 +20,18 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Sign;
+import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static org.junit.Assert.assertTrue;
 /**
  * Test SignatureUtils.
  * 
@@ -33,36 +40,37 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestSignatureUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(TestSignatureUtils.class);
+
     @Test
-    public void testSignatureUtils() throws Exception {
+    public void testSignatureUtils()
+        throws InvalidAlgorithmParameterException, 
+        NoSuchAlgorithmException,
+        NoSuchProviderException, 
+        SignatureException {
 
         ECKeyPair keyPair = SignatureUtils.createKeyPair();
-        // public key
-        // 6005884739482598907019672016029935954035758996027051146272921018865015941269698926222431345309233458526942087465818124661687956402067203118790805113144306
-        // private key
-        // 11695290896330592173013668505941497555094145434653626165899956696676058923570
-        // serialize key
         String str = "hello world...........................yes";
         Sign.SignatureData sigData = SignatureUtils.signMessage(str, keyPair);
         BigInteger publicKey = SignatureUtils.signatureToPublicKey(str, sigData);
-        System.out.println("publicKey " + publicKey);
+        logger.info("publicKey " + publicKey);
 
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         Sign.SignatureData sigData2 = SignatureUtils.signMessage(str, privateKey);
         publicKey = SignatureUtils.signatureToPublicKey(str, sigData2);
-        System.out.println("publicKey " + publicKey);
+        logger.info("publicKey " + publicKey);
 
         boolean result = SignatureUtils.verifySignature(str, sigData2, publicKey);
-        assertTrue(result);
+        Assert.assertTrue(result);
 
         publicKey = SignatureUtils.publicKeyFromPrivate(new BigInteger(privateKey));
-        System.out.println("publicKey " + publicKey);
+        logger.info("publicKey " + publicKey);
 
         keyPair = SignatureUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
 
         byte[] serialized = SignatureUtils.simpleSignatureSerialization(sigData);
         Sign.SignatureData newSigData = SignatureUtils.simpleSignatureDeserialization(serialized);
-        System.out.println(newSigData);
+        logger.info(newSigData.toString());
     }
 }

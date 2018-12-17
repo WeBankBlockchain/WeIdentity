@@ -19,34 +19,49 @@
 
 package com.webank.weid.demo;
 
+import java.text.ParseException;
+
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.util.DateUtils;
-import org.springframework.stereotype.Component;
 
 /**
  * WeIdentity DID demo.
  *
  * @author v_wbgyang
  */
-@Component
 public class DemoTest extends DemoBase {
 
     /** jsonSchema. */
-    private static String schema =
-        "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"title\":\"/etc/fstab\",\"description\":\"JSON representation of /etc/fstab\",\"type\":\"object\",\"properties\":{\"swap\":{\"$ref\":\"#/definitions/mntent\"}},\"patternProperties\":{\"^/([^/]+(/[^/]+)*)?$\":{\"$ref\":\"#/definitions/mntent\"}},\"required\":[\"/\",\"swap\"],\"additionalProperties\":false,\"definitions\":{\"mntent\":{\"title\":\"mntent\",\"description\":\"An fstab entry\",\"type\":\"object\",\"properties\":{\"device\":{\"type\":\"string\"},\"fstype\":{\"type\":\"string\"},\"options\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"string\"}},\"dump\":{\"type\":\"integer\",\"minimum\":0},\"fsck\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"device\",\"fstype\"],\"additionalItems\":false}}}";
+    public final static String SCHEMA =
+        "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"title\""
+        + ":\"/etc/fstab\",\"description\":\"JSON representation of /etc/fstab\""
+        + ",\"type\":\"object\",\"properties\":{\"swap\":{\"$ref\":\"#/definitions/mntent\"}}"
+        + ",\"patternProperties\":{\"^/([^/]+(/[^/]+)*)?$\":{\"$ref\":\"#/definitions/mntent\"}}"
+        + ",\"required\":[\"/\",\"swap\"],\"additionalProperties\":false,\"definitions\""
+        + ":{\"mntent\":{\"title\":\"mntent\",\"description\":\"An fstab entry\",\"type\""
+        + ":\"object\",\"properties\":{\"device\":{\"type\":\"string\"},\"fstype\""
+        + ":{\"type\":\"string\"},\"options\":{\"type\":\"array\",\"minItems\":1,\"items\""
+        + ":{\"type\":\"string\"}},\"dump\":{\"type\":\"integer\",\"minimum\":0},\"fsck\""
+        + ":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"device\",\"fstype\"]"
+        + ",\"additionalItems\":false}}}";
 
     /** claim. */
-    private static String schemaData =
-        "{\"/\":{\"device\":\"/dev/sda2\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
+    public final static String SCHEMADATA =
+        "{\"/\":{\"device\":\"/dev/sda2\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\""
+        + ":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\""
+        + ":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\""
+        + ":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
 
     /**
      * main of demo.
+     * @throws ParseException the parseException
+     * @throws RuntimeException the runtimeException
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws RuntimeException, ParseException {
 
         // get service instance
         DemoService demo = context.getBean(DemoService.class);
@@ -64,30 +79,27 @@ public class DemoTest extends DemoBase {
 
         // get WeId Dom
         WeIdDocument weIdDom = demo.getWeIdDom(createWeId.getWeId());
-        System.out.println("----------------------");
         BeanUtil.print(weIdDom);
 
         // regist authority issuer
         demo.registerAuthorityIssuer(createWeId, "webank", "0");
 
         // registCpt
-        CptBaseInfo cptResult = demo.registCpt(createWeId, schema);
-        System.out.println("----------------------");
+        CptBaseInfo cptResult = demo.registCpt(createWeId, SCHEMA);
         BeanUtil.print(cptResult);
 
         // create Credential
         Credential credential = demo.createCredential(createWeId,
             cptResult.getCptId(),
-            schemaData,
+            SCHEMADATA,
             DateUtils.convertStringToDate("2019-10-11T18:09:42Z").getTime());
-        System.out.println("----------------------");
         BeanUtil.print(credential);
 
         boolean result = demo.verifyCredential(credential);
         if (result) {
-            System.out.println("verify success");
+            BeanUtil.print("verify success");
         } else {
-            System.out.println("verify fail");
+            BeanUtil.print("verify fail");
         }
     }
 }

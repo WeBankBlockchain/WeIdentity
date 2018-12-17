@@ -19,6 +19,13 @@
 
 package com.webank.weid.performance;
 
+import java.io.IOException;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.BaseTest;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -26,7 +33,6 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import org.junit.Test;
 
 /**
  * performance testing.
@@ -35,43 +41,48 @@ import org.junit.Test;
  *
  */
 public class TestWeIdPerformance extends BaseTest {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestWeIdPerformance.class);
 
     @Test
-    public void testGetWeIdDom() throws Exception {
+    public void testGetWeIdDom() throws IOException {
 
-        System.out.println("blockNumber:" + this.getBlockNumber());
+        logger.info("blockNumber:" + this.getBlockNumber());
 
         CreateWeIdDataResult weIdResult = this.createWeId();
-        System.out.println("weIdentity DID:" + weIdResult.getWeId());
+        logger.info("WeIdentity DID:" + weIdResult.getWeId());
 
         int count = 1;
         for (int i = 0; i < count; i++) {
             this.setService(weIdResult,
                 "driving" + i,
                 "https://weidentity.webank.com/endpoint/8377464" + i);
-            System.out.println("------" + i);
+            logger.info("------" + i);
         }
-        System.out.println("blockNumber:" + this.getBlockNumber());
+        logger.info("blockNumber:" + this.getBlockNumber());
 
         long startTime = System.currentTimeMillis();
 
         WeIdDocument result = this.getWeIdDom(weIdResult.getWeId());
-        System.out.println(result.getService().size());
+        logger.info(result.getService().size() + "");
 
         long gasTime = System.currentTimeMillis() - startTime;
-        System.out.println("use time:" + gasTime + "ms");
+        logger.info("use time:" + gasTime + "ms");
+        
+        Assert.assertNotNull(result);
     }
 
     /**
-     * create weIdentity DID.
+     * create WeIdentity DID.
      */
-    public CreateWeIdDataResult createWeId() throws RuntimeException {
+    public CreateWeIdDataResult createWeId() {
 
-        // create weIdentity DID,publicKey,privateKey
+        // create WeIdentity DID,publicKey,privateKey
         ResponseData<CreateWeIdDataResult> responseCreate = weIdService.createWeId();
         // check result is success
         if (responseCreate.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
-            throw new RuntimeException(responseCreate.getErrorMessage());
+            logger.info("createWeId fail :" + responseCreate.getErrorMessage());
+            Assert.assertTrue(false);
         }
         return responseCreate.getResult();
     }
@@ -82,10 +93,9 @@ public class TestWeIdPerformance extends BaseTest {
     public void setService(
         CreateWeIdDataResult createResult,
         String serviceType,
-        String serviceEnpoint)
-        throws RuntimeException {
+        String serviceEnpoint) {
 
-        // setService for this weIdentity DID
+        // setService for this WeIdentity DID
         SetServiceArgs setServiceArgs = new SetServiceArgs();
         setServiceArgs.setWeId(createResult.getWeId());
         setServiceArgs.setType(serviceType);
@@ -97,21 +107,23 @@ public class TestWeIdPerformance extends BaseTest {
         // check is success
         if (responseSetSer.getErrorCode() != ErrorCode.SUCCESS.getCode()
             || !responseSetSer.getResult()) {
-            throw new RuntimeException(responseSetSer.getErrorMessage());
+            logger.info("setService fail :" + responseSetSer.getErrorMessage());
+            Assert.assertTrue(false);
         }
     }
 
     /**
      * getWeIdDom.
      */
-    public WeIdDocument getWeIdDom(String weId) throws RuntimeException {
+    public WeIdDocument getWeIdDom(String weId) {
 
         // get weIdDom
         ResponseData<WeIdDocument> responseResult = weIdService.getWeIdDocument(weId);
         // check result
         if (responseResult.getErrorCode() != ErrorCode.SUCCESS.getCode()
             || responseResult.getResult() == null) {
-            throw new RuntimeException(responseResult.getErrorMessage());
+            logger.info("getWeIdDocument fail :" + responseResult.getErrorMessage());
+            Assert.assertTrue(false);
         }
         return responseResult.getResult();
     }

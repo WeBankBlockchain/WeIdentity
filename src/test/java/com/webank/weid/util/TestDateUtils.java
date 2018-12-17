@@ -19,6 +19,92 @@
 
 package com.webank.weid.util;
 
-public class TestDateUtils {
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
+import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * test DateUtils.
+ * @author v_wbgyang
+ *
+ */
+public class TestDateUtils {
+    
+    private DateFormat df;
+
+    private Date now;
+    
+    private SimpleDateFormat simpleDateFormat;
+    
+    /**
+     * initialization before test.
+     */
+    @Before
+    public void init() {
+        TimeZone tz = TimeZone.getTimeZone("Asia/Shanghai");
+        df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        df.setTimeZone(tz);
+       
+        now = new Date();
+        
+        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    }
+
+    @Test
+    public void testGetIso8601Timestamp() {
+        
+        String dateString = DateUtils.getISO8601Timestamp(now);
+        Assert.assertEquals(df.format(now), dateString);
+        
+        dateString = DateUtils.getISO8601Timestamp(now.getTime());
+        Assert.assertEquals(df.format(now), dateString);
+    }
+    
+    @Test
+    public void testConvertStringToDate() throws ParseException {
+        
+        String dateString = DateUtils.getISO8601Timestamp(now);
+        Date date = DateUtils.convertStringToDate(dateString);
+        Assert.assertEquals(DateUtils.getISO8601Timestamp(date), dateString);
+        
+        dateString = DateUtils.getISO8601Timestamp(now);
+        date = DateUtils.convertLongStringToDate(String.valueOf(now.getTime()));
+        Assert.assertEquals(DateUtils.getISO8601Timestamp(date), dateString);
+    }
+    
+    @Test
+    public void testConverDateToTimeStamp() throws ParseException {
+        
+        String dateString = "2018-12-20 11:35:43";
+        long time = DateUtils.converDateToTimeStamp(dateString);
+        Assert.assertEquals(simpleDateFormat.parse(dateString).getTime(), time);
+    }
+    
+    @Test
+    public void testIsValidUtcDateString() {
+        
+        String dateString = DateUtils.getISO8601Timestamp(now);
+        boolean isValid = DateUtils.isValidUTCDateString(dateString);
+        Assert.assertTrue(isValid);
+        
+        isValid = DateUtils.isValidUTCDateString("2018-12-20 11:40:06");
+        Assert.assertFalse(isValid);
+    }
+
+    @Test
+    public void testGetCurrentTimeStampInt256() {
+        
+        Int256 int256String = DateUtils.getCurrentTimeStampInt256();
+        Assert.assertNotNull(int256String);
+        
+        String  timeStampString = DateUtils.getCurrentTimeStampString();
+        Assert.assertNotNull(timeStampString);
+    }
 }

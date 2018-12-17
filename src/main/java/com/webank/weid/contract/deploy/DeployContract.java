@@ -169,7 +169,7 @@ public class DeployContract {
             writeAddressToFile(contractAddress,"weIdContract.address");
             return contractAddress;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
+           logger.error("WeIdContract deploy exception", e);
         }
         return StringUtils.EMPTY;
     }
@@ -206,7 +206,7 @@ public class DeployContract {
             String cptControllerAddress = cptController.getContractAddress();
             writeAddressToFile(cptControllerAddress,"cptController.address");
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            e.printStackTrace();
+            logger.error("CptController deploy exception", e);
         }
         return StringUtils.EMPTY;
     }
@@ -242,7 +242,7 @@ public class DeployContract {
                     new Address(roleControllerAddress));
             
         } catch (Exception e) {
-            logger.error("RoleController deployment error:" + e.toString());
+            logger.error("RoleController deployment error:", e);
             return authorityIssuerDataAddress;
         }
         
@@ -262,7 +262,7 @@ public class DeployContract {
                 new Address(roleControllerAddress));
             
         } catch (Exception e) {
-            logger.error("CommitteeMemberData deployment error:" + e.toString());
+            logger.error("CommitteeMemberData deployment error:", e);
             return authorityIssuerDataAddress;
         }
         
@@ -278,7 +278,7 @@ public class DeployContract {
                     new Address(roleControllerAddress));
             
         } catch (Exception e) {
-            logger.error("CommitteeMemberController deployment error:" + e.toString());
+            logger.error("CommitteeMemberController deployment error:", e);
             return authorityIssuerDataAddress;
         }
         
@@ -298,7 +298,7 @@ public class DeployContract {
                     new Address(roleControllerAddress));
             
         } catch (Exception e) {
-            logger.error("AuthorityIssuerData deployment error:" + e.toString());
+            logger.error("AuthorityIssuerData deployment error:", e);
             return authorityIssuerDataAddress;
         }
         
@@ -312,7 +312,7 @@ public class DeployContract {
             writeAddressToFile(authorityIssuerControllerAddress,"authorityIssuer.address");
             return authorityIssuerControllerAddress;
         } catch (Exception e) {
-            logger.error("AuthorityIssuerController deployment error:" + e.toString());
+            logger.error("AuthorityIssuerController deployment error:", e);
         }
         return authorityIssuerDataAddress;
     }
@@ -330,13 +330,13 @@ public class DeployContract {
             fileWritter.write(content);
             fileWritter.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("writer file exception", e);
         } finally {
             if (null != fileWritter) {
                 try {
                     fileWritter.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("io close exception", e);
                 }
             }
         }

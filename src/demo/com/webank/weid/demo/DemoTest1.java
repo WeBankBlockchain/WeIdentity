@@ -1,22 +1,33 @@
 /*
- * Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
- * This file is part of weidentity-java-sdk.
+ *       This file is part of weidentity-java-sdk.
  *
- * weidentity-java-sdk is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Lesser General Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
  *
- * weidentity-java-sdk is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
+ *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License along with
- * weidentity-java-sdk. If not, see <https://www.gnu.org/licenses/>.
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.demo;
 
+import java.math.BigInteger;
+
+import org.bcos.contract.tools.ToolConf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -33,10 +44,6 @@ import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.WeIdService;
-import java.math.BigInteger;
-import org.bcos.contract.tools.ToolConf;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 /**
  * <p>
@@ -69,83 +76,153 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
  *
  */
 public class DemoTest1 {
-
-    /** jsonSchema. */
-    private static String schema =
-            "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"title\":\"/etc/fstab\",\"description\":\"JSON representation of /etc/fstab\",\"type\":\"object\",\"properties\":{\"swap\":{\"$ref\":\"#/definitions/mntent\"}},\"patternProperties\":{\"^/([^/]+(/[^/]+)*)?$\":{\"$ref\":\"#/definitions/mntent\"}},\"required\":[\"/\",\"swap\"],\"additionalProperties\":false,\"definitions\":{\"mntent\":{\"title\":\"mntent\",\"description\":\"An fstab entry\",\"type\":\"object\",\"properties\":{\"device\":{\"type\":\"string\"},\"fstype\":{\"type\":\"string\"},\"options\":{\"type\":\"array\",\"minItems\":1,\"items\":{\"type\":\"string\"}},\"dump\":{\"type\":\"integer\",\"minimum\":0},\"fsck\":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"device\",\"fstype\"],\"additionalItems\":false}}}";
-
-    /** claim. */
-    private static String schemaData =
-            "{\"/\":{\"device\":\"/dev/sda2\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
-
+    
     /**
-     * main for DemoTest1.
+     * log4j.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(DemoTest1.class);
+    
+    /**
+     * Because weidentity-java-sdk is implemented based on spring framework, it is necessary to
+     * use spring container to manage core objects.
+     * 
+     * 1. The purpose of loading SpringApplicationContext-test.xml is to let spring containers
+     * manage core objects. In their own spring project, annotation-driven scanning of
+     * com.webank.weid package is required.
+     * 
+     * 2. The purpose of loading applicationContext. XML is to obtain the contract deployment
+     * private key. If you need to register an authority, you need to use the private key.
+     * Otherwise, you do not have the right to register as an authority.
      * 
      */
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
-        /*
-         * Because weidentity-java-sdk is implemented based on spring framework, it is necessary to
-         * use spring container to manage core objects.
-         * 
-         * 1. The purpose of loading SpringApplicationContext-test.xml is to let spring containers
-         * manage core objects. In their own spring project, annotation-driven scanning of
-         * com.webank.weid package is required.
-         * 
-         * 2. The purpose of loading applicationContext. XML is to obtain the contract deployment
-         * private key. If you need to register an authority, you need to use the private key.
-         * Otherwise, you do not have the right to register as an authority.
-         * 
-         */
-        System.out.println("init context...");
+        BeanUtil.print("init context...");
         ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {
             "classpath:SpringApplicationContext-test.xml", "classpath:applicationContext.xml"});
 
         // The purpose of this step is to get relevant service objects from the spring container.
         WeIdService weIdService = context.getBean(WeIdService.class);
-        AuthorityIssuerService authorityIssuerService =
-                context.getBean(AuthorityIssuerService.class);
-        CptService cptService = context.getBean(CptService.class);
-        CredentialService credentialService = context.getBean(CredentialService.class);
-        ToolConf toolConf = context.getBean(ToolConf.class);
-        String sdkPrivKey = new BigInteger(toolConf.getPrivKey(), 16).toString();
-
+        
         // Step one: create weId and set the public key and authenticator status.
-        System.out.println("begin create weId...");
+        BeanUtil.print("begin create weId...");
 
         // 1. Create weId on the chain
         ResponseData<CreateWeIdDataResult> createWeIdResult = weIdService.createWeId();
         if (createWeIdResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
-                || createWeIdResult.getResult() == null) {
-            throw new Exception(createWeIdResult.getErrorMessage());
+            || createWeIdResult.getResult() == null) {
+            logger.info(createWeIdResult.getErrorMessage());
+            return;
         }
 
         String weId = createWeIdResult.getResult().getWeId();
         String privateKey = createWeIdResult.getResult().getUserWeIdPrivateKey().getPrivateKey();
         String publicKey = createWeIdResult.getResult().getUserWeIdPublicKey().getPublicKey();
-        System.out.println("----------createWeIdResult--------------");
-        System.out.println("weId:" + weId);
-        System.out.println("privateKey:" + privateKey);
-        System.out.println("publicKey:" + publicKey);
-        System.out.println("------------------------");
+        BeanUtil.print("----------createWeIdResult--------------");
+        BeanUtil.print("weId:" + weId);
+        BeanUtil.print("privateKey:" + privateKey);
+        BeanUtil.print("publicKey:" + publicKey);
+        BeanUtil.print("------------------------");
 
         // 2. Set the public key on the chain
-        System.out.println("begin set publicKey...");
+        BeanUtil.print("begin set publicKey...");
+        SetPublicKeyArgs setPublicKeyArgs = buildSetPublicKeyArgs(weId, privateKey, publicKey);
+
+        ResponseData<Boolean> setPubResult = weIdService.setPublicKey(setPublicKeyArgs);
+        if (setPubResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
+            || !setPubResult.getResult()) {
+            logger.info(setPubResult.getErrorMessage());
+            return;
+        }
+
+        // 3. Set the Authenticator on chain.
+        BeanUtil.print("begin set authentication...");
+        SetAuthenticationArgs setAuthenticationArgs =
+            buildSetAuthenticationArgs(weId, privateKey, publicKey);
+
+        ResponseData<Boolean> setAuthResult = weIdService.setAuthentication(setAuthenticationArgs);
+        if (setAuthResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
+            || !setAuthResult.getResult()) {
+            logger.info(setAuthResult.getErrorMessage());
+            return;
+        }
+
+        // The second step: register as an authority, this step is not necessary.
+        BeanUtil.print("begin regist authority issuer...");
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            buildRegisterAuthorityIssuerArgs(context, weId);
+
+        AuthorityIssuerService authorityIssuerService =
+            context.getBean(AuthorityIssuerService.class);
+        ResponseData<Boolean> registAuthResult =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        if (registAuthResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
+            || !registAuthResult.getResult()) {
+            logger.info(registAuthResult.getErrorMessage());
+            return;
+        }
+
+        // The third step: register CPT template
+        BeanUtil.print("begin regist cpt...");
+        RegisterCptArgs registerCptArgs = buildRegisterCptArgs(weId, privateKey);
+
+        CptService cptService = context.getBean(CptService.class);
+        ResponseData<CptBaseInfo> cptBaseResult = cptService.registerCpt(registerCptArgs);
+        if (cptBaseResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
+            || cptBaseResult.getResult() == null) {
+            logger.info(cptBaseResult.getErrorMessage());
+            return;
+        }
+
+        // The fourth step: create credential information.
+        BeanUtil.print("begin create credential...");
+        CreateCredentialArgs createCredentialArgs =
+            buildCreateCredentialArgs(weId, privateKey, cptBaseResult);
+
+        CredentialService credentialService = context.getBean(CredentialService.class);
+        ResponseData<Credential> credentialResult =
+            credentialService.createCredential(createCredentialArgs);
+        if (credentialResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
+            || credentialResult.getResult() == null) {
+            logger.info(credentialResult.getErrorMessage());
+            return;
+        }
+        Credential credential = credentialResult.getResult();
+
+        // The fifth step: verify the voucher.
+        BeanUtil.print("begin verify credential...");
+        ResponseData<Boolean> verifyResult = credentialService.verifyCredential(credential);
+        if (verifyResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            logger.info(verifyResult.getErrorMessage());
+            return;
+        }
+
+        if (verifyResult.getResult()) {
+            BeanUtil.print("credential verify success");
+        } else {
+            BeanUtil.print("credential verify fail");
+        }
+    }
+
+    private static SetPublicKeyArgs buildSetPublicKeyArgs(
+        String weId, 
+        String privateKey,
+        String publicKey) {
+        
         SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
         setPublicKeyArgs.setWeId(weId);
         setPublicKeyArgs.setPublicKey(publicKey);
 
         setPublicKeyArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
         setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey(privateKey);
+        return setPublicKeyArgs;
+    }
 
-        ResponseData<Boolean> setPubResult = weIdService.setPublicKey(setPublicKeyArgs);
-        if (setPubResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
-                || !setPubResult.getResult()) {
-            throw new Exception(setPubResult.getErrorMessage());
-        }
-
-        // 3. Set the Authenticator on chain.
-        System.out.println("begin set authentication...");
+    private static SetAuthenticationArgs buildSetAuthenticationArgs(
+        String weId, 
+        String privateKey,
+        String publicKey) {
+        
         SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
         setAuthenticationArgs.setWeId(weId);
         setAuthenticationArgs.setPublicKey(publicKey);
@@ -153,78 +230,54 @@ public class DemoTest1 {
 
         setAuthenticationArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
         setAuthenticationArgs.getUserWeIdPrivateKey().setPrivateKey(privateKey);
+        return setAuthenticationArgs;
+    }
 
-        ResponseData<Boolean> setAuthResult = weIdService.setAuthentication(setAuthenticationArgs);
-        if (setAuthResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
-                || !setAuthResult.getResult()) {
-            throw new Exception(setAuthResult.getErrorMessage());
-        }
-
-        // The second step: register as an authority, this step is not necessary.
-        System.out.println("begin regist authority issuer...");
-        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = new RegisterAuthorityIssuerArgs();
+    private static RegisterAuthorityIssuerArgs buildRegisterAuthorityIssuerArgs(
+        ApplicationContext context, 
+        String weId) {
+        
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = 
+            new RegisterAuthorityIssuerArgs();
         registerAuthorityIssuerArgs.setAuthorityIssuer(new AuthorityIssuer());
         registerAuthorityIssuerArgs.getAuthorityIssuer().setWeId(weId);
         registerAuthorityIssuerArgs.getAuthorityIssuer().setName("webank");
         registerAuthorityIssuerArgs.getAuthorityIssuer().setAccValue("0");
 
+        ToolConf toolConf = context.getBean(ToolConf.class);
+        String sdkPrivKey = new BigInteger(toolConf.getPrivKey(), 16).toString();
         registerAuthorityIssuerArgs.setWeIdPrivateKey(new WeIdPrivateKey());
         registerAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey(sdkPrivKey);
+        return registerAuthorityIssuerArgs;
+    }
 
-        ResponseData<Boolean> registAuthResult =
-                authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        if (registAuthResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
-                || !registAuthResult.getResult()) {
-            throw new Exception(registAuthResult.getErrorMessage());
-        }
+    private static CreateCredentialArgs buildCreateCredentialArgs(
+        String weId, 
+        String privateKey,
+        ResponseData<CptBaseInfo> cptBaseResult) {
+        
+        CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+        createCredentialArgs.setClaim(DemoTest.SCHEMADATA); // Set data required for template
+        createCredentialArgs.setCptId(cptBaseResult.getResult().getCptId()); // Set cptId
+        createCredentialArgs.setIssuer(weId); // Set Creator of voucher
+        // Set expiration date
+        createCredentialArgs.setExpirationDate(System.currentTimeMillis() + 1000000);
 
-        // The third step: register CPT template
-        System.out.println("begin regist cpt...");
+        createCredentialArgs.setWeIdPrivateKey(new WeIdPrivateKey());
+        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(privateKey);
+        return createCredentialArgs;
+    }
+
+    private static RegisterCptArgs buildRegisterCptArgs(
+        String weId, 
+        String privateKey) {
+        
         RegisterCptArgs registerCptArgs = new RegisterCptArgs();
-        registerCptArgs.setCptJsonSchema(schema); // Set up a template
+        registerCptArgs.setCptJsonSchema(DemoTest.SCHEMA); // Set up a template
         registerCptArgs.setCptPublisher(weId); // Set template publisher
 
         registerCptArgs.setCptPublisherPrivateKey(new WeIdPrivateKey());
         registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(privateKey);
-
-        ResponseData<CptBaseInfo> cptBaseResult = cptService.registerCpt(registerCptArgs);
-        if (cptBaseResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
-                || cptBaseResult.getResult() == null) {
-            throw new Exception(cptBaseResult.getErrorMessage());
-        }
-
-        // The fourth step: create credential information.
-        System.out.println("begin create credential...");
-        CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
-        createCredentialArgs.setClaim(schemaData); // Set data required for template
-        createCredentialArgs.setCptId(cptBaseResult.getResult().getCptId()); // Set cptId
-        createCredentialArgs.setIssuer(weId); // Set Creator of voucher
-        createCredentialArgs.setExpirationDate(System.currentTimeMillis() + 1000000);// Set
-                                                                                     // expiration
-                                                                                     // date
-
-        createCredentialArgs.setWeIdPrivateKey(new WeIdPrivateKey());
-        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(privateKey);
-
-        ResponseData<Credential> credentialResult =
-                credentialService.createCredential(createCredentialArgs);
-        if (credentialResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()
-                || credentialResult.getResult() == null) {
-            throw new Exception(credentialResult.getErrorMessage());
-        }
-        Credential credential = credentialResult.getResult();
-
-        // The fifth step: verify the voucher.
-        System.out.println("begin verify credential...");
-        ResponseData<Boolean> verifyResult = credentialService.verifyCredential(credential);
-        if (verifyResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-            throw new Exception(verifyResult.getErrorMessage());
-        }
-
-        if (verifyResult.getResult()) {
-            System.out.println("credential verify success");
-        } else {
-            System.out.println("credential verify fail");
-        }
+        return registerCptArgs;
     }
 }
