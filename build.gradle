@@ -4,7 +4,7 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'jacoco'
 
-version = "1.0.0"
+version = "1.0.3"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
