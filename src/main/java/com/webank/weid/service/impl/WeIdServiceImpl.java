@@ -55,12 +55,14 @@ import org.springframework.stereotype.Component;
 
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.constant.WeIdEventConstant;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
+import com.webank.weid.exception.ResolveAttributeException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.ServiceProperty;
@@ -72,6 +74,7 @@ import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
+import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
@@ -145,43 +148,45 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         topicMap.put(EventEncoder.encode(event), WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE);
     }
 
-    private static ResponseData<Integer> resolveAttributeEvent(
+    private static ResolveEventLogResult resolveAttributeEvent(
         String weId,
         TransactionReceipt receipt,
         WeIdDocument result) {
 
         List<WeIdAttributeChangedEventResponse> eventlog =
             WeIdContract.getWeIdAttributeChangedEvents(receipt);
-        if (CollectionUtils.isNotEmpty(eventlog)) {
+        ResolveEventLogResult response = new ResolveEventLogResult();
 
-            WeIdAttributeChangedEventResponse res = eventlog.get(0);
-            if (res.identity == null || res.updated == null || res.previousBlock == null) {
-                return new ResponseData<Integer>(
-                    null,
-                    ErrorCode.RESOLVE_EVENT_LOG_NULL_ERROR.getCode(),
-                    ErrorCode.RESOLVE_EVENT_LOG_NULL_ERROR.getCodeDesc());
-            }
-            String identity = res.identity.toString();
-            if (null == result.getUpdated()) {
-                long timeStamp = res.updated.getValue().longValue();
-                result.setUpdated(timeStamp);
-            }
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-            if (StringUtils.equals(weAddress, identity)) {
-                String key = DataTypetUtils.bytes32ToString(res.key);
-                String value = DataTypetUtils.dynamicBytesToString(res.value);
-                int previousBlock = res.previousBlock.getValue().intValue();
-                buildupWeIdAttribute(key, value, weId, result);
-                return new ResponseData<Integer>(
-                    previousBlock,
-                    ErrorCode.SUCCESS.getCode(),
-                    ErrorCode.SUCCESS.getCodeDesc());
-            }
+        if (CollectionUtils.isEmpty(eventlog)) {
+            response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENTLOG_NULL);
+            return response;
         }
-        return new ResponseData<Integer>(
-            null,
-            ErrorCode.RESOLVE_EVENT_LOG_ERROR.getCode(),
-            ErrorCode.RESOLVE_EVENT_LOG_ERROR.getCodeDesc());
+
+        WeIdAttributeChangedEventResponse res = eventlog.get(0);
+        if (res.identity == null || res.updated == null || res.previousBlock == null) {
+            response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_RES_NULL);
+            return response;
+        }
+
+        String identity = res.identity.toString();
+        if (null == result.getUpdated()) {
+            long timeStamp = res.updated.getValue().longValue();
+            result.setUpdated(timeStamp);
+        }
+        String weAddress = WeIdUtils.convertWeIdToAddress(weId);
+        if (!StringUtils.equals(weAddress, identity)) {
+            response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_WEID_NOT_MATCH);
+            return response;
+        }
+
+        String key = DataTypetUtils.bytes32ToString(res.key);
+        String value = DataTypetUtils.dynamicBytesToString(res.value);
+        int previousBlock = res.previousBlock.getValue().intValue();
+        buildupWeIdAttribute(key, value, weId, result);
+
+        response.setPreviousBlock(previousBlock);
+        response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_SUCCESS);
+        return response;
     }
 
     private static void buildupWeIdAttribute(
@@ -278,7 +283,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
     }
 
-    private static ResponseData<Integer> resolveEventLog(
+    private static ResolveEventLogResult resolveEventLog(
         String weId, Log log, TransactionReceipt receipt, WeIdDocument result) {
         String topic = log.getTopics().get(0);
         String event = topicMap.get(topic);
@@ -290,13 +295,15 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 default:
             }
         }
-        return new ResponseData<Integer>(
-            null,
-            ErrorCode.RESOLVE_EVENT_LOG_ERROR.getCode(),
-            ErrorCode.RESOLVE_EVENT_LOG_ERROR.getCodeDesc());
+        ResolveEventLogResult response = new ResolveEventLogResult();
+        response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENT_NULL);
+        return response;
     }
 
-    private static void resolveTransaction(String weId, int blockNumber, WeIdDocument result) {
+    private static void resolveTransaction(
+        String weId,
+        int blockNumber,
+        WeIdDocument result) {
 
         if (blockNumber == 0) {
             return;
@@ -336,18 +343,29 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 TransactionReceipt receipt = rec1.getTransactionReceipt().get();
                 List<Log> logs = rec1.getResult().getLogs();
                 for (Log log : logs) {
-                    ResponseData<Integer> returnValue = resolveEventLog(weId, log, receipt, result);
-                    if (returnValue.getErrorCode().equals(ErrorCode.SUCCESS.getCode())) {
-                        previousBlock = returnValue.getResult();
+                    ResolveEventLogResult returnValue = resolveEventLog(weId, log, receipt, result);
+                    if (returnValue.getResultStatus().equals(
+                        ResolveEventLogStatus.STATUS_SUCCESS)) {
+                        previousBlock = returnValue.getPreviousBlock();
+                    } else {
+                        logger.error(
+                            "[resolveTransaction]: resolveEventLog failed. resultStatus:{}",
+                            returnValue.getResultStatus());
+
+                        throw new ResolveAttributeException(
+                            ErrorCode.DATA_RESOLVE_ATTRIBUTE_ERROR.getCode(),
+                            ErrorCode.DATA_RESOLVE_ATTRIBUTE_ERROR.getCodeDesc());
                     }
                 }
             }
         } catch (IOException | DataTypeCastException e) {
             logger.error(
-                "[resolveTransaction]:get TransactionReceipt by weId :{} failed. message:{}",
+                "[resolveTransaction]: get TransactionReceipt by weId :{} failed.",
                 weId,
                 e);
-            return;
+            throw new ResolveAttributeException(
+                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc());
         }
 
         resolveTransaction(weId, previousBlock, result);
@@ -501,6 +519,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
 
+        ResponseData<WeIdDocument> responseData = new ResponseData<WeIdDocument>();
         int latestBlockNumber = 0;
         try {
             String identityAddr = WeIdUtils.convertWeIdToAddress(weId);
@@ -513,17 +532,28 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             if (0 == latestBlockNumber) {
                 return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
             }
+
+            resolveTransaction(weId, latestBlockNumber, result);
+            responseData.setResult(result);
+            return responseData;
         } catch (InterruptedException | ExecutionException e) {
             logger.error("Set weId service failed. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
             return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (ResolveAttributeException e) {
+            logger.error("[getWeIdDocument]: resolveTransaction failed. "
+                    + "weId: {}, errorCode:{}",
+                weId,
+                e.getErrorCode(),
+                e);
+            responseData.setErrorCode(e.getErrorCode());
+            responseData.setErrorMessage(e.getErrorMessage());
+            return responseData;
+        } catch (Exception e) {
+            logger.error("[getWeIdDocument]: exception.", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
-
-        resolveTransaction(weId, latestBlockNumber, result);
-        ResponseData<WeIdDocument> responseData = new ResponseData<WeIdDocument>();
-        responseData.setResult(result);
-        return responseData;
     }
 
     /**

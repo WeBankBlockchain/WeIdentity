@@ -101,6 +101,9 @@ public final class WeIdUtils {
 
     /**
      * check if the public key matchs the private key.
+     * @param privateKey the WeIdentity DID private key
+     * @param publicKey the WeIdentity DID publicKey key
+     * @return true if the private and publicKey key is match, false otherwise.
      */
     public static boolean isKeypairMatch(String privateKey, String publicKey) {
         try {

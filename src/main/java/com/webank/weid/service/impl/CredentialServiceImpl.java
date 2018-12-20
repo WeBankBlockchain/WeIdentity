@@ -19,7 +19,9 @@
 
 package com.webank.weid.service.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -388,9 +390,14 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 }
                 return responseData;
             }
+        } catch (SignatureException | UnsupportedEncodingException e) {
+            logger.error(
+                "Generic signatureException or unsupportedEncodingException occurred "
+                    + "during verify signature when verifyCredential: ", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
         } catch (Exception e) {
             logger.error(
-                "Generic error occurred during verify signature when verifyCredential: " + e);
+                "Generic exception occurred during verify signature when verifyCredential: ", e);
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_ERROR);
         }
     }

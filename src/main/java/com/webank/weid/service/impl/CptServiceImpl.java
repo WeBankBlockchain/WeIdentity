@@ -200,7 +200,9 @@ public class CptServiceImpl extends BaseService implements CptService {
                 return responseData;
             }
 
-            typeList = cptController.queryCpt(DataTypetUtils.intToUint256(cptId)).get();
+            typeList = cptController
+                .queryCpt(DataTypetUtils.intToUint256(cptId))
+                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
             if (typeList != null) {
                 if (WeIdConstant.EMPTY_ADDRESS.equals(((Address) typeList.get(0)).toString())) {
