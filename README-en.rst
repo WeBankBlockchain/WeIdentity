@@ -80,6 +80,8 @@ More
 *
    `WeIdentity Specification (Chinese Version) <https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-spec.html>`_
 
+*
+   `FAQ <https://weidentity.readthedocs.io/en/latest/docs/faq.html>`_
 
 Getting Started
 ---------------
