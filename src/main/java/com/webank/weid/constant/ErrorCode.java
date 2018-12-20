@@ -40,7 +40,9 @@ public enum ErrorCode {
      * cpt id generated for authority issuer exceeds limited max value.
      */
     CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX(
-        500302, "cpt id generated for authority issuer exceeds limited max value"),
+        500302,
+        "cpt id generated for authority issuer exceeds limited max value"
+    ),
 
     /**
      * cpt publisher does not exist.
@@ -76,7 +78,9 @@ public enum ErrorCode {
      * The credential issuer not exists in list.
      */
     CREDENTIAL_ISSUER_NOT_EXISTS_IN_LIST(
-        100404, "credential issuer does not exist in the authority issuer list"),
+        100404,
+        "credential issuer does not exist in the authority issuer list"
+    ),
 
     /**
      * The credential signature broken.
@@ -144,6 +148,11 @@ public enum ErrorCode {
     CREDENTIAL_ISSUER_INVALID(100418, "credential issuer invalid"),
 
     /**
+     * The credential credential verify signature is exception.
+     */
+    CREDENTIAL_EXCEPTION_VERIFYSIGNATURE(100419, "credential verify signature exception"),
+
+    /**
      * Authority issuer main error code.
      */
     AUTHORITY_ISSUER_ERROR(100200, "error occured during processing authority issuer tasks"),
@@ -191,13 +200,17 @@ public enum ErrorCode {
      * The Authority Issuer Contract level error: subject already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS(
-        500202, "the authority issuer contract error: the subject does not exist"),
+        500202,
+        "the authority issuer contract error: the subject does not exist"
+    ),
 
     /**
      * The Authority Issuer Contract level error: no permission.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION(
-        500203, "the authority issuer contract error: no permission"),
+        500203,
+        "the authority issuer contract error: no permission"
+    ),
 
     /**
      * The weid invalid.
@@ -213,7 +226,9 @@ public enum ErrorCode {
      * private key is invalid.
      */
     WEID_PRIVATEKEY_INVALID(
-        100103, "the input private key is invalid, please check and input your private key."),
+        100103,
+        "the input private key is invalid, please check and input your private key."
+    ),
 
     /**
      * weid does not exist.
@@ -239,7 +254,9 @@ public enum ErrorCode {
      * public key and private key are not a keypair.
      */
     WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED(
-        10108, "the public key and private key are not matched."),
+        10108,
+        "the public key and private key are not matched."
+    ),
 
     /**
      * transaction timeout.
@@ -269,28 +286,25 @@ public enum ErrorCode {
     /**
      * weidentity base exceptions or error.
      */
-    BASE_ERROR(160007, "baes exception error, please check error log."),
+    BASE_ERROR(160007, "baes exception error, please check the error log."),
 
     /**
      * weidentity data type case exceptions or error.
      */
-    DATA_TYPE_CASE_ERROR(160008, "data type cast exception error, please check error log."),
+    DATA_TYPE_CASE_ERROR(160008, "data type cast exception error, please check the error log."),
 
     /**
-     * resolve eventLog identity or updated or previousBlock is null.
+     * weidentity resolve attribute exceptions or error.
      */
-    RESOLVE_EVENT_LOG_NULL_ERROR(160009, "resolve eventLog identity or updated or previousBlock "
-        + "is null, please check error log."),
-
-    /**
-     * resolve eventLog exceptions or error.
-     */
-    RESOLVE_EVENT_LOG_ERROR(160010, "resolve eventLog exception or error, please check error log."),
+    DATA_RESOLVE_ATTRIBUTE_ERROR(
+        160011,
+        "data resolve attribute exception error, please check the error log."
+    ),
 
     /**
      * other uncatched exceptions or error.
      */
-    UNKNOW_ERROR(160003, "unknow error, please check error log.");
+    UNKNOW_ERROR(160003, "unknow error, please check the error log.");
 
     /**
      * error code.

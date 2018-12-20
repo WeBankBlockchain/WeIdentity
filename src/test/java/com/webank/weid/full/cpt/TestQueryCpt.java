@@ -24,7 +24,9 @@ import java.util.concurrent.Future;
 
 import mockit.Mock;
 import mockit.MockUp;
+import org.bcos.web3j.abi.datatypes.DynamicArray;
 import org.bcos.web3j.abi.datatypes.Type;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,12 +36,15 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.CptController;
+import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.request.UpdateCptArgs;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DataTypetUtils;
 
 /**
  * queryCpt method for testing CptService.
@@ -195,4 +200,35 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
+
+    /**
+     * case: mock DataTypetUtils.bytes32DynamicArrayToStringArrayWithoutTrim()
+     *      for DataTypeCastException.DataTypeCastException()
+     */
+    @Test
+    public void testQueryCptCase8() {
+
+        MockUp<DataTypetUtils> mockTest = new MockUp<DataTypetUtils>() {
+            @Mock
+            public String[] bytes32DynamicArrayToStringArrayWithoutTrim(
+                DynamicArray<Bytes32> bytes32DynamicArray)
+                throws DataTypeCastException {
+                WeIdBaseException e = new WeIdBaseException(
+                    "mock DataTypeCastException for coverage.");
+                logger.error("testQueryCptCase8:{}", e.toString(), e);
+                throw new DataTypeCastException(e);
+            }
+        };
+
+        ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
+        logger.info("queryCpt result:");
+        BeanUtil.print(response);
+
+        mockTest.tearDown();
+
+        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+
 }

@@ -210,7 +210,6 @@ public abstract class TestBaseServcie extends BaseTest {
      * 
      * @param createWeId createWeId
      * @param registerCptArgs registerCptArgs
-     * @param isRegisterAuthorityIssuer isRegisterAuthorityIssuer
      * @return
      */
     protected CptBaseInfo registerCpt(
@@ -231,7 +230,6 @@ public abstract class TestBaseServcie extends BaseTest {
      * cpt register.
      * 
      * @param createWeId createWeId
-     * @param isRegisterAuthorityIssuer isRegisterAuthorityIssuer
      * @return
      */
     protected CptBaseInfo registerCpt(CreateWeIdDataResult createWeId) {
