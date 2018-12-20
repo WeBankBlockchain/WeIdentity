@@ -290,8 +290,8 @@ public final class DataTypetUtils {
      * @return the string[]
      */
     public static String[] bytes32DynamicArrayToStringArrayWithoutTrim(
-
         DynamicArray<Bytes32> bytes32DynamicArray) {
+
         List<Bytes32> bytes32List = bytes32DynamicArray.getValue();
         String[] stringArray = new String[bytes32List.size()];
         for (int i = 0; i < bytes32List.size(); i++) {
