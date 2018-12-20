@@ -156,7 +156,7 @@ public class Cpt {
      * The base data structure for CPT meta data.
      */
     @Data
-    public class MetaData {
+    public static class MetaData {
 
         /**
          * The weIdentity DID of the publisher who register this CPT.

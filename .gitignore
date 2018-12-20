@@ -8,6 +8,7 @@ Created by https://www.gitignore.io/api/vim,java,maven,gradle,java-web,intellij,
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/dictionaries
+.idea/checkstyle-idea.xml
 
 # Sensitive or high-churn files:
 .idea/**/dataSources/

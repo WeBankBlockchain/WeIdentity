@@ -37,13 +37,13 @@ public enum ErrorCode {
     CPT_NOT_EXISTS(500301, "cpt does not exist"),
 
     /**
-     * cpt id generated for authority issuer exceeds limited max value
+     * cpt id generated for authority issuer exceeds limited max value.
      */
     CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX(
         500302, "cpt id generated for authority issuer exceeds limited max value"),
 
     /**
-     * cpt publisher does not exist
+     * cpt publisher does not exist.
      */
     CPT_PUBLISHER_NOT_EXIST(500303, "cpt publisher does not exist"),
 
@@ -182,19 +182,19 @@ public enum ErrorCode {
         100207, "the authority issuer accumulator value is illegal (integer value required)"),
 
     /**
-     * The Authority Issuer Contract level error: subject already exists
+     * The Authority Issuer Contract level error: subject already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST(
         500201, "the authority issuer contract error: the subject already exists"),
 
     /**
-     * The Authority Issuer Contract level error: subject already exists
+     * The Authority Issuer Contract level error: subject already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS(
         500202, "the authority issuer contract error: the subject does not exist"),
 
     /**
-     * The Authority Issuer Contract level error: no permission
+     * The Authority Issuer Contract level error: no permission.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION(
         500203, "the authority issuer contract error: no permission"),
@@ -210,23 +210,23 @@ public enum ErrorCode {
     WEID_PUBLICKEY_INVALID(100102, "the input public key is invalid."),
 
     /**
-     * private key is invalid
+     * private key is invalid.
      */
     WEID_PRIVATEKEY_INVALID(
         100103, "the input private key is invalid, please check and input your private key."),
 
     /**
-     * weid does not exist
+     * weid does not exist.
      */
     WEID_DOES_NOT_EXIST(100104, "the weid does not exist on blockchain."),
 
     /**
-     * weid has already exist
+     * weid has already exist.
      */
     WEID_ALREADY_EXIST(100105, "the weid has already exist on blockchain."),
 
     /**
-     * the private key is not the weid's
+     * the private key is not the weid's.
      */
     WEID_PRIVATEKEY_DOES_NOT_MATCH(100106, "the private key does not match the current weid."),
 
@@ -236,7 +236,7 @@ public enum ErrorCode {
     WEID_KEYPAIR_CREATE_FAILED(10107, "create keypair faild."),
 
     /**
-     * public key and private key are not a keypair
+     * public key and private key are not a keypair.
      */
     WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED(
         10108, "the public key and private key are not matched."),
@@ -247,12 +247,12 @@ public enum ErrorCode {
     TRANSACTION_TIMEOUT(160001, "the transaction is timeout."),
 
     /**
-     * exception happens when transaction executes
+     * exception happens when transaction executes.
      */
     TRANSACTION_EXECUTE_ERROR(160002, "the transaction does not correctly executed."),
 
     /**
-     * input parameter is illegal
+     * input parameter is illegal.
      */
     ILLEGAL_INPUT(160004, "input parameter is illegal."),
 
@@ -272,17 +272,33 @@ public enum ErrorCode {
     BASE_ERROR(160007, "baes exception error, please check error log."),
 
     /**
+     * weidentity data type case exceptions or error.
+     */
+    DATA_TYPE_CASE_ERROR(160008, "data type cast exception error, please check error log."),
+
+    /**
+     * resolve eventLog identity or updated or previousBlock is null.
+     */
+    RESOLVE_EVENT_LOG_NULL_ERROR(160009, "resolve eventLog identity or updated or previousBlock "
+        + "is null, please check error log."),
+
+    /**
+     * resolve eventLog exceptions or error.
+     */
+    RESOLVE_EVENT_LOG_ERROR(160010, "resolve eventLog exception or error, please check error log."),
+
+    /**
      * other uncatched exceptions or error.
      */
     UNKNOW_ERROR(160003, "unknow error, please check error log.");
 
     /**
-     * error code
+     * error code.
      */
     private int code;
 
     /**
-     * error message
+     * error message.
      */
     private String codeDesc;
 
@@ -311,7 +327,7 @@ public enum ErrorCode {
      *
      * @param code the new ErrorCode
      */
-    public void setCode(int code) {
+    protected void setCode(int code) {
         this.code = code;
     }
 
@@ -329,7 +345,7 @@ public enum ErrorCode {
      *
      * @param codeDesc the new ErrorCode Description
      */
-    public void setCodeDesc(String codeDesc) {
+    protected void setCodeDesc(String codeDesc) {
         this.codeDesc = codeDesc;
     }
 }

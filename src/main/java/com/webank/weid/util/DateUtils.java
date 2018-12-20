@@ -40,7 +40,7 @@ public class DateUtils {
      * @param date the date
      * @return the ISO 8601 timestamp
      */
-    public static String getISO8601Timestamp(Date date) {
+    public static String getTimestamp(Date date) {
         return getDefaultDateFormat().format(date);
     }
 
@@ -50,7 +50,7 @@ public class DateUtils {
      * @param date the date
      * @return the ISO 8601 timestamp
      */
-    public static String getISO8601Timestamp(long date) {
+    public static String getTimestamp(long date) {
         return getDefaultDateFormat().format(date);
     }
 
@@ -108,13 +108,13 @@ public class DateUtils {
      * @param dateString the date string
      * @return true, if is valid UTC date string
      */
-    public static boolean isValidUTCDateString(String dateString) {
+    public static boolean isValidDateString(String dateString) {
         try {
             DateFormat df = getDefaultDateFormat();
             df.setLenient(false);
             df.parse(dateString);
             return true;
-        } catch (ParseException pEx) {
+        } catch (ParseException parseEx) {
             return false;
         }
     }
@@ -135,5 +135,14 @@ public class DateUtils {
      */
     public static String getCurrentTimeStampString() {
         return String.valueOf(System.currentTimeMillis());
+    }
+
+    /**
+     *  Get current timestamp in String type.
+     *
+     * @return the current time stamp long
+     */
+    public static Long getCurrentTimeStamp() {
+        return System.currentTimeMillis();
     }
 }
