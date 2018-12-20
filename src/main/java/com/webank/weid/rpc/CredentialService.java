@@ -44,7 +44,7 @@ public interface CredentialService {
      *
      * @param args the args
      * @return the verification result. True if yes, false otherwise with exact verify error codes
-     * in ResponseData
+     *      in ResponseData
      */
     ResponseData<Boolean> verifyCredential(Credential args);
 
@@ -53,7 +53,7 @@ public interface CredentialService {
      *
      * @param args the args
      * @return the verification result. True if yes, false otherwise with exact verify error codes
-     * in ResponseData
+     *      in ResponseData
      */
     ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(VerifyCredentialArgs args);
 }

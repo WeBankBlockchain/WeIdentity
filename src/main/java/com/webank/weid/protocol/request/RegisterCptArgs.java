@@ -19,9 +19,9 @@
 
 package com.webank.weid.protocol.request;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-
 import lombok.Data;
+
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 
 /**
  * The Arguments for the SDK API register CPT.

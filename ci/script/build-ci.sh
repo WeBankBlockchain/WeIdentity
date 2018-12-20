@@ -16,7 +16,7 @@ function modify_config()
     export ISSUER_ADDRESS=${issuer_address}
     MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
-	cp ${app_xml_config} ${java_source_code_dir}/src/test/resources/
+    cp ${app_xml_config} ${java_source_code_dir}/src/test/resources/
     #cat $app_xml_config
     echo "modify sdk config finished..."
 }
@@ -36,7 +36,7 @@ function gradle_build_sdk()
 
     echo "Begin to compile java code......"
     if [ -d ${java_source_code_dir}/dist ]; then
-	rm -rf ${java_source_code_dir}/dist
+        rm -rf ${java_source_code_dir}/dist
     fi
     gradle clean build -x test
     echo "compile java code done."
@@ -44,22 +44,19 @@ function gradle_build_sdk()
 
 function deploy_contract()
 {
-
-	CLASSPATH=${java_source_code_dir}/dist/conf
-	echo "begin to deploy contract..."
-	for jar_file in ${java_source_code_dir}/dist/lib/*.jar
-	do
-	CLASSPATH=${CLASSPATH}:${jar_file}
-	done
-
-	for jar_file in ${java_source_code_dir}/dist/app/*.jar
-	do
-	CLASSPATH=${CLASSPATH}:${jar_file}
-	done
+    CLASSPATH=${java_source_code_dir}/dist/conf
+    echo "begin to deploy contract..."
+    for jar_file in ${java_source_code_dir}/dist/lib/*.jar
+    do
+        CLASSPATH=${CLASSPATH}:${jar_file}
+    done
+    for jar_file in ${java_source_code_dir}/dist/app/*.jar
+    do
+        CLASSPATH=${CLASSPATH}:${jar_file}
+    done
 
     java -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract
     echo "contract deployment done."
-        
 }
 
 function main()

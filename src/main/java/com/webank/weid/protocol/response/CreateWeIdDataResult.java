@@ -19,10 +19,10 @@
 
 package com.webank.weid.protocol.response;
 
+import lombok.Data;
+
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
-
-import lombok.Data;
 
 /**
  * The response result for creating WeIdentity DID.
