@@ -19,9 +19,9 @@
 
 package com.webank.weid.protocol.response;
 
-import com.webank.weid.constant.ErrorCode;
-
 import lombok.Data;
+
+import com.webank.weid.constant.ErrorCode;
 
 /**
  * The internal base response result class.
