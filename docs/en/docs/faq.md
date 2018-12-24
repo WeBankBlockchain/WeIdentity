@@ -4,7 +4,7 @@
 
 - **What can the user do on his/her/its data?**
 
-1. User (can be a person, an object or an organization) has full control and ownership of the digital identifier without reliance on external authorities.
+1. User (a person, an object or an organization) has full control and ownership of the digital identifier without reliance on external authorities.
 2. User’s digital identifier can be portable to other systems and be used as long as the identifiers support DIDs and DID methods.
 3. Users can authorize the access of their data to a third party.
 4. User can decide what information from digital credential should be disclosed whereas the validity and the authenticity of the data can still be preserved.
@@ -37,7 +37,7 @@ WeIdentity can be applied in all business contexts where proof of one’s identi
 
 WeIdentity never publishes private information on chain and such will only be stored separately off-chain. There are two ways in retrieving these information:
 1. User can first download the information through User agent, then submit the information online or via QR code to the party who needs to access the information.
-2. Or, the user can authorize User Agent to access the data directrly, if there is a data transfer channel already built between User Agent and data consumer.
+2. On the contrary, the user can authorize User Agent to access the data directly, if there is a data transfer channel already built between User Agent and data consumer.
 
 ---
 
@@ -49,7 +49,7 @@ New user must go through User Agent to access the chain. And new organizations a
 
 ---
 
-- **How can WeIdentity ensure the authoritativeness of information provided by the issuing organization? E.g. making sure a sustainable and stable provision of reliable data from genuine source?**
+- **How can WeIdentity ensure the authoritativeness of information provided by the issuing organization, e.g. making sure a sustainable and stable provision of reliable data from genuine source?**
 
 In a WeIdentity project, data credibility is built upon the trust and recognition people have on the data provider as an authority. It is down to the capability of the data provider (e.g. government) to maintain its authority of information and quality of data service.
 
@@ -83,7 +83,7 @@ Currently batch processing is not yet ready, however it will be provided in a la
 
 - **What is the difference between WeIdentity DID and Standard DID ?**
 
-WeIdentity DID has further implemented a distributed and multi-centered identity authentication protocol (WeIdentity is required to be run on a distributed ledger platform) based on W3C DID specification to allow a person or anobject to be registered,identified and authenticated on chain.
+WeIdentity DID has further implemented a distributed and multi-centered identity authentication protocol (WeIdentity is required to be run on a distributed ledger platform) based on W3C DID specification to allow a person or an object to be registered, identified and authenticated on chain.
 
 ---
 
@@ -119,6 +119,6 @@ At the same time, WeIdentity allows issuer to renew or extend the expirity date 
 
 - **Can Credential be forged? Any way to prevent the forgery?**  
 
-WeIdentity Credentialcurrently adopts ECDSA signature algorithm, and will support RSA signature in future releases. The effort to forge a Credential is the same as to compromise an ECDSA/RSA private key with a given key-length, which makes forgery practically impossible if the private key of Credential is securely kept.
+WeIdentity Credential currently adopts ECDSA signature algorithm, and will support RSA signature in future releases. The effort to forge a Credential is the same as to compromise an ECDSA/RSA private key with a given key-length, which makes forgery practically impossible if the private key of Credential is securely kept.
 
 ---
