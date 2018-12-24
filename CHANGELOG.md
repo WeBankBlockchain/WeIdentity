@@ -1,12 +1,23 @@
+### V1.0.3 (2018-12-20)
+
+* Features:
+1. Add cache rules in travis-ci config. Only apply CI build on master, develop and tag.
+2. Auto release when add a new tag.
+3. Minor issues fix in gradle build configuration.
+
+* Bugfixes:
+1. Fix issues found by code safe scan.
+2. Fix issues found by checkstyle and spotbugs.
+
 ### V1.0.2 (2018-12-14)
 
 * Features:
-1. remove codecov patch check
-2. modify FISCO-BCOS sdk ca.crt and client.keystore file
-3. use correct badge url from WeBankFinTech
+1. Remove codecov patch check
+2. Modify FISCO-BCOS sdk ca.crt and client.keystore file
+3. Use correct badge url from WeBankFinTech
 
 * Bugfixes:
-1. fix issues found by codacy.
+1. Fix issues found by codacy.
 
 ### V1.0.1 (2018-11-30)
 
