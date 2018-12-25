@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -58,7 +58,7 @@ public class TestSetPublicKey extends TestBaseServcie {
     public void testSetPublicKeyCase1() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-
+        BeanUtil.print(setPublicKeyArgs);
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
         logger.info("setPublicKey result:");
         BeanUtil.print(response);

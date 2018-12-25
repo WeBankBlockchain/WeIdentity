@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -18,8 +18,6 @@
  */
 
 package com.webank.weid.util;
-
-import java.util.Arrays;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -47,7 +45,7 @@ public class TestHashUtils {
         // use assert here to verify the String to be 64 bit and Bytes[] to be
         // 32 bit
         logger.info(
-            "After hash, String: " + hashedString + ", Bytes: " + Arrays.toString(hashedBytes));
+            "After hash, String: {}, Bytes: {}", hashedString, new String(hashedBytes));
         Assert.assertNotNull(hashedBytes);
     }
 }

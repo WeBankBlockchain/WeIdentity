@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -19,6 +19,7 @@
 
 package com.webank.weid.full.credential;
 
+import java.security.SignatureException;
 import java.util.Map;
 
 import mockit.Mock;
@@ -42,7 +43,7 @@ import com.webank.weid.util.SignatureUtils;
 
 /**
  * verifyCredential method for testing CredentialService.
- *
+ * 
  * @author v_wbgyang
  */
 public class TestVerifyCredential extends TestBaseServcie {
@@ -148,7 +149,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setId("xxxxxxxxx");
         ResponseData<Boolean> response = super.verifyCredential(credentialWrapper);
         credential.setId(id);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -317,15 +318,15 @@ public class TestVerifyCredential extends TestBaseServcie {
         MockUp<SignatureUtils> mockTest = new MockUp<SignatureUtils>() {
             @Mock
             public Sign.SignatureData simpleSignatureDeserialization(
-                byte[] serializedSignatureData) {
-                return null;
+                byte[] serializedSignatureData) throws SignatureException {
+                throw new SignatureException();
             }
         };
         ResponseData<Boolean> response = super.verifyCredential(credentialWrapper);
 
         mockTest.tearDown();
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -454,7 +455,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         Assert.assertEquals(false, response.getResult());
     }
 
-    /**
+    /** 
      * case: issuer is not exists.
      */
     @Test

@@ -83,7 +83,7 @@ List jackson = [
 	"com.squareup:javapoet:1.7.0",
 	"io.reactivex:rxjava:1.2.4",
 	"com.github.jnr:jnr-unixsocket:0.15",
-	"com.webank:weidentity-contract-java:1.0.0"
+	"com.webank:weidentity-contract-java:1.1.0"
 ]
 
 // In this section you declare the dependencies for your production and test code

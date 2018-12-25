@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -75,9 +75,9 @@ public enum ErrorCode {
     CREDENTIAL_ERROR(100400, "error occured during processing credential tasks"),
 
     /**
-     * The exact error codes in credential tasks.
+     * The credential does not exist on chain (evidence not found).
      */
-    CREDENTIAL_NOT_EXISTS(100401, "credential does not exist"),
+    CREDENTIAL_EVIDENCE_NOT_EXISTS_ON_CHAIN(100401, "credential evidence does not exist on chain"),
 
     /**
      * The credential expired.
@@ -156,7 +156,7 @@ public enum ErrorCode {
      * The credential issuer does not have a valid WeIdentity DID document.
      */
     CREDENTIAL_WEID_DOCUMENT_ILLEGAL(100417, "weid document illegal"),
-    
+
     /**
      * The credential issuer is invalid.
      */
@@ -167,6 +167,32 @@ public enum ErrorCode {
      */
     CREDENTIAL_EXCEPTION_VERIFYSIGNATURE(100419, "credential verify signature exception"),
     
+    /**
+     * The credential evidence contract failure: illegal input.
+     */
+    CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT(
+        500401,
+        "credential evidence contract failure: illegal input"
+    ),
+
+    /**
+     * The credential evidence base error.
+     */
+    CREDENTIAL_EVIDENCE_BASE_ERROR(
+        100500,
+        "generic error when processing credential evidence tasks"
+    ),
+
+    /**
+     * The credential evidence hash mismatch.
+     */
+    CREDENTIAL_EVIDENCE_HASH_MISMATCH(100501, "credential evidence hash mismatch"),
+
+    /**
+     * The credential evidence id mismatch.
+     */
+    CREDENTIAL_EVIDENCE_ID_MISMATCH(100502, "credential evidence id mismatch"),
+
     /**
      * Authority issuer main error code.
      */
@@ -191,8 +217,10 @@ public enum ErrorCode {
     /**
      * The authority issuer opcode mismatch.
      */
-    AUTHORITY_ISSUER_OPCODE_MISMATCH(100205,
-        "opcode in event log does not match the desired opcode"),
+    AUTHORITY_ISSUER_OPCODE_MISMATCH(
+        100205,
+        "opcode in event log does not match the desired opcode"
+    ),
 
     /**
      * The authority issuer name illegal.
@@ -203,13 +231,17 @@ public enum ErrorCode {
      * The authority issuer accvalue illegal.
      */
     AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL(
-        100207, "the authority issuer accumulator value is illegal (integer value required)"),
+        100207,
+        "the authority issuer accumulator value is illegal (integer value required)"
+    ),
 
     /**
      * The Authority Issuer Contract level error: subject already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST(
-        500201, "the authority issuer contract error: the subject already exists"),
+        500201,
+        "the authority issuer contract error: the subject already exists"
+    ),
 
     /**
      * The Authority Issuer Contract level error: subject already exists.
