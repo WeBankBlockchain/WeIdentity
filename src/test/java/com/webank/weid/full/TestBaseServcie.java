@@ -40,6 +40,7 @@ import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
@@ -434,5 +435,19 @@ public abstract class TestBaseServcie extends BaseTest {
             }
         };
     }
+
+    protected Credential copyCredential(Credential credential) {
+        Credential ct = new Credential();
+        ct.setSignature(credential.getSignature());
+        ct.setContext(credential.getContext());
+        ct.setClaim(credential.getClaim());
+        ct.setIssuranceDate(credential.getIssuranceDate());
+        ct.setCptId(credential.getCptId());
+        ct.setExpirationDate(credential.getExpirationDate());
+        ct.setIssuer(credential.getIssuer());
+        ct.setId(credential.getId());
+        return ct;
+    }
+
 
 }

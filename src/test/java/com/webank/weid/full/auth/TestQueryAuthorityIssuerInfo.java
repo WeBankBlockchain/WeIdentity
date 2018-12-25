@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -57,9 +57,9 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     @Override
     public void testInit() {
 
+        super.testInit();
         if (null == createWeId) {
-            createWeId = super.registerAuthorityIssuer();
-            super.testInit();
+            createWeId = super.registerAuthorityIssuer(); 
         }
     }
 

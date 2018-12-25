@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -25,13 +25,21 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bouncycastle.util.encoders.Base64;
 
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.base.AuthenticationProperty;
+import com.webank.weid.protocol.base.PublicKeyProperty;
+import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * The Signature related Utils class. Based on ECDSA Asymmetric Encryption + SHA256 Hash Algorithm.
@@ -45,7 +53,7 @@ import com.webank.weid.constant.WeIdConstant;
  *
  * <p>Future support of SM2/SM3 is under construction.
  *
- * @author chaoxinhu 2018.10
+ * @author chaoxinhu 2019.1
  */
 public class SignatureUtils {
 
@@ -57,9 +65,9 @@ public class SignatureUtils {
      * @throws NoSuchAlgorithmException No such algorithm.
      * @throws NoSuchProviderException No such provider.
      */
-    public static ECKeyPair createKeyPair() 
-        throws InvalidAlgorithmParameterException, 
-        NoSuchAlgorithmException, 
+    public static ECKeyPair createKeyPair()
+        throws InvalidAlgorithmParameterException,
+        NoSuchAlgorithmException,
         NoSuchProviderException {
         return Keys.createEcKeyPair();
     }
@@ -111,26 +119,25 @@ public class SignatureUtils {
         throws SignatureException, UnsupportedEncodingException {
 
         return Sign.signedMessageToKey(HashUtils.sha3(message.getBytes(WeIdConstant.UTF_8)),
-                signatureData);
+            signatureData);
     }
 
     /**
      * Verify whether the message and the Signature matches the given public Key.
      *
      * @param message This should be from the same plain-text source with the signature Data.
-     * @param signatureData This must be in SignatureData. Caller should call
-     *      impleSignatureDeserialization.
+     * @param signatureData This must be in SignatureData. Caller should call deserialize.
      * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
      * @return true if yes, false otherwise
      * @throws SignatureException Signature is the exception.
      * @throws UnsupportedEncodingException If the named charset is not supported.
      */
     public static boolean verifySignature(
-        String message, 
-        Sign.SignatureData signatureData, 
+        String message,
+        Sign.SignatureData signatureData,
         BigInteger publicKey)
         throws SignatureException, UnsupportedEncodingException {
-        
+
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
     }
@@ -234,5 +241,51 @@ public class SignatureUtils {
     public static Sign.SignatureData rawSignatureDeserialization(int v, byte[] r, byte[] s) {
         byte valueByte = (byte) v;
         return new Sign.SignatureData(valueByte, r, s);
+    }
+
+    /**
+     * Verify a signature based on the provided raw data, and the WeID Document from chain. This
+     * will traverse each public key in the WeID Document and fetch all keys which belongs to the
+     * authentication list. Then, verify signature to each one; return true if anyone matches. This
+     * is used in CredentialService and EvidenceService.
+     *
+     * @param rawData the rawData to be verified
+     * @param signatureData the Signature Data structure
+     * @param weIdDocument the WeIdDocument to be extracted
+     * @return true if yes, false otherwise with exact error codes
+     */
+    public static ResponseData<Boolean> verifySignatureFromWeId(
+        String rawData,
+        Sign.SignatureData signatureData,
+        WeIdDocument weIdDocument) {
+        List<String> publicKeysListToVerify = new ArrayList<String>();
+
+        // Traverse public key list indexed Authentication key list
+        for (AuthenticationProperty authenticationProperty : weIdDocument
+            .getAuthentication()) {
+            String index = authenticationProperty.getPublicKey();
+            for (PublicKeyProperty publicKeyProperty : weIdDocument.getPublicKey()) {
+                if (publicKeyProperty.getId().equalsIgnoreCase(index)) {
+                    publicKeysListToVerify.add(publicKeyProperty.getPublicKey());
+                }
+            }
+        }
+        try {
+            boolean result = false;
+            for (String publicKeyItem : publicKeysListToVerify) {
+                if (StringUtils.isNotEmpty(publicKeyItem)) {
+                    result =
+                        result
+                            || SignatureUtils.verifySignature(
+                            rawData, signatureData, new BigInteger(publicKeyItem));
+                }
+            }
+            if (!result) {
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
+            }
+        } catch (Exception e) {
+            new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
+        }
+        return new ResponseData<>(true, ErrorCode.SUCCESS);
     }
 }

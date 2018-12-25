@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -101,7 +101,6 @@ public class TestWeIdUtils {
 
     @Test
     public void testIsPrivateKeyValid() {
-
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         WeIdPrivateKey key = new WeIdPrivateKey();
