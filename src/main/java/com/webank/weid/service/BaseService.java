@@ -139,6 +139,7 @@ public abstract class BaseService {
      * Reload contract.
      *
      * @param contractAddress the contract address
+     * @param privateKey the privateKey of the sender
      * @param cls the class
      * @return the contract
      */
