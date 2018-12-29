@@ -92,6 +92,7 @@ public interface WeIdService {
     /**
      * Check if the WeIdentity DID exists on chain.
      *
+     * @param weId The WeIdentity DID.
      * @return true if exists, false otherwise.
      */
     ResponseData<Boolean> isWeIdExist(String weId);

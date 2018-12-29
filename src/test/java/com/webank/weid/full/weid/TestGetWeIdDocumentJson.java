@@ -50,6 +50,7 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
 
     @Override
     public void testInit() {
+        super.testInit();
         if (null == createWeIdForGetJson) {
             createWeIdForGetJson = super.createWeIdWithSetAttr();
         }

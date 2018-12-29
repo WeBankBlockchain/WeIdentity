@@ -52,6 +52,10 @@ public class SignatureUtils {
     /**
      * Generate a new Key-pair.
      *
+     * @return the ECKeyPair
+     * @throws InvalidAlgorithmParameterException Invalid algorithm.
+     * @throws NoSuchAlgorithmException No such algorithm.
+     * @throws NoSuchProviderException No such provider.
      */
     public static ECKeyPair createKeyPair() 
         throws InvalidAlgorithmParameterException, 
@@ -66,6 +70,7 @@ public class SignatureUtils {
      * @param message the message
      * @param keyPair the key pair
      * @return SignatureData
+     * @throws UnsupportedEncodingException If the named charset is not supported.
      */
     public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair)
         throws UnsupportedEncodingException {
@@ -79,6 +84,7 @@ public class SignatureUtils {
      * @param message the message
      * @param privateKeyString the private key string
      * @return SignatureData
+     * @throws UnsupportedEncodingException If the named charset is not supported.
      */
     public static Sign.SignatureData signMessage(
         String message,
@@ -96,6 +102,8 @@ public class SignatureUtils {
      * @param message the message
      * @param signatureData the signature data
      * @return publicKey
+     * @throws SignatureException Signature is the exception.
+     * @throws UnsupportedEncodingException If the named charset is not supported.
      */
     public static BigInteger signatureToPublicKey(
         String message,
@@ -114,6 +122,8 @@ public class SignatureUtils {
      *      impleSignatureDeserialization.
      * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
      * @return true if yes, false otherwise
+     * @throws SignatureException Signature is the exception.
+     * @throws UnsupportedEncodingException If the named charset is not supported.
      */
     public static boolean verifySignature(
         String message, 
@@ -180,7 +190,6 @@ public class SignatureUtils {
      *
      * @param keyPair the key pair
      * @return the byte[]
-     * @throws Exception the exception
      */
     public static byte[] simpleKeyPairSerialization(ECKeyPair keyPair) {
         return Keys.serialize(keyPair);

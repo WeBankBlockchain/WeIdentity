@@ -33,6 +33,7 @@ public class WeIdBaseException extends RuntimeException {
      * constructor.
      *
      * @param msg exception message
+     * @param cause exception object
      */
     public WeIdBaseException(String msg, Throwable cause) {
         super(msg, cause);
@@ -49,6 +50,7 @@ public class WeIdBaseException extends RuntimeException {
 
     /**
      * get associated error code.
+     * @return ErrorCode
      */
     public ErrorCode getErrorCode() {
         return ErrorCode.BASE_ERROR;

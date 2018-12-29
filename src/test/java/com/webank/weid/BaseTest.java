@@ -39,7 +39,7 @@ import com.webank.weid.service.BaseService;
 
 /**
  * Test base class.
- * 
+ *
  * @author v_wbgyang
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -61,17 +61,17 @@ public abstract class BaseTest extends BaseService {
 
     @Autowired
     protected ToolConf toolConf;
-    
+
     /**
      * the private key of sdk is a BigInteger,which needs to be used
      * when registering authority.
-     * 
+     *
      */
     protected String privateKey;
 
     /**
      *  initialization some for test.
-     *  
+     *
      */
     @Before
     public void setUp() {
@@ -83,7 +83,7 @@ public abstract class BaseTest extends BaseService {
 
     /**
      *  tearDown some for test.
-     *  
+     *
      */
     @After
     public void tearDown() {

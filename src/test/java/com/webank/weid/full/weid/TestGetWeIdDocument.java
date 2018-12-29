@@ -19,11 +19,14 @@
 
 package com.webank.weid.full.weid;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Future;
 
 import mockit.Mock;
 import mockit.MockUp;
 import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -32,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
+import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -52,6 +56,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     
     @Override
     public void testInit() {
+        super.testInit();
         if (null == createWeIdForGetDoc) {
             createWeIdForGetDoc = super.createWeIdWithSetAttr(); 
         }
@@ -200,5 +205,56 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         mockTest.tearDown();
         mockFuture.tearDown();
         return weIdDoc;
+    }
+    
+    /**
+     * case: mock WeIdContract.getWeIdAttributeChangedEvents
+     *      for WeIdServiceImpl.resolveAttributeEvent().
+     * 
+     */
+    @Test
+    public void testGetWeIdDocumentCase8() {
+
+        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
+            @Mock
+            public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
+                    TransactionReceipt transactionReceipt) {
+                List<WeIdAttributeChangedEventResponse> eventlog = 
+                    new ArrayList<WeIdContract.WeIdAttributeChangedEventResponse>();
+                eventlog.add(new WeIdAttributeChangedEventResponse());
+                return eventlog;
+            }
+        };
+
+        ResponseData<WeIdDocument> weIdDoc = 
+            weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
+        mockTest.tearDown();
+        BeanUtil.print(weIdDoc);
+        Assert.assertEquals(ErrorCode.DATA_RESOLVE_ATTRIBUTE_ERROR.getCode(),
+            weIdDoc.getErrorCode().intValue());
+    }
+    
+    /**
+     * case: mock WeIdContract.getWeIdAttributeChangedEvents 
+     * for WeIdServiceImpl.resolveAttributeEvent().
+     * 
+     */
+    @Test
+    public void testGetWeIdDocumentCase9() {
+
+        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
+            @Mock
+            public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
+                    TransactionReceipt transactionReceipt) {
+                return null;
+            }
+        };
+        
+        ResponseData<WeIdDocument> weIdDoc = 
+            weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
+        mockTest.tearDown();
+        BeanUtil.print(weIdDoc);
+        Assert.assertEquals(ErrorCode.DATA_RESOLVE_ATTRIBUTE_ERROR.getCode(),
+            weIdDoc.getErrorCode().intValue());
     }
 }
