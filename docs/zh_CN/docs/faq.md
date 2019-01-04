@@ -4,7 +4,7 @@
 
 技术问题 FAQ 列表：  
 
-* [JAVA SDK FAQ](weidentity-java-sdk/faq.html)
+* [JAVA SDK FAQ](https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/faq.html)
 
 ---
 
