@@ -20,6 +20,8 @@
 package com.webank.weid.demo;
 
 import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -27,6 +29,7 @@ import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.JsonUtil;
 
 /**
  * WeIdentity DID demo.
@@ -36,25 +39,31 @@ import com.webank.weid.util.DateUtils;
 public class DemoTest extends DemoBase {
 
     /** jsonSchema. */
-    public final static String SCHEMA =
-        "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"title\""
-        + ":\"/etc/fstab\",\"description\":\"JSON representation of /etc/fstab\""
-        + ",\"type\":\"object\",\"properties\":{\"swap\":{\"$ref\":\"#/definitions/mntent\"}}"
-        + ",\"patternProperties\":{\"^/([^/]+(/[^/]+)*)?$\":{\"$ref\":\"#/definitions/mntent\"}}"
-        + ",\"required\":[\"/\",\"swap\"],\"additionalProperties\":false,\"definitions\""
-        + ":{\"mntent\":{\"title\":\"mntent\",\"description\":\"An fstab entry\",\"type\""
-        + ":\"object\",\"properties\":{\"device\":{\"type\":\"string\"},\"fstype\""
-        + ":{\"type\":\"string\"},\"options\":{\"type\":\"array\",\"minItems\":1,\"items\""
-        + ":{\"type\":\"string\"}},\"dump\":{\"type\":\"integer\",\"minimum\":0},\"fsck\""
-        + ":{\"type\":\"integer\",\"minimum\":0}},\"required\":[\"device\",\"fstype\"]"
-        + ",\"additionalItems\":false}}}";
+    public final static String SCHEMA = "{"
+        + "  \"properties\" : {"
+        + "      \"name\": {"
+        + "          \"type\": \"string\", "
+        + "          \"description\": \"the name of the certificate owner\""
+        + "      }, "
+        + "      \"gender\": {"
+        + "          \"enum\": [\"F\", \"M\"],"
+        + "          \"type\": \"string\", "
+        + "          \"description\": \"the gender of the certificate owner\""
+        + "      }, "
+        + "      \"age\": {"
+        + "          \"type\": \"number\", "
+        + "          \"description\": \"the age of the certificate owner\""
+        + "      }"
+        + "  },"
+        + "  \"required\": [\"name\", \"age\"]"
+        + "}";
 
     /** claim. */
-    public final static String SCHEMADATA =
-        "{\"/\":{\"device\":\"/dev/sda2\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\""
-        + ":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\""
-        + ":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\""
-        + ":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
+    public final static String SCHEMADATA = "{"
+        + "    \"name\": \"zhangshan\", "
+        + "    \"gender\": \"F\", "
+        + "\"age\": 32"
+        + "}";
 
     /**
      * main of demo.
@@ -85,13 +94,17 @@ public class DemoTest extends DemoBase {
         demo.registerAuthorityIssuer(createWeId, "webank", "0");
 
         // registCpt
-        CptBaseInfo cptResult = demo.registCpt(createWeId, SCHEMA);
+        CptBaseInfo cptResult =
+            demo.registCpt(
+                createWeId,
+                (Map<String, Object>) JsonUtil.jsonStrToObj(new HashMap<String, Object>(), SCHEMA)
+            );
         BeanUtil.print(cptResult);
 
         // create Credential
         Credential credential = demo.createCredential(createWeId,
             cptResult.getCptId(),
-            SCHEMADATA,
+            (Map<String, Object>) JsonUtil.jsonStrToObj(new HashMap<String, Object>(), SCHEMADATA),
             DateUtils.convertStringToDate("2019-10-11T18:09:42Z").getTime());
         BeanUtil.print(credential);
 

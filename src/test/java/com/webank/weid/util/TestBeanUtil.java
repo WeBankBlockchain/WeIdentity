@@ -53,7 +53,7 @@ public class TestBeanUtil {
         BeanUtil.print(passwordKey);
         BeanUtil.print(new ResponseData<PasswordKey>(passwordKey, ErrorCode.SUCCESS));
         
-        Map<Object,Object> map = new HashMap<Object,Object>();
+        Map<Object, Object> map = new HashMap<Object, Object>();
         map.put("key1", passwordKey);
         map.put("key2", "1234");
         map.put("key3", new Date());
@@ -61,7 +61,7 @@ public class TestBeanUtil {
         BeanUtil.print(map);
         BeanUtil.printSimpleMap(map);
         BeanUtil.printSimpleMap(null);
-        BeanUtil.print(new String[]{"one","two"});
+        BeanUtil.print(new String[]{"one", "two"});
         BeanUtil.print(new Date());
         BeanUtil.print(new BigDecimal(23));
         BeanUtil.print(new BigInteger("11"));
@@ -81,7 +81,7 @@ public class TestBeanUtil {
         map.put("response", new ResponseData<List<Object>>(list, ErrorCode.SUCCESS));
         BeanUtil.print(map);
         
-        Map<Object,Object> newMap = new HashMap<Object,Object>();
+        Map<Object, Object> newMap = new HashMap<Object, Object>();
         newMap.put("map", map);
         BeanUtil.print(newMap);
         

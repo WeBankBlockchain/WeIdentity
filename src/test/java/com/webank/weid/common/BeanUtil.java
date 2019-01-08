@@ -182,7 +182,7 @@ public class BeanUtil {
         }
     }
 
-    private static void printCollection(String blank, Collection<?> c,StringBuilder beanStr) {
+    private static void printCollection(String blank, Collection<?> c, StringBuilder beanStr) {
         if (null == c) {
             return;
         }

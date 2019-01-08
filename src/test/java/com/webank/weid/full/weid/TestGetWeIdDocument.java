@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
 import mockit.Mock;
 import mockit.MockUp;
 import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,11 +37,14 @@ import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DataTypetUtils;
 
 /**
  * getWeIdDocument method for testing WeIdService.
@@ -75,9 +79,9 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(1,weIdDoc.getResult().getService().size());
-        Assert.assertEquals(1,weIdDoc.getResult().getAuthentication().size());
-        Assert.assertEquals(1,weIdDoc.getResult().getPublicKey().size());
+        Assert.assertEquals(1, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
+        Assert.assertEquals(1, weIdDoc.getResult().getPublicKey().size());
     }
 
     /**
@@ -103,9 +107,9 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         BeanUtil.print(weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(2,weIdDoc.getResult().getService().size());
-        Assert.assertEquals(2,weIdDoc.getResult().getAuthentication().size());
-        Assert.assertEquals(3,weIdDoc.getResult().getPublicKey().size());
+        Assert.assertEquals(2, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(2, weIdDoc.getResult().getAuthentication().size());
+        Assert.assertEquals(3, weIdDoc.getResult().getPublicKey().size());
     }
 
     /**
@@ -230,7 +234,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         mockTest.tearDown();
         BeanUtil.print(weIdDoc);
-        Assert.assertEquals(ErrorCode.DATA_RESOLVE_ATTRIBUTE_ERROR.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             weIdDoc.getErrorCode().intValue());
     }
     
@@ -254,7 +258,31 @@ public class TestGetWeIdDocument extends TestBaseServcie {
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         mockTest.tearDown();
         BeanUtil.print(weIdDoc);
-        Assert.assertEquals(ErrorCode.DATA_RESOLVE_ATTRIBUTE_ERROR.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            weIdDoc.getErrorCode().intValue());
+    }
+
+    /**
+     * mock ResolveAttributeException for coverage.
+     */
+    @Test
+    public void testGetWeIdDocumentCase10() {
+
+        MockUp<DataTypetUtils> mockTest = new MockUp<DataTypetUtils>() {
+            @Mock
+            public String bytes32ToString(Bytes32 bytes32) {
+                WeIdBaseException e = new WeIdBaseException(
+                    "mock ResolveAttributeException for coverage.");
+                logger.error("testGetWeIdDocumentCase10:{}", e.toString(), e);
+                throw new DataTypeCastException(e);
+            }
+        };
+
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
+        mockTest.tearDown();
+        BeanUtil.print(weIdDoc);
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             weIdDoc.getErrorCode().intValue());
     }
 }

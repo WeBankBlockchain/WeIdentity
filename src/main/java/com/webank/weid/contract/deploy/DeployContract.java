@@ -167,7 +167,7 @@ public class DeployContract {
             WeIdContract weIdContract =
                 f.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String contractAddress = weIdContract.getContractAddress();
-            writeAddressToFile(contractAddress,"weIdContract.address");
+            writeAddressToFile(contractAddress, "weIdContract.address");
             return contractAddress;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("WeIdContract deploy exception", e);
@@ -206,7 +206,7 @@ public class DeployContract {
             CptController cptController =
                 f2.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String cptControllerAddress = cptController.getContractAddress();
-            writeAddressToFile(cptControllerAddress,"cptController.address");
+            writeAddressToFile(cptControllerAddress, "cptController.address");
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("CptController deploy exception", e);
         }
@@ -312,7 +312,7 @@ public class DeployContract {
                     TimeUnit.SECONDS);
             String authorityIssuerControllerAddress =
                 authorityIssuerController.getContractAddress();
-            writeAddressToFile(authorityIssuerControllerAddress,"authorityIssuer.address");
+            writeAddressToFile(authorityIssuerControllerAddress, "authorityIssuer.address");
             return authorityIssuerControllerAddress;
         } catch (Exception e) {
             logger.error("AuthorityIssuerController deployment error:", e);

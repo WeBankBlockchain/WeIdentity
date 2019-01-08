@@ -42,7 +42,7 @@ import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.request.UpdateCptArgs;
+import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.DataTypetUtils;
 
@@ -134,9 +134,11 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
 
-        UpdateCptArgs updateCptArgs = TestBaseUtil.buildUpdateCptArgs(createWeIdNew, cptBaseInfo);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeIdNew);
 
-        ResponseData<CptBaseInfo> responseUp = cptService.updateCpt(updateCptArgs);
+        ResponseData<CptBaseInfo> responseUp = cptService.updateCpt(
+            cptMapArgs,
+            cptBaseInfo.getCptId());
         logger.info("updateCpt result:");
         BeanUtil.print(responseUp);
 

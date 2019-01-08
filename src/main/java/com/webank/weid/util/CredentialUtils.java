@@ -59,21 +59,8 @@ public final class CredentialUtils {
                 + WeIdConstant.PIPELINE
                 + arg.getExpirationDate().toString()
                 + WeIdConstant.PIPELINE
-                + arg.getClaim();
+                + JsonUtil.objToJsonStr(arg.getClaim());
         return rawData;
-    }
-
-    /**
-     * Craft a non-masquerade hash which contains all fields of Credential info.
-     *
-     * @param arg the arg
-     * @return Hash value in String.
-     */
-    public static String getCredentialFields(VerifyCredentialArgs arg) {
-        if (arg == null) {
-            return StringUtils.EMPTY;
-        }
-        return getCredentialFields(extractCredentialResult(arg));
     }
 
     /**

@@ -20,13 +20,11 @@
 package com.webank.weid.full.cpt;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Future;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import mockit.Mock;
 import mockit.MockUp;
 import org.bcos.web3j.abi.datatypes.Address;
@@ -43,13 +41,14 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.contract.CptController;
 import com.webank.weid.contract.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.full.TestData;
 import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.request.RegisterCptArgs;
+import com.webank.weid.protocol.request.CptMapArgs;
+import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.WeIdUtils;
@@ -82,7 +81,7 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase1() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+        CptMapArgs registerCptArgs = TestBaseUtil.buildCptArgs(createWeId);
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
         logger.info("registerCpt result:");
@@ -98,7 +97,8 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase2() {
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(null);
+        CptMapArgs cptMapArgs = null;
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -106,36 +106,51 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： cptJsonSchema is null.
      */
     @Test
     public void testRegisterCptCase3() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.setCptJsonSchema(null);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.setCptJsonSchema(null);
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
-        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(),
+        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_NULL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
     /** 
-     * case： cptJsonSchema is invalid.
+     * case： Mock for ErrorCode.UNKNOW_ERROR.
      */
     @Test
     public void testRegisterCptCase4() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.setCptJsonSchema("xxxxxxxxx");
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        MockUp<CptController> mockTest = new MockUp<CptController>() {
+            @Mock
+            public Future<TransactionReceipt> registerCpt(
+                Address publisher,
+                StaticArray<Int256> intArray,
+                StaticArray<Bytes32> bytes32Array,
+                StaticArray<Bytes32> jsonSchemaArray,
+                Uint8 v,
+                Bytes32 r,
+                Bytes32 s) {
+                return null;
+            }
+        };
+
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
+
+        mockTest.tearDown();
 
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -147,22 +162,18 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase5() throws JsonProcessingException, IOException {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
 
         StringBuffer value = new StringBuffer("");
         for (int i = 0; i < 5000; i++) {
             value.append("x");
         }
 
-        JsonNode jsonNode = new ObjectMapper().readTree(TestData.schema);
-        ObjectNode objNode = (ObjectNode) jsonNode;
-        objNode.put("title", value.toString());
-        String afterStr =
-            new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(objNode);
+        HashMap<String, Object> cptJsonSchema = TestBaseUtil.buildCptJsonSchema();
+        cptJsonSchema.put(JsonSchemaConstant.TITLE_KEY, value.toString());
+        cptMapArgs.setCptJsonSchema(cptJsonSchema);
 
-        registerCptArgs.setCptJsonSchema(afterStr);
-
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -177,10 +188,10 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase6() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.setCptPublisher(null);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().setWeId(null);
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -194,10 +205,10 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase7() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.setCptPublisher("di:weid:0xaaaaaaaaaaaaaaaa");
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().setWeId("di:weid:0xaaaaaaaaaaaaaaaa");
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -211,10 +222,10 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase8() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.setCptPublisher("did:weid:0xaaaaaaaaaaaaaaaa");
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().setWeId("did:weid:0xaaaaaaaaaaaaaaaa");
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -229,16 +240,16 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase9() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
 
-        response = cptService.registerCpt(registerCptArgs);
+        response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -252,10 +263,10 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase10() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.setCptPublisherPrivateKey(null);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().setWeIdPrivateKey(null);
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -270,10 +281,10 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase11() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(null);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().getWeIdPrivateKey().setPrivateKey(null);
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -288,10 +299,10 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase12() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.getCptPublisherPrivateKey().setPrivateKey("1231325456468789");
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().getWeIdPrivateKey().setPrivateKey("1231325456468789");
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -307,11 +318,11 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase13() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.getCptPublisherPrivateKey()
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().getWeIdPrivateKey()
             .setPrivateKey(TestBaseUtil.createEcKeyPair().getPrivateKey());
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -326,10 +337,10 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase14() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(privateKey);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().getWeIdPrivateKey().setPrivateKey(privateKey);
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -344,10 +355,10 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase15() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.getCptPublisherPrivateKey().setPrivateKey("xxxxxxxxxx");
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().getWeIdPrivateKey().setPrivateKey("xxxxxxxxxx");
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -366,11 +377,13 @@ public class TestRegisterCpt extends TestBaseServcie {
         PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
         String weId = WeIdUtils.convertPublicKeyToWeId(passwordKey.getPublicKey());
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
-        registerCptArgs.setCptPublisher(weId);
-        registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.getWeIdAuthentication().setWeId(weId);
+        cptMapArgs.getWeIdAuthentication()
+            .getWeIdPrivateKey()
+            .setPrivateKey(passwordKey.getPrivateKey());
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -385,11 +398,11 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase17() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
 
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
-        ResponseData<CptBaseInfo> response = registerCptForMock(registerCptArgs, mockFuture);
+        ResponseData<CptBaseInfo> response = registerCptForMock(cptMapArgs, mockFuture);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -402,11 +415,11 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase18() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
 
         MockUp<Future<?>> mockFuture = mockTimeoutFuture();
 
-        ResponseData<CptBaseInfo> response = registerCptForMock(registerCptArgs, mockFuture);
+        ResponseData<CptBaseInfo> response = registerCptForMock(cptMapArgs, mockFuture);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -414,7 +427,7 @@ public class TestRegisterCpt extends TestBaseServcie {
     }
 
     private ResponseData<CptBaseInfo> registerCptForMock(
-        RegisterCptArgs registerCptArgs,
+        CptMapArgs cptMapArgs,
         MockUp<Future<?>> mockFuture) {
         
         MockUp<CptController> mockTest = new MockUp<CptController>() {
@@ -431,7 +444,7 @@ public class TestRegisterCpt extends TestBaseServcie {
             }
         };
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
@@ -446,7 +459,7 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase19() {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
 
         MockUp<CptController> mockTest = new MockUp<CptController>() {
             @Mock
@@ -456,13 +469,99 @@ public class TestRegisterCpt extends TestBaseServcie {
             }
         };
 
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         logger.info("registerCpt result:");
         BeanUtil.print(response);
 
         mockTest.tearDown();
 
+        Assert.assertEquals(
+            ErrorCode.CPT_EVENT_LOG_NULL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /**
+     * case： build cpt string.
+     */
+    @Test
+    public void testRegisterCptCase20() throws IOException {
+
+        CptStringArgs cptStringArgs =
+            TestBaseUtil.buildCptStringArgs(createWeId, false);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptStringArgs);
+        logger.info("registerCpt result:");
+        BeanUtil.print(response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+    }
+
+    /**
+     * case： build cpt string, args is null.
+     */
+    @Test
+    public void testRegisterCptCase21() {
+
+        CptStringArgs cptStringArgs = null;
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptStringArgs);
+        logger.info("registerCpt result:");
+        BeanUtil.print(response);
+
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /**
+     * case： build cpt string for unkonw_error.
+     */
+    @Test
+    public void testRegisterCptCase22() throws IOException {
+
+        CptStringArgs cptStringArgs =
+            TestBaseUtil.buildCptStringArgs(createWeId, false);
+        cptStringArgs.setCptJsonSchema("xxxxx");
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptStringArgs);
+        logger.info("registerCpt result:");
+        BeanUtil.print(response);
+
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
+
+    /**
+     * case： build cpt string by file.
+     */
+    @Test
+    public void testRegisterCptCase23() throws IOException {
+
+        CptStringArgs cptStringArgs =
+            TestBaseUtil.buildCptStringArgs(createWeId, true);
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptStringArgs);
+        logger.info("registerCpt result:");
+        BeanUtil.print(response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+    }
+
+    /**
+     * case： cptPublisher is blank.
+     */
+    @Test
+    public void testRegisterCptCase27() {
+
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        cptMapArgs.setWeIdAuthentication(null);
+
+        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
+        logger.info("registerCpt result:");
+        BeanUtil.print(response);
+
+        Assert.assertEquals(
+            ErrorCode.WEID_AUTHORITY_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
 }
