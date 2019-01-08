@@ -20,7 +20,9 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -46,21 +48,24 @@ import org.springframework.stereotype.Component;
 
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.CptController;
 import com.webank.weid.contract.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.contract.CptController.UpdateCptRetLogEventResponse;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.request.RegisterCptArgs;
-import com.webank.weid.protocol.request.UpdateCptArgs;
+import com.webank.weid.protocol.request.CptMapArgs;
+import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.JsonSchemaValidatorUtils;
+import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.SignatureUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -98,90 +103,87 @@ public class CptServiceImpl extends BaseService implements CptService {
 
     /**
      * This is used to register a new CPT to the blockchain.
+     * @param args the args
+     * @return the response data
+     */
+    public ResponseData<CptBaseInfo> registerCpt(CptStringArgs args) {
+
+        try {
+            if (args == null) {
+                logger.error(
+                    "[registerCpt1]input CptStringArgs is null");
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+
+            CptMapArgs cptMapArgs = new CptMapArgs();
+            cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
+            cptMapArgs.setCptJsonSchema(
+                (Map<String, Object>)JsonUtil.jsonStrToObj(
+                    new HashMap<String, Object>(),
+                    args.getCptJsonSchema())
+            );
+            return this.registerCpt(cptMapArgs);
+        } catch (Exception e) {
+            logger.error("[registerCpt1] register cpt failed due to unknown error. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    /**
+     * This is used to register a new CPT to the blockchain.
      *
      * @param args the args
      * @return the response data
      */
-    public ResponseData<CptBaseInfo> registerCpt(RegisterCptArgs args) {
-        ResponseData<CptBaseInfo> responseData = new ResponseData<CptBaseInfo>();
+    public ResponseData<CptBaseInfo> registerCpt(CptMapArgs args) {
 
         try {
-            responseData = validateRegisterCptArgs(args, responseData);
+            if (args == null) {
+                logger.error("[registerCpt]input CptMapArgs is null");
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+            ResponseData<CptBaseInfo> responseData =
+                this.validateCptArgs(
+                    args.getWeIdAuthentication(),
+                    args.getCptJsonSchema()
+                );
+
             if (responseData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 return responseData;
             }
 
-            long[] longArray = new long[WeIdConstant.LONG_ARRAY_LENGTH];
-            long created = System.currentTimeMillis();
-            longArray[1] = created;
-            StaticArray<Int256> intArray = DataTypetUtils.longArrayToInt256StaticArray(longArray);
-
-            String[] stringArray = new String[WeIdConstant.STRING_ARRAY_LENGTH];
-            StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
-                stringArray
+            TransactionReceipt transactionReceipt = this.getTransactionReceipt(
+                args.getWeIdAuthentication(),
+                args.getCptJsonSchema(),
+                false,
+                null
             );
-
-            List<String> stringList = Splitter
-                .fixedLength(WeIdConstant.BYTES32_FIXED_LENGTH)
-                .splitToList(args.getCptJsonSchema());
-            String[] jsonSchemaArray = new String[WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH];
-            for (int i = 0; i < stringList.size(); i++) {
-                jsonSchemaArray[i] = stringList.get(i);
-            }
-            StaticArray<Bytes32> jsonSchema =
-                DataTypetUtils.stringArrayToBytes32StaticArray(jsonSchemaArray);
-
-            RsvSignature rsvSignature =
-                sign(args.getCptPublisher(), args.getCptJsonSchema(),
-                    args.getCptPublisherPrivateKey());
-
-            Address publisher = new Address(WeIdUtils.convertWeIdToAddress(args.getCptPublisher()));
-            reloadContract(args.getCptPublisherPrivateKey().getPrivateKey());
-            TransactionReceipt transactionReceipt = cptController.registerCpt(
-                publisher,
-                intArray,
-                bytes32Array,
-                jsonSchema,
-                rsvSignature.getV(),
-                rsvSignature.getR(),
-                rsvSignature.getS()
-            ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-
             List<RegisterCptRetLogEventResponse> event = CptController.getRegisterCptRetLogEvents(
                 transactionReceipt
             );
-            if (CollectionUtils.isNotEmpty(event)) {
-                if (DataTypetUtils.uint256ToInt(event.get(0).retCode)
-                    == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
-                    responseData = new ResponseData<>(null,
-                        ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX);
-                } else if (DataTypetUtils.uint256ToInt(event.get(0).retCode)
-                    == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
-                    responseData = new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST);
-                } else {
-                    CptBaseInfo result = new CptBaseInfo();
-                    result.setCptId(DataTypetUtils.uint256ToInt(event.get(0).cptId));
-                    result.setCptVersion(DataTypetUtils.int256ToInt(event.get(0).cptVersion));
-                    responseData.setResult(result);
-                }
-            } else {
-                responseData = new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+
+            if (CollectionUtils.isEmpty(event)) {
+                logger.error("[registerCpt] event is empty");
+                return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
             }
+
+            return this.getResultByResolveEvent(
+                event.get(0).retCode,
+                event.get(0).cptId,
+                event.get(0).cptVersion);
         } catch (InterruptedException | ExecutionException e) {
-            responseData = new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
             logger.error(
-                "[CptServiceImpl] register cpt failed due to transaction execution error. ",
+                "[registerCpt] register cpt failed due to transaction execution error. ",
                 e
             );
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
-            responseData = new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-            logger.error("[CptServiceImpl] register cpt failed due to transaction timeout. ", e);
+            logger.error("[registerCpt] register cpt failed due to transaction timeout. ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         } catch (Exception e) {
-            responseData = new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
-            logger.error("[CptServiceImpl] register cpt failed due to unknown error. ", e);
+            logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
-
-        return responseData;
     }
 
     /**
@@ -191,74 +193,104 @@ public class CptServiceImpl extends BaseService implements CptService {
      * @return the response data
      */
     public ResponseData<Cpt> queryCpt(Integer cptId) {
-        ResponseData<Cpt> responseData = new ResponseData<Cpt>();
-        List<Type> typeList;
 
         try {
             if (cptId == null || cptId < 0) {
-                responseData = new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
-                return responseData;
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
 
-            typeList = cptController
+            List<Type> typeList = cptController
                 .queryCpt(DataTypetUtils.intToUint256(cptId))
                 .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
-            if (typeList != null) {
-                if (WeIdConstant.EMPTY_ADDRESS.equals(((Address) typeList.get(0)).toString())) {
-                    responseData = new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
-                    logger.error("Query cpt id : {} does not exist.", cptId);
-                    return responseData;
-                }
-                Cpt cpt = new Cpt();
-                cpt.setCptId(cptId);
-
-                cpt.setCptPublisher(
-                    WeIdUtils.convertAddressToWeId(((Address) typeList.get(0)).toString()));
-
-                long[] longArray = DataTypetUtils.int256DynamicArrayToLongArray(
-                    (DynamicArray<Int256>) typeList.get(1)
-                );
-                cpt.setCptVersion((int) longArray[0]);
-                cpt.setCreated(longArray[1]);
-                cpt.setUpdated(longArray[2]);
-
-                String[] jsonSchemaArray =
-                    DataTypetUtils.bytes32DynamicArrayToStringArrayWithoutTrim(
-                        (DynamicArray<Bytes32>) typeList.get(3)
-                    );
-                StringBuffer jsonSchema = new StringBuffer();
-                for (int i = 0; i < jsonSchemaArray.length; i++) {
-                    jsonSchema.append(jsonSchemaArray[i]);
-                }
-                cpt.setCptJsonSchema(jsonSchema.toString().trim());
-
-                int v = DataTypetUtils.uint8ToInt((Uint8) typeList.get(4));
-                byte[] r = DataTypetUtils.bytes32ToBytesArray((Bytes32) typeList.get(5));
-                byte[] s = DataTypetUtils.bytes32ToBytesArray((Bytes32) typeList.get(6));
-                Sign.SignatureData signatureData = SignatureUtils
-                    .rawSignatureDeserialization(v, r, s);
-                String cptSignature =
-                    new String(
-                        SignatureUtils.base64Encode(
-                            SignatureUtils.simpleSignatureSerialization(signatureData)),
-                            WeIdConstant.UTF_8);
-                cpt.setCptSignature(cptSignature);
-
-                responseData.setResult(cpt);
+            if (typeList == null || typeList.isEmpty()) {
+                logger.error("Query cpt id : {} does not exist, result is null.", cptId);
+                return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
             }
+
+            if (WeIdConstant.EMPTY_ADDRESS.equals(((Address) typeList.get(0)).toString())) {
+                logger.error("Query cpt id : {} does not exist.", cptId);
+                return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
+            }
+            Cpt cpt = new Cpt();
+            cpt.setCptId(cptId);
+            cpt.setCptPublisher(
+                WeIdUtils.convertAddressToWeId(((Address) typeList.get(0)).toString()));
+
+            long[] longArray = DataTypetUtils.int256DynamicArrayToLongArray(
+                (DynamicArray<Int256>) typeList.get(1)
+            );
+            cpt.setCptVersion((int) longArray[0]);
+            cpt.setCreated(longArray[1]);
+            cpt.setUpdated(longArray[2]);
+
+            String[] jsonSchemaArray =
+                DataTypetUtils.bytes32DynamicArrayToStringArrayWithoutTrim(
+                    (DynamicArray<Bytes32>) typeList.get(3)
+                );
+            StringBuffer jsonSchema = new StringBuffer();
+            for (int i = 0; i < jsonSchemaArray.length; i++) {
+                jsonSchema.append(jsonSchemaArray[i]);
+            }
+
+            Map<String, Object> jsonSchemaMap =
+                (Map<String, Object>)JsonUtil.jsonStrToObj(
+                    new HashMap<String, Object>(),
+                    jsonSchema.toString().trim());
+            cpt.setCptJsonSchema(jsonSchemaMap);
+
+            int v = DataTypetUtils.uint8ToInt((Uint8) typeList.get(4));
+            byte[] r = DataTypetUtils.bytes32ToBytesArray((Bytes32) typeList.get(5));
+            byte[] s = DataTypetUtils.bytes32ToBytesArray((Bytes32) typeList.get(6));
+            Sign.SignatureData signatureData = SignatureUtils
+                .rawSignatureDeserialization(v, r, s);
+            String cptSignature =
+                new String(
+                    SignatureUtils.base64Encode(
+                        SignatureUtils.simpleSignatureSerialization(signatureData)),
+                        WeIdConstant.UTF_8);
+            cpt.setCptSignature(cptSignature);
+
+            ResponseData<Cpt> responseData = new ResponseData<Cpt>();
+            responseData.setResult(cpt);
+            return responseData;
         } catch (InterruptedException | ExecutionException e) {
-            responseData = new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
             logger.error(
-                "[CptServiceImpl] query cpt failed due to transaction execution error. ",
+                "[updateCpt] query cpt failed due to transaction execution error. ",
                 e
             );
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
-            responseData = new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
-            logger.error("[CptServiceImpl] query cpt failed due to unknown error. ", e);
+            logger.error("[updateCpt] query cpt failed due to unknown error. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
+    }
 
-        return responseData;
+    /**
+     * This is used to update a CPT data which has been register.
+     * @param args the args
+     * @return the response data
+     */
+    public ResponseData<CptBaseInfo> updateCpt(CptStringArgs args, Integer cptId) {
+
+        try {
+            if (args == null) {
+                logger.error("[updateCpt1]input UpdateCptArgs is null");
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+
+            CptMapArgs cptMapArgs = new CptMapArgs();
+            cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
+            cptMapArgs.setCptJsonSchema(
+                (Map<String, Object>)JsonUtil.jsonStrToObj(
+                    new HashMap<String, Object>(),
+                    args.getCptJsonSchema())
+            );
+            return this.updateCpt(cptMapArgs, cptId);
+        } catch (Exception e) {
+            logger.error("[updateCpt1] update cpt failed due to unkown error. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }
     }
 
     /**
@@ -267,93 +299,159 @@ public class CptServiceImpl extends BaseService implements CptService {
      * @param args the args
      * @return the response data
      */
-    public ResponseData<CptBaseInfo> updateCpt(UpdateCptArgs args) {
-        ResponseData<CptBaseInfo> responseData = new ResponseData<>();
+    public ResponseData<CptBaseInfo> updateCpt(CptMapArgs args, Integer cptId) {
 
         try {
-            responseData = validateUpdateCptArgs(args, responseData);
+            if (args == null) {
+                logger.error("[updateCpt]input UpdateCptArgs is null");
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+            if (cptId == null) {
+                logger.error("[updateCpt]input cptId is null");
+                return new ResponseData<>(null, ErrorCode.CPT_ID_NULL);
+            }
+            ResponseData<CptBaseInfo> responseData =
+                this.validateCptArgs(
+                    args.getWeIdAuthentication(),
+                    args.getCptJsonSchema());
             if (responseData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 return responseData;
             }
 
-            long[] longArray = new long[WeIdConstant.LONG_ARRAY_LENGTH];
-            long updated = System.currentTimeMillis();
-            longArray[2] = updated;
-            StaticArray<Int256> intArray = DataTypetUtils.longArrayToInt256StaticArray(longArray);
-
-            String[] stringArray = new String[WeIdConstant.STRING_ARRAY_LENGTH];
-            StaticArray<Bytes32> bytes32Array =
-                DataTypetUtils.stringArrayToBytes32StaticArray(stringArray);
-
-            List<String> stringList = Splitter
-                .fixedLength(WeIdConstant.BYTES32_FIXED_LENGTH)
-                .splitToList(args.getCptJsonSchema());
-            String[] jsonSchemaArray = new String[WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH];
-            for (int i = 0; i < stringList.size(); i++) {
-                jsonSchemaArray[i] = stringList.get(i);
-            }
-            StaticArray<Bytes32> jsonSchema = DataTypetUtils.stringArrayToBytes32StaticArray(
-                jsonSchemaArray
-            );
-
-            RsvSignature rsvSignature = sign(
-                args.getCptPublisher(),
+            TransactionReceipt transactionReceipt = this.getTransactionReceipt(
+                args.getWeIdAuthentication(),
                 args.getCptJsonSchema(),
-                args.getCptPublisherPrivateKey()
+                true,
+                cptId
             );
+            List<UpdateCptRetLogEventResponse> event = CptController.getUpdateCptRetLogEvents(
+                transactionReceipt
+            );
+            if (CollectionUtils.isEmpty(event)) {
+                logger.error("[updateCpt] event is empty, cptId:{}.", cptId);
+                return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
+            }
+            return this.getResultByResolveEvent(
+                event.get(0).retCode,
+                event.get(0).cptId,
+                event.get(0).cptVersion);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error(
+                "[updateCpt2] update cpt failed due to transaction execution error. ",
+                e
+            );
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            logger.error("[updateCpt] update cpt failed due to transaction timeout. ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (Exception e) {
+            logger.error("[updateCpt] update cpt failed due to unkown error. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
 
-            Address publisher = new Address(WeIdUtils.convertWeIdToAddress(args.getCptPublisher()));
-            Uint256 cptId = DataTypetUtils.intToUint256(args.getCptId());
-            reloadContract(args.getCptPublisherPrivateKey().getPrivateKey());
-            TransactionReceipt transactionReceipt = cptController.updateCpt(
-                cptId,
-                publisher,
-                intArray,
+    private TransactionReceipt getTransactionReceipt(
+        WeIdAuthentication weIdAuthentication,
+        Map<String, Object> cptJsonSchemaMap,
+        Boolean isUpdate,
+        Integer cptId) throws Exception {
+
+        String weId = weIdAuthentication.getWeId();
+        WeIdPrivateKey weIdPrivateKey = weIdAuthentication.getWeIdPrivateKey();
+        String cptJsonSchemaNew = this.cptSchemaToString(cptJsonSchemaMap);
+        RsvSignature rsvSignature = sign(
+            weId,
+            cptJsonSchemaNew,
+            weIdPrivateKey);
+
+        StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
+            new String[WeIdConstant.STRING_ARRAY_LENGTH]
+        );
+
+        reloadContract(weIdPrivateKey.getPrivateKey());
+        if (isUpdate) {
+            return cptController.updateCpt(
+                DataTypetUtils.intToUint256(cptId),
+                new Address(WeIdUtils.convertWeIdToAddress(weId)),
+                this.getParamCreated(),
                 bytes32Array,
-                jsonSchema,
+                this.getParamJsonSchema(cptJsonSchemaNew),
                 rsvSignature.getV(),
                 rsvSignature.getR(),
                 rsvSignature.getS()
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+        }
+        return cptController.registerCpt(
+            new Address(WeIdUtils.convertWeIdToAddress(weId)),
+            this.getParamCreated(),
+            bytes32Array,
+            this.getParamJsonSchema(cptJsonSchemaNew),
+            rsvSignature.getV(),
+            rsvSignature.getR(),
+            rsvSignature.getS()
+        ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+    }
 
-            List<UpdateCptRetLogEventResponse> event = CptController.getUpdateCptRetLogEvents(
-                transactionReceipt
-            );
-            if (CollectionUtils.isNotEmpty(event)) {
-                if (DataTypetUtils.uint256ToInt(event.get(0).retCode)
-                    == ErrorCode.CPT_NOT_EXISTS.getCode()) {
-                    responseData = new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
-                    logger.error("Update cpt id : {} does not exist.", args.getCptId());
-                } else if (DataTypetUtils.uint256ToInt(event.get(0).retCode)
-                    == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
-                    responseData = new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST);
-                } else {
-                    CptBaseInfo result = new CptBaseInfo();
-                    result.setCptId(DataTypetUtils.uint256ToInt(event.get(0).cptId));
-                    result.setCptVersion(DataTypetUtils.int256ToInt(event.get(0).cptVersion));
-                    responseData.setResult(result);
-                }
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            responseData = new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-            logger.error(
-                "[CptServiceImpl] update cpt failed due to transaction execution error. ",
-                e
-            );
-        } catch (TimeoutException e) {
-            responseData = new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-            logger.error("[CptServiceImpl] update cpt failed due to transaction timeout. ", e);
-        } catch (Exception e) {
-            responseData = new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
-            logger.error("[CptServiceImpl] update cpt failed due to unkown error. ", e);
+    private StaticArray<Int256> getParamCreated() {
+
+        long[] longArray = new long[WeIdConstant.LONG_ARRAY_LENGTH];
+        long created = System.currentTimeMillis();
+        longArray[1] = created;
+        return DataTypetUtils.longArrayToInt256StaticArray(longArray);
+    }
+
+    private StaticArray<Bytes32> getParamJsonSchema(String cptJsonSchemaNew) {
+
+        List<String> stringList = Splitter
+            .fixedLength(WeIdConstant.BYTES32_FIXED_LENGTH)
+            .splitToList(cptJsonSchemaNew);
+        String[] jsonSchemaArray = new String[WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH];
+        for (int i = 0; i < stringList.size(); i++) {
+            jsonSchemaArray[i] = stringList.get(i);
+        }
+        return DataTypetUtils.stringArrayToBytes32StaticArray(jsonSchemaArray);
+    }
+
+    private ResponseData<CptBaseInfo> getResultByResolveEvent(
+        Uint256 retCode,
+        Uint256 cptId,
+        Int256 cptVersion) {
+
+        // register
+        if (DataTypetUtils.uint256ToInt(retCode)
+            == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
+            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}", cptId);
+            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX);
         }
 
+        // register and update
+        if (DataTypetUtils.uint256ToInt(retCode)
+            == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}", cptId);
+            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST);
+        }
+
+        // update
+        if (DataTypetUtils.uint256ToInt(retCode)
+            == ErrorCode.CPT_NOT_EXISTS.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.", cptId);
+            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
+        }
+
+        CptBaseInfo result = new CptBaseInfo();
+        result.setCptId(DataTypetUtils.uint256ToInt(cptId));
+        result.setCptVersion(DataTypetUtils.int256ToInt(cptVersion));
+
+        ResponseData<CptBaseInfo> responseData = new ResponseData<CptBaseInfo>();
+        responseData.setResult(result);
         return responseData;
     }
 
     private RsvSignature sign(
-        String cptPublisher, String jsonSchema, WeIdPrivateKey cptPublisherPrivateKey)
-        throws Exception {
+        String cptPublisher,
+        String jsonSchema,
+        WeIdPrivateKey cptPublisherPrivateKey) throws Exception {
+
         StringBuilder sb = new StringBuilder();
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
@@ -371,45 +469,45 @@ public class CptServiceImpl extends BaseService implements CptService {
         return rsvSignature;
     }
 
-    private ResponseData<CptBaseInfo> validateRegisterCptArgs(
-        RegisterCptArgs args, 
-        ResponseData<CptBaseInfo> responseData) throws Exception {
+    private ResponseData<CptBaseInfo> validateCptArgs(
+        WeIdAuthentication weIdAuthentication,
+        Map<String, Object> cptJsonSchemaMap) throws Exception {
 
-        ResponseData<CptBaseInfo> responseDataReq = responseData;
-        if (args == null) {
-            logger.error("input RegisterCptArgs is null");
-            responseDataReq = new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
-            return responseDataReq;
+        if (weIdAuthentication == null) {
+            logger.error("Input cpt weIdAuthentication is invalid.");
+            return new ResponseData<>(null, ErrorCode.WEID_AUTHORITY_INVALID);
         }
 
-        if (!WeIdUtils.isWeIdValid(args.getCptPublisher())) {
-            logger.error("Input cpt publisher : {} is invalid.", args.getCptPublisher());
-            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_INVALID);
-            return responseDataReq;
+        String weId = weIdAuthentication.getWeId();
+        if (!WeIdUtils.isWeIdValid(weId)) {
+            logger.error("Input cpt publisher : {} is invalid.", weId);
+            return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
 
-        if (!JsonSchemaValidatorUtils.isCptJsonSchemaValid(args.getCptJsonSchema())) {
-            logger.error("Input cpt json schema : {} is invalid.", args.getCptJsonSchema());
-            responseDataReq = new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
-            return responseDataReq;
+        if (cptJsonSchemaMap == null || cptJsonSchemaMap.isEmpty()) {
+            logger.error("Input cpt json schema is null.");
+            return new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_NULL);
+        }
+        String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
+        if (!JsonSchemaValidatorUtils.isCptJsonSchemaValid(cptJsonSchema)) {
+            logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaMap);
+            return new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
         }
 
-        if (null == args.getCptPublisherPrivateKey()
-            || StringUtils.isEmpty(args.getCptPublisherPrivateKey().getPrivateKey())) {
+        WeIdPrivateKey weIdPrivateKey = weIdAuthentication.getWeIdPrivateKey();
+        if (null == weIdPrivateKey
+            || StringUtils.isEmpty(weIdPrivateKey.getPrivateKey())) {
             logger.error(
                 "Input cpt publisher private key : {} is in valid.",
-                args.getCptPublisherPrivateKey()
+                weIdPrivateKey
             );
-            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
-            return responseDataReq;
+            return new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
 
-        if (!validatePrivateKeyWeIdMatches(args.getCptPublisherPrivateKey(),
-            args.getCptPublisher())) {
-            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+        if (!validatePrivateKeyWeIdMatches(weIdPrivateKey, weId)) {
+            return new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
-
-        return responseDataReq;
+        return new ResponseData<>();
     }
 
     private boolean validatePrivateKeyWeIdMatches(WeIdPrivateKey cptPublisherPrivateKey,
@@ -432,43 +530,19 @@ public class CptServiceImpl extends BaseService implements CptService {
         return isMatch;
     }
 
-    private ResponseData<CptBaseInfo> validateUpdateCptArgs(
-        UpdateCptArgs args, ResponseData<CptBaseInfo> responseData) throws Exception {
 
-        ResponseData<CptBaseInfo> responseDataReq = responseData;
-        if (args == null) {
-            logger.error("input UpdateCptArgs is null");
-            responseDataReq = new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
-            return responseDataReq;
-        }
+    /**
+     * create new cpt json schema.
+     * @param cptJsonSchema Map
+     * @return String
+     */
+    private String cptSchemaToString(Map<String, Object> cptJsonSchema) throws Exception {
 
-        if (!WeIdUtils.isWeIdValid(args.getCptPublisher())) {
-            logger.error("Input cpt publisher : {} is invalid.", args.getCptPublisher());
-            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_INVALID);
-            return responseDataReq;
-        }
-
-        if (!JsonSchemaValidatorUtils.isCptJsonSchemaValid(args.getCptJsonSchema())) {
-            logger.error("Input cpt json schema : {} is in valid.", args.getCptJsonSchema());
-            responseDataReq = new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
-            return responseDataReq;
-        }
-
-        if (null == args.getCptPublisherPrivateKey()
-            || StringUtils.isEmpty(args.getCptPublisherPrivateKey().getPrivateKey())) {
-            logger.error(
-                "Input cpt publisher private key : {} is in valid.",
-                args.getCptPublisherPrivateKey()
-            );
-            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_INVALID);
-            return responseDataReq;
-        }
-
-        if (!validatePrivateKeyWeIdMatches(args.getCptPublisherPrivateKey(),
-            args.getCptPublisher())) {
-            responseDataReq = new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
-        }
-
-        return responseDataReq;
+        Map<String, Object> cptJsonSchemaNew = new HashMap<String, Object>();
+        cptJsonSchemaNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
+        cptJsonSchemaNew.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_OBJECT);
+        cptJsonSchemaNew.putAll(cptJsonSchema);
+        return JsonUtil.objToJsonStr(cptJsonSchemaNew);
     }
+
 }

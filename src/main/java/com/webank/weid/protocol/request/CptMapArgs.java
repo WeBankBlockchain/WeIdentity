@@ -23,38 +23,22 @@ import java.util.Map;
 
 import lombok.Data;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 
 /**
- * The Arguments for the following SDK API: createCredential().
- *
- * @author chaoxinhu 2018.10
+ * The Arguments for the SDK API register CPT.
+ * The cptJsonSchema is Map.
+ * @author lingfenghe
  */
 @Data
-public class CreateCredentialArgs {
+public class CptMapArgs {
 
     /**
-     * Required: The CPT type in standard integer format.
+     * Required: weId authority  for this CPT.
      */
-    private Integer cptId;
-
+    private WeIdAuthentication weIdAuthentication;
     /**
-     * Required: The issuer WeIdentity DID.
+     * Required: The json schema content defined for this CPT.
      */
-    private String issuer;
-
-    /**
-     * Required: The expire date.
-     */
-    private Long expirationDate;
-
-    /**
-     * Required: The claim data.
-     */
-    private Map<String, Object> claim;
-
-    /**
-     * Required: The private key structure used for signing.
-     */
-    private WeIdPrivateKey weIdPrivateKey;
+    private Map<String, Object> cptJsonSchema;
 }
