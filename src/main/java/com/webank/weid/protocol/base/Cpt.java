@@ -19,6 +19,8 @@
 
 package com.webank.weid.protocol.base;
 
+import java.util.Map;
+
 import lombok.Data;
 
 /**
@@ -37,7 +39,7 @@ public class Cpt {
     /**
      * The cpt json schema.
      */
-    private String cptJsonSchema;
+    private Map<String, Object> cptJsonSchema;
 
     /**
      * The meta data.

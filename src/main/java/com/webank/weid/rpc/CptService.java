@@ -21,8 +21,8 @@ package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.request.RegisterCptArgs;
-import com.webank.weid.protocol.request.UpdateCptArgs;
+import com.webank.weid.protocol.request.CptMapArgs;
+import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
@@ -38,7 +38,16 @@ public interface CptService {
      * @param args the args
      * @return The registered CPT info
      */
-    ResponseData<CptBaseInfo> registerCpt(RegisterCptArgs args);
+    ResponseData<CptBaseInfo> registerCpt(CptMapArgs args);
+
+
+    /**
+     * Register a new CPT to the blockchain.
+     *
+     * @param args the args
+     * @return The registered CPT info
+     */
+    ResponseData<CptBaseInfo> registerCpt(CptStringArgs args);
 
     /**
      * Query the latest CPT version.
@@ -54,5 +63,13 @@ public interface CptService {
      * @param args the args
      * @return The updated CPT info
      */
-    ResponseData<CptBaseInfo> updateCpt(UpdateCptArgs args);
+    ResponseData<CptBaseInfo> updateCpt(CptMapArgs args, Integer cptId);
+
+    /**
+     * Update the data fields of a registered CPT.
+     *
+     * @param args the args
+     * @return The updated CPT info
+     */
+    ResponseData<CptBaseInfo> updateCpt(CptStringArgs args, Integer cptId);
 }

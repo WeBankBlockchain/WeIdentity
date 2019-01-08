@@ -19,6 +19,8 @@
 
 package com.webank.weid.full.credential;
 
+import java.util.HashMap;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -289,7 +291,9 @@ public class TestCreateCredential extends TestBaseServcie {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
-        createCredentialArgs.setClaim("xxxxxxxxxxxxxx");
+        HashMap<String, Object> claim = new HashMap<>();
+        claim.put("xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx");
+        createCredentialArgs.setClaim(claim);
 
         ResponseData<Credential> response =
             credentialService.createCredential(createCredentialArgs);

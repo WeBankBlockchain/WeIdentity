@@ -19,6 +19,7 @@
 
 package com.webank.weid.util;
 
+import java.util.LinkedHashMap;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -27,7 +28,6 @@ import org.junit.Test;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.VerifyCredentialArgs;
-import com.webank.weid.util.CredentialUtils;
 
 /**
  * test crentialUtils.
@@ -59,7 +59,9 @@ public class TestCredentialUtils {
         arg.setIssuer("gdsgshher");
         arg.setIssuranceDate(new Long(System.currentTimeMillis()));
         arg.setExpirationDate(new Long(System.currentTimeMillis()));
-        arg.setClaim("sfsfs");
+
+        LinkedHashMap<String, Object> claim = new LinkedHashMap<>();
+        claim.put("sfsfs", "sfsfs");
         args = new VerifyCredentialArgs();
         args.setCredential(arg);
         result = CredentialUtils.extractCredentialResult(args);
@@ -82,7 +84,8 @@ public class TestCredentialUtils {
         arg.setIssuer("gdsgshher");
         arg.setIssuranceDate(new Long(System.currentTimeMillis()));
         arg.setExpirationDate(new Long(System.currentTimeMillis()));
-        arg.setClaim("sfsfs");
+        LinkedHashMap<String, Object> claim = new LinkedHashMap<>();
+        claim.put("sfsfs", "sfsfs");
         result = CredentialUtils.extractCredentialMetadata(arg);
         Assert.assertNotNull(result);
     }

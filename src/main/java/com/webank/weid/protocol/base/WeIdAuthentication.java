@@ -17,37 +17,25 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.request;
+package com.webank.weid.protocol.base;
 
 import lombok.Data;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-
 /**
- * The Arguments for the SDK API update CPT.
+ * The base data structure to handle WeIdentity DID authority info.
  *
- * @author lingfenghe
+ * @author darwindu
  */
 @Data
-public class UpdateCptArgs {
+public class WeIdAuthentication {
 
     /**
-     * Required: the id for the CPT.
+     * Required: The weIdentity DID.
      */
-    private Integer cptId;
+    private String weId;
 
     /**
-     * Required: the json schema content defined for this CPT.
+     * Required: The private key or The weIdentity DID.
      */
-    private String cptJsonSchema;
-
-    /**
-     * Required: the WeIdentity DID of the publisher who register this CPT.
-     */
-    private String cptPublisher;
-
-    /**
-     * Required: the private key for the publisher who register this CPT.
-     */
-    private WeIdPrivateKey cptPublisherPrivateKey;
+    private WeIdPrivateKey weIdPrivateKey;
 }
