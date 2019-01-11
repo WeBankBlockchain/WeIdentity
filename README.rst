@@ -74,10 +74,10 @@ WeIdentity支持认证机构自行注册标准化凭证模板，共同丰富公�
 ^^^^
 
 *
-   `案例及场景 <https://weidentity.readthedocs.io/zh_CN/master/docs/use-cases.html>`_
+   `案例及场景 <docs/use-cases.html>`_
 
 *
-   `WeIdentity规范文档 <https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-spec.html>`_
+   `WeIdentity规范文档 <docs/weidentity-spec.html>`_
 
 
 开始使用
@@ -99,8 +99,8 @@ WeIdentity目前支持基于FISCO-BCOS运行，并提供JAVA SDK供调用。具�
             <td style="text-align:center">JAVA SDK</td>
             <td>
                <ul>
-                 <li><a href="https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-installation.html">安装部署文档</a></li>
-                 <li><a href="https://weidentity.readthedocs.io/zh_CN/master/docs/weidentity-java-sdk-doc.html">SDK使用文档</a></li>
+                 <li><a href="https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-installation.html">安装部署文档</a></li>
+                 <li><a href="https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-java-sdk-doc.html">SDK使用文档</a></li>
                </ul>
             </td>
             <td>
