@@ -19,6 +19,14 @@
 
 package com.webank.weid.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.WeIdConstant;
@@ -46,6 +54,9 @@ public final class CredentialUtils {
             || arg.getExpirationDate() == null) {
             return StringUtils.EMPTY;
         }
+        
+        String claimHash = getClaimHash(arg);
+        
         String rawData =
             arg.getContext()
                 + WeIdConstant.PIPELINE
@@ -59,10 +70,36 @@ public final class CredentialUtils {
                 + WeIdConstant.PIPELINE
                 + arg.getExpirationDate().toString()
                 + WeIdConstant.PIPELINE
-                + JsonUtil.objToJsonStr(arg.getClaim());
+                + claimHash;
         return rawData;
     }
 
+    private static String getClaimHash(Credential credential) {
+    	
+    	Map<String, Object>claim = credential.getClaim();
+    	List<String>disclosureKeys = credential.getDisclosureKeys();
+    	
+    	if(CollectionUtils.isNotEmpty(disclosureKeys)) {
+    		for(String key : disclosureKeys) {
+    			claim.put(key, HashUtils.sha3(String.valueOf(claim.get(key))));
+    		}
+    	}
+    	
+    	List<Map.Entry<String, Object>>list = new ArrayList<Map.Entry<String, Object>>(claim.entrySet());
+		Collections.sort(list,new Comparator<Map.Entry<String, Object>>() {
+
+			@Override
+			public int compare(Entry<String, Object> o1, Entry<String, Object> o2) {
+				return o1.getKey().compareTo(o2.getKey());
+			}
+		});
+		
+    	StringBuffer sb = new StringBuffer();
+    		for(Map.Entry<String, Object> en:list) {
+    			sb.append(en.getKey()).append(en.getValue());
+    		}
+    	return sb.toString();
+    }
     /**
      * Get default Credential Context String.
      *

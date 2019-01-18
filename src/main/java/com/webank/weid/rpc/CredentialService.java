@@ -19,6 +19,8 @@
 
 package com.webank.weid.rpc;
 
+import java.util.List;
+
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.VerifyCredentialArgs;
@@ -32,13 +34,21 @@ import com.webank.weid.protocol.response.ResponseData;
 public interface CredentialService {
 
     /**
-     * Generate a credential.
+     * Generate a credential for full claim content.
      *
      * @param args the args
      * @return credential
      */
     ResponseData<Credential> createCredential(CreateCredentialArgs args);
-
+    
+    /**
+     * Generate a credential with selected data.
+     *
+     * @param args the args
+     * @param keys the keys which select to disclosure
+     * @return credential
+     */
+    ResponseData<Credential> createSelectiveCredential(Credential args, List<String>keys);
     /**
      * Verify the validity of a credential. Public key will be fetched from chain.
      *
