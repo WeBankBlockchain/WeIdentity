@@ -55,6 +55,21 @@ public enum ErrorCode {
     CPT_JSON_SCHEMA_INVALID(100301, "cpt json schema is invalid"),
 
     /**
+     * The cpt json schema null.
+     */
+    CPT_JSON_SCHEMA_NULL(100302, "cpt json schema is null"),
+
+    /**
+     * cptId is null.
+     */
+    CPT_ID_NULL(100303, "cptId is null"),
+
+    /**
+     * cpt event log is null.
+     */
+    CPT_EVENT_LOG_NULL(100304, "cpt event log is null."),
+
+    /**
      * Credential main error code.
      */
     CREDENTIAL_ERROR(100400, "error occured during processing credential tasks"),
@@ -248,15 +263,20 @@ public enum ErrorCode {
     /**
      * create keypair exception.
      */
-    WEID_KEYPAIR_CREATE_FAILED(10107, "create keypair faild."),
+    WEID_KEYPAIR_CREATE_FAILED(100107, "create keypair faild."),
 
     /**
      * public key and private key are not a keypair.
      */
     WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED(
-        10108,
+        100108,
         "the public key and private key are not matched."
     ),
+
+    /**
+     * the authority of the weIdentity DID is invalid.
+     */
+    WEID_AUTHORITY_INVALID(100109, "the authority of the weIdentity DID is invalid."),
 
     /**
      * transaction timeout.
@@ -292,14 +312,6 @@ public enum ErrorCode {
      * weidentity data type case exceptions or error.
      */
     DATA_TYPE_CASE_ERROR(160008, "data type cast exception error, please check the error log."),
-
-    /**
-     * weidentity resolve attribute exceptions or error.
-     */
-    DATA_RESOLVE_ATTRIBUTE_ERROR(
-        160011,
-        "data resolve attribute exception error, please check the error log."
-    ),
 
     /**
      * other uncatched exceptions or error.

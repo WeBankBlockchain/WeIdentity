@@ -71,17 +71,24 @@ public class TestData {
 
     /** a valid jsonSchema template needed to register CPT. */
     public static String schema =
-        "{\"$schema\":\"http://json-schema.org/draft-04/schema#\",\"title\":\"/etc/fstab\",\"description\""
-        + ":\"JSON representation of /etc/fstab\",\"type\":\"object\",\"properties\""
-        + ":{\"swap\":{\"$ref\":\"#/definitions/mntent\"}},\"patternProperties\""
-        + ":{\"^/([^/]+(/[^/]+)*)?$\":{\"$ref\":\"#/definitions/mntent\"}},\"required\""
-        + ":[\"/\",\"swap\"],\"additionalProperties\":false,\"definitions\":{\"mntent\""
-        + ":{\"title\":\"mntent\",\"description\":\"An fstab entry\",\"type\""
-        + ":\"object\",\"properties\":{\"device\":{\"type\":\"string\"},\"fstype\""
-        + ":{\"type\":\"string\"},\"options\":{\"type\":\"array\",\"minItems\":1,\"items\""
-        + ":{\"type\":\"string\"}},\"dump\":{\"type\":\"integer\",\"minimum\":0},\"fsck\""
-        + ":{\"type\":\"integer\",\"minimum\":0}},\"required\""
-        + ":[\"device\",\"fstype\"],\"additionalItems\":false}}}";
+        "{"
+            + "  \"properties\" : {"
+            + "      \"name\": {"
+            + "          \"type\": \"string\", "
+            + "          \"description\": \"the name of certificate owner\""
+            + "      }, "
+            + "      \"gender\": {"
+            + "          \"enum\": [\"F\", \"M\"],"
+            + "          \"type\": \"string\", "
+            + "          \"description\": \"the gender of certificate owner\""
+            + "      }, "
+            + "      \"age\": {"
+            + "          \"type\": \"number\", "
+            + "          \"description\": \"the age of certificate owner\""
+            + "      }"
+            + "  },"
+            + "  \"required\": [\"name\", \"age\"]"
+            + "}";
 
     /** valid data corresponding to template in CPT. */
     public static String schemaData =

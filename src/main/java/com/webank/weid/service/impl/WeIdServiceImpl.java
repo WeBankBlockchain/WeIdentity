@@ -108,28 +108,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     /**
      * The topic map.
      */
-    private static HashMap<String, String> topicMap;
+    private static final HashMap<String, String> topicMap;
 
-    /**
-     * Instantiates a new WeIdentity DID service.
-     */
-    public WeIdServiceImpl() {
-        init();
-    }
-
-    private static void init() {
-
-        // initialize the WeIdentity DID contract
-        ContractConfig config = context.getBean(ContractConfig.class);
-        weIdContractAddress = config.getWeIdAddress();
-        weIdContract = (WeIdContract) getContractService(weIdContractAddress, WeIdContract.class);
-
+    static {
         // initialize the event topic
-        initEventTopic();
-    }
-
-    private static void initEventTopic() {
-
         topicMap = new HashMap<String, String>();
         final Event event =
             new Event(
@@ -145,8 +127,27 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     },
                     new TypeReference<Int256>() {
                     }));
-        topicMap.put(EventEncoder.encode(event), WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE);
+        topicMap.put(
+            EventEncoder.encode(event),
+            WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
+        );
     }
+
+    /**
+     * Instantiates a new WeIdentity DID service.
+     */
+    public WeIdServiceImpl() {
+        init();
+    }
+
+    private static void init() {
+
+        // initialize the WeIdentity DID contract
+        ContractConfig config = context.getBean(ContractConfig.class);
+        weIdContractAddress = config.getWeIdAddress();
+        weIdContract = (WeIdContract) getContractService(weIdContractAddress, WeIdContract.class);
+    }
+
 
     private static ResolveEventLogResult resolveAttributeEvent(
         String weId,
@@ -347,14 +348,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     if (returnValue.getResultStatus().equals(
                         ResolveEventLogStatus.STATUS_SUCCESS)) {
                         previousBlock = returnValue.getPreviousBlock();
-                    } else {
-                        logger.error(
-                            "[resolveTransaction]: resolveEventLog failed. resultStatus:{}",
-                            returnValue.getResultStatus());
-
-                        throw new ResolveAttributeException(
-                            ErrorCode.DATA_RESOLVE_ATTRIBUTE_ERROR.getCode(),
-                            ErrorCode.DATA_RESOLVE_ATTRIBUTE_ERROR.getCodeDesc());
                     }
                 }
             }
