@@ -1,0 +1,20 @@
+{
+    "title": "cpt templet",
+    "description": "five information requirements for users",
+    "properties" : {
+        "name": {
+            "type": "string",
+            "description": "the name of certificate owner"
+        },
+        "gender": {
+            "enum": ["F", "M"],
+            "type": "string",
+            "description": "the gender of certificate owner"
+        },
+        "age": {
+            "type": "number",
+            "description": "the age of certificate owner"
+        }
+    },
+    "required": ["name", "age"]
+}

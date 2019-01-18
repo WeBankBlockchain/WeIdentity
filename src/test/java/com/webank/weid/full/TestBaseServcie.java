@@ -43,10 +43,10 @@ import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
-import com.webank.weid.protocol.request.RegisterCptArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
@@ -79,7 +79,7 @@ public abstract class TestBaseServcie extends BaseTest {
 
     protected static CreateCredentialArgs createCredentialArgs = null;
 
-    protected static RegisterCptArgs registerCptArgs = null;
+    protected static CptMapArgs registerCptArgs = null;
 
     protected static CptBaseInfo cptBaseInfo = null;
 
@@ -96,7 +96,7 @@ public abstract class TestBaseServcie extends BaseTest {
                 initIssuer("org1.txt");
                 isInitIssuer = true;
             } catch (Exception e) {
-                logger.error("initIssuer error",e);
+                logger.error("initIssuer error", e);
                 Assert.assertTrue(false);
             }
         }
@@ -111,7 +111,7 @@ public abstract class TestBaseServcie extends BaseTest {
             createWeIdNew = this.createWeId();
         }
         if (null == createCredentialArgs) {
-            registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeIdResultWithSetAttr);
+            registerCptArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
             createCredentialArgs =
                 TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr);
             cptBaseInfo = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
@@ -214,7 +214,7 @@ public abstract class TestBaseServcie extends BaseTest {
      */
     protected CptBaseInfo registerCpt(
         CreateWeIdDataResult createWeId,
-        RegisterCptArgs registerCptArgs) {
+        CptMapArgs registerCptArgs) {
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
         logger.info("registerCpt result:");
@@ -234,7 +234,7 @@ public abstract class TestBaseServcie extends BaseTest {
      */
     protected CptBaseInfo registerCpt(CreateWeIdDataResult createWeId) {
 
-        RegisterCptArgs registerCptArgs = TestBaseUtil.buildRegisterCptArgs(createWeId);
+        CptMapArgs registerCptArgs = TestBaseUtil.buildCptArgs(createWeId);
 
         CptBaseInfo cptBaseInfo = registerCpt(createWeId, registerCptArgs);
 

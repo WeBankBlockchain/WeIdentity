@@ -20,6 +20,8 @@
 package com.webank.weid.demo;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.bcos.contract.tools.ToolConf;
 import org.slf4j.Logger;
@@ -32,10 +34,11 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
-import com.webank.weid.protocol.request.RegisterCptArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
@@ -44,6 +47,7 @@ import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.util.JsonUtil;
 
 /**
  * <p>
@@ -164,7 +168,7 @@ public class DemoTest1 {
 
         // The third step: register CPT template
         BeanUtil.print("begin regist cpt...");
-        RegisterCptArgs registerCptArgs = buildRegisterCptArgs(weId, privateKey);
+        CptMapArgs registerCptArgs = buildRegisterCptArgs(weId, privateKey);
 
         CptService cptService = context.getBean(CptService.class);
         ResponseData<CptBaseInfo> cptBaseResult = cptService.registerCpt(registerCptArgs);
@@ -257,7 +261,11 @@ public class DemoTest1 {
         ResponseData<CptBaseInfo> cptBaseResult) {
         
         CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
-        createCredentialArgs.setClaim(DemoTest.SCHEMADATA); // Set data required for template
+        createCredentialArgs.setClaim(
+            (Map<String, Object>) JsonUtil.jsonStrToObj(
+                new HashMap<String, Object>(),
+                DemoTest.SCHEMADATA)
+        ); // Set data required for template
         createCredentialArgs.setCptId(cptBaseResult.getResult().getCptId()); // Set cptId
         createCredentialArgs.setIssuer(weId); // Set Creator of voucher
         // Set expiration date
@@ -268,16 +276,21 @@ public class DemoTest1 {
         return createCredentialArgs;
     }
 
-    private static RegisterCptArgs buildRegisterCptArgs(
+    private static CptMapArgs buildRegisterCptArgs(
         String weId, 
         String privateKey) {
-        
-        RegisterCptArgs registerCptArgs = new RegisterCptArgs();
-        registerCptArgs.setCptJsonSchema(DemoTest.SCHEMA); // Set up a template
-        registerCptArgs.setCptPublisher(weId); // Set template publisher
 
-        registerCptArgs.setCptPublisherPrivateKey(new WeIdPrivateKey());
-        registerCptArgs.getCptPublisherPrivateKey().setPrivateKey(privateKey);
+        CptMapArgs registerCptArgs = new CptMapArgs();
+        registerCptArgs.setCptJsonSchema(
+            (Map<String, Object>) JsonUtil.jsonStrToObj(
+                new HashMap<String, Object>(),
+                DemoTest.SCHEMA)
+        ); // Set up a template
+
+        registerCptArgs.setWeIdAuthentication(new WeIdAuthentication());
+        registerCptArgs.getWeIdAuthentication().setWeId(weId); // Set template publisher
+        registerCptArgs.getWeIdAuthentication().setWeIdPrivateKey(new WeIdPrivateKey());
+        registerCptArgs.getWeIdAuthentication().getWeIdPrivateKey().setPrivateKey(privateKey);
         return registerCptArgs;
     }
 }

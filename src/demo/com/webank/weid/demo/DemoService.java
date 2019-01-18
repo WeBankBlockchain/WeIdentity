@@ -20,6 +20,7 @@
 package com.webank.weid.demo;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,11 +30,12 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
-import com.webank.weid.protocol.request.RegisterCptArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
@@ -155,14 +157,16 @@ public class DemoService {
     /**
      * regist cpt.
      */
-    public CptBaseInfo registCpt(CreateWeIdDataResult weIdResult, String cptJsonSchema)
+    public CptBaseInfo registCpt(CreateWeIdDataResult weIdResult, Map<String, Object> cptJsonSchema)
         throws RuntimeException {
 
-        RegisterCptArgs registerCptArgs = new RegisterCptArgs();
+        CptMapArgs registerCptArgs = new CptMapArgs();
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
         weIdPrivateKey.setPrivateKey(weIdResult.getUserWeIdPrivateKey().getPrivateKey());
-        registerCptArgs.setCptPublisher(weIdResult.getWeId());
-        registerCptArgs.setCptPublisherPrivateKey(weIdPrivateKey);
+        registerCptArgs.getWeIdAuthentication().setWeIdPrivateKey(weIdPrivateKey);
+
+        registerCptArgs.setWeIdAuthentication(new WeIdAuthentication());
+        registerCptArgs.getWeIdAuthentication().setWeId(weIdResult.getWeId());
         registerCptArgs.setCptJsonSchema(cptJsonSchema);
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
         // check result
@@ -209,7 +213,7 @@ public class DemoService {
     public Credential createCredential(
         CreateWeIdDataResult weIdResult,
         Integer cptId,
-        String claim,
+        Map<String, Object> claim,
         long expirationDate)
         throws RuntimeException {
 

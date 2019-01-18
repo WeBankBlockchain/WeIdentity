@@ -42,18 +42,6 @@ public class HashUtils {
     }
 
     /**
-     * Keccak-256 hash function.
-     *
-     * @param input binary encoded input data
-     * @param offset (optional) offset of start of data
-     * @param length (optional) length of data
-     * @return hash value
-     */
-    public static byte[] sha3(byte[] input, int offset, int length) {
-        return Hash.sha3(input, offset, length);
-    }
-
-    /**
      * Sha 3.
      *
      * @param input the input

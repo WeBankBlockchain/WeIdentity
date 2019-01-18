@@ -143,9 +143,4 @@ public final class WeIdConstant {
      * 0L.
      */
     public static final Long LONG_VALUE_ZERO = 0L;
-
-    /**
-     * -1.
-     */
-    public static final Integer VALUE_NEG_FIRST = -1;
 }

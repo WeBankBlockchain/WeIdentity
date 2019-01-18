@@ -19,8 +19,11 @@
 
 package com.webank.weid.full.credential;
 
+import java.util.HashMap;
+
 import mockit.Mock;
 import mockit.MockUp;
+import org.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,7 +31,6 @@ import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.full.TestData;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -36,6 +38,7 @@ import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.CredentialServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
+import com.webank.weid.util.SignatureUtils;
 
 /**
  * verifyCredential method for testing CredentialService.
@@ -365,9 +368,17 @@ public class TestVerifyCredential extends TestBaseServcie {
     public void testVerifyCredentialCase20() {
 
         Credential credential = super.createCredential(createCredentialArgs);
-        credential.setClaim("xxxxxxxxxxxxxx");
 
+        MockUp<SignatureUtils> mockTest = new MockUp<SignatureUtils>() {
+            @Mock
+            public Sign.SignatureData simpleSignatureDeserialization(
+                byte[] serializedSignatureData) {
+                return null;
+            }
+        };
         ResponseData<Boolean> response = super.verifyCredential(credential);
+
+        mockTest.tearDown();
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -381,7 +392,9 @@ public class TestVerifyCredential extends TestBaseServcie {
     public void testVerifyCredentialCase21() {
 
         Credential credential = super.createCredential(createCredentialArgs);
-        credential.setClaim(TestData.schemaDataInvalid);
+        HashMap<String, Object> claim = new HashMap<>();
+        claim.put("xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx");
+        credential.setClaim(claim);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
 
