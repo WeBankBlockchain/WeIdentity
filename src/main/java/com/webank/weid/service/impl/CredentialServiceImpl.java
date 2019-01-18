@@ -24,10 +24,12 @@ import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign;
 import org.slf4j.Logger;
@@ -50,6 +52,7 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.HashUtils;
 import com.webank.weid.util.JsonSchemaValidatorUtils;
 import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.SignatureUtils;
@@ -96,7 +99,6 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setIssuranceDate(DateUtils.getCurrentTimeStamp());
             result.setExpirationDate(args.getExpirationDate());
             result.setClaim(args.getClaim());
-
             String rawData = CredentialUtils.getCredentialFields(result);
             String privateKey = args.getWeIdPrivateKey().getPrivateKey();
             Sign.SignatureData sigData = SignatureUtils.signMessage(rawData, privateKey);
@@ -406,4 +408,31 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_ERROR);
         }
     }
+
+	/* (non-Javadoc)
+	 * @see com.webank.weid.rpc.CredentialService#createSelectiveCredential(com.webank.weid.protocol.base.Credential, java.util.List)
+	 */
+	@Override
+	public ResponseData<Credential> createSelectiveCredential(Credential credential, List<String> keys) {
+		
+		
+		Map<String, Object> claim = credential.getClaim();
+		Map<String, Object> hashMap = new HashMap<String, Object>(claim);
+		
+		//if no keys 
+		if(CollectionUtils.isEmpty(keys)) {
+			logger.info("No disclosure for this credential.");
+			for(Map.Entry<String, Object>entry : claim.entrySet()) {
+				claim.put(entry.getKey(), HashUtils.sha3(String.valueOf(entry.getValue())));
+			}
+		}
+		else {
+			for(String key : keys) {
+				claim.put(key, hashMap.get(key));
+			}
+		}
+		credential.setDisclosureKeys(keys);
+		return new ResponseData<>(credential, ErrorCode.SUCCESS);
+	}
+
 }
