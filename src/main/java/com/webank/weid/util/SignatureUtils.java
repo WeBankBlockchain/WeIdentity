@@ -186,26 +186,6 @@ public class SignatureUtils {
     }
 
     /**
-     * The Serialization/De-serialization class of Key-Pairs.
-     *
-     * @param keyPair the key pair
-     * @return the byte[]
-     */
-    public static byte[] simpleKeyPairSerialization(ECKeyPair keyPair) {
-        return Keys.serialize(keyPair);
-    }
-
-    /**
-     * Simple key pair deserialization.
-     *
-     * @param nonHexedBytes the non hexed bytes
-     * @return the EC key pair
-     */
-    public static ECKeyPair simpleKeyPairDeserialization(byte[] nonHexedBytes) {
-        return Keys.deserialize(nonHexedBytes);
-    }
-
-    /**
      * The Serialization class of Signatures. This is simply a concatenation of bytes of the v, r,
      * and s. Ethereum uses a similar approach with a wrapping from Base64.
      * https://www.programcreek.com/java-api-examples/index.php?source_dir=redPandaj-master/src/org/redPandaLib/crypt/ECKey.java

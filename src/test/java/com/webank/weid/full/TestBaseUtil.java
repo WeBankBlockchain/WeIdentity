@@ -30,8 +30,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jackson.JsonLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
@@ -40,20 +43,22 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.BeanUtil;
 import com.webank.weid.common.PasswordKey;
+import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.request.CptMapArgs;
+import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
-import com.webank.weid.protocol.request.RegisterCptArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
-import com.webank.weid.protocol.request.UpdateCptArgs;
 import com.webank.weid.protocol.request.VerifyCredentialArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 
@@ -94,7 +99,7 @@ public class TestBaseUtil {
         createCredentialArgs.setWeIdPrivateKey(new WeIdPrivateKey());
         createCredentialArgs.getWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
-        createCredentialArgs.setClaim(TestData.schemaData);
+        createCredentialArgs.setClaim(buildCptJsonSchemaData());
 
         return createCredentialArgs;
     }
@@ -112,36 +117,97 @@ public class TestBaseUtil {
     }
 
     /**
-     * build default UpdateCptArgs.
+     * build default CptMapArgs.
      */
-    public static UpdateCptArgs buildUpdateCptArgs(
-        CreateWeIdDataResult createWeId,
-        CptBaseInfo cptBaseInfo) {
+    public static CptMapArgs buildCptArgs(CreateWeIdDataResult createWeId) {
 
-        UpdateCptArgs updateCptArgs = new UpdateCptArgs();
-        updateCptArgs.setCptJsonSchema(TestData.schema);
-        updateCptArgs.setCptPublisher(createWeId.getWeId());
-        updateCptArgs.setCptPublisherPrivateKey(new WeIdPrivateKey());
-        updateCptArgs.getCptPublisherPrivateKey()
-            .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
-        updateCptArgs.setCptId(cptBaseInfo.getCptId());
+        CptMapArgs cptMapArgs = new CptMapArgs();
+        cptMapArgs.setCptJsonSchema(buildCptJsonSchema());
+        cptMapArgs.setWeIdAuthentication(buildWeIdAuthority(createWeId));
 
-        return updateCptArgs;
+        return cptMapArgs;
     }
 
     /**
-     * build default RegisterCptArgs.
+     * build default buildCptStringArgs.
      */
-    public static RegisterCptArgs buildRegisterCptArgs(CreateWeIdDataResult createWeId) {
+    public static CptStringArgs buildCptStringArgs(
+        CreateWeIdDataResult createWeId,
+        Boolean isFormatFile) throws IOException {
 
-        RegisterCptArgs registerCptArgs = new RegisterCptArgs();
-        registerCptArgs.setCptJsonSchema(TestData.schema);
-        registerCptArgs.setCptPublisher(createWeId.getWeId());
-        registerCptArgs.setCptPublisherPrivateKey(new WeIdPrivateKey());
-        registerCptArgs.getCptPublisherPrivateKey()
+        String jsonSchema = TestData.schema;
+        if (isFormatFile) {
+            JsonNode jsonNode = JsonLoader.fromResource("/jsonSchemaCpt.json");
+            jsonSchema = jsonNode.toString();
+        }
+
+        CptStringArgs cptStringArgs = new CptStringArgs();
+        cptStringArgs.setCptJsonSchema(jsonSchema);
+        cptStringArgs.setWeIdAuthentication(buildWeIdAuthority(createWeId));
+
+        return cptStringArgs;
+    }
+
+    /**
+     * build weId authority.
+     */
+    private static WeIdAuthentication buildWeIdAuthority(CreateWeIdDataResult createWeId) {
+
+        WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+        weIdAuthentication.setWeId(createWeId.getWeId());
+        weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
+        weIdAuthentication.getWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
+        return weIdAuthentication;
+    }
 
-        return registerCptArgs;
+
+    /**
+     * build cpt json schema.
+     * @return HashMap
+     */
+    public static HashMap<String, Object> buildCptJsonSchema() {
+
+        HashMap<String, Object> cptJsonSchemaNew = new HashMap<String, Object>(3);
+        cptJsonSchemaNew.put(JsonSchemaConstant.TITLE_KEY, "cpt template");
+        cptJsonSchemaNew.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is a cpt template");
+
+        HashMap<String, Object> propertitesMap1 = new HashMap<String, Object>(2);
+        propertitesMap1.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_STRING);
+        propertitesMap1.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is name");
+
+        String[] genderEnum = {"F", "M"};
+        HashMap<String, Object> propertitesMap2 = new HashMap<String, Object>(2);
+        propertitesMap2.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_STRING);
+        propertitesMap2.put(JsonSchemaConstant.DATE_TYPE_ENUM, genderEnum);
+
+        HashMap<String, Object> propertitesMap3 = new HashMap<String, Object>(2);
+        propertitesMap3.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_NUMBER);
+        propertitesMap3.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is age");
+
+        HashMap<String, Object> cptJsonSchema = new HashMap<String, Object>(3);
+        cptJsonSchema.put("name", propertitesMap1);
+        cptJsonSchema.put("gender", propertitesMap2);
+        cptJsonSchema.put("age", propertitesMap3);
+        cptJsonSchemaNew.put(JsonSchemaConstant.PROPERTIES_KEY, cptJsonSchema);
+
+        String[] genderRequired = {"name", "gender"};
+        cptJsonSchemaNew.put(JsonSchemaConstant.REQUIRED_KEY, genderRequired);
+
+        return cptJsonSchemaNew;
+    }
+
+    /**
+     * build cpt json schemaData.
+     * @return HashMap
+     */
+    public static HashMap<String, Object> buildCptJsonSchemaData() {
+
+        HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>(3);
+        cptJsonSchemaData.put("name", "zhang san");
+        cptJsonSchemaData.put("gender", "F");
+        cptJsonSchemaData.put("age", 18);
+        return cptJsonSchemaData;
     }
 
     /**
@@ -321,29 +387,29 @@ public class TestBaseUtil {
             logger.info("privateKey:" + pk[1]);
             return pk;
         } catch (FileNotFoundException e) {
-            logger.error("resolvePk error:",e);
+            logger.error("resolvePk error:", e);
         } catch (IOException e) {
-            logger.error("resolvePk error:",e);
+            logger.error("resolvePk error:", e);
         }  finally {
             if (null != br) {
                 try {
                     br.close();
                 } catch (IOException e) {
-                    logger.error("br close error:",e);
+                    logger.error("br close error:", e);
                 }
             }
             if (null != isr) {
                 try {
                     isr.close();
                 } catch (IOException e) {
-                    logger.error("isr close error:",e);
+                    logger.error("isr close error:", e);
                 }
             }
             if (null != fis) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    logger.error("fis close error:",e);
+                    logger.error("fis close error:", e);
                 }
             }
         }

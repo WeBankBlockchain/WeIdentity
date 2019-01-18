@@ -21,28 +21,25 @@ package com.webank.weid.protocol.request;
 
 import lombok.Data;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 
 /**
- * The Arguments for the SDK API register CPT.
+ * This is a subclass, The Arguments for the SDK API register CPT.
+ * The cptJsonSchema is String.
  *
- * @author lingfenghe
+ * @author darwindu
  */
 @Data
-public class RegisterCptArgs {
+public class CptStringArgs {
+
+    /**
+     * Required: weId authority  for this CPT.
+     */
+    private WeIdAuthentication weIdAuthentication;
 
     /**
      * Required: The json schema content defined for this CPT.
      */
     private String cptJsonSchema;
 
-    /**
-     * Required: The weIdentity DID of the publisher who register this CPT.
-     */
-    private String cptPublisher;
-
-    /**
-     * Required: The private key for the publisher who register this CPT.
-     */
-    private WeIdPrivateKey cptPublisherPrivateKey;
 }
