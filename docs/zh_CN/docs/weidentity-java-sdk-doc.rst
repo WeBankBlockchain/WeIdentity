@@ -37,9 +37,9 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 #. 注册CPT：通过CptService的registerCpt()，通过之前生成的WeIdentity DID身份创建一个你喜欢的CPT模板；
 #. 查询CPT：调用CptService的queryCpt()查阅生成的CPT模板；
 #. 生成凭证：通过CredentialService的CreateCredential()，根据CPT模板，生成一份Credential；
-#. 查询凭证：调用CredentialService的VerifyCredential()，验证此Credential是否合法。
-
-以上流程的简要版本可见demo/demoTest.java
+#. 查询凭证：调用CredentialService的VerifyCredential()，验证此Credential是否合法；
+#. 凭证存证上链：调用EvidenceService的CreateEvidence()，将之前生成的Credential生成一份Hash存证上链；
+#. 验证链上凭证存证：调用EvidenceService的VerifyEvidence()，和链上对比，验证Credential是否被篡改。
 
 代码结构说明
 ------------
@@ -61,7 +61,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 接口简介
 --------
 
-整体上，WeIdentity Java SDK包括四个主要的类，它们分别是：AuthorityIssuerService、CptService、CredentialService、WeIdService。
+整体上，WeIdentity Java SDK包括五个主要的接口，它们分别是：AuthorityIssuerService、CptService、CredentialService、WeIdService、EvidenceService。
 
 
 * AuthorityIssuerService
@@ -91,10 +91,12 @@ WeIdentity DID相关功能的核心接口。
 
 本接口提供WeIdentity DID的创建、获取信息、设置属性等相关操作。
 
-接口时序图
-----------
 
-详见：`接口时序图 <./weidentity-sequences.html>`_
+* EvidenceService
+
+凭证存证上链的相关接口。
+
+本接口提供凭证的Hash存证的生成上链、链上查询及校验等操作。
 
 
 接口列表
@@ -286,6 +288,42 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    errorCode: 0
    errorMessage: success
 
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant WeIdService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: 调用RegisterAuthorityIssuer()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>WeIdService: 查询WeIdentity DID存在性
+   WeIdService->>区块链节点: 链上查询WeIdentity DID属性
+   区块链节点-->>WeIdService: 返回查询结果
+   WeIdService-->>AuthorityIssuerService: 返回查询结果
+   opt 在链上不存在
+   AuthorityIssuerService-->>调用者: 报错并退出
+   end
+   AuthorityIssuerService->>区块链节点: 加载私钥，调用注册合约
+   opt 身份校验
+   Note over 区块链节点: 如果传入WeIdentity DID在链上不存在
+   区块链节点->>区块链节点: 报错并退出
+   end
+   区块链节点->>区块链节点: 权限检查，执行合约写入AuthorityIssuer信息
+   区块链节点-->>AuthorityIssuerService: 返回合约执行结果
+   AuthorityIssuerService->>AuthorityIssuerService: 解析合约事件
+   opt 失败，地址无效或无权限
+   AuthorityIssuerService-->>调用者: 报错并退出
+   end
+   AuthorityIssuerService-->>调用者: 返回成功
+
+
 ----
 
 2. removeAuthorityIssuer
@@ -431,6 +469,32 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    errorCode: 0
    errorMessage: success
 
+
+**时序图**
+
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: 调用RemoverAuthorityIssuer()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>区块链节点: 加载交易私钥，调用移除合约
+   区块链节点->>区块链节点: 权限检查，执行合约删除WeIdentity DID信息
+   区块链节点-->>AuthorityIssuerService: 返回合约执行结果
+   AuthorityIssuerService->>AuthorityIssuerService: 解析合约事件
+   opt 失败，地址无效或无权限
+   AuthorityIssuerService-->>调用者: 报错并退出
+   end
+   AuthorityIssuerService-->>调用者: 返回成功
+
+
+
 ----
 
 3. isAuthorityIssuer
@@ -523,6 +587,26 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    result: true
    errorCode: 0
    errorMessage: success
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: 调用IsAuthorityIssuer()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>区块链节点: 调用查询是否为授权机构合约
+   区块链节点->>区块链节点: 执行合约通过WeIdentity DID查询
+   区块链节点-->>AuthorityIssuerService: 返回查询结果
+   AuthorityIssuerService-->>调用者: 返回是/否
+
 
 ----
 
@@ -657,6 +741,24 @@ com.webank.weid.protocol.base.AuthorityIssuer
       accValue:
    errorCode: 0
    errorMessage: success
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: 调用queryAuthorityIssuerInfo()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>区块链节点: 调用查询详细信息合约
+   区块链节点->>区块链节点: 执行合约通过WeIdentity DID查询
+   区块链节点-->>AuthorityIssuerService: 返回查询结果
+   AuthorityIssuerService-->>调用者: 返回查询结果（非授权机构则无）
 
 ----
 
@@ -826,6 +928,25 @@ com.webank.weid.protocol.base.CptBaseInfo
    errorCode: 0
    errorMessage: success
 
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   调用者->>WeIdentity SDK : 传入自己已有的WeIdentity DID及对应的私钥，及其jsonSchema，调用registerCpt来注册CPT。
+   opt 参数校验
+   Note over WeIdentity SDK:如果WeIdentity DID或者私钥为空或不匹配
+   WeIdentity SDK->>WeIdentity SDK:报错，提示参数不合法并退出
+   end
+   WeIdentity SDK->>区块链节点: 将java对象转换为合约所需的字段，调用智能合约，将CPT信息上链
+   opt 身份校验
+   Note over 区块链节点:如果传入WeIdentity DID在链上不存在
+   区块链节点->>区块链节点:报错，提示WeIdentity DID不存在并退出
+   end
+   区块链节点->>区块链节点:写入CPT信息
+   区块链节点-->>WeIdentity SDK:返回
+   WeIdentity SDK-->>调用者:返回调用结果
+
 ----
 
 2. queryCpt
@@ -992,6 +1113,24 @@ com.webank.weid.protocol.base.Cpt.MetaData
          updated: 0
    errorCode: 0
    errorMessage: success
+
+
+**时序图**
+
+
+.. mermaid::
+
+   sequenceDiagram
+   调用者->>WeIdentity SDK : 传入指定的cptId
+   opt 参数校验
+   Note over WeIdentity SDK:检查传入的cptId是否为空或负数
+   WeIdentity SDK->>WeIdentity SDK:报错，提示weid不合法并退出
+   end
+   WeIdentity SDK->>区块链节点: 调用合约查询链上的指定cpt对应的信息
+   区块链节点-->>WeIdentity SDK:返回
+   WeIdentity SDK->>WeIdentity SDK:根据合约返回的值构建返回的java对象
+   WeIdentity SDK-->>调用者:返回调用结果
+
 
 ----
 
@@ -1163,6 +1302,25 @@ com.webank.weid.protocol.base.CptBaseInfo
       cptVersion: 3
    errorCode: 0
    errorMessage: success
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   调用者->>WeIdentity SDK : 传入自己已有的WeIdentity DID及对应的私钥，及其需新版本的jsonSchema，调用updateCpt来更新CPT。
+   opt 参数校验
+   Note over WeIdentity SDK:如果WeIdentity DID或者私钥为空或不匹配
+   WeIdentity SDK->>WeIdentity SDK:报错，提示参数不合法并退出
+   end
+   WeIdentity SDK->>区块链节点: 将java对象转换为合约所需的字段，调用智能合约，将更新的CPT信息上链
+   opt 身份校验
+   Note over 区块链节点:如果传入WeIdentity DID在链上不存在
+   区块链节点->>区块链节点:报错，提示WeIdentity DID不存在并退出
+   end
+   区块链节点->>区块链节点:写入CPT更新信息
+   区块链节点-->>WeIdentity SDK:返回
+   WeIdentity SDK-->>调用者:返回调用结果
 
 ----
 
@@ -1381,6 +1539,21 @@ com.webank.weid.protocol.base.Credential
    errorCode: 0
    errorMessage: success
 
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialService
+   调用者->>CredentialService: 调用CreateCredential()
+   CredentialService->>CredentialService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialService->>CredentialService: 生成签发日期、生成数字签名
+   CredentialService-->>调用者: 返回凭证
+
 ----
 
 2. verifyCredential
@@ -1558,6 +1731,54 @@ com.webank.weid.protocol.base.Credential
    result: false
    errorCode: 0
    errorMessage: success
+
+
+**时序图**
+
+（同时也包含verifyCredentialWithSpecifiedPubKey时序）
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialService
+   participant CptService
+   participant WeIdService
+   participant 区块链节点
+   调用者->>CredentialService: 调用VerifyCredential()或verifyCredentialWithSpecifiedPubKey()
+   CredentialService->>CredentialService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialService->>WeIdService: 查询WeIdentity DID存在性
+   WeIdService->>区块链节点: 调用智能合约，查询WeIdentity DID属性
+   区块链节点-->>WeIdService: 返回查询结果
+   WeIdService-->>CredentialService: 返回查询结果
+   opt 查询不存在
+   CredentialService-->>调用者: 报错并退出
+   end
+   CredentialService->>CptService: 查询CPT存在性及Claim关联语义
+   CptService->>区块链节点: 调用智能合约，查询CPT
+   区块链节点-->>CptService: 返回查询结果
+   CptService-->>CredentialService: 返回查询结果
+   opt 不符合CPT格式要求
+   CredentialService-->>调用者: 报错并退出
+   end
+   CredentialService->>CredentialService: 验证过期、撤销与否
+   opt 任一验证失败
+   CredentialService-->>调用者: 报错并退出
+   end
+   opt 未提供验签公钥
+   CredentialService->>WeIdService: 查询Issuer对应公钥
+   WeIdService->>区块链节点: 调用智能合约，查询Issuer的WeIdentity DID Document
+   区块链节点-->>WeIdService: 返回查询结果
+   WeIdService-->>CredentialService: 返回查询结果
+   end
+   CredentialService->>CredentialService: 通过公钥与签名对比，验证Issuer是否签发此凭证
+   opt 验证签名失败
+   CredentialService-->>调用者: 报错并退出
+   end
+   CredentialService-->>调用者: 返回成功
 
 ----
 
@@ -1766,6 +1987,113 @@ com.webank.weid.protocol.base.Credential
 
 ----
 
+4. getCredentialHash
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialService.getCredentialHash
+   接口定义:ResponseData<String> getCredentialHash(Credential args)
+   接口详细描述: 传入Credential信息生成Credential整体的Hash值。
+
+**调用示例**
+
+.. code-block:: java
+   @Autowired
+   private CredentialService credentialService;
+     String schemaData =  "{\"/\":{\"device\":\"/dev/sda2\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
+   Credential args = new Credential();
+   args.setClaimData(RequestUtil.schemaData);
+   args.setContext("v1");
+   args.setCptId(155);
+   args.setIssuranceDate(11313312312312312L);
+   args.setCredentialId("54bc3832-fce7-433a-80c7-ba284635c67a");// 系统生成
+   args.setSignature("HLrW58iqkupFZAykaPTvU8RJ1paNUk3dou9h4LFR22y2NjQsINN2DkQk8otiKLuSUjrFFvupSxfpEvUrMOC5nWc=");
+   args.setExpirationDate(21313312312312312L);
+   args.setIssuer("did:weid:1:0x0106595955ce4713fd169bfa68e599eb99ca2e9f");
+   String credHash = credentialService.getCredentialHash(args);
+   return credHash;
+.. code-block:: text
+
+   返回结果如：
+   result: d8d969faf6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923bea5459
+   errorCode: 0
+   errorMessage: success
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ERROR
+     - 100400
+     - Credential标准错误
+   * - CREDENTIAL_NOT_EXISTS
+     - 100401
+     - Credential入参为空
+   * - CREDENTIAL_EXPIRED
+     - 100402
+     - 过期
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名破坏
+   * - CREDENTIAL_ISSUER_NOT_EXISTS
+     - 100407
+     - WeIdentity DID不能为空
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialService
+   调用者->>CredentialService: 调用GetCredentialHash()
+   CredentialService->>CredentialService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialService->>CredentialService: 生成凭证Hash
+   CredentialService-->>调用者: 返回凭证Hash
+
+----
+
+
 WeIDService
 ^^^^^^^^^^^
 
@@ -1901,6 +2229,20 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    errorCode: 0
    errorMessage: success
 
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   调用者->>WeIdentity SDK: 调用CreateWeID()
+   WeIdentity SDK->>WeIdentity SDK: 创建公私钥对
+   WeIdentity SDK->>区块链节点: 调用智能合约
+   区块链节点->>区块链节点: 以事件的方式记录created属性和public key属性
+   区块链节点->>区块链节点: 记录当前的最新块高
+   区块链节点-->>WeIdentity SDK: 创建成功
+   WeIdentity SDK-->>调用者:新创建好的WeIdentity DID以及公私钥对
+
 ----
 
 2. createWeId
@@ -2025,6 +2367,24 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    errorCode: 0
    errorMessage: success
 
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   Note over 调用者:传入自己的WeIdentity DID及用作authentication的私钥
+   调用者->>WeIdentity SDK:调用CreateWeID()
+   WeIdentity SDK->>区块链节点:调用智能合约
+   区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
+   opt 身份校验不通过
+   区块链节点-->>WeIdentity SDK:报错，提示私钥不匹配并退出
+   WeIdentity SDK-->>调用者:报错退出
+   end
+   区块链节点->>区块链节点 : 以事件的方式记录created属性和public key属性
+   区块链节点->>区块链节点 : 记录当前的最新块高
+   区块链节点-->>WeIdentity SDK: 创建成功
+   WeIdentity SDK-->>调用者:新创建好的WeIdentity DID
+
 ----
 
 3. getWeIdDocumentJson
@@ -2141,6 +2501,29 @@ com.webank.weid.protocol.base.WeIdPrivateKey
           }
    errorCode: 0
    errorMessage: success
+
+**时序图**
+
+（同时也包含getWeIDDocment时序）
+
+.. mermaid::
+
+   sequenceDiagram
+   调用者->>WeIdentity SDK : 传入指定的WeIdentity DID
+   WeIdentity SDK->>区块链节点: 调用智能合约
+   区块链节点->>区块链节点: 查找记录该WeIdentity DID关联的属性事件最后一次更新时的块高
+   区块链节点-->>WeIdentity SDK: 返回
+   loop 解析事件
+   WeIdentity SDK->>区块链节点: 根据块高，过滤该区块里的属性事件
+   区块链节点-->>WeIdentity SDK: 返回
+   WeIdentity SDK->>WeIdentity SDK: 根据块高，获取到对应区块所有交易
+   WeIdentity SDK->>WeIdentity SDK: 根据交易获取交易回执
+   WeIdentity SDK->>WeIdentity SDK: 根据交易回执过滤跟当前WeIdentity DID相关的属性事件
+   WeIdentity SDK->>WeIdentity SDK: 根据不同的key，解析public key, authentication, service endpoint
+   WeIdentity SDK->>WeIdentity SDK: 组装WeIdentity Document
+   WeIdentity SDK->>WeIdentity SDK: 根据当前事件找到上一个事件对应的块高
+   end
+   WeIdentity SDK-->>调用者:返回WeIdentity Document
 
 ----
 
@@ -2496,6 +2879,26 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    errorCode: 0
    errorMessage: success
 
+**时序图**
+
+
+.. mermaid::
+
+   sequenceDiagram
+   Note over 调用者:传入自己的WeIdentity DID及用作authentication的公私钥
+   调用者->>WeIdentity SDK : 调用setPublicKey来添加公钥。
+   WeIdentity SDK->>WeIdentity SDK:拿私钥来重新加载合约对象
+   WeIdentity SDK->>区块链节点: 调用智能合约
+   区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
+   opt 身份校验不通过
+   区块链节点-->>WeIdentity SDK:报错，提示私钥不匹配并退出
+   WeIdentity SDK-->>调用者:报错退出
+   end
+   区块链节点->>区块链节点:将公钥和WeIdentity DID以及上次记录的块高写到属性事件中
+   区块链节点->>区块链节点:记录最新块高
+   区块链节点-->>WeIdentity SDK:返回
+   WeIdentity SDK-->>调用者:返回调用结果
+
 ----
 
 6. setService
@@ -2629,6 +3032,25 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    result: true
    errorCode: 0
    errorMessage: success
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   Note over 调用者:传入自己的WeIdentity DID及要用作<br>authentication的私钥，<br>以及service endpoint
+   调用者->>WeIdentity SDK : 调用setAuthentication来添加认证。
+   WeIdentity SDK->>WeIdentity SDK:拿私钥来重新加载合约对象
+   WeIdentity SDK->>区块链节点: 调用智能合约
+   区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
+   opt 身份校验不通过
+   区块链节点-->>WeIdentity SDK:报错，提示私钥不匹配并退出
+   WeIdentity SDK-->>调用者:报错退出
+   end
+   区块链节点->>区块链节点:将service endpoint和WeIdentity DID以及上次记录的块高写到属性事件中
+   区块链节点->>区块链节点:记录最新块高
+   区块链节点-->>WeIdentity SDK:返回
+   WeIdentity SDK-->>调用者:返回调用结果
 
 ----
 
@@ -2770,3 +3192,588 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    errorCode: 0
    errorMessage: success
 
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   Note over 调用者:传入自己的WeIdentity DID及用作authentication的公私钥
+   调用者->>WeIdentity SDK : 调用setAuthentication来添加认证。
+   WeIdentity SDK->>WeIdentity SDK:拿私钥来重新加载合约对象
+   WeIdentity SDK->>区块链节点: 调用智能合约
+   区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
+   opt 身份校验不通过
+   区块链节点-->>WeIdentity SDK:报错，提示私钥不匹配并退出
+   WeIdentity SDK-->>调用者:报错退出
+   end
+   区块链节点->>区块链节点:将authentication和WeIdentity DID以及上次记录的块高写到属性事件中
+   区块链节点->>区块链节点:记录最新块高
+   区块链节点-->>WeIdentity SDK:返回
+   WeIdentity SDK-->>调用者:返回调用结果
+
+----
+
+EvidenceService
+^^^^^^^^^^^^^^^^^
+
+1. createEvidence
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.createEvidence
+   接口定义:ResponseData<String> createEvidence(Credential credential, WeIdPrivateKey weIdPrivateKey)
+   接口详细描述: 生成凭证存证信息并上链，有判断要求数据有效，相关非空验证等
+   注意：本接口并不进行凭证的有效性验证，也就是说，上链的凭证源有可能无效。
+   调用方有义务事先调用CredentialService.verifyCredential()进行判断以避免脏数据。
+   传入的私钥将会成为链上存证的签名方。此签名方和凭证的Issuer可以不是同一方。
+
+**接口入参**\ : 
+
+com.webank.weid.protocol.base.Credential
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 版本
+     - 默认为v1
+   * - id
+     - String
+     - Y
+     - 证书编号
+     - 
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     - 
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     - 
+   * - issuranceDate
+     - Long
+     - Y
+     - 创建日期
+     - 
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     - 
+   * - signature
+     - String
+     - Y
+     - 签名数据
+     - 
+   * - claimData
+     - String
+     - Y
+     - Claim数据
+     - 
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 数字私钥
+     - 使用十进制数字表示
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - String
+     - 创建的凭证合约地址
+     - 为空则表示失败
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_JSON_SCHEMA_INVALID
+     - 100301
+     - Json Schema非法
+   * - CREDENTIAL_ERROR
+     - 100400
+     - Credential标准错误
+   * - CREDENTIAL_EXPIRED
+     - 100402
+     - 过期
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuer与签名不匹配
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名破坏
+   * - CREDENTIAL_REVOKED
+     - 100406
+     - 已被撤销
+   * - CREDENTIAL_ISSUER_NOT_EXISTS
+     - 100407
+     - WeIdentity DID不能为空
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
+     - 100417
+     - WeIdentity Document为空
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+   @Autowired
+   private CredentialService credentialService;
+   private EvidenceService evidenceService;
+   String schema1Data =  "{\"/\":{\"device\":\"/dev/sda1\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
+   CreateCredentialArgs args = new CreateCredentialArgs();
+   args.setClaimData(RequestUtil.schema1Data);
+   args.setCptId(155);
+   args.setExpirationDate(21313312312312312L);
+   args.setIssuer("did:weid:1:0x0106595955ce4713fd169bfa68e599eb99ca2e9f");
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey(new BigInteger(1231232142).toString());
+   args.setWeIdPrivateKey(weIdPrivateKey);
+   ResponseData<Credential> credResponse = credentialService.createCredential(args);
+   ResponseData<String> response = evidenceService.createEvidence(credResponse.getResult(), weIdPrivateKey);
+   return response;
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: 0x425c613348946c3a84861c56808710ea4ba5c961
+   errorCode: 0
+   errorMessage: success
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用CreateEvidence()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService->>EvidenceService: 生成凭证Hash
+   EvidenceService->>EvidenceService: 基于凭证Hash生成签名值
+   EvidenceService->>区块链节点: 调用智能合约，创建并上传凭证存证
+   区块链节点-->>EvidenceService: 返回创建结果
+   opt 创建失败
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService-->>调用者: 返回成功
+
+----
+
+2. getEvidence
+~~~~~~~~~~~~~~~~~~~
+
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.getEvidence
+   接口定义:ResponseData<Evidence> getEvidence(String evidenceAddress)
+   接口详细描述: 根据传入的凭证存证地址，在链上查找凭证存证信息。
+
+
+**接口入参**\ :   String
+
+**接口返回**\ :   com.webank.weid.protocol.base.Evidence;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - credentialHash
+     - String
+     - Y
+     - 凭证Hash值
+     - 是一个66个字节的字符串，以0x开头
+   * - signers
+     - List<String>
+     - Y
+     - 凭证签发者
+     - 链上允许存在多个凭证签发者
+   * - signatures
+     - List<String>
+     - Y
+     - 签发者生成签名
+     - 和每个签发者一一按序对应的签名值
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_NOT_EXISTS_ON_CHAIN
+     - 100401
+     - Credential入参为空
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+   @Autowired
+   private EvidenceService evidenceService;
+   ResponseData<Evidence> response = evidenceService.getEvidence("0x425c613348946c3a84861c56808710ea4ba5c961");
+   return response;
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: (com.webank.weid.protocol.base.Evidence)
+      credentialHash: c8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
+      signers: 0x0106595955ce4713fd169bfa68e599eb99ca2e9f
+      signature: HO+/ve+/vXfvv70hQO+/vQwMVO+/vSot77+977+9UGEhLO+/vW4277+977+977+9HO+/ve+/vSTvv70777+9f14=
+   errorCode: 0
+   errorMessage: success
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用GetEvidence()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService->>区块链节点: 调用智能合约，查询凭证存证内容
+   区块链节点-->>EvidenceService: 返回查询结果
+   opt 查询出错
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService-->>调用者: 返回成功
+
+----
+
+3. verifyEvidence()
+~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.verifyEvidence
+   接口定义:ResponseData<Boolean> verifyEvidence(Credential credential, String evidenceAddress)
+   接口详细描述: 根据传入的凭证和链上凭证对比，验证其是否遭到篡改。
+
+**接口入参**\ : com.webank.weid.protocol.base.Credential
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 版本
+     - 默认为v1
+   * - id
+     - String
+     - Y
+     - 证书编号
+     - 
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     - 
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     - 
+   * - issuranceDate
+     - Long
+     - Y
+     - 创建日期
+     - 
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     - 
+   * - signature
+     - String
+     - Y
+     - 签名数据
+     - 
+   * - claimData
+     - String
+     - Y
+     - Claim数据
+     - 
+
+String：以地址形式存在的String，会进行入参检查
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Boolean
+     - 是否set成功
+     - 
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_JSON_SCHEMA_INVALID
+     - 100301
+     - Json Schema非法
+   * - CREDENTIAL_ERROR
+     - 100400
+     - Credential标准错误
+   * - CREDENTIAL_EXPIRED
+     - 100402
+     - 过期
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuer与签名不匹配
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名破坏
+   * - CREDENTIAL_REVOKED
+     - 100406
+     - 已被撤销
+   * - CREDENTIAL_ISSUER_NOT_EXISTS
+     - 100407
+     - WeIdentity DID不能为空
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
+     - 100417
+     - WeIdentity Document为空
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - CREDENTIAL_EVIDENCE_ID_MISMATCH
+     - 100502
+     - Evidence ID不匹配
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ALREADY_EXISTS
+     - 500401
+     - Evidence ID已存在
+   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_NO_PERMISSION
+     - 500402
+     - Evidence操作无权限
+
+
+**调用示例**
+
+.. code-block:: java
+   @Autowired
+   private CredentialService credentialService;
+   private EvidenceService evidenceService;
+   String schema1Data =  "{\"/\":{\"device\":\"/dev/sda1\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]},\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]},\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
+   CreateCredentialArgs args = new CreateCredentialArgs();
+   args.setClaimData(RequestUtil.schema1Data);
+   args.setCptId(155);
+   args.setExpirationDate(21313312312312312L);
+   args.setIssuer("did:weid:1:0x0106595955ce4713fd169bfa68e599eb99ca2e9f");
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey(new BigInteger(1231232142).toString());
+   args.setWeIdPrivateKey(weIdPrivateKey);
+   ResponseData<Credential> credResponse = credentialService.createCredential(args);
+   ResponseData<String> response = evidenceService.createEvidence(credResponse.getCredential(), weIdPrivateKey);
+   return evidenceService.verifyEvidence(credResponse.getResult(), response.getResult());
+   
+.. code-block:: text
+
+   返回结果如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant WeIdService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用VerifyEvidence()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService->>EvidenceService: 调用GetEvidence()查询凭证内容
+   EvidenceService->>区块链节点: 调用智能合约，查询凭证存证内容
+   区块链节点-->>EvidenceService: 返回查询结果
+   opt 查询出错
+   EvidenceService-->>调用者: 返回验证失败，报错并退出
+   end
+   EvidenceService->>EvidenceService: 生成凭证Hash，与链上凭证Hash对比是否一致
+   opt Hash不一致
+   EvidenceService-->>调用者: 返回验证失败，报错并退出
+   end
+   EvidenceService->>WeIdService: 根据存证中签名方信息，调用GetWeIdDocument()查询WeID公钥
+   WeIdService->>区块链节点: 调用智能合约，查询WeID公钥
+   区块链节点-->>WeIdService: 返回查询结果
+   EvidenceService->>EvidenceService: 验证存证中签名是否为与凭证Hash一致
+   opt 验签失败
+   EvidenceService-->>调用者: 返回验证失败，报错并退出
+   end
+   EvidenceService-->>调用者: 返回验证成功
