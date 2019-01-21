@@ -99,6 +99,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setIssuranceDate(DateUtils.getCurrentTimeStamp());
             result.setExpirationDate(args.getExpirationDate());
             result.setClaim(args.getClaim());
+            result.setDisclosureKeys(new ArrayList<String>(args.getClaim().keySet()));
             String rawData = CredentialUtils.getCredentialFields(result);
             String privateKey = args.getWeIdPrivateKey().getPrivateKey();
             Sign.SignatureData sigData = SignatureUtils.signMessage(rawData, privateKey);
