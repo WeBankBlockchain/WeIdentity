@@ -406,4 +406,18 @@ public enum ErrorCode {
     protected void setCodeDesc(String codeDesc) {
         this.codeDesc = codeDesc;
     }
+
+    /**
+     * get ErrorType By errcode.
+     *
+     * @param errorCode the ErrorCode
+     */
+    public static ErrorCode getTypeByErrorCode(int errorCode) {
+        for (ErrorCode type : ErrorCode.values()) {
+            if (type.getCode() == errorCode) {
+                return type;
+            }
+        }
+        return null;
+    }
 }

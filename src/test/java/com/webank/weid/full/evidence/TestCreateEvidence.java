@@ -110,7 +110,7 @@ public class TestCreateEvidence extends TestBaseServcie {
     /**
      * case5: privateKey is null.
      */
-    @Test
+    // @Test
     public void testCreateEvidenceCase04() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = createWeIdResultWithSetAttr;
         WeIdPrivateKey weIdPrivateKey = createWeIdResultWithSetAttr.getUserWeIdPrivateKey();
@@ -130,7 +130,7 @@ public class TestCreateEvidence extends TestBaseServcie {
     /**
      * case6: privateKey is xxxxx.
      */
-    @Test
+    // @Test
     public void testCreateEvidenceCase05() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = createWeIdResultWithSetAttr;
         WeIdPrivateKey weIdPrivateKey = createWeIdResultWithSetAttr.getUserWeIdPrivateKey();

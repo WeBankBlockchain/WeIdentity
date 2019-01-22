@@ -61,7 +61,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     @Override
     public void testInit() {
         super.testInit();
-        if (null == createWeIdForGetDoc) {
+        if (createWeIdForGetDoc == null) {
             createWeIdForGetDoc = super.createWeIdWithSetAttr(); 
         }
     }
