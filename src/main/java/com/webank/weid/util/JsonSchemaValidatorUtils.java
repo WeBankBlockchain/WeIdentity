@@ -62,7 +62,7 @@ public class JsonSchemaValidatorUtils {
      * @return true if yes, false otherwise
      * @throws Exception the exception
      */
-    public static boolean validateJsonVersusSchema(String jsonData, String jsonSchema)
+    public static boolean isValidateJsonVersusSchema(String jsonData, String jsonSchema)
         throws Exception {
         JsonNode jsonDataNode = loadJsonObject(jsonData);
         JsonNode jsonSchemaNode = loadJsonObject(jsonSchema);
