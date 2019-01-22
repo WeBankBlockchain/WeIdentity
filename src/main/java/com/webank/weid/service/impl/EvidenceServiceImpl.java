@@ -20,6 +20,7 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -101,23 +102,22 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         Credential credential,
         WeIdPrivateKey weIdPrivateKey) {
 
-        ResponseData<Boolean> innerResponse = CredentialUtils
+        ErrorCode innerResponse = CredentialUtils
             .isCreateEvidenceArgsValid(credential, weIdPrivateKey);
-        if (!innerResponse.getResult()) {
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
             logger.error("Create Evidence input format error!");
             return new ResponseData<>(
                 StringUtils.EMPTY,
-                innerResponse.getErrorCode(),
-                innerResponse.getErrorMessage());
+                innerResponse
+            );
         }
 
         innerResponse = CredentialUtils.isCredentialValid(credential);
-        if (!innerResponse.getResult()) {
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
             logger.error("Create Evidence input format error: credential!");
             return new ResponseData<>(
                 StringUtils.EMPTY,
-                innerResponse.getErrorCode(),
-                innerResponse.getErrorMessage());
+                innerResponse);
         }
 
         try {
@@ -160,11 +160,11 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
 
             if (event != null) {
                 innerResponse = verifyCreateEvidenceEvent(event);
-                if (!innerResponse.getResult()) {
+                if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
                     return new ResponseData<>(
                         StringUtils.EMPTY,
-                        innerResponse.getErrorCode(),
-                        innerResponse.getErrorMessage());
+                        innerResponse
+                    );
                 }
                 return new ResponseData<>(event.addr.toString(), ErrorCode.SUCCESS);
             } else {
@@ -250,7 +250,8 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 signaturesList.add(new String(
                     SignatureUtils
                         .base64Encode(SignatureUtils.simpleSignatureSerialization(sigData)),
-                    WeIdConstant.UTF_8));
+                    StandardCharsets.UTF_8)
+                );
             }
             evidenceInfoData.setSignatures(signaturesList);
 
@@ -277,11 +278,14 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
      */
     @Override
     public ResponseData<Boolean> verify(Credential credential, String evidenceAddress) {
-        ResponseData<Boolean> innerResponse = CredentialUtils
+        ErrorCode innerResponse = CredentialUtils
             .isCredentialValid(credential);
-        if (!innerResponse.getResult()) {
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
             logger.error("Verify EvidenceInfo input illegal: credential");
-            return innerResponse;
+            return new ResponseData<>(
+                false,
+                innerResponse
+            );
         }
         if (!WeIdUtils.isValidAddress(evidenceAddress)) {
             logger.error("Verify EvidenceInfo input illegal: evidenceInfo address");
@@ -293,9 +297,10 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         if (innerEvidenceResponseData.getResult() == null) {
             return new ResponseData<>(
                 false,
-                innerEvidenceResponseData.getErrorCode(),
-                innerEvidenceResponseData.getErrorMessage());
+                ErrorCode.getTypeByErrorCode(innerEvidenceResponseData.getErrorCode())
+            );
         }
+
         EvidenceInfo evidenceInfo = innerEvidenceResponseData.getResult();
 
         // Step 2: Verify Hash value
@@ -319,12 +324,13 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 SignatureData signatureData =
                     SignatureUtils.simpleSignatureDeserialization(
                         SignatureUtils.base64Decode(
-                            signature.getBytes(WeIdConstant.UTF_8)));
+                            signature.getBytes(StandardCharsets.UTF_8)));
 
                 ResponseData<Boolean> innerResponseData = verifySignatureToSigner(
                     hashOffChain,
                     WeIdUtils.convertAddressToWeId(signer),
-                    signatureData);
+                    signatureData
+                );
                 if (!innerResponseData.getResult()) {
                     return innerResponseData;
                 }
@@ -337,17 +343,16 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         return new ResponseData<>(true, ErrorCode.SUCCESS);
     }
 
-    private ResponseData<Boolean> verifyCreateEvidenceEvent(CreateEvidenceLogEventResponse event) {
+    private ErrorCode verifyCreateEvidenceEvent(CreateEvidenceLogEventResponse event) {
         if (event.retCode == null || event.addr == null) {
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+            return ErrorCode.ILLEGAL_INPUT;
         }
         Integer eventRetCode = event.retCode.getValue().intValue();
         if (eventRetCode
             .equals(ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode())) {
-            return new ResponseData<>(false,
-                ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT);
+            return ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT;
         }
-        return new ResponseData<>(true, ErrorCode.SUCCESS);
+        return ErrorCode.SUCCESS;
     }
 
     private ResponseData<Boolean> verifySignatureToSigner(String rawData,

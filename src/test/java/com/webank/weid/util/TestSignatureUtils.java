@@ -19,7 +19,6 @@
 
 package com.webank.weid.util;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -35,9 +34,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Test SignatureUtils.
- * 
- * @author v_wbjnzhang
  *
+ * @author v_wbjnzhang
  */
 public class TestSignatureUtils {
 
@@ -45,11 +43,10 @@ public class TestSignatureUtils {
 
     @Test
     public void testSignatureUtils()
-        throws InvalidAlgorithmParameterException, 
+        throws InvalidAlgorithmParameterException,
         NoSuchAlgorithmException,
-        NoSuchProviderException, 
-        SignatureException,
-        UnsupportedEncodingException {
+        NoSuchProviderException,
+        SignatureException {
 
         ECKeyPair keyPair = SignatureUtils.createKeyPair();
         String str = "hello world...........................yes";

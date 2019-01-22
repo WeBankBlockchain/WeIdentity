@@ -227,27 +227,27 @@ public final class CredentialUtils {
      * @param args CreateCredentialArgs
      * @return true if yes, false otherwise
      */
-    public static ResponseData<Boolean> isCreateCredentialArgsValid(
+    public static ErrorCode isCreateCredentialArgsValid(
         CreateCredentialArgs args) {
         if (args == null) {
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+            return ErrorCode.ILLEGAL_INPUT;
         }
         if (args.getCptId() == null || args.getCptId().intValue() < 0) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CPT_NOT_EXISTS);
+            return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
         }
         if (!WeIdUtils.isWeIdValid(args.getIssuer())) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_INVALID);
+            return ErrorCode.CREDENTIAL_ISSUER_INVALID;
         }
         Long expirationDate = args.getExpirationDate();
         if (expirationDate == null
             || expirationDate.longValue() < 0
             || expirationDate.longValue() == 0) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL);
+            return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
         }
         if (args.getClaim() == null || args.getClaim().isEmpty()) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS);
+            return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
         }
-        return new ResponseData<>(true, ErrorCode.SUCCESS);
+        return ErrorCode.SUCCESS;
     }
 
     /**
@@ -256,21 +256,20 @@ public final class CredentialUtils {
      * @param args Credential
      * @return true if yes, false otherwise
      */
-    public static ResponseData<Boolean> isCredentialValid(Credential args) {
+    public static ErrorCode isCredentialValid(Credential args) {
         if (args == null) {
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+            return ErrorCode.ILLEGAL_INPUT;
         }
         CreateCredentialArgs createCredentialArgs = extractCredentialMetadata(args);
-        ResponseData<Boolean> metadataResponseData =
-            isCreateCredentialArgsValid(createCredentialArgs);
-        if (!metadataResponseData.getResult()) {
+        ErrorCode metadataResponseData = isCreateCredentialArgsValid(createCredentialArgs);
+        if (ErrorCode.SUCCESS.getCode() != metadataResponseData.getCode()) {
             return metadataResponseData;
         }
-        ResponseData<Boolean> contentResponseData = isCredentialContentValid(args);
-        if (!contentResponseData.getResult()) {
+        ErrorCode contentResponseData = isCredentialContentValid(args);
+        if (ErrorCode.SUCCESS.getCode() != contentResponseData.getCode()) {
             return contentResponseData;
         }
-        return new ResponseData<>(true, ErrorCode.SUCCESS);
+        return ErrorCode.SUCCESS;
     }
 
     /**
@@ -279,27 +278,27 @@ public final class CredentialUtils {
      * @param args Credential
      * @return true if yes, false otherwise
      */
-    public static ResponseData<Boolean> isCredentialContentValid(Credential args) {
+    public static ErrorCode isCredentialContentValid(Credential args) {
         String credentialId = args.getId();
         if (StringUtils.isEmpty(credentialId) || !CredentialUtils.isValidUuid(credentialId)) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_ID_NOT_EXISTS);
+            return ErrorCode.CREDENTIAL_ID_NOT_EXISTS;
         }
         String context = args.getContext();
         if (StringUtils.isEmpty(context)) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS);
+            return ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS;
         }
         Long issuranceDate = args.getIssuranceDate();
         if (issuranceDate == null) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL);
+            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
         }
         if (issuranceDate.longValue() > args.getExpirationDate().longValue()) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXPIRED);
+            return ErrorCode.CREDENTIAL_EXPIRED;
         }
         String signature = args.getSignature();
         if (StringUtils.isEmpty(signature) || !SignatureUtils.isValidBase64String(signature)) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
+            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
         }
-        return new ResponseData<>(true, ErrorCode.SUCCESS);
+        return ErrorCode.SUCCESS;
     }
 
     /**
@@ -309,14 +308,15 @@ public final class CredentialUtils {
      * @param weIdPrivateKey the signer WeID's private key
      * @return evidence address. Return empty string if failed due to any reason.
      */
-    public static ResponseData<Boolean> isCreateEvidenceArgsValid(Credential credential,
+    public static ErrorCode isCreateEvidenceArgsValid(
+        Credential credential,
         WeIdPrivateKey weIdPrivateKey) {
         if (credential == null) {
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+            return ErrorCode.ILLEGAL_INPUT;
         }
         if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
+            return ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS;
         }
-        return new ResponseData<>(true, ErrorCode.SUCCESS);
+        return ErrorCode.SUCCESS;
     }
 }
