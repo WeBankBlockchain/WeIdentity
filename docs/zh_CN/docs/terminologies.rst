@@ -33,10 +33,10 @@
      - 分布式身份标识
      - W3C的DID规范定义的去中心化ID。详见：\ `W3C DID规范 <https://w3c-ccg.github.io/did-spec/>`_
    * - WeIdentity DID
-     - 
+     -
      - 分布式身份标识，WeIdentity的分布式多中心的ID注册机制下生成的实体的ID。符合W3C DID规范
    * - WeIdentity Document
-     - 
+     -
      - 描述如何使用DID，至少包含了3个字段：披露的公钥列表；Authentication描述如何Authenticate；Service Endpoint
    * - Claim
      - 声明
@@ -90,8 +90,8 @@
      - 数据托管机构
      - 数据的托管机构，例如用户把Credential托管在某个用户身份管理APP里面
    * - User Agent
-     - 
+     - 用户代理
      - 用户私钥托管机构，例如某个用户身份管理APP。依据业务场景需求，可以是云端保存机制的，也可以是客服端本地保存机制的
    * - Publisher
-     - 
+     - CPT发布者
      - 发布一个新的CPT的角色，被称为Publisher

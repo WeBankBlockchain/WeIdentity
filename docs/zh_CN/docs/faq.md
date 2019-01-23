@@ -4,7 +4,7 @@
 
 技术问题 FAQ 列表：  
 
-* [JAVA SDK FAQ](weidentity-java-sdk/faq.html)
+* [JAVA SDK FAQ](https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/faq.html)
 
 ---
 
@@ -133,7 +133,7 @@ Credential的重新生成则为重新发行一个Credential ID不相同的全新
 
 - **Credential（凭证）有没有伪造的可能，如何防伪造？**  
 
-目前 Credential（凭证） 使用 ECDSA 签名，未来会支持 RSA。链上证明被伪造的可能性，即特定长度密匙的 ECDSA 或 RSA 秘钥被攻破的肯能性。在私钥不泄露，且密匙未被攻破的情况下，目前不存在被伪造的可能性。
+目前 Credential（凭证） 使用 ECDSA 签名，未来会支持 RSA。链上证明被伪造的可能性，即特定长度密匙的 ECDSA 或 RSA 私钥被攻破的可能性。在私钥不泄露，且密匙未被攻破的情况下，目前不存在被伪造的可能性。
 
 > 参见：  
 > * [how-big-an-rsa-key-is-considered-secure-today](https://crypto.stackexchange.com/questions/1978/how-big-an-rsa-key-is-considered-secure-today/1982#1982)  
@@ -141,9 +141,9 @@ Credential的重新生成则为重新发行一个Credential ID不相同的全新
 > * 2048-bit 长的RSA私钥,在2030年以前是足够安全的。参见：[Asymmetric_algorithm_key_lengths](https://en.wikipedia.org/wiki/Key_size#Asymmetric_algorithm_key_lengths)  
 > * [目前RSA因式分解的记录是 768 bit（这个挑战目前已经停止）](https://en.wikipedia.org/wiki/RSA_numbers#RSA-768)  
 > * [ECDSA vs RSA (可以直接看Conclusion)](https://www.ssl.com/article/comparing-ecdsa-vs-rsa/)
-    
+
 > 注：  
-> * 如果假设量子计算机是可行的，任何 ECDSA 和 RSA 密钥都可使用Shor算法攻破。参见：[RSA key length vs. Shor's algorithm](https://security.stackexchange.com/a/37638/18064)，
+> * 如果假设量子计算机是可行的，任何 ECDSA 和 RSA 私钥都可使用Shor算法攻破。参见：[RSA key length vs. Shor's algorithm](https://security.stackexchange.com/a/37638/18064)，
 [Quantum_computing_attacks](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Quantum_computing_attacks)
 
 ---
