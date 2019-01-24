@@ -19,7 +19,7 @@ WeIdentity目前主要包含两大模块：WeIdentity DID以及WeIdentity Creden
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 传统方式中，用户的注册和身份管理完全依赖于单一中心的注册机构；随着分布式账本技术（例如区块链）的出现，分布式多中心的身份注册、标识和管理成为可能。
-WeIdentity DID模块在\ `FISCO-BCOS区块链底层平台 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/>`_\ 上实现了一套符合\ `W3C DID规范 <https://w3c-ccg.github.io/did-spec/>`_\ 的分布式多中心的身份标识协议，使实体（人或物）的现实身份实现了链上的身份标识；同时，WeIdentity DID给与Subject（人或者物）直接拥有和控制自己身份ID的能力。
+WeIdentity DID模块在\ `FISCO-BCOS区块链底层平台 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/>`_\ 上实现了一套符合\ `W3C DID规范 <https://w3c-ccg.github.io/did-spec/>`_\ 的分布式多中心的身份标识协议，使实体（人或物）的现实身份实现了链上的身份标识；同时，WeIdentity DID给与Entity（人或者物）直接拥有和控制自己身份ID的能力。
 
 WeIdentity DID秉承以下设计理念：
 

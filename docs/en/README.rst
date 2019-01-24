@@ -21,7 +21,7 @@ Decentralized Identifiers (WeIdentity DID)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Traditionally, user identity is issued and managed by single centralized organization. With the advent of blockchain technology, it is possible to publish and distribute user identity on chain to allow more than one organization to manage on as a multi-centers solution
-WeIdentity DID Module has come with a distributed identification protocol based on \ `FISCO-BCOS Blockchain Platform <https://fisco-bcos-documentation-en.readthedocs.io/en/latest/>`_\ , and \ `W3C DID specification <https://w3c-ccg.github.io/did-spec/>`_\, to create identities on chain and associate it with any person or object in the real world. Moreover, DID ensures the Subject’s owner with full rights of control and ownership of the identities.
+WeIdentity DID Module has come with a distributed identification protocol based on \ `FISCO-BCOS Blockchain Platform <https://fisco-bcos-documentation-en.readthedocs.io/en/latest/>`_\ , and \ `W3C DID specification <https://w3c-ccg.github.io/did-spec/>`_\, to create identities on chain and associate it with any person or object in the real world. Moreover, DID ensures the Entity’s owner with full rights of control and ownership of the identities.
 
 The design goals of WeIdentity DID:
 
