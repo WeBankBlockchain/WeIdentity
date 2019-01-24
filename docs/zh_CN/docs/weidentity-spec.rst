@@ -129,7 +129,7 @@ WeIdentity DID = did:weid:net-id:bs-specific-string
    * - net-id
      - 网络id，用于路由到不同的网络
    * - bs-specific-string
-     - 基于底层区块链平台生成，代表Subject在链上的地址，保证全网唯一
+     - 基于底层区块链平台生成，代表Entity在链上的地址，保证全网唯一
 
 
 备注：bsSpecificString根据区块链底层平台和业务具体情况来确定生成规则，例如可以是随机字符串，或者区块链上的地址。
@@ -147,7 +147,7 @@ WeIdentity Document格式
    * - @context
      - 用于描述WeIdentity Document结构等信息
    * - id
-     - WeIdentity DID，表示当前Document描述的subject，用于自描述
+     - WeIdentity DID，表示当前Document描述的Entity，用于自描述
    * - created
      - Document的创建时间
    * - updated
@@ -159,9 +159,9 @@ WeIdentity Document格式
    * - publicKey.type
      - 用于指定signature suite
    * - publicKey.owner
-     - 指定控制对应私钥的Subject，遵从WeIdentity规范，如果为空，则表明owner是Document的id字段，如果是Credential类Subject，则owner一般是某用户
+     - 指定控制对应私钥的Entity，遵从WeIdentity规范，如果为空，则表明owner是Document的id字段，如果是Credential类Entity，则owner一般是某用户
    * - authentication
-     - 用于Subject证明其与当前Document的关联性
+     - 用于Entity证明其与当前Document的关联性
    * - authentication.type
      - 用于指定signature suite
    * - authentication.publicKey
@@ -255,7 +255,7 @@ WeIdentity DID支持操作
 
       * - 角色
         - 说明
-      * - User (Subject)
+      * - User (Entity)
         - 用户（实体）。会注册属于自己的WeIdentity DID，申请Credential，并通过出示给相关业务方来使用之。
       * - Issuer
         - Credential的发行者。会首先验证实体对WeIdentity DID的所有权，其次发行Credential交给实体。
@@ -449,7 +449,7 @@ Credential操作
 验证Credential
 ~~~~~~~~~~~~~~
 
-通过这个接口，一个Subject可以对一个Credential进行验证。
+通过这个接口，一个Entity可以对一个Credential进行验证。
 
 存储/提取Credential
 ~~~~~~~~~~~~~~~~~~~
