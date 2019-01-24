@@ -61,7 +61,7 @@
      - 用于路由到不同的网络
    * - Service Endpoint
      - 服务端点
-     - Subject暴露的服务的地址，例如暴露自己的Credential托管的服务地址，暴露自己的文件存储服务地址
+     - Entity暴露的服务的地址，例如暴露自己的Credential托管的服务地址，暴露自己的文件存储服务地址
    * - publish
      - 发布
      - 一个Issuer（包括Authority Issuer）发行一种新的CPT，这个动作称为publish
@@ -76,13 +76,13 @@
      - 由权威机构发行的与实体关联的数据，通过摘要算法与签名算法，在保证数据隐私前提下，实现数据不可篡改与可验证
    * - Issuer
      - 凭证发行者
-     - 任意拥有WeIdentity DID的Subject都可以作为Issuer来发行Credential
+     - 任意拥有WeIdentity DID的Entity都可以作为Issuer来发行Credential
    * - Authority Issuer
      - 权威凭证发行者
      - 例如对Claim进行认证的权威机构或者可信机构，例如下发驾照的交通事务局
-   * - Subject
-     - 主体
-     - WeIdentity Document或Credential描述的主体，即拥有WeIdentity DID的人或者物
+   * - Entity
+     - 实体
+     - WeIdentity Document或Credential描述的实体，即拥有WeIdentity DID的人或者物
    * - Verifier
      - 凭证验证者
      - 使用凭证的第三方，会验证这个凭证是否经过权威机构认证，例如劳工局办理业务时需要用户提供驾照，这时劳工局就是Verifier
