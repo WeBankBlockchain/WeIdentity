@@ -166,7 +166,7 @@ public enum ErrorCode {
      * The credential credential verify signature is exception.
      */
     CREDENTIAL_EXCEPTION_VERIFYSIGNATURE(100419, "credential verify signature exception"),
-
+    
     /**
      * Authority issuer main error code.
      */

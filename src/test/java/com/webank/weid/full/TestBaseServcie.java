@@ -40,7 +40,7 @@ import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CptMapArgs;
@@ -53,6 +53,7 @@ import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.WeIdUtils;
+
 
 /**
  * testing basic method classes.
@@ -174,12 +175,12 @@ public abstract class TestBaseServcie extends BaseTest {
     /**
      * verifyCredential.
      * 
-     * @param credential credential
+     * @param credentialWrapper credentialWrapper
      * @return
      */
-    protected ResponseData<Boolean> verifyCredential(Credential credential) {
+    protected ResponseData<Boolean> verifyCredential(CredentialWrapper credentialWrapper) {
 
-        ResponseData<Boolean> response = credentialService.verifyCredential(credential);
+        ResponseData<Boolean> response = credentialService.verify(credentialWrapper);
         logger.info("verifyCredentialWithSpecifiedPubKey result:");
         BeanUtil.print(response);
 
@@ -192,9 +193,9 @@ public abstract class TestBaseServcie extends BaseTest {
      * @param createCredentialArgs createCredentialArgs
      * @return
      */
-    protected Credential createCredential(CreateCredentialArgs createCredentialArgs) {
+    protected CredentialWrapper createCredential(CreateCredentialArgs createCredentialArgs) {
 
-        ResponseData<Credential> response =
+        ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);
         logger.info("createCredential result:");
         BeanUtil.print(response);
@@ -433,5 +434,5 @@ public abstract class TestBaseServcie extends BaseTest {
             }
         };
     }
-            
+
 }

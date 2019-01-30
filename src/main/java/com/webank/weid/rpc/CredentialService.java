@@ -20,8 +20,9 @@
 package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialWrapper;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
-import com.webank.weid.protocol.request.VerifyCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
@@ -32,28 +33,56 @@ import com.webank.weid.protocol.response.ResponseData;
 public interface CredentialService {
 
     /**
-     * Generate a credential.
+     * Generate a credential for full claim content.
      *
      * @param args the args
      * @return credential
      */
-    ResponseData<Credential> createCredential(CreateCredentialArgs args);
+    ResponseData<CredentialWrapper> createCredential(CreateCredentialArgs args);
+
+    /**
+     * Generate a credential with selected data.
+     *
+     * @param credential the credential.
+     * @param disclosure the setting of disclosure, such as: {@code{"name":1,"gender":0,"age":1}},
+     *      which means you WILL disclose "name" and "age" to others, and "gender" WILL NOT disclose
+     *      to others.
+     * @return CredentialWrapper
+     */
+    ResponseData<CredentialWrapper> createSelectiveCredential(
+        Credential credential,
+        String disclosure
+    );
 
     /**
      * Verify the validity of a credential. Public key will be fetched from chain.
      *
-     * @param args the args
+     * @param credential the credential
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      *      in ResponseData
      */
-    ResponseData<Boolean> verifyCredential(Credential args);
+    ResponseData<Boolean> verify(Credential credential);
+
+    /**
+     * Verify the validity of a credential. Public key will be fetched from chain.
+     *
+     * @param credentialWrapper the credentialWrapper
+     * @return the verification result. True if yes, false otherwise with exact verify error codes
+     *      in ResponseData
+     */
+    ResponseData<Boolean> verify(CredentialWrapper credentialWrapper);
 
     /**
      * Verify the validity of a credential. Public key must be provided.
      *
-     * @param args the args
+     * @param credentialWrapper the credential wrapper.
+     * @param weIdPublicKey the specific public key which used to verify signature of the
+     *      credential.
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      *      in ResponseData
      */
-    ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(VerifyCredentialArgs args);
+    ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(
+        CredentialWrapper credentialWrapper,
+        WeIdPublicKey weIdPublicKey
+    );
 }

@@ -322,8 +322,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
         if (latestBlock == null) {
             logger.info(
-                    "[resolveTransaction]:get block by number :{} . latestBlock is null",
-                    blockNumber);
+                "[resolveTransaction]:get block by number :{} . latestBlock is null",
+                blockNumber);
             return;
         }
         List<Transaction> transList =
@@ -668,8 +668,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         return !(null == setPublicKeyArgs
             || null == setPublicKeyArgs.getType()
             || null == setPublicKeyArgs.getUserWeIdPrivateKey()
-            || null == setPublicKeyArgs.getPublicKey()
-            );
+            || null == setPublicKeyArgs.getPublicKey());
     }
 
     /**
@@ -735,8 +734,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         return !(null == setServiceArgs
             || null == setServiceArgs.getType()
             || null == setServiceArgs.getUserWeIdPrivateKey()
-            || null == setServiceArgs.getServiceEndpoint()
-            );
+            || null == setServiceArgs.getServiceEndpoint());
     }
 
     /**
@@ -816,8 +814,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         return !(null == setAuthenticationArgs
             || null == setAuthenticationArgs.getType()
             || null == setAuthenticationArgs.getUserWeIdPrivateKey()
-            || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey())
-            );
+            || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey()));
     }
 
     /**
