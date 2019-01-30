@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,15 +35,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
-import com.webank.weid.protocol.request.VerifyCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialService;
@@ -77,13 +80,14 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
      * @return the Credential response data
      */
     @Override
-    public ResponseData<Credential> createCredential(CreateCredentialArgs args) {
+    public ResponseData<CredentialWrapper> createCredential(CreateCredentialArgs args) {
 
+        CredentialWrapper credentialWrapper = new CredentialWrapper();
         try {
             ResponseData<Boolean> innerResponse = checkCreateCredentialArgsValidity(args, true);
             if (!innerResponse.getResult()) {
                 logger.error("Generate Credential input format error!");
-                return new ResponseData<Credential>(
+                return new ResponseData<>(
                     null, innerResponse.getErrorCode(), innerResponse.getErrorMessage());
             }
 
@@ -96,69 +100,97 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setIssuranceDate(DateUtils.getCurrentTimeStamp());
             result.setExpirationDate(args.getExpirationDate());
             result.setClaim(args.getClaim());
-
-            String rawData = CredentialUtils.getCredentialFields(result);
+            Map<String, Object> disclosureMap = new HashMap<>(args.getClaim());
+            for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
+                disclosureMap.put(
+                    entry.getKey(),
+                    CredentialFieldDisclosureValue.DISCLOSED.getStatus()
+                );
+            }
+            credentialWrapper.setDisclosure(disclosureMap);
+            String rawData = CredentialUtils.getCredentialFields(result, disclosureMap);
             String privateKey = args.getWeIdPrivateKey().getPrivateKey();
             Sign.SignatureData sigData = SignatureUtils.signMessage(rawData, privateKey);
             result.setSignature(
                 new String(
                     SignatureUtils
                         .base64Encode(SignatureUtils.simpleSignatureSerialization(sigData)),
-                        WeIdConstant.UTF_8));
+                    WeIdConstant.UTF_8));
 
-            ResponseData<Credential> responseData = new ResponseData<Credential>();
-            responseData.setResult(result);
+            ResponseData<CredentialWrapper> responseData = new ResponseData<CredentialWrapper>();
+            credentialWrapper.setCredential(result);
+            responseData.setResult(credentialWrapper);
             return responseData;
         } catch (Exception e) {
             logger.error("Generate Credential failed due to system error. ", e);
-            return new ResponseData<Credential>(null, ErrorCode.CREDENTIAL_ERROR);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }
     }
 
     /**
      * Verify the validity of a credential without public key provided.
      *
-     * @param args the args
+     * @param credentialWrapper the credential wrapper.
      * @return the Boolean response data
      */
     @Override
-    public ResponseData<Boolean> verifyCredential(Credential args) {
-        return verifyCredentialContent(args, null);
+    public ResponseData<Boolean> verify(CredentialWrapper credentialWrapper) {
+        return verifyCredentialContent(credentialWrapper, null);
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.CredentialService#verify(com.webank.weid.protocol.base.Credential)
+     */
+    @Override
+    public ResponseData<Boolean> verify(Credential credential) {
+        Map<String, Object> disclosureMap = new HashMap<>(credential.getClaim());
+        for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
+            disclosureMap.put(entry.getKey(), CredentialFieldDisclosureValue.DISCLOSED.getStatus());
+        }
+        CredentialWrapper credentialWrapper = new CredentialWrapper();
+        credentialWrapper.setCredential(credential);
+        credentialWrapper.setDisclosure(disclosureMap);
+        return verifyCredentialContent(credentialWrapper, null);
     }
 
     /**
      * Verify the validity of a credential with public key provided.
      *
-     * @param args the args
+     * @param credentialWrapper the args
+     * @param weIdPublicKey the specific public key to verify the credential.
      * @return the Boolean response data
      */
     @Override
-    public ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(VerifyCredentialArgs args) {
-        if (args == null) {
+    public ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(
+        CredentialWrapper credentialWrapper, 
+        WeIdPublicKey weIdPublicKey) {
+        if (credentialWrapper == null) {
             return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
         }
-        if (args.getWeIdPublicKey() == null) {
+        if (weIdPublicKey == null) {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
         }
-        return verifyCredentialContent(args.getCredential(),
-            args.getWeIdPublicKey().getPublicKey());
+        return verifyCredentialContent(credentialWrapper, weIdPublicKey.getPublicKey());
     }
 
-    private ResponseData<Boolean> verifyCredentialContent(Credential credential, String publicKey) {
+    private ResponseData<Boolean> verifyCredentialContent(CredentialWrapper credentialWrapper,
+        String publicKey) {
 
         try {
-            ResponseData<Boolean> innerResponse = checkCredentialArgsValidity(credential);
+            Credential credential = credentialWrapper.getCredential();
+            ResponseData<Boolean> innerResponse = checkCredentialValidity(credential);
             if (!innerResponse.getResult()) {
                 logger.error("Credential input format error!");
                 return new ResponseData<>(
                     false, innerResponse.getErrorCode(), innerResponse.getErrorMessage());
             }
 
-            ResponseData<Boolean> responseData = verifyIssuerExistence(credential.getIssuer());
-            if (!responseData.getResult()) {
-                return responseData;
+            if (!WeIdUtils.isWeIdValid(credential.getIssuer())) {
+                logger.error(ErrorCode.CREDENTIAL_ISSUER_INVALID.getCodeDesc());
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_INVALID);
             }
-            responseData = verifyCptFormat(credential);
+
+            ResponseData<Boolean> responseData = verifyIssuerExistence(credential.getIssuer());
             if (!responseData.getResult()) {
                 return responseData;
             }
@@ -166,7 +198,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             if (!responseData.getResult()) {
                 return responseData;
             }
-            responseData = verifySignature(credential, publicKey);
+            responseData = verifySignature(credentialWrapper, publicKey);
             return responseData;
         } catch (Exception e) {
             logger.error("Verify Credential failed due to generic error: ", e);
@@ -210,7 +242,14 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS);
             }
 
-            if (privateKeyRequired 
+            //check if the claim is right format
+            ResponseData<Boolean> claimFormatverifyResult = verifyCptFormat(args.getCptId(),
+                args.getClaim());
+            if (!claimFormatverifyResult.getResult()) {
+                return claimFormatverifyResult;
+            }
+
+            if (privateKeyRequired
                 && StringUtils.isEmpty(args.getWeIdPrivateKey().getPrivateKey())) {
                 logger.error(ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCodeDesc());
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
@@ -225,7 +264,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         }
     }
 
-    private ResponseData<Boolean> checkCredentialArgsValidity(Credential args) {
+    private ResponseData<Boolean> checkCredentialValidity(Credential args) {
+
         ResponseData<Boolean> responseData = new ResponseData<Boolean>();
         if (args == null) {
             logger.error("Credential argument null input error.");
@@ -233,20 +273,17 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         }
 
         try {
-            CreateCredentialArgs generateCredentialArgs = CredentialUtils
-                .extractCredentialMetadata(args);
-            // Do not need to check privateKey field since it won't be set in this case.
-            ResponseData<Boolean> innerResponseData =
-                checkCreateCredentialArgsValidity(generateCredentialArgs, false);
-            if (!innerResponseData.getResult()) {
-                return new ResponseData<>(
-                    false, innerResponseData.getErrorCode(), innerResponseData.getErrorMessage());
-            }
             // Check new fields: id, context, signature, and issurancedate;
             String credentialId = args.getId();
             if (StringUtils.isEmpty(credentialId)) {
                 logger.error(ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCodeDesc());
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_ID_NOT_EXISTS);
+            }
+
+            Map<String, Object> cliamMap = args.getClaim();
+            if (cliamMap == null || cliamMap.isEmpty()) {
+                logger.error(ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCodeDesc());
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS);
             }
 
             String context = args.getContext();
@@ -259,6 +296,11 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             if (issuranceDate == null) {
                 logger.error(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCodeDesc());
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL);
+            }
+            Long expirationDate = args.getExpirationDate();
+            if (expirationDate == null || expirationDate <= 0) {
+                logger.error(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCodeDesc());
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL);
             }
             if (issuranceDate.longValue() > args.getExpirationDate().longValue()) {
                 logger.error(ErrorCode.CREDENTIAL_EXPIRED.getCodeDesc());
@@ -287,11 +329,10 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         return responseData;
     }
 
-    private ResponseData<Boolean> verifyCptFormat(Credential credential) {
+    private ResponseData<Boolean> verifyCptFormat(Integer cptId, Map<String, Object> claim) {
 
         try {
-            String claim = JsonUtil.objToJsonStr(credential.getClaim());
-            Integer cptId = credential.getCptId();
+            String claimStr = JsonUtil.objToJsonStr(claim);
             Cpt cpt = cptService.queryCpt(cptId).getResult();
             if (cpt == null) {
                 logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
@@ -303,7 +344,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
                 return new ResponseData<>(false, ErrorCode.CPT_JSON_SCHEMA_INVALID);
             }
-            if (!JsonSchemaValidatorUtils.validateJsonVersusSchema(claim, cptJsonSchema)) {
+            if (!JsonSchemaValidatorUtils.validateJsonVersusSchema(claimStr, cptJsonSchema)) {
                 logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL);
             }
@@ -330,15 +371,20 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         return responseData;
     }
 
-    private ResponseData<Boolean> verifySignature(Credential credential, String publicKey) {
-    
+    private ResponseData<Boolean> verifySignature(
+        CredentialWrapper credentialWrapper,
+        String publicKey) {
+
         ResponseData<Boolean> responseData = new ResponseData<Boolean>();
         try {
-            String hashedRawData = CredentialUtils.getCredentialFields(credential);
+            Credential credential = credentialWrapper.getCredential();
+            Map<String, Object> disclosureMap = credentialWrapper.getDisclosure();
+            String hashedRawData = CredentialUtils.getCredentialFields(credential, disclosureMap);
             Sign.SignatureData signatureData =
                 SignatureUtils.simpleSignatureDeserialization(
                     SignatureUtils.base64Decode(
-                            credential.getSignature().getBytes(WeIdConstant.UTF_8)));
+                        credential.getSignature().getBytes(WeIdConstant.UTF_8))
+                );
 
             if (StringUtils.isEmpty(publicKey)) {
                 // Fetch public key from chain
@@ -406,4 +452,53 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_ERROR);
         }
     }
+
+    /**
+     * Generate a credential with selected data.
+     *
+     * @param credential the credential
+     * @param disclosure the keys which select to disclosure
+     * @return credential
+     */
+    @Override
+    public ResponseData<CredentialWrapper> createSelectiveCredential(
+        Credential credential,
+        String disclosure) {
+
+        Map<String, Object> disclosureMap = (Map<String, Object>) JsonUtil.jsonStrToObj(
+            new HashMap<String, Object>(), disclosure);
+
+        //setp 1: check if the input args is illegal.
+        CredentialWrapper credentialResult = new CredentialWrapper();
+        ResponseData<Boolean> checkResp = checkCredentialValidity(credential);
+        if (!checkResp.getResult()) {
+            return new ResponseData<>(
+                credentialResult,
+                checkResp.getErrorCode(),
+                checkResp.getErrorMessage()
+            );
+        }
+
+        //step 2: convet values of claim to hash by disclosure status
+        Map<String, Object> claim = credential.getClaim();
+        Map<String, Object> hashMap = new HashMap<String, Object>(claim);
+
+        for (Map.Entry<String, Object> entry : claim.entrySet()) {
+            claim.put(entry.getKey(), CredentialUtils.getFieldHash(entry.getValue()));
+        }
+
+        for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
+            if (CredentialFieldDisclosureValue.DISCLOSED.getStatus()
+                .equals(entry.getValue())) {
+                claim.put(entry.getKey(), hashMap.get(entry.getKey()));
+            }
+        }
+
+        // step 3: build response of selective credential to caller.
+        credentialResult.setCredential(credential);
+        credentialResult.setDisclosure(disclosureMap);
+
+        return new ResponseData<>(credentialResult, ErrorCode.SUCCESS);
+    }
+
 }
