@@ -23,9 +23,8 @@ import java.util.Map;
 
 import lombok.Data;
 
-import java.util.Map;
-
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+
 
 /**
  * The Arguments for the following SDK API: createCredential().

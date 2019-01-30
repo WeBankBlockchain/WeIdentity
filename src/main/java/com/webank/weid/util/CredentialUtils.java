@@ -22,17 +22,17 @@ package com.webank.weid.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
-import com.webank.weid.protocol.request.VerifyCredentialArgs;
 
 /**
  * The Class CredentialUtils.
@@ -47,16 +47,16 @@ public final class CredentialUtils {
      * @param arg target Credential object
      * @return Hash value in String.
      */
-    public static String getCredentialFields(Credential arg) {
+    public static String getCredentialFields(Credential arg, Map<String, Object> disclosures) {
         if (arg == null
             || arg.getCptId() == null
             || arg.getIssuranceDate() == null
             || arg.getExpirationDate() == null) {
             return StringUtils.EMPTY;
         }
-        
-        String claimHash = getClaimHash(arg);
-        
+
+        String claimHash = getClaimHash(arg, disclosures);
+
         String rawData =
             arg.getContext()
                 + WeIdConstant.PIPELINE
@@ -74,32 +74,47 @@ public final class CredentialUtils {
         return rawData;
     }
 
-    private static String getClaimHash(Credential credential) {
-    	
-    	Map<String, Object>claim = credential.getClaim();
-    	List<String>disclosureKeys = credential.getDisclosureKeys();
-    	
-    	if(CollectionUtils.isNotEmpty(disclosureKeys)) {
-    		for(String key : disclosureKeys) {
-    			claim.put(key, HashUtils.sha3(String.valueOf(claim.get(key))));
-    		}
-    	}
-    	
-    	List<Map.Entry<String, Object>>list = new ArrayList<Map.Entry<String, Object>>(claim.entrySet());
-		Collections.sort(list,new Comparator<Map.Entry<String, Object>>() {
+    private static String getClaimHash(Credential credential, Map<String, Object> disclosures) {
 
-			@Override
-			public int compare(Entry<String, Object> o1, Entry<String, Object> o2) {
-				return o1.getKey().compareTo(o2.getKey());
-			}
-		});
-		
-    	StringBuffer sb = new StringBuffer();
-    		for(Map.Entry<String, Object> en:list) {
-    			sb.append(en.getKey()).append(en.getValue());
-    		}
-    	return sb.toString();
+        Map<String, Object> claim = credential.getClaim();
+        Map<String, Object> claimHashMap = new HashMap<String, Object>(claim);
+
+        for (Map.Entry<String, Object> entry : disclosures.entrySet()) {
+            if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(entry.getValue())) {
+                claimHashMap.put(
+                    entry.getKey(),
+                    getFieldHash(claimHashMap.get(entry.getKey()))
+                );
+            }
+        }
+
+        List<Map.Entry<String, Object>> list = new ArrayList<Map.Entry<String, Object>>(
+            claimHashMap.entrySet()
+        );
+        Collections.sort(list, new Comparator<Map.Entry<String, Object>>() {
+
+            @Override
+            public int compare(Entry<String, Object> o1, Entry<String, Object> o2) {
+                return o1.getKey().compareTo(o2.getKey());
+            }
+        });
+
+        StringBuffer hash = new StringBuffer();
+        for (Map.Entry<String, Object> en : list) {
+            hash.append(en.getKey()).append(en.getValue());
+        }
+        return hash.toString();
     }
+
+    /**
+     * convert a field to hash.
+     * @param field which will be converted to hash.
+     * @return hash value.
+     */
+    public static String getFieldHash(Object field) {
+        return HashUtils.sha3(String.valueOf(field));
+    }
+
     /**
      * Get default Credential Context String.
      *
@@ -107,20 +122,6 @@ public final class CredentialUtils {
      */
     public static String getDefaultCredentialContext() {
         return WeIdConstant.DEFAULT_CERTIFICATE_CONTEXT;
-    }
-
-    /**
-     * Extract Credential from VerifyCredentialArgs.
-     *
-     * @param arg the arg
-     * @return Credential
-     */
-    public static Credential extractCredentialResult(VerifyCredentialArgs arg) {
-        if (arg == null) {
-            return null;
-        }
-        Credential credential = arg.getCredential();
-        return credential;
     }
 
     /**
