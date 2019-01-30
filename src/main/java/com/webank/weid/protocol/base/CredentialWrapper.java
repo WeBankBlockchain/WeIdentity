@@ -17,28 +17,30 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.request;
+package com.webank.weid.protocol.base;
+
+import java.util.Map;
 
 import lombok.Data;
 
-import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.base.Credential;
 
 /**
- * This is a subclass, The Arguments for the SDK API register CPT. The cptJsonSchema is String.
+ * Credential response.
  *
- * @author darwindu
+ * @author tonychen 2019年1月24日
  */
 @Data
-public class CptStringArgs {
+public class CredentialWrapper {
 
     /**
-     * Required: weId authority  for this CPT.
+     * Required: The Credential.
      */
-    private WeIdAuthentication weIdAuthentication;
+    private Credential credential;
 
     /**
-     * Required: The json schema content defined for this CPT.
+     * Required: key is the credential field, and value "1" for disclosure to the third party, "0"
+     *      for no disclosure.
      */
-    private String cptJsonSchema;
-
+    private Map<String, Object> disclosure;
 }

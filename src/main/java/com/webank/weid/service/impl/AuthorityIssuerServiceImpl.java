@@ -309,7 +309,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
 
     private ResponseData<Boolean> checkRegisterAuthorityIssuerArgs(
         RegisterAuthorityIssuerArgs args) {
-        
+
         if (args == null) {
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }
@@ -340,7 +340,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
     }
 
     private ResponseData<Boolean> checkRemoveAuthorityIssuerArgs(RemoveAuthorityIssuerArgs args) {
-        
+
         if (args == null) {
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }
@@ -357,7 +357,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
     }
 
     private ResponseData<Boolean> checkAuthorityIssuerArgsValidity(AuthorityIssuer args) {
-        
+
         if (args == null) {
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }

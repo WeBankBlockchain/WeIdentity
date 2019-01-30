@@ -103,6 +103,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
     /**
      * This is used to register a new CPT to the blockchain.
+     *
      * @param args the args
      * @return the response data
      */
@@ -118,7 +119,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             cptMapArgs.setCptJsonSchema(
-                (Map<String, Object>)JsonUtil.jsonStrToObj(
+                (Map<String, Object>) JsonUtil.jsonStrToObj(
                     new HashMap<String, Object>(),
                     args.getCptJsonSchema())
             );
@@ -234,7 +235,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             }
 
             Map<String, Object> jsonSchemaMap =
-                (Map<String, Object>)JsonUtil.jsonStrToObj(
+                (Map<String, Object>) JsonUtil.jsonStrToObj(
                     new HashMap<String, Object>(),
                     jsonSchema.toString().trim());
             cpt.setCptJsonSchema(jsonSchemaMap);
@@ -248,7 +249,7 @@ public class CptServiceImpl extends BaseService implements CptService {
                 new String(
                     SignatureUtils.base64Encode(
                         SignatureUtils.simpleSignatureSerialization(signatureData)),
-                        WeIdConstant.UTF_8);
+                    WeIdConstant.UTF_8);
             cpt.setCptSignature(cptSignature);
 
             ResponseData<Cpt> responseData = new ResponseData<Cpt>();
@@ -268,6 +269,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
     /**
      * This is used to update a CPT data which has been register.
+     *
      * @param args the args
      * @return the response data
      */
@@ -282,7 +284,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             cptMapArgs.setCptJsonSchema(
-                (Map<String, Object>)JsonUtil.jsonStrToObj(
+                (Map<String, Object>) JsonUtil.jsonStrToObj(
                     new HashMap<String, Object>(),
                     args.getCptJsonSchema())
             );
@@ -533,6 +535,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
     /**
      * create new cpt json schema.
+     *
      * @param cptJsonSchema Map
      * @return String
      */

@@ -17,28 +17,38 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.request;
-
-import lombok.Data;
-
-import com.webank.weid.protocol.base.Credential;
-import com.webank.weid.protocol.base.WeIdPublicKey;
+package com.webank.weid.constant;
 
 /**
- * The Arguments for the following SDK API: verifyCredential().
- *
- * @author chaoxinhu 2018.10
+ * credential field disclosure status.
+ * @author tonychen
  */
-@Data
-public class VerifyCredentialArgs {
+public enum CredentialFieldDisclosureValue {
 
     /**
-     * Required: The Credential content.
+     * the field is disclosed.
      */
-    private Credential credential;
+    DISCLOSED(1),
 
     /**
-     * Optional: The public key passed in.
+     * the field is not disclosed.
      */
-    private WeIdPublicKey weIdPublicKey;
+    NOT_DISCLOSED(0);
+
+    /**
+     * disclosure status.
+     */
+    private Integer status;
+
+    CredentialFieldDisclosureValue(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * get field disclosure status.
+     * @return disclosure status of the field.
+     */
+    public Integer getStatus() {
+        return status;
+    }
 }
