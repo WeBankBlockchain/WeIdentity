@@ -3455,7 +3455,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
 
 **接口入参**\ :   String
 
-**接口返回**\ :   com.webank.weid.protocol.base.Evidence;
+**接口返回**\ :   com.webank.weid.protocol.base.EvidenceInfo;
 
 .. list-table::
    :header-rows: 1
@@ -3521,7 +3521,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
 .. code-block:: text
 
    返回结果如：
-   result: (com.webank.weid.protocol.base.Evidence)
+   result: (com.webank.weid.protocol.base.EvidenceInfo)
       credentialHash: c8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
       signers: 0x0106595955ce4713fd169bfa68e599eb99ca2e9f
       signature: HO+/ve+/vXfvv70hQO+/vQwMVO+/vSot77+977+9UGEhLO+/vW4277+977+977+9HO+/ve+/vSTvv70777+9f14=
@@ -3550,14 +3550,14 @@ com.webank.weid.protocol.base.WeIdPrivateKey
 
 ----
 
-3. verifyEvidence()
+3. verify()
 ~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.verifyEvidence
+   接口名称:com.webank.weid.rpc.EvidenceService.verify
    接口定义:ResponseData<Boolean> verifyEvidence(Credential credential, String evidenceAddress)
    接口详细描述: 根据传入的凭证和链上凭证对比，验证其是否遭到篡改。
 
@@ -3735,7 +3735,7 @@ String：以地址形式存在的String，会进行入参检查
    args.setWeIdPrivateKey(weIdPrivateKey);
    ResponseData<Credential> credResponse = credentialService.createCredential(args);
    ResponseData<String> response = evidenceService.createEvidence(credResponse.getCredential(), weIdPrivateKey);
-   return evidenceService.verifyEvidence(credResponse.getResult(), response.getResult());
+   return evidenceService.verify(credResponse.getResult(), response.getResult());
    
 .. code-block:: text
 

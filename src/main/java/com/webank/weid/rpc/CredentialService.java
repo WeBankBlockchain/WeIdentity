@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -28,7 +28,7 @@ import com.webank.weid.protocol.response.ResponseData;
 /**
  * Service interface for operations on Credentials.
  *
- * @author chaoxinhu 2018.10
+ * @author chaoxinhu 2018.12
  */
 public interface CredentialService {
 
@@ -45,8 +45,8 @@ public interface CredentialService {
      *
      * @param credential the credential.
      * @param disclosure the setting of disclosure, such as: {@code{"name":1,"gender":0,"age":1}},
-     *      which means you WILL disclose "name" and "age" to others, and "gender" WILL NOT disclose
-     *      to others.
+     *     which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
+     *     to others.
      * @return CredentialWrapper
      */
     ResponseData<CredentialWrapper> createSelectiveCredential(
@@ -59,7 +59,7 @@ public interface CredentialService {
      *
      * @param credential the credential
      * @return the verification result. True if yes, false otherwise with exact verify error codes
-     *      in ResponseData
+     *     in ResponseData
      */
     ResponseData<Boolean> verify(Credential credential);
 
@@ -68,7 +68,6 @@ public interface CredentialService {
      *
      * @param credentialWrapper the credentialWrapper
      * @return the verification result. True if yes, false otherwise with exact verify error codes
-     *      in ResponseData
      */
     ResponseData<Boolean> verify(CredentialWrapper credentialWrapper);
 
@@ -76,13 +75,21 @@ public interface CredentialService {
      * Verify the validity of a credential. Public key must be provided.
      *
      * @param credentialWrapper the credential wrapper.
-     * @param weIdPublicKey the specific public key which used to verify signature of the
-     *      credential.
+     * @param weIdPublicKey the specified public key which used to verify signature of the
+     *     credential.
      * @return the verification result. True if yes, false otherwise with exact verify error codes
-     *      in ResponseData
      */
     ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(
         CredentialWrapper credentialWrapper,
         WeIdPublicKey weIdPublicKey
     );
+
+    /**
+     * Get the full hash value of a Credential. All fields in the Credential will be included. This
+     * method should be called when creating and verifying the Credential Evidence.
+     *
+     * @param args the args
+     * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
+     */
+    ResponseData<String> getCredentialHash(Credential args);
 }
