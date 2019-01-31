@@ -1,4 +1,16 @@
-### V1.0.3 (2018-12-20)
+### v1.1.0 (2019-01-31)
+
+Features:
+1.The first version implementation of selective disclosure.
+2.The first version implementation of evidence.
+3.Download weidentity-contract.jar from maven instead of local.
+4.Use JSON string as parameter in class cptServiceImpl and credentialServiceImpl instead of plain string.
+
+Documents modifications:
+1.Move SDK document from WeIdentity project to this project.
+2.Use embedded mermaidjs plugin to render sequences diagram instead of PNG files.
+
+### v1.0.3 (2018-12-20)
 
 * Features:
 1. Add cache rules in travis-ci config. Only apply CI build on master, develop and tag.
@@ -9,7 +21,7 @@
 1. Fix issues found by code safe scan.
 2. Fix issues found by checkstyle and spotbugs.
 
-### V1.0.2 (2018-12-14)
+### v1.0.2 (2018-12-14)
 
 * Features:
 1. Remove codecov patch check
@@ -19,7 +31,7 @@
 * Bugfixes:
 1. Fix issues found by codacy.
 
-### V1.0.1 (2018-11-30)
+### v1.0.1 (2018-11-30)
 
 * 新增功能：
 1. 增加了对Travis CI（travis-ci.org）, Maven中央仓库, 代码质量检测（codefactor.io & codacy.com）, 代码覆盖率检测（codecov.io）等工具的集成。
@@ -35,7 +47,7 @@
 * Bugfixes:
 1. Miscellenous code style and input parameter validation issues are fixed.
 
-### V1.0.0 (2018-10-30)
+### v1.0.0 (2018-10-30)
 首次release.
 
 * 新增功能:
