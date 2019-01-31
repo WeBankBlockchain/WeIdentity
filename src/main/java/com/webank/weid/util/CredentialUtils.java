@@ -260,35 +260,44 @@ public final class CredentialUtils {
         if (args == null) {
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }
-        try {
-            CreateCredentialArgs createCredentialArgs = extractCredentialMetadata(args);
-            ResponseData<Boolean> innerResponseData =
-                isCreateCredentialArgsValid(createCredentialArgs);
-            if (!innerResponseData.getResult()) {
-                return innerResponseData;
-            }
-            // Check new fields: id, context, signature, and issurance date;
-            String credentialId = args.getId();
-            if (StringUtils.isEmpty(credentialId) || !CredentialUtils.isValidUuid(credentialId)) {
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_ID_NOT_EXISTS);
-            }
-            String context = args.getContext();
-            if (StringUtils.isEmpty(context)) {
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS);
-            }
-            Long issuranceDate = args.getIssuranceDate();
-            if (issuranceDate == null) {
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL);
-            }
-            if (issuranceDate.longValue() > args.getExpirationDate().longValue()) {
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXPIRED);
-            }
-            String signature = args.getSignature();
-            if (StringUtils.isEmpty(signature) || !SignatureUtils.isValidBase64String(signature)) {
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
-            }
-        } catch (Exception e) {
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_ERROR);
+        CreateCredentialArgs createCredentialArgs = extractCredentialMetadata(args);
+        ResponseData<Boolean> metadataResponseData =
+            isCreateCredentialArgsValid(createCredentialArgs);
+        if (!metadataResponseData.getResult()) {
+            return metadataResponseData;
+        }
+        ResponseData<Boolean> contentResponseData = isCredentialContentValid(args);
+        if (!contentResponseData.getResult()) {
+            return contentResponseData;
+        }
+        return new ResponseData<>(true, ErrorCode.SUCCESS);
+    }
+
+    /**
+     * Check the given Credential content fields validity excluding metadata, based on its input.
+     *
+     * @param args Credential
+     * @return true if yes, false otherwise
+     */
+    public static ResponseData<Boolean> isCredentialContentValid(Credential args) {
+        String credentialId = args.getId();
+        if (StringUtils.isEmpty(credentialId) || !CredentialUtils.isValidUuid(credentialId)) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_ID_NOT_EXISTS);
+        }
+        String context = args.getContext();
+        if (StringUtils.isEmpty(context)) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS);
+        }
+        Long issuranceDate = args.getIssuranceDate();
+        if (issuranceDate == null) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL);
+        }
+        if (issuranceDate.longValue() > args.getExpirationDate().longValue()) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXPIRED);
+        }
+        String signature = args.getSignature();
+        if (StringUtils.isEmpty(signature) || !SignatureUtils.isValidBase64String(signature)) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
         }
         return new ResponseData<>(true, ErrorCode.SUCCESS);
     }
