@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -22,8 +22,11 @@ package com.webank.weid.util;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
+import org.bcos.web3j.crypto.WalletUtils;
 
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -71,8 +74,7 @@ public final class WeIdUtils {
     public static boolean isWeIdValid(String weId) {
         return (StringUtils.isNotEmpty(weId)
             && StringUtils.startsWith(weId, WeIdConstant.WEID_PREFIX)
-            && StringUtils.isNotEmpty(StringUtils.splitByWholeSeparator(weId, ":")[2])
-            );
+            && StringUtils.isNotEmpty(StringUtils.splitByWholeSeparator(weId, ":")[2]));
     }
 
     /**
@@ -96,11 +98,14 @@ public final class WeIdUtils {
      * @return true if the private key is not empty, false otherwise.
      */
     public static boolean isPrivateKeyValid(WeIdPrivateKey weIdPrivateKey) {
-        return (null != weIdPrivateKey && StringUtils.isNotEmpty(weIdPrivateKey.getPrivateKey()));
+        return (null != weIdPrivateKey && StringUtils.isNotEmpty(weIdPrivateKey.getPrivateKey())
+            && NumberUtils.isDigits(weIdPrivateKey.getPrivateKey())
+            && new BigInteger(weIdPrivateKey.getPrivateKey()).compareTo(BigInteger.ZERO) > 0);
     }
 
     /**
      * check if the public key matchs the private key.
+     *
      * @param privateKey the WeIdentity DID private key
      * @param publicKey the WeIdentity DID publicKey key
      * @return true if the private and publicKey key is match, false otherwise.
@@ -112,5 +117,32 @@ public final class WeIdUtils {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * check if the given string is a valid address.
+     *
+     * @param addr given string
+     * @return true if yes, false otherwise.
+     */
+    public static boolean isValidAddress(String addr) {
+        if (StringUtils.isEmpty(addr)) {
+            return false;
+        }
+        try {
+            return WalletUtils.isValidAddress(addr);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * check if the given Address is empty.
+     *
+     * @param addr given Address
+     * @return true if yes, false otherwise.
+     */
+    public static boolean isEmptyAddress(Address addr) {
+        return addr.getValue().equals(BigInteger.ZERO);
     }
 }

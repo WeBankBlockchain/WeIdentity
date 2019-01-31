@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -143,4 +143,25 @@ public final class WeIdConstant {
      * 0L.
      */
     public static final Long LONG_VALUE_ZERO = 0L;
+
+    /**
+     * -1.
+     */
+    public static final Integer VALUE_NEG_FIRST = -1;
+
+    /**
+     * Hex Prefix.
+     */
+    public static final String HEX_PREFIX = "0x";
+
+    /**
+     * UUID Separator.
+     */
+    public static final String UUID_SEPARATOR = "-";
+
+    /**
+     * UUID Pattern.
+     */
+    public static final String UUID_PATTERN =
+        "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$";
 }

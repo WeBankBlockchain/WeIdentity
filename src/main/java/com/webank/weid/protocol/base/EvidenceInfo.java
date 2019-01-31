@@ -17,42 +17,34 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.config;
+package com.webank.weid.protocol.base;
+
+import java.util.List;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
- * contract address config.
+ * The base data structure to handle Credential EvidenceInfo info.
  *
- * @author tonychen 2018.9.29
+ * @author chaoxinhu 2019.1
  */
-@Component("ContractConfig")
 @Data
-public class ContractConfig {
+public class EvidenceInfo {
 
     /**
-     * The WeIdentity DID Contract address.
+     * Required: The full Credential hash.
      */
-    @Value("${weId.contractaddress}")
-    private String weIdAddress;
+    private String credentialHash;
 
     /**
-     * The CPT Contract address.
+     * Required: The signers of this Credential.
      */
-    @Value("${cpt.contractaddress}")
-    private String cptAddress;
+    private List<String> signers;
 
     /**
-     * The AuthorityIssuerController Contract address.
+     * Required: The signatures of each signers with the same order.
+     * In JavaBean object, the signatures will be encoded in Base64.
+     * On the blockchain, the signatures will be stored in its r, s, v.
      */
-    @Value("${issuer.contractaddress}")
-    private String issuerAddress;
-
-    /**
-     * The EvidenceController Contract address.
-     */
-    @Value("${evidence.contractaddress}")
-    private String evidenceAddress;
+    private List<String> signatures;
 }
