@@ -45,7 +45,7 @@ public class TestCreateCredential extends TestBaseServcie {
     private static final Logger logger = LoggerFactory.getLogger(TestCreateCredential.class);
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
 
         super.testInit();
         if (cptBaseInfo == null) {

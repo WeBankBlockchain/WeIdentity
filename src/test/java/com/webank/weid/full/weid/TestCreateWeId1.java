@@ -37,6 +37,7 @@ import com.webank.weid.common.BeanUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -151,10 +152,8 @@ public class TestCreateWeId1 extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt)
-                throws NullPointerException {
-                
-                throw new NullPointerException();
+                TransactionReceipt transactionReceipt) {
+                throw new WeIdBaseException("mock exception");
             }
         };
 

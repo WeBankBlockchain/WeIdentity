@@ -41,7 +41,6 @@ import com.webank.weid.contract.EvidenceFactory;
 import com.webank.weid.contract.EvidenceFactory.CreateEvidenceLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -54,12 +53,12 @@ public class TestCreateEvidence extends TestBaseServcie {
 
     private static final Logger logger = LoggerFactory.getLogger(TestCreateEvidence.class);
 
-    private static Credential credential;
+    private static volatile Credential credential = null;
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         super.testInit();
-        if (credential == null) {
+        if (null == credential) {
             credential = super.createCredential(createCredentialArgs).getCredential();
         }
     }
@@ -69,7 +68,8 @@ public class TestCreateEvidence extends TestBaseServcie {
      */
     @Test
     public void testCreateEvidenceCase01() {
-        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = createWeIdResultWithSetAttr;
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = 
+            super.copyCreateWeId(createWeIdResultWithSetAttr);
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         logger.info("testCreateEvidenceCase1 createEvidence result:");
@@ -83,7 +83,8 @@ public class TestCreateEvidence extends TestBaseServcie {
      */
     @Test
     public void testCreateEvidenceCase02() {
-        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = createWeIdResultWithSetAttr;
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = 
+            super.copyCreateWeId(createWeIdResultWithSetAttr);
         ResponseData<String> response = evidenceService
             .createEvidence(null, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         logger.info("testCreateEvidenceCase2 createEvidence result:");
@@ -112,10 +113,9 @@ public class TestCreateEvidence extends TestBaseServcie {
      */
     // @Test
     public void testCreateEvidenceCase04() {
-        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = createWeIdResultWithSetAttr;
-        WeIdPrivateKey weIdPrivateKey = createWeIdResultWithSetAttr.getUserWeIdPrivateKey();
-        weIdPrivateKey.setPrivateKey(null);
-        tempCreateWeIdResultWithSetAttr.setUserWeIdPrivateKey(weIdPrivateKey);
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = 
+            super.copyCreateWeId(createWeIdResultWithSetAttr);
+        tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey().setPrivateKey(null);
 
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
@@ -132,10 +132,9 @@ public class TestCreateEvidence extends TestBaseServcie {
      */
     // @Test
     public void testCreateEvidenceCase05() {
-        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = createWeIdResultWithSetAttr;
-        WeIdPrivateKey weIdPrivateKey = createWeIdResultWithSetAttr.getUserWeIdPrivateKey();
-        weIdPrivateKey.setPrivateKey("xxxxx");
-        tempCreateWeIdResultWithSetAttr.setUserWeIdPrivateKey(weIdPrivateKey);
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = 
+            super.copyCreateWeId(createWeIdResultWithSetAttr);
+        tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey().setPrivateKey("xxxxx");
 
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
@@ -152,7 +151,7 @@ public class TestCreateEvidence extends TestBaseServcie {
      */
     @Test
     public void testCreateEvidenceCase06() {
-        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = createWeIdNew;
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = super.copyCreateWeId(createWeIdNew);
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         logger.info("testCreateEvidenceCase8 createEvidence result:");

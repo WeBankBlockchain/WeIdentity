@@ -47,7 +47,7 @@ public class TestVerifyCredentialWithSpecifiedPubKey extends TestBaseServcie {
     protected PasswordKey newPasswordKey = null;
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         super.testInit();
         newPasswordKey = TestBaseUtil.createEcKeyPair();
     }

@@ -64,7 +64,7 @@ public class TestUpdateCpt extends TestBaseServcie {
     private static final Logger logger = LoggerFactory.getLogger(TestUpdateCpt.class);
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
 
         super.testInit();
         if (cptBaseInfo == null) {

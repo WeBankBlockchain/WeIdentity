@@ -38,11 +38,11 @@ public class TestWeIdUtils {
 
     @Test
     public void testConvertWeIdToAddress() {
-        String weid = null;
-        String address = WeIdUtils.convertWeIdToAddress(weid);
+        
+        String address = WeIdUtils.convertWeIdToAddress(null);
         Assert.assertEquals(address, "");
 
-        weid = "gdhgdrhrhjrersgfds";
+        String weid = "gdhgdrhrhjrersgfds";
         address = WeIdUtils.convertWeIdToAddress(weid);
         Assert.assertEquals(address, "");
 
@@ -55,11 +55,11 @@ public class TestWeIdUtils {
 
     @Test
     public void testIsWeIdValid() {
-        String weid = null;
-        boolean result = WeIdUtils.isWeIdValid(weid);
+        
+        boolean result = WeIdUtils.isWeIdValid(null);
         Assert.assertFalse(result);
 
-        weid = "gdhgdrhrhjrersgfds";
+        String weid = "gdhgdrhrhjrersgfds";
         result = WeIdUtils.isWeIdValid(weid);
         Assert.assertFalse(result);
 

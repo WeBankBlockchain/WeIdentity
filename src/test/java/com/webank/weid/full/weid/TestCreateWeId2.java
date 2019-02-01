@@ -38,6 +38,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.PrivateKeyIllegalException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
@@ -287,10 +288,8 @@ public class TestCreateWeId2 extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt)
-                throws NullPointerException {
-                
-                throw new NullPointerException();
+                TransactionReceipt transactionReceipt) {
+                throw new WeIdBaseException("mock exception");
             }
         };
 

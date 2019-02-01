@@ -19,6 +19,7 @@
 
 package com.webank.weid.util;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,10 +31,13 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
@@ -45,6 +49,8 @@ import com.webank.weid.protocol.response.ResponseData;
  * @author chaoxinhu 2019.1
  */
 public final class CredentialUtils {
+    
+    private static final Logger logger = LoggerFactory.getLogger(CredentialUtils.class);
 
     /**
      * Concat all fields of Credential info, without Signature. This should be invoked when
@@ -206,8 +212,14 @@ public final class CredentialUtils {
             return new Bytes32(new byte[32]);
         }
         String mergedId = id.replaceAll(WeIdConstant.UUID_SEPARATOR, StringUtils.EMPTY);
-        byte[] uuidBytes = mergedId.getBytes();
-        return DataTypetUtils.bytesArrayToBytes32(uuidBytes);
+        byte[] uuidBytes;
+        try {
+            uuidBytes = mergedId.getBytes(WeIdConstant.UTF_8);
+            return DataTypetUtils.bytesArrayToBytes32(uuidBytes);
+        } catch (UnsupportedEncodingException e) {
+            logger.error("convertCredentialIdToBytes32 is exception", e);
+            throw new DataTypeCastException(e.getCause());
+        }
     }
 
     /**

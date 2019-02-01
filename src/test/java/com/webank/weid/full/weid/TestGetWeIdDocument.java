@@ -56,10 +56,10 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     
     private static final Logger logger = LoggerFactory.getLogger(TestGetWeIdDocument.class);
     
-    protected static CreateWeIdDataResult createWeIdForGetDoc = null;
+    private static CreateWeIdDataResult createWeIdForGetDoc = null;
     
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         super.testInit();
         if (createWeIdForGetDoc == null) {
             createWeIdForGetDoc = super.createWeIdWithSetAttr(); 
