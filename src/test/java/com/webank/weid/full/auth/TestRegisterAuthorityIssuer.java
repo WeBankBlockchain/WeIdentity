@@ -262,9 +262,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     @Test
     public void testRegisterAuthorityIssuerCase10() {
 
-        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = null;
         ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+            authorityIssuerService.registerAuthorityIssuer(null);
         logger.info("registerAuthorityIssuer result:");
         BeanUtil.print(response);
 

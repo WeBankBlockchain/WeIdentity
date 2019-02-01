@@ -67,6 +67,8 @@ public class TestSignatureUtils {
         logger.info("publicKey " + publicKey);
 
         keyPair = SignatureUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        logger.info("publicKey " + keyPair.getPublicKey());
+        logger.info("privateKey " + keyPair.getPrivateKey());
 
         byte[] serialized = SignatureUtils.simpleSignatureSerialization(sigData);
         Sign.SignatureData newSigData = SignatureUtils.simpleSignatureDeserialization(serialized);

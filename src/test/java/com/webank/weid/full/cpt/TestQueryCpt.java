@@ -57,7 +57,7 @@ public class TestQueryCpt extends TestBaseServcie {
     private static final Logger logger = LoggerFactory.getLogger(TestQueryCpt.class);
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
 
         super.testInit();
         if (cptBaseInfo == null) {

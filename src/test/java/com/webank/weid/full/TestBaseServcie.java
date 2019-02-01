@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.BaseTest;
 import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -67,32 +68,32 @@ public abstract class TestBaseServcie extends BaseTest {
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(TestBaseServcie.class);
+    
+    public static volatile List<String> issuerPrivateList = null;
 
-    protected static List<String> issuerPrivateList = new ArrayList<String>();
+    protected static volatile boolean isInitIssuer = false;
 
-    protected static boolean isInitIssuer = false;
+    protected static volatile CreateWeIdDataResult createWeIdResult = null;
 
-    protected static CreateWeIdDataResult createWeIdResult = null;
+    protected static volatile CreateWeIdDataResult createWeIdNew = null;
 
-    protected static CreateWeIdDataResult createWeIdNew = null;
+    protected static volatile CreateWeIdDataResult createWeIdResultWithSetAttr = null;
 
-    protected static CreateWeIdDataResult createWeIdResultWithSetAttr = null;
+    protected static volatile CreateCredentialArgs createCredentialArgs = null;
 
-    protected static CreateCredentialArgs createCredentialArgs = null;
+    protected static volatile CptMapArgs registerCptArgs = null;
 
-    protected static CptMapArgs registerCptArgs = null;
-
-    protected static CptBaseInfo cptBaseInfo = null;
-
+    protected static volatile CptBaseInfo cptBaseInfo = null;
 
     /**
      * initializing related services.
      */
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
 
         if (!isInitIssuer) {
             try {
+                issuerPrivateList = new ArrayList<String>();
                 issuerPrivateList.add(privateKey);
                 initIssuer("org1.txt");
                 isInitIssuer = true;
@@ -128,34 +129,36 @@ public abstract class TestBaseServcie extends BaseTest {
      */
     private void initIssuer(String fileName) {
 
-        String[] pk = TestBaseUtil.resolvePk(fileName);
+        PasswordKey passwordKey = TestBaseUtil.resolvePk(fileName);
+        String publicKey = passwordKey.getPublicKey();
+        String privateKey = passwordKey.getPrivateKey();
 
         CreateWeIdArgs createWeIdArgs1 = TestBaseUtil.buildCreateWeIdArgs();
-        createWeIdArgs1.setPublicKey(pk[0]);
-        createWeIdArgs1.getWeIdPrivateKey().setPrivateKey(pk[1]);
+        createWeIdArgs1.setPublicKey(publicKey);
+        createWeIdArgs1.getWeIdPrivateKey().setPrivateKey(privateKey);
         ResponseData<String> response1 = weIdService.createWeId(createWeIdArgs1);
         if (response1.getErrorCode().intValue() != ErrorCode.WEID_ALREADY_EXIST.getCode()
             && response1.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             Assert.assertTrue(false);
         }
 
-        String weId = WeIdUtils.convertPublicKeyToWeId(pk[0]);
+        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
 
         CreateWeIdDataResult createResult = new CreateWeIdDataResult();
         createResult.setWeId(weId);
         createResult.setUserWeIdPrivateKey(new WeIdPrivateKey());
         createResult.setUserWeIdPublicKey(new WeIdPublicKey());
-        createResult.getUserWeIdPrivateKey().setPrivateKey(pk[1]);
-        createResult.getUserWeIdPublicKey().setPublicKey(pk[0]);
+        createResult.getUserWeIdPrivateKey().setPrivateKey(privateKey);
+        createResult.getUserWeIdPublicKey().setPublicKey(publicKey);
 
-        this.setPublicKey(createResult, pk[0], createResult.getWeId());
-        this.setAuthentication(createResult, pk[0], createResult.getWeId());
+        this.setPublicKey(createResult, publicKey, createResult.getWeId());
+        this.setAuthentication(createResult, publicKey, createResult.getWeId());
 
         CreateWeIdDataResult createWeId = new CreateWeIdDataResult();
         createWeId.setWeId(weId);
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, this.privateKey);
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
@@ -168,7 +171,7 @@ public abstract class TestBaseServcie extends BaseTest {
             Assert.assertTrue(false);
         }
 
-        issuerPrivateList.add(pk[1]);
+        issuerPrivateList.add(privateKey);
         logger.info("initIssuer success");
     }
 
@@ -282,7 +285,7 @@ public abstract class TestBaseServcie extends BaseTest {
             createWeId.getWeId());
         this.setAuthentication(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
             createWeId.getWeId());
-        this.setService(createWeId, TestData.serviceType, TestData.serviceEndpoint);
+        this.setService(createWeId, TestData.SERVICE_TYPE, TestData.SERVICE_ENDPOINT);
         return createWeId;
     }
 
@@ -443,6 +446,16 @@ public abstract class TestBaseServcie extends BaseTest {
         ct.setId(credential.getId());
         return ct;
     }
-
-
+    
+    protected CreateWeIdDataResult copyCreateWeId(CreateWeIdDataResult createWeId) {
+        CreateWeIdDataResult copyWeId = new CreateWeIdDataResult();
+        copyWeId.setWeId(createWeId.getWeId());
+        copyWeId.setUserWeIdPrivateKey(new WeIdPrivateKey());
+        copyWeId.getUserWeIdPrivateKey()
+            .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
+        copyWeId.setUserWeIdPublicKey(new WeIdPublicKey());
+        copyWeId.getUserWeIdPublicKey()
+            .setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
+        return copyWeId;
+    }
 }

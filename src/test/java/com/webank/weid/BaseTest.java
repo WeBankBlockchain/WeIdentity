@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 import org.bcos.contract.tools.ToolConf;
+import org.bcos.web3j.protocol.core.Response;
+import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -109,7 +111,17 @@ public abstract class BaseTest extends BaseService {
         Assert.assertTrue(true);
     }
 
+    /**
+     *  get current blockNumber.
+     * @return return blockNumber
+     * @throws IOException possible exceptions to sending transactions
+     */
     public int getBlockNumber() throws IOException {
-        return super.getWeb3j().ethBlockNumber().send().getBlockNumber().intValue();
+        Response<String> response = super.getWeb3j().ethBlockNumber().send();
+        if (response instanceof EthBlockNumber) {
+            EthBlockNumber ethBlockNumber = (EthBlockNumber)response;
+            return ethBlockNumber.getBlockNumber().intValue();
+        }
+        return 0;
     }
 }

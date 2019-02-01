@@ -45,10 +45,10 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
 
     private static final Logger logger = LoggerFactory.getLogger(TestGetWeIdDocumentJson.class);
 
-    protected static CreateWeIdDataResult createWeIdForGetJson = null;
+    private static CreateWeIdDataResult createWeIdForGetJson = null;
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         super.testInit();
         if (createWeIdForGetJson == null) {
             createWeIdForGetJson = super.createWeIdWithSetAttr();

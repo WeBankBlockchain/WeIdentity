@@ -46,9 +46,9 @@ public class TestGetEvidence extends TestBaseServcie {
     private static String evidenceAddress;
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         super.testInit();
-        if (evidenceCredential == null) {
+        if (null == evidenceCredential) {
             Credential credential = super.createCredential(createCredentialArgs).getCredential();
             ResponseData<String> evidence = evidenceService
                 .createEvidence(credential, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
@@ -82,8 +82,8 @@ public class TestGetEvidence extends TestBaseServcie {
      */
     @Test
     public void testGetEvidenceCase2() {
-        String evidenceAddress = null;
-        ResponseData<EvidenceInfo> responseData = evidenceService.getEvidence(evidenceAddress);
+        
+        ResponseData<EvidenceInfo> responseData = evidenceService.getEvidence(null);
         logger.info("testGetEvidenceCase2 result :" + responseData);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             responseData.getErrorCode().intValue());

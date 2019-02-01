@@ -220,10 +220,8 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
     @Test
     public void testRemoveAuthorityIssuerCase8() {
 
-        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs = null;
-
         ResponseData<Boolean> response =
-            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
+            authorityIssuerService.removeAuthorityIssuer(null);
         logger.info("removeAuthorityIssuer result:");
         BeanUtil.print(response);
 

@@ -59,8 +59,6 @@ public class TestBeanUtil {
         map.put("key3", new Date());
         
         BeanUtil.print(map);
-        BeanUtil.printSimpleMap(map);
-        BeanUtil.printSimpleMap(null);
         BeanUtil.print(new String[]{"one", "two"});
         BeanUtil.print(new Date());
         BeanUtil.print(new BigDecimal(23));
@@ -73,8 +71,6 @@ public class TestBeanUtil {
         list.add(null);
         
         BeanUtil.print(list);
-        BeanUtil.printSimpleCollection(list);
-        BeanUtil.printSimpleCollection(null);
         BeanUtil.print(new ResponseData<List<Object>>(list, ErrorCode.SUCCESS));
         
         map.put("list", list);

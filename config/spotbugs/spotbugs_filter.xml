@@ -29,5 +29,17 @@
         <Method name="checkAuthorityIssuerArgsValidity" />
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
+    
+    <!-- 
+    	Filtering spotbug problems caused by mock and known empty problems.
+    	1. UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS
+    	2. ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD
+    	3. SIC_INNER_SHOULD_BE_STATIC_ANON
+    	4. NP_LOAD_OF_KNOWN_NULL_VALUE
+     -->
+    <Match>
+        <Package name="~com\.webank\.weid\.full\.*.*" />
+        <Bug pattern="UMAC_UNCALLABLE_METHOD_OF_ANONYMOUS_CLASS, ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD, SIC_INNER_SHOULD_BE_STATIC_ANON, NP_LOAD_OF_KNOWN_NULL_VALUE" />
+    </Match>
 
 </FindBugsFilter>
