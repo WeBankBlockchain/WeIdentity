@@ -138,7 +138,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 .signMessage(credentialHash, weIdPrivateKey.getPrivateKey());
             Bytes32 r = DataTypetUtils.bytesArrayToBytes32(sigData.getR());
             Bytes32 s = DataTypetUtils.bytesArrayToBytes32(sigData.getS());
-            Uint8 v = DataTypetUtils.intToUnt8(new Byte(sigData.getV()).intValue());
+            Uint8 v = DataTypetUtils.intToUnt8(Integer.valueOf(sigData.getV()));
             List<Address> signer = new ArrayList<>();
             signer.add(new Address(Keys.getAddress(SignatureUtils
                 .createKeyPairFromPrivate(new BigInteger(weIdPrivateKey.getPrivateKey())))));

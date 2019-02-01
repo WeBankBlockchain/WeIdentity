@@ -44,11 +44,11 @@ public class TestVerifyEvidence extends TestBaseServcie {
     private static String evidenceAddress;
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         if (!isInitIssuer) {
             super.testInit();
         }
-        if (evidenceCredential == null) {
+        if (null == evidenceCredential) {
             evidenceCredential = super.createCredential(createCredentialArgs).getCredential();
             ResponseData<String> evidence = evidenceService.createEvidence(evidenceCredential,
                 createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
@@ -207,7 +207,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
      */
     @Test
     public void testVerifyEvidenceCase13() {
-        CreateWeIdDataResult weIdWithSetAttr = createWeIdResultWithSetAttr;
+        CreateWeIdDataResult weIdWithSetAttr = super.copyCreateWeId(createWeIdResultWithSetAttr);
         weIdWithSetAttr.getUserWeIdPrivateKey().setPrivateKey("11111111");
         ResponseData<String> responseData = evidenceService
             .createEvidence(evidenceCredential, weIdWithSetAttr.getUserWeIdPrivateKey());

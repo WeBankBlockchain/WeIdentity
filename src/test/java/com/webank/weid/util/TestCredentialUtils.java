@@ -41,19 +41,18 @@ public class TestCredentialUtils {
     public void getCredentialFieldsTest() {
 
         // test arg is null
-        Credential arg = null;
         Map<String, Object> map = new HashMap<>();
-        String result = CredentialUtils.getCredentialFields(arg, map);
+        String result = CredentialUtils.getCredentialFields(null, map);
         Assert.assertEquals(result, "");
     }
 
     @Test
     public void extractCredentialMetadataTest() {
-        Credential arg = null;
-        CreateCredentialArgs result = CredentialUtils.extractCredentialMetadata(arg);
+        
+        CreateCredentialArgs result = CredentialUtils.extractCredentialMetadata(null);
         Assert.assertNull(result);
 
-        arg = new Credential();
+        Credential arg = new Credential();
         result = CredentialUtils.extractCredentialMetadata(arg);
         Assert.assertNotNull(result);
 
@@ -61,8 +60,8 @@ public class TestCredentialUtils {
         arg.setId(UUID.randomUUID().toString());
         arg.setCptId(14356);
         arg.setIssuer("gdsgshher");
-        arg.setIssuranceDate(new Long(System.currentTimeMillis()));
-        arg.setExpirationDate(new Long(System.currentTimeMillis()));
+        arg.setIssuranceDate(Long.valueOf(System.currentTimeMillis()));
+        arg.setExpirationDate(Long.valueOf(System.currentTimeMillis()));
         LinkedHashMap<String, Object> claim = new LinkedHashMap<>();
         claim.put("sfsfs", "sfsfs");
         result = CredentialUtils.extractCredentialMetadata(arg);

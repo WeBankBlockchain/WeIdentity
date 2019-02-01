@@ -118,7 +118,7 @@ public class TestBaseUtil {
         CreateWeIdDataResult createWeId,
         Boolean isFormatFile) throws IOException {
 
-        String jsonSchema = TestData.schema;
+        String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
             JsonNode jsonNode = JsonLoader.fromResource("/jsonSchemaCpt.json");
             jsonSchema = jsonNode.toString();
@@ -203,8 +203,8 @@ public class TestBaseUtil {
         AuthorityIssuer authorityIssuer = new AuthorityIssuer();
         authorityIssuer.setWeId(createWeId.getWeId());
         authorityIssuer.setCreated(new Date().getTime());
-        authorityIssuer.setName(TestData.authorityIssuerName);
-        authorityIssuer.setAccValue(TestData.authorityIssuerAccValue);
+        authorityIssuer.setName(TestData.AUTHORITY_ISSUER_NAME);
+        authorityIssuer.setAccValue(TestData.AUTHORITY_ISSUER_ACCVALUE);
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = new RegisterAuthorityIssuerArgs();
         registerAuthorityIssuerArgs.setAuthorityIssuer(authorityIssuer);
@@ -240,7 +240,7 @@ public class TestBaseUtil {
         SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
         setAuthenticationArgs.setWeId(createWeId.getWeId());
         setAuthenticationArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-        setAuthenticationArgs.setType(TestData.authenticationType);
+        setAuthenticationArgs.setType(TestData.AUTHENTICATION_TYPE);
         setAuthenticationArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
         setAuthenticationArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
@@ -256,7 +256,7 @@ public class TestBaseUtil {
         SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
         setPublicKeyArgs.setWeId(createWeId.getWeId());
         setPublicKeyArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-        setPublicKeyArgs.setType(TestData.publicKeyType);
+        setPublicKeyArgs.setType(TestData.PUBLIC_KEY_TYPE);
         setPublicKeyArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
         setPublicKeyArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
@@ -271,8 +271,8 @@ public class TestBaseUtil {
 
         SetServiceArgs setServiceArgs = new SetServiceArgs();
         setServiceArgs.setWeId(createWeId.getWeId());
-        setServiceArgs.setType(TestData.serviceType);
-        setServiceArgs.setServiceEndpoint(TestData.serviceEndpoint);
+        setServiceArgs.setType(TestData.SERVICE_TYPE);
+        setServiceArgs.setServiceEndpoint(TestData.SERVICE_ENDPOINT);
         setServiceArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
         setServiceArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
@@ -325,26 +325,27 @@ public class TestBaseUtil {
      * @param fileName fileName
      * @return
      */
-    public static String[] resolvePk(String fileName) {
-
+    public static PasswordKey resolvePk(String fileName) {
+        
         BufferedReader br = null;
         FileInputStream fis = null;
         InputStreamReader isr = null;
 
+        PasswordKey passwordKey = new PasswordKey();
         try {
 
             URL fileUrl = TestBaseUtil.class.getClassLoader().getResource(fileName);
             if (fileUrl == null) {
-                return null;
+                return passwordKey;
             }
 
             String filePath = fileUrl.getFile();
             if (filePath == null) {
-                return null;
+                return passwordKey;
             }
 
             fis = new FileInputStream(fileUrl.getFile());
-            isr = new InputStreamReader(fis);
+            isr = new InputStreamReader(fis, WeIdConstant.UTF_8);
             br = new BufferedReader(isr);
 
             List<String> strList = new ArrayList<String>();
@@ -365,10 +366,11 @@ public class TestBaseUtil {
                     pk[i] = lineStr[1];
                 }
             }
-
-            logger.info("publicKey:" + pk[0]);
-            logger.info("privateKey:" + pk[1]);
-            return pk;
+            passwordKey.setPublicKey(pk[0]);
+            passwordKey.setPrivateKey(pk[1]);
+            logger.info("publicKey:" + passwordKey.getPublicKey());
+            logger.info("privateKey:" + passwordKey.getPrivateKey());
+            return passwordKey;
         } catch (FileNotFoundException e) {
             logger.error("resolvePk error:", e);
         } catch (IOException e) {
@@ -396,6 +398,6 @@ public class TestBaseUtil {
                 }
             }
         }
-        return null;
+        return passwordKey;
     }
 }

@@ -33,6 +33,8 @@ import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bouncycastle.util.encoders.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -56,6 +58,8 @@ import com.webank.weid.protocol.response.ResponseData;
  * @author chaoxinhu 2019.1
  */
 public class SignatureUtils {
+    
+    private static final Logger logger = LoggerFactory.getLogger(SignatureUtils.class);
 
     /**
      * Generate a new Key-pair.
@@ -277,8 +281,9 @@ public class SignatureUtils {
             if (!result) {
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
             }
-        } catch (Exception e) {
-            new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
+        } catch (SignatureException | UnsupportedEncodingException e) {
+            logger.error("some exceptions occurred in signature verification", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
         }
         return new ResponseData<>(true, ErrorCode.SUCCESS);
     }

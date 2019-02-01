@@ -34,7 +34,7 @@ import com.webank.weid.protocol.response.ResponseData;
 public class TestGetCredentialHash extends TestBaseServcie {
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         System.out.println();
     }
 
@@ -58,7 +58,7 @@ public class TestGetCredentialHash extends TestBaseServcie {
         claim.put("xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx");
         credential.setClaim(claim);
         credential.setContext("v1");
-        credential.setCptId(new Integer(1001));
+        credential.setCptId(Integer.valueOf(1001));
         credential.setExpirationDate(System.currentTimeMillis() + 1000L);
         credential.setId(UUID.randomUUID().toString());
         credential.setIssuer("did:weid:0x0000000000000000");

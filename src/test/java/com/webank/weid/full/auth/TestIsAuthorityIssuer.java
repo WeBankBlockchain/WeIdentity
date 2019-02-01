@@ -51,7 +51,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
     private static CreateWeIdDataResult createWeId;
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
 
         super.testInit();
         if (createWeId == null) {

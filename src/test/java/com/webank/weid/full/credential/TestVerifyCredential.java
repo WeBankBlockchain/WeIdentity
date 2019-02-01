@@ -54,7 +54,7 @@ public class TestVerifyCredential extends TestBaseServcie {
     private static Credential credential = null;
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         super.testInit();
         passwordKey = TestBaseUtil.createEcKeyPair();
         if (credential == null) {

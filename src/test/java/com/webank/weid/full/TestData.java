@@ -32,45 +32,45 @@ public class TestData {
      * key type,but for now the value is fixed and you don't need to modify it.
      * 
      */
-    public static String publicKeyType = "Secp256k1";
+    public static final String PUBLIC_KEY_TYPE = "Secp256k1";
 
     /**
      * after you create WeIdentity DID,you may need to add service information which indicates the
      * type of service,You can modify this value but note that. there is a length limit
      * 
      */
-    public static String serviceType = "drivingCardService";
+    public static final String SERVICE_TYPE = "drivingCardService";
 
     /**
      * after you create WeIdentity DID,you may need to add service information which indicates the
      * serviceEndpoint of service,You can modify this value.
      * 
      */
-    public static String serviceEndpoint = "https://weidentity.webank.com/endpoint/xxxxx";
+    public static final String SERVICE_ENDPOINT = "https://weidentity.webank.com/endpoint/xxxxx";
 
     /**
      * you may need to add authorization after you create weId,This property is the public key
      * type,but for now the value is fixed and you don't need to modify it.
      * 
      */
-    public static String authenticationType = "RsaSignatureAuthentication2018";
+    public static final String AUTHENTICATION_TYPE = "RsaSignatureAuthentication2018";
 
     /**
      * when you register an authority,you may need to get a name,which indicates the name of the
      * authority.
      * 
      */
-    public static String authorityIssuerName = "weBank";
+    public static final String AUTHORITY_ISSUER_NAME = "weBank";
 
     /**
      * when you register an authority,you may need to get a accValue,which indicates the accValue of
      * the authority, the default value for testing is 0.
      * 
      */
-    public static String authorityIssuerAccValue = "0";
+    public static final String AUTHORITY_ISSUER_ACCVALUE = "0";
 
     /** a valid jsonSchema template needed to register CPT. */
-    public static String schema =
+    public static final String SCHEMA =
         "{"
             + "  \"properties\" : {"
             + "      \"name\": {"
@@ -89,18 +89,4 @@ public class TestData {
             + "  },"
             + "  \"required\": [\"name\", \"age\"]"
             + "}";
-
-    /** valid data corresponding to template in CPT. */
-    public static String schemaData =
-        "{\"/\":{\"device\":\"/dev/sda2\",\"fstype\":\"btrfs\",\"options\""
-        + ":[\"ssd\"]},\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"}"
-        + ",\"/tmp\":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]}"
-        + ",\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
-
-    /** an invalid template may be required in the CPT registration case. */
-    public static String schemaDataInvalid =
-        "{\"/\":{\"device111\":\"/dev/sda2\",\"fstype\":\"btrfs\",\"options\":[\"ssd\"]}"
-        + ",\"swap\":{\"device\":\"/dev/sda2\",\"fstype\":\"swap\"},\"/tmp\""
-        + ":{\"device\":\"tmpfs\",\"fstype\":\"tmpfs\",\"options\":[\"size=64M\"]}"
-        + ",\"/var/lib/mysql\":{\"device\":\"/dev/data/mysql\",\"fstype\":\"btrfs\"}}";
 }
