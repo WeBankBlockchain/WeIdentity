@@ -38,7 +38,6 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
-import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * The Class CredentialUtils.

@@ -20,6 +20,7 @@ public class TestJsonUtil {
         Assert.assertNotNull(propertites);
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void testJsonStrToObj() {
 
