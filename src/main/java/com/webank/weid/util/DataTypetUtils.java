@@ -33,11 +33,6 @@ import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.exception.DataTypeCastException;
 
 /**
  * Data type conversion utilities between solidity data type and java data type.
@@ -45,8 +40,6 @@ import com.webank.weid.exception.DataTypeCastException;
  * @author lingfenghe
  */
 public final class DataTypetUtils {
-
-    private static final Logger logger = LoggerFactory.getLogger(DataTypetUtils.class);
 
     /**
      * Bytes array to bytes 32.
