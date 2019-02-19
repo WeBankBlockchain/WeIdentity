@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -345,7 +346,7 @@ public class TestBaseUtil {
             }
 
             fis = new FileInputStream(fileUrl.getFile());
-            isr = new InputStreamReader(fis, WeIdConstant.UTF_8);
+            isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
             br = new BufferedReader(isr);
 
             List<String> strList = new ArrayList<String>();
