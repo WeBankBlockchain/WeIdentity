@@ -126,7 +126,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     new TypeReference<Uint256>() {
                     },
                     new TypeReference<Int256>() {
-                    }));
+                    })
+            );
         topicMap.put(
             EventEncoder.encode(event),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
@@ -170,7 +171,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
 
         String identity = res.identity.toString();
-        if (null == result.getUpdated()) {
+        if (result.getUpdated() == null) {
             long timeStamp = res.updated.getValue().longValue();
             result.setUpdated(timeStamp);
         }
@@ -220,7 +221,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 .append(weId)
                 .append("#keys-")
                 .append(result.getPublicKey().size())
-                .toString());
+                .toString()
+        );
         String[] publicKeyData = StringUtils.splitByWholeSeparator(value, "/");
         if (publicKeyData != null && publicKeyData.length == 2) {
             pubKey.setPublicKey(publicKeyData[0]);
@@ -392,8 +394,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         result.setUserWeIdPrivateKey(userWeIdPrivateKey);
         String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
         result.setWeId(weId);
-        ResponseData<CreateWeIdDataResult> responseData = new ResponseData<CreateWeIdDataResult>();
-        responseData.setResult(result);
+        ResponseData<CreateWeIdDataResult> responseData = new ResponseData<>(
+            result,
+            ErrorCode.SUCCESS
+        );
 
         WeIdContract weIdContract = (WeIdContract) reloadContract(
             weIdContractAddress,
@@ -404,7 +408,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 new Address(WeIdUtils.convertWeIdToAddress(weId)),
                 DataTypetUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
                 DataTypetUtils.stringToDynamicBytes(DateUtils.getCurrentTimeStampString()),
-                DateUtils.getCurrentTimeStampInt256());
+                DateUtils.getCurrentTimeStampInt256()
+            );
 
         try {
             TransactionReceipt receipt =
@@ -437,11 +442,11 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     @Override
     public ResponseData<String> createWeId(CreateWeIdArgs createWeIdArgs) {
 
-        if (null == createWeIdArgs) {
+        if (createWeIdArgs == null) {
             logger.error("[createWeId]: input parameter createWeIdArgs is null.");
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        ResponseData<String> responseData = new ResponseData<String>();
+        ResponseData<String> responseData = new ResponseData<>();
         if (!WeIdUtils.isPrivateKeyValid(createWeIdArgs.getWeIdPrivateKey())) {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
@@ -450,11 +455,13 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (StringUtils.isNotBlank(publicKey)) {
             if (!WeIdUtils.isKeypairMatch(privateKey, publicKey)) {
                 return new ResponseData<>(
-                    StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED);
+                    StringUtils.EMPTY,
+                    ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED
+                );
             }
             String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
             ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
-            if (null == isWeIdExistResp.getResult() || isWeIdExistResp.getResult()) {
+            if (isWeIdExistResp.getResult() == null || isWeIdExistResp.getResult()) {
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
             responseData.setResult(weId);
@@ -468,7 +475,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                         new Address(WeIdUtils.convertWeIdToAddress(weId)),
                         DataTypetUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
                         DataTypetUtils.stringToDynamicBytes(DateUtils.getCurrentTimeStampString()),
-                        DateUtils.getCurrentTimeStampInt256());
+                        DateUtils.getCurrentTimeStampInt256()
+                    );
 
                 TransactionReceipt receipt =
                     future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
@@ -512,7 +520,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
 
-        ResponseData<WeIdDocument> responseData = new ResponseData<WeIdDocument>();
+        ResponseData<WeIdDocument> responseData = new ResponseData<>();
         int latestBlockNumber = 0;
         try {
             String identityAddr = WeIdUtils.convertWeIdToAddress(weId);
@@ -540,8 +548,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 weId,
                 e.getErrorCode(),
                 e);
-            responseData.setErrorCode(e.getErrorCode());
-            responseData.setErrorMessage(e.getErrorMessage());
+            responseData.setErrorCode(ErrorCode.getTypeByErrorCode(e.getErrorCode()));
             return responseData;
         } catch (Exception e) {
             logger.error("[getWeIdDocument]: exception.", e);
@@ -561,9 +568,11 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         ResponseData<WeIdDocument> responseData = this.getWeIdDocument(weId);
         WeIdDocument result = responseData.getResult();
 
-        if (null == result) {
+        if (result == null) {
             return new ResponseData<>(
-                StringUtils.EMPTY, responseData.getErrorCode(), responseData.getErrorMessage());
+                StringUtils.EMPTY,
+                ErrorCode.getTypeByErrorCode(responseData.getErrorCode())
+            );
         }
         ObjectMapper mapper = new ObjectMapper();
         String weIdDocument;
@@ -571,7 +580,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             weIdDocument = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
         } catch (Exception e) {
             return new ResponseData<>(
-                StringUtils.EMPTY, responseData.getErrorCode(), responseData.getErrorMessage());
+                StringUtils.EMPTY,
+                ErrorCode.getTypeByErrorCode(responseData.getErrorCode())
+            );
         }
         weIdDocument =
             new StringBuffer()
@@ -581,8 +592,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
         ResponseData<String> responseDataJson = new ResponseData<String>();
         responseDataJson.setResult(weIdDocument);
-        responseDataJson.setErrorCode(responseData.getErrorCode());
-        responseDataJson.setErrorMessage(responseData.getErrorMessage());
+        responseDataJson.setErrorCode(ErrorCode.getTypeByErrorCode(responseData.getErrorCode()));
 
         return responseDataJson;
     }
@@ -634,14 +644,16 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             WeIdContract weIdContract = (WeIdContract) reloadContract(
                 weIdContractAddress,
                 privateKey,
-                WeIdContract.class);
+                WeIdContract.class
+            );
             Future<TransactionReceipt> future =
                 weIdContract.setAttribute(
                     new Address(weAddress),
                     DataTypetUtils.stringToBytes32(attributeKey),
                     DataTypetUtils.stringToDynamicBytes(
                         new StringBuffer().append(pubKey).append("/").append(owner).toString()),
-                    DateUtils.getCurrentTimeStampInt256());
+                    DateUtils.getCurrentTimeStampInt256()
+                );
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             List<WeIdAttributeChangedEventResponse> response =
@@ -665,10 +677,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     private boolean verifySetPublicKeyArgs(SetPublicKeyArgs setPublicKeyArgs) {
 
-        return !(null == setPublicKeyArgs
-            || null == setPublicKeyArgs.getType()
-            || null == setPublicKeyArgs.getUserWeIdPrivateKey()
-            || null == setPublicKeyArgs.getPublicKey());
+        return !(setPublicKeyArgs == null
+            || setPublicKeyArgs.getType() == null
+            || setPublicKeyArgs.getUserWeIdPrivateKey() == null
+            || setPublicKeyArgs.getPublicKey() == null);
     }
 
     /**
@@ -731,10 +743,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
 
-        return !(null == setServiceArgs
-            || null == setServiceArgs.getType()
-            || null == setServiceArgs.getUserWeIdPrivateKey()
-            || null == setServiceArgs.getServiceEndpoint());
+        return !(setServiceArgs == null
+            || setServiceArgs.getType() == null
+            || setServiceArgs.getUserWeIdPrivateKey() == null
+            || setServiceArgs.getServiceEndpoint() == null);
     }
 
     /**
@@ -811,9 +823,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     private boolean verifySetAuthenticationArgs(SetAuthenticationArgs setAuthenticationArgs) {
 
-        return !(null == setAuthenticationArgs
-            || null == setAuthenticationArgs.getType()
-            || null == setAuthenticationArgs.getUserWeIdPrivateKey()
+        return !(setAuthenticationArgs == null
+            || setAuthenticationArgs.getType() == null
+            || setAuthenticationArgs.getUserWeIdPrivateKey() == null
             || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey()));
     }
 
