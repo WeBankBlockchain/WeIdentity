@@ -30,7 +30,7 @@ public class PasswordKey {
      * the key of privateKey.
      */
     private String privateKey;
-    
+
     /**
      * the key of publicKey.
      */

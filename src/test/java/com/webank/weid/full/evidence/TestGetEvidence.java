@@ -48,7 +48,7 @@ public class TestGetEvidence extends TestBaseServcie {
     @Override
     public synchronized void testInit() {
         super.testInit();
-        if (null == evidenceCredential) {
+        if (evidenceCredential == null) {
             Credential credential = super.createCredential(createCredentialArgs).getCredential();
             ResponseData<String> evidence = evidenceService
                 .createEvidence(credential, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());

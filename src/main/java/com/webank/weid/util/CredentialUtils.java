@@ -207,8 +207,7 @@ public final class CredentialUtils {
             return new Bytes32(new byte[32]);
         }
         String mergedId = id.replaceAll(WeIdConstant.UUID_SEPARATOR, StringUtils.EMPTY);
-        byte[] uuidBytes;
-        uuidBytes = mergedId.getBytes(StandardCharsets.UTF_8);
+        byte[] uuidBytes = mergedId.getBytes(StandardCharsets.UTF_8);
         return DataTypetUtils.bytesArrayToBytes32(uuidBytes);
     }
 

@@ -281,7 +281,7 @@ public class SignatureUtils {
             if (!result) {
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
             }
-        } catch (SignatureException | UnsupportedEncodingException e) {
+        } catch (SignatureException e) {
             logger.error("some exceptions occurred in signature verification", e);
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
         }
