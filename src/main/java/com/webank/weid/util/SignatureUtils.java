@@ -19,8 +19,8 @@
 
 package com.webank.weid.util;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -78,11 +78,9 @@ public class SignatureUtils {
      * @param message the message
      * @param keyPair the key pair
      * @return SignatureData
-     * @throws UnsupportedEncodingException If the named charset is not supported.
      */
-    public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair)
-        throws UnsupportedEncodingException {
-        return Sign.signMessage(HashUtils.sha3(message.getBytes(WeIdConstant.UTF_8)), keyPair);
+    public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair) {
+        return Sign.signMessage(HashUtils.sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
     }
 
     /**
@@ -92,16 +90,14 @@ public class SignatureUtils {
      * @param message the message
      * @param privateKeyString the private key string
      * @return SignatureData
-     * @throws UnsupportedEncodingException If the named charset is not supported.
      */
     public static Sign.SignatureData signMessage(
         String message,
-        String privateKeyString)
-        throws UnsupportedEncodingException {
+        String privateKeyString) {
 
         BigInteger privateKey = new BigInteger(privateKeyString);
         ECKeyPair keyPair = new ECKeyPair(privateKey, publicKeyFromPrivate(privateKey));
-        return Sign.signMessage(HashUtils.sha3(message.getBytes(WeIdConstant.UTF_8)), keyPair);
+        return Sign.signMessage(HashUtils.sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
     }
 
     /**
@@ -111,14 +107,13 @@ public class SignatureUtils {
      * @param signatureData the signature data
      * @return publicKey
      * @throws SignatureException Signature is the exception.
-     * @throws UnsupportedEncodingException If the named charset is not supported.
      */
     public static BigInteger signatureToPublicKey(
         String message,
         Sign.SignatureData signatureData)
-        throws SignatureException, UnsupportedEncodingException {
+        throws SignatureException {
 
-        return Sign.signedMessageToKey(HashUtils.sha3(message.getBytes(WeIdConstant.UTF_8)),
+        return Sign.signedMessageToKey(HashUtils.sha3(message.getBytes(StandardCharsets.UTF_8)),
             signatureData);
     }
 
@@ -130,13 +125,12 @@ public class SignatureUtils {
      * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
      * @return true if yes, false otherwise
      * @throws SignatureException Signature is the exception.
-     * @throws UnsupportedEncodingException If the named charset is not supported.
      */
     public static boolean verifySignature(
         String message,
         Sign.SignatureData signatureData,
         BigInteger publicKey)
-        throws SignatureException, UnsupportedEncodingException {
+        throws SignatureException {
 
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);

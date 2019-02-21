@@ -334,12 +334,12 @@ public class TestBaseUtil {
         try {
 
             URL fileUrl = TestBaseUtil.class.getClassLoader().getResource(fileName);
-            if (null == fileUrl) {
+            if (fileUrl == null) {
                 return null;
             }
 
             String filePath = fileUrl.getFile();
-            if (null == filePath) {
+            if (filePath == null) {
                 return null;
             }
 

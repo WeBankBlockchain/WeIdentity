@@ -35,25 +35,25 @@ import org.springframework.beans.BeanUtils;
 
 /**
  * debug class for output object information.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class BeanUtil {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(BeanUtil.class);
-    
+
     private static final String LINE_CHARAC = System.lineSeparator();
-    
+
     private static final String LEFT_MID_BRACKETS = "[";
-    
+
     private static final String RIGHT_MID_BRACKETS = "]";
-    
+
     private static final String COLON_CHARAC = ":";
-    
+
     private static final String LEFT_BRACKETS = "(";
-    
+
     private static final String RIGHT_BRACKETS = ")";
-    
+
     private static final String BLANK_SPACE = " ";
 
     private static SimpleDateFormat getFormat() {
@@ -62,14 +62,15 @@ public class BeanUtil {
 
     /**
      * printSimpe Bean.
-     * @param obj  required
+     *
+     * @param obj required
      */
     private static void printSimpleBean(Object obj, StringBuilder beanStr) {
-        
-        if (null == obj) {
+
+        if (obj == null) {
             return;
         }
-        
+
         Field[] f = obj.getClass().getDeclaredFields();
         for (int i = 0; (null != f) && (i < f.length); i++) {
             try {
@@ -79,7 +80,7 @@ public class BeanUtil {
                         + f[i].getName().substring(1), new Class[0]);
                     if (null != m) {
                         beanStr.append(f[i].getName()).append(COLON_CHARAC).append(BLANK_SPACE)
-                            .append(String.valueOf(m.invoke(obj, new Object[] {})))
+                            .append(String.valueOf(m.invoke(obj, new Object[]{})))
                             .append(LINE_CHARAC);
                     }
                 }
@@ -98,14 +99,15 @@ public class BeanUtil {
 
     /**
      * printSimple Collection.
+     *
      * @param c this is object of Collection
      */
     public static void printSimpleCollection(Collection<?> c) {
-        if (null == c) {
+        if (c == null) {
             return;
         }
         StringBuilder beanStr = new StringBuilder(LINE_CHARAC);
-        
+
         Iterator<?> it = c.iterator();
         int i = 0;
         while (it.hasNext()) {
@@ -118,10 +120,11 @@ public class BeanUtil {
 
     /**
      * printSimple Map.
+     *
      * @param map this is map
      */
     public static void printSimpleMap(Map<?, ?> map) {
-        if (null == map) {
+        if (map == null) {
             return;
         }
         StringBuilder beanStr = new StringBuilder(LINE_CHARAC);
@@ -165,7 +168,7 @@ public class BeanUtil {
 
                     if (null != m) {
                         Object left = f[i].getName();
-                        Object right = m.invoke(obj, new Object[] {});
+                        Object right = m.invoke(obj, new Object[]{});
                         printByType(blank, left, right, beanStr);
                     }
                 }
@@ -183,17 +186,17 @@ public class BeanUtil {
     }
 
     private static void printCollection(String blank, Collection<?> c, StringBuilder beanStr) {
-        if (null == c) {
+        if (c == null) {
             return;
         }
         Iterator<?> it = c.iterator();
         int i = 0;
         while (it.hasNext()) {
             Object obj = it.next();
-            if (null == obj) {
+            if (obj == null) {
                 beanStr.append(blank).append(LEFT_MID_BRACKETS).append(i++)
-                .append(RIGHT_MID_BRACKETS).append(COLON_CHARAC)
-                .append(obj).append(LINE_CHARAC);
+                    .append(RIGHT_MID_BRACKETS).append(COLON_CHARAC)
+                    .append(obj).append(LINE_CHARAC);
                 continue;
             }
             if (isSimpleValueType(obj)) {
@@ -214,7 +217,7 @@ public class BeanUtil {
     }
 
     private static void printMap(String blank, Map<?, ?> map, StringBuilder beanStr) {
-        if (null == map) {
+        if (map == null) {
             return;
         }
         Iterator<?> it = map.keySet().iterator();
@@ -226,8 +229,8 @@ public class BeanUtil {
     }
 
     protected static boolean isSimpleValueType(Object obj) {
-        
-        if (null == obj) {
+
+        if (obj == null) {
             return false;
         }
         if (Date.class.isAssignableFrom(obj.getClass())) {
@@ -237,18 +240,18 @@ public class BeanUtil {
     }
 
     private static void printByType(
-        String blank, 
-        Object left, 
-        Object right, 
+        String blank,
+        Object left,
+        Object right,
         StringBuilder beanStr) {
-        
+
         Object leftObj = left;
-        if (null == right) {
+        if (right == null) {
             beanStr.append(blank).append(String.valueOf(leftObj)).append(COLON_CHARAC)
                 .append(right).append(LINE_CHARAC);
             return;
         }
-        if ((null != leftObj) && ((leftObj instanceof Date))) {
+        if ((leftObj != null) && ((leftObj instanceof Date))) {
             leftObj = getFormat().format((Date) leftObj);
         }
         Class<?> clazz = right.getClass();
@@ -277,7 +280,7 @@ public class BeanUtil {
     }
 
     private static void print(String blank, Object obj, StringBuilder beanStr) {
-        if (null == obj) {
+        if (obj == null) {
             return;
         }
         if ((obj instanceof Collection)) {
@@ -290,12 +293,13 @@ public class BeanUtil {
     }
 
     /**
-     *  print object.
+     * print object.
+     *
      * @param obj this object for print
      */
     public static void print(Object obj) {
         StringBuilder beanStr = new StringBuilder();
-        if (null == obj) {
+        if (obj == null) {
             return;
         }
         if ((obj instanceof Collection)) {

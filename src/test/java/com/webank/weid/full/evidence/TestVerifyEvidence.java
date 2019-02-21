@@ -39,7 +39,7 @@ import com.webank.weid.service.impl.EvidenceServiceImpl;
  */
 public class TestVerifyEvidence extends TestBaseServcie {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestCreateEvidence.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestVerifyEvidence.class);
     private static Credential evidenceCredential = null;
     private static String evidenceAddress;
 

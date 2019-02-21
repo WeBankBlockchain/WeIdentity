@@ -69,7 +69,7 @@ public class TestRegisterCpt extends TestBaseServcie {
     public void testInit() {
 
         super.testInit();
-        if (null == createWeId) {
+        if (createWeId == null) {
             createWeId = super.createWeId();
             super.registerAuthorityIssuer(createWeId);
         }
