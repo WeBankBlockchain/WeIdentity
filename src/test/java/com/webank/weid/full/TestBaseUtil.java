@@ -369,11 +369,11 @@ public class TestBaseUtil {
             }
             passwordKey.setPublicKey(pk[0]);
             passwordKey.setPrivateKey(pk[1]);
-            logger.info("publicKey:" + passwordKey.getPublicKey());
-            logger.info("privateKey:" + passwordKey.getPrivateKey());
+            logger.info("publicKey:{}", passwordKey.getPublicKey());
+            logger.info("privateKey:{}", passwordKey.getPrivateKey());
             return passwordKey;
         } catch (FileNotFoundException e) {
-            logger.error("resolvePk error:", e);
+            logger.error("the file is not exists:", e);
         } catch (IOException e) {
             logger.error("resolvePk error:", e);
         }  finally {
@@ -381,21 +381,21 @@ public class TestBaseUtil {
                 try {
                     br.close();
                 } catch (IOException e) {
-                    logger.error("br close error:", e);
+                    logger.error("BufferedReader close error:", e);
                 }
             }
             if (null != isr) {
                 try {
                     isr.close();
                 } catch (IOException e) {
-                    logger.error("isr close error:", e);
+                    logger.error("InputStreamReader close error:", e);
                 }
             }
             if (null != fis) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    logger.error("fis close error:", e);
+                    logger.error("FileInputStream close error:", e);
                 }
             }
         }

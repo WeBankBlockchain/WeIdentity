@@ -48,7 +48,7 @@ public class TestBuildPrivateKey {
         PasswordKey passwordKey = TestBaseUtil.resolvePk("org1.txt");
         BigInteger bigInter1 = new BigInteger(passwordKey.getPrivateKey(), 10);
         String str1 = bigInter1.toString(16);
-        logger.info("private key:" + str1);
+        logger.info("private key:{}", str1);
         Assert.assertNotNull(str1);
     }
 }

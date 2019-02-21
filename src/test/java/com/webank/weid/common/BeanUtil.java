@@ -170,9 +170,9 @@ public class BeanUtil {
     }
 
     private static void printByType(
-        String blank, 
-        Object left, 
-        Object right, 
+        String blank,
+        Object left,
+        Object right,
         StringBuilder beanStr) {
         
         Object leftObj = left;

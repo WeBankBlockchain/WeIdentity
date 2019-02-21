@@ -47,27 +47,28 @@ public class TestWeIdPerformance extends BaseTest {
     @Test
     public void testGetWeIdDom() throws IOException {
 
-        logger.info("blockNumber:" + this.getBlockNumber());
+        logger.info("blockNumber:{}", this.getBlockNumber());
 
         CreateWeIdDataResult weIdResult = this.createWeId();
-        logger.info("WeIdentity DID:" + weIdResult.getWeId());
+        logger.info("WeIdentity DID:{}", weIdResult.getWeId());
 
         int count = 1;
         for (int i = 0; i < count; i++) {
-            this.setService(weIdResult,
+            this.setService(
+                weIdResult,
                 "driving" + i,
-                "https://weidentity.webank.com/endpoint/8377464" + i);
-            logger.info("------" + i);
+                "https://weidentity.webank.com/endpoint/8377464" + i
+            );
         }
-        logger.info("blockNumber:" + this.getBlockNumber());
+        logger.info("blockNumber:{}", this.getBlockNumber());
 
         long startTime = System.currentTimeMillis();
 
         WeIdDocument result = this.getWeIdDom(weIdResult.getWeId());
-        logger.info(result.getService().size() + "");
+        logger.info(String.valueOf(result.getService().size()));
 
         long gasTime = System.currentTimeMillis() - startTime;
-        logger.info("use time:" + gasTime + "ms");
+        logger.info("use time:{}ms", gasTime);
         
         Assert.assertNotNull(result);
     }
@@ -81,7 +82,7 @@ public class TestWeIdPerformance extends BaseTest {
         ResponseData<CreateWeIdDataResult> responseCreate = weIdService.createWeId();
         // check result is success
         if (responseCreate.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
-            logger.info("createWeId fail :" + responseCreate.getErrorMessage());
+            logger.info("createWeId fail :{}", responseCreate.getErrorMessage());
             Assert.assertTrue(false);
         }
         return responseCreate.getResult();
@@ -107,7 +108,7 @@ public class TestWeIdPerformance extends BaseTest {
         // check is success
         if (responseSetSer.getErrorCode() != ErrorCode.SUCCESS.getCode()
             || !responseSetSer.getResult()) {
-            logger.info("setService fail :" + responseSetSer.getErrorMessage());
+            logger.info("setService fail :{}", responseSetSer.getErrorMessage());
             Assert.assertTrue(false);
         }
     }
@@ -122,7 +123,7 @@ public class TestWeIdPerformance extends BaseTest {
         // check result
         if (responseResult.getErrorCode() != ErrorCode.SUCCESS.getCode()
             || responseResult.getResult() == null) {
-            logger.info("getWeIdDocument fail :" + responseResult.getErrorMessage());
+            logger.info("getWeIdDocument fail :{}", responseResult.getErrorMessage());
             Assert.assertTrue(false);
         }
         return responseResult.getResult();
