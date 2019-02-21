@@ -43,9 +43,8 @@ import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * queryAuthorityIssuerInfo method for testing AuthorityIssuerService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
@@ -58,14 +57,13 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     public void testInit() {
 
         super.testInit();
-        if (null == createWeId) {
-            createWeId = super.registerAuthorityIssuer(); 
+        if (createWeId == null) {
+            createWeId = super.registerAuthorityIssuer();
         }
     }
 
     /**
      * case: query success.
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase1() {
@@ -81,7 +79,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is blank.
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase2() {
@@ -97,7 +94,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is bad format.
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase3() {
@@ -113,7 +109,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is not exists.
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase4() {
@@ -130,7 +125,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is registed by other.
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase5() {
@@ -147,7 +141,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is removed.
-     * 
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase6() {
@@ -177,7 +170,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: mock an InterruptedException.
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase7() {
@@ -193,7 +185,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: mock an TimeoutException.
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase8() {
@@ -209,7 +200,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: mock returns null when invoking the future.get().
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase9() {
@@ -225,7 +215,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     private ResponseData<AuthorityIssuer> queryAuthorityIssuerInfoForMock(
         MockUp<Future<?>> mockFuture) {
-        
+
         MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
             @Mock
             public Future<?> getAuthorityIssuerInfoNonAccValue(Address addr) {
@@ -245,7 +235,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
     /**
      * case: mock an NullPointerException.
-     *
      */
     @Test
     public void testQueryAuthorityIssuerInfoCase10() {

@@ -41,7 +41,7 @@ import com.webank.weid.protocol.response.ResponseData;
  */
 public class TestGetEvidence extends TestBaseServcie {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestCreateEvidence.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestGetEvidence.class);
     private static Credential evidenceCredential = null;
     private static String evidenceAddress;
 

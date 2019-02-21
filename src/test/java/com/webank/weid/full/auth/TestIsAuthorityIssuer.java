@@ -54,7 +54,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
     public void testInit() {
 
         super.testInit();
-        if (null == createWeId) {
+        if (createWeId == null) {
             createWeId = super.registerAuthorityIssuer();
         }
 

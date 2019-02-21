@@ -135,11 +135,6 @@ public final class WeIdConstant {
     public static final Integer REMOVE_AUTHORITY_ISSUER_OPCODE = 1;
 
     /**
-     * UTF-8.
-     */
-    public static final String UTF_8 = "UTF-8";
-
-    /**
      * 0L.
      */
     public static final Long LONG_VALUE_ZERO = 0L;

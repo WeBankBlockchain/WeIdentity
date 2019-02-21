@@ -33,13 +33,14 @@ import com.webank.weid.constant.ErrorCode;
 public class ResponseData<T> {
 
     private T result;
-    private Integer errorCode = ErrorCode.SUCCESS.getCode();
-    private String errorMessage = ErrorCode.SUCCESS.getCodeDesc();
+    private Integer errorCode;
+    private String errorMessage;
 
     /**
      * Instantiates a new response data.
      */
     public ResponseData() {
+        this.setErrorCode(ErrorCode.SUCCESS);
     }
 
     /**
@@ -55,15 +56,11 @@ public class ResponseData<T> {
     }
 
     /**
-     * Instantiates a new response data.
-     *
-     * @param result the result
-     * @param errorCode the return code
-     * @param errorMessage the return message
+     * set a ErrorCode type errorCode.
      */
-    public ResponseData(T result, Integer errorCode, String errorMessage) {
-        this.result = result;
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
+    public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode.getCode();
+        this.errorMessage = errorCode.getCodeDesc();
     }
+
 }

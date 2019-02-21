@@ -48,7 +48,7 @@ public class TestCreateCredential extends TestBaseServcie {
     public void testInit() {
 
         super.testInit();
-        if (null == cptBaseInfo) {
+        if (cptBaseInfo == null) {
             cptBaseInfo = super.registerCpt(createWeIdResultWithSetAttr);
         }
     }
