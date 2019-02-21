@@ -407,7 +407,7 @@ public class TestVerifyCredential extends TestBaseServcie {
 
         createCredentialArgs.getWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
         CredentialWrapper credentialWrapper = super.createCredential(createCredentialArgs);
-        ResponseData<Boolean> response = super.verifyCredential(credential);
+        ResponseData<Boolean> response = super.verifyCredential(credentialWrapper.getCredential());
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());

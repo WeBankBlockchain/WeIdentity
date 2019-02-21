@@ -48,7 +48,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
         if (!isInitIssuer) {
             super.testInit();
         }
-        if (null == evidenceCredential) {
+        if (evidenceCredential == null) {
             evidenceCredential = super.createCredential(createCredentialArgs).getCredential();
             ResponseData<String> evidence = evidenceService.createEvidence(evidenceCredential,
                 createWeIdResultWithSetAttr.getUserWeIdPrivateKey());

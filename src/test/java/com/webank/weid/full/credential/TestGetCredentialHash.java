@@ -33,11 +33,6 @@ import com.webank.weid.protocol.response.ResponseData;
 
 public class TestGetCredentialHash extends TestBaseServcie {
 
-    @Override
-    public synchronized void testInit() {
-        System.out.println();
-    }
-
     @Test
     public void testGetCredentialHashCase1() {
         Credential credential = buildCredential();
