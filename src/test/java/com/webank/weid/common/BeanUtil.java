@@ -41,7 +41,7 @@ import org.springframework.beans.BeanUtils;
  *
  */
 public class BeanUtil {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BeanUtil.class);
 
     private static SimpleDateFormat getFormat() {
@@ -101,14 +101,14 @@ public class BeanUtil {
     }
 
     private static void printCollection(String blank, Collection<?> c, StringBuilder beanStr) {
-        if (null == c) {
+        if (c == null) {
             return;
         }
         Iterator<?> it = c.iterator();
         int i = 0;
         while (it.hasNext()) {
             Object obj = it.next();
-            if (null == obj) {
+            if (obj == null) {
                 beanStr.append(blank)
                     .append(BeanConstant.LEFT_MID_BRACKETS)
                     .append(i++)
@@ -148,7 +148,7 @@ public class BeanUtil {
     }
 
     private static void printMap(String blank, Map<?, ?> map, StringBuilder beanStr) {
-        if (null == map) {
+        if (map == null) {
             return;
         }
         for (Entry<?, ?> entry : map.entrySet()) {
@@ -160,7 +160,7 @@ public class BeanUtil {
 
     private static boolean isSimpleValueType(Object obj) {
         
-        if (null == obj) {
+        if (obj == null) {
             return false;
         }
         if (Date.class.isAssignableFrom(obj.getClass())) {
@@ -176,7 +176,7 @@ public class BeanUtil {
         StringBuilder beanStr) {
         
         Object leftObj = left;
-        if (null == right) {
+        if (right == null) {
             beanStr.append(blank)
                 .append(String.valueOf(leftObj))
                 .append(BeanConstant.COLON_CHARAC)
@@ -184,7 +184,7 @@ public class BeanUtil {
                 .append(BeanConstant.LINE_CHARAC);
             return;
         }
-        if ((null != leftObj) && ((leftObj instanceof Date))) {
+        if ((leftObj != null) && ((leftObj instanceof Date))) {
             leftObj = getFormat().format((Date) leftObj);
         }
         Class<?> clazz = right.getClass();
@@ -233,7 +233,7 @@ public class BeanUtil {
     }
 
     private static void print(String blank, Object obj, StringBuilder beanStr) {
-        if (null == obj) {
+        if (obj == null) {
             return;
         }
         if ((obj instanceof Collection)) {
@@ -251,7 +251,7 @@ public class BeanUtil {
      */
     public static void print(Object obj) {
         StringBuilder beanStr = new StringBuilder();
-        if (null == obj) {
+        if (obj == null) {
             return;
         }
         if ((obj instanceof Collection)) {

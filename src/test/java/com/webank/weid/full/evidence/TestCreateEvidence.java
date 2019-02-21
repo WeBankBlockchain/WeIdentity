@@ -58,7 +58,7 @@ public class TestCreateEvidence extends TestBaseServcie {
     @Override
     public synchronized void testInit() {
         super.testInit();
-        if (null == credential) {
+        if (credential == null) {
             credential = super.createCredential(createCredentialArgs).getCredential();
         }
     }
@@ -111,7 +111,7 @@ public class TestCreateEvidence extends TestBaseServcie {
     /**
      * case5: privateKey is null.
      */
-    // @Test
+    @Test
     public void testCreateEvidenceCase04() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = 
             super.copyCreateWeId(createWeIdResultWithSetAttr);
@@ -130,7 +130,7 @@ public class TestCreateEvidence extends TestBaseServcie {
     /**
      * case6: privateKey is xxxxx.
      */
-    // @Test
+    @Test
     public void testCreateEvidenceCase05() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = 
             super.copyCreateWeId(createWeIdResultWithSetAttr);
