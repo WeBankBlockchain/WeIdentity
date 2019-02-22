@@ -38,7 +38,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
@@ -87,8 +87,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -102,8 +101,7 @@ public class TestUpdateCpt extends TestBaseServcie {
 
         CptMapArgs cptMapArgs = null;
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, null);
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -119,8 +117,7 @@ public class TestUpdateCpt extends TestBaseServcie {
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, null);
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.CPT_ID_NULL.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -136,8 +133,7 @@ public class TestUpdateCpt extends TestBaseServcie {
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, -1);
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -153,8 +149,7 @@ public class TestUpdateCpt extends TestBaseServcie {
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, 10000);
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.CPT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -173,8 +168,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_NULL.getCode(),
             response.getErrorCode().intValue());
@@ -208,8 +202,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         mockTest.tearDown();
 
@@ -238,8 +231,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -259,8 +251,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -279,8 +270,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -299,16 +289,14 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
 
         ResponseData<Cpt> responseCpt = cptService.queryCpt(cptBaseInfo.getCptId());
-        logger.info("queryCpt result:");
-        BeanUtil.print(responseCpt);
+        LogUtil.info(logger, "queryCpt", responseCpt);
     }
 
     /**
@@ -324,8 +312,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -345,8 +332,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -366,8 +352,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -388,8 +373,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -409,8 +393,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -430,8 +413,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -454,8 +436,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -474,8 +455,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -501,16 +481,14 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
 
         ResponseData<Cpt> responseCpt = cptService.queryCpt(cptBaseInfo.getCptId());
-        logger.info("queryCpt result:");
-        BeanUtil.print(responseCpt);
+        LogUtil.info(logger, "updateCpt", responseCpt);
     }
 
     /**
@@ -525,6 +503,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
         ResponseData<CptBaseInfo> response = updateCptForMock(cptMapArgs, mockFuture);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -553,9 +532,6 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response;
@@ -573,6 +549,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockTimeoutFuture();
 
         ResponseData<CptBaseInfo> response = updateCptForMock(cptMapArgs, mockFuture);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -595,8 +572,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptStringArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -613,8 +589,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptStringArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -637,8 +612,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptStringArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -660,8 +634,7 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptStringArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());

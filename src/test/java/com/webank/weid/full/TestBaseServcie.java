@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.BaseTest;
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
@@ -56,7 +56,6 @@ import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.WeIdUtils;
 
-
 /**
  * testing basic method classes.
  *
@@ -68,21 +67,45 @@ public abstract class TestBaseServcie extends BaseTest {
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(TestBaseServcie.class);
-    
+
+    /**
+     * private key of authority membership list.
+     */
     public static volatile List<String> issuerPrivateList = null;
 
+    /**
+     * whether to initialize authority list.
+     */
     protected static volatile boolean isInitIssuer = false;
 
+    /**
+     * weId information required for use cases.
+     */
     protected static volatile CreateWeIdDataResult createWeIdResult = null;
 
+    /**
+     * new weId information required for use cases.
+     */
     protected static volatile CreateWeIdDataResult createWeIdNew = null;
 
+    /**
+     * weId information and set related attribute.
+     */
     protected static volatile CreateWeIdDataResult createWeIdResultWithSetAttr = null;
 
+    /**
+     * parameters needed to create credentials.
+     */
     protected static volatile CreateCredentialArgs createCredentialArgs = null;
 
+    /**
+     * parameters needed to register CPT.
+     */
     protected static volatile CptMapArgs registerCptArgs = null;
 
+    /**
+     * CPT registration information.
+     */
     protected static volatile CptBaseInfo cptBaseInfo = null;
 
     /**
@@ -162,8 +185,7 @@ public abstract class TestBaseServcie extends BaseTest {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         if (response.getErrorCode()
             .intValue() != ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST.getCode()
@@ -183,9 +205,6 @@ public abstract class TestBaseServcie extends BaseTest {
     protected ResponseData<Boolean> verifyCredential(Credential credential) {
 
         ResponseData<Boolean> response = credentialService.verify(credential);
-        logger.info("verifyCredentialWithSpecifiedPubKey result:");
-        BeanUtil.print(response);
-
         return response;
     }
 
@@ -198,8 +217,7 @@ public abstract class TestBaseServcie extends BaseTest {
 
         ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);
-        logger.info("createCredential result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createCredential", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -218,8 +236,7 @@ public abstract class TestBaseServcie extends BaseTest {
         CptMapArgs registerCptArgs) {
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
-        logger.info("registerCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerCpt", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -266,7 +283,7 @@ public abstract class TestBaseServcie extends BaseTest {
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -297,8 +314,7 @@ public abstract class TestBaseServcie extends BaseTest {
     protected CreateWeIdDataResult createWeId() {
 
         ResponseData<CreateWeIdDataResult> createWeIdDataResult = weIdService.createWeId();
-        logger.info("createWeId result:");
-        BeanUtil.print(createWeIdDataResult);
+        LogUtil.info(logger, "createWeId", createWeIdDataResult);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             createWeIdDataResult.getErrorCode().intValue());
@@ -325,8 +341,7 @@ public abstract class TestBaseServcie extends BaseTest {
         setPublicKeyArgs.setOwner(owner);
 
         ResponseData<Boolean> responseSetPub = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(responseSetPub);
+        LogUtil.info(logger, "setPublicKey", responseSetPub);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetPub.getErrorCode().intValue());
         Assert.assertEquals(true, responseSetPub.getResult());
@@ -350,8 +365,7 @@ public abstract class TestBaseServcie extends BaseTest {
         setServiceArgs.setServiceEndpoint(serviceEnpoint);
 
         ResponseData<Boolean> responseSetSer = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(responseSetSer);
+        LogUtil.info(logger, "setService", responseSetSer);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetSer.getErrorCode().intValue());
         Assert.assertEquals(true, responseSetSer.getResult());
@@ -376,8 +390,7 @@ public abstract class TestBaseServcie extends BaseTest {
         setAuthenticationArgs.setPublicKey(publicKey);
         ResponseData<Boolean> responseSetAuth =
             weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(responseSetAuth);
+        LogUtil.info(logger, "setAuthentication", responseSetAuth);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetAuth.getErrorCode().intValue());
         Assert.assertEquals(true, responseSetAuth.getResult());

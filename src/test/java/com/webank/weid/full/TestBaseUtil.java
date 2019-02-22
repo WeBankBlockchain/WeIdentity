@@ -42,7 +42,7 @@ import org.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.protocol.base.AuthorityIssuer;
@@ -309,7 +309,7 @@ public class TestBaseUtil {
             String privateKey = String.valueOf(keyPair.getPrivateKey());
             passwordKey.setPrivateKey(privateKey);
             passwordKey.setPublicKey(publicKey);
-            BeanUtil.print(passwordKey);
+            LogUtil.info(logger, "createEcKeyPair", passwordKey);
         } catch (InvalidAlgorithmParameterException e) {
             logger.error("createEcKeyPair error:", e);
         } catch (NoSuchAlgorithmException e) {
@@ -377,21 +377,21 @@ public class TestBaseUtil {
         } catch (IOException e) {
             logger.error("resolvePk error:", e);
         }  finally {
-            if (null != br) {
+            if (br != null) {
                 try {
                     br.close();
                 } catch (IOException e) {
                     logger.error("BufferedReader close error:", e);
                 }
             }
-            if (null != isr) {
+            if (isr != null) {
                 try {
                     isr.close();
                 } catch (IOException e) {
                     logger.error("InputStreamReader close error:", e);
                 }
             }
-            if (null != fis) {
+            if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException e) {

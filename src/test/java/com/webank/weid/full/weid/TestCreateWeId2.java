@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
@@ -64,8 +64,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -79,8 +78,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
     public void testCreateWeIdCase2() {
 
         ResponseData<String> response = weIdService.createWeId(null);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
@@ -97,8 +95,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         createWeIdArgs.setPublicKey(null);
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -116,8 +113,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         createWeIdArgs.setPublicKey("abc");
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED.getCode(),
             response.getErrorCode().intValue());
@@ -135,8 +131,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         createWeIdArgs.setWeIdPrivateKey(null);
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -154,8 +149,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         createWeIdArgs.getWeIdPrivateKey().setPrivateKey(null);
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -173,8 +167,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         createWeIdArgs.getWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxx");
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -193,8 +186,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         createWeIdArgs.getWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED.getCode(),
             response.getErrorCode().intValue());
@@ -219,8 +211,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         mockTest.tearDown();
 
@@ -240,6 +231,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
         
         ResponseData<String> response = createWeIdForMock(mockFuture);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -252,9 +244,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response;
@@ -271,6 +260,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockTimeoutFuture();
 
         ResponseData<String> response = createWeIdForMock(mockFuture);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -295,8 +285,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         mockTest.tearDown();
 
@@ -324,8 +313,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         };
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         mockTest.tearDown();
 
@@ -343,15 +331,13 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
 
         ResponseData<String> response1 = weIdService.createWeId(createWeIdArgs);
-        logger.info("createWeId result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "createWeId", response1);
 
         Assert.assertEquals(ErrorCode.WEID_ALREADY_EXIST.getCode(),
             response1.getErrorCode().intValue());

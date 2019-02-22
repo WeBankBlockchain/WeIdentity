@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.exception.WeIdBaseException;
@@ -56,8 +56,7 @@ public class TestIsWeIdExist extends TestBaseServcie {
     public void testIsWeIdExistCase1() {
 
         ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeIdResult.getWeId());
-        logger.info("isWeIdExist result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "isWeIdExist", response1);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(true, response1.getResult());
@@ -71,8 +70,7 @@ public class TestIsWeIdExist extends TestBaseServcie {
     public void testIsWeIdExistCase2() {
 
         ResponseData<Boolean> response1 = weIdService.isWeIdExist(null);
-        logger.info("isWeIdExist result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "isWeIdExist", response1);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(false, response1.getResult());
@@ -86,8 +84,7 @@ public class TestIsWeIdExist extends TestBaseServcie {
     public void testIsWeIdExistCase3() {
 
         ResponseData<Boolean> response1 = weIdService.isWeIdExist("xxxxxx");
-        logger.info("isWeIdExist result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "isWeIdExist", response1);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(false, response1.getResult());
@@ -101,8 +98,7 @@ public class TestIsWeIdExist extends TestBaseServcie {
     public void testIsWeIdExistCase4() {
 
         ResponseData<Boolean> response1 = weIdService.isWeIdExist("did:weid:xxxxxx");
-        logger.info("isWeIdExist result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "isWeIdExist", response1);
 
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(false, response1.getResult());
@@ -116,8 +112,7 @@ public class TestIsWeIdExist extends TestBaseServcie {
     public void testIsWeIdExistCase5() {
 
         ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeIdResult.getWeId());
-        logger.info("isWeIdExist result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "isWeIdExist", response1);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(true, response1.getResult());
@@ -139,8 +134,7 @@ public class TestIsWeIdExist extends TestBaseServcie {
         };
 
         ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeIdResult.getWeId());
-        logger.info("isWeIdExist result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "isWeIdExist", response1);
 
         mockTest.tearDown();
 
@@ -165,8 +159,7 @@ public class TestIsWeIdExist extends TestBaseServcie {
         };
 
         ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeIdResult.getWeId());
-        logger.info("isWeIdExist result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "isWeIdExist", response1);
 
         mockTest.tearDown();
 
@@ -191,8 +184,7 @@ public class TestIsWeIdExist extends TestBaseServcie {
         };
 
         ResponseData<Boolean> response1 = weIdService.isWeIdExist(createWeIdResult.getWeId());
-        logger.info("isWeIdExist result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "isWeIdExist", response1);
 
         mockTest.tearDown();
 

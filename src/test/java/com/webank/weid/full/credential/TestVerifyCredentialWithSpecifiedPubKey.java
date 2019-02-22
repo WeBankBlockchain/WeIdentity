@@ -24,7 +24,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
@@ -70,8 +70,7 @@ public class TestVerifyCredentialWithSpecifiedPubKey extends TestBaseServcie {
         weIdPublicKey.setPublicKey(newPasswordKey.getPublicKey());
         ResponseData<Boolean> response =
             credentialService.verifyCredentialWithSpecifiedPubKey(credentialWrapper, weIdPublicKey);
-        logger.info("verifyCredentialWithSpecifiedPubKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "verifyCredentialWithSpecifiedPubKey", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -97,8 +96,7 @@ public class TestVerifyCredentialWithSpecifiedPubKey extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             credentialService.verifyCredentialWithSpecifiedPubKey(credentialWrapper, weIdPublicKey);
-        logger.info("verifyCredentialWithSpecifiedPubKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "verifyCredentialWithSpecifiedPubKey", response);
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
             response.getErrorCode().intValue());
@@ -121,8 +119,7 @@ public class TestVerifyCredentialWithSpecifiedPubKey extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             credentialService.verifyCredentialWithSpecifiedPubKey(credentialWrapper, null);
-        logger.info("verifyCredentialWithSpecifiedPubKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "verifyCredentialWithSpecifiedPubKey", response);
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
@@ -139,8 +136,7 @@ public class TestVerifyCredentialWithSpecifiedPubKey extends TestBaseServcie {
         weIdPublicKey.setPublicKey(newPasswordKey.getPublicKey());
         ResponseData<Boolean> response =
             credentialService.verifyCredentialWithSpecifiedPubKey(null, weIdPublicKey);
-        logger.info("verifyCredentialWithSpecifiedPubKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "verifyCredentialWithSpecifiedPubKey", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -166,8 +162,7 @@ public class TestVerifyCredentialWithSpecifiedPubKey extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             credentialService.verifyCredentialWithSpecifiedPubKey(credentialWrapper, weIdPublicKey);
-        logger.info("verifyCredentialWithSpecifiedPubKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "verifyCredentialWithSpecifiedPubKey", response);
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
             response.getErrorCode().intValue());

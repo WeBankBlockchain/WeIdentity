@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
@@ -61,8 +61,7 @@ public class TestSetService extends TestBaseServcie {
         SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -79,8 +78,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.setWeId(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -97,8 +95,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.setWeId("di:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac73");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -115,8 +112,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.setWeId("did:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac7a");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -134,8 +130,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.setType(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -153,8 +148,7 @@ public class TestSetService extends TestBaseServcie {
             .setType("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -171,8 +165,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.setServiceEndpoint(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -189,8 +182,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.setUserWeIdPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -207,8 +199,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.getUserWeIdPrivateKey().setPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -227,8 +218,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.setUserWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -246,8 +236,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.getUserWeIdPrivateKey().setPrivateKey("11111111111111");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -267,8 +256,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.getUserWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -286,8 +274,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.setWeId(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -307,6 +294,7 @@ public class TestSetService extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
         ResponseData<Boolean> response = setAttributeForMock(setServiceArgs, mockFuture);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -320,9 +308,6 @@ public class TestSetService extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response;
@@ -341,6 +326,7 @@ public class TestSetService extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockTimeoutFuture();
 
         ResponseData<Boolean> response = setAttributeForMock(setServiceArgs, mockFuture);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -366,8 +352,7 @@ public class TestSetService extends TestBaseServcie {
         };
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         mockTest.tearDown();
 
@@ -383,8 +368,7 @@ public class TestSetService extends TestBaseServcie {
     public void testSetServiceCase17() {
 
         ResponseData<Boolean> response = weIdService.setService(null);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -401,8 +385,7 @@ public class TestSetService extends TestBaseServcie {
         setServiceArgs.getUserWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        logger.info("setService result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());

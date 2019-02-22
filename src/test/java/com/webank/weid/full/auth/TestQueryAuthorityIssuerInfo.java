@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.AuthorityIssuerController;
 import com.webank.weid.full.TestBaseServcie;
@@ -70,8 +70,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
         ResponseData<AuthorityIssuer> response =
             authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId());
-        logger.info("queryAuthorityIssuerInfo result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -85,8 +84,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
         ResponseData<AuthorityIssuer> response =
             authorityIssuerService.queryAuthorityIssuerInfo(null);
-        logger.info("queryAuthorityIssuerInfo result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -100,8 +98,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
         ResponseData<AuthorityIssuer> response =
             authorityIssuerService.queryAuthorityIssuerInfo("xx:xx:xxxxxxx");
-        logger.info("queryAuthorityIssuerInfo result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -115,8 +112,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
         ResponseData<AuthorityIssuer> response = authorityIssuerService
             .queryAuthorityIssuerInfo("did:weid:0xc7e399b8d2da337f4e92eb33ca88b60b899b5022");
-        logger.info("queryAuthorityIssuerInfo result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -131,8 +127,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
         ResponseData<AuthorityIssuer> response = authorityIssuerService
             .queryAuthorityIssuerInfo("did:weid:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d8773b");
-        logger.info("queryAuthorityIssuerInfo result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -146,22 +141,21 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     public void testQueryAuthorityIssuerInfoCase6() {
 
         CreateWeIdDataResult createWeId = super.registerAuthorityIssuer();
+        LogUtil.info(logger, "registerAuthorityIssuer", createWeId);
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeId, privateKey);
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
 
         ResponseData<AuthorityIssuer> response1 =
             authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId());
-        logger.info("queryAuthorityIssuerInfo result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
             response1.getErrorCode().intValue());
@@ -177,6 +171,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
         ResponseData<AuthorityIssuer> response = queryAuthorityIssuerInfoForMock(mockFuture);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -192,6 +187,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
         final MockUp<Future<?>> mockFuture = mockTimeoutFuture();
 
         ResponseData<AuthorityIssuer> response = queryAuthorityIssuerInfoForMock(mockFuture);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -207,6 +203,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
         final MockUp<Future<?>> mockFuture = mockReturnNullFuture();
 
         ResponseData<AuthorityIssuer> response = queryAuthorityIssuerInfoForMock(mockFuture);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -225,9 +222,6 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
         ResponseData<AuthorityIssuer> response =
             authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId());
-        logger.info("queryAuthorityIssuerInfo result:");
-        BeanUtil.print(response);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response;
@@ -248,8 +242,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
         ResponseData<AuthorityIssuer> response =
             authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId());
-        logger.info("queryAuthorityIssuerInfo result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         mockTest.tearDown();
 

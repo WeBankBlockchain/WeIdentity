@@ -27,8 +27,10 @@ import mockit.MockUp;
 import org.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
@@ -48,6 +50,8 @@ import com.webank.weid.util.SignatureUtils;
  * @author v_wbgyang
  */
 public class TestVerifyCredential extends TestBaseServcie {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TestVerifyCredential.class);
 
     protected PasswordKey passwordKey = null;
 
@@ -69,6 +73,8 @@ public class TestVerifyCredential extends TestBaseServcie {
     public void testVerifyCredentialCase1() {
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
     }
@@ -81,8 +87,9 @@ public class TestVerifyCredential extends TestBaseServcie {
 
         String context = credential.getContext();
         credential.setContext(null);
-        BeanUtil.print(credential);
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setContext(context);
         Assert.assertEquals(ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -99,6 +106,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setContext("xxx");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setContext(context);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
@@ -116,6 +125,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setCptId(cpt.getCptId());
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setCptId(cptId);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
@@ -132,6 +143,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setId(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setId(id);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -147,6 +160,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         String id = credential.getId();
         credential.setId("xxxxxxxxx");
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setId(id);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -163,6 +178,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setIssuer(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setIssuer(issuer);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -179,6 +196,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setIssuer("xxxxxxxxxxx");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setIssuer(issuer);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -195,6 +214,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setIssuer(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setIssuer(issuer);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
@@ -211,6 +232,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setIssuranceDate(-1L);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setIssuranceDate(issuranceDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
@@ -227,6 +250,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setIssuranceDate(System.currentTimeMillis() + 100000);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setIssuranceDate(issuranceDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
@@ -242,6 +267,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         Long expirationDate = credential.getExpirationDate();
         credential.setExpirationDate(-1L);
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setExpirationDate(expirationDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
@@ -257,6 +284,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         Long expirationDate = credential.getExpirationDate();
         credential.setExpirationDate(System.currentTimeMillis() - 10000);
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setExpirationDate(expirationDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
@@ -272,6 +301,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         Long expirationDate = credential.getExpirationDate();
         credential.setExpirationDate(null);
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setExpirationDate(expirationDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
@@ -287,6 +318,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         Long issuranceDate = credential.getIssuranceDate();
         credential.setIssuranceDate(null);
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setIssuranceDate(issuranceDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
@@ -303,6 +336,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         Map<String, Object> claim = credential.getClaim();
         credential.setClaim(null);
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setClaim(claim);
         Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -324,6 +359,7 @@ public class TestVerifyCredential extends TestBaseServcie {
             }
         };
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
 
         mockTest.tearDown();
 
@@ -343,6 +379,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setSignature(null);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setSignature(signature);
         Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
             response.getErrorCode().intValue());
@@ -359,6 +397,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setSignature("xxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setSignature(signature);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -379,6 +419,7 @@ public class TestVerifyCredential extends TestBaseServcie {
 
         CredentialWrapper credentialWrapper = super.createCredential(createCredentialArgs);
         ResponseData<Boolean> response = super.verifyCredential(credentialWrapper.getCredential());
+        LogUtil.info(logger, "verifyCredential", response);
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
@@ -408,6 +449,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         createCredentialArgs.getWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
         CredentialWrapper credentialWrapper = super.createCredential(createCredentialArgs);
         ResponseData<Boolean> response = super.verifyCredential(credentialWrapper.getCredential());
+        LogUtil.info(logger, "verifyCredential", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -423,10 +465,11 @@ public class TestVerifyCredential extends TestBaseServcie {
         Long expirationDate = credential.getExpirationDate();
         credential.setIssuranceDate(System.currentTimeMillis() - 12000);
         credential.setExpirationDate(System.currentTimeMillis() - 10000);
-
         ResponseData<Boolean> response = super.verifyCredential(credential);
         credential.setIssuranceDate(issuranceDate);
         credential.setExpirationDate(expirationDate);
+        LogUtil.info(logger, "verifyCredential", response);
+        
         Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -448,6 +491,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         };
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
 
         mockTest.tearDown();
 
@@ -466,6 +510,8 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setIssuer("did:weid:0x111111111111111");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
         credential.setIssuer(issuer);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
