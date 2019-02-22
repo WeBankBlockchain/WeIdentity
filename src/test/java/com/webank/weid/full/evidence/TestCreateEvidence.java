@@ -35,7 +35,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.EvidenceFactory;
 import com.webank.weid.contract.EvidenceFactory.CreateEvidenceLogEventResponse;
@@ -72,8 +72,8 @@ public class TestCreateEvidence extends TestBaseServcie {
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase1 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(!response.getResult().isEmpty());
     }
@@ -87,8 +87,8 @@ public class TestCreateEvidence extends TestBaseServcie {
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         ResponseData<String> response = evidenceService
             .createEvidence(null, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase2 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
@@ -100,8 +100,8 @@ public class TestCreateEvidence extends TestBaseServcie {
     public void testCreateEvidenceCase03() {
         ResponseData<String> response = evidenceService
             .createEvidence(credential, null);
-        logger.info("testCreateEvidenceCase3 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -119,8 +119,8 @@ public class TestCreateEvidence extends TestBaseServcie {
 
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase5 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -138,8 +138,8 @@ public class TestCreateEvidence extends TestBaseServcie {
 
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase6 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -154,8 +154,8 @@ public class TestCreateEvidence extends TestBaseServcie {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = super.copyCreateWeId(createWeIdNew);
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase8 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
@@ -163,8 +163,8 @@ public class TestCreateEvidence extends TestBaseServcie {
 
         ResponseData<String> response1 = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase8 createEvidence again result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
@@ -178,8 +178,8 @@ public class TestCreateEvidence extends TestBaseServcie {
     public void testCreateEvidenceCase07() {
         ResponseData<String> response = evidenceService
             .createEvidence(credential, createWeIdNew.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase9 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
@@ -196,8 +196,8 @@ public class TestCreateEvidence extends TestBaseServcie {
 
         ResponseData<String> response = evidenceService
             .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase10 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -214,8 +214,8 @@ public class TestCreateEvidence extends TestBaseServcie {
 
         ResponseData<String> response = evidenceService
             .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        logger.info("testCreateEvidenceCase12 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -229,8 +229,8 @@ public class TestCreateEvidence extends TestBaseServcie {
     public void testCreateEvidenceCase10() {
         MockUp<Future<?>> mockFuture = mockTimeoutFuture();
         ResponseData<String> response = this.createEvidence(mockFuture);
-        logger.info("testCreateEvidenceCase13 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -244,8 +244,8 @@ public class TestCreateEvidence extends TestBaseServcie {
     public void testCreateEvidenceCase11() {
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
         ResponseData<String> response = this.createEvidence(mockFuture);
-        logger.info("testCreateEvidenceCase14 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -272,8 +272,8 @@ public class TestCreateEvidence extends TestBaseServcie {
         ResponseData<String> response = evidenceService
             .createEvidence(credential, createWeIdNew.getUserWeIdPrivateKey());
         mockTest.tearDown();
-        logger.info("testCreateEvidenceCase15 createEvidence result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createEvidence", response);
+
         Assert.assertEquals(
             ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR.getCode(),
             response.getErrorCode().intValue());

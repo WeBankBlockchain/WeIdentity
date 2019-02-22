@@ -32,7 +32,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.AuthorityIssuerController;
 import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
@@ -67,8 +67,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -87,8 +86,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -107,8 +105,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -127,8 +124,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -154,8 +150,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -165,8 +160,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response1 =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "removeAuthorityIssuer", response1);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(true, response1.getResult());
@@ -184,8 +178,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response = 
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -205,8 +198,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
@@ -222,8 +214,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(null);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -242,8 +233,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
@@ -263,8 +253,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
@@ -284,8 +273,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -306,8 +294,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> responseRegister =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(responseRegister);
+        LogUtil.info(logger, "registerAuthorityIssuer", responseRegister);
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeId, privateKey);
@@ -315,8 +302,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
@@ -337,8 +323,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> responseRegist =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(responseRegist);
+        LogUtil.info(logger, "registerAuthorityIssuer", responseRegist);
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeId, privateKey);
@@ -347,8 +332,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
@@ -369,6 +353,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response1 =
             removeAuthorityIssuerForMock(removeAuthorityIssuerArgs, mockFuture);
+        LogUtil.info(logger, "removeAuthorityIssuer", response1);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response1.getErrorCode().intValue());
@@ -389,9 +374,6 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response1 =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response1);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response1;
@@ -411,6 +393,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response1 =
             removeAuthorityIssuerForMock(removeAuthorityIssuerArgs, mockFuture);
+        LogUtil.info(logger, "removeAuthorityIssuer", response1);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response1.getErrorCode().intValue());
@@ -440,8 +423,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response1 =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        logger.info("removeAuthorityIssuer result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "removeAuthorityIssuer", response1);
 
         mockTest.tearDown();
 
