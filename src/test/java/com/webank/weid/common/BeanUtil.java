@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -48,7 +49,7 @@ public class BeanUtil {
         return new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
     }
 
-    private static void printBean(String blank, Object obj, StringBuilder beanStr) {
+    private static void beanToString(String blank, Object obj, StringBuilder beanStr) {
         if (isSimpleValueType(obj)) {
             beanStr.append(blank)
                 .append(String.valueOf(obj))
@@ -82,7 +83,7 @@ public class BeanUtil {
                         + f[i].getName().substring(1), new Class[0]);
                     Object left = f[i].getName();
                     Object right = m.invoke(obj, new Object[] {});
-                    printByType(blank, left, right, beanStr);
+                    formatByType(blank, left, right, beanStr);
                 }
             } catch (NoSuchMethodException ex) {
                 beanStr.append(blank)
@@ -100,7 +101,7 @@ public class BeanUtil {
         }
     }
 
-    private static void printCollection(String blank, Collection<?> c, StringBuilder beanStr) {
+    private static void collectionToString(String blank, Collection<?> c, StringBuilder beanStr) {
         if (c == null) {
             return;
         }
@@ -147,14 +148,14 @@ public class BeanUtil {
         }
     }
 
-    private static void printMap(String blank, Map<?, ?> map, StringBuilder beanStr) {
+    private static void mapToString(String blank, Map<?, ?> map, StringBuilder beanStr) {
         if (map == null) {
             return;
         }
         for (Entry<?, ?> entry : map.entrySet()) {
             Object left = entry.getKey();
             Object right = entry.getValue();
-            printByType(blank, left, right, beanStr);
+            formatByType(blank, left, right, beanStr);
         }
     }
 
@@ -169,7 +170,7 @@ public class BeanUtil {
         return BeanUtils.isSimpleValueType(obj.getClass());
     }
 
-    private static void printByType(
+    private static void formatByType(
         String blank,
         Object left,
         Object right,
@@ -210,7 +211,7 @@ public class BeanUtil {
                 .append(clazz.getName())
                 .append(BeanConstant.RIGHT_BRACKETS)
                 .append(BeanConstant.LINE_CHARAC);
-            printCollection(blank + "   ", (Collection<?>) right, beanStr);
+            collectionToString(blank + "   ", (Collection<?>) right, beanStr);
         } else if ((right instanceof Map)) {
             beanStr.append(blank)
                 .append(String.valueOf(leftObj))
@@ -219,7 +220,7 @@ public class BeanUtil {
                 .append(clazz.getName())
                 .append(BeanConstant.RIGHT_BRACKETS)
                 .append(BeanConstant.LINE_CHARAC);
-            printMap(blank + "   ", (Map<?, ?>) right, beanStr);
+            mapToString(blank + "   ", (Map<?, ?>) right, beanStr);
         } else {
             beanStr.append(blank)
                 .append(String.valueOf(leftObj))
@@ -228,7 +229,7 @@ public class BeanUtil {
                 .append(clazz.getName())
                 .append(BeanConstant.RIGHT_BRACKETS)
                 .append(BeanConstant.LINE_CHARAC);
-            printBean(blank + "   ", right, beanStr);
+            beanToString(blank + "   ", right, beanStr);
         }
     }
 
@@ -237,30 +238,30 @@ public class BeanUtil {
             return;
         }
         if ((obj instanceof Collection)) {
-            printCollection(blank, (Collection<?>) obj, beanStr);
+            collectionToString(blank, (Collection<?>) obj, beanStr);
         } else if ((obj instanceof Map)) {
-            printMap(blank, (Map<?, ?>) obj, beanStr);
+            mapToString(blank, (Map<?, ?>) obj, beanStr);
         } else {
-            printBean(blank, obj, beanStr);
+            beanToString(blank, obj, beanStr);
         }
     }
 
     /**
-     *  print object.
-     * @param obj this object for print
+     *  converting objects into strings.
+     * @param obj objects requiring format conversion
      */
-    public static void print(Object obj) {
+    public static String objToString(Object obj) {
         StringBuilder beanStr = new StringBuilder();
         if (obj == null) {
-            return;
+            return StringUtils.EMPTY;
         }
         if ((obj instanceof Collection)) {
-            printCollection("", (Collection<?>) obj, beanStr);
+            collectionToString("", (Collection<?>) obj, beanStr);
         } else if ((obj instanceof Map)) {
-            printMap("", (Map<?, ?>) obj, beanStr);
+            mapToString("", (Map<?, ?>) obj, beanStr);
         } else {
-            printBean("", obj, beanStr);
+            beanToString("", obj, beanStr);
         }
-        LOGGER.info(beanStr.toString());
+        return beanStr.toString();
     }
 }

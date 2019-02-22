@@ -19,7 +19,6 @@
 
 package com.webank.weid.util;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Assert;
@@ -38,7 +37,7 @@ public class TestHashUtils {
     private static final Logger logger = LoggerFactory.getLogger(TestHashUtils.class);
 
     @Test
-    public void testHashUtils() throws UnsupportedEncodingException {
+    public void testHashUtils() {
 
         String rawString = "hello world.";
         byte[] rawBytes = rawString.getBytes(StandardCharsets.UTF_8);
