@@ -18,10 +18,8 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 
 部署SDK
 -------
-我们提供源码编译和工具集成两种方式使用SDK，两种方式均可以快速部署和使用SDK：   
 
-* 源码编译方式请参阅：`WeIdentity JAVA SDK 安装部署文档 <./weidentity-installation.html>`_   
-* 工具集成方式请参阅：`WeIdentity JAVA SDK 安装集成文档 <https://weidentity.readthedocs.io/projects/buildtools/zh_CN/latest/docs/weidentity-build-tools-doc.html>`_
+* `WeIdentity JAVA SDK 安装部署文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-installation.html>`_   
 
 * 开始使用之前，再次确认启动FISCO-BCOS节点已启动，确保端口可以访问。
 
