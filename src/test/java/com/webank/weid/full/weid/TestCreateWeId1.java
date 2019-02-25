@@ -33,10 +33,11 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -59,8 +60,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
     public void testCreateWeIdCase1() {
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -77,6 +77,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockTimeoutFuture();
 
         ResponseData<CreateWeIdDataResult> response = createWeIdForMock(mockFuture);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -94,6 +95,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
         ResponseData<CreateWeIdDataResult> response = createWeIdForMock(mockFuture);
+        LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -105,9 +107,6 @@ public class TestCreateWeId1 extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response;
@@ -130,8 +129,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
         };
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         mockTest.tearDown();
 
@@ -151,16 +149,13 @@ public class TestCreateWeId1 extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt)
-                throws NullPointerException {
-                
-                throw new NullPointerException();
+                TransactionReceipt transactionReceipt) {
+                throw new WeIdBaseException("mock exception");
             }
         };
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         mockTest.tearDown();
 
@@ -186,8 +181,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
         };
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
-        logger.info("createWeId result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "createWeId", response);
 
         mockTest.tearDown();
 

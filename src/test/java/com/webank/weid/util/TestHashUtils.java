@@ -19,6 +19,8 @@
 
 package com.webank.weid.util;
 
+import java.nio.charset.StandardCharsets;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -38,14 +40,21 @@ public class TestHashUtils {
     public void testHashUtils() {
 
         String rawString = "hello world.";
-        byte[] rawBytes = rawString.getBytes();
-        logger.info("String: " + rawString + ", Bytes: " + new String(rawBytes));
+        byte[] rawBytes = rawString.getBytes(StandardCharsets.UTF_8);
+        logger.info("Befor hash, String: {}, Bytes: {} ", 
+            rawString, 
+            rawBytes, 
+            new String(rawBytes, StandardCharsets.UTF_8)
+        );
         String hashedString = HashUtils.sha3(rawString);
         byte[] hashedBytes = HashUtils.sha3(rawBytes);
         // use assert here to verify the String to be 64 bit and Bytes[] to be
         // 32 bit
         logger.info(
-            "After hash, String: {}, Bytes: {}", hashedString, new String(hashedBytes));
+            "After hash, String: {}, Bytes: {}", 
+            hashedString, 
+            new String(hashedBytes, StandardCharsets.UTF_8)
+        );
         Assert.assertNotNull(hashedBytes);
     }
 }

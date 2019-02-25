@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -20,35 +20,49 @@
 package com.webank.weid.common;
 
 /**
- * public and private key object class.
+ * the constant for BaseBean to get Object String.
  * @author v_wbgyang
  *
  */
-public class PasswordKey {
+public class BeanConstant {
 
     /**
-     * the key of privateKey.
+     * line separator.
      */
-    private String privateKey;
+    public static final String LINE_CHARAC = System.lineSeparator();
 
     /**
-     * the key of publicKey.
+     * left square bracket.
      */
-    private String publicKey;
+    public static final String LEFT_MID_BRACKETS = "[";
 
-    public String getPrivateKey() {
-        return privateKey;
-    }
+    /**
+     * right square bracket.
+     */
+    public static final String RIGHT_MID_BRACKETS = "]";
 
-    public void setPrivateKey(String privateKey) {
-        this.privateKey = privateKey;
-    }
+    /**
+     * colon.
+     */
+    public static final String COLON_CHARAC = ":";
 
-    public String getPublicKey() {
-        return publicKey;
-    }
+    /**
+     * left parenthesis.
+     */
+    public static final String LEFT_BRACKETS = "(";
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    } 
+    /**
+     * right parenthesis.
+     */
+    public static final String RIGHT_BRACKETS = ")";
+
+    /**
+     * blank space.
+     */
+    public static final String BLANK_SPACE = " ";
+
+    /**
+     * empty object.
+     */
+    public static final String BLANK_STR = "null";
 }

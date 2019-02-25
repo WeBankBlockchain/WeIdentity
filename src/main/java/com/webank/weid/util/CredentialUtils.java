@@ -19,6 +19,7 @@
 
 package com.webank.weid.util;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,7 +46,7 @@ import com.webank.weid.protocol.response.ResponseData;
  * @author chaoxinhu 2019.1
  */
 public final class CredentialUtils {
-
+    
     /**
      * Concat all fields of Credential info, without Signature. This should be invoked when
      * calculating Credential Signature. Return null if credential format is illegal.
@@ -206,7 +207,7 @@ public final class CredentialUtils {
             return new Bytes32(new byte[32]);
         }
         String mergedId = id.replaceAll(WeIdConstant.UUID_SEPARATOR, StringUtils.EMPTY);
-        byte[] uuidBytes = mergedId.getBytes();
+        byte[] uuidBytes = mergedId.getBytes(StandardCharsets.UTF_8);
         return DataTypetUtils.bytesArrayToBytes32(uuidBytes);
     }
 

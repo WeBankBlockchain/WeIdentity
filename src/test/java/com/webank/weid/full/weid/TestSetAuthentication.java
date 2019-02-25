@@ -30,11 +30,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
@@ -61,8 +62,7 @@ public class TestSetAuthentication extends TestBaseServcie {
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -80,8 +80,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setWeId(null);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -99,8 +98,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setWeId("di:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac73");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -118,8 +116,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setWeId("did:weid:0xbb");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -138,8 +135,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setType(null);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -159,8 +155,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setPublicKey(passwordKey.getPublicKey());
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -178,8 +173,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setPublicKey(null);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -197,8 +191,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setPublicKey("xxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -216,8 +209,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setUserWeIdPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -235,8 +227,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.getUserWeIdPrivateKey().setPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -255,8 +246,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.getUserWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -276,8 +266,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.getUserWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -296,8 +285,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setUserWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -316,8 +304,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setWeId(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -336,8 +323,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setOwner(setAuthenticationArgs.getWeId());
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -355,8 +341,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setOwner(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -374,8 +359,7 @@ public class TestSetAuthentication extends TestBaseServcie {
         setAuthenticationArgs.setOwner("xxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -396,6 +380,7 @@ public class TestSetAuthentication extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             setAuthenticationForMock(setAuthenticationArgs, mockFuture);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -409,9 +394,6 @@ public class TestSetAuthentication extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response;
@@ -432,6 +414,7 @@ public class TestSetAuthentication extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             setAuthenticationForMock(setAuthenticationArgs, mockFuture);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -452,16 +435,13 @@ public class TestSetAuthentication extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt)
-                throws NullPointerException {
-                
-                throw new NullPointerException();
+                TransactionReceipt transactionReceipt) {
+                throw new WeIdBaseException("mock exception");
             }
         };
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         mockTest.tearDown();
 
@@ -477,8 +457,7 @@ public class TestSetAuthentication extends TestBaseServcie {
     public void testSetAuthenticationCase21() {
 
         ResponseData<Boolean> response = weIdService.setAuthentication(null);
-        logger.info("setAuthentication result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());

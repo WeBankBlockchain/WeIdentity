@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.CptController;
 import com.webank.weid.exception.DataTypeCastException;
@@ -57,7 +57,7 @@ public class TestQueryCpt extends TestBaseServcie {
     private static final Logger logger = LoggerFactory.getLogger(TestQueryCpt.class);
 
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
 
         super.testInit();
         if (cptBaseInfo == null) {
@@ -72,8 +72,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase1() {
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        logger.info("queryCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryCpt", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -86,8 +85,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase2() {
 
         ResponseData<Cpt> response = cptService.queryCpt(null);
-        logger.info("queryCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryCpt", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -100,8 +98,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase3() {
 
         ResponseData<Cpt> response = cptService.queryCpt(-1);
-        logger.info("queryCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryCpt", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -114,8 +111,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase4() {
 
         ResponseData<Cpt> response = cptService.queryCpt(100000);
-        logger.info("queryCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryCpt", response);
 
         Assert.assertEquals(ErrorCode.CPT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -128,8 +124,7 @@ public class TestQueryCpt extends TestBaseServcie {
     public void testQueryCptCase5() {
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        logger.info("queryCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryCpt", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -139,15 +134,13 @@ public class TestQueryCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> responseUp = cptService.updateCpt(
             cptMapArgs,
             cptBaseInfo.getCptId());
-        logger.info("updateCpt result:");
-        BeanUtil.print(responseUp);
+        LogUtil.info(logger, "updateCpt", responseUp);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseUp.getErrorCode().intValue());
         Assert.assertNotNull(responseUp.getResult());
 
         ResponseData<Cpt> responseQ = cptService.queryCpt(cptBaseInfo.getCptId());
-        logger.info("queryCpt result:");
-        BeanUtil.print(responseQ);
+        LogUtil.info(logger, "queryCpt", responseQ);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseQ.getErrorCode().intValue());
         Assert.assertNotNull(responseQ.getResult());
@@ -169,8 +162,7 @@ public class TestQueryCpt extends TestBaseServcie {
         };
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        logger.info("queryCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryCpt", response);
 
         mockTest.tearDown();
         mockFuture.tearDown();
@@ -194,9 +186,8 @@ public class TestQueryCpt extends TestBaseServcie {
         };
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        logger.info("queryCpt result:");
-        BeanUtil.print(response);
-
+        LogUtil.info(logger, "queryCpt", response);
+ 
         mockTest.tearDown();
 
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
@@ -223,8 +214,7 @@ public class TestQueryCpt extends TestBaseServcie {
         };
 
         ResponseData<Cpt> response = cptService.queryCpt(cptBaseInfo.getCptId());
-        logger.info("queryCpt result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "queryCpt", response);
 
         mockTest.tearDown();
 
