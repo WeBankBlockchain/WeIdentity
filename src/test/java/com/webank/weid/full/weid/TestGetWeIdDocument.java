@@ -33,7 +33,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
@@ -56,10 +56,10 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     
     private static final Logger logger = LoggerFactory.getLogger(TestGetWeIdDocument.class);
     
-    protected static CreateWeIdDataResult createWeIdForGetDoc = null;
+    private static CreateWeIdDataResult createWeIdForGetDoc = null;
     
     @Override
-    public void testInit() {
+    public synchronized void testInit() {
         super.testInit();
         if (createWeIdForGetDoc == null) {
             createWeIdForGetDoc = super.createWeIdWithSetAttr(); 
@@ -75,8 +75,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
         ResponseData<WeIdDocument> weIdDoc =
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
-        logger.info("getWeIdDocument result:");
-        BeanUtil.print(weIdDoc);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(1, weIdDoc.getResult().getService().size());
@@ -103,8 +102,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
         ResponseData<WeIdDocument> weIdDoc =
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
-        logger.info("getWeIdDocument result:");
-        BeanUtil.print(weIdDoc);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(2, weIdDoc.getResult().getService().size());
@@ -120,8 +118,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     public void testGetWeIdDocumentCase3() {
 
         ResponseData<WeIdDocument> weIdDoc = weIdService.getWeIdDocument("xxxxxxxxxx");
-        logger.info("getWeIdDocument result:");
-        BeanUtil.print(weIdDoc);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertNull(weIdDoc.getResult());
@@ -135,8 +132,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     public void testGetWeIdDocumentCase4() {
 
         ResponseData<WeIdDocument> weIdDoc = weIdService.getWeIdDocument(null);
-        logger.info("getWeIdDocument result:");
-        BeanUtil.print(weIdDoc);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertNull(weIdDoc.getResult());
@@ -151,8 +147,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
         ResponseData<WeIdDocument> weIdDoc =
             weIdService.getWeIdDocument("did:weid:0xa1c93e93622c6a0b2f52c90741e0b98ab77385a9");
-        logger.info("getWeIdDocument result:");
-        BeanUtil.print(weIdDoc);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
             weIdDoc.getErrorCode().intValue());
@@ -170,6 +165,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
         ResponseData<WeIdDocument> weIdDoc = getWeIdDocument(mockFuture);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             weIdDoc.getErrorCode().intValue());
@@ -186,6 +182,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockTimeoutFuture();
 
         ResponseData<WeIdDocument> weIdDoc = getWeIdDocument(mockFuture);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             weIdDoc.getErrorCode().intValue());
@@ -193,7 +190,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     }
 
     private ResponseData<WeIdDocument> getWeIdDocument(MockUp<Future<?>> mockFuture) {
-        
+
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public Future<?> getLatestRelatedBlock(Address identity) {
@@ -203,14 +200,11 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
         ResponseData<WeIdDocument> weIdDoc =
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
-        logger.info("getWeIdDocument result:");
-        BeanUtil.print(weIdDoc);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return weIdDoc;
     }
-    
+
     /**
      * case: mock WeIdContract.getWeIdAttributeChangedEvents
      *      for WeIdServiceImpl.resolveAttributeEvent().
@@ -233,7 +227,8 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         ResponseData<WeIdDocument> weIdDoc = 
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         mockTest.tearDown();
-        BeanUtil.print(weIdDoc);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
+
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             weIdDoc.getErrorCode().intValue());
     }
@@ -253,11 +248,12 @@ public class TestGetWeIdDocument extends TestBaseServcie {
                 return null;
             }
         };
-        
+
         ResponseData<WeIdDocument> weIdDoc = 
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         mockTest.tearDown();
-        BeanUtil.print(weIdDoc);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
+
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             weIdDoc.getErrorCode().intValue());
     }
@@ -281,7 +277,8 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         ResponseData<WeIdDocument> weIdDoc =
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         mockTest.tearDown();
-        BeanUtil.print(weIdDoc);
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
+
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             weIdDoc.getErrorCode().intValue());
     }

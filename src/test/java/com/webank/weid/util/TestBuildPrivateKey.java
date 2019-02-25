@@ -21,10 +21,12 @@ package com.webank.weid.util;
 
 import java.math.BigInteger;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.common.PasswordKey;
 import com.webank.weid.full.TestBaseUtil;
 
 /**
@@ -43,9 +45,10 @@ public class TestBuildPrivateKey {
      */
     @Test
     public void testBuildPrivateKey() {
-        String[] pk = TestBaseUtil.resolvePk("org1.txt");
-        BigInteger bigInter1 = new BigInteger(pk[1], 10);
+        PasswordKey passwordKey = TestBaseUtil.resolvePk("org1.txt");
+        BigInteger bigInter1 = new BigInteger(passwordKey.getPrivateKey(), 10);
         String str1 = bigInter1.toString(16);
-        logger.info("private key:" + str1);
+        logger.info("private key:{}", str1);
+        Assert.assertNotNull(str1);
     }
 }

@@ -178,7 +178,7 @@ public class TestDataTypetUtils {
 
         String[] array1 = DataTypetUtils.bytes32DynamicArrayToStringArrayWithoutTrim(result1);
         for (int i = 0; i < array.length; i++) {
-            logger.info("---" + array1[i] + "---");
+            logger.info("---{}----", array1[i]);
         }
         Assert.assertNotNull(array1);
     }
