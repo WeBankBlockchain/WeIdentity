@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,30 +17,37 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.demo;
+package com.webank.weid.common;
 
-import java.math.BigInteger;
-
-import org.bcos.contract.tools.ToolConf;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.slf4j.Logger;
 
 /**
- * Base class for demo.
- * 
+ * logging tool class.
  * @author v_wbgyang
+ *
  */
-public abstract class DemoBase {
+public class LogUtil {
 
-    public final static String PRIVKEY;
-    protected static ApplicationContext context;
-
-    static {
-        context = new ClassPathXmlApplicationContext(new String[] {
-            "classpath:SpringApplicationContext-test.xml", 
-            "classpath:applicationContext.xml"});
-
-        ToolConf toolConf = context.getBean(ToolConf.class);
-        PRIVKEY = new BigInteger(toolConf.getPrivKey(), 16).toString();
+    /**
+     * log record.
+     * @param message log description
+     * @param obj objects to be recorded
+     */
+    public static void info(Logger logger, String message, Object obj) {
+        logger.info(
+            "{}-{} result:\r\n{}",
+            stackTrace().getMethodName(),
+            message,
+            BeanUtil.objToString(obj)
+        );
+    }
+    
+    /**
+     * get stack information for log records.
+     * @return StackTraceElement for currentThread.
+     */
+    private static StackTraceElement stackTrace() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        return stackTrace[3];
     }
 }

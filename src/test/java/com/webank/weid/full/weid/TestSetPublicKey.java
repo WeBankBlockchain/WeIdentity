@@ -30,11 +30,12 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
@@ -58,10 +59,8 @@ public class TestSetPublicKey extends TestBaseServcie {
     public void testSetPublicKeyCase1() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-        BeanUtil.print(setPublicKeyArgs);
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -78,8 +77,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setWeId(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -96,8 +94,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setWeId("di:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac73");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -114,8 +111,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setWeId("did:weid:0aaaaaaaaaaaa");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -133,8 +129,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setType(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -153,8 +148,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setPublicKey(passwordKey.getPublicKey());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -171,8 +165,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setPublicKey(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -189,8 +182,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setPublicKey("xxxxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -207,8 +199,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setUserWeIdPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -225,8 +216,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -244,8 +234,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
@@ -264,8 +253,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -283,8 +271,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setUserWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -302,8 +289,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setWeId(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
@@ -321,8 +307,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setOwner(setPublicKeyArgs.getWeId());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -339,8 +324,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setOwner(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -357,8 +341,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         setPublicKeyArgs.setOwner("xxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -377,6 +360,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
 
         ResponseData<Boolean> response = setPublicKeyForMock(setPublicKeyArgs, mockFuture);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -390,9 +374,6 @@ public class TestSetPublicKey extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response;
@@ -411,6 +392,7 @@ public class TestSetPublicKey extends TestBaseServcie {
         MockUp<Future<?>> mockFuture = mockTimeoutFuture();
 
         ResponseData<Boolean> response = setPublicKeyForMock(setPublicKeyArgs, mockFuture);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -430,16 +412,13 @@ public class TestSetPublicKey extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt)
-                throws NullPointerException {
-                
-                throw new NullPointerException();
+                TransactionReceipt transactionReceipt) {
+                throw new WeIdBaseException("mock exception");
             }
         };
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         mockTest.tearDown();
 
@@ -455,8 +434,7 @@ public class TestSetPublicKey extends TestBaseServcie {
     public void testSetPublicKeyCase21() {
 
         ResponseData<Boolean> response = weIdService.setPublicKey(null);
-        logger.info("setPublicKey result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "setPublicKey", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());

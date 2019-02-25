@@ -36,7 +36,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.BeanUtil;
+import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.AuthorityIssuerController;
 import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
@@ -70,8 +70,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -91,8 +90,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -112,8 +110,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -132,8 +129,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -152,8 +148,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
@@ -176,8 +171,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -196,8 +190,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
             response.getErrorCode().intValue());
@@ -218,8 +211,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
@@ -239,16 +231,14 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
 
         ResponseData<Boolean> response1 =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response1);
+        LogUtil.info(logger, "registerAuthorityIssuer", response1);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST.getCode(),
             response1.getErrorCode().intValue());
@@ -262,11 +252,9 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     @Test
     public void testRegisterAuthorityIssuerCase10() {
 
-        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = null;
         ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+            authorityIssuerService.registerAuthorityIssuer(null);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -285,8 +273,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -305,8 +292,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
@@ -326,8 +312,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
@@ -347,8 +332,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -369,8 +353,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
@@ -392,8 +375,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
@@ -413,8 +395,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
@@ -435,6 +416,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
                 
         ResponseData<Boolean> response =
             registerAuthorityIssuerForMock(registerAuthorityIssuerArgs, mockFuture);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
@@ -455,6 +437,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             registerAuthorityIssuerForMock(registerAuthorityIssuerArgs, mockFuture);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
             response.getErrorCode().intValue());
@@ -479,9 +462,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
-
         mockTest.tearDown();
         mockFuture.tearDown();
         return response;
@@ -510,8 +490,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         mockTest.tearDown();
 
@@ -534,8 +513,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        logger.info("registerAuthorityIssuer result:");
-        BeanUtil.print(response);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
