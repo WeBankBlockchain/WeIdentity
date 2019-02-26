@@ -1,6 +1,5 @@
 
 .. image:: docs/images/weidentity-logo.png
-   :target: docs/images/weidentity-logo.png
    :alt: weidentity-logo.png
 
 ----
