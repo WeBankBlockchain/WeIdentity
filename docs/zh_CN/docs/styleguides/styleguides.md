@@ -46,7 +46,7 @@
 
 * **WeIdentity DID KEY**
 
-SDK 测（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通过 SDK 解析为地址后，在合约中使用地址作为 key，取名 weAddress。类型使用 ```address```。
+SDK 侧（例如JAVA SDK， C++ SDK）都使用 WeIdentity DID 作为 key。通过 SDK 解析为地址后，在合约中使用地址作为 key，取名 weAddress。类型使用 ```address```。
 
 * **id, Id or ID?**
 
