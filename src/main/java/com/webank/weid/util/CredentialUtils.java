@@ -29,12 +29,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -46,29 +49,71 @@ import com.webank.weid.protocol.request.CreateCredentialArgs;
  * @author chaoxinhu 2019.1
  */
 public final class CredentialUtils {
-    
+
     /**
-     * Concat all fields of Credential info, without Signature. This should be invoked when
-     * calculating Credential Signature. Return null if credential format is illegal.
+     * Concat all fields of Credential info, without Signature, in Json format. This should be
+     * invoked when calculating Credential Signature. Return null if credential format is illegal.
+     * Note that: 1. Keys should be dict-ordered; 2. Claim should use standard getClaimHash() to
+     * support selective disclosure; 3. Use compact output to avoid Json format confusion.
      *
-     * @param arg target Credential object
+     * @param credential target Credential object
      * @return Hash value in String.
      */
-    public static String getCredentialFields(Credential arg, Map<String, Object> disclosures) {
-        String metaData = concatCredentialMetadata(arg);
-        if (StringUtils.isEmpty(metaData)) {
+    public static String getCredentialThumbprintWithoutSig(
+        Credential credential,
+        Map<String, Object> disclosures) {
+        try {
+            Map<String, Object> credMap = JsonUtil.objToMap(credential);
+            credMap.remove(ParamKeyConstant.CREDENTIAL_SIGNATURE);
+            String claimHash = getClaimHash(credential, disclosures);
+            credMap.replace(ParamKeyConstant.CLAIM, claimHash);
+            return JsonUtil.mapToCompactJson(credMap);
+        } catch (Exception e) {
             return StringUtils.EMPTY;
         }
-        String claimHash = getClaimHash(arg, disclosures);
-        String rawData = metaData + WeIdConstant.PIPELINE + claimHash;
-        return rawData;
     }
 
-    private static String getClaimHash(Credential credential, Map<String, Object> disclosures) {
+    /**
+     * Concat all fields of Credential info, with signature. This should be invoked when calculating
+     * Credential Evidence. Return null if credential format is illegal.
+     *
+     * @param credential target Credential object
+     * @return Hash value in String.
+     */
+    public static String getCredentialThumbprint(Credential credential,
+        Map<String, Object> disclosures) {
+        try {
+            Map<String, Object> credMap = JsonUtil.objToMap(credential);
+            String claimHash = getClaimHash(credential, disclosures);
+            credMap.replace(ParamKeyConstant.CLAIM, claimHash);
+            return JsonUtil.mapToCompactJson(credMap);
+        } catch (Exception e) {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    /**
+     * Get the claim hash. This is irrelevant to selective disclosure.
+     *
+     * @param credential Credential
+     * @param disclosures Disclosure Map
+     * @return the unique claim hash value
+     */
+    public static String getClaimHash(Credential credential, Map<String, Object> disclosures) {
 
         Map<String, Object> claim = credential.getClaim();
         Map<String, Object> claimHashMap = new HashMap<String, Object>(claim);
 
+        if (disclosures == null) {
+            Map<String, Object> disclosureMap = new HashMap<>(credential.getClaim());
+            for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
+                disclosureMap.put(
+                    entry.getKey(),
+                    CredentialFieldDisclosureValue.DISCLOSED.getStatus()
+                );
+            }
+            disclosures = disclosureMap;
+        }
         for (Map.Entry<String, Object> entry : disclosures.entrySet()) {
             if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(entry.getValue())) {
                 claimHashMap.put(
@@ -107,53 +152,6 @@ public final class CredentialUtils {
     }
 
     /**
-     * Concat all fields of Credential info, with signature. This should be invoked when calculating
-     * Credential Evidence and currently it does not allow selective disclosure. Return null if
-     * credential format is illegal.
-     *
-     * @param arg target Credential object
-     * @return Hash value in String.
-     */
-    public static String getFullCredentialFields(Credential arg) {
-        String metaData = concatCredentialMetadata(arg);
-        if (StringUtils.isEmpty(metaData)) {
-            return StringUtils.EMPTY;
-        }
-        String rawData = metaData
-            + WeIdConstant.PIPELINE
-            + JsonUtil.objToJsonStr(arg.getClaim())
-            + WeIdConstant.PIPELINE
-            + arg.getSignature();
-        return rawData;
-    }
-
-    /**
-     * Concat metadata fields of Credential info. Return null if credential format is illegal.
-     *
-     * @param arg target Credential object
-     * @return Hash value in String.
-     */
-    public static String concatCredentialMetadata(Credential arg) {
-        if (arg == null
-            || arg.getCptId() == null
-            || arg.getIssuranceDate() == null
-            || arg.getExpirationDate() == null) {
-            return StringUtils.EMPTY;
-        }
-        return arg.getContext()
-            + WeIdConstant.PIPELINE
-            + arg.getId()
-            + WeIdConstant.PIPELINE
-            + Integer.toString(arg.getCptId())
-            + WeIdConstant.PIPELINE
-            + arg.getIssuer()
-            + WeIdConstant.PIPELINE
-            + arg.getIssuranceDate().toString()
-            + WeIdConstant.PIPELINE
-            + arg.getExpirationDate().toString();
-    }
-
-    /**
      * Get default Credential Context String.
      *
      * @return Context value in String.
@@ -189,7 +187,7 @@ public final class CredentialUtils {
      * @return Hash in byte array
      */
     public static String getCredentialHash(Credential arg) {
-        String rawData = getFullCredentialFields(arg);
+        String rawData = getCredentialThumbprint(arg, null);
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }

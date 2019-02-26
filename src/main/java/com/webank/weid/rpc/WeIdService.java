@@ -50,6 +50,14 @@ public interface WeIdService {
     ResponseData<String> createWeId(CreateWeIdArgs createWeIdArgs);
 
     /**
+     * Create a WeIdentity DID by sending preset transaction hex value to chain.
+     *
+     * @param transactionHex the transaction hex value
+     * @return Error message if any
+     */
+    ResponseData<String> createWeId(String transactionHex);
+
+    /**
      * Query WeIdentity DID document.
      *
      * @param weId the WeIdentity DID

@@ -20,8 +20,11 @@
 package com.webank.weid.util;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -83,5 +86,27 @@ public class JsonUtil {
         } catch (JsonProcessingException e) {
             throw new DataTypeCastException(e);
         }
+    }
+
+    /**
+     * Convert a Map to compact Json output, with keys ordered. Use Jackson JsonNode toString() to
+     * ensure key order and compact output.
+     *
+     * @param map input map
+     * @return JsonString
+     */
+    public static String mapToCompactJson(Map<String, Object> map) throws Exception {
+        return OBJECT_MAPPER.readTree(JsonUtil.objToJsonStr(map)).toString();
+    }
+
+    /**
+     * Convert a POJO to Map.
+     *
+     * @param object POJO
+     * @return Map
+     */
+    public static Map<String, Object> objToMap(Object object) throws Exception {
+        JsonNode jsonNode = OBJECT_MAPPER.readTree(JsonUtil.objToJsonStr(object));
+        return (HashMap<String, Object>) OBJECT_MAPPER.convertValue(jsonNode, HashMap.class);
     }
 }

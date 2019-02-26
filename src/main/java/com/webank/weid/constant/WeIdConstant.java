@@ -85,6 +85,16 @@ public final class WeIdConstant {
     public static final Integer STRING_ARRAY_LENGTH = 8;
 
     /**
+     * The Constant Authority Issuer contract array length.
+     */
+    public static final Integer AUTHORITY_ISSUER_ARRAY_LEGNTH = 16;
+
+    /**
+     * The default accumulator value.
+     */
+    public static final String DEFAULT_ACCUMULATOR_VALUE = "1";
+
+    /**
      * The Constant WeIdentity DID Json Schema Array Length.
      */
     public static final Integer JSON_SCHEMA_ARRAY_LENGTH = 128;
@@ -159,4 +169,19 @@ public final class WeIdConstant {
      */
     public static final String UUID_PATTERN =
         "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$";
+
+    /**
+     * The transaction poll interval.
+     */
+    public static final Integer POLL_TRANSACTION_SLEEP_DURATION = 1500;
+
+    /**
+     * The transaction poll attempts (max).
+     */
+    public static final Integer POLL_TRANSACTION_ATTEMPTS = 5;
+
+    /**
+     * The additive block height.
+     */
+    public static final Integer ADDITIVE_BLOCK_HEIGHT = 500;
 }

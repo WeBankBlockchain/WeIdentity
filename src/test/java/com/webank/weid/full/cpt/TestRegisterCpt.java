@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import mockit.Mock;
 import mockit.MockUp;
+import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.StaticArray;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
@@ -540,4 +541,26 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
+    /**
+     * case: call hex method - null.
+     */
+    @Test
+    public void testRegisterCptCase28() {
+        String hex = StringUtils.EMPTY;
+        ResponseData<String> response = cptService.registerCpt(hex);
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
+    }
+
+    /**
+     * case: call transactionhex method - arbitrary.
+     */
+    @Test
+    public void testRegisterCptCase29() {
+        String hex = "11111";
+        ResponseData<String> response = cptService.registerCpt(hex);
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
+    }
 }
