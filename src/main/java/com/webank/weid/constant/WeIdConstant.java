@@ -32,7 +32,7 @@ public final class WeIdConstant {
      * The Constant WeIdentity DID Document Protocol Version.
      */
     public static final String WEID_DOC_PROTOCOL_VERSION =
-        "\"@context\": \"https://weidentity.webank.com/did/v1\",";
+        "\"@context\" : \"https://w3id.org/did/v1\",";
 
     /**
      * The Constant GAS_PRICE.
@@ -115,11 +115,6 @@ public final class WeIdConstant {
     public static final String PIPELINE = "|";
 
     /**
-     * The Constant default Certificate Context.
-     */
-    public static final String DEFAULT_CERTIFICATE_CONTEXT = "v1";
-
-    /**
      * The Constant Max authority issuer name length in Chars.
      */
     public static final Integer MAX_AUTHORITY_ISSUER_NAME_LENGTH = 32;
@@ -153,6 +148,11 @@ public final class WeIdConstant {
      * UUID Separator.
      */
     public static final String UUID_SEPARATOR = "-";
+
+    /**
+     * Quote.
+     */
+    public static final String DOUBLE_QUOTE = "\"";
 
     /**
      * UUID Pattern.
