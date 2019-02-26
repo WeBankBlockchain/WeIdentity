@@ -76,8 +76,8 @@ public class TestCreateWeId2 extends TestBaseServcie {
      */
     @Test
     public void testCreateWeIdCase2() {
-
-        ResponseData<String> response = weIdService.createWeId(null);
+        CreateWeIdArgs createWeIdArgs = null;
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
         LogUtil.info(logger, "createWeId", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());

@@ -36,7 +36,7 @@ public interface CredentialService {
      * Generate a credential for full claim content.
      *
      * @param args the args
-     * @return credential
+     * @return credential wrapper
      */
     ResponseData<CredentialWrapper> createCredential(CreateCredentialArgs args);
 

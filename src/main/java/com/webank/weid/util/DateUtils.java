@@ -103,6 +103,20 @@ public class DateUtils {
     }
 
     /**
+     * Conver utc date to time stamp.
+     *
+     * @param time the time
+     * @return the long
+     * @throws ParseException the parse exception
+     */
+    public static long convertUtcDateToTimeStamp(String time) throws ParseException {
+        DateFormat simpleDateFormat = getDefaultDateFormat();
+        Date date = simpleDateFormat.parse(time);
+        long ts = date.getTime();
+        return ts;
+    }
+
+    /**
      * Check the UTC format validity of a Date String.
      *
      * @param dateString the date string

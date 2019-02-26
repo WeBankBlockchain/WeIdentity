@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
 
 import mockit.Mock;
 import mockit.MockUp;
+import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicBytes;
 import org.bcos.web3j.abi.datatypes.StaticArray;
@@ -48,18 +49,16 @@ import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * registerAuthorityIssuer method for testing AuthorityIssuerService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
-    private static final Logger logger = 
+    private static final Logger logger =
         LoggerFactory.getLogger(TestRegisterAuthorityIssuer.class);
 
     /**
      * case: WeIdentity DID is invalid.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase1() {
@@ -78,7 +77,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is bad format.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase2() {
@@ -98,7 +96,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the WeIdentity DID address is not exists.
-     * 
      */
     @Test
     public void testRegisterAuthorityIssuerCase3() {
@@ -118,7 +115,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the WeIdentity DID is null or "" or " ".
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase4() {
@@ -137,7 +133,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the name is blank.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase5() {
@@ -157,7 +152,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the created before now ,now or after now.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase6() {
@@ -179,7 +173,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the accValue is null.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase7() {
@@ -199,7 +192,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: registerAuthorityIssuer success.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase8() {
@@ -219,7 +211,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the WeIdentity DID is registed.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase9() {
@@ -247,13 +238,12 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: registerAuthorityIssuerArgs is null.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase10() {
-
+        RegisterAuthorityIssuerArgs args = new RegisterAuthorityIssuerArgs();
         ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(null);
+            authorityIssuerService.registerAuthorityIssuer(args);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -262,7 +252,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: authorityIssuer is null.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase11() {
@@ -281,7 +270,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: weIdPrivateKey is null.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase12() {
@@ -301,7 +289,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: privateKey is null.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase13() {
@@ -321,7 +308,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: privateKey is invalid.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase14() {
@@ -341,7 +327,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: privateKey and private key of WeIdentity DID do not match.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase15() {
@@ -362,7 +347,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: privateKey belongs to the private key of other WeIdentity DID.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase16() {
@@ -384,7 +368,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the private key is the private key of the members of the committee.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase17() {
@@ -404,7 +387,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: mock an InterruptedException.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase18() {
@@ -413,7 +395,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
 
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-                
+
         ResponseData<Boolean> response =
             registerAuthorityIssuerForMock(registerAuthorityIssuerArgs, mockFuture);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
@@ -425,7 +407,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: mock an TimeoutException.
-     * 
      */
     @Test
     public void testRegisterAuthorityIssuerCase19() {
@@ -447,12 +428,12 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     private ResponseData<Boolean> registerAuthorityIssuerForMock(
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs,
         MockUp<Future<?>> mockFuture) {
-        
+
         MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
             @Mock
             public Future<?> addAuthorityIssuer(
                 Address addr,
-                StaticArray<Bytes32> attribBytes32, 
+                StaticArray<Bytes32> attribBytes32,
                 StaticArray<Int256> attribInt,
                 DynamicBytes accValue) {
 
@@ -469,7 +450,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: mock returns null when invoking the getAuthorityIssuerRetLogEvents.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase20() {
@@ -501,7 +481,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: authorityIssuer.name is too long.
-     *
      */
     @Test
     public void testRegisterAuthorityIssuerCase21() {
@@ -518,5 +497,28 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: call transactionhex method - null.
+     */
+    @Test
+    public void testRegisterAuthorityIssuerCase22() {
+        String hex = StringUtils.EMPTY;
+        ResponseData<String> response = authorityIssuerService.registerAuthorityIssuer(hex);
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
+    }
+
+    /**
+     * case: call transactionhex method - arbitrary.
+     */
+    @Test
+    public void testRegisterAuthorityIssuerCase23() {
+        String hex = "11111";
+        ResponseData<String> response = authorityIssuerService.registerAuthorityIssuer(hex);
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
     }
 }
