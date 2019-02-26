@@ -83,7 +83,6 @@ WeIdentity DID与WeIdentity Credential的关系
 
 
 .. image:: images/weidentity-er.png
-   :target: images/weidentity-er.png
    :alt: weidentity-er.png
 
 从图中可见，WeIdentity DID与WeIdentity Credential的关系并非单纯的一对多：从设计目标上看，WeIdentity DID用来描述实体（人或物），WeIdentity Credential用来描述实体的身份、属性和实体间关系。因此，一个WeIdentity DID可以持有多个WeIdentity Credential；而一个WeIdentity Credential则会包含至少一个所描述的WeIdentity DID，可能会有多个。最后，每个WeIdentity DID都有一个WeIdentity Document，用来存储此DID的认证方式（如公钥、私钥套件）等信息，与WeIdentity Credential无关。
@@ -93,7 +92,6 @@ WeIdentity DID与WeIdentity Credential的关系
 
 
 .. image:: images/overall-flow@2x.png
-   :target: images/overall-flow@2x.png
    :alt: overall-flow.png
 
 一般来说，WeIdentity解决方案的基本流程如下：
@@ -113,7 +111,6 @@ WeIdentity DID = did:weid:net-id:bs-specific-string
 
 
 .. image:: images/weidentity-did-format1.png
-   :target: images/weidentity-did-format1.png
    :alt: weidentity-did-format1.png
 
 
@@ -245,7 +242,6 @@ WeIdentity DID支持操作
 
 
 .. image:: images/roles-relation.png
-   :target: images/roles-relation.png
    :alt: roles-relation.png
 
 如图所示在WeIdentity生态中，存在着以下角色：
@@ -269,7 +265,6 @@ WeIdentity DID支持操作
 
 
 .. image:: images/scenario.png
-   :target: images/scenario.png
    :alt: scenario.png
 
 上图展示了五个WeIdentity生态下Credential在不同角色间流转的场景：
@@ -428,7 +423,6 @@ Claim Protocol Type（CPT）注册机制
 
 
 .. image:: images/cpt-er.png
-   :target: images/cpt-er.png
    :alt: cpt-er.png
 
 其中CPT为模板类，定义了Claim包含的数据字段及各字段属性要求。Claim为CPT的实例。Issuer将Claim进行签名，即可生成Credential。
@@ -477,7 +471,6 @@ Issuer生成Credential签名的过程：
 
 
 .. image:: images/sign-credential.png
-   :target: images/sign-credential.png
    :alt: sign-credential.png
 
 
@@ -496,7 +489,6 @@ Issuer生成Credential签名的过程：
 
 
 .. image:: images/verify-credential.png
-   :target: images/verify-credential.png
    :alt: verify-credential.png
 
 
@@ -525,12 +517,10 @@ Verifier 如何验证一个 Credential 有效（未被撤销）
 
 
 .. image:: images/before-revocation.png
-   :target: images/before-revocation.png
    :alt: before-revocation.png
 
 
 .. image:: images/after-revocation.png
-   :target: images/after-revocation.png
    :alt: after-revocation.png
 
 
