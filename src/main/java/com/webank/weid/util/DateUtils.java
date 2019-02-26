@@ -120,6 +120,18 @@ public class DateUtils {
     }
 
     /**
+     * Check the timestamp date to UTC date string.
+     *
+     * @param timestamp the date string
+     * @return UTC formatted date string
+     */
+    public static String convertTimestampToUtc(Long timestamp) {
+        DateFormat df = getDefaultDateFormat();
+        df.setLenient(false);
+        return df.format(new Date(timestamp));
+    }
+
+    /**
      * Get current timestamp in Int256 type.
      *
      * @return the current time stamp int 256
@@ -138,7 +150,7 @@ public class DateUtils {
     }
 
     /**
-     *  Get current timestamp in String type.
+     * Get current timestamp in String type.
      *
      * @return the current time stamp long
      */
