@@ -104,6 +104,11 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
      * WeIdentity DID contract address.
      */
     private static String weIdContractAddress;
+    
+    /**
+     *  Block number for stopping parsing.
+     */
+    private static final int STOP_RESOLVE_BLOCK_NUMBER = 0;
 
     /**
      * The topic map.
@@ -307,63 +312,73 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         String weId,
         int blockNumber,
         WeIdDocument result) {
+        
+        int previousBlock = blockNumber;
+        while (previousBlock != STOP_RESOLVE_BLOCK_NUMBER) {
+            int currentBlockNumber = previousBlock;
+            EthBlock latestBlock = null;
+            try {
+                latestBlock =
+                    getWeb3j()
+                        .ethGetBlockByNumber(
+                            new DefaultBlockParameterNumber(currentBlockNumber), 
+                            true
+                        )
+                        .send();
+            } catch (IOException e) {
+                logger.error(
+                    "[resolveTransaction]:get block by number :{} failed. Exception message:{}",
+                    currentBlockNumber,
+                    e
+                );
+            }
+            if (latestBlock == null) {
+                logger.info(
+                    "[resolveTransaction]:get block by number :{} . latestBlock is null",
+                    currentBlockNumber
+                );
+                return;
+            }
+            List<Transaction> transList =
+                latestBlock
+                    .getBlock()
+                    .getTransactions()
+                    .stream()
+                    .map(transactionResult -> (Transaction) transactionResult.get())
+                    .collect(Collectors.toList());
+            
+            previousBlock = 0;
+            try {
+                for (Transaction transaction : transList) {
+                    String transHash = transaction.getHash();
 
-        if (blockNumber == 0) {
-            return;
-        }
-        EthBlock latestBlock = null;
-        try {
-            latestBlock =
-                getWeb3j().ethGetBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true)
-                    .send();
-        } catch (IOException e) {
-            logger.error(
-                "[resolveTransaction]:get block by number :{} failed. Exception message:{}",
-                blockNumber,
-                e);
-        }
-        if (latestBlock == null) {
-            logger.info(
-                "[resolveTransaction]:get block by number :{} . latestBlock is null",
-                blockNumber);
-            return;
-        }
-        List<Transaction> transList =
-            latestBlock
-                .getBlock()
-                .getTransactions()
-                .stream()
-                .map(transactionResult -> (Transaction) transactionResult.get())
-                .collect(Collectors.toList());
-
-        int previousBlock = 0;
-        try {
-            for (Transaction transaction : transList) {
-                String transHash = transaction.getHash();
-
-                EthGetTransactionReceipt rec1 = getWeb3j().ethGetTransactionReceipt(transHash)
-                    .send();
-                TransactionReceipt receipt = rec1.getTransactionReceipt().get();
-                List<Log> logs = rec1.getResult().getLogs();
-                for (Log log : logs) {
-                    ResolveEventLogResult returnValue = resolveEventLog(weId, log, receipt, result);
-                    if (returnValue.getResultStatus().equals(
-                        ResolveEventLogStatus.STATUS_SUCCESS)) {
-                        previousBlock = returnValue.getPreviousBlock();
+                    EthGetTransactionReceipt rec1 = getWeb3j().ethGetTransactionReceipt(transHash)
+                        .send();
+                    TransactionReceipt receipt = rec1.getTransactionReceipt().get();
+                    List<Log> logs = rec1.getResult().getLogs();
+                    for (Log log : logs) {
+                        ResolveEventLogResult returnValue = 
+                            resolveEventLog(weId, log, receipt, result);
+                        if (returnValue.getResultStatus().equals(
+                            ResolveEventLogStatus.STATUS_SUCCESS)) {
+                            if (returnValue.getPreviousBlock() == currentBlockNumber) {
+                                continue;
+                            }
+                            previousBlock = returnValue.getPreviousBlock();
+                        }
                     }
                 }
+            } catch (IOException | DataTypeCastException e) {
+                logger.error(
+                    "[resolveTransaction]: get TransactionReceipt by weId :{} failed.",
+                    weId,
+                    e
+                );
+                throw new ResolveAttributeException(
+                    ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+                    ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc());
             }
-        } catch (IOException | DataTypeCastException e) {
-            logger.error(
-                "[resolveTransaction]: get TransactionReceipt by weId :{} failed.",
-                weId,
-                e);
-            throw new ResolveAttributeException(
-                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc());
         }
-
-        resolveTransaction(weId, previousBlock, result);
     }
 
     /**
