@@ -30,7 +30,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -203,7 +202,6 @@ public class TestBaseUtil {
 
         AuthorityIssuer authorityIssuer = new AuthorityIssuer();
         authorityIssuer.setWeId(createWeId.getWeId());
-        authorityIssuer.setCreated(new Date().getTime());
         authorityIssuer.setName(TestData.AUTHORITY_ISSUER_NAME);
         authorityIssuer.setAccValue(TestData.AUTHORITY_ISSUER_ACCVALUE);
 
