@@ -43,10 +43,9 @@ public interface CredentialService {
     /**
      * Generate a credential with selected data.
      *
-     * @param credential the credential.
+     * @param credential the credential
      * @param disclosure the setting of disclosure, such as: {@code{"name":1,"gender":0,"age":1}},
      *     which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
-     *     to others.
      * @return CredentialWrapper
      */
     ResponseData<CredentialWrapper> createSelectiveCredential(
@@ -59,7 +58,6 @@ public interface CredentialService {
      *
      * @param credential the credential
      * @return the verification result. True if yes, false otherwise with exact verify error codes
-     *     in ResponseData
      */
     ResponseData<Boolean> verify(Credential credential);
 
@@ -74,9 +72,8 @@ public interface CredentialService {
     /**
      * Verify the validity of a credential. Public key must be provided.
      *
-     * @param credentialWrapper the credential wrapper.
-     * @param weIdPublicKey the specified public key which used to verify signature of the
-     *     credential.
+     * @param credentialWrapper the credential wrapper
+     * @param weIdPublicKey the specified public key which used to verify credential signature
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
     ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(
@@ -88,8 +85,17 @@ public interface CredentialService {
      * Get the full hash value of a Credential. All fields in the Credential will be included. This
      * method should be called when creating and verifying the Credential Evidence.
      *
-     * @param args the args
+     * @param credential the args
      * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
      */
-    ResponseData<String> getCredentialHash(Credential args);
+    ResponseData<String> getCredentialHash(Credential credential);
+
+    /**
+     * Get the Json String of a Credential. All fields in the Credential will be included. This
+     * also supports the selectively disclosed Credential.
+     *
+     * @param credential the credential
+     * @return the Credential Json value in String
+     */
+    ResponseData<String> getCredentialJson(Credential credential);
 }

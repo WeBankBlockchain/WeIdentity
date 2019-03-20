@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -158,7 +159,7 @@ public final class CredentialUtils {
      * @return Context value in String.
      */
     public static String getDefaultCredentialContext() {
-        return WeIdConstant.DEFAULT_CERTIFICATE_CONTEXT;
+        return CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT;
     }
 
     /**

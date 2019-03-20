@@ -26,15 +26,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
@@ -392,4 +396,62 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         return new ResponseData<>(credentialResult, ErrorCode.SUCCESS);
     }
 
+    /**
+     * Get the Json String of a Credential. All fields in the Credential will be included. This also
+     * supports the selectively disclosed Credential.
+     *
+     * @param credential the credential wrapper
+     * @return the Credential Json value in String
+     */
+    @Override
+    public ResponseData<String> getCredentialJson(Credential credential) {
+        ErrorCode errorCode = CredentialUtils.isCredentialValid(credential);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(
+                StringUtils.EMPTY,
+                ErrorCode.getTypeByErrorCode(errorCode.getCode())
+            );
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        String credentialString = StringUtils.EMPTY;
+        try {
+            credentialString = mapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(credential);
+        } catch (Exception e) {
+            logger.error("Error occurred in getCredentialJson: ", e);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_ERROR);
+        }
+
+        // Convert timestamp into UTC timezone
+        try {
+            String issueranceDate = new StringBuilder()
+                .append(WeIdConstant.DOUBLE_QUOTE)
+                .append(DateUtils.convertTimestampToUtc(credential.getIssuranceDate()))
+                .append(WeIdConstant.DOUBLE_QUOTE)
+                .toString();
+            String expirationDate = new StringBuilder()
+                .append(WeIdConstant.DOUBLE_QUOTE)
+                .append(DateUtils.convertTimestampToUtc(credential.getExpirationDate()))
+                .append(WeIdConstant.DOUBLE_QUOTE)
+                .toString();
+            credentialString = credentialString
+                .replace(credential.getIssuranceDate().toString(), issueranceDate);
+            credentialString = credentialString
+                .replace(credential.getExpirationDate().toString(), expirationDate);
+            // Convert context into "@context"
+            credentialString = credentialString.replaceFirst(
+                Pattern.quote(CredentialConstant.CREDENTIAL_CONTEXT_FIELD),
+                CredentialConstant.CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD
+            );
+        } catch (Exception e) {
+            logger.error("Date conversion failed in getCredentialJson: ", e);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_ERROR);
+        }
+
+        ResponseData<String> credentialResult = new ResponseData<>();
+        credentialResult.setResult(credentialString);
+        credentialResult.setErrorCode(errorCode);
+        return credentialResult;
+    }
 }
