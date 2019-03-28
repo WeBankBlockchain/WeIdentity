@@ -56,8 +56,7 @@ import com.webank.weid.service.BaseService;
 
 /**
  * Transaction related utility functions. This class handles specific Transaction tasks, including
- * sending raw transactions into blockchain, and parse the transaction receipts. Some codes are
- * stolen from web3sdk.
+ * sending raw transactions into blockchain, and parse the transaction receipts.
  *
  * @author chaoxinhu 2019.3
  */
@@ -82,26 +81,30 @@ public class TransactionUtils {
         EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(transactionHex)
             .sendAsync().get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
         if (ethSendTransaction.hasError()) {
-            throw new Exception("Error processing transaction request: "
+            logger.error("Error processing transaction request: "
                 + ethSendTransaction.getError().getMessage());
+            return null;
         }
-        String transactionHash = ethSendTransaction.getTransactionHash();
-
         Optional<TransactionReceipt> receiptOptional =
-            getTransactionReceiptRequest(web3j, transactionHash);
+            getTransactionReceiptRequest(web3j, ethSendTransaction.getTransactionHash());
         int sumTime = 0;
-        for (int i = 0; i < WeIdConstant.POLL_TRANSACTION_ATTEMPTS; i++) {
-            if (!receiptOptional.isPresent()) {
-                Thread.sleep((long) WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION);
-                sumTime += WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION;
-                receiptOptional = getTransactionReceiptRequest(web3j, transactionHash);
-            } else {
-                return receiptOptional.get();
+        try {
+            for (int i = 0; i < WeIdConstant.POLL_TRANSACTION_ATTEMPTS; i++) {
+                if (!receiptOptional.isPresent()) {
+                    Thread.sleep((long) WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION);
+                    sumTime += WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION;
+                    receiptOptional = getTransactionReceiptRequest(web3j,
+                        ethSendTransaction.getTransactionHash());
+                } else {
+                    return receiptOptional.get();
+                }
             }
+        } catch (Exception e) {
+            throw new TransactionTimeoutException("Transaction receipt was not generated after "
+                + ((sumTime) / 1000
+                + " seconds for transaction: " + ethSendTransaction));
         }
-        throw new TransactionTimeoutException("Transaction receipt was not generated after "
-            + ((sumTime) / 1000
-            + " seconds for transaction: " + transactionHash));
+        return null;
     }
 
     /**
@@ -230,11 +233,11 @@ public class TransactionUtils {
             SignatureUtils.convertBase64StringToSignatureData(cptSignature));
 
         StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
-            new String[WeIdConstant.STRING_ARRAY_LENGTH]
+            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
         return Arrays.<Type>asList(
             new Address(WeIdUtils.convertWeIdToAddress(weId)),
-            getParamCreated(WeIdConstant.LONG_ARRAY_LENGTH),
+            getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
             bytes32Array,
             getParamJsonSchema(cptJsonSchemaNew),
             rsvSignature.getV(),
@@ -303,8 +306,9 @@ public class TransactionUtils {
         EthGetTransactionReceipt transactionReceipt =
             web3j.ethGetTransactionReceipt(transactionHash).send();
         if (transactionReceipt.hasError()) {
-            throw new Exception("Error processing request: "
+            logger.error("Error processing transaction request: "
                 + transactionReceipt.getError().getMessage());
+            return Optional.empty();
         }
         return transactionReceipt.getTransactionReceipt();
     }
@@ -330,7 +334,7 @@ public class TransactionUtils {
                 .add(new BigInteger(String.valueOf(WeIdConstant.ADDITIVE_BLOCK_HEIGHT)));
         } catch (Exception e) {
             //Send a large enough block limit number
-            return new BigInteger("99999999999");
+            return new BigInteger(WeIdConstant.BIG_BLOCK_LIMIT);
         }
     }
 }

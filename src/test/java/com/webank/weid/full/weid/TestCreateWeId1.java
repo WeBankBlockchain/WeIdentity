@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -192,13 +192,14 @@ public class TestCreateWeId1 extends TestBaseServcie {
     }
 
     /**
-     * case: call hex method - null.
+     * case: call transactionhex null - arbitrary.
      */
     @Test
     public void testCreateWeIdCase7() {
         String hex = StringUtils.EMPTY;
         ResponseData<String> response = weIdService.createWeId(hex);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
     }
 

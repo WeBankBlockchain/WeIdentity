@@ -32,6 +32,9 @@ import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.ParamKeyConstant;
+
 /**
  * test DateUtils.
  *
@@ -69,10 +72,32 @@ public class TestTransactionUtils {
         Assert.assertNotNull(weidList);
         Assert.assertNotNull(cptList);
         Assert.assertNotNull(auList);
+        weidInput = "{\"privateKey\":\"70537665785763632951200438731252630131035197449894"
+            + "31221067702996992390039255438365261578388688523991111186187372079349839639924734"
+            + "406270591552495358668267\"}";
+        cptInput = "{\"cpt\":{\"title\":\"a CPT schema\"},\"cptSignature\":\"HJ"
+            + "PbDmoi39xgZBGi/aj1zB6VQL5QLyt4qTV6GOvQwzfgUJEZTazKZXe1dRg5aCt8Q44GwNF2k+l1rfhpY1h"
+            + "c/ls=\",\"weId\":\"did:weid:0xc0594581636589876d8bf3455e1844f0cc0d8c19\"}";
+        auInput = "{\"authority\":\"Sample College\",\"weId\":\"did:weid:0xc5ead7a40f13a8b7b6"
+            + "111691043f5936537a55ac\"}";
+        weidList = TransactionUtils.buildCreateWeIdInputParameters(weidInput);
+        cptList = TransactionUtils.buildRegisterCptInputParameters(cptInput);
+        auList = TransactionUtils.buildAuthorityIssuerInputParameters(auInput);
+        Assert.assertNull(weidList);
+        Assert.assertNull(cptList);
+        Assert.assertNull(auList);
+        Assert.assertNotNull(ParamKeyConstant.CLAIM);
+        Assert.assertNotNull(ParamKeyConstant.WEID);
+        Assert.assertNotNull(ParamKeyConstant.CONTEXT);
+        Assert.assertNotNull(ParamKeyConstant.AUTHORITY_ISSUER_NAME);
+        Assert.assertNotNull(ParamKeyConstant.CPT_JSON_SCHEMA);
+        Assert.assertNotNull(ParamKeyConstant.CPT_SIGNATURE);
+        Assert.assertNotNull(CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
+
     }
 
     @Test
-    public void sendTransactionNullTest() throws Exception {
+    public void testNullTransaction() throws Exception {
         Assert.assertNull(TransactionUtils.sendTransaction(null, StringUtils.EMPTY));
     }
 }
