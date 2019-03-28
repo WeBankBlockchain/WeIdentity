@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -53,7 +53,6 @@ import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataTypetUtils;
-import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -137,7 +136,10 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
                 TimeUnit.SECONDS
             );
-            return resolveRegisterAuthorityIssuerEvents(receipt);
+            Boolean result = resolveRegisterAuthorityIssuerEvents(receipt);
+            if (result) {
+                return new ResponseData<>(result, ErrorCode.SUCCESS);
+            }
         } catch (TimeoutException e) {
             logger.error("register authority issuer failed due to system timeout. ", e);
             return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
@@ -146,8 +148,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
             logger.error("register authority issuer failed.", e);
-            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
+        return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
     }
 
     /**
@@ -160,16 +162,16 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
      */
     @Override
     public ResponseData<String> registerAuthorityIssuer(String transactionHex) {
-        if (StringUtils.isEmpty(transactionHex)) {
-            logger.error("[registerAuthorityIssuer] hex value invalid.");
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-        }
         try {
+            if (StringUtils.isEmpty(transactionHex)) {
+                logger.error("AuthorityIssuer transaction error");
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+            }
             TransactionReceipt transactionReceipt = TransactionUtils
                 .sendTransaction(getWeb3j(), transactionHex);
-            Boolean result = resolveRegisterAuthorityIssuerEvents(transactionReceipt).getResult();
+            Boolean result = resolveRegisterAuthorityIssuerEvents(transactionReceipt);
             if (result) {
-                return new ResponseData<>(JsonUtil.objToJsonStr(result), ErrorCode.SUCCESS);
+                return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS);
             }
         } catch (Exception e) {
             logger.error("[registerAuthorityIssuer] register failed due to transaction error.", e);
@@ -177,7 +179,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
     }
 
-    private ResponseData<Boolean> resolveRegisterAuthorityIssuerEvents(
+    private Boolean resolveRegisterAuthorityIssuerEvents(
         TransactionReceipt transactionReceipt) {
         List<AuthorityIssuerRetLogEventResponse> eventList =
             AuthorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
@@ -188,16 +190,11 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 event,
                 WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
             );
-            if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
-                return new ResponseData<>(false, errorCode);
-            } else {
-                return new ResponseData<>(true, errorCode);
-            }
+            return (ErrorCode.SUCCESS == errorCode);
         } else {
             logger.error(
                 "register authority issuer failed due to transcation event decoding failure.");
-            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
-
+            return false;
         }
     }
 

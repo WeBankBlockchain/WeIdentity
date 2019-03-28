@@ -308,7 +308,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         try {
             Credential credential = credentialWrapper.getCredential();
             Map<String, Object> disclosureMap = credentialWrapper.getDisclosure();
-            String wawData = CredentialUtils
+            String rawData = CredentialUtils
                 .getCredentialThumbprintWithoutSig(credential, disclosureMap);
             Sign.SignatureData signatureData =
                 SignatureUtils.simpleSignatureDeserialization(
@@ -329,12 +329,12 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 } else {
                     WeIdDocument weIdDocument = innerResponseData.getResult();
                     return SignatureUtils
-                        .verifySignatureFromWeId(wawData, signatureData, weIdDocument);
+                        .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
                 }
             } else {
                 boolean result =
                     SignatureUtils
-                        .verifySignature(wawData, signatureData, new BigInteger(publicKey));
+                        .verifySignature(rawData, signatureData, new BigInteger(publicKey));
                 if (!result) {
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
                 }
@@ -417,15 +417,15 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             Map<String, Object> credMap = JsonUtil.objToMap(credential);
             String issuranceDate = DateUtils.convertTimestampToUtc(credential.getIssuranceDate());
             String expirationDate = DateUtils.convertTimestampToUtc(credential.getExpirationDate());
-            credMap.replace(ParamKeyConstant.ISSURANCE_DATE, issuranceDate);
-            credMap.replace(ParamKeyConstant.EXPIRATION_DATE, expirationDate);
+            credMap.put(ParamKeyConstant.ISSURANCE_DATE, issuranceDate);
+            credMap.put(ParamKeyConstant.EXPIRATION_DATE, expirationDate);
             credMap.remove(ParamKeyConstant.CONTEXT);
             credMap.put(CredentialConstant.CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD,
                 CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
             String credentialString = JsonUtil.mapToCompactJson(credMap);
             return new ResponseData<>(credentialString, ErrorCode.SUCCESS);
         } catch (Exception e) {
-            logger.error("Date conversion failed in getCredentialJson: ", e);
+            logger.error("Json conversion failed in getCredentialJson: ", e);
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_ERROR);
         }
     }

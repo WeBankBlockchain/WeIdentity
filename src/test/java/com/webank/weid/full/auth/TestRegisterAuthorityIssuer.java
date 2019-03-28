@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -231,8 +231,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response1);
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST.getCode(),
-            response1.getErrorCode().intValue());
         Assert.assertEquals(false, response1.getResult());
     }
 
@@ -340,8 +338,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION.getCode(),
-            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
@@ -361,8 +357,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION.getCode(),
-            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
@@ -380,8 +374,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION.getCode(),
-            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
@@ -500,13 +492,14 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: call transactionhex method - null.
+     * case: call transactionhex null - arbitrary.
      */
     @Test
     public void testRegisterAuthorityIssuerCase22() {
         String hex = StringUtils.EMPTY;
         ResponseData<String> response = authorityIssuerService.registerAuthorityIssuer(hex);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
     }
 
