@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -527,11 +527,11 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
      */
     @Override
     public ResponseData<String> createWeId(String transactionHex) {
-        if (StringUtils.isEmpty(transactionHex)) {
-            logger.error("[createWeId] hex value invalid.");
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-        }
         try {
+            if (StringUtils.isEmpty(transactionHex)) {
+                logger.error("WeID transaction error");
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+            }
             TransactionReceipt transactionReceipt = TransactionUtils
                 .sendTransaction(getWeb3j(), transactionHex);
             List<WeIdAttributeChangedEventResponse> response =

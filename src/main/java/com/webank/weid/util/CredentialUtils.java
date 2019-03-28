@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 
@@ -66,7 +64,7 @@ public final class CredentialUtils {
             Map<String, Object> credMap = JsonUtil.objToMap(credential);
             credMap.remove(ParamKeyConstant.CREDENTIAL_SIGNATURE);
             String claimHash = getClaimHash(credential, disclosures);
-            credMap.replace(ParamKeyConstant.CLAIM, claimHash);
+            credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return JsonUtil.mapToCompactJson(credMap);
         } catch (Exception e) {
             return StringUtils.EMPTY;
@@ -85,7 +83,7 @@ public final class CredentialUtils {
         try {
             Map<String, Object> credMap = JsonUtil.objToMap(credential);
             String claimHash = getClaimHash(credential, disclosures);
-            credMap.replace(ParamKeyConstant.CLAIM, claimHash);
+            credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return JsonUtil.mapToCompactJson(credMap);
         } catch (Exception e) {
             return StringUtils.EMPTY;
@@ -102,19 +100,22 @@ public final class CredentialUtils {
     public static String getClaimHash(Credential credential, Map<String, Object> disclosures) {
 
         Map<String, Object> claim = credential.getClaim();
-        Map<String, Object> claimHashMap = new HashMap<String, Object>(claim);
+        Map<String, Object> claimHashMap = new HashMap<>(claim);
+        Map<String, Object> disclosureMap;
 
         if (disclosures == null) {
-            Map<String, Object> disclosureMap = new HashMap<>(credential.getClaim());
+            disclosureMap = new HashMap<>(claim);
             for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
                 disclosureMap.put(
                     entry.getKey(),
                     CredentialFieldDisclosureValue.DISCLOSED.getStatus()
                 );
             }
-            disclosures = disclosureMap;
+        } else {
+            disclosureMap = disclosures;
         }
-        for (Map.Entry<String, Object> entry : disclosures.entrySet()) {
+
+        for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
             if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(entry.getValue())) {
                 claimHashMap.put(
                     entry.getKey(),

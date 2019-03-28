@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import com.google.common.base.Splitter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
@@ -184,11 +183,11 @@ public class CptServiceImpl extends BaseService implements CptService {
      * @return The registered CPT info
      */
     public ResponseData<String> registerCpt(String transactionHex) {
-        if (StringUtils.isEmpty(transactionHex)) {
-            logger.error("[registerCpt] hex value invalid.");
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-        }
         try {
+            if (StringUtils.isEmpty(transactionHex)) {
+                logger.error("CptService transaction error");
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+            }
             TransactionReceipt transactionReceipt = TransactionUtils
                 .sendTransaction(getWeb3j(), transactionHex);
             CptBaseInfo cptBaseInfo = this.resolveRegisterCptEvents(transactionReceipt).getResult();
@@ -386,7 +385,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             weIdPrivateKey);
 
         StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
-            new String[WeIdConstant.STRING_ARRAY_LENGTH]
+            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
 
         reloadContract(weIdPrivateKey.getPrivateKey());
@@ -394,7 +393,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             return cptController.updateCpt(
                 DataTypetUtils.intToUint256(cptId),
                 new Address(WeIdUtils.convertWeIdToAddress(weId)),
-                TransactionUtils.getParamCreated(WeIdConstant.LONG_ARRAY_LENGTH),
+                TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
                 bytes32Array,
                 TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
                 rsvSignature.getV(),
@@ -404,7 +403,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         }
         return cptController.registerCpt(
             new Address(WeIdUtils.convertWeIdToAddress(weId)),
-            TransactionUtils.getParamCreated(WeIdConstant.LONG_ARRAY_LENGTH),
+            TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
             bytes32Array,
             TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
             rsvSignature.getV(),
