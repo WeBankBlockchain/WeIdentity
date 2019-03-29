@@ -1,3 +1,16 @@
+v1.1.1 (2019-03-29)
+
+- Features:
+1. Add adaption of new changes in RestAPI service.
+2. Modify @context field and add Credential Serilization interface
+3. Add Evidence support in Build-tools
+4. Add fundamental support of storage connectivity layer
+
+- Bugfixes:
+1. Fixed the query error in Multithread Synchronized Block Output
+2. Fixed numerous image and URL errors in SDK documentation.
+3. Multiple Code Quality improvements
+
 ### v1.1.0 (2019-01-31)
 
 Features:
