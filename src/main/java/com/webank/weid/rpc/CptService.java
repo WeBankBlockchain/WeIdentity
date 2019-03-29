@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -40,6 +40,13 @@ public interface CptService {
      */
     ResponseData<CptBaseInfo> registerCpt(CptMapArgs args);
 
+    /**
+     * Register a new CPT to the blockchain by sending preset transaction hex value.
+     *
+     * @param transactionHex the transaction hex value
+     * @return The registered CPT info
+     */
+    ResponseData<String> registerCpt(String transactionHex);
 
     /**
      * Register a new CPT to the blockchain.

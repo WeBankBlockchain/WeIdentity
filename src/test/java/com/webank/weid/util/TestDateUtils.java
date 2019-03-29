@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -104,7 +104,17 @@ public class TestDateUtils {
         Int256 int256String = DateUtils.getCurrentTimeStampInt256();
         Assert.assertNotNull(int256String);
         
-        String  timeStampString = DateUtils.getCurrentTimeStampString();
+        String timeStampString = DateUtils.getCurrentTimeStampString();
         Assert.assertNotNull(timeStampString);
+
+        Long timestamp = DateUtils.getCurrentTimeStamp();
+        Assert.assertNotNull(timestamp);
+    }
+
+    @Test
+    public void testConvertUtcDate() throws Exception {
+        String testDate = "2019-03-19T21:12:33Z";
+        Long testLongDate = DateUtils.convertUtcDateToTimeStamp(testDate);
+        Assert.assertNotNull(testLongDate);
     }
 }

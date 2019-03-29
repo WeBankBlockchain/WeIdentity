@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -80,6 +80,7 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -516,6 +517,32 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_INVALID);
         }
         return responseData;
+    }
+
+    /**
+     * Create a WeIdentity DID from the provided public key, with preset transaction hex value.
+     *
+     * @param transactionHex the transaction hex value
+     * @return Error message if any
+     */
+    @Override
+    public ResponseData<String> createWeId(String transactionHex) {
+        try {
+            if (StringUtils.isEmpty(transactionHex)) {
+                logger.error("WeID transaction error");
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+            }
+            TransactionReceipt transactionReceipt = TransactionUtils
+                .sendTransaction(getWeb3j(), transactionHex);
+            List<WeIdAttributeChangedEventResponse> response =
+                WeIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
+            if (!CollectionUtils.isEmpty(response)) {
+                return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS);
+            }
+        } catch (Exception e) {
+            logger.error("[createWeId] create failed due to unknown transaction error. ", e);
+        }
+        return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
     }
 
     /**

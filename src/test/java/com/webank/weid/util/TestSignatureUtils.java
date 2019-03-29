@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -20,11 +20,8 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
 
+import com.lambdaworks.codec.Base64;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
@@ -43,10 +40,7 @@ public class TestSignatureUtils {
 
     @Test
     public void testSignatureUtils()
-        throws InvalidAlgorithmParameterException,
-        NoSuchAlgorithmException,
-        NoSuchProviderException,
-        SignatureException {
+        throws Exception {
 
         ECKeyPair keyPair = SignatureUtils.createKeyPair();
         String str = "hello world...........................yes";
@@ -73,5 +67,9 @@ public class TestSignatureUtils {
         byte[] serialized = SignatureUtils.simpleSignatureSerialization(sigData);
         Sign.SignatureData newSigData = SignatureUtils.simpleSignatureDeserialization(serialized);
         logger.info(newSigData.toString());
+
+        Sign.SignatureData signatureData = SignatureUtils
+            .convertBase64StringToSignatureData(new String(Base64.encode(serialized)));
+        logger.info(signatureData.toString());
     }
 }

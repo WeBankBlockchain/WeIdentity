@@ -75,8 +75,9 @@ public class TestCreateCredential extends TestBaseServcie {
      */
     @Test
     public void testCreateCredentialCase2() {
-
-        ResponseData<CredentialWrapper> response = credentialService.createCredential(null);
+        CreateCredentialArgs createCredentialArgs = null;
+        ResponseData<CredentialWrapper> response = credentialService
+            .createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
