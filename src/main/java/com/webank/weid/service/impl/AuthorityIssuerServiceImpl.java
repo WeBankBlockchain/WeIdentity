@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -53,6 +53,7 @@ import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -135,25 +136,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
                 TimeUnit.SECONDS
             );
-            List<AuthorityIssuerRetLogEventResponse> eventList =
-                AuthorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
-
-            AuthorityIssuerRetLogEventResponse event = eventList.get(0);
-            if (event != null) {
-                ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(
-                    event,
-                    addr,
-                    WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
-                );
-                if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
-                    return new ResponseData<>(false, errorCode);
-                } else {
-                    return new ResponseData<>(true, errorCode);
-                }
-            } else {
-                logger.error(
-                    "register authority issuer failed due to transcation event decoding failure.");
-                return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+            Boolean result = resolveRegisterAuthorityIssuerEvents(receipt);
+            if (result) {
+                return new ResponseData<>(result, ErrorCode.SUCCESS);
             }
         } catch (TimeoutException e) {
             logger.error("register authority issuer failed due to system timeout. ", e);
@@ -163,7 +148,53 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
             logger.error("register authority issuer failed.", e);
-            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+        return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+    }
+
+    /**
+     * Register a new Authority Issuer on Chain with preset transaction hex value. The inputParam is
+     * a Json String, with two keys: WeIdentity DID and Name. Parameters will be ordered as
+     * mentioned after validity check; then transactionHex will be sent to blockchain.
+     *
+     * @param transactionHex the transaction hex value
+     * @return true if succeeds, false otherwise
+     */
+    @Override
+    public ResponseData<String> registerAuthorityIssuer(String transactionHex) {
+        try {
+            if (StringUtils.isEmpty(transactionHex)) {
+                logger.error("AuthorityIssuer transaction error");
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+            }
+            TransactionReceipt transactionReceipt = TransactionUtils
+                .sendTransaction(getWeb3j(), transactionHex);
+            Boolean result = resolveRegisterAuthorityIssuerEvents(transactionReceipt);
+            if (result) {
+                return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS);
+            }
+        } catch (Exception e) {
+            logger.error("[registerAuthorityIssuer] register failed due to transaction error.", e);
+        }
+        return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+    }
+
+    private Boolean resolveRegisterAuthorityIssuerEvents(
+        TransactionReceipt transactionReceipt) {
+        List<AuthorityIssuerRetLogEventResponse> eventList =
+            AuthorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
+
+        AuthorityIssuerRetLogEventResponse event = eventList.get(0);
+        if (event != null) {
+            ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(
+                event,
+                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
+            );
+            return (ErrorCode.SUCCESS == errorCode);
+        } else {
+            logger.error(
+                "register authority issuer failed due to transcation event decoding failure.");
+            return false;
         }
     }
 
@@ -196,7 +227,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             if (event != null) {
                 ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(
                     event,
-                    addr,
                     WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
                 );
                 if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
@@ -377,23 +407,19 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
 
     private ErrorCode verifyAuthorityIssuerRelatedEvent(
         AuthorityIssuerRetLogEventResponse event,
-        Address addr,
         Integer opcode) {
 
         if (event.addr == null || event.operation == null || event.retCode == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        if (event.addr.getValue().equals(addr.getValue())) {
-            Integer eventOpcode = event.operation.getValue().intValue();
-            if (eventOpcode.equals(opcode)) {
-                Integer eventRetCode = event.retCode.getValue().intValue();
-                return ErrorCode.getTypeByErrorCode(eventRetCode);
-            } else {
-                return ErrorCode.AUTHORITY_ISSUER_OPCODE_MISMATCH;
-            }
+        Integer eventOpcode = event.operation.getValue().intValue();
+        if (eventOpcode.equals(opcode)) {
+            Integer eventRetCode = event.retCode.getValue().intValue();
+            return ErrorCode.getTypeByErrorCode(eventRetCode);
         } else {
-            return ErrorCode.AUTHORITY_ISSUER_ADDRESS_MISMATCH;
+            return ErrorCode.AUTHORITY_ISSUER_OPCODE_MISMATCH;
         }
+
     }
 
     private boolean isValidAuthorityIssuerName(String name) {
@@ -404,7 +430,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
     }
 
     private String[] loadNameToStringAttributes(String name) {
-        String[] nameArray = new String[16];
+        String[] nameArray = new String[WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH];
         nameArray[0] = name;
         return nameArray;
     }

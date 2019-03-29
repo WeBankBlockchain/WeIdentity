@@ -32,12 +32,10 @@ public final class CredentialConstant {
      */
     public static final String DEFAULT_CREDENTIAL_CONTEXT =
         "https://www.w3.org/2018/credentials/v1";
-    /**
-     * The Constant default Credential Context field name.
-     */
-    public static final String CREDENTIAL_CONTEXT_FIELD = "\"context\"";
+
     /**
      * The Constant default Credential Context field name in Credential Json String.
      */
-    public static final String CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD = "\"@context\"";
+    public static final String CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD = "@context";
+
 }

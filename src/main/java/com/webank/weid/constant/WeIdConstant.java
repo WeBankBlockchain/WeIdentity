@@ -77,12 +77,22 @@ public final class WeIdConstant {
     /**
      * The Constant WeIdentity DID Long Array Length.
      */
-    public static final Integer LONG_ARRAY_LENGTH = 8;
+    public static final Integer CPT_LONG_ARRAY_LENGTH = 8;
 
     /**
      * The Constant WeIdentity DID String Array Length.
      */
-    public static final Integer STRING_ARRAY_LENGTH = 8;
+    public static final Integer CPT_STRING_ARRAY_LENGTH = 8;
+
+    /**
+     * The Constant Authority Issuer contract array length.
+     */
+    public static final Integer AUTHORITY_ISSUER_ARRAY_LEGNTH = 16;
+
+    /**
+     * The default accumulator value.
+     */
+    public static final String DEFAULT_ACCUMULATOR_VALUE = "1";
 
     /**
      * The Constant WeIdentity DID Json Schema Array Length.
@@ -135,11 +145,6 @@ public final class WeIdConstant {
     public static final Long LONG_VALUE_ZERO = 0L;
 
     /**
-     * -1.
-     */
-    public static final Integer VALUE_NEG_FIRST = -1;
-
-    /**
      * Hex Prefix.
      */
     public static final String HEX_PREFIX = "0x";
@@ -150,13 +155,28 @@ public final class WeIdConstant {
     public static final String UUID_SEPARATOR = "-";
 
     /**
-     * Quote.
-     */
-    public static final String DOUBLE_QUOTE = "\"";
-
-    /**
      * UUID Pattern.
      */
     public static final String UUID_PATTERN =
         "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$";
+
+    /**
+     * The transaction poll interval.
+     */
+    public static final Integer POLL_TRANSACTION_SLEEP_DURATION = 1500;
+
+    /**
+     * The transaction poll attempts (max).
+     */
+    public static final Integer POLL_TRANSACTION_ATTEMPTS = 5;
+
+    /**
+     * The additive block height.
+     */
+    public static final Integer ADDITIVE_BLOCK_HEIGHT = 500;
+
+    /**
+     * The big-enough block limit number.
+     */
+    public static final String BIG_BLOCK_LIMIT = "9999999999";
 }

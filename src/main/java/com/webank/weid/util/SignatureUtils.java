@@ -29,9 +29,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Uint8;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
+import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +44,7 @@ import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.response.RsvSignature;
 
 /**
  * The Signature related Utils class. Based on ECDSA Asymmetric Encryption + SHA256 Hash Algorithm.
@@ -57,7 +61,7 @@ import com.webank.weid.protocol.response.ResponseData;
  * @author chaoxinhu 2019.1
  */
 public class SignatureUtils {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(SignatureUtils.class);
 
     /**
@@ -285,5 +289,35 @@ public class SignatureUtils {
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
         }
         return new ResponseData<>(true, ErrorCode.SUCCESS);
+    }
+
+    /**
+     * Convert SignatureData to blockchain-ready RSV format.
+     *
+     * @param signatureData the signature data
+     * @return rsvSignature the rsv signature structure
+     */
+    public static RsvSignature convertSignatureDataToRsv(
+        SignatureData signatureData) {
+        Uint8 v = DataTypetUtils.intToUnt8(Integer.valueOf(signatureData.getV()));
+        Bytes32 r = DataTypetUtils.bytesArrayToBytes32(signatureData.getR());
+        Bytes32 s = DataTypetUtils.bytesArrayToBytes32(signatureData.getS());
+        RsvSignature rsvSignature = new RsvSignature();
+        rsvSignature.setV(v);
+        rsvSignature.setR(r);
+        rsvSignature.setS(s);
+        return rsvSignature;
+    }
+
+    /**
+     * Convert an off-chain Base64 signature String to signatureData format.
+     *
+     * @param base64Signature the signature string in Base64
+     * @return signatureData structure
+     */
+    public static SignatureData convertBase64StringToSignatureData(String base64Signature) {
+        return simpleSignatureDeserialization(
+            base64Decode(base64Signature.getBytes(StandardCharsets.UTF_8))
+        );
     }
 }
