@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -25,6 +25,7 @@ import java.util.concurrent.Future;
 
 import mockit.Mock;
 import mockit.MockUp;
+import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -188,5 +189,29 @@ public class TestCreateWeId1 extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.WEID_KEYPAIR_CREATE_FAILED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
+    }
+
+    /**
+     * case: call transactionhex null - arbitrary.
+     */
+    @Test
+    public void testCreateWeIdCase7() {
+        String hex = StringUtils.EMPTY;
+        ResponseData<String> response = weIdService.createWeId(hex);
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
+    }
+
+    /**
+     * case: call transactionhex method - arbitrary.
+     */
+    @Test
+    public void testCreateWeIdCase8() {
+        String hex = "11111";
+        ResponseData<String> response = weIdService.createWeId(hex);
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
     }
 }

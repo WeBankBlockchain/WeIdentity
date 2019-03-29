@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -100,7 +100,7 @@ public abstract class BaseService {
      *
      * @return the web3j
      */
-    protected static Web3j getWeb3j() {
+    public static Web3j getWeb3j() {
         if (web3j == null && !initWeb3j()) {
             throw new InitWeb3jException();
         }
