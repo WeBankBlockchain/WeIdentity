@@ -1,8 +1,8 @@
 
 .. _weidentity-spec:
 
-WeIdentity规范文档
-==================
+WeIdentity 规范文档
+=====================
 
 .. list-table::
    :header-rows: 1

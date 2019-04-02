@@ -22,4 +22,5 @@ WeIdentity文档
    docs/use-cases.rst
    docs/weidentity-spec.rst
    docs/faq.md
-   WeIdentity JAVA SDK文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>
+   docs/weidentity-rest.rst
+   WeIdentity JAVA SDK 文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>

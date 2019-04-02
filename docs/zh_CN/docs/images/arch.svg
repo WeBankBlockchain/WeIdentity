@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- 由 Microsoft Visio, SVG Export 生成 arch.svg Page-1 -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events"
+		xmlns:v="http://schemas.microsoft.com/visio/2003/SVGExtensions/" width="8.66142in" height="1.77165in"
+		viewBox="0 0 623.622 127.559" xml:space="preserve" color-interpolation-filters="sRGB" class="st10">
+	<v:documentProperties v:langID="2052" v:metric="true" v:viewMarkup="false">
+		<v:userDefs>
+			<v:ud v:nameU="msvSubprocessMaster" v:prompt="" v:val="VT4(Rectangle)"/>
+			<v:ud v:nameU="msvNoAutoConnect" v:val="VT0(1):26"/>
+		</v:userDefs>
+	</v:documentProperties>
+
+	<style type="text/css">
+	<![CDATA[
+		.st1 {fill:none;stroke:#000000;stroke-width:2.5}
+		.st2 {fill:#000000;font-family:黑体;font-size:1.5em}
+		.st3 {fill:none;stroke:#000000;stroke-width:1.5}
+		.st4 {fill:#000000;font-family:Calibri;font-size:1.16666em}
+		.st5 {font-family:黑体;font-size:1em}
+		.st6 {fill:#000000;font-family:Calibri;font-size:1.5em}
+		.st7 {font-size:1em}
+		.st8 {marker-end:url(#mrkr13-24);stroke:#000000;stroke-linecap:round;stroke-linejoin:round;stroke-width:1.5}
+		.st9 {fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:0.37313432835821}
+		.st10 {fill:none;fill-rule:evenodd;font-size:12px;overflow:visible;stroke-linecap:square;stroke-miterlimit:3}
+	]]>
+	</style>
+
+	<defs id="Markers">
+		<g id="lend13">
+			<path d="M 3 1 L 0 0 L 3 -1 L 3 1 " style="stroke:none"/>
+		</g>
+		<marker id="mrkr13-24" class="st9" v:arrowType="13" v:arrowSize="2" v:setback="8.04" refX="-8.04" orient="auto"
+				markerUnits="strokeWidth" overflow="visible">
+			<use xlink:href="#lend13" transform="scale(-2.68,-2.68) "/>
+		</marker>
+	</defs>
+	<g v:mID="0" v:index="1" v:groupContext="foregroundPage">
+		<v:userDefs>
+			<v:ud v:nameU="msvThemeOrder" v:val="VT0(0):26"/>
+		</v:userDefs>
+		<title>页-1</title>
+		<v:pageProperties v:drawingScale="0.0393701" v:pageScale="0.0393701" v:drawingUnits="24" v:shadowOffsetX="8.50394"
+				v:shadowOffsetY="-8.50394"/>
+		<g id="shape1-1" v:mID="1" v:groupContext="shape" transform="translate(11.6293,-14.1732)">
+			<title>矩形</title>
+			<desc>用户应用</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="56.6929" cy="77.9527" width="113.39" height="99.2126"/>
+			<rect x="0" y="28.3464" width="113.386" height="99.2126" class="st1"/>
+			<text x="20.69" y="73.14" class="st2" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>用户应用<v:newlineChar/></text>		</g>
+		<g id="shape2-4" v:mID="2" v:groupContext="shape" transform="translate(42.5197,-14.1732)">
+			<title>矩形.2</title>
+			<desc>HTTP/HTTPS 请求</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="41.2074" cy="109.134" width="82.42" height="36.8504"/>
+			<rect x="0" y="90.7087" width="82.4147" height="36.8504" class="st3"/>
+			<text x="5.69" y="104.02" class="st4" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>HTTP/HTTPS<v:newlineChar/><tspan
+						x="27.21" dy="1.298em" class="st5">请求</tspan></text>		</g>
+		<g id="shape3-8" v:mID="3" v:groupContext="shape" transform="translate(255.118,-14.1732)">
+			<title>矩形.3</title>
+			<desc>RestServer</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="56.6929" cy="77.9527" width="113.39" height="99.2126"/>
+			<rect x="0" y="28.3464" width="113.386" height="99.2126" class="st1"/>
+			<text x="17.36" y="72.55" class="st6" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>RestServer<v:newlineChar/></text>		</g>
+		<g id="shape4-11" v:mID="4" v:groupContext="shape" transform="translate(286.008,-14.1732)">
+			<title>矩形.4</title>
+			<desc>WeIdentity-Java-SDK</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="41.2074" cy="109.134" width="82.42" height="36.8504"/>
+			<rect x="0" y="90.7087" width="82.4147" height="36.8504" class="st3"/>
+			<text x="7.29" y="104.93" class="st4" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>WeIdentity-<tspan
+						x="15.81" dy="1.2em" class="st7">Java</tspan>-SDK</text>		</g>
+		<g id="shape5-15" v:mID="5" v:groupContext="shape" transform="translate(497.88,-14.1732)">
+			<title>矩形.5</title>
+			<desc>Blockchain Node</desc>
+			<v:userDefs>
+				<v:ud v:nameU="visVersion" v:val="VT0(15):26"/>
+			</v:userDefs>
+			<v:textBlock v:margins="rect(4,4,4,4)" v:tabSpace="42.5197"/>
+			<v:textRect cx="56.6929" cy="77.9527" width="113.39" height="99.2126"/>
+			<rect x="0" y="28.3464" width="113.386" height="99.2126" class="st1"/>
+			<text x="17.45" y="72.55" class="st6" v:langID="2052"><v:paragraph v:horizAlign="1"/><v:tabList/>Blockchain<v:newlineChar/><tspan
+						x="36.93" dy="1.2em" class="st7">Node</tspan></text>		</g>
+		<g id="shape6-19" v:mID="6" v:groupContext="shape" transform="translate(125.015,-63.7795)">
+			<title>工作表.6</title>
+			<path d="M0 127.56 L118.04 127.56" class="st8"/>
+		</g>
+		<g id="shape7-25" v:mID="7" v:groupContext="shape" transform="translate(368.504,-63.7795)">
+			<title>工作表.7</title>
+			<path d="M0 127.56 L117.32 127.56" class="st8"/>
+		</g>
+	</g>
+</svg>
