@@ -20,6 +20,7 @@
 package com.webank.weid.protocol.base;
 
 import java.util.Map;
+
 import lombok.Data;
 
 /**

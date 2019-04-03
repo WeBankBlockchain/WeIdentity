@@ -45,7 +45,7 @@ public interface CredentialService {
      *
      * @param credential the credential
      * @param disclosure the setting of disclosure, such as: {@code{"name":1,"gender":0,"age":1}},
-     *     which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
+     * which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
      * @return CredentialWrapper
      */
     ResponseData<CredentialWrapper> createSelectiveCredential(
@@ -91,8 +91,8 @@ public interface CredentialService {
     ResponseData<String> getCredentialHash(Credential credential);
 
     /**
-     * Get the Json String of a Credential. All fields in the Credential will be included. This
-     * also supports the selectively disclosed Credential.
+     * Get the Json String of a Credential. All fields in the Credential will be included. This also
+     * supports the selectively disclosed Credential.
      *
      * @param credential the credential
      * @return the Credential Json value in String

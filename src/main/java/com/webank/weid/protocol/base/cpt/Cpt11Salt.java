@@ -23,6 +23,7 @@ package com.webank.weid.protocol.base.cpt;
  * Created by Junqi Zhang on 2019/4/3.
  */
 public class Cpt11Salt {
+
     String cptId;
     String userId;
     String userName;
