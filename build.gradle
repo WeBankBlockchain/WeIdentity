@@ -16,7 +16,7 @@ apply plugin: 'checkstyle'
 apply plugin: "com.github.spotbugs"
 apply plugin: 'jacoco'
 
-version = "1.1.0"
+version = "1.1.1"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
