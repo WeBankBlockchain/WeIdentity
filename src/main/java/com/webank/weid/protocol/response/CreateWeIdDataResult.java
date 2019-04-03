@@ -21,6 +21,7 @@ package com.webank.weid.protocol.response;
 
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
+
 import lombok.Data;
 
 /**

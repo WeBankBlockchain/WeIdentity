@@ -19,11 +19,12 @@
 
 package com.webank.weid.rpc;
 
+import java.util.Map;
+
+import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialPojoWrapper;
-import com.webank.weid.protocol.base.ClaimSalt;
-import com.webank.weid.protocol.base.PresentationPolicy.ClaimPolicy;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -47,24 +48,14 @@ public interface CredentialPojoService {
      * Generate a credential with selected data.
      *
      * @param credential the credential
-     * @param presentationPolicy the setting of disclosure, such as:
-     * {@code{"name":1,"gender":0,"age":1}}, which means you WILL disclose "name" and "age", and
-     * "gender" WILL NOT be disclosed
+     * @param presentationPolicy the setting of disclosure, such as: {@code{"name":1,"gender":0,"age":1}},
+     * which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
      * @return CredentialWrapper
      */
     ResponseData<CredentialPojoWrapper> createSelectiveCredential(
-        CredentialPojo credential,
-        ClaimSalt salt,
-        PresentationPolicy.ClaimPolicy presentationPolicy
+        CredentialPojoWrapper credentialPojoWrapper,
+        ClaimPolicy presentationPolicy
     );
-
-    /**
-     * Verify the validity of a credential. Public key will be fetched from chain.
-     *
-     * @param credential the credential
-     * @return the verification result. True if yes, false otherwise with exact verify error codes
-     */
-    ResponseData<Boolean> verify(CredentialPojo credential);
 
     /**
      * Verify the validity of a credential. Public key will be fetched from chain.
@@ -96,13 +87,12 @@ public interface CredentialPojoService {
     ResponseData<String> getCredentialHash(Credential credential);
 
     /**
-     * Get the Json String of a Credential. All fields in the Credential will be included. This
-     * also supports the selectively disclosed Credential.
+     * Get the Json String of a Credential. All fields in the Credential will be included. This also
+     * supports the selectively disclosed Credential.
      *
      * @param credential the credential
      * @return the Credential Json value in String
      */
     ResponseData<String> getCredentialJson(Credential credential);
-
 
 }

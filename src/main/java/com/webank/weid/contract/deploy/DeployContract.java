@@ -29,6 +29,7 @@ import com.webank.weid.contract.CptData;
 import com.webank.weid.contract.EvidenceFactory;
 import com.webank.weid.contract.RoleController;
 import com.webank.weid.contract.WeIdContract;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.contract.tools.ToolConf;

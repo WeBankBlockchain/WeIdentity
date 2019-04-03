@@ -21,6 +21,7 @@ package com.webank.weid.protocol.request;
 
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+
 import lombok.Data;
 
 /**
