@@ -20,6 +20,7 @@
 package com.webank.weid.protocol.request;
 
 import com.webank.weid.protocol.base.WeIdAuthentication;
+
 import lombok.Data;
 
 /**

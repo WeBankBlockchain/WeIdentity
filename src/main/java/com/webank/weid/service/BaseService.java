@@ -23,9 +23,11 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+
 import org.bcos.channel.client.Service;
 import org.bcos.contract.tools.ToolConf;
 import org.bcos.web3j.crypto.Credentials;

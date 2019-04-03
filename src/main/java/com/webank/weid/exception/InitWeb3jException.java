@@ -23,6 +23,7 @@ import com.webank.weid.constant.ErrorCode;
 
 /**
  * InitWeb3sdk Exception.
+ *
  * @author tonychen
  */
 @SuppressWarnings("serial")

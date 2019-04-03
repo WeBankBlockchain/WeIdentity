@@ -1,6 +1,7 @@
 package com.webank.weid.protocol.response;
 
 import com.webank.weid.constant.ResolveEventLogStatus;
+
 import lombok.Data;
 
 @Data
@@ -14,7 +15,7 @@ public class ResolveEventLogResult {
 
     /**
      * set value for resultStatus.
-     * 
+     *
      * @param resolveEventLogStatus the enum is ResolveEventLogStatus.
      */
     public void setResolveEventLogStatus(ResolveEventLogStatus resolveEventLogStatus) {

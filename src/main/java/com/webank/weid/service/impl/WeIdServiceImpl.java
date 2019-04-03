@@ -20,6 +20,7 @@
 package com.webank.weid.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ResolveEventLogStatus;
@@ -49,6 +50,7 @@ import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,6 +60,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.EventEncoder;
@@ -103,9 +106,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
      * WeIdentity DID contract address.
      */
     private static String weIdContractAddress;
-    
+
     /**
-     *  Block number for stopping parsing.
+     * Block number for stopping parsing.
      */
     private static final int STOP_RESOLVE_BLOCK_NUMBER = 0;
 
@@ -311,7 +314,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         String weId,
         int blockNumber,
         WeIdDocument result) {
-        
+
         int previousBlock = blockNumber;
         while (previousBlock != STOP_RESOLVE_BLOCK_NUMBER) {
             int currentBlockNumber = previousBlock;
@@ -320,7 +323,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 latestBlock =
                     getWeb3j()
                         .ethGetBlockByNumber(
-                            new DefaultBlockParameterNumber(currentBlockNumber), 
+                            new DefaultBlockParameterNumber(currentBlockNumber),
                             true
                         )
                         .send();
@@ -345,7 +348,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     .stream()
                     .map(transactionResult -> (Transaction) transactionResult.get())
                     .collect(Collectors.toList());
-            
+
             previousBlock = 0;
             try {
                 for (Transaction transaction : transList) {
@@ -356,7 +359,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     TransactionReceipt receipt = rec1.getTransactionReceipt().get();
                     List<Log> logs = rec1.getResult().getLogs();
                     for (Log log : logs) {
-                        ResolveEventLogResult returnValue = 
+                        ResolveEventLogResult returnValue =
                             resolveEventLog(weId, log, receipt, result);
                         if (returnValue.getResultStatus().equals(
                             ResolveEventLogStatus.STATUS_SUCCESS)) {

@@ -20,6 +20,7 @@
 package com.webank.weid.protocol.base;
 
 import java.util.Map;
+
 import lombok.Data;
 
 /**
@@ -37,7 +38,7 @@ public class CredentialWrapper {
 
     /**
      * Required: key is the credential field, and value "1" for disclosure to the third party, "0"
-     *      for no disclosure.
+     * for no disclosure.
      */
     private Map<String, Object> disclosure;
 }

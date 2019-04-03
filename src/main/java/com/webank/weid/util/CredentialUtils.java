@@ -27,6 +27,7 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 
