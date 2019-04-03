@@ -25,7 +25,7 @@ import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * Service interface for operations on Authority Issuer.
+ * Service inf for operations on Authority Issuer.
  *
  * @author chaoxinhu 2018.10
  */

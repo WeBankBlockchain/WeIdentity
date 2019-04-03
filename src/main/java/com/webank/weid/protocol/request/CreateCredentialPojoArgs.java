@@ -17,28 +17,19 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.protocol.request;
 
-import java.util.Map;
 import lombok.Data;
 
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+
 /**
- * The base data structure to handle Credential info.
+ * The Arguments for the following SDK API: createCredential().
  *
  * @author chaoxinhu 2018.10
  */
 @Data
-public class Credential {
-
-    /**
-     * Required: The context field.
-     */
-    private String context;
-
-    /**
-     * Required: The ID.
-     */
-    private String id;
+public class CreateCredentialPojoArgs<T> {
 
     /**
      * Required: The CPT type in standard integer format.
@@ -51,11 +42,6 @@ public class Credential {
     private String issuer;
 
     /**
-     * Required: The create date.
-     */
-    private Long issuranceDate;
-
-    /**
      * Required: The expire date.
      */
     private Long expirationDate;
@@ -63,11 +49,10 @@ public class Credential {
     /**
      * Required: The claim data.
      */
-    private Map<String, Object> claim;
+    private T claim;
 
     /**
-     * Required: The signature of the Credential. Selective Disclosure is supported together with
-     * Claim Data structure.
+     * Required: The private key structure used for signing.
      */
-    private String signature;
+    private WeIdPrivateKey weIdPrivateKey;
 }

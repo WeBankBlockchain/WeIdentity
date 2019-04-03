@@ -19,55 +19,17 @@
 
 package com.webank.weid.protocol.base;
 
-import java.util.Map;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * The base data structure to handle Credential info.
  *
- * @author chaoxinhu 2018.10
+ * @author junqizhang 2019.04
  */
 @Data
-public class Credential {
+public class PresentationPolicy {
 
-    /**
-     * Required: The context field.
-     */
-    private String context;
-
-    /**
-     * Required: The ID.
-     */
-    private String id;
-
-    /**
-     * Required: The CPT type in standard integer format.
-     */
-    private Integer cptId;
-
-    /**
-     * Required: The issuer WeIdentity DID.
-     */
-    private String issuer;
-
-    /**
-     * Required: The create date.
-     */
-    private Long issuranceDate;
-
-    /**
-     * Required: The expire date.
-     */
-    private Long expirationDate;
-
-    /**
-     * Required: The claim data.
-     */
-    private Map<String, Object> claim;
-
-    /**
-     * Required: The signature of the Credential. Selective Disclosure is supported together with
-     * Claim Data structure.
-     */
-    private String signature;
+    private List<ClaimPolicy> policy;
 }

@@ -26,7 +26,7 @@ import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * Service interface for operation on CPT (Claim protocol Type).
+ * Service inf for operation on CPT (Claim protocol Type).
  *
  * @author lingfenghe
  */
