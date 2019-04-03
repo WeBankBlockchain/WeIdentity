@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,33 +17,14 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
-
-import java.util.List;
-import lombok.Data;
+package com.webank.weid.protocol.inf;
 
 /**
- * The base data structure to handle Credential EvidenceInfo info.
+ * Service inf for operations on Authority Issuer.
  *
- * @author chaoxinhu 2019.1
+ * @author chaoxinhu 2018.10
  */
-@Data
-public class EvidenceInfo {
+public interface CptInterface {
 
-    /**
-     * Required: The full Credential hash.
-     */
-    private String credentialHash;
-
-    /**
-     * Required: The signers of this Credential.
-     */
-    private List<String> signers;
-
-    /**
-     * Required: The signatures of each signers with the same order.
-     * In JavaBean object, the signatures will be encoded in Base64.
-     * On the blockchain, the signatures will be stored in its r, s, v.
-     */
-    private List<String> signatures;
+    String getClaimHash();
 }

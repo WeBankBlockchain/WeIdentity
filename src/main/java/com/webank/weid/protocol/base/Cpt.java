@@ -20,7 +20,6 @@
 package com.webank.weid.protocol.base;
 
 import java.util.Map;
-
 import lombok.Data;
 
 /**
@@ -34,17 +33,17 @@ public class Cpt {
     /**
      * Base info of cpt.
      */
-    private CptBaseInfo cptBaseInfo = new CptBaseInfo();
+    protected CptBaseInfo cptBaseInfo = new CptBaseInfo();
 
     /**
      * The cpt json schema.
      */
-    private Map<String, Object> cptJsonSchema;
+    protected Map<String, Object> cptJsonSchema;
 
     /**
      * The meta data.
      */
-    private MetaData metaData = new MetaData();
+    protected MetaData metaData = new MetaData();
 
     /**
      * Gets the cpt id.

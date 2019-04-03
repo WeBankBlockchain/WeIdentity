@@ -19,29 +19,6 @@
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.crypto.Sign;
-import org.bcos.web3j.crypto.Sign.SignatureData;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -60,6 +37,27 @@ import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataTypetUtils;
 import com.webank.weid.util.SignatureUtils;
 import com.webank.weid.util.WeIdUtils;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.DynamicArray;
+import org.bcos.web3j.abi.datatypes.Type;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.bcos.web3j.crypto.Keys;
+import org.bcos.web3j.crypto.Sign;
+import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Service implementations for operations on Evidence.

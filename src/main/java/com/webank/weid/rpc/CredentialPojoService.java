@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -20,9 +20,12 @@
 package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.base.Credential;
-import com.webank.weid.protocol.base.CredentialWrapper;
+import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialPojoWrapper;
+import com.webank.weid.protocol.base.ClaimSalt;
+import com.webank.weid.protocol.base.PresentationPolicy.ClaimPolicy;
 import com.webank.weid.protocol.base.WeIdPublicKey;
-import com.webank.weid.protocol.request.CreateCredentialArgs;
+import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
@@ -30,7 +33,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author chaoxinhu 2018.12
  */
-public interface CredentialService {
+public interface CredentialPojoService {
 
     /**
      * Generate a credential for full claim content.
@@ -38,19 +41,21 @@ public interface CredentialService {
      * @param args the args
      * @return credential wrapper
      */
-    ResponseData<CredentialWrapper> createCredential(CreateCredentialArgs args);
+    ResponseData<CredentialPojoWrapper> createCredential(CreateCredentialPojoArgs args);
 
     /**
      * Generate a credential with selected data.
      *
      * @param credential the credential
-     * @param disclosure the setting of disclosure, such as: {@code{"name":1,"gender":0,"age":1}},
-     *     which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
+     * @param presentationPolicy the setting of disclosure, such as:
+     * {@code{"name":1,"gender":0,"age":1}}, which means you WILL disclose "name" and "age", and
+     * "gender" WILL NOT be disclosed
      * @return CredentialWrapper
      */
-    ResponseData<CredentialWrapper> createSelectiveCredential(
-        Credential credential,
-        String disclosure
+    ResponseData<CredentialPojoWrapper> createSelectiveCredential(
+        CredentialPojo credential,
+        ClaimSalt salt,
+        PresentationPolicy.ClaimPolicy presentationPolicy
     );
 
     /**
@@ -59,7 +64,7 @@ public interface CredentialService {
      * @param credential the credential
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
-    ResponseData<Boolean> verify(Credential credential);
+    ResponseData<Boolean> verify(CredentialPojo credential);
 
     /**
      * Verify the validity of a credential. Public key will be fetched from chain.
@@ -67,7 +72,7 @@ public interface CredentialService {
      * @param credentialWrapper the credentialWrapper
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
-    ResponseData<Boolean> verify(CredentialWrapper credentialWrapper);
+    ResponseData<Boolean> verify(CredentialPojoWrapper credentialWrapper);
 
     /**
      * Verify the validity of a credential. Public key must be provided.
@@ -77,7 +82,7 @@ public interface CredentialService {
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
     ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(
-        CredentialWrapper credentialWrapper,
+        CredentialPojoWrapper credentialWrapper,
         WeIdPublicKey weIdPublicKey
     );
 
@@ -98,4 +103,6 @@ public interface CredentialService {
      * @return the Credential Json value in String
      */
     ResponseData<String> getCredentialJson(Credential credential);
+
+
 }
