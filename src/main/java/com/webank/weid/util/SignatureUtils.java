@@ -19,6 +19,12 @@
 
 package com.webank.weid.util;
 
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.protocol.base.AuthenticationProperty;
+import com.webank.weid.protocol.base.PublicKeyProperty;
+import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.response.RsvSignature;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -27,7 +33,6 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
@@ -38,13 +43,6 @@ import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.protocol.base.AuthenticationProperty;
-import com.webank.weid.protocol.base.PublicKeyProperty;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.RsvSignature;
 
 /**
  * The Signature related Utils class. Based on ECDSA Asymmetric Encryption + SHA256 Hash Algorithm.

@@ -28,7 +28,7 @@ import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * Service interface for operations on WeIdentity DID.
+ * Service inf for operations on WeIdentity DID.
  *
  * @author tonychen
  */

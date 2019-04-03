@@ -19,10 +19,6 @@
 
 package com.webank.weid.util;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -30,8 +26,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
-
 import com.webank.weid.exception.DataTypeCastException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * data type cast by jackson method.

@@ -21,7 +21,6 @@ package com.webank.weid.protocol.base;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.Data;
 
 /**

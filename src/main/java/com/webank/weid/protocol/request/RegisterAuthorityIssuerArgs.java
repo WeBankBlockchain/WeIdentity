@@ -19,10 +19,9 @@
 
 package com.webank.weid.protocol.request;
 
-import lombok.Data;
-
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import lombok.Data;
 
 /**
  * The Arguments for SDK RegisterAuthorityIssuer.

@@ -19,20 +19,6 @@
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
@@ -53,6 +39,18 @@ import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.JsonSchemaValidatorUtils;
 import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.SignatureUtils;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.crypto.Sign;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
  * Service implementations for operations on Credential.
@@ -182,7 +180,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     }
 
     /**
-     * The only standardized interface to create a full Credential Hash for a given Credential.
+     * The only standardized inf to create a full Credential Hash for a given Credential.
      *
      * @param args the args
      * @return the Boolean response data
