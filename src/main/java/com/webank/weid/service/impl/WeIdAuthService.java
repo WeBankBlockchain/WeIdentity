@@ -17,19 +17,11 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
-
-import lombok.Data;
+package com.webank.weid.service.impl;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by Junqi Zhang on 2019/4/9.
  */
-@Data
-public class ClaimPolicy extends Version {
+public class WeIdAuthService {
 
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
 }

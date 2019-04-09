@@ -19,17 +19,29 @@
 
 package com.webank.weid.protocol.base;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by Junqi Zhang on 2019/4/9.
  */
-@Data
-public class ClaimPolicy extends Version {
+@Getter
+@Setter
+public class Challenge extends Version {
 
-    private Integer cptId;
+    Integer challegeId;
 
-    private String fieldsToBeDisclosed;
+    /**
+     * Specify who you want to challenge.
+     */
+    String weId;
+
+    /**
+     * Specify a random alphanumeric nonce and WeIdentity DID owner will sign a credential which
+     * include the nonce to prove the ownership of this WeIdentity DID. The relying party should
+     * include a random alphanumeric (i.e. nonce) in the challenge, to prevent replay attacks. This
+     * is also known as dynamic challenge.
+     *
+     */
+    String nonce;
 }

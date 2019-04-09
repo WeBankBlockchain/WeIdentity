@@ -19,17 +19,42 @@
 
 package com.webank.weid.protocol.base;
 
-import lombok.Data;
+import java.util.List;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by Junqi Zhang on 2019/4/4.
  */
-@Data
-public class ClaimPolicy extends Version {
+@Getter
+@Setter
+public class PresentationE {
 
-    private Integer cptId;
+    /**
+     * Required: The context field.
+     */
+    private String context;
 
-    private String fieldsToBeDisclosed;
+    private List<CredentialPojoWrapper> credentialList;
+
+    private PresentationPolicyE presentationPolicy;
+
+    public boolean push(SelectiveDisclosureCredential credential) {
+        return false;
+    }
+
+    public boolean push(CredentialPojoWrapper credentialPojoWrapper) {
+        return false;
+    }
+
+    public boolean commit(CredentialPojoWrapper credentialPojoWrapper) {
+        return false;
+    }
+
+    public String toJson() {
+        // sort the credential in the list based on the credential id before converting to json.
+        return null;
+    }
+
+    //TODO: Proof to be added
 }

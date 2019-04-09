@@ -17,19 +17,20 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.protocol.amop;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by junqizhang on 08/07/2017.
  */
 @Data
-public class ClaimPolicy extends Version {
+@EqualsAndHashCode(callSuper = false)
+public class CheckDirectRouteMsgHealthArgs extends DirectRouteBaseMsgArgs {
 
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    /*
+     * 任意包体
+     */
+    private String message;
 }

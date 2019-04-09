@@ -17,19 +17,19 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.protocol.base.cpt;
 
-import lombok.Data;
+import com.webank.weid.protocol.base.Challenge;
 
 /**
- * The base data structure to handle Credential info.
+ * Credential for authentication. The answer to meet the challenge. We package the answer into a
+ * Credential(CPT104) so the verifier can verify this answer.
  *
- * @author junqizhang 2019.04
+ * Created by Junqi Zhang on 2019/4/9.
  */
-@Data
-public class ClaimPolicy extends Version {
+public class Cpt103 {
 
-    private Integer cptId;
+    private Challenge challenge;
 
-    private String fieldsToBeDisclosed;
+    private String proof;
 }

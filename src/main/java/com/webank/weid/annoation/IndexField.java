@@ -17,19 +17,24 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.annoation;
 
-import lombok.Data;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.util.List;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-/**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
- */
-@Data
-public class PresentationPolicy {
+@Target({FIELD})
+@Retention(RUNTIME)
+public @interface IndexField {
 
-    private List<ClaimPolicy> policy;
+    String name() default "";
+
+    String nullAs() default "";
+
+    /**
+     * start from 0
+     */
+    int index();
 }
