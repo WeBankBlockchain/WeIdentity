@@ -17,19 +17,27 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.rpc.callback;
 
-import lombok.Data;
+//import cn.webank.blockchain.protocol.*;
+//import cn.webank.blockchain.result.DirectRouteNotifyMsgResult;
+//import cn.webank.blockchain.result.RecordAccountsPayableResult;
+
+import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by junqizhang on 17/5/24.
  */
-@Data
-public class ClaimPolicy extends Version {
+public interface PushNotifyAllCallback {
 
-    private Integer cptId;
 
-    private String fieldsToBeDisclosed;
+    /**
+     * 链上链下health check
+     * 不需要覆盖实现
+     *
+     * @param arg echo arg
+     * @return
+     */
+    DirectRouteNotifyMsgResult onPush(CheckDirectRouteMsgHealthArgs arg);
 }

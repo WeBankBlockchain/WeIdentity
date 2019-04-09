@@ -19,17 +19,15 @@
 
 package com.webank.weid.protocol.base;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by Junqi Zhang on 2019/4/10.
  */
-@Data
-public class ClaimPolicy extends Version {
+@Setter
+@Getter
+public class Version {
 
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    Integer version;
 }

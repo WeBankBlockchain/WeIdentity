@@ -19,6 +19,8 @@
 
 package com.webank.weid.rpc;
 
+import com.webank.weid.protocol.base.Challenge;
+import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
@@ -104,4 +106,19 @@ public interface WeIdService {
      * @return true if exists, false otherwise.
      */
     ResponseData<Boolean> isWeIdExist(String weId);
+
+
+    ResponseData<Challenge> presentChallenge(String challengerWeId);
+
+    ResponseData<Credential> meetChallenge(Challenge challenge);
+
+    /**
+     * Relying party authenticate the WeIdentity DID owner using this function.
+     *
+     * @param weId
+     * @param credential
+     * @return
+     */
+    ResponseData<Boolean> authenticate(String weId, Challenge challenge, Credential credential);
+
 }

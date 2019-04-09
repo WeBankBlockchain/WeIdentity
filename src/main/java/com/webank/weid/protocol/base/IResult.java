@@ -19,17 +19,12 @@
 
 package com.webank.weid.protocol.base;
 
-import lombok.Data;
-
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * 结果
  */
-@Data
-public class ClaimPolicy extends Version {
+public interface IResult {
 
-    private Integer cptId;
+    Integer getErrorCode();
 
-    private String fieldsToBeDisclosed;
+    void setErrorCode(Integer errorCode);
 }

@@ -17,19 +17,21 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.rpc;
 
-import lombok.Data;
+import com.webank.weid.protocol.base.Challenge;
+import com.webank.weid.protocol.base.PresentationE;
+import com.webank.weid.protocol.base.PresentationPolicyE;
+import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by Junqi Zhang on 2019/4/10.
  */
-@Data
-public class ClaimPolicy extends Version {
+public interface PresentationService {
 
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    ResponseData<Boolean> verify(
+        PresentationPolicyE presentationPolicyE,
+        Challenge challenge,
+        PresentationE presentationE
+    );
 }
