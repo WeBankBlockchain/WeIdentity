@@ -17,19 +17,30 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.rpc.base;
 
-import lombok.Data;
+import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.service.impl.callback.DirectRouteCallback;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by Junqi Zhang on 2019/4/10.
  */
-@Data
-public class ClaimPolicy extends Version {
+public interface BaseClient {
 
-    private Integer cptId;
+    /**
+     * 注册处理来自其他机构的通知消息的回调函数
+     * 需要实现一个类，继承DirectRouteCallback，并实现对应的几个onPush函数
+     */
+    void registerCallback(DirectRouteCallback directRouteCallback);
 
-    private String fieldsToBeDisclosed;
+    /**
+     * 链上链下check heath接口
+     *
+     * @param toOrgId
+     * @param arg
+     * @return
+     */
+    ResponseData<DirectRouteNotifyMsgResult> checkDirectRouteMsgHealth(String toOrgId, CheckDirectRouteMsgHealthArgs arg);
 }

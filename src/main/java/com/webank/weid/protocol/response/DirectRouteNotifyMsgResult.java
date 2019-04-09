@@ -17,19 +17,23 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.protocol.response;
 
+import com.webank.weid.protocol.base.IResult;
 import lombok.Data;
 
 /**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
+ * Created by junqizhang on 15/08/2017.
  */
 @Data
-public class ClaimPolicy extends Version {
+public class DirectRouteNotifyMsgResult implements IResult {
 
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    /*
+     * 错误信息
+     */
+    protected String message;
+    /*
+     * 错误码：返回0表明成功收到通知；其他表明异常情况.
+     */
+    private Integer errorCode;
 }

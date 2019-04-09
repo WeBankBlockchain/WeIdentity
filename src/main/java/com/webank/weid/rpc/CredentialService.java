@@ -19,6 +19,7 @@
 
 package com.webank.weid.rpc;
 
+import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdPublicKey;
@@ -98,4 +99,5 @@ public interface CredentialService {
      * @return the Credential Json value in String
      */
     ResponseData<String> getCredentialJson(Credential credential);
+
 }

@@ -47,14 +47,13 @@ public interface CredentialPojoService {
     /**
      * Generate a credential with selected data.
      *
-     * @param credential the credential
-     * @param presentationPolicy the setting of disclosure, such as: {@code{"name":1,"gender":0,"age":1}},
-     * which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
+     * @param credentialPojoWrapper the credential
+     * @param claimPolicy
      * @return CredentialWrapper
      */
     ResponseData<CredentialPojoWrapper> createSelectiveCredential(
         CredentialPojoWrapper credentialPojoWrapper,
-        ClaimPolicy presentationPolicy
+        ClaimPolicy claimPolicy
     );
 
     /**
