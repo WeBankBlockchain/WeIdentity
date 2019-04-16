@@ -22,18 +22,12 @@ package com.webank.weid.rpc.base;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.impl.callback.DirectRouteCallback;
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
-public interface BaseClient {
+public interface AmopClient {
 
-    /**
-     * 注册处理来自其他机构的通知消息的回调函数
-     * 需要实现一个类，继承DirectRouteCallback，并实现对应的几个onPush函数
-     */
-    void registerCallback(DirectRouteCallback directRouteCallback);
 
     /**
      * 链上链下check heath接口

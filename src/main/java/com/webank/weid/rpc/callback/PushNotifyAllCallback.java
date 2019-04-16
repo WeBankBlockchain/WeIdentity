@@ -19,10 +19,6 @@
 
 package com.webank.weid.rpc.callback;
 
-//import cn.webank.blockchain.protocol.*;
-//import cn.webank.blockchain.result.DirectRouteNotifyMsgResult;
-//import cn.webank.blockchain.result.RecordAccountsPayableResult;
-
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 
