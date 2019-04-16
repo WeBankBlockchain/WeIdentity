@@ -19,6 +19,7 @@
 
 package com.webank.weid.service.impl;
 
+import com.webank.weid.constant.DirectRouteMsgType;
 import com.webank.weid.rpc.base.AmopService;
 import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.service.BaseService;
@@ -31,13 +32,13 @@ import com.webank.weid.service.impl.callback.DirectRouteCallback;
 public class AmopServiceImpl extends BaseService implements AmopService {
 
 	/* (non-Javadoc)
-	 * @see com.webank.weid.rpc.base.AmopService#registerCallback(com.webank.weid.service.impl.callback.DirectRouteCallback)
+	 * @see com.webank.weid.rpc.base.AmopService#registerCallback(com.webank.weid.constant.DirectRouteMsgType, com.webank.weid.service.impl.callback.DirectRouteCallback)
 	 */
 	@Override
-	public void registerCallback(DirectRouteCallback directRouteCallback) {
+	public void registerCallback(DirectRouteMsgType directRouteMsgType, DirectRouteCallback directRouteCallback) {
 		
 		OnNotifyCallback callback = (OnNotifyCallback)getService().getPushCallback();
-		callback.setDirectRouteCallback(directRouteCallback);
+		callback.RegistRouteCallBackMap(directRouteMsgType, directRouteCallback);
 	}
 
 }
