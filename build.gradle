@@ -78,6 +78,11 @@ List weidentity_contract = [
     "com.webank:weidentity-contract-java:1.+"
 ]
 
+List mysql_driver = [
+    "mysql:mysql-connector-java:5.1.44"
+]
+
+
 // In this section you declare the dependencies for your production and test code
 List web3sdk_dependencies = [
     "io.netty:netty-all:4.1.15.Final",
@@ -94,7 +99,7 @@ List web3sdk_dependencies = [
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile logger, spring, lombok, apache_commons, jackson, web3sdk_dependencies, weidentity_contract
+    compile logger, spring, lombok, apache_commons, jackson, web3sdk_dependencies, weidentity_contract,mysql_driver
     testCompile logger, spring, lombok, apache_commons, jackson, web3sdk_dependencies, junit, jmockit
     compile files("lib/web3sdk.jar")
 }
