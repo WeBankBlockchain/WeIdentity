@@ -24,7 +24,4 @@ package com.webank.weid.protocol.base;
  */
 public interface IResult {
 
-    Integer getErrorCode();
-
-    void setErrorCode(Integer errorCode);
 }

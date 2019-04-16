@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,19 +17,20 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc.base;
+package com.webank.weid.protocol.amop;
 
-import com.webank.weid.constant.DirectRouteMsgType;
-import com.webank.weid.service.impl.callback.DirectRouteCallback;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author tonychen 2019年4月16日
- *
  */
-public interface AmopService {
-    /**
-     * 注册处理来自其他机构的通知消息的回调函数
-     * 需要实现一个类，继承DirectRouteCallback，并实现对应的几个onPush函数
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class PresentationPolicyArgs extends DirectRouteBaseMsgArgs {
+
+    /*
+     * 任意包体
      */
-    void registerCallback(DirectRouteMsgType directRouteMsgType, DirectRouteCallback directRouteCallback);
+    private String message;
 }
