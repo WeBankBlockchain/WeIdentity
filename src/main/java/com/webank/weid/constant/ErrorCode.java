@@ -345,6 +345,8 @@ public enum ErrorCode {
      */
     DATA_TYPE_CASE_ERROR(160008, "data type cast exception error, please check the error log."),
 
+    DIRECT_ROUTE_REQUEST_TIMEOUT(160009, "amop timeout"),
+    DIRECT_ROUTE_MSG_BASE_ERROR(160010, "amop timeout"),
     /**
      * other uncatched exceptions or error.
      */

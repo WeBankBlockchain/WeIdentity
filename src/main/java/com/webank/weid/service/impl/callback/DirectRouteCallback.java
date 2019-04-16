@@ -19,14 +19,7 @@
 
 package com.webank.weid.service.impl.callback;
 
-//import cn.webank.blockchain.api.accounting.callback.ClearingBankNotifyCallback;
-//import cn.webank.blockchain.constants.ErrorCode;
-//import cn.webank.blockchain.impl.payment.PushNotifyAllCallback;
-//import cn.webank.blockchain.protocol.*;
-//import cn.webank.blockchain.result.DirectRouteNotifyMsgResult;
-//import cn.webank.blockchain.result.RecordAccountsPayableResult;
-//import cn.webank.common.conf.Config;
-
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 import com.webank.weid.rpc.callback.PushNotifyAllCallback;
@@ -41,6 +34,12 @@ public class DirectRouteCallback implements PushNotifyAllCallback {
     static private final String ERROR_MSG_NO_OVERRIDE = "server side have not handle this type of message!";
 
     public DirectRouteNotifyMsgResult onPush(CheckDirectRouteMsgHealthArgs arg) {
-        return null;
+    	
+    	DirectRouteNotifyMsgResult result = new DirectRouteNotifyMsgResult();
+    	result.setMessage(MSG_HEALTH);
+    	result.setErrorCode(ErrorCode.SUCCESS.getCode());
+    	result.setMessage(ErrorCode.SUCCESS.getCodeDesc());
+        return result;
     }
+
 }
