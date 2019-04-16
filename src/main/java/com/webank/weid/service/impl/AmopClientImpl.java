@@ -132,7 +132,7 @@ public class AmopClientImpl extends BaseService implements AmopClient  {
 		responseStruct.setResult(msgBodyObj);
 		return responseStruct;
     }
-	
+
 
 	
 }

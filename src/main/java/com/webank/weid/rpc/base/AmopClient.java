@@ -20,11 +20,15 @@
 package com.webank.weid.rpc.base;
 
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.amop.PresentationEncryptKeyArgs;
+import com.webank.weid.protocol.amop.PresentationPolicyArgs;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
+import com.webank.weid.protocol.response.PresentationEncryptKeyResult;
+import com.webank.weid.protocol.response.PresentationPolicyResult;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * @author tonychen 2019年4月16日
  */
 public interface AmopClient {
 
@@ -37,4 +41,23 @@ public interface AmopClient {
      * @return
      */
     ResponseData<DirectRouteNotifyMsgResult> checkDirectRouteMsgHealth(String toOrgId, CheckDirectRouteMsgHealthArgs arg);
+    
+    
+    /**
+     * 链上链下发消息的通用接口
+     *
+     * @param toOrgId
+     * @param arg
+     * @return
+     */
+    ResponseData<PresentationPolicyResult> requestPresentationPolicy(String toOrgId,  PresentationPolicyArgs presentationPolicyArg);
+    
+    /**
+     * 链上链下发消息的通用接口
+     *
+     * @param toOrgId
+     * @param arg
+     * @return
+     */
+    ResponseData<PresentationEncryptKeyResult> requestPresentationEncryptKey(String toOrgId, PresentationEncryptKeyArgs arg);
 }
