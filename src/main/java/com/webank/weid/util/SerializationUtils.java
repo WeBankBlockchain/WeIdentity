@@ -1,4 +1,3 @@
-package com.webank.weid.util;
 
 	/*
 	 *       Copyright© (2018-2019) WeBank Co., Ltd.
@@ -18,6 +17,8 @@ package com.webank.weid.util;
 	 *       You should have received a copy of the GNU Lesser General Public License
 	 *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
 	 */
+
+package com.webank.weid.util;
 
 	import java.io.IOException;
 	import java.io.StringWriter;
