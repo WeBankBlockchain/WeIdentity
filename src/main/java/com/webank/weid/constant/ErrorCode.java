@@ -347,6 +347,11 @@ public enum ErrorCode {
 
     DIRECT_ROUTE_REQUEST_TIMEOUT(160009, "amop timeout"),
     DIRECT_ROUTE_MSG_BASE_ERROR(160010, "amop timeout"),
+    
+    /**
+     * sql execute failed.
+     */
+    SQL_EXECUTE_FAILED(160011, "sql execute failed."),
     /**
      * other uncatched exceptions or error.
      */
