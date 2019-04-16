@@ -19,14 +19,12 @@
 
 package com.webank.weid.service;
 
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.exception.InitWeb3jException;
-import com.webank.weid.exception.LoadContractException;
-import com.webank.weid.exception.PrivateKeyIllegalException;
-
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bcos.channel.client.Service;
 import org.bcos.contract.tools.ToolConf;
@@ -40,6 +38,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.InitWeb3jException;
+import com.webank.weid.exception.LoadContractException;
+import com.webank.weid.exception.PrivateKeyIllegalException;
+import com.webank.weid.rpc.callback.OnNotifyCallback;
+import com.webank.weid.util.PropertyUtils;
 
 /**
  * The BaseService for other RPC classes.
@@ -55,13 +60,27 @@ public abstract class BaseService {
     private static Credentials credentials;
 
     private static Web3j web3j;
+    
+    private static Service service;
+    
 
     static {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        service = context.getBean(Service.class);
     }
 
+    protected static Service getService() {
+    	return service;
+    }
     private static boolean initWeb3j() {
-        Service service = context.getBean(Service.class);
+    	
+//        Service service = context.getBean(Service.class);
+        //initialize amop
+        if(initAmop(service)) {
+        	logger.error("[BaseService] initialize amop failed.");
+        	return false;
+        }
+        
         try {
             service.run();
         } catch (Exception e) {
@@ -78,6 +97,28 @@ public abstract class BaseService {
         return true;
     }
 
+    private static boolean initAmop(Service service) {
+    	
+    	try {
+			PropertyUtils.loadProperties("sdk.properties");
+		} catch (IOException e) {
+			logger.error("[BaseService] Load sdk.properties file failed.", e);
+			return false;
+		}
+        String orgId = PropertyUtils.getProperty("blockchain.orgId");
+        
+        OnNotifyCallback pushCallBack = new OnNotifyCallback();
+//        pushCallBack.se
+        service.setPushCallback(pushCallBack);
+        
+    	//设置topic，支持多个topic
+		List<String> topics = new ArrayList<String>();
+		topics.add(orgId);
+		service.setTopics(topics);
+		
+		return true;
+		
+    }
     /**
      * Inits the credentials.
      *
@@ -85,7 +126,7 @@ public abstract class BaseService {
      */
     private static boolean initCredentials() {
         ToolConf toolConf = context.getBean(ToolConf.class);
-        logger.info("begin init credentials");
+        logger.info("begin to init credentials");
         credentials = GenCredential.create(toolConf.getPrivKey());
 
         if (credentials == null) {
@@ -107,6 +148,9 @@ public abstract class BaseService {
         return web3j;
     }
 
+    protected static String getSeq() {
+    	return service.newSeq();
+    }
     private static Object loadContract(
         String contractAddress,
         Credentials credentials,
