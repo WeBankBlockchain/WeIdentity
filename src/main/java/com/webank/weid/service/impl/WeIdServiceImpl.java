@@ -32,6 +32,8 @@ import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.exception.ResolveAttributeException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
+import com.webank.weid.protocol.base.Challenge;
+import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.ServiceProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -897,4 +899,31 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
+
+	/* (non-Javadoc)
+	 * @see com.webank.weid.rpc.WeIdService#presentChallenge(java.lang.String)
+	 */
+	@Override
+	public ResponseData<Challenge> presentChallenge(String challengerWeId) {
+		ResponseData<Challenge> response = new ResponseData<Challenge>();
+		return response;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.webank.weid.rpc.WeIdService#meetChallenge(com.webank.weid.protocol.base.Challenge)
+	 */
+	@Override
+	public ResponseData<Credential> meetChallenge(Challenge challenge) {
+		ResponseData<Credential> response = new ResponseData<Credential>();
+		return response;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.webank.weid.rpc.WeIdService#authenticate(java.lang.String, com.webank.weid.protocol.base.Challenge, com.webank.weid.protocol.base.Credential)
+	 */
+	@Override
+	public ResponseData<Boolean> authenticate(String weId, Challenge challenge, Credential credential) {
+		ResponseData<Boolean> response = new ResponseData<Boolean>();
+		return response;
+	}
 }
