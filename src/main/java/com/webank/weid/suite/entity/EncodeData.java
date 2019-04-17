@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,18 +17,42 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
+package com.webank.weid.suite.entity;
 
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+import lombok.Getter;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * 编辑码的实体类，封装了需要编解码的数据.
+ * @author v_wbgyang
+ *
  */
-public interface JsonTransportation {
-
-    public ResponseData<String> serialize(PresentationE wrapper, JsonProtocolProperty property);
-
-    public ResponseData<PresentationE> deserialize(String transString);
+@Getter
+public class EncodeData {
+    
+    /**
+     * 机构名称.
+     */
+    private String orgId;
+   
+    /**
+     * 待编解码字符串.
+     */
+    private String data;
+   
+    /**
+     * 待编解码字符串数据编号.
+     */
+    private String id;
+   
+    /**
+     * 构建编解码对象.
+     * @param orgId 协议所属机构
+     * @param id 数据编号
+     * @param data 需要编解码数据
+     */
+    public EncodeData(String id, String orgId, String data) {
+        this.id = id;
+        this.orgId = orgId;
+        this.data = data;
+    }
 }

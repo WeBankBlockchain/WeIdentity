@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,18 +17,30 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
+package com.webank.weid.suite.crypto;
 
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+import com.webank.weid.exception.EncodeSuiteException;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * 秘钥加解密接口.
+ * @author v_wbgyang
+ *
  */
-public interface JsonTransportation {
+public interface CryptService {
 
-    public ResponseData<String> serialize(PresentationE wrapper, JsonProtocolProperty property);
-
-    public ResponseData<PresentationE> deserialize(String transString);
+    /**
+     * 加密方法.
+     * @param content 待加密字符串
+     * @param password 秘钥
+     * @return 返回加密后的字符串数据
+     */
+    public String encrypt(String content, String password) throws EncodeSuiteException;
+    
+    /**
+     * 解密方法.
+     * @param content 待解密字符串
+     * @param password 秘钥
+     * @return 返回解密后的字符串数据
+     */
+    public String decrypt(String content, String password) throws EncodeSuiteException;
 }

@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,18 +17,27 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
+package com.webank.weid.exception;
 
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+import com.webank.weid.constant.ErrorCode;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * 协议处理异常.
+ * @author v_wbgyang
+ *
  */
-public interface JsonTransportation {
+public class ProtocolSuiteException extends WeIdBaseException {
 
-    public ResponseData<String> serialize(PresentationE wrapper, JsonProtocolProperty property);
+    private static final long serialVersionUID = 1L;
+    
+    private ErrorCode errorCode;
 
-    public ResponseData<PresentationE> deserialize(String transString);
+    public ProtocolSuiteException(ErrorCode errorCode) {
+        super(errorCode.getCodeDesc());
+        this.errorCode = errorCode;
+    }
+    
+    public ErrorCode getErrorCode() {
+        return this.errorCode;
+    }
 }

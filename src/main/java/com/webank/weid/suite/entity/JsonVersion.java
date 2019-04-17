@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,18 +17,38 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
-
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+package com.webank.weid.suite.entity;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * JSON传输协议枚举.
+ * @author v_wbgyang
+ *
  */
-public interface JsonTransportation {
+public enum JsonVersion {
 
-    public ResponseData<String> serialize(PresentationE wrapper, JsonProtocolProperty property);
+    V1(1);
+    
+    private int code;
 
-    public ResponseData<PresentationE> deserialize(String transString);
+    JsonVersion(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
+    
+    /**
+     * get JsonVersion By code.
+     *
+     * @param code the JsonVersion
+     */
+    public static JsonVersion getJsonVersion(int code) {
+        for (JsonVersion version : JsonVersion.values()) {
+            if (version.getCode() == code) {
+                return version;
+            }
+        }
+        return null;
+    }
 }

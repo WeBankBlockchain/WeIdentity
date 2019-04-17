@@ -20,6 +20,7 @@
 package com.webank.weid.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,15 +45,38 @@ public class JsonUtil {
 
     private static final ObjectWriter OBJECT_WRITER;
     private static final ObjectReader OBJECT_READER;
+    private static final ObjectWriter OBJECT_WRITER_UN_PRETTY_PRINTER;
 
     static {
         // sort by letter
         OBJECT_MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
         // when map is serialization, sort by key
         OBJECT_MAPPER.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+        // ignore mismatched fields
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        OBJECT_WRITER_UN_PRETTY_PRINTER = OBJECT_MAPPER.writer();
 
         OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
         OBJECT_READER = OBJECT_MAPPER.reader();
+    }
+    
+    /**
+     * Json String to Object.
+     *
+     * @param cls the type of Object
+     * @param jsonStr Json String
+     * @return Object
+     */
+    public static <T> T jsonStrToObj(Class<T> cls, String jsonStr) {
+
+        try {
+            return OBJECT_READER.readValue(
+                OBJECT_MAPPER.getFactory().createParser(jsonStr),
+                cls);
+        } catch (IOException e) {
+            throw new DataTypeCastException(e);
+        }
     }
 
     /**
@@ -87,7 +111,22 @@ public class JsonUtil {
             throw new DataTypeCastException(e);
         }
     }
+    
+    /**
+     * Object to Json String.
+     *
+     * @param obj Object
+     * @return String
+     */
+    public static String objToJsonStrWithNoPretty(Object obj) {
 
+        try {
+            return OBJECT_WRITER_UN_PRETTY_PRINTER.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new DataTypeCastException(e);
+        }
+    }
+    
     /**
      * Convert a Map to compact Json output, with keys ordered. Use Jackson JsonNode toString() to
      * ensure key order and compact output.

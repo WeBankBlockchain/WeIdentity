@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,18 +17,22 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
+package com.webank.weid.suite.crypto;
 
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+import com.webank.weid.util.UuIdUtils;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * 秘钥生成器.
+ * @author v_wbgyang
+ *
  */
-public interface JsonTransportation {
+public class KeyGenerator {
 
-    public ResponseData<String> serialize(PresentationE wrapper, JsonProtocolProperty property);
-
-    public ResponseData<PresentationE> deserialize(String transString);
+    /**
+     * 使用UUID作为秘钥.
+     * @return 返回UUID字符串
+     */
+    public static String getKey() {
+        return UuIdUtils.getUuId32();   
+    }
 }

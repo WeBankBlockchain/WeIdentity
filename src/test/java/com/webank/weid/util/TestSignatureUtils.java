@@ -42,33 +42,33 @@ public class TestSignatureUtils {
     public void testSignatureUtils()
         throws Exception {
 
-        ECKeyPair keyPair = SignatureUtils.createKeyPair();
+        ECKeyPair keyPair = DataToolUtils.createKeyPair();
         String str = "hello world...........................yes";
-        Sign.SignatureData sigData = SignatureUtils.signMessage(str, keyPair);
-        BigInteger publicKey = SignatureUtils.signatureToPublicKey(str, sigData);
+        Sign.SignatureData sigData = DataToolUtils.signMessage(str, keyPair);
+        BigInteger publicKey = DataToolUtils.signatureToPublicKey(str, sigData);
         logger.info("publicKey:{} ", publicKey);
 
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
-        Sign.SignatureData sigData2 = SignatureUtils.signMessage(str, privateKey);
-        publicKey = SignatureUtils.signatureToPublicKey(str, sigData2);
+        Sign.SignatureData sigData2 = DataToolUtils.signMessage(str, privateKey);
+        publicKey = DataToolUtils.signatureToPublicKey(str, sigData2);
         logger.info("publicKey:{} ", publicKey);
 
-        boolean result = SignatureUtils.verifySignature(str, sigData2, publicKey);
+        boolean result = DataToolUtils.verifySignature(str, sigData2, publicKey);
         Assert.assertTrue(result);
 
-        publicKey = SignatureUtils.publicKeyFromPrivate(new BigInteger(privateKey));
+        publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
         logger.info("publicKey:{} ", publicKey);
 
-        keyPair = SignatureUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         logger.info("publicKey:{} ", keyPair.getPublicKey());
         logger.info("privateKey:{}", keyPair.getPrivateKey());
 
-        byte[] serialized = SignatureUtils.simpleSignatureSerialization(sigData);
-        Sign.SignatureData newSigData = SignatureUtils.simpleSignatureDeserialization(serialized);
+        byte[] serialized = DataToolUtils.simpleSignatureSerialization(sigData);
+        Sign.SignatureData newSigData = DataToolUtils.simpleSignatureDeserialization(serialized);
         logger.info(newSigData.toString());
 
-        Sign.SignatureData signatureData = SignatureUtils
+        Sign.SignatureData signatureData = DataToolUtils
             .convertBase64StringToSignatureData(new String(Base64.encode(serialized)));
         logger.info(signatureData.toString());
     }

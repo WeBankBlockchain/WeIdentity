@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,18 +17,37 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
+package com.webank.weid.suite.entity;
 
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+public enum QrCodeVersion {
+    
+    V1(1);
+    
+    private int code;
+    
+    QrCodeVersion(int code) {
+        this.code = code;
+    }
 
-/**
- * Created by Junqi Zhang on 2019/4/10.
- */
-public interface JsonTransportation {
-
-    public ResponseData<String> serialize(PresentationE wrapper, JsonProtocolProperty property);
-
-    public ResponseData<PresentationE> deserialize(String transString);
+    public int getCode() {
+        return code;
+    }
+    
+    public String toString() {
+        return String.valueOf(this.code);
+    }
+    
+    /**
+     * get MetaVersion by code.
+     * @param value code value
+     * @return
+     */
+    public static QrCodeVersion getObject(String value) {
+        for (QrCodeVersion version : QrCodeVersion.values()) {
+            if (String.valueOf(version.getCode()).equals(value)) {
+                return version;
+            }
+        }
+        return null;
+    }
 }

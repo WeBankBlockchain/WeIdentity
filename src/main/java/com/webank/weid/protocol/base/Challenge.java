@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -21,6 +21,8 @@ package com.webank.weid.protocol.base;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import com.webank.weid.constant.WeIdConstant;
 
 /**
  * Created by Junqi Zhang on 2019/4/9.
@@ -44,4 +46,16 @@ public class Challenge extends Version {
      *
      */
     String nonce;
+    
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer(this.version);
+        buffer.append(WeIdConstant.PIPELINE)
+            .append(this.challegeId)
+            .append(WeIdConstant.PIPELINE)
+            .append(this.weId)
+            .append(WeIdConstant.PIPELINE)
+            .append(this.nonce);
+        return buffer.toString();
+    }
 }

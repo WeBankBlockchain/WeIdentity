@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,18 +17,21 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
+package com.webank.weid.util;
 
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * UUID tool.
+ * @author v_wbgyang
+ *
  */
-public interface JsonTransportation {
+public class UuIdUtils {
+    
+    private static final String SEPARATOR_CHAR = "-";
 
-    public ResponseData<String> serialize(PresentationE wrapper, JsonProtocolProperty property);
-
-    public ResponseData<PresentationE> deserialize(String transString);
+    public static String getUuId32() {
+        return UUID.randomUUID().toString().replaceAll(SEPARATOR_CHAR, StringUtils.EMPTY);   
+    }
 }
