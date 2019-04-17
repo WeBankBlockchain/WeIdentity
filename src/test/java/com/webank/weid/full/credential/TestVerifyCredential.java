@@ -42,7 +42,7 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.util.SignatureUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * verifyCredential method for testing CredentialService.
@@ -351,7 +351,7 @@ public class TestVerifyCredential extends TestBaseServcie {
     @Test
     public void testVerifyCredentialCase20() {
 
-        MockUp<SignatureUtils> mockTest = new MockUp<SignatureUtils>() {
+        MockUp<DataToolUtils> mockTest = new MockUp<DataToolUtils>() {
             @Mock
             public Sign.SignatureData simpleSignatureDeserialization(
                 byte[] serializedSignatureData) throws SignatureException {

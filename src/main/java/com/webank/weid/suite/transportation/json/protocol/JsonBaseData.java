@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,18 +17,48 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
+package com.webank.weid.suite.transportation.json.protocol;
 
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * JSON协议实体.
+ * @author v_wbgyang
+ *
  */
-public interface JsonTransportation {
+@Getter
+@Setter
+public class JsonBaseData {  
+    
+    /**
+     * JSON协议版本.
+     */
+    private int version;
+    
+    /**
+     * JSON协议编解码方式.
+     */
+    private int encodeType;
+    
+    /**
+     * 协议所属机构.
+     */
+    private String orgId;
+    
+    /**
+     * 协议数据Id.
+     */
+    private String id;
+    
+    /**
+     * 协议数据体.
+     */
+    private Object data;
 
-    public ResponseData<String> serialize(PresentationE wrapper, JsonProtocolProperty property);
-
-    public ResponseData<PresentationE> deserialize(String transString);
+    /**
+     * 协议通讯类型.
+     */
+    private String type = "AMOP";
+    
 }
