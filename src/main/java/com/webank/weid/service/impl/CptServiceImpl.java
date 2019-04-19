@@ -100,6 +100,34 @@ public class CptServiceImpl extends BaseService implements CptService {
     }
 
     /**
+     * Register a new CPT with a pre-set CPT ID, to the blockchain.
+     *
+     * @param args the args
+     * @param cptId the CPT ID
+     * @return response data
+     */
+    public ResponseData<CptBaseInfo> registerCpt(CptStringArgs args, Integer cptId) {
+        if (args == null || cptId == null || cptId <= 0) {
+            logger.error(
+                "[registerCpt1] input argument is illegal");
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        try {
+            CptMapArgs cptMapArgs = new CptMapArgs();
+            cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
+            cptMapArgs.setCptJsonSchema(
+                (Map<String, Object>) JsonUtil.jsonStrToObj(
+                    new HashMap<String, Object>(),
+                    args.getCptJsonSchema())
+            );
+            return this.registerCpt(cptMapArgs, cptId);
+        } catch (Exception e) {
+            logger.error("[registerCpt1] register cpt failed due to unknown error. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    /**
      * This is used to register a new CPT to the blockchain.
      *
      * @param args the args
@@ -124,6 +152,50 @@ public class CptServiceImpl extends BaseService implements CptService {
             return this.registerCpt(cptMapArgs);
         } catch (Exception e) {
             logger.error("[registerCpt1] register cpt failed due to unknown error. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    /**
+     * Register a new CPT with a pre-set CPT ID, to the blockchain.
+     *
+     * @param args the args
+     * @param cptId the CPT ID
+     * @return response data
+     */
+    public ResponseData<CptBaseInfo> registerCpt(CptMapArgs args, Integer cptId) {
+        if (args == null || cptId == null || cptId <= 0) {
+            logger.error("[registerCpt] input argument is illegal");
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        try {
+            ErrorCode errorCode =
+                this.validateCptArgs(
+                    args.getWeIdAuthentication(),
+                    args.getCptJsonSchema()
+                );
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(null, errorCode);
+            }
+
+            TransactionReceipt transactionReceipt = this.getTransactionReceipt(
+                args.getWeIdAuthentication(),
+                args.getCptJsonSchema(),
+                false,
+                cptId
+            );
+            return this.resolveRegisterCptEvents(transactionReceipt);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error(
+                "[registerCpt] register cpt failed due to transaction execution error. ",
+                e
+            );
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            logger.error("[registerCpt] register cpt failed due to transaction timeout. ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (Exception e) {
+            logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
@@ -387,6 +459,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
         reloadContract(weIdPrivateKey.getPrivateKey());
         if (isUpdate) {
+            // the case to update a CPT. Requires a valid CPT ID
             return cptController.updateCpt(
                 DataTypetUtils.intToUint256(cptId),
                 new Address(WeIdUtils.convertWeIdToAddress(weId)),
@@ -397,16 +470,32 @@ public class CptServiceImpl extends BaseService implements CptService {
                 rsvSignature.getR(),
                 rsvSignature.getS()
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+        } else {
+            if (cptId == null || cptId == 0) {
+                // the case to register a CPT with an auto-generated CPT ID
+                return cptController.registerCpt(
+                    new Address(WeIdUtils.convertWeIdToAddress(weId)),
+                    TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
+                    bytes32Array,
+                    TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
+                    rsvSignature.getV(),
+                    rsvSignature.getR(),
+                    rsvSignature.getS()
+                ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            } else {
+                // the case to register a CPT with a pre-set CPT ID
+                return cptController.registerCpt(
+                    DataTypetUtils.intToUint256(cptId),
+                    new Address(WeIdUtils.convertWeIdToAddress(weId)),
+                    TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
+                    bytes32Array,
+                    TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
+                    rsvSignature.getV(),
+                    rsvSignature.getR(),
+                    rsvSignature.getS()
+                ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            }
         }
-        return cptController.registerCpt(
-            new Address(WeIdUtils.convertWeIdToAddress(weId)),
-            TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
-            bytes32Array,
-            TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
-            rsvSignature.getV(),
-            rsvSignature.getR(),
-            rsvSignature.getS()
-        ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
     }
 
     private ResponseData<CptBaseInfo> getResultByResolveEvent(
@@ -417,21 +506,36 @@ public class CptServiceImpl extends BaseService implements CptService {
         // register
         if (DataTypetUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
-            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}", cptId);
+            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}",
+                DataTypetUtils.uint256ToInt(cptId));
             return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX);
+        }
+
+        if (DataTypetUtils.uint256ToInt(retCode) == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
+                DataTypetUtils.uint256ToInt(cptId));
+            return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST);
+        }
+
+        if (DataTypetUtils.uint256ToInt(retCode) == ErrorCode.CPT_NO_PERMISSION.getCode()) {
+            logger.error("[getResultByResolveEvent] no permission. cptId:{}",
+                DataTypetUtils.uint256ToInt(cptId));
+            return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION);
         }
 
         // register and update
         if (DataTypetUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
-            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}", cptId);
+            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}",
+                DataTypetUtils.uint256ToInt(cptId));
             return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST);
         }
 
         // update
         if (DataTypetUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_NOT_EXISTS.getCode()) {
-            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.", cptId);
+            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.",
+                DataTypetUtils.uint256ToInt(cptId));
             return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
         }
 
