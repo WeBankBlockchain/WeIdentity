@@ -19,22 +19,13 @@
 
 package com.webank.weid.contract.deploy;
 
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.AuthorityIssuerController;
-import com.webank.weid.contract.AuthorityIssuerData;
-import com.webank.weid.contract.CommitteeMemberController;
-import com.webank.weid.contract.CommitteeMemberData;
-import com.webank.weid.contract.CptController;
-import com.webank.weid.contract.CptData;
-import com.webank.weid.contract.EvidenceFactory;
-import com.webank.weid.contract.RoleController;
-import com.webank.weid.contract.WeIdContract;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -48,10 +39,23 @@ import org.bcos.web3j.crypto.Credentials;
 import org.bcos.web3j.crypto.GenCredential;
 import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.channel.ChannelEthereumService;
+import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.AuthorityIssuerController;
+import com.webank.weid.contract.AuthorityIssuerData;
+import com.webank.weid.contract.CommitteeMemberController;
+import com.webank.weid.contract.CommitteeMemberData;
+import com.webank.weid.contract.CptController;
+import com.webank.weid.contract.CptData;
+import com.webank.weid.contract.EvidenceFactory;
+import com.webank.weid.contract.RoleController;
+import com.webank.weid.contract.WeIdContract;
+import com.webank.weid.util.WeIdUtils;
 
 /**
  * The Class DeployContract.
@@ -149,8 +153,12 @@ public class DeployContract {
 
     private static void deployContract() {
         String weIdContractAddress = deployWeIdContract();
-        String authorityIssuerDataAddress = deployAuthorityIssuerContracts();
-        deployCptContracts(authorityIssuerDataAddress, weIdContractAddress);
+        String roleControllerAddress = deployRoleControllerContracts();
+        Map<String, String> addrList = deployIssuerContracts(roleControllerAddress);
+        if (addrList.containsKey("AuthorityIssuerData")) {
+            String authorityIssuerDataAddress = addrList.get("AuthorityIssuerData");
+            deployCptContracts(authorityIssuerDataAddress, weIdContractAddress, roleControllerAddress);
+        }
         deployEvidenceContracts();
     }
 
@@ -179,7 +187,9 @@ public class DeployContract {
     }
 
     private static String deployCptContracts(
-        String authorityIssuerDataAddress, String weIdContractAddress) {
+        String authorityIssuerDataAddress,
+        String weIdContractAddress,
+        String roleControllerAddress) {
         if (web3j == null) {
             loadConfig();
         }
@@ -195,7 +205,6 @@ public class DeployContract {
                     new Address(authorityIssuerDataAddress));
             CptData cptData = f1.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String cptDataAddress = cptData.getContractAddress();
-            //        writeAddressToFile("CptData", cptDataAddress);
 
             Future<CptController> f2 =
                 CptController.deploy(
@@ -211,6 +220,10 @@ public class DeployContract {
                 f2.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             String cptControllerAddress = cptController.getContractAddress();
             writeAddressToFile(cptControllerAddress, "cptController.address");
+
+            Future<TransactionReceipt> f3 = cptController
+                .setRoleController(new Address(roleControllerAddress));
+            f3.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             logger.error("CptController deploy exception", e);
         }
@@ -218,28 +231,37 @@ public class DeployContract {
         return StringUtils.EMPTY;
     }
 
-    private static String deployAuthorityIssuerContracts() {
+    private static String deployRoleControllerContracts() {
         if (web3j == null) {
             loadConfig();
         }
 
-        // Step 1: Deploy RoleController sol => [addr1]
-        String authorityIssuerDataAddress = StringUtils.EMPTY;
-        Future<RoleController> f1 =
-            RoleController.deploy(
-                web3j,
-                credentials,
-                WeIdConstant.GAS_PRICE,
-                WeIdConstant.GAS_LIMIT,
-                WeIdConstant.INILITIAL_VALUE);
-
-        // Step 2: Deploy CommitteeMemberData sol => [addr1]
-        Future<CommitteeMemberData> f2 = null;
-        String roleControllerAddress = StringUtils.EMPTY;
         try {
+            Future<RoleController> f1 =
+                RoleController.deploy(
+                    web3j,
+                    credentials,
+                    WeIdConstant.GAS_PRICE,
+                    WeIdConstant.GAS_LIMIT,
+                    WeIdConstant.INILITIAL_VALUE);
             RoleController roleController =
                 f1.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-            roleControllerAddress = roleController.getContractAddress();
+            return roleController.getContractAddress();
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            logger.error("RoleController deploy exception", e);
+            return StringUtils.EMPTY;
+        }
+    }
+
+    private static Map<String, String> deployIssuerContracts(String roleControllerAddress) {
+        if (web3j == null) {
+            loadConfig();
+        }
+        Map<String, String> issuerAddressList = new HashMap<>();
+
+        Future<CommitteeMemberData> f2;
+        String committeeMemberDataAddress;
+        try {
             f2 = CommitteeMemberData.deploy(
                 web3j,
                 credentials,
@@ -247,19 +269,21 @@ public class DeployContract {
                 WeIdConstant.GAS_LIMIT,
                 WeIdConstant.INILITIAL_VALUE,
                 new Address(roleControllerAddress));
-
-        } catch (Exception e) {
-            logger.error("RoleController deployment error:", e);
-            return authorityIssuerDataAddress;
-        }
-
-        // Step 3: Deploy CommitteeMemberController sol => [addr1]
-        try {
             CommitteeMemberData committeeMemberData =
                 f2.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
-            String committeeMemberDataAddress = committeeMemberData.getContractAddress();
+            committeeMemberDataAddress = committeeMemberData.getContractAddress();
+            if (!WeIdUtils.isEmptyAddress(new Address(committeeMemberDataAddress))) {
+                issuerAddressList.put("CommitteeMemberData", committeeMemberDataAddress);
+            }
+        } catch (Exception e) {
+            logger.error("CommitteeMemberData deployment error:", e);
+            return issuerAddressList;
+        }
 
-            CommitteeMemberController.deploy(
+        Future<CommitteeMemberController> f3;
+        String committeeMemberControllerAddress;
+        try {
+            f3 = CommitteeMemberController.deploy(
                 web3j,
                 credentials,
                 WeIdConstant.GAS_PRICE,
@@ -268,14 +292,20 @@ public class DeployContract {
                 new Address(committeeMemberDataAddress),
                 new Address(roleControllerAddress)
             );
-
+            CommitteeMemberController committeeMemberController =
+                f3.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+            committeeMemberControllerAddress = committeeMemberController.getContractAddress();
+            if (!WeIdUtils.isEmptyAddress(new Address(committeeMemberControllerAddress))) {
+                issuerAddressList
+                    .put("CommitteeMemberController", committeeMemberControllerAddress);
+            }
         } catch (Exception e) {
-            logger.error("CommitteeMemberData deployment error:", e);
-            return authorityIssuerDataAddress;
+            logger.error("CommitteeMemberController deployment error:", e);
+            return issuerAddressList;
         }
 
-        // Step 4: Deploy AuthorityIssuerData sol => [addr1]
-        Future<AuthorityIssuerData> f4 = null;
+        Future<AuthorityIssuerData> f4;
+        String authorityIssuerDataAddress;
         try {
             f4 = AuthorityIssuerData.deploy(
                 web3j,
@@ -285,18 +315,20 @@ public class DeployContract {
                 WeIdConstant.INILITIAL_VALUE,
                 new Address(roleControllerAddress)
             );
-
-        } catch (Exception e) {
-            logger.error("CommitteeMemberController deployment error:", e);
-            return authorityIssuerDataAddress;
-        }
-
-        // Step 5: Deploy AuthorityIssuerController sol => [addr1]
-        Future<AuthorityIssuerController> f5 = null;
-        try {
             AuthorityIssuerData authorityIssuerData =
                 f4.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
             authorityIssuerDataAddress = authorityIssuerData.getContractAddress();
+            if (!WeIdUtils.isEmptyAddress(new Address(authorityIssuerDataAddress))) {
+                issuerAddressList.put("AuthorityIssuerData", authorityIssuerDataAddress);
+            }
+        } catch (Exception e) {
+            logger.error("AuthorityIssuerData deployment error:", e);
+            return issuerAddressList;
+        }
+
+        Future<AuthorityIssuerController> f5;
+        String authorityIssuerControllerAddress;
+        try {
             f5 = AuthorityIssuerController.deploy(
                 web3j,
                 credentials,
@@ -305,27 +337,24 @@ public class DeployContract {
                 WeIdConstant.INILITIAL_VALUE,
                 new Address(authorityIssuerDataAddress),
                 new Address(roleControllerAddress));
-
-        } catch (Exception e) {
-            logger.error("AuthorityIssuerData deployment error:", e);
-            return authorityIssuerDataAddress;
-        }
-
-        // Step 6: Write [addrress] Into File
-        try {
             AuthorityIssuerController authorityIssuerController =
-                f5.get(
-                    DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS,
-                    TimeUnit.SECONDS
-                );
-            String authorityIssuerControllerAddress =
-                authorityIssuerController.getContractAddress();
-            writeAddressToFile(authorityIssuerControllerAddress, "authorityIssuer.address");
-            return authorityIssuerControllerAddress;
+                f5.get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+            authorityIssuerControllerAddress = authorityIssuerController.getContractAddress();
+            if (!WeIdUtils.isEmptyAddress(new Address(authorityIssuerControllerAddress))) {
+                issuerAddressList
+                    .put("AuthorityIssuerController", authorityIssuerControllerAddress);
+            }
         } catch (Exception e) {
             logger.error("AuthorityIssuerController deployment error:", e);
+            return issuerAddressList;
         }
-        return authorityIssuerDataAddress;
+
+        try {
+            writeAddressToFile(authorityIssuerControllerAddress, "authorityIssuer.address");
+        } catch (Exception e) {
+            logger.error("Write error:", e);
+        }
+        return issuerAddressList;
     }
 
     private static String deployEvidenceContracts() {

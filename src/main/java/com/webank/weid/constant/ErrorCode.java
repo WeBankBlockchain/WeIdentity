@@ -50,6 +50,16 @@ public enum ErrorCode {
     CPT_PUBLISHER_NOT_EXIST(500303, "cpt publisher does not exist"),
 
     /**
+     * This cpt id already exists on chain.
+     */
+    CPT_ALREADY_EXIST(500304, "cpt already exist on chain"),
+
+    /**
+     * No permission to perform this CPT task.
+     */
+    CPT_NO_PERMISSION(500305, "no permission to perform this cpt task"),
+
+    /**
      * The cpt json schema invalid.
      */
     CPT_JSON_SCHEMA_INVALID(100301, "cpt json schema is invalid"),

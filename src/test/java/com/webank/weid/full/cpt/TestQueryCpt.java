@@ -110,7 +110,7 @@ public class TestQueryCpt extends TestBaseServcie {
     @Test
     public void testQueryCptCase4() {
 
-        ResponseData<Cpt> response = cptService.queryCpt(100000);
+        ResponseData<Cpt> response = cptService.queryCpt(999999999);
         LogUtil.info(logger, "queryCpt", response);
 
         Assert.assertEquals(ErrorCode.CPT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
