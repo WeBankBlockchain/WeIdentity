@@ -26,5 +26,13 @@ package com.webank.weid.protocol.base.cpt;
  */
 public class Cpt105 {
 
+    private String ownerWeId;
 
+    private String url;
+
+    private String port;
+
+    private Integer policyId;
+
+    private String orgId;
 }

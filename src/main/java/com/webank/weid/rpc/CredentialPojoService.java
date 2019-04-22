@@ -19,6 +19,9 @@
 
 package com.webank.weid.rpc;
 
+import com.webank.weid.protocol.base.Challenge;
+import com.webank.weid.protocol.base.PresentationE;
+import com.webank.weid.protocol.base.PresentationPolicyE;
 import java.util.Map;
 
 import com.webank.weid.protocol.base.ClaimPolicy;
@@ -45,10 +48,10 @@ public interface CredentialPojoService {
     ResponseData<CredentialPojoWrapper> createCredential(CreateCredentialPojoArgs args);
 
     /**
-     * Generate a credential with selected data.
+     * Generate a selective disclosure credential with specified claim policy.
      *
      * @param credentialPojoWrapper the credential
-     * @param claimPolicy
+     * @param claimPolicy describe which fields in credential should be disclosed.
      * @return CredentialWrapper
      */
     ResponseData<CredentialPojoWrapper> createSelectiveCredential(
@@ -62,36 +65,27 @@ public interface CredentialPojoService {
      * @param credentialWrapper the credentialWrapper
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
-    ResponseData<Boolean> verify(CredentialPojoWrapper credentialWrapper);
+    ResponseData<Boolean> verify(
+        CredentialPojoWrapper credentialWrapper,
+        String issuerWeId
+    );
 
     /**
      * Verify the validity of a credential. Public key must be provided.
      *
      * @param credentialWrapper the credential wrapper
-     * @param weIdPublicKey the specified public key which used to verify credential signature
+     * @param issuerPublicKey the specified public key which used to verify credential signature
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
-    ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(
+    ResponseData<Boolean> verify(
         CredentialPojoWrapper credentialWrapper,
-        WeIdPublicKey weIdPublicKey
+        WeIdPublicKey issuerPublicKey
     );
 
-    /**
-     * Get the full hash value of a Credential. All fields in the Credential will be included. This
-     * method should be called when creating and verifying the Credential Evidence.
-     *
-     * @param credential the args
-     * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
-     */
-    ResponseData<String> getCredentialHash(Credential credential);
-
-    /**
-     * Get the Json String of a Credential. All fields in the Credential will be included. This also
-     * supports the selectively disclosed Credential.
-     *
-     * @param credential the credential
-     * @return the Credential Json value in String
-     */
-    ResponseData<String> getCredentialJson(Credential credential);
-
+    ResponseData<Boolean> verify(
+        PresentationE presentationE,
+        String presenterWeId,
+        PresentationPolicyE presentationPolicyE,
+        Challenge challenge
+    );
 }

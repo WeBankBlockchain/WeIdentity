@@ -32,11 +32,23 @@ import lombok.Setter;
 @Setter
 public class PresentationPolicyE extends Version {
 
-    private String weId;
+    /**
+     * Policy ID.
+     */
+    private Integer id;
 
+    /**
+     * represent who publish this presentation policy.
+     */
     private String orgId;
 
-    private Integer policyId;
+    /**
+     * represent who publish this presentation policy.
+     */
+    private String weId;
 
+    /**
+     * specify which properties in which credential are needed.
+     */
     private Map<Integer, ClaimPolicy> policy;
 }
