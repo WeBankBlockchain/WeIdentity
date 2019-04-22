@@ -19,19 +19,15 @@
 
 package com.webank.weid.rpc;
 
-import com.webank.weid.protocol.base.Challenge;
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.PresentationPolicyE;
+import com.webank.weid.protocol.base.PolicyAndChellenge;
 import com.webank.weid.protocol.response.ResponseData;
+//import com.webank.weid.rpc.base.BaseClient;
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
-public interface PresentationService {
+public interface MessageService {
 
-    ResponseData<Boolean> verify(
-        PresentationPolicyE presentationPolicyE,
-        Challenge challenge,
-        PresentationE presentationE
-    );
+    ResponseData<PolicyAndChellenge> getPresentationPolicy(String orgId, Integer policyId);
+
 }

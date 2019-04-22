@@ -20,6 +20,7 @@
 package com.webank.weid.protocol.base;
 
 import java.util.List;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,28 +34,28 @@ public class PresentationE {
     /**
      * Required: The context field.
      */
-    private String context;
+    private List<String> context;
+
+    private List<String> type;
 
     private List<CredentialPojoWrapper> credentialList;
 
-    private PresentationPolicyE presentationPolicy;
+    private Map<String, String> proof;
 
-    public boolean push(SelectiveDisclosureCredential credential) {
-        return false;
-    }
-
-    public boolean push(CredentialPojoWrapper credentialPojoWrapper) {
-        return false;
-    }
-
-    public boolean commit(CredentialPojoWrapper credentialPojoWrapper) {
-        return false;
-    }
+//    private PresentationPolicyE presentationPolicy;
 
     public String toJson() {
         // sort the credential in the list based on the credential id before converting to json.
         return null;
     }
 
-    //TODO: Proof to be added
+    public PresentationE create(
+        List<CredentialPojoWrapper> credentialList,
+        PresentationPolicyE policy,
+        WeIdAuthentication weIdAuthentication) {
+
+        //call function createSelectiveCredential in CredentialPojoService to create the selective
+        // disclosure credential.
+        return null;
+    }
 }
