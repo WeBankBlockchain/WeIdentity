@@ -83,9 +83,33 @@ public interface CredentialPojoService {
     );
 
     ResponseData<Boolean> verify(
-        PresentationE presentationE,
+        String issuerWeId,
+        CredentialPojoWrapper credentialWrapper
+    );
+
+    ResponseData<Boolean> verify(
         String presenterWeId,
         PresentationPolicyE presentationPolicyE,
-        Challenge challenge
+        Challenge challenge,
+        PresentationE presentationE
     );
+
+    /**
+     * Get the full hash value of a Credential. All fields in the Credential will be included. This
+     * method should be called when creating and verifying the Credential Evidence.
+     *
+     * @param credential the args
+     * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
+     */
+    ResponseData<String> getCredentialHash(Credential credential);
+
+    /**
+     * Get the Json String of a Credential. All fields in the Credential will be included. This also
+     * supports the selectively disclosed Credential.
+     *
+     * @param credential the credential
+     * @return the Credential Json value in String
+     */
+    ResponseData<String> getCredentialJson(Credential credential);
+
 }

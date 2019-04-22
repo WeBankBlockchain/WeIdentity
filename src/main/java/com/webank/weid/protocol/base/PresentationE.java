@@ -42,6 +42,7 @@ public class PresentationE {
 
     private Map<String, String> proof;
 
+
 //    private PresentationPolicyE presentationPolicy;
 
     public String toJson() {
