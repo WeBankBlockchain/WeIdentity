@@ -19,15 +19,6 @@
 
 package com.webank.weid.util;
 
-import com.webank.weid.constant.CredentialConstant;
-import com.webank.weid.constant.CredentialFieldDisclosureValue;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.protocol.base.Credential;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.request.CreateCredentialArgs;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,12 +32,23 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 
+import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.CredentialFieldDisclosureValue;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialPojoWrapper;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.CreateCredentialArgs;
+
 /**
  * The Class CredentialUtils.
  *
  * @author chaoxinhu 2019.1
  */
-public final class CredentialUtils {
+public final class CredentialPojoUtils {
 
     /**
      * Concat all fields of Credential info, without Signature, in Json format. This should be
@@ -58,12 +60,13 @@ public final class CredentialUtils {
      * @return Hash value in String.
      */
     public static String getCredentialThumbprintWithoutSig(
-        Credential credential,
+        CredentialPojo credential,
+        Map<String, Object> salt,
         Map<String, Object> disclosures) {
         try {
             Map<String, Object> credMap = JsonUtil.objToMap(credential);
             credMap.remove(ParamKeyConstant.CREDENTIAL_SIGNATURE);
-            String claimHash = getClaimHash(credential, disclosures);
+            String claimHash = getClaimHash(credential, salt, disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return JsonUtil.mapToCompactJson(credMap);
         } catch (Exception e) {
@@ -78,11 +81,11 @@ public final class CredentialUtils {
      * @param credential target Credential object
      * @return Hash value in String.
      */
-    public static String getCredentialThumbprint(Credential credential,
+    public static String getCredentialThumbprint(CredentialPojo credential,Map<String, Object> salt,
         Map<String, Object> disclosures) {
         try {
             Map<String, Object> credMap = JsonUtil.objToMap(credential);
-            String claimHash = getClaimHash(credential, disclosures);
+            String claimHash = getClaimHash(credential, salt,disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return JsonUtil.mapToCompactJson(credMap);
         } catch (Exception e) {
@@ -97,35 +100,15 @@ public final class CredentialUtils {
      * @param disclosures Disclosure Map
      * @return the unique claim hash value
      */
-    public static String getClaimHash(Credential credential, Map<String, Object> disclosures) {
+    public static String getClaimHash(CredentialPojo credential, Map<String, Object> salt, Map<String, Object> disclosures) {
 
-        Map<String, Object> claim = credential.getClaim();
-        Map<String, Object> claimHashMap = new HashMap<>(claim);
-        Map<String, Object> disclosureMap;
-
-        if (disclosures == null) {
-            disclosureMap = new HashMap<>(claim);
-            for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
-                disclosureMap.put(
-                    entry.getKey(),
-                    CredentialFieldDisclosureValue.DISCLOSED.getStatus()
-                );
-            }
-        } else {
-            disclosureMap = disclosures;
-        }
-
-        for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
-            if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(entry.getValue())) {
-                claimHashMap.put(
-                    entry.getKey(),
-                    getFieldHash(claimHashMap.get(entry.getKey()))
-                );
-            }
-        }
+		Map<String, Object> claim = credential.getClaim();
+		Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
+        
+		addSaltAndGetHash(newClaim, salt, disclosures);
 
         List<Map.Entry<String, Object>> list = new ArrayList<Map.Entry<String, Object>>(
-            claimHashMap.entrySet()
+        		newClaim.entrySet()
         );
         Collections.sort(list, new Comparator<Map.Entry<String, Object>>() {
 
@@ -141,7 +124,31 @@ public final class CredentialUtils {
         }
         return hash.toString();
     }
+    
+    private static void addSaltAndGetHash(Map<String, Object> claim, Map<String, Object> salt,Map<String, Object> disclosures) {
+    	    	
+		for (Map.Entry<String, Object> entry : claim.entrySet()) {
+			String key = entry.getKey();
+			Object disclosureObj = null;
+			if (disclosures != null) {
+				disclosureObj = disclosures.get(key);
+			}
+			Object saltObj = salt.get(key);
+			Object newClaimObj = claim.get(key);
 
+			if (newClaimObj instanceof Map) {
+				addSaltAndGetHash((HashMap) newClaimObj, (HashMap) saltObj, (HashMap) disclosureObj);
+			} else {
+				if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(saltObj)
+						|| disclosureObj == null) {
+					((HashMap) newClaimObj).put(key,
+							getFieldHash(String.valueOf(newClaimObj) + String.valueOf(saltObj)));
+				}
+			}
+		}
+    }
+    
+    
     /**
      * convert a field to hash.
      *
@@ -187,8 +194,8 @@ public final class CredentialUtils {
      * @param arg the args
      * @return Hash in byte array
      */
-    public static String getCredentialHash(Credential arg) {
-        String rawData = getCredentialThumbprint(arg, null);
+    public static String getCredentialHash(CredentialPojo arg) {
+        String rawData = getCredentialThumbprint(arg, null,null);
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
@@ -202,7 +209,7 @@ public final class CredentialUtils {
      * @return a Bytes32 object
      */
     public static Bytes32 convertCredentialIdToBytes32(String id) {
-        if (!isValidUuid(id)) {
+		if (!isValidUuid(id)) {
             return new Bytes32(new byte[32]);
         }
         String mergedId = id.replaceAll(WeIdConstant.UUID_SEPARATOR, StringUtils.EMPTY);
@@ -280,7 +287,7 @@ public final class CredentialUtils {
      */
     public static ErrorCode isCredentialContentValid(Credential args) {
         String credentialId = args.getId();
-        if (StringUtils.isEmpty(credentialId) || !CredentialUtils.isValidUuid(credentialId)) {
+        if (StringUtils.isEmpty(credentialId) || !CredentialPojoUtils.isValidUuid(credentialId)) {
             return ErrorCode.CREDENTIAL_ID_NOT_EXISTS;
         }
         String context = args.getContext();
@@ -319,4 +326,19 @@ public final class CredentialUtils {
         }
         return ErrorCode.SUCCESS;
     }
+    
+    
+	public static String getCredentialPojoHash(CredentialPojoWrapper credentialWrapper) {
+		
+		String rawData = getCredentialThumbprint(credentialWrapper.getCredentialPojo(), credentialWrapper.getSalt(),
+				null);
+		if (StringUtils.isEmpty(rawData)) {
+			return StringUtils.EMPTY;
+		}
+		return DataToolUtils.sha3(rawData);
+	}
+	
+//	public static String getCredentialJson(CredentialPojo credential) {
+//		return null;
+//	}
 }

@@ -34,7 +34,7 @@ public class CredentialPojoWrapper {
     /**
      * Required: The Credential.
      */
-    private CredentialPojo credential;
+    private CredentialPojo credentialPojo;
 
     /**
      * Required: The salts corresponding to the credential. The structure is same as specific cpt
