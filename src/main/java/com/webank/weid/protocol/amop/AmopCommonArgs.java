@@ -17,37 +17,20 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.util;
+package com.webank.weid.protocol.amop;
 
-import org.bcos.web3j.crypto.Hash;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
- * The Hash related Utils class. Based on SHA3 algorithm.
- *
- * <p>Most implementations are re-factors or wrappers based on FISCO-BCOS web3j and Ethereumj. The
- * future support of SM2/SM3 is under construction.
- *
- * @author chaoxinhu 2018.10
+ * @author tonychen 2019年4月16日
  */
-public class HashUtils {
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class AmopCommonArgs extends DirectRouteBaseMsgArgs {
 
-    /**
-     * Keccak-256 hash function.
-     *
-     * @param hexInput hex encoded input data with optional 0x prefix
-     * @return hash value as hex encoded string
+    /*
+     * 任意包体
      */
-    public static String sha3(String hexInput) {
-        return Hash.sha3(hexInput);
-    }
-
-    /**
-     * Sha 3.
-     *
-     * @param input the input
-     * @return the byte[]
-     */
-    public static byte[] sha3(byte[] input) {
-        return Hash.sha3(input, 0, input.length);
-    }
+    private String message;
 }

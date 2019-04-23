@@ -20,14 +20,11 @@
 package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.base.Challenge;
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.PresentationPolicyE;
-import java.util.Map;
-
 import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialPojoWrapper;
+import com.webank.weid.protocol.base.PresentationE;
+import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -83,11 +80,6 @@ public interface CredentialPojoService {
     );
 
     ResponseData<Boolean> verify(
-        String issuerWeId,
-        CredentialPojoWrapper credentialWrapper
-    );
-
-    ResponseData<Boolean> verify(
         String presenterWeId,
         PresentationPolicyE presentationPolicyE,
         Challenge challenge,
@@ -101,7 +93,7 @@ public interface CredentialPojoService {
      * @param credential the args
      * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
      */
-    ResponseData<String> getCredentialHash(Credential credential);
+//    ResponseData<String> getCredentialHash(CredentialPojo credential);
 
     /**
      * Get the Json String of a Credential. All fields in the Credential will be included. This also
@@ -110,6 +102,6 @@ public interface CredentialPojoService {
      * @param credential the credential
      * @return the Credential Json value in String
      */
-    ResponseData<String> getCredentialJson(Credential credential);
+//    ResponseData<String> getCredentialJson(CredentialPojo credential);
 
 }

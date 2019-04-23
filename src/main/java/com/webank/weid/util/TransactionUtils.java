@@ -220,18 +220,18 @@ public class TransactionUtils {
             cptJsonSchemaNew);
         if (cptJsonSchemaMap == null
             || cptJsonSchemaMap.isEmpty()
-            || !JsonSchemaValidatorUtils.isCptJsonSchemaValid(cptJsonSchemaNew)) {
+            || !DataToolUtils.isCptJsonSchemaValid(cptJsonSchemaNew)) {
             logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaNew);
             return null;
         }
 
         String cptSignature = cptSignatureNode.textValue();
-        if (!SignatureUtils.isValidBase64String(cptSignature)) {
+        if (!DataToolUtils.isValidBase64String(cptSignature)) {
             logger.error("Input cpt signature invalid: {}", cptSignature);
             return null;
         }
-        RsvSignature rsvSignature = SignatureUtils.convertSignatureDataToRsv(
-            SignatureUtils.convertBase64StringToSignatureData(cptSignature));
+        RsvSignature rsvSignature = DataToolUtils.convertSignatureDataToRsv(
+        		DataToolUtils.convertBase64StringToSignatureData(cptSignature));
 
         StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]

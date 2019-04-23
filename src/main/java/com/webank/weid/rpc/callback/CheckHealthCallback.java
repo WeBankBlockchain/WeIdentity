@@ -17,28 +17,12 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.service.impl;
-
-import com.webank.weid.constant.DirectRouteMsgType;
-import com.webank.weid.rpc.base.AmopService;
-import com.webank.weid.rpc.callback.OnNotifyCallback;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.callback.DirectRouteCallback;
+package com.webank.weid.rpc.callback;
 
 /**
  * @author tonychen 2019年4月16日
  *
  */
-public class AmopServiceImpl extends BaseService implements AmopService {
-
-	/* (non-Javadoc)
-	 * @see com.webank.weid.rpc.base.AmopService#registerCallback(com.webank.weid.constant.DirectRouteMsgType, com.webank.weid.service.impl.callback.DirectRouteCallback)
-	 */
-	@Override
-	public void registerCallback(DirectRouteMsgType directRouteMsgType, DirectRouteCallback directRouteCallback) {
-		
-		OnNotifyCallback callback = (OnNotifyCallback)getService().getPushCallback();
-		callback.RegistRouteCallBackMap(directRouteMsgType, directRouteCallback);
-	}
+public class CheckHealthCallback extends DirectRouteCallback {
 
 }

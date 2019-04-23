@@ -39,13 +39,11 @@ public final class PropertyUtils {
      */
     public static void loadProperties(String filePath) throws IOException {
 
-    	
         InputStream in;
         in = PropertyUtils.class.getClassLoader().getResourceAsStream(filePath);
 //        in = new FileInputStream(new File(filePath));
         prop.load(in);
         in.close();
-
     }
 
     /**

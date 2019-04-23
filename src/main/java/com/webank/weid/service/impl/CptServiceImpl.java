@@ -19,30 +19,6 @@
 
 package com.webank.weid.service.impl;
 
-import com.webank.weid.config.ContractConfig;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.CptController;
-import com.webank.weid.contract.CptController.RegisterCptRetLogEventResponse;
-import com.webank.weid.contract.CptController.UpdateCptRetLogEventResponse;
-import com.webank.weid.protocol.base.Cpt;
-import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.request.CptMapArgs;
-import com.webank.weid.protocol.request.CptStringArgs;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.RsvSignature;
-import com.webank.weid.rpc.CptService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataTypetUtils;
-import com.webank.weid.util.JsonSchemaValidatorUtils;
-import com.webank.weid.util.JsonUtil;
-import com.webank.weid.util.SignatureUtils;
-import com.webank.weid.util.TransactionUtils;
-import com.webank.weid.util.WeIdUtils;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -69,6 +45,29 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.webank.weid.config.ContractConfig;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.JsonSchemaConstant;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.CptController;
+import com.webank.weid.contract.CptController.RegisterCptRetLogEventResponse;
+import com.webank.weid.contract.CptController.UpdateCptRetLogEventResponse;
+import com.webank.weid.protocol.base.Cpt;
+import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.CptMapArgs;
+import com.webank.weid.protocol.request.CptStringArgs;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.response.RsvSignature;
+import com.webank.weid.rpc.CptService;
+import com.webank.weid.service.BaseService;
+import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.JsonUtil;
+import com.webank.weid.util.TransactionUtils;
+import com.webank.weid.util.WeIdUtils;
 
 /**
  * Service implementation for operation on CPT (Claim Protocol Type).
@@ -258,12 +257,12 @@ public class CptServiceImpl extends BaseService implements CptService {
             int v = DataTypetUtils.uint8ToInt((Uint8) typeList.get(4));
             byte[] r = DataTypetUtils.bytes32ToBytesArray((Bytes32) typeList.get(5));
             byte[] s = DataTypetUtils.bytes32ToBytesArray((Bytes32) typeList.get(6));
-            Sign.SignatureData signatureData = SignatureUtils
+            Sign.SignatureData signatureData = DataToolUtils
                 .rawSignatureDeserialization(v, r, s);
             String cptSignature =
                 new String(
-                    SignatureUtils.base64Encode(
-                        SignatureUtils.simpleSignatureSerialization(signatureData)),
+                		DataToolUtils.base64Encode(
+                				DataToolUtils.simpleSignatureSerialization(signatureData)),
                     StandardCharsets.UTF_8
                 );
             cpt.setCptSignature(cptSignature);
@@ -456,8 +455,8 @@ public class CptServiceImpl extends BaseService implements CptService {
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
         SignatureData signatureData =
-            SignatureUtils.signMessage(sb.toString(), cptPublisherPrivateKey.getPrivateKey());
-        return SignatureUtils.convertSignatureDataToRsv(signatureData);
+        	DataToolUtils.signMessage(sb.toString(), cptPublisherPrivateKey.getPrivateKey());
+        return DataToolUtils.convertSignatureDataToRsv(signatureData);
     }
 
     private ErrorCode validateCptArgs(
@@ -480,7 +479,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             return ErrorCode.CPT_JSON_SCHEMA_NULL;
         }
         String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
-        if (!JsonSchemaValidatorUtils.isCptJsonSchemaValid(cptJsonSchema)) {
+        if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
             logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaMap);
             return ErrorCode.CPT_JSON_SCHEMA_INVALID;
         }
@@ -506,7 +505,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         boolean isMatch = false;
 
         try {
-            BigInteger publicKey = SignatureUtils
+            BigInteger publicKey = DataToolUtils
                 .publicKeyFromPrivate(new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
             String address1 = "0x" + Keys.getAddress(publicKey);
             String address2 = WeIdUtils.convertWeIdToAddress(cptPublisher);
@@ -517,7 +516,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             logger.error("Validate private key We Id matches failed. Error message :{}", e);
             return isMatch;
         }
-
+        
         return isMatch;
     }
 
