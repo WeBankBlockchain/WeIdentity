@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -32,9 +32,26 @@ import com.webank.weid.constant.ErrorCode;
 @Data
 public class ResponseData<T> {
 
+    /**
+     * The generic type result object.
+     */
     private T result;
+
+    /**
+     * The error code.
+     */
     private Integer errorCode;
+
+    /**
+     * The error message.
+     */
     private String errorMessage;
+
+    /**
+     * The blockchain transaction info. Note that this transaction only becomes valid (not null nor
+     * blank) when a successful transaction is sent to chain with a block generated.
+     */
+    private TransactionInfo transactionInfo = null;
 
     /**
      * Instantiates a new response data.
@@ -44,23 +61,44 @@ public class ResponseData<T> {
     }
 
     /**
-     * Instantiates a new response data.
+     * Instantiates a new response data. Transaction info is left null to avoid unnecessary boxing.
      *
      * @param result the result
      * @param errorCode the return code
      */
     public ResponseData(T result, ErrorCode errorCode) {
         this.result = result;
-        this.errorCode = errorCode.getCode();
-        this.errorMessage = errorCode.getCodeDesc();
+        if (errorCode != null) {
+            this.errorCode = errorCode.getCode();
+            this.errorMessage = errorCode.getCodeDesc();
+        }
+    }
+
+    /**
+     * Instantiates a new response data with transaction info.
+     *
+     * @param result the result
+     * @param errorCode the return code
+     */
+    public ResponseData(T result, ErrorCode errorCode, TransactionInfo transactionInfo) {
+        this.result = result;
+        if (errorCode != null) {
+            this.errorCode = errorCode.getCode();
+            this.errorMessage = errorCode.getCodeDesc();
+        }
+        if (transactionInfo != null) {
+            this.transactionInfo = transactionInfo;
+        }
     }
 
     /**
      * set a ErrorCode type errorCode.
      */
     public void setErrorCode(ErrorCode errorCode) {
-        this.errorCode = errorCode.getCode();
-        this.errorMessage = errorCode.getCodeDesc();
+        if (errorCode != null) {
+            this.errorCode = errorCode.getCode();
+            this.errorMessage = errorCode.getCodeDesc();
+        }
     }
 
 }
