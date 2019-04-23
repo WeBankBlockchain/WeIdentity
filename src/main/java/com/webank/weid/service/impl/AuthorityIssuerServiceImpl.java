@@ -49,6 +49,7 @@ import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
@@ -136,9 +137,10 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
                 TimeUnit.SECONDS
             );
+            TransactionInfo info = new TransactionInfo(receipt);
             Boolean result = resolveRegisterAuthorityIssuerEvents(receipt);
             if (result) {
-                return new ResponseData<>(result, ErrorCode.SUCCESS);
+                return new ResponseData<>(result, ErrorCode.SUCCESS, info);
             }
         } catch (TimeoutException e) {
             logger.error("register authority issuer failed due to system timeout. ", e);
@@ -169,9 +171,10 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             }
             TransactionReceipt transactionReceipt = TransactionUtils
                 .sendTransaction(getWeb3j(), transactionHex);
+            TransactionInfo info = new TransactionInfo(transactionReceipt);
             Boolean result = resolveRegisterAuthorityIssuerEvents(transactionReceipt);
             if (result) {
-                return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS);
+                return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS, info);
             }
         } catch (Exception e) {
             logger.error("[registerAuthorityIssuer] register failed due to transaction error.", e);
@@ -223,6 +226,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             List<AuthorityIssuerRetLogEventResponse> eventList =
                 AuthorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
 
+            TransactionInfo info = new TransactionInfo(receipt);
             AuthorityIssuerRetLogEventResponse event = eventList.get(0);
             if (event != null) {
                 ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(
@@ -230,13 +234,13 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                     WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
                 );
                 if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
-                    return new ResponseData<>(false, errorCode);
+                    return new ResponseData<>(false, errorCode, info);
                 } else {
-                    return new ResponseData<>(true, errorCode);
+                    return new ResponseData<>(true, errorCode, info);
                 }
             } else {
                 logger.error("remove authority issuer failed, transcation event decoding failure.");
-                return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+                return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR, info);
             }
         } catch (TimeoutException e) {
             logger.error("remove authority issuer failed due to system timeout. ", e);
