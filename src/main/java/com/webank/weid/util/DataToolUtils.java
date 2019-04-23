@@ -1,31 +1,13 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weidentity-java-sdk.
- *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package com.webank.weid.util;
 
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.protocol.base.AuthenticationProperty;
-import com.webank.weid.protocol.base.PublicKeyProperty;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.RsvSignature;
-
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
@@ -33,12 +15,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
 import org.bcos.web3j.crypto.ECKeyPair;
+import org.bcos.web3j.crypto.Hash;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
@@ -46,24 +31,221 @@ import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.core.report.ProcessingMessage;
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.main.JsonSchema;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.base.AuthenticationProperty;
+import com.webank.weid.protocol.base.PublicKeyProperty;
+import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.response.RsvSignature;
+
 /**
- * The Signature related Utils class. Based on ECDSA Asymmetric Encryption + SHA256 Hash Algorithm.
+ * @author tonychen 2019年4月23日
  *
- * <p>Two types of Objects are taken care of in this class: 1. Key-pair (pubkey and privkey). 2.
- * Signature. This class provides the following functionalities to them above: 1. Creation of
- * Key-Pairs and Signatures. 2. Verification of Key-Pairs and Signatures. 3. Serialization and
- * De-serializations. This Util class also takes care of: 1. Base64 and Hex encoding styles. It is
- * worth noting that we suggest to add encode/decode instead of plain serial/de-serializations. Most
- * implementations are re-factors or wrappers based on FISCO-BCOS web3j and Ethereumj.
- *
- * <p>Future support of SM2/SM3 is under construction.
- *
- * @author chaoxinhu 2019.1
  */
-public class SignatureUtils {
+public final class DataToolUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(SignatureUtils.class);
+	private static final Logger logger = LoggerFactory.getLogger(DataToolUtils.class);
+	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	/**
+	 * verify signature with the given public key.
+	 * @param signature
+	 * @param publicKey
+	 * @return
+	 */
+	public static boolean verifySignature(String signature, String publicKey) {
+		
+		return false;
+	}
+	
+	/**
+     * Keccak-256 hash function.
+     *
+     * @param hexInput hex encoded input data with optional 0x prefix
+     * @return hash value as hex encoded string
+     */
+    public static String sha3(String hexInput) {
+        return Hash.sha3(hexInput);
+    }
+    
+    /**
+     * Sha 3.
+     *
+     * @param input the input
+     * @return the byte[]
+     */
+    public static byte[] sha3(byte[] input) {
+        return Hash.sha3(input, 0, input.length);
+    }
+    
+    /**
+     * generate random string
+     * @return random string
+     */
+	public static String getRandomSalt() {
 
+		String length = PropertyUtils.getProperty("salt.length");
+		int saltLength = Integer.valueOf(length);
+		String base = "abcdefghijklmnopqrstuvwxyz0123456789";
+		int randomNum;
+		char randomChar;
+		Random random = new Random();
+		StringBuffer str = new StringBuffer();
+
+		for (int i = 0; i < saltLength; i++) {
+			randomNum = random.nextInt(base.length());
+			randomChar = base.charAt(randomNum);
+			str.append(randomChar);
+		}
+		return str.toString();
+	}
+
+    /**
+     * serialize a class instance to Json String.
+     *
+     * @param object the class instance to serialize
+     * @return JSON String
+     */
+    public static String serialize(Object object) {
+        Writer write = new StringWriter();
+        try {
+            objectMapper.writeValue(write, object);
+        } catch (JsonGenerationException e) {
+            logger.error("JsonGenerationException when serialize object to json", e);
+        } catch (JsonMappingException e) {
+            logger.error("JsonMappingException when serialize object to json", e);
+        } catch (IOException e) {
+            logger.error("IOException when serialize object to json", e);
+        }
+        return write.toString();
+    }
+    
+    /**
+     * deserialize a JSON String to an class instance.
+     *
+     * @return class instance
+     */
+    public static <T> T deserialize(String json, Class<T> clazz) {
+        Object object = null;
+        try {
+            object = objectMapper.readValue(json, TypeFactory.rawClass(clazz));
+        } catch (JsonParseException e) {
+            logger.error("JsonParseException when serialize object to json", e);
+        } catch (JsonMappingException e) {
+            logger.error("JsonMappingException when serialize object to json", e);
+        } catch (IOException e) {
+            logger.error("IOException when serialize object to json", e);
+        }
+        return (T) object;
+    }
+
+    
+    /**
+     * 对象深度复制(对象必须是实现了Serializable接口)
+     *
+     * @param obj
+     * @return T
+     * @author tonychen
+     * @date 2019/4/18 
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends Serializable> T clone(T obj) {
+        T clonedObj = null;
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(obj);
+            oos.close();
+
+            ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            clonedObj = (T) ois.readObject();
+            ois.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return clonedObj;
+    }
+    
+    
+    /**
+     * Load Json Object. Can be used to return both Json Data and Json Schema.
+     *
+     * @param jsonString the json string
+     * @return JsonNode
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public static JsonNode loadJsonObject(String jsonString) throws IOException {
+        return JsonLoader.fromString(jsonString);
+    }
+
+    /**
+     * Validate Json Data versus Json Schema.
+     *
+     * @param jsonData the json data
+     * @param jsonSchema the json schema
+     * @return true if yes, false otherwise
+     * @throws Exception the exception
+     */
+    public static boolean isValidateJsonVersusSchema(String jsonData, String jsonSchema)
+        throws Exception {
+        JsonNode jsonDataNode = loadJsonObject(jsonData);
+        JsonNode jsonSchemaNode = loadJsonObject(jsonSchema);
+        JsonSchema schema = JsonSchemaFactory.byDefault().getJsonSchema(jsonSchemaNode);
+
+        ProcessingReport report = schema.validate(jsonDataNode);
+        if (report.isSuccess()) {
+            logger.info(report.toString());
+            return true;
+        } else {
+            Iterator<ProcessingMessage> it = report.iterator();
+            StringBuffer errorMsg = new StringBuffer();
+            while (it.hasNext()) {
+                errorMsg.append(it.next().getMessage());
+            }
+            logger.error("Json schema validator failed, error: {}", errorMsg.toString());
+            return false;
+        }
+    }
+
+    /**
+     * Validate Json Schema format validity.
+     *
+     * @param jsonSchema the json schema
+     * @return true if yes, false otherwise
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public static boolean isValidJsonSchema(String jsonSchema) throws IOException {
+        return JsonSchemaFactory
+            .byDefault()
+            .getSyntaxValidator()
+            .schemaIsValid(loadJsonObject(jsonSchema));
+    }
+
+    /**
+     * validate Cpt Json Schema validity .
+     *
+     * @param cptJsonSchema the cpt json schema
+     * @return true, if is cpt json schema valid
+     * @throws IOException Signals that an I/O exception has occurred.
+     */
+    public static boolean isCptJsonSchemaValid(String cptJsonSchema) throws IOException {
+        return StringUtils.isNotEmpty(cptJsonSchema)
+            && isValidJsonSchema(cptJsonSchema)
+            && cptJsonSchema.length() <= WeIdConstant.JSON_SCHEMA_MAX_LENGTH;
+    }
+    
     /**
      * Generate a new Key-pair.
      *
@@ -87,7 +269,7 @@ public class SignatureUtils {
      * @return SignatureData
      */
     public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair) {
-        return Sign.signMessage(HashUtils.sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
+        return Sign.signMessage(sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
     }
 
     /**
@@ -104,7 +286,7 @@ public class SignatureUtils {
 
         BigInteger privateKey = new BigInteger(privateKeyString);
         ECKeyPair keyPair = new ECKeyPair(privateKey, publicKeyFromPrivate(privateKey));
-        return Sign.signMessage(HashUtils.sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
+        return Sign.signMessage(sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
     }
 
     /**
@@ -120,7 +302,7 @@ public class SignatureUtils {
         Sign.SignatureData signatureData)
         throws SignatureException {
 
-        return Sign.signedMessageToKey(HashUtils.sha3(message.getBytes(StandardCharsets.UTF_8)),
+        return Sign.signedMessageToKey(sha3(message.getBytes(StandardCharsets.UTF_8)),
             signatureData);
     }
 
@@ -255,7 +437,7 @@ public class SignatureUtils {
      * @param weIdDocument the WeIdDocument to be extracted
      * @return true if yes, false otherwise with exact error codes
      */
-    public static ResponseData<Boolean> verifySignatureFromWeId(
+    public static ErrorCode verifySignatureFromWeId(
         String rawData,
         Sign.SignatureData signatureData,
         WeIdDocument weIdDocument) {
@@ -277,18 +459,18 @@ public class SignatureUtils {
                 if (StringUtils.isNotEmpty(publicKeyItem)) {
                     result =
                         result
-                            || SignatureUtils.verifySignature(
+                            || verifySignature(
                             rawData, signatureData, new BigInteger(publicKeyItem));
                 }
             }
             if (!result) {
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
+                return ErrorCode.CREDENTIAL_ISSUER_MISMATCH;
             }
         } catch (SignatureException e) {
             logger.error("some exceptions occurred in signature verification", e);
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
+            return ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE;
         }
-        return new ResponseData<>(true, ErrorCode.SUCCESS);
+        return ErrorCode.SUCCESS;
     }
 
     /**
