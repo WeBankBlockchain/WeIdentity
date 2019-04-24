@@ -33,6 +33,7 @@ import org.bcos.web3j.abi.datatypes.StaticArray;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
@@ -52,16 +53,16 @@ import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
  * registerCpt method for testing CptService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestRegisterCpt extends TestBaseServcie {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestRegisterCpt.class);
 
     private static CreateWeIdDataResult createWeId = null;
@@ -76,7 +77,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         }
     }
 
-    /** 
+    /**
      * case： cpt register success.
      */
     @Test
@@ -89,9 +90,14 @@ public class TestRegisterCpt extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
+        Transaction transaction = TransactionUtils
+            .getTransaction(response.getTransactionInfo());
+        Assert.assertNotNull(transaction);
+        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getFrom())));
+        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getTo())));
     }
 
-    /** 
+    /**
      * case： registerCptArgs is null.
      */
     @Test
@@ -122,7 +128,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： Mock for ErrorCode.UNKNOW_ERROR.
      */
     @Test
@@ -153,7 +159,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： cptJsonSchema too long.
      */
     @Test
@@ -178,7 +184,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： cptPublisher is blank.
      */
     @Test
@@ -194,7 +200,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： cptPublisher is invalid.
      */
     @Test
@@ -210,7 +216,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： cptPublisher is not exists and the private key does not match.
      */
     @Test
@@ -227,7 +233,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： cpt register again.
      */
     @Test
@@ -248,7 +254,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNotNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： cptPublisherPrivateKey is null.
      */
     @Test
@@ -265,7 +271,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： privateKey is null.
      */
     @Test
@@ -282,7 +288,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： privateKey is invalid.
      */
     @Test
@@ -301,7 +307,6 @@ public class TestRegisterCpt extends TestBaseServcie {
 
     /**
      * case： privateKey is new privateKey.
-     * 
      */
     @Test
     public void testRegisterCptCase13() {
@@ -318,7 +323,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： privateKey is SDK privateKey.
      */
     @Test
@@ -335,7 +340,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： privateKey is xxxxxxxxx.
      */
     @Test
@@ -352,9 +357,8 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： cptPublisher is not exists and the private key is match.
-     * 
      */
     @Test
     public void testRegisterCptCase16() {
@@ -376,7 +380,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： mock an InterruptedException.
      */
     @Test
@@ -394,7 +398,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         Assert.assertNull(response.getResult());
     }
 
-    /** 
+    /**
      * case： mock an TimeoutException.
      */
     @Test
@@ -415,7 +419,7 @@ public class TestRegisterCpt extends TestBaseServcie {
     private ResponseData<CptBaseInfo> registerCptForMock(
         CptMapArgs cptMapArgs,
         MockUp<Future<?>> mockFuture) {
-        
+
         MockUp<CptController> mockTest = new MockUp<CptController>() {
             @Mock
             public Future<?> registerCpt(
@@ -436,7 +440,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         return response;
     }
 
-    /** 
+    /**
      * case： mock returns null.
      */
     @Test
@@ -521,6 +525,11 @@ public class TestRegisterCpt extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
+        Transaction transaction = TransactionUtils
+            .getTransaction(response.getTransactionInfo());
+        Assert.assertNotNull(transaction);
+        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getFrom())));
+        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getTo())));
     }
 
     /**

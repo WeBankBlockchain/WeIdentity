@@ -61,6 +61,7 @@ import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
+import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataTypetUtils;
@@ -190,9 +191,11 @@ public class CptServiceImpl extends BaseService implements CptService {
             }
             TransactionReceipt transactionReceipt = TransactionUtils
                 .sendTransaction(getWeb3j(), transactionHex);
+            TransactionInfo info = new TransactionInfo(transactionReceipt);
             CptBaseInfo cptBaseInfo = this.resolveRegisterCptEvents(transactionReceipt).getResult();
             if (cptBaseInfo != null) {
-                return new ResponseData<>(JsonUtil.objToJsonStr(cptBaseInfo), ErrorCode.SUCCESS);
+                return new ResponseData<>(JsonUtil.objToJsonStr(cptBaseInfo), ErrorCode.SUCCESS,
+                    info);
             }
         } catch (Exception e) {
             logger.error("[registerCpt] register failed due to unknown transaction error. ", e);
@@ -353,7 +356,8 @@ public class CptServiceImpl extends BaseService implements CptService {
             return this.getResultByResolveEvent(
                 event.get(0).retCode,
                 event.get(0).cptId,
-                event.get(0).cptVersion
+                event.get(0).cptVersion,
+                transactionReceipt
             );
         } catch (InterruptedException | ExecutionException e) {
             logger.error(
@@ -415,34 +419,37 @@ public class CptServiceImpl extends BaseService implements CptService {
     private ResponseData<CptBaseInfo> getResultByResolveEvent(
         Uint256 retCode,
         Uint256 cptId,
-        Int256 cptVersion) {
+        Int256 cptVersion,
+        TransactionReceipt receipt) {
 
+        TransactionInfo info = new TransactionInfo(receipt);
         // register
         if (DataTypetUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
             logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX);
+            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
         }
 
         // register and update
         if (DataTypetUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
             logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST);
+            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
         }
 
         // update
         if (DataTypetUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_NOT_EXISTS.getCode()) {
             logger.error("[getResultByResolveEvent] cpt id : {} does not exist.", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
+            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
         }
 
         CptBaseInfo result = new CptBaseInfo();
         result.setCptId(DataTypetUtils.uint256ToInt(cptId));
         result.setCptVersion(DataTypetUtils.int256ToInt(cptVersion));
 
-        ResponseData<CptBaseInfo> responseData = new ResponseData<>(result, ErrorCode.SUCCESS);
+        ResponseData<CptBaseInfo> responseData = new ResponseData<>(result, ErrorCode.SUCCESS,
+            info);
         return responseData;
     }
 
@@ -551,7 +558,8 @@ public class CptServiceImpl extends BaseService implements CptService {
         return this.getResultByResolveEvent(
             event.get(0).retCode,
             event.get(0).cptId,
-            event.get(0).cptVersion
+            event.get(0).cptVersion,
+            transactionReceipt
         );
     }
 
