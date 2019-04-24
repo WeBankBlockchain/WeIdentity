@@ -19,6 +19,7 @@
 
 package com.webank.weid.util;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,8 +43,11 @@ import org.bcos.web3j.abi.datatypes.Type;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.protocol.Web3j;
+import org.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
+import org.bcos.web3j.protocol.core.methods.response.EthBlock;
 import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
 import org.bcos.web3j.protocol.core.methods.response.EthSendTransaction;
+import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.slf4j.Logger;
@@ -52,6 +57,7 @@ import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.response.RsvSignature;
+import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.BaseService;
 
 /**
@@ -336,5 +342,65 @@ public class TransactionUtils {
             //Send a large enough block limit number
             return new BigInteger(WeIdConstant.BIG_BLOCK_LIMIT);
         }
+    }
+
+    /**
+     * Get the transaction instance from blockchain. Requires an on-chain Read operation.
+     *
+     * @param info the transaction info
+     * @return the transaction
+     */
+    public static Transaction getTransaction(TransactionInfo info) {
+        if (info == null) {
+            return null;
+        }
+        Web3j web3j = BaseService.getWeb3j();
+        EthBlock ethBlock = null;
+        BigInteger blockNumber = info.getBlockNumber();
+        try {
+            ethBlock = web3j
+                .ethGetBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true).send();
+        } catch (IOException e) {
+            logger.error("Cannot get a block with number: {}. Error: {}", blockNumber, e);
+        }
+        if (ethBlock == null) {
+            logger.error("Block number {} is null", blockNumber);
+            return null;
+        }
+        List<Transaction> transactionList;
+        try {
+            transactionList = getTransactionListFromBlock(ethBlock);
+        } catch (Exception e) {
+            logger.error(
+                "Error occurred during getting transaction list with block number: {}. Error: {}",
+                blockNumber, e);
+            return null;
+        }
+        if (transactionList.size() == 0) {
+            logger.error("Cannot get any transaction with block number: {}", blockNumber);
+            return null;
+        }
+        return getTransactionFromList(transactionList, info);
+    }
+
+    private static List<Transaction> getTransactionListFromBlock(EthBlock ethBlock) {
+        return ethBlock
+            .getBlock()
+            .getTransactions()
+            .stream()
+            .map(transactionResult -> (Transaction) transactionResult.get())
+            .collect(Collectors.toList());
+    }
+
+    private static Transaction getTransactionFromList(List<Transaction> transactionList,
+        TransactionInfo info) {
+        for (Transaction transaction : transactionList) {
+            if (transaction.getHash().equalsIgnoreCase(info.getTransactionHash())
+                && transaction.getTransactionIndex().longValue() == info.getTransactionIndex()
+                .longValue()) {
+                return transaction;
+            }
+        }
+        return null;
     }
 }
