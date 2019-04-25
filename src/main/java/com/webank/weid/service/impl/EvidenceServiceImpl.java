@@ -59,7 +59,6 @@ import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DataTypetUtils;
-import com.webank.weid.util.SignatureUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -369,8 +368,12 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
-            return DataToolUtils
+            ErrorCode errorCode = DataToolUtils
                 .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+            if(errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            	return new ResponseData<>(false, errorCode);
+            }
+            return new ResponseData<>(true, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("error occurred during verifying signatures from chain: ", e);
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
