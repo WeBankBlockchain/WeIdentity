@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,12 +17,29 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.service.impl.callback;
+package com.webank.weid.protocol.response;
+
+import com.webank.weid.protocol.base.IResult;
+
+import lombok.Data;
 
 /**
- * @author tonychen 2019年4月16日
- *
+ * @author tonychen 2019.04.16
  */
-public class CheckHealthCallback extends DirectRouteCallback {
 
+@Data
+public class AmopResponse implements IResult {
+
+	/**
+	 * Presentation Policy
+	 */
+	private String result;
+	
+	private Integer errorCode;
+	
+	/*
+     * 错误信息
+     */
+    protected String message;
+	
 }

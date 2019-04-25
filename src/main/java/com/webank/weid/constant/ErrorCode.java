@@ -166,7 +166,17 @@ public enum ErrorCode {
      * The credential credential verify signature is exception.
      */
     CREDENTIAL_EXCEPTION_VERIFYSIGNATURE(100419, "credential verify signature exception"),
+    
 
+    /**
+     * claim policy is null.
+     */
+    CREDENTIAL_CLAIM_POLICY_NOT_EXIST(100420, "claim policy is null"),
+
+    /**
+     * The credential private key not exists.
+     */
+    CREDENTIAL_PUBLIC_KEY_NOT_EXISTS(100421, "public key for verifying credential signature does not exist"),
     /**
      * The credential evidence contract failure: illegal input.
      */

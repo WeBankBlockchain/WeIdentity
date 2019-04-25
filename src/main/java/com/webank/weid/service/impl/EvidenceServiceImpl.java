@@ -19,25 +19,6 @@
 
 package com.webank.weid.service.impl;
 
-import com.webank.weid.config.ContractConfig;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.Evidence;
-import com.webank.weid.contract.EvidenceFactory;
-import com.webank.weid.contract.EvidenceFactory.CreateEvidenceLogEventResponse;
-import com.webank.weid.protocol.base.Credential;
-import com.webank.weid.protocol.base.EvidenceInfo;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.EvidenceService;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.util.CredentialUtils;
-import com.webank.weid.util.DataTypetUtils;
-import com.webank.weid.util.SignatureUtils;
-import com.webank.weid.util.WeIdUtils;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -60,6 +41,25 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.webank.weid.config.ContractConfig;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.Evidence;
+import com.webank.weid.contract.EvidenceFactory;
+import com.webank.weid.contract.EvidenceFactory.CreateEvidenceLogEventResponse;
+import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.EvidenceInfo;
+import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.EvidenceService;
+import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.BaseService;
+import com.webank.weid.util.CredentialUtils;
+import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.WeIdUtils;
 
 /**
  * Service implementations for operations on Evidence.
@@ -134,13 +134,13 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 ));
             List<String> extraValueList = new ArrayList<>();
             extraValueList.add(StringUtils.EMPTY);
-            Sign.SignatureData sigData = SignatureUtils
+            Sign.SignatureData sigData = DataToolUtils
                 .signMessage(credentialHash, weIdPrivateKey.getPrivateKey());
             Bytes32 r = DataTypetUtils.bytesArrayToBytes32(sigData.getR());
             Bytes32 s = DataTypetUtils.bytesArrayToBytes32(sigData.getS());
             Uint8 v = DataTypetUtils.intToUnt8(Integer.valueOf(sigData.getV()));
             List<Address> signer = new ArrayList<>();
-            signer.add(new Address(Keys.getAddress(SignatureUtils
+            signer.add(new Address(Keys.getAddress(DataToolUtils
                 .createKeyPairFromPrivate(new BigInteger(weIdPrivateKey.getPrivateKey())))));
             Future<TransactionReceipt> future = evidenceFactory.createEvidence(
                 new DynamicArray<Bytes32>(generateBytes32List(hashAttributes)),
@@ -248,8 +248,8 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 s = slist.get(index).getValue();
                 SignatureData sigData = new SignatureData(v, r, s);
                 signaturesList.add(new String(
-                    SignatureUtils
-                        .base64Encode(SignatureUtils.simpleSignatureSerialization(sigData)),
+                		DataToolUtils
+                        .base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                     StandardCharsets.UTF_8)
                 );
             }
@@ -322,8 +322,8 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                     break;
                 }
                 SignatureData signatureData =
-                    SignatureUtils.simpleSignatureDeserialization(
-                        SignatureUtils.base64Decode(
+                	DataToolUtils.simpleSignatureDeserialization(
+                			DataToolUtils.base64Decode(
                             signature.getBytes(StandardCharsets.UTF_8)));
 
                 ResponseData<Boolean> innerResponseData = verifySignatureToSigner(
@@ -368,8 +368,12 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
-            return SignatureUtils
+            ErrorCode errorCode = DataToolUtils
                 .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+            if(errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            	return new ResponseData<>(false, errorCode);
+            }
+            return new ResponseData<>(true, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("error occurred during verifying signatures from chain: ", e);
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
