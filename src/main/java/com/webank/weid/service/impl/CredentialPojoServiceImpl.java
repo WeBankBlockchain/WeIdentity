@@ -100,7 +100,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 	
 	private static void generateSalt(Map<String, Object> map) {
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
-			String key = entry.getKey();
+//			String ClaimKey = entry.getKey();
 			Object value = entry.getValue();
 			if (value instanceof Map) {
 				generateSalt((HashMap) value);
@@ -164,18 +164,18 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 			Map<String, Object> claim) 
 	{
 		for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
-			String key = entry.getKey();
+			String claimKey = entry.getKey();
 			Object value = entry.getValue();
-			Object saltV = saltMap.get(key);
-			Object claimV = claim.get(key);
+			Object saltV = saltMap.get(claimKey);
+			Object claimV = claim.get(claimKey);
 
 			if (value instanceof Map) {
 				addSelectSalt((HashMap) value, (HashMap) saltV, (HashMap) claimV);
 			} else {
 				if (((Integer) value).equals(CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus())) {
-					saltMap.put(key, CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus());
+					saltMap.put(claimKey, CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus());
 					String hash = DataToolUtils.sha3(String.valueOf(value) + String.valueOf(saltV));
-					claim.put(key, hash);
+					claim.put(claimKey, hash);
 				}
 			}
 		}

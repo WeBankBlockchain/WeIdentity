@@ -52,7 +52,7 @@ public class PresentationE {
 
     public PresentationE create(
         List<CredentialPojoWrapper> credentialList,
-        PresentationPolicyE policy,
+        PolicyAndChellenge policyAndChellenge,
         WeIdAuthentication weIdAuthentication) {
 
         //call function createSelectiveCredential in CredentialPojoService to create the selective
