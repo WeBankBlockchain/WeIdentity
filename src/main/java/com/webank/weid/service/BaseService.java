@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bcos.channel.client.Service;
+import org.bcos.channel.dto.ChannelRequest;
+import org.bcos.channel.dto.ChannelResponse;
 import org.bcos.contract.tools.ToolConf;
 import org.bcos.web3j.crypto.Credentials;
 import org.bcos.web3j.crypto.ECKeyPair;
@@ -39,11 +41,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.webank.weid.constant.DirectRouteMsgType;
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
+import com.webank.weid.protocol.amop.AmopCommonArgs;
+import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.amop.DirectPathRequestBody;
+import com.webank.weid.protocol.amop.DirectRouteBaseMsgArgs;
+import com.webank.weid.protocol.response.AmopResponse;
+import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.callback.DirectRouteCallback;
 import com.webank.weid.rpc.callback.OnNotifyCallback;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
 
 /**
@@ -63,6 +76,17 @@ public abstract class BaseService {
     
     private static Service service;
     
+    
+    /*
+     * 链上链下最大超时时间
+     * unit : millisecond
+     */
+    public static final int MAX_DIRECT_ROUTE_REQUEST_TIMEOUT = 50000;
+    
+    public static final int DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT = 5000;
+    
+    private static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
+    
 
     static {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
@@ -76,7 +100,7 @@ public abstract class BaseService {
     	
 //        Service service = context.getBean(Service.class);
         //initialize amop
-        if(initAmop(service)) {
+		if (!initAmop(service)) {
         	logger.error("[BaseService] initialize amop failed.");
         	return false;
         }
@@ -247,4 +271,92 @@ public abstract class BaseService {
         }
         return (Contract) contract;
     }
+    
+	public ResponseData<DirectRouteNotifyMsgResult> checkDirectRouteMsgHealth(String toOrgId,
+			CheckDirectRouteMsgHealthArgs arg) {
+		
+        return this.getImpl(
+                fromOrgId,
+                toOrgId,
+                arg,
+                CheckDirectRouteMsgHealthArgs.class,
+                DirectRouteNotifyMsgResult.class,
+                DirectRouteMsgType.TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH,
+                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
+        );
+	}
+
+	protected <T, F extends DirectRouteBaseMsgArgs> ResponseData<T> getImpl(
+            String fromOrgId,
+            String toOrgId,
+            F arg,
+            Class<F> argsClass,
+            Class<T> resultClass,
+            DirectRouteMsgType msgType,
+            int timeOut
+    ) {
+        
+        arg.setFromOrgId(fromOrgId);
+        arg.setToOrgId(toOrgId);
+
+        ChannelRequest request = new ChannelRequest();
+        if (timeOut > MAX_DIRECT_ROUTE_REQUEST_TIMEOUT || timeOut < 0) {
+        	request.setTimeout(timeOut);
+//            timeOut = MAX_DIRECT_ROUTE_REQUEST_TIMEOUT;
+            logger.error("invalid timeOut : {}", timeOut);
+        }
+        request.setToTopic(toOrgId);
+        request.setMessageID(getSeq());
+
+//        String msgBody = jsonMapper.toJson(arg);
+        String msgBody = DataToolUtils.serialize(arg);
+        DirectPathRequestBody directPathRequestBody = new DirectPathRequestBody();
+        directPathRequestBody.setMsgType(msgType);
+        directPathRequestBody.setMsgBody(msgBody);
+        String wePopDirectPathRequestBodyStr = DataToolUtils.serialize(arg);
+        logger.info("direct route request, seq : {}, body ：{}", request.getMessageID(), wePopDirectPathRequestBodyStr);
+        request.setContent(wePopDirectPathRequestBodyStr);
+
+        ChannelResponse response = getService().sendChannelMessage2(request);
+        logger.info("direct route response, seq : {}, errorCode : {}, body : {}",
+                response.getMessageID(),
+                response.getErrorCode(),
+                response.getContent()
+        );
+        ResponseData<T> responseStruct = new ResponseData<>();
+
+        responseStruct.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
+        if (102 == response.getErrorCode()) {
+        	responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_REQUEST_TIMEOUT);
+//            return responseStruct;
+        } else if (0 != response.getErrorCode()) {
+            responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_BASE_ERROR);
+            return responseStruct;
+        }
+//        T msgBodyObj = DirectRouteBodyParser.deserialize(response.getContent(), resultClass);
+        T msgBodyObj = DataToolUtils.deserialize(response.getContent(), resultClass);
+        if (null == msgBodyObj) {
+        	responseStruct.setErrorCode(ErrorCode.UNKNOW_ERROR);
+		}
+		responseStruct.setResult(msgBodyObj);
+		return responseStruct;
+    }
+
+	public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
+		 return this.getImpl(
+	                fromOrgId,
+	                toOrgId,
+	                args,
+	                AmopCommonArgs.class,
+	                AmopResponse.class,
+	                DirectRouteMsgType.TYPE_TRANSPORTATION,
+	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
+	        );
+	}
+
+	public void registerCallback(DirectRouteMsgType directRouteMsgType, DirectRouteCallback directRouteCallback) {
+		
+		OnNotifyCallback callback = (OnNotifyCallback)getService().getPushCallback();
+		callback.RegistRouteCallBackMap(directRouteMsgType, directRouteCallback);
+	}
 }

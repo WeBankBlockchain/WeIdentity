@@ -19,6 +19,8 @@
 
 package com.webank.weid.protocol.base;
 
+import java.util.Map;
+
 import lombok.Data;
 
 /**
@@ -27,7 +29,7 @@ import lombok.Data;
  * @author junqizhang 2019.04
  */
 @Data
-public class CredentialPojo<T> {
+public class CredentialPojo {
 
     /**
      * Required: The context field.
@@ -62,7 +64,7 @@ public class CredentialPojo<T> {
     /**
      * Required: The claim data.
      */
-    private T claim;
+    private Map<String, Object> claim;
 
     /**
      * Required: The signature of the Credential. Selective Disclosure is supported together with

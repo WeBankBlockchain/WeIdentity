@@ -21,8 +21,8 @@ package com.webank.weid.constant;
 
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
-import com.webank.weid.service.impl.callback.DirectRouteCallback;
-import com.webank.weid.util.SerializationUtils;
+import com.webank.weid.rpc.callback.DirectRouteCallback;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * Created by junqizhang on 12/06/2017.
@@ -80,17 +80,17 @@ public enum DirectRouteMsgType {
 
         switch (this) {
         case TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH: {
-            CheckDirectRouteMsgHealthArgs args = SerializationUtils.deserialize(msgBodyStr, CheckDirectRouteMsgHealthArgs.class);
+            CheckDirectRouteMsgHealthArgs args = DataToolUtils.deserialize(msgBodyStr, CheckDirectRouteMsgHealthArgs.class);
             args.setMessageId(messageId);
             DirectRouteNotifyMsgResult result = directRouteCallback.onPush(args);
-            resultBodyStr = SerializationUtils.serialize(result);
+            resultBodyStr = DataToolUtils.serialize(result);
         }
         break;
         case TYPE_TRANSPORTATION: {
-            CheckDirectRouteMsgHealthArgs args = SerializationUtils.deserialize(msgBodyStr, CheckDirectRouteMsgHealthArgs.class);
+            CheckDirectRouteMsgHealthArgs args = DataToolUtils.deserialize(msgBodyStr, CheckDirectRouteMsgHealthArgs.class);
             args.setMessageId(messageId);
             DirectRouteNotifyMsgResult result = directRouteCallback.onPush(args);
-            resultBodyStr = SerializationUtils.serialize(result);
+            resultBodyStr = DataToolUtils.serialize(result);
         }
         break;
             default:
