@@ -19,9 +19,6 @@
 
 package com.webank.weid.rpc.callback;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.bcos.channel.client.ChannelPushCallback;
 import org.bcos.channel.dto.ChannelPush;
 import org.bcos.channel.dto.ChannelResponse;
@@ -30,8 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DirectRouteMsgType;
 import com.webank.weid.protocol.amop.DirectPathRequestBody;
-import com.webank.weid.service.impl.callback.DirectRouteCallback;
-import com.webank.weid.util.SerializationUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * Created by junqizhang on 08/07/2017.
@@ -39,39 +35,32 @@ import com.webank.weid.util.SerializationUtils;
 public class OnNotifyCallback extends ChannelPushCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallback.class);
-//    @Setter
-//    @Getter
-//    protected DirectRouteCallback directRouteCallback = new DirectRouteCallback();
     
-    private Map<Integer, DirectRouteCallback>routeCallBackMap = new HashMap<>();
+    private DirectRouteCallback directRouteCallBack = new DirectRouteCallback();
 
     public void RegistRouteCallBackMap(DirectRouteMsgType msgType, DirectRouteCallback routeCallBack) {
-    	routeCallBackMap.put(msgType.getValue(), routeCallBack);
+    	directRouteCallBack =  routeCallBack;
     }
     @Override
     public void onPush(ChannelPush push) {
 
-//        if (null == directRouteCallback) {
-//            ChannelResponse response = new ChannelResponse();
-//            response.setContent("directRouteCallback is null on server side!");
-//            response.setErrorCode(0);
-//            push.sendResponse(response);
-//            return;
-//        }
+        if (null == directRouteCallBack) {
+            ChannelResponse response = new ChannelResponse();
+            response.setContent("directRouteCallback is null on server side!");
+            response.setErrorCode(0);
+            push.sendResponse(response);
+            return;
+        }
         logger.info("received ChannelPush msg : " + push.getContent());
-        DirectPathRequestBody directPathRequestBody = SerializationUtils.deserialize(push.getContent(), DirectPathRequestBody.class);
+        DirectPathRequestBody directPathRequestBody = DataToolUtils.deserialize(push.getContent(), DirectPathRequestBody.class);
         DirectRouteMsgType responseMsgType = directPathRequestBody.getMsgType();
-//        String errorMsg = "";
-//        Class msgBodyClass = directPathRequestBody.getMsgType().getMsgBodyArgsClass();
-//        Class msgResultClass = directPathRequestBody.getMsgType().getMsgBodyResultClass();
         DirectRouteMsgType msgType = directPathRequestBody.getMsgType();
-        DirectRouteCallback directRouteCallback = routeCallBackMap.get(msgType.getValue());
-        String resultBodyStr = msgType.callOnPush(directRouteCallback, push.getMessageID(), directPathRequestBody.getMsgBody());
+        String resultBodyStr = msgType.callOnPush(directRouteCallBack, push.getMessageID(), directPathRequestBody.getMsgBody());
 
         DirectPathRequestBody responseRequestBody = new DirectPathRequestBody();
         responseRequestBody.setMsgBody(resultBodyStr);
         responseRequestBody.setMsgType(responseMsgType);
-        String responseRequestBodyStr = SerializationUtils.serialize(responseRequestBody);
+        String responseRequestBodyStr = DataToolUtils.serialize(responseRequestBody);
 
         /*
          * 接收到以后需要给发送端回包

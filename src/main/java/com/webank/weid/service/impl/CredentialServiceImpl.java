@@ -19,6 +19,20 @@
 
 package com.webank.weid.service.impl;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.crypto.Sign;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
@@ -35,24 +49,9 @@ import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.JsonSchemaValidatorUtils;
 import com.webank.weid.util.JsonUtil;
-import com.webank.weid.util.SignatureUtils;
-
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 /**
  * Service implementations for operations on Credential.
@@ -114,11 +113,11 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             String rawData = CredentialUtils
                 .getCredentialThumbprintWithoutSig(result, disclosureMap);
             String privateKey = args.getWeIdPrivateKey().getPrivateKey();
-            Sign.SignatureData sigData = SignatureUtils.signMessage(rawData, privateKey);
+            Sign.SignatureData sigData = DataToolUtils.signMessage(rawData, privateKey);
             result.setSignature(
                 new String(
-                    SignatureUtils
-                        .base64Encode(SignatureUtils.simpleSignatureSerialization(sigData)),
+                		DataToolUtils
+                        .base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                     StandardCharsets.UTF_8)
             );
 
@@ -265,11 +264,11 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             }
             String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
 
-            if (!JsonSchemaValidatorUtils.isCptJsonSchemaValid(cptJsonSchema)) {
+            if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
                 logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
                 return ErrorCode.CPT_JSON_SCHEMA_INVALID;
             }
-            if (!JsonSchemaValidatorUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
+            if (!DataToolUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
                 logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
             }
@@ -311,8 +310,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             String rawData = CredentialUtils
                 .getCredentialThumbprintWithoutSig(credential, disclosureMap);
             Sign.SignatureData signatureData =
-                SignatureUtils.simpleSignatureDeserialization(
-                    SignatureUtils.base64Decode(
+            	DataToolUtils.simpleSignatureDeserialization(
+                	DataToolUtils.base64Decode(
                         credential.getSignature().getBytes(StandardCharsets.UTF_8))
                 );
 
@@ -328,12 +327,16 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
                 } else {
                     WeIdDocument weIdDocument = innerResponseData.getResult();
-                    return SignatureUtils
+                    ErrorCode errorCode =  DataToolUtils
                         .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+                    if(errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    	return new ResponseData<>(false, errorCode);
+                    }
+                    return new ResponseData<>(true, ErrorCode.SUCCESS);
                 }
             } else {
                 boolean result =
-                    SignatureUtils
+                		DataToolUtils
                         .verifySignature(rawData, signatureData, new BigInteger(publicKey));
                 if (!result) {
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);

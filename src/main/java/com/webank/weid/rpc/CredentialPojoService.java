@@ -20,14 +20,11 @@
 package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.base.Challenge;
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.PresentationPolicyE;
-import java.util.Map;
-
 import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialPojoWrapper;
+import com.webank.weid.protocol.base.PresentationE;
+import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -83,9 +80,28 @@ public interface CredentialPojoService {
     );
 
     ResponseData<Boolean> verify(
-        PresentationE presentationE,
         String presenterWeId,
         PresentationPolicyE presentationPolicyE,
-        Challenge challenge
+        Challenge challenge,
+        PresentationE presentationE
     );
+
+    /**
+     * Get the full hash value of a Credential. All fields in the Credential will be included. This
+     * method should be called when creating and verifying the Credential Evidence.
+     *
+     * @param credential the args
+     * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
+     */
+//    ResponseData<String> getCredentialHash(CredentialPojo credential);
+
+    /**
+     * Get the Json String of a Credential. All fields in the Credential will be included. This also
+     * supports the selectively disclosed Credential.
+     *
+     * @param credential the credential
+     * @return the Credential Json value in String
+     */
+//    ResponseData<String> getCredentialJson(CredentialPojo credential);
+
 }
