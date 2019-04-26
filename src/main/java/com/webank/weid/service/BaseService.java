@@ -91,8 +91,19 @@ public abstract class BaseService {
     static {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
         service = context.getBean(Service.class);
+        
+        try {
+			PropertyUtils.loadProperties("sdk.properties");
+		} catch (IOException e) {
+			logger.error("[BaseService] Load sdk.properties file failed.", e);
+		}
     }
 
+    public BaseService() {
+    	if(web3j == null) {
+    		initWeb3j();
+    	}
+    }
     protected static Service getService() {
     	return service;
     }
@@ -123,12 +134,6 @@ public abstract class BaseService {
 
     private static boolean initAmop(Service service) {
     	
-    	try {
-			PropertyUtils.loadProperties("sdk.properties");
-		} catch (IOException e) {
-			logger.error("[BaseService] Load sdk.properties file failed.", e);
-			return false;
-		}
         String orgId = PropertyUtils.getProperty("blockchain.orgId");
         
         OnNotifyCallback pushCallBack = new OnNotifyCallback();
