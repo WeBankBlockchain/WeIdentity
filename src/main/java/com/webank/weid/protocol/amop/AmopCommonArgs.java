@@ -29,6 +29,11 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class AmopCommonArgs extends DirectRouteBaseMsgArgs {
 
+	/**
+	 * 
+	 */
+	private String serviceType;
+	
     /*
      * 任意包体
      */
