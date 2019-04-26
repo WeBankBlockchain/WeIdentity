@@ -43,7 +43,7 @@ public class OnNotifyCallback extends ChannelPushCallback {
     }
     @Override
     public void onPush(ChannelPush push) {
-
+    	
         if (null == directRouteCallBack) {
             ChannelResponse response = new ChannelResponse();
             response.setContent("directRouteCallback is null on server side!");
