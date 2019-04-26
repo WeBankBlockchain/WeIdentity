@@ -30,12 +30,11 @@ import lombok.Data;
 @Data
 public class AmopResponse implements IResult {
 
-	/**
-	 * Presentation Policy
-	 */
 	private String result;
 	
 	private Integer errorCode;
+	
+	protected String serviceType;
 	
 	/*
      * 错误信息
