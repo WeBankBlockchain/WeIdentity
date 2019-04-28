@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,17 +17,13 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
-
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.ResponseData;
+package com.webank.weid.suite.entity;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * 加解密类型枚举.
+ * @author v_wbgyang
+ *
  */
-public interface JsonTransportation {
-
-    public ResponseData<String> serialize(PresentationE wrapper, ProtocolProperty property);
-
-    public ResponseData<PresentationE> deserialize(String transString);
+public enum CryptType {
+    AES;
 }

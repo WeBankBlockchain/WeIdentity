@@ -17,21 +17,48 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.suite.transportation.json.protocol;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
- * The base data structure to handle Credential info.
+ * JSON协议实体.
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
+@Getter
+@Setter
+public class JsonBaseData {  
+    
+    /**
+     * JSON协议版本.
+     */
+    private int version;
+    
+    /**
+     * JSON协议编解码方式.
+     */
+    private int encodeType;
+    
+    /**
+     * 协议所属机构.
+     */
+    private String orgId;
+    
+    /**
+     * 协议数据Id.
+     */
+    private String id;
+    
+    /**
+     * 协议数据体.
+     */
+    private Object data;
 
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    /**
+     * 协议通讯类型.
+     */
+    private String type = "AMOP";
+    
 }

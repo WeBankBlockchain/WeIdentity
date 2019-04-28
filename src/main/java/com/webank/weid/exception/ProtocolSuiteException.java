@@ -17,21 +17,27 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.exception;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.webank.weid.constant.ErrorCode;
 
 /**
- * The base data structure to handle Credential info.
+ * 协议处理异常.
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
+public class ProtocolSuiteException extends WeIdBaseException {
 
-    private Integer cptId;
+    private static final long serialVersionUID = 1L;
+    
+    private ErrorCode errorCode;
 
-    private String fieldsToBeDisclosed;
+    public ProtocolSuiteException(ErrorCode errorCode) {
+        super(errorCode.getCodeDesc());
+        this.errorCode = errorCode;
+    }
+    
+    public ErrorCode getErrorCode() {
+        return this.errorCode;
+    }
 }
