@@ -36,11 +36,13 @@ import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialPojoWrapper;
 import com.webank.weid.protocol.base.PresentationE;
+import com.webank.weid.protocol.response.HandleEntity;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.transportation.qr.QrCodeTransportation;
 import com.webank.weid.suite.transportation.qr.QrCodeTransportationService;
+import com.webank.weid.util.DataToolUtils;
 
 public abstract class TestBaseTransportation extends TestBaseServcie {
 
@@ -52,8 +54,15 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
         MockUp<BaseService> mockBaseService = new MockUp<BaseService>() {
             @Mock
             public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
+                HandleEntity entity = new HandleEntity();
+                entity.setErrorCode(ErrorCode.SUCCESS.getCode());
+                entity.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
+                String result = dataDriver.getData(args.getMessage()).getResult();
+                entity.setResult(result);
                 AmopResponse respone = new AmopResponse();
-                respone.setResult(dataDriver.getData(args.getMessage()).getResult());
+                respone.setErrorCode(ErrorCode.SUCCESS.getCode());
+                respone.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
+                respone.setResult(DataToolUtils.serialize(entity));
                 return new ResponseData<>(respone, ErrorCode.SUCCESS);
             }
         };
@@ -62,6 +71,8 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
         mockBaseService.tearDown();
         return wrapperRes;
     }
+    
+    
 
     protected PresentationE getPresentationE() {
         
