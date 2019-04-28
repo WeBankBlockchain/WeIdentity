@@ -20,7 +20,6 @@
 package com.webank.weid.protocol.base;
 
 import java.util.Map;
-import com.webank.weid.util.JsonUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -52,9 +51,4 @@ public class PresentationPolicyE extends Version implements JsonSerialize {
      * specify which properties in which credential are needed.
      */
     private Map<Integer, ClaimPolicy> policy;
-
-    @Override
-    public String toJson() {
-        return JsonUtil.objToJsonStrWithNoPretty(this);
-    }
 }
