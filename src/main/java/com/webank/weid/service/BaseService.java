@@ -318,9 +318,9 @@ public abstract class BaseService {
         DirectPathRequestBody directPathRequestBody = new DirectPathRequestBody();
         directPathRequestBody.setMsgType(msgType);
         directPathRequestBody.setMsgBody(msgBody);
-        String wePopDirectPathRequestBodyStr = DataToolUtils.serialize(arg);
-        logger.info("direct route request, seq : {}, body ：{}", request.getMessageID(), wePopDirectPathRequestBodyStr);
-        request.setContent(wePopDirectPathRequestBodyStr);
+        String requestBodyStr = DataToolUtils.serialize(directPathRequestBody);
+        logger.info("direct route request, seq : {}, body ：{}", request.getMessageID(), requestBodyStr);
+        request.setContent(requestBodyStr);
 
         ChannelResponse response = getService().sendChannelMessage2(request);
         logger.info("direct route response, seq : {}, errorCode : {}, body : {}",
@@ -362,6 +362,6 @@ public abstract class BaseService {
 	public void registerCallback(DirectRouteMsgType directRouteMsgType, DirectRouteCallback directRouteCallback) {
 		
 		OnNotifyCallback callback = (OnNotifyCallback)getService().getPushCallback();
-		callback.RegistRouteCallBackMap(directRouteMsgType, directRouteCallback);
+		callback.RegistRouteCallBack(directRouteCallback);
 	}
 }
