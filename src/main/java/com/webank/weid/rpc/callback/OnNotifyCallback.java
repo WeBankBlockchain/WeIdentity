@@ -38,7 +38,7 @@ public class OnNotifyCallback extends ChannelPushCallback {
     
     private DirectRouteCallback directRouteCallBack = new DirectRouteCallback();
 
-    public void RegistRouteCallBackMap(DirectRouteMsgType msgType, DirectRouteCallback routeCallBack) {
+    public void RegistRouteCallBack(DirectRouteCallback routeCallBack) {
     	directRouteCallBack =  routeCallBack;
     }
     @Override
@@ -51,22 +51,18 @@ public class OnNotifyCallback extends ChannelPushCallback {
             push.sendResponse(response);
             return;
         }
+        
         logger.info("received ChannelPush msg : " + push.getContent());
         DirectPathRequestBody directPathRequestBody = DataToolUtils.deserialize(push.getContent(), DirectPathRequestBody.class);
-        DirectRouteMsgType responseMsgType = directPathRequestBody.getMsgType();
         DirectRouteMsgType msgType = directPathRequestBody.getMsgType();
-        String resultBodyStr = msgType.callOnPush(directRouteCallBack, push.getMessageID(), directPathRequestBody.getMsgBody());
-
-        DirectPathRequestBody responseRequestBody = new DirectPathRequestBody();
-        responseRequestBody.setMsgBody(resultBodyStr);
-        responseRequestBody.setMsgType(responseMsgType);
-        String responseRequestBodyStr = DataToolUtils.serialize(responseRequestBody);
+        String messageBody = directPathRequestBody.getMsgBody();
+        String result = msgType.callOnPush(directRouteCallBack, push.getMessageID(), messageBody);
 
         /*
          * 接收到以后需要给发送端回包
          */
         ChannelResponse response = new ChannelResponse();
-        response.setContent(responseRequestBodyStr);
+        response.setContent(result);
         response.setErrorCode(0);
         push.sendResponse(response);
     }
