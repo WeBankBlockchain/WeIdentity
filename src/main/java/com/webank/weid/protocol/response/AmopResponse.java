@@ -30,15 +30,24 @@ import lombok.Data;
 @Data
 public class AmopResponse implements IResult {
 
+	/**
+	 * 返回的消息
+	 */
 	private String result;
 	
-	private Integer errorCode;
-	
+	/**
+	 * 业务类型
+	 */
 	protected String serviceType;
 	
-	/*
+	/**
+	 * 错误码
+	 */
+	private Integer errorCode;
+	
+	/**
      * 错误信息
      */
-    protected String message;
+    protected String errorMessage;
 	
 }

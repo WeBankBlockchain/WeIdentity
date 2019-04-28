@@ -10,6 +10,7 @@ public enum AmopServiceType {
 	
 	GET_POLICY(2);
 	
+	
 	private Integer typeId;
 	
 	public Integer getTypeId() {

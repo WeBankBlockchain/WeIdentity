@@ -20,6 +20,7 @@
 package com.webank.weid.constant;
 
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 import com.webank.weid.rpc.callback.DirectRouteCallback;
 import com.webank.weid.util.DataToolUtils;
@@ -87,6 +88,8 @@ public enum DirectRouteMsgType {
         }
         break;
         case TYPE_TRANSPORTATION: {
+        	//1.GET key
+        	
             CheckDirectRouteMsgHealthArgs args = DataToolUtils.deserialize(msgBodyStr, CheckDirectRouteMsgHealthArgs.class);
             args.setMessageId(messageId);
             DirectRouteNotifyMsgResult result = directRouteCallback.onPush(args);
