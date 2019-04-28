@@ -40,7 +40,6 @@ import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.service.impl.CredentialPojoServiceImpl;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -64,10 +63,6 @@ public class PresentationE implements JsonSerialize {
     private List<CredentialPojoWrapper> credentialList;
 
     private Map<String, String> proof;
-    
-    public String toJson() {
-        return JsonUtil.objToJsonStrWithNoPretty(this);
-    }
 
     public PresentationE create(
         List<CredentialPojoWrapper> credentialList,

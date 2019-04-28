@@ -19,7 +19,6 @@
 
 package com.webank.weid.protocol.base;
 
-import com.webank.weid.util.JsonUtil;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,10 +32,5 @@ public class PolicyAndChellenge implements JsonSerialize {
     private PresentationPolicyE presentationPolicyE;
 
     private Challenge challenge;
-
-    @Override
-    public String toJson() {
-        return JsonUtil.objToJsonStrWithNoPretty(this);
-    }
 }
 
