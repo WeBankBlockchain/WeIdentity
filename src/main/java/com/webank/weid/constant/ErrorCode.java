@@ -178,6 +178,26 @@ public enum ErrorCode {
      */
     CREDENTIAL_PUBLIC_KEY_NOT_EXISTS(100421, "public key for verifying credential signature does not exist"),
     /**
+     * The signature for verifying credential does not exist.
+     */
+    CREDENTIAL_SIGNATURE_NOT_EXISTS(100422, "signature for verifying credential does not exist"),
+    /**
+     * The credential policy disclosurevalue illegal.
+     */
+    CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL(100423, "policy disclosurevalue illegal"),
+    /**
+     * The credential disclosurevalue notmatch saltvalue.
+     */
+    CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE(100424, "disclosurevalue notmatch saltvalue"),
+    /**
+     * The credential cptId notmatch.
+     */
+    CREDENTIAL_CPTID_NOTMATCH(100425, "credential cptId notmatch"),
+    /**
+     * The credential presenterWeId notmatch.
+     */
+    CREDENTIAL_PRESENTERWEID_NOTMATCH(100426, "credential presenterWeId notmatch"),
+    /**
      * The credential evidence contract failure: illegal input.
      */
     CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT(
