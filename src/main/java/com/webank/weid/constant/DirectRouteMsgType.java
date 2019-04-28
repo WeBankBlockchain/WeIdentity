@@ -19,10 +19,15 @@
 
 package com.webank.weid.constant;
 
+import org.apache.commons.lang3.StringUtils;
+import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 import com.webank.weid.rpc.callback.DirectRouteCallback;
+import com.webank.weid.service.impl.callback.KeyManagerHandle;
+import com.webank.weid.service.impl.callback.PresentationHandle;
+import com.webank.weid.service.impl.callback.PresentationPolicyService;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -44,7 +49,11 @@ public enum DirectRouteMsgType {
 
 	
     private Integer value;
-
+    
+    private static KeyManagerHandle keyManagerHandle = new KeyManagerHandle();
+    
+    private static PresentationHandle presentationHandle = new PresentationHandle();
+    
     private DirectRouteMsgType(Integer index) {
         this.value = index;
     }
@@ -52,7 +61,11 @@ public enum DirectRouteMsgType {
     public Integer getValue() {
         return this.value;
     }
-
+    
+    public static void registPolicyService(PresentationPolicyService policyService) {
+        presentationHandle.registPolicyService(policyService);
+    }
+  
     public Class getMsgBodyArgsClass() {
 
         switch (this) {
@@ -89,11 +102,18 @@ public enum DirectRouteMsgType {
         break;
         case TYPE_TRANSPORTATION: {
         	//1.GET key
-        	
-            CheckDirectRouteMsgHealthArgs args = DataToolUtils.deserialize(msgBodyStr, CheckDirectRouteMsgHealthArgs.class);
-            args.setMessageId(messageId);
-            DirectRouteNotifyMsgResult result = directRouteCallback.onPush(args);
-            resultBodyStr = DataToolUtils.serialize(result);
+        	String result = StringUtils.EMPTY;
+            AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
+            if (AmopServiceType.GET_ENCRYPT_KEY.getTypeId().toString().equals(args.getServiceType())) {
+                result = keyManagerHandle.queryKey(args.getMessage());
+            } else if (AmopServiceType.GET_POLICY.getTypeId().toString().equals(args.getServiceType())) {
+                result = presentationHandle.getPolicyByPolicyId(args.getMessage());
+            }
+            AmopResponse amopResponse = new AmopResponse();
+            amopResponse.setResult(result);
+            amopResponse.setErrorCode(ErrorCode.SUCCESS.getCode());
+            amopResponse.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
+            resultBodyStr = DataToolUtils.serialize(amopResponse);
         }
         break;
             default:

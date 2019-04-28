@@ -22,16 +22,18 @@ package com.webank.weid.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.webank.weid.constant.AmopServiceType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.base.PolicyAndChellenge;
+import com.webank.weid.protocol.response.HandleEntity;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.MessageService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.transportation.json.JsonTransportation;
 import com.webank.weid.suite.transportation.json.JsonTransportationService;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
@@ -54,6 +56,7 @@ public class MessageServiceImpl extends BaseService implements MessageService {
             args.setToOrgId(orgId);
             args.setMessage(String.valueOf(policyId));
             args.setMessageId(getService().newSeq());
+            args.setServiceType(AmopServiceType.GET_POLICY.getTypeId().toString());
             ResponseData<AmopResponse> retResponse = super.request(orgId, args);
             if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("AMOP response fail, policyId={}, errorCode={}, errorMessage={}",
@@ -66,8 +69,24 @@ public class MessageServiceImpl extends BaseService implements MessageService {
                     ErrorCode.getTypeByErrorCode(retResponse.getErrorCode().intValue())
                 );
             }
+            String result = retResponse.getResult().getResult();
+            HandleEntity entity = DataToolUtils.deserialize(result, HandleEntity.class);
+            ErrorCode errorCode = 
+                ErrorCode.getTypeByErrorCode(entity.getErrorCode().intValue());
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                    "getPresentationPolicy error, policyId={}, errorCode={}, errorMessage={}",
+                    policyId,
+                    entity.getErrorCode(),
+                    entity.getErrorMessage()
+                );
+                return new ResponseData<PolicyAndChellenge>(
+                    null, 
+                    errorCode
+                );
+            }
             ResponseData<PolicyAndChellenge> policyResponse = jsonTransportationService.deserialize(
-                retResponse.getResult().getResult(),
+                entity.getResult(),
                 PolicyAndChellenge.class
             );
             return policyResponse;
