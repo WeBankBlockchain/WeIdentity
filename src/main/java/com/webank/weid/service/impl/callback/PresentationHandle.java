@@ -25,9 +25,9 @@ public class PresentationHandle {
     private static final Logger logger = 
             LoggerFactory.getLogger(PresentationHandle.class);
 
-    private JsonTransportation jsonTransportationService = new JsonTransportationService();
+    private static JsonTransportation jsonTransportationService = new JsonTransportationService();
     
-    private PresentationPolicyService policyService;
+    private static PresentationPolicyService policyService;
 
     public String getPolicyByPolicyId(String policyId) {
         logger.info("PresentationCallback param:{}", policyId);
@@ -66,7 +66,7 @@ public class PresentationHandle {
         return DataToolUtils.serialize(entity);
     }
     
-    public void registPolicyService(PresentationPolicyService policyService) {
-        this.policyService = policyService;
+    public static void registPolicyService(PresentationPolicyService service) {
+        policyService = service;
     }
 }
