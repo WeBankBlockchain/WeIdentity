@@ -136,9 +136,11 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
                 TimeUnit.SECONDS
             );
-            Boolean result = resolveRegisterAuthorityIssuerEvents(receipt);
-            if (result) {
-                return new ResponseData<>(result, ErrorCode.SUCCESS);
+            ErrorCode errorCode = resolveRegisterAuthorityIssuerEvents(receipt);
+            if (errorCode.equals(ErrorCode.SUCCESS)) {
+                return new ResponseData<>(Boolean.TRUE, ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(Boolean.FALSE, errorCode);
             }
         } catch (TimeoutException e) {
             logger.error("register authority issuer failed due to system timeout. ", e);
@@ -169,9 +171,11 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             }
             TransactionReceipt transactionReceipt = TransactionUtils
                 .sendTransaction(getWeb3j(), transactionHex);
-            Boolean result = resolveRegisterAuthorityIssuerEvents(transactionReceipt);
-            if (result) {
+            ErrorCode errorCode = resolveRegisterAuthorityIssuerEvents(transactionReceipt);
+            if (errorCode.equals(ErrorCode.SUCCESS)) {
                 return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(Boolean.FALSE.toString(), errorCode);
             }
         } catch (Exception e) {
             logger.error("[registerAuthorityIssuer] register failed due to transaction error.", e);
@@ -179,7 +183,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
     }
 
-    private Boolean resolveRegisterAuthorityIssuerEvents(
+    private ErrorCode resolveRegisterAuthorityIssuerEvents(
         TransactionReceipt transactionReceipt) {
         List<AuthorityIssuerRetLogEventResponse> eventList =
             AuthorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
@@ -190,11 +194,11 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 event,
                 WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
             );
-            return (ErrorCode.SUCCESS == errorCode);
+            return errorCode;
         } else {
             logger.error(
                 "register authority issuer failed due to transcation event decoding failure.");
-            return false;
+            return ErrorCode.AUTHORITY_ISSUER_ERROR;
         }
     }
 

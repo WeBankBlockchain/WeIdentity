@@ -77,7 +77,7 @@ public abstract class BaseService {
     private static Service service;
     
     
-    /*
+    /* 
      * 链上链下最大超时时间
      * unit : millisecond
      */
@@ -85,7 +85,7 @@ public abstract class BaseService {
     
     public static final int DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT = 5000;
     
-    private static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
+    protected static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
     
 
     static {

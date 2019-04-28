@@ -17,21 +17,30 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.suite.crypto;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.webank.weid.exception.EncodeSuiteException;
 
 /**
- * The base data structure to handle Credential info.
+ * 秘钥加解密接口.
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
+public interface CryptService {
 
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    /**
+     * 加密方法.
+     * @param content 待加密字符串
+     * @param password 秘钥
+     * @return 返回加密后的字符串数据
+     */
+    public String encrypt(String content, String password) throws EncodeSuiteException;
+    
+    /**
+     * 解密方法.
+     * @param content 待解密字符串
+     * @param password 秘钥
+     * @return 返回解密后的字符串数据
+     */
+    public String decrypt(String content, String password) throws EncodeSuiteException;
 }

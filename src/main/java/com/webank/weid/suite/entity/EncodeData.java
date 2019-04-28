@@ -17,21 +17,42 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.suite.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 /**
- * The base data structure to handle Credential info.
+ * 编辑码的实体类，封装了需要编解码的数据.
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
-
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+@Getter
+public class EncodeData {
+    
+    /**
+     * 机构名称.
+     */
+    private String orgId;
+   
+    /**
+     * 待编解码字符串.
+     */
+    private String data;
+   
+    /**
+     * 待编解码字符串数据编号.
+     */
+    private String id;
+   
+    /**
+     * 构建编解码对象.
+     * @param orgId 协议所属机构
+     * @param id 数据编号
+     * @param data 需要编解码数据
+     */
+    public EncodeData(String id, String orgId, String data) {
+        this.id = id;
+        this.orgId = orgId;
+        this.data = data;
+    }
 }
