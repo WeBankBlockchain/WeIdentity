@@ -17,21 +17,35 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.suite.transportation.qr.protocol;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.webank.weid.suite.entity.EncodeProperty;
+import com.webank.weid.suite.entity.EncodeType;
+import com.webank.weid.suite.entity.QrCodeVersion;
 
 /**
- * The base data structure to handle Credential info.
+ * 协议属性配置.
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
+public class QrCodeProtocolProperty extends EncodeProperty {
+    
+    /**
+     * 协议默认版本.
+     */
+    private QrCodeVersion version = QrCodeVersion.V1;
 
-    private Integer cptId;
+    public QrCodeVersion getVersion() {
+        return version;
+    }
 
-    private String fieldsToBeDisclosed;
+    public QrCodeProtocolProperty(EncodeType encodeType) {
+        super(encodeType);
+    }
+    
+    @Override
+    public String toString() {
+        return "QrCodeProtocolProperty [version=" + version + ",encodeType=" 
+            + super.getEncodeType().getCode() + "]";
+    } 
 }

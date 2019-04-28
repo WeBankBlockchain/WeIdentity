@@ -17,21 +17,22 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.suite.crypto;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.webank.weid.util.UuIdUtils;
 
 /**
- * The base data structure to handle Credential info.
+ * 秘钥生成器.
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
+public class KeyGenerator {
 
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    /**
+     * 使用UUID作为秘钥.
+     * @return 返回UUID字符串
+     */
+    public static String getKey() {
+        return UuIdUtils.getUuId32();   
+    }
 }

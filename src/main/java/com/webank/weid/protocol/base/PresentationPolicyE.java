@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -20,17 +20,18 @@
 package com.webank.weid.protocol.base;
 
 import java.util.Map;
-import lombok.Getter;
-import lombok.Setter;
+import com.webank.weid.util.JsonUtil;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * The base data structure to handle Credential info.
  *
  * @author junqizhang 2019.04
  */
-@Getter
-@Setter
-public class PresentationPolicyE extends Version {
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class PresentationPolicyE extends Version implements JsonSerialize {
 
     /**
      * Policy ID.
@@ -51,4 +52,9 @@ public class PresentationPolicyE extends Version {
      * specify which properties in which credential are needed.
      */
     private Map<Integer, ClaimPolicy> policy;
+
+    @Override
+    public String toJson() {
+        return JsonUtil.objToJsonStrWithNoPretty(this);
+    }
 }

@@ -46,8 +46,8 @@ public class TestHashUtils {
             rawBytes, 
             new String(rawBytes, StandardCharsets.UTF_8)
         );
-        String hashedString = HashUtils.sha3(rawString);
-        byte[] hashedBytes = HashUtils.sha3(rawBytes);
+        String hashedString = DataToolUtils.sha3(rawString);
+        byte[] hashedBytes = DataToolUtils.sha3(rawBytes);
         // use assert here to verify the String to be 64 bit and Bytes[] to be
         // 32 bit
         logger.info(

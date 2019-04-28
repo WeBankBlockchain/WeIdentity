@@ -17,21 +17,37 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.suite.entity;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+public enum QrCodeVersion {
+    
+    V1(1);
+    
+    private int code;
+    
+    QrCodeVersion(int code) {
+        this.code = code;
+    }
 
-/**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
- */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
-
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    public int getCode() {
+        return code;
+    }
+    
+    public String toString() {
+        return String.valueOf(this.code);
+    }
+    
+    /**
+     * get MetaVersion by code.
+     * @param value code value
+     * @return
+     */
+    public static QrCodeVersion getObject(String value) {
+        for (QrCodeVersion version : QrCodeVersion.values()) {
+            if (String.valueOf(version.getCode()).equals(value)) {
+                return version;
+            }
+        }
+        return null;
+    }
 }

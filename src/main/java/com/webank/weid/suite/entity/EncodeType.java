@@ -17,21 +17,55 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+package com.webank.weid.suite.entity;
 
 /**
- * The base data structure to handle Credential info.
+ * enumeration of supported coding types.
+ * 
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
+public enum EncodeType {
 
-    private Integer cptId;
+    /**
+     * The original type.
+     */
+    ORIGINAL(0),
+    
+    /**
+     * The cipher type.
+     */
+    CIPHER(1);
+    
+    /**
+     * encode number.
+     */
+    private int code;
 
-    private String fieldsToBeDisclosed;
+    
+    EncodeType(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String toString() {
+        return String.valueOf(this.code);
+    }
+    
+    /**
+     * get EncodeType by code.
+     * @param value code value
+     * @return
+     */
+    public static EncodeType getObject(String value) {
+        for (EncodeType codeType : EncodeType.values()) {
+            if (String.valueOf(codeType.getCode()).equals(value)) {
+                return codeType;
+            }
+        }
+        return null;
+    }
 }

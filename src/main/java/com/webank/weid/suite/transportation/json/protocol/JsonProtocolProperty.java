@@ -17,21 +17,37 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.suite.transportation.json.protocol;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import com.webank.weid.suite.entity.EncodeProperty;
+import com.webank.weid.suite.entity.EncodeType;
+import com.webank.weid.suite.entity.JsonVersion;
 
 /**
- * The base data structure to handle Credential info.
+ * JSON协议属性配置.
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
+public class JsonProtocolProperty extends EncodeProperty {
 
-    private Integer cptId;
+    /**
+     * 协议默认版本.
+     */
+    private JsonVersion version = JsonVersion.V1;
 
-    private String fieldsToBeDisclosed;
+    public JsonVersion getVersion() {
+        return version;
+    }
+
+    public JsonProtocolProperty(EncodeType encodeType) {
+        super(encodeType);
+    }
+
+    @Override
+    public String toString() {
+        return "JsonProtocolProperty [version=" + version + ",encodeType=" 
+            + super.getEncodeType().getCode() + "]";
+    } 
+    
+    
 }

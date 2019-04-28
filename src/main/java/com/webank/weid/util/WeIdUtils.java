@@ -21,7 +21,6 @@ package com.webank.weid.util;
 
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
-
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,6 +29,8 @@ import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.WalletUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -38,6 +39,11 @@ import org.bcos.web3j.crypto.WalletUtils;
  * @author tonychen
  */
 public final class WeIdUtils {
+    
+    /**
+     * log4j object, for recording log.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
 
     /**
      * Convert a WeIdentity DID to a fisco account address.
@@ -144,5 +150,31 @@ public final class WeIdUtils {
      */
     public static boolean isEmptyAddress(Address addr) {
         return addr.getValue().equals(BigInteger.ZERO);
+    }
+    
+    /**
+     * check the weId is match the private key.
+     * 
+     * @param privateKey the private key
+     * @param weId the weId
+     * @return true if match, false mismatch
+     */
+    public static boolean validatePrivateKeyWeIdMatches(WeIdPrivateKey privateKey, String weId) {
+        boolean isMatch = false;
+
+        try {
+            BigInteger publicKey = DataToolUtils
+                .publicKeyFromPrivate(new BigInteger(privateKey.getPrivateKey()));
+            String address1 = "0x" + Keys.getAddress(publicKey);
+            String address2 = WeIdUtils.convertWeIdToAddress(weId);
+            if (address1.equals(address2)) {
+                isMatch = true;
+            }
+        } catch (Exception e) {
+            logger.error("Validate private key We Id matches failed. Error message :{}", e);
+            return isMatch;
+        }
+        
+        return isMatch;
     }
 }
