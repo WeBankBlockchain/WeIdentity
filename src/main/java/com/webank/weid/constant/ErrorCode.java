@@ -266,6 +266,21 @@ public enum ErrorCode {
     CLAIM_POLICY_NOT_EXISTS(100302, "the claim policy is not exists."),
     
     /**
+     * the encrypt key is not exists.
+     */
+    ENCRYPT_KEY_NOT_EXISTS(100400, "the encrypt key not exists."),
+    
+    /**
+     * the policy service is not exists.
+     */
+    POLICY_SERVICE_NOT_EXISTS(100401, "no policy service."),
+    
+    /**
+     * the policy service call fail.
+     */
+    POLICY_SERVICE_CALL_FAIL(100402, "the policy service call fail, please check the error log."),
+    
+    /**
      * suite基本异常.
      */
     SUITE_BASE_ERROR(110000, "suite baes exception error, please check the error log."),

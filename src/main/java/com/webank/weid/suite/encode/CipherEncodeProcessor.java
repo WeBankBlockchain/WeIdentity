@@ -24,9 +24,11 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.connectivity.driver.DataDriver;
 import com.webank.weid.connectivity.driver.MysqlDriver;
+import com.webank.weid.constant.AmopServiceType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.EncodeSuiteException;
 import com.webank.weid.protocol.amop.AmopCommonArgs;
+import com.webank.weid.protocol.response.HandleEntity;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
@@ -34,6 +36,7 @@ import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.crypto.KeyGenerator;
 import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.EncodeData;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.UuIdUtils;
 
 /**
@@ -87,21 +90,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         logger.info("cipher decode process, decryption with AES.");
         try {
             //获取秘钥，
-            AmopCommonArgs args = new AmopCommonArgs();
-            args.setMessage(encodeData.getId());
-            args.setMessageId(UuIdUtils.getUuId32());
-            args.setToOrgId(encodeData.getOrgId());
-            args.setFromOrgId(fromOrgId);
-            ResponseData<AmopResponse> retResponse = super.request(encodeData.getOrgId(), args);
-            if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                logger.error("AMOP response fail, dataId={}, errorCode={}, errorMessage={}",
-                    encodeData.getId(),
-                    retResponse.getErrorCode(),
-                    retResponse.getErrorMessage()
-                );
-                throw new EncodeSuiteException();
-            }
-            String key = retResponse.getResult().getResult();
+            String key = requestEncryptKey(encodeData);
             //将数据进行AES解密
             String value = 
                 CryptServiceFactory
@@ -117,5 +106,44 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             logger.error("decode processor has unknow error.", e);
             throw new EncodeSuiteException(e);
         }  
+    }
+
+    /**
+     * 获取秘钥key
+     * @param encodeData
+     * @return
+     */
+    private String requestEncryptKey(EncodeData encodeData) {
+        AmopCommonArgs args = new AmopCommonArgs();
+        args.setMessage(encodeData.getId());
+        args.setMessageId(UuIdUtils.getUuId32());
+        args.setToOrgId(encodeData.getOrgId());
+        args.setFromOrgId(fromOrgId);
+        args.setServiceType(AmopServiceType.GET_ENCRYPT_KEY.getTypeId().toString());
+        ResponseData<AmopResponse> retResponse = super.request(encodeData.getOrgId(), args);
+        if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            logger.error("AMOP response fail, dataId={}, errorCode={}, errorMessage={}",
+                encodeData.getId(),
+                retResponse.getErrorCode(),
+                retResponse.getErrorMessage()
+            );
+            throw new EncodeSuiteException(
+                ErrorCode.getTypeByErrorCode(retResponse.getErrorCode().intValue())
+            );
+        }
+        String result = retResponse.getResult().getResult();
+        HandleEntity entity = DataToolUtils.deserialize(result, HandleEntity.class);
+        ErrorCode errorCode = 
+                ErrorCode.getTypeByErrorCode(entity.getErrorCode().intValue());
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "requestEncryptKey error, dataId={}, errorCode={}, errorMessage={}",
+                encodeData.getId(),
+                entity.getErrorCode(),
+                entity.getErrorMessage()
+            );
+           new EncodeSuiteException(errorCode);
+        }
+        return entity.getResult();
     }
 }
