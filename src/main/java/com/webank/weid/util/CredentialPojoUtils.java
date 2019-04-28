@@ -40,6 +40,8 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialPojoWrapper;
+import com.webank.weid.protocol.base.PresentationE;
+import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 
@@ -338,6 +340,35 @@ public final class CredentialPojoUtils {
 		return DataToolUtils.sha3(rawData);
 	}
 	
+    /**
+     * Check the credential and proof of presentationE
+     * 
+     * @param presentationE
+     * @return
+     */
+    public static ErrorCode checkPresentationEValid(PresentationE presentationE) {
+        if(presentationE == null || presentationE.getCredentialList() == null 
+                || presentationE.getCredentialList().isEmpty() 
+                || presentationE.getProof() == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        if(StringUtils.isEmpty(presentationE.getProof().get("signature"))) {
+            return ErrorCode.CREDENTIAL_SIGNATURE_NOT_EXISTS;
+        }
+        return ErrorCode.SUCCESS;
+    }
+	
+    /**
+     * Check the policy of PresentationPolicyE 
+     * 
+     * @param presentationPolicyE
+     * @return
+     */
+    public static boolean checkPresentationPolicyEValid(PresentationPolicyE presentationPolicyE) {
+        return (presentationPolicyE != null 
+                && presentationPolicyE.getPolicy() != null 
+                && presentationPolicyE.getPolicy().size() != 0);
+    }
 //	public static String getCredentialJson(CredentialPojo credential) {
 //		return null;
 //	}
