@@ -42,14 +42,5 @@ public class DirectRouteCallback implements PushNotifyAllCallback {
 //    	result.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         return result;
     }
-    
-    public AmopResponse onPush(AmopCommonArgs arg) {
-    	
-    	AmopResponse result = new AmopResponse();
-    	result.setResult("");
-    	result.setErrorCode(ErrorCode.SUCCESS.getCode());
-    	result.setMessage(ErrorCode.SUCCESS.getCodeDesc());
-        return result;
-    }
 
 }

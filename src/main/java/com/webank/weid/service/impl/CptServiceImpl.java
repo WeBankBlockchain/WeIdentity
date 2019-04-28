@@ -19,7 +19,6 @@
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -38,7 +37,6 @@ import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -494,32 +492,11 @@ public class CptServiceImpl extends BaseService implements CptService {
             return ErrorCode.WEID_PRIVATEKEY_INVALID;
         }
 
-        if (!validatePrivateKeyWeIdMatches(weIdPrivateKey, weId)) {
+        if (!WeIdUtils.validatePrivateKeyWeIdMatches(weIdPrivateKey, weId)) {
             return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
         }
         return ErrorCode.SUCCESS;
     }
-
-    private boolean validatePrivateKeyWeIdMatches(WeIdPrivateKey cptPublisherPrivateKey,
-        String cptPublisher) {
-        boolean isMatch = false;
-
-        try {
-            BigInteger publicKey = DataToolUtils
-                .publicKeyFromPrivate(new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-            String address1 = "0x" + Keys.getAddress(publicKey);
-            String address2 = WeIdUtils.convertWeIdToAddress(cptPublisher);
-            if (address1.equals(address2)) {
-                isMatch = true;
-            }
-        } catch (Exception e) {
-            logger.error("Validate private key We Id matches failed. Error message :{}", e);
-            return isMatch;
-        }
-        
-        return isMatch;
-    }
-
 
     /**
      * create new cpt json schema.

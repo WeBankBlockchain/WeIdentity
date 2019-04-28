@@ -19,19 +19,8 @@
 
 package com.webank.weid.protocol.base;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+public interface JsonSerialize {
 
-/**
- * The base data structure to handle Credential info.
- *
- * @author junqizhang 2019.04
- */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
-
-    private Integer cptId;
-
-    private String fieldsToBeDisclosed;
+    public String toJson();
+     
 }
