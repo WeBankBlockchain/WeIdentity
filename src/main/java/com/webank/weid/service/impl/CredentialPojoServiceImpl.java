@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -30,6 +31,7 @@ import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.WeIdUtils;
 
 /**
  * @author tonychen 2019年4月17日
@@ -207,11 +209,72 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 	@Override
 	public ResponseData<Boolean> verify(String presenterWeId, PresentationPolicyE presentationPolicyE,
 			Challenge challenge, PresentationE presentationE) {
+        if ( WeIdUtils.isWeIdValid(presenterWeId) 
+                || CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)
+                || challenge == null ) {
+                return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
+        }
+		
+        ErrorCode checkPresentationE = CredentialPojoUtils.checkPresentationEValid(presentationE);
+        if (checkPresentationE.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<Boolean>(false, checkPresentationE);
+        }
 
-		return null;
+        //verify presenterWeId
+        if ( !presenterWeId.equals(challenge.getWeId())) {
+            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
+        }
+		
+        //verify challenge
+        String rawData = String.valueOf(challenge);
+	    WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
+	    
+	    String signature = presentationE.getProof().get("signature");
+	    Sign.SignatureData signatureData =
+	            DataToolUtils.simpleSignatureDeserialization(
+	                    DataToolUtils.base64Decode(
+	                            signature.getBytes(StandardCharsets.UTF_8))
+	                    );
+	     
+	    ErrorCode errorCode = 
+	            DataToolUtils.verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+	    if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+	    	logger.error("[verify] verify challenge {} failed.",challenge);
+	        return new ResponseData<Boolean>(false, errorCode);
+	    }
+
+	    //verify cptId of presentationE
+	    List<CredentialPojoWrapper> credentialPojoWrapperlist = presentationE.getCredentialList();	   
+	    Map<Integer, ClaimPolicy> policyMap = presentationPolicyE.getPolicy();
+	    ResponseData<Boolean> verifyCptIdresult = 
+	            this.verifyCptId(policyMap,credentialPojoWrapperlist);
+	    if (verifyCptIdresult.getErrorCode() != ErrorCode.SUCCESS.getCode() 
+	            || !verifyCptIdresult.getResult()) {
+	        logger.error("[verify] verify cptId failed.");
+            return verifyCptIdresult;
+	    }
+		
+	    for (CredentialPojoWrapper credentialPojoWrapper : credentialPojoWrapperlist) {
+	        //verify policy
+	        ResponseData<Boolean> verifypolicyResult = this.verifyPolicy(credentialPojoWrapper, 
+	            policyMap);
+	        if (verifypolicyResult.getErrorCode() != ErrorCode.SUCCESS.getCode() 
+	                || !verifypolicyResult.getResult()) {
+	            logger.error("[verify] verify policy {} failed.",policyMap);
+	            return verifypolicyResult;
+	        }
+	    		
+	        //verify credential
+			ErrorCode verifyCredentialResult = verifyContent(credentialPojoWrapper, null);
+	        if(errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+	            logger.error(
+	                    "[verify] verify credential {} failed.",credentialPojoWrapper);
+	            return new ResponseData<Boolean>(false, verifyCredentialResult);
+	        }	        
+        }
+	     
+	    return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
 	}
-
-
 
 	/* (non-Javadoc)
 	 * @see com.webank.weid.rpc.CredentialPojoService#verify(com.webank.weid.protocol.base.CredentialPojoWrapper, com.webank.weid.protocol.base.WeIdPublicKey)
@@ -219,16 +282,16 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 	@Override
 	public ResponseData<Boolean> verify(CredentialPojoWrapper credentialWrapper, WeIdPublicKey issuerPublicKey) {
 
-		String publicKey = issuerPublicKey.getPublicKey();
-		if(StringUtils.isEmpty(publicKey)) {
-			return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
-		}
-		ErrorCode errorCode = verifyContent(credentialWrapper, publicKey);
-		if(errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-			return new ResponseData<Boolean>(false, errorCode);
-		}
-		return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
-	}
+        String publicKey = issuerPublicKey.getPublicKey();
+        if(StringUtils.isEmpty(publicKey)) {
+            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
+        }
+        ErrorCode errorCode = verifyContent(credentialWrapper, publicKey);
+        if(errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<Boolean>(false, errorCode);
+        }
+        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+    }
 
 	private static ErrorCode verifyContent(CredentialPojoWrapper credentialWrapper, String publicKey) {
 		Map<String, Object>salt = credentialWrapper.getSalt();
@@ -271,4 +334,65 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
              return ErrorCode.SUCCESS;
          }
 	}
+	
+    private ResponseData<Boolean> verifyCptId(Map<Integer, ClaimPolicy> policyMap,
+            List<CredentialPojoWrapper> credentialPojoWrapperlist){
+        if ( policyMap.size() != credentialPojoWrapperlist.size() ) {	    	
+            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_CPTID_NOTMATCH);
+        } else {
+            for (CredentialPojoWrapper credentialPojoWrapper : credentialPojoWrapperlist) {	    		
+                if(!policyMap.containsKey(credentialPojoWrapper.getCredentialPojo().getCptId())) {
+                    return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_CPTID_NOTMATCH);
+                }
+            }	
+        }
+        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+    }
+    
+    private ResponseData<Boolean> verifyPolicy(CredentialPojoWrapper credentialPojoWrapper,
+		    Map<Integer, ClaimPolicy> policyMap) {
+        Map<String, Object> saltMap = credentialPojoWrapper.getSalt();
+		
+        Integer cptId = credentialPojoWrapper.getCredentialPojo().getCptId();
+        ClaimPolicy claimPolicy = policyMap.get(cptId);
+        String disclosure = claimPolicy.getFieldsToBeDisclosed();
+        Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
+		
+        for (String disclosureK : disclosureMap.keySet()) {
+            Object disclosureV = disclosureMap.get(disclosureK);
+            Object saltV = saltMap.get(disclosureK);
+			
+            if (!((Integer) disclosureV).equals(
+                    CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
+                    && !((Integer) disclosureV).equals(
+                            CredentialFieldDisclosureValue.DISCLOSED.getStatus())){
+                logger.error("[verify] policy disclosureValue {} illegal.",policyMap);
+                return new ResponseData<Boolean>(false,
+                        ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);				 
+            }
+			
+            if (StringUtils.isEmpty(String.valueOf(saltV))) {
+                return new ResponseData<Boolean>(false,
+                        ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);
+            }
+            
+            if ((((Integer) disclosureV).equals(
+            		CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
+            		&& String.valueOf(saltV).length() > 1)
+        	    || (((Integer) disclosureV).equals(
+        	    		CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
+        	    		&& !((Integer) saltV).equals(
+        	    				CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()))) {
+                return new ResponseData<Boolean>(false,
+                		ErrorCode.CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE);
+            }
+
+            if (((Integer) disclosureV).equals(CredentialFieldDisclosureValue.DISCLOSED.getStatus()) 
+                    && String.valueOf(saltV).length() <= 1) {
+                return new ResponseData<Boolean>(false,
+                        ErrorCode.CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE);
+            }
+        }
+        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+    }
 }
