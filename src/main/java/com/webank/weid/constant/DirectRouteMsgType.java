@@ -50,9 +50,7 @@ public enum DirectRouteMsgType {
 	
     private Integer value;
     
-    private static KeyManagerHandle keyManagerHandle = new KeyManagerHandle();
-    
-    private static PresentationHandle presentationHandle = new PresentationHandle();
+  
     
     private DirectRouteMsgType(Integer index) {
         this.value = index;
@@ -102,18 +100,9 @@ public enum DirectRouteMsgType {
         break;
         case TYPE_TRANSPORTATION: {
         	//1.GET key
-        	String result = StringUtils.EMPTY;
-            AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
-            if (AmopServiceType.GET_ENCRYPT_KEY.getTypeId().toString().equals(args.getServiceType())) {
-                result = keyManagerHandle.queryKey(args.getMessage());
-            } else if (AmopServiceType.GET_POLICY.getTypeId().toString().equals(args.getServiceType())) {
-                result = presentationHandle.getPolicyByPolicyId(args.getMessage());
-            }
-            AmopResponse amopResponse = new AmopResponse();
-            amopResponse.setResult(result);
-            amopResponse.setErrorCode(ErrorCode.SUCCESS.getCode());
-            amopResponse.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
-            resultBodyStr = DataToolUtils.serialize(amopResponse);
+        	AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
+        	AmopResponse result = directRouteCallback.onPush(args);
+            resultBodyStr = DataToolUtils.serialize(result);
         }
         break;
             default:
