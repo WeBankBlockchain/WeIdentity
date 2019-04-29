@@ -27,7 +27,7 @@ import lombok.Setter;
  */
 @Setter
 @Getter
-public class PolicyAndChellenge implements JsonSerialize {
+public class PolicyAndChallenge implements JsonSerializer {
 
     private PresentationPolicyE presentationPolicyE;
 

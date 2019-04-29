@@ -30,14 +30,14 @@ public class EncodeSuiteException extends WeIdBaseException {
 
     private static final long serialVersionUID = 1L;
 
-    private ErrorCode errorCode = ErrorCode.ENCODE_BASE_ERROR;
+    private ErrorCode errorCode = ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR;
     
     public EncodeSuiteException(Throwable e) {
-        super(ErrorCode.ENCODE_BASE_ERROR.getCodeDesc(), e);
+        super(ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCodeDesc(), e);
     }
     
     public EncodeSuiteException() {
-        super(ErrorCode.ENCODE_BASE_ERROR.getCodeDesc()); 
+        super(ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCodeDesc()); 
     }
     
     public EncodeSuiteException(ErrorCode errorCode) {
