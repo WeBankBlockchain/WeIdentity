@@ -17,21 +17,13 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.util;
+package com.webank.weid.protocol.base;
 
-import java.util.UUID;
-import org.apache.commons.lang3.StringUtils;
+import com.webank.weid.util.JsonUtil;
 
-/**
- * UUID tool.
- * @author v_wbgyang
- *
- */
-public class UuIdUtils {
-    
-    private static final String SEPARATOR_CHAR = "-";
+public interface JsonSerializer {
 
-    public static String getUuId32() {
-        return UUID.randomUUID().toString().replaceAll(SEPARATOR_CHAR, StringUtils.EMPTY);   
-    }
+   default public String toJson() {
+       return JsonUtil.objToJsonStrWithNoPretty(this);
+   }
 }

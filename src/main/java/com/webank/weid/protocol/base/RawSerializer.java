@@ -19,12 +19,9 @@
 
 package com.webank.weid.protocol.base;
 
-import com.webank.weid.util.JsonUtil;
-
-public interface JsonSerialize {
-
-   default public String toJson() {
-       return JsonUtil.objToJsonStrWithNoPretty(this);
-   }
-     
+public interface RawSerializer extends JsonSerializer {
+    
+    default public String toRawData() {
+        return toJson();
+    } 
 }

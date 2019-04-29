@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.JsonSerialize;
+import com.webank.weid.protocol.base.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
@@ -62,7 +62,7 @@ public class QrCodeTransportationService
     }
     
     @Override
-    public <T extends JsonSerialize> ResponseData<String> serialize(
+    public <T extends JsonSerializer> ResponseData<String> serialize(
         T object, 
         QrCodeProtocolProperty property) {
         
@@ -121,7 +121,7 @@ public class QrCodeTransportationService
     }  
 
     @Override
-    public <T extends JsonSerialize> ResponseData<T> deserialize(
+    public <T extends JsonSerializer> ResponseData<T> deserialize(
         String transString,
         Class<T> clazz) {
         

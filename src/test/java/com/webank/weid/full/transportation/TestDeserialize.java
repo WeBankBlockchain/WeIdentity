@@ -110,7 +110,7 @@ public class TestDeserialize extends TestBaseTransportation {
             qrCodeTransportation.deserialize(transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_STRING_INVALID.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
         ); 
         Assert.assertNull(wrapperRes.getResult());
@@ -126,7 +126,7 @@ public class TestDeserialize extends TestBaseTransportation {
             qrCodeTransportation.deserialize(transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_STRING_INVALID.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -142,7 +142,7 @@ public class TestDeserialize extends TestBaseTransportation {
             qrCodeTransportation.deserialize(transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_STRING_INVALID.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -158,7 +158,7 @@ public class TestDeserialize extends TestBaseTransportation {
             qrCodeTransportation.deserialize(trans, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_VERSION_ERROR.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_VERSION_ERROR.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -174,7 +174,7 @@ public class TestDeserialize extends TestBaseTransportation {
             qrCodeTransportation.deserialize(trans, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_STRING_INVALID.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -206,7 +206,7 @@ public class TestDeserialize extends TestBaseTransportation {
             qrCodeTransportation.deserialize(trans, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_STRING_INVALID.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
         ); 
         Assert.assertNull(wrapperRes.getResult());
@@ -235,7 +235,7 @@ public class TestDeserialize extends TestBaseTransportation {
         mockTest.tearDown();
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.ENCODE_BASE_ERROR.getCode(),
+            ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
