@@ -19,8 +19,12 @@
 
 package com.webank.weid.protocol.base;
 
+import com.webank.weid.util.JsonUtil;
+
 public interface JsonSerialize {
 
-    public String toJson();
+   default public String toJson() {
+       return JsonUtil.objToJsonStrWithNoPretty(this);
+   }
      
 }
