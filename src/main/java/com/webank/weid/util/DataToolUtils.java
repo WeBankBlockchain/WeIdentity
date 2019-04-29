@@ -3,8 +3,10 @@ package com.webank.weid.util;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -18,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
@@ -57,6 +62,8 @@ public final class DataToolUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataToolUtils.class);
 	private static ObjectMapper objectMapper = new ObjectMapper();
+	
+	private static final String SEPARATOR_CHAR = "-";
 	
 	/**
      * Keccak-256 hash function.
@@ -280,6 +287,26 @@ public final class DataToolUtils {
         ECKeyPair keyPair = new ECKeyPair(privateKey, publicKeyFromPrivate(privateKey));
         return Sign.signMessage(sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
     }
+    
+    /**
+     * Sign a object based on the given privateKey in Decimal String BigInt.
+     *
+     * @param rawData this rawData to be signed,
+     * @param privateKeyString the private key string
+     * @return String the data after signature
+     */
+    public static String sign(
+        String rawData,
+        String privateKeyString) {
+
+        Sign.SignatureData sigData = signMessage(rawData, privateKeyString);
+        String signature =
+            new String(
+                base64Encode(simpleSignatureSerialization(sigData)),
+                StandardCharsets.UTF_8
+            );
+        return signature;
+    }
 
     /**
      * Extract the Public Key from the message and the SignatureData.
@@ -313,6 +340,26 @@ public final class DataToolUtils {
         BigInteger publicKey)
         throws SignatureException {
 
+        BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
+        return extractedPublicKey.equals(publicKey);
+    }
+    
+    /**
+     * Verify whether the message and the Signature matches the given public Key.
+     *
+     * @param message This should be from the same plain-text source with the signature Data.
+     * @param signature this is a signature string of Base64.
+     * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
+     * @return true if yes, false otherwise
+     * @throws SignatureException Signature is the exception.
+     */
+    public static boolean verifySignature(
+        String message,
+        String signature,
+        BigInteger publicKey)
+        throws SignatureException {
+        
+        Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
     }
@@ -422,6 +469,26 @@ public final class DataToolUtils {
      * Verify a signature based on the provided raw data, and the WeID Document from chain. This
      * will traverse each public key in the WeID Document and fetch all keys which belongs to the
      * authentication list. Then, verify signature to each one; return true if anyone matches. This
+     * is used for object checking.
+     *
+     * @param rawData the rawData to be verified
+     * @param signature the Signature Data
+     * @param weIdDocument the WeIdDocument to be extracted
+     * @return true if yes, false otherwise with exact error codes
+     */
+    public static ErrorCode verifySignatureFromWeId(
+        String rawData,
+        String signature,
+        WeIdDocument weIdDocument) {
+
+        Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
+        return verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+    }
+    
+    /**
+     * Verify a signature based on the provided raw data, and the WeID Document from chain. This
+     * will traverse each public key in the WeID Document and fetch all keys which belongs to the
+     * authentication list. Then, verify signature to each one; return true if anyone matches. This
      * is used in CredentialService and EvidenceService.
      *
      * @param rawData the rawData to be verified
@@ -493,5 +560,88 @@ public final class DataToolUtils {
         return simpleSignatureDeserialization(
             base64Decode(base64Signature.getBytes(StandardCharsets.UTF_8))
         );
+    }
+    
+    /**
+     * Get the UUID and remove the '-'.
+     * @return return the UUID of the length is 32
+     */
+    public static String getUuId32() {
+        return UUID.randomUUID().toString().replaceAll(SEPARATOR_CHAR, StringUtils.EMPTY);   
+    }
+    
+    /**
+     * Compress JSON String.
+     * 
+     * @param arg the compress string
+     * @return return the value of compressed
+     */
+    public static String compress(String arg) throws IOException {
+        if (null == arg || arg.length() <= 0) {
+            return arg;
+        }
+        ByteArrayOutputStream out = null;
+        GZIPOutputStream gzip = null;
+        try {
+            out = new ByteArrayOutputStream();
+            gzip = new GZIPOutputStream(out);
+            gzip.write(arg.getBytes(StandardCharsets.UTF_8.toString()));
+            close(gzip);
+            String value = out.toString(StandardCharsets.ISO_8859_1.toString());
+            return value;
+        } finally {
+            close(out);
+        }
+    }
+
+    /**
+     * Decompression of String data.
+     * 
+     * @param arg String data with decompression
+     * @return return the value of decompression
+     */
+    public static String unCompress(String arg) throws IOException {
+        if (null == arg || arg.length() <= 0) {
+            return arg;
+        }
+        ByteArrayOutputStream out = null;
+        ByteArrayInputStream in = null;
+        GZIPInputStream gzip = null;
+        try {
+            out = new ByteArrayOutputStream();
+            in = new ByteArrayInputStream(arg.getBytes(StandardCharsets.ISO_8859_1.toString()));
+            gzip = new GZIPInputStream(in);
+            byte[] buffer = new byte[256];
+            int n = 0;
+            while ((n = gzip.read(buffer)) >= 0) {
+                out.write(buffer, 0, n);
+            }
+            String value = out.toString(StandardCharsets.UTF_8.toString());
+            return value;
+        } finally {
+            close(gzip);
+            close(in);
+            close(out);
+        }
+    }
+
+    private static void close(OutputStream os) {
+        if (os != null) {
+            try {
+                os.close();
+            } catch (IOException e) {
+                logger.error("close OutputStream error", e);
+            }
+        }
+    }
+    
+    private static void close(InputStream is) {
+        if (is != null) {
+            try {
+                is.close();
+            } catch (IOException e) {
+                logger.error("close InputStream error", e);
+            }
+        }
     }
 }

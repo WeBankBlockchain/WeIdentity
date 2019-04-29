@@ -1,6 +1,6 @@
 package com.webank.weid.service.impl.callback;
 
-import com.webank.weid.protocol.base.PolicyAndChellenge;
+import com.webank.weid.protocol.base.PolicyAndChallenge;
 
 public interface PresentationPolicyService {
 
@@ -9,5 +9,5 @@ public interface PresentationPolicyService {
      * @param policyId 策略编号
      * @return 返回PresentationPolicyE对象数据
      */
-    public PolicyAndChellenge obtainPolicy(String policyId);
+    public PolicyAndChallenge obtainPolicy(String policyId);
 }
