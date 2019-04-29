@@ -19,15 +19,11 @@
 
 package com.webank.weid.constant;
 
-import org.apache.commons.lang3.StringUtils;
 import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 import com.webank.weid.rpc.callback.DirectRouteCallback;
-import com.webank.weid.service.impl.callback.KeyManagerHandle;
-import com.webank.weid.service.impl.callback.PresentationHandle;
-import com.webank.weid.service.impl.callback.PresentationPolicyService;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -50,18 +46,12 @@ public enum DirectRouteMsgType {
 	
     private Integer value;
     
-  
-    
     private DirectRouteMsgType(Integer index) {
         this.value = index;
     }
 
     public Integer getValue() {
         return this.value;
-    }
-    
-    public static void registPolicyService(PresentationPolicyService policyService) {
-        presentationHandle.registPolicyService(policyService);
     }
   
     public Class getMsgBodyArgsClass() {

@@ -52,8 +52,6 @@ public class JsonTransportationService
     private static final Logger logger = 
         LoggerFactory.getLogger(JsonTransportationService.class);
     
-    
-    
     @Override
     public <T extends JsonSerialize> ResponseData<String> serialize(
         T object,
