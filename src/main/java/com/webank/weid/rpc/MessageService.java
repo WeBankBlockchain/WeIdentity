@@ -19,15 +19,14 @@
 
 package com.webank.weid.rpc;
 
-import com.webank.weid.protocol.base.PolicyAndChellenge;
+import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.response.ResponseData;
-//import com.webank.weid.rpc.base.BaseClient;
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
 public interface MessageService extends BaseClient{
 
-    ResponseData<PolicyAndChellenge> getPresentationPolicy(String orgId, Integer policyId);
+    ResponseData<PolicyAndChallenge> getPresentationPolicy(String orgId, Integer policyId);
 
 }

@@ -179,4 +179,9 @@ public final class WeIdConstant {
      * The big-enough block limit number.
      */
     public static final String BIG_BLOCK_LIMIT = "9999999999";
+    
+    /**
+     *  the default sign type.
+     */
+    public static final String DEFAULT_SIGN_TYPE = "RsaSignature2018";
 }
