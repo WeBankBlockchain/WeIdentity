@@ -23,7 +23,6 @@ public class TransportationCallBack extends DirectRouteCallback {
 
 		String result = StringUtils.EMPTY;
 		AmopResponse response = new AmopResponse();
-
 		if (AmopServiceType.GET_ENCRYPT_KEY.getTypeId().toString().equals(args.getServiceType())) {
 			result = keyManagerHandle.queryKey(args.getMessage());
 		} else if (AmopServiceType.GET_POLICY.getTypeId().toString().equals(args.getServiceType())) {
