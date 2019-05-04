@@ -54,6 +54,8 @@ import com.webank.weid.contract.CptController;
 import com.webank.weid.contract.CptData;
 import com.webank.weid.contract.EvidenceFactory;
 import com.webank.weid.contract.RoleController;
+import com.webank.weid.contract.SpecificIssuerController;
+import com.webank.weid.contract.SpecificIssuerData;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.util.WeIdUtils;
 
@@ -353,6 +355,54 @@ public class DeployContract {
             writeAddressToFile(authorityIssuerControllerAddress, "authorityIssuer.address");
         } catch (Exception e) {
             logger.error("Write error:", e);
+        }
+
+        String specificIssuerDataAddress = StringUtils.EMPTY;
+        try {
+            Future<SpecificIssuerData> f6 = SpecificIssuerData.deploy(
+                web3j,
+                credentials,
+                WeIdConstant.GAS_PRICE,
+                WeIdConstant.GAS_LIMIT,
+                WeIdConstant.INILITIAL_VALUE
+            );
+            SpecificIssuerData specificIssuerData = f6.get(
+                DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS,
+                TimeUnit.SECONDS
+            );
+            specificIssuerDataAddress = specificIssuerData.getContractAddress();
+            if (!WeIdUtils.isEmptyAddress(new Address(specificIssuerDataAddress))) {
+                issuerAddressList.put("SpecificIssuerData", specificIssuerDataAddress);
+            }
+        } catch (Exception e) {
+            logger.error("SpecificIssuerData deployment error:", e);
+        }
+
+        try {
+            Future<SpecificIssuerController> f7 = SpecificIssuerController.deploy(
+                web3j,
+                credentials,
+                WeIdConstant.GAS_PRICE,
+                WeIdConstant.GAS_LIMIT,
+                WeIdConstant.INILITIAL_VALUE,
+                new Address(specificIssuerDataAddress),
+                new Address(roleControllerAddress)
+            );
+            SpecificIssuerController specificIssuerController = f7.get(
+                DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS,
+                TimeUnit.SECONDS
+            );
+            String specificIssuerControllerAddress = specificIssuerController.getContractAddress();
+            if (!WeIdUtils.isEmptyAddress(new Address(specificIssuerControllerAddress))) {
+                issuerAddressList.put("SpecificIssuerController", specificIssuerControllerAddress);
+            }
+            try {
+                writeAddressToFile(specificIssuerControllerAddress, "specificIssuer.address");
+            } catch (Exception e) {
+                logger.error("Write error:", e);
+            }
+        } catch (Exception e) {
+            logger.error("SpecificIssuerController deployment error:", e);
         }
         return issuerAddressList;
     }
