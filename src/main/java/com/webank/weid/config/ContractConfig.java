@@ -55,4 +55,10 @@ public class ContractConfig {
      */
     @Value("${evidence.contractaddress}")
     private String evidenceAddress;
+
+    /**
+     * The Specific issuer Contract address.
+     */
+    @Value("${specificissuer.contractaddress}")
+    private String specificIssuerAddress;
 }
