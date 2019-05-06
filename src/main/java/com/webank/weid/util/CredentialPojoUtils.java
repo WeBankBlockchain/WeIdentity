@@ -20,17 +20,14 @@
 package com.webank.weid.util;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
@@ -52,6 +49,10 @@ import com.webank.weid.protocol.request.CreateCredentialArgs;
  */
 public final class CredentialPojoUtils {
 
+	/**
+     * log4j object, for recording log.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(CredentialPojoUtils.class);
     /**
      * Concat all fields of Credential info, without Signature, in Json format. This should be
      * invoked when calculating Credential Signature. Return null if credential format is illegal.
@@ -108,23 +109,13 @@ public final class CredentialPojoUtils {
 		Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
         
 		addSaltAndGetHash(newClaim, salt, disclosures);
-
-        List<Map.Entry<String, Object>> list = new ArrayList<Map.Entry<String, Object>>(
-        		newClaim.entrySet()
-        );
-        Collections.sort(list, new Comparator<Map.Entry<String, Object>>() {
-
-            @Override
-            public int compare(Entry<String, Object> o1, Entry<String, Object> o2) {
-                return o1.getKey().compareTo(o2.getKey());
-            }
-        });
-
-        StringBuffer hash = new StringBuffer();
-        for (Map.Entry<String, Object> en : list) {
-            hash.append(en.getKey()).append(en.getValue());
-        }
-        return hash.toString();
+		try {
+			String jsonData = JsonUtil.mapToCompactJson(newClaim);
+			return jsonData;
+		} catch (Exception e) {
+			logger.error("[getClaimHash] get claim hash failed. {}", e);
+		}
+		return StringUtils.EMPTY;
     }
     
     private static void addSaltAndGetHash(Map<String, Object> claim, Map<String, Object> salt,Map<String, Object> disclosures) {
@@ -144,7 +135,7 @@ public final class CredentialPojoUtils {
 				if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(saltObj)
 						|| disclosureObj == null) {
 					((HashMap) newClaimObj).put(key,
-							getFieldHash(String.valueOf(newClaimObj) + String.valueOf(saltObj)));
+							getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj)));
 				}
 			}
 		}
@@ -369,7 +360,9 @@ public final class CredentialPojoUtils {
                 && presentationPolicyE.getPolicy() != null 
                 && presentationPolicyE.getPolicy().size() != 0);
     }
-//	public static String getCredentialJson(CredentialPojo credential) {
-//		return null;
-//	}
+    
+    
+    public static String getFieldSaltHash(String field, String salt) {
+    	return DataToolUtils.sha3(String.valueOf(field) + String.valueOf(salt));
+    }
 }

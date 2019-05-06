@@ -59,17 +59,6 @@ public final class DataToolUtils {
 	private static ObjectMapper objectMapper = new ObjectMapper();
 	
 	/**
-	 * verify signature with the given public key.
-	 * @param signature
-	 * @param publicKey
-	 * @return
-	 */
-	public static boolean verifySignature(String signature, String publicKey) {
-		
-		return false;
-	}
-	
-	/**
      * Keccak-256 hash function.
      *
      * @param hexInput hex encoded input data with optional 0x prefix
@@ -79,6 +68,9 @@ public final class DataToolUtils {
         return Hash.sha3(hexInput);
     }
     
+    public static String getHash(String hexInput) {
+    	return sha3(hexInput);
+    }
     /**
      * Sha 3.
      *
