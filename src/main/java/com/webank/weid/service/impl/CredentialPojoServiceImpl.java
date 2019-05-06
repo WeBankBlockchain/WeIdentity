@@ -6,6 +6,7 @@ import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -99,10 +100,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         }
 	}
 
-	
 	private static void generateSalt(Map<String, Object> map) {
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
-//			String ClaimKey = entry.getKey();
 			Object value = entry.getValue();
 			if (value instanceof Map) {
 				generateSalt((HashMap) value);
@@ -113,20 +112,46 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 		}
 	}
 	
-//	   private ErrorCode checkCreateCredentialArgsValidity(
-//			   CreateCredentialPojoArgs args, boolean privateKeyRequired) {
-//		        ErrorCode innerResponseData = CredentialUtils.isCreateCredentialArgsValid(args);
-//		        if (ErrorCode.SUCCESS.getCode() != innerResponseData.getCode()) {
-//		            logger.error("Create Credential Args illegal: {}", innerResponseData.getCodeDesc());
-//		            return innerResponseData;
-//		        }
-//		        if (privateKeyRequired
-//		            && StringUtils.isEmpty(args.getWeIdPrivateKey().getPrivateKey())) {
-//		            logger.error(ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCodeDesc());
-//		            return ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS;
-//		        }
-//		        return ErrorCode.SUCCESS;
-//		    }
+	/**
+	 * 校验claim、salt和disclosureMap的格式是否一致
+	 * 
+	 * @param claim
+	 * @param salt
+	 * @param disclosureMap
+	 * @return
+	 */
+	private static boolean validCredentialMapArgs(Map<String, Object>claim, Map<String, Object>salt, Map<String, Object>disclosureMap) {
+	
+		//检查是否为空
+		if (claim == null || salt == null || disclosureMap == null) {
+			return false;
+		}
+
+		//检查每个map里的key个数是否相同
+		Set<String> claimKeys = claim.keySet();
+		Set<String> saltKeys = salt.keySet();
+		Set<String> disclosureKeys = disclosureMap.keySet();
+
+		if (claimKeys.size() != saltKeys.size() || saltKeys.size() != disclosureKeys.size()) {
+			return false;
+		}
+
+		//检查key值是否一致
+		for (Map.Entry<String, Object> entry : claim.entrySet()) {
+			String k = entry.getKey();
+			Object v = entry.getValue();
+			Object saltV = salt.get(k);
+			Object disclosureV = disclosureMap.get(k);
+			if (saltV == null || disclosureV == null) {
+				return false;
+			}
+			if (v instanceof Map) {
+				//递归检查
+				validCredentialMapArgs((HashMap) v, (HashMap) saltV, (HashMap) disclosureV);
+			}
+		}
+		return false;
+	}
 	
 	/* (non-Javadoc)
 	 * @see com.webank.weid.rpc.CredentialPojoService#createSelectiveCredential(com.webank.weid.protocol.base.CredentialPojoWrapper, com.webank.weid.protocol.base.ClaimPolicy)
@@ -135,7 +160,6 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 	public ResponseData<CredentialPojoWrapper> createSelectiveCredential(CredentialPojoWrapper credentialPojoWrapper,
 			ClaimPolicy claimPolicy) {
 		
-//		ResponseData<CredentialPojoWrapper> response = new ResponseData<CredentialPojoWrapper>();
 		if (credentialPojoWrapper == null) {
 			logger.error("[createSelectiveCredential] credentialPojoWrapper is null.");
 			return new ResponseData<CredentialPojoWrapper>();
@@ -151,6 +175,9 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 
 		Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
+		if(! validCredentialMapArgs(claim,saltMap,disclosureMap)) {
+			return new ResponseData<CredentialPojoWrapper>();
+		}
 		addSelectSalt(disclosureMap, saltMap, claim);
 		credentialPojoWrapper.setSalt(saltMap);
 
@@ -176,7 +203,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 			} else {
 				if (((Integer) value).equals(CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus())) {
 					saltMap.put(claimKey, CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus());
-					String hash = DataToolUtils.sha3(String.valueOf(value) + String.valueOf(saltV));
+//					String hash = DataToolUtils.sha3(String.valueOf(value) + String.valueOf(saltV));
+					String hash = CredentialPojoUtils.getFieldSaltHash(String.valueOf(value), String.valueOf(saltV));
 					claim.put(claimKey, hash);
 				}
 			}
