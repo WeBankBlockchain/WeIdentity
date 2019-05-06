@@ -348,6 +348,14 @@ public enum ErrorCode {
     /**
      * The Authority Issuer Contract level error: subject already exists.
      */
+    PRESISTENCE_DATA_KEY_INVALID(
+        100901,
+        "the key of the data is empty."
+    ),
+    
+    /**
+     * The Authority Issuer Contract level error: subject already exists.
+     */
     AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST(
         500201,
         "the authority issuer contract error: the subject already exists"
