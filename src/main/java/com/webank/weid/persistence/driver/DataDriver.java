@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.connectivity.driver;
+package com.webank.weid.persistence.driver;
 
 import java.util.List;
 
