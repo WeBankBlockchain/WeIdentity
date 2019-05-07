@@ -29,12 +29,13 @@ import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
+
 /**
  * Service inf for operations on WeIdentity DID.
  *
  * @author tonychen
  */
-public interface WeIdService {
+public interface WeIdService extends BaseClient{
 
     /**
      * Create a WeIdentity DID without a keypair. SDK will generate a keypair for the caller.
