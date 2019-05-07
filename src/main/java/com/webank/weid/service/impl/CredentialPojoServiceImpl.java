@@ -1,7 +1,6 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +26,7 @@ import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
@@ -38,7 +37,7 @@ import com.webank.weid.util.WeIdUtils;
  * @author tonychen 2019年4月17日
  *
  */
-public class CredentialPojoServiceImpl implements CredentialPojoService {
+public class CredentialPojoServiceImpl extends BaseService implements CredentialPojoService {
 
 	private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
 	
@@ -79,13 +78,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             String rawData = CredentialPojoUtils
                 .getCredentialThumbprintWithoutSig(result, saltMap, null);
             String privateKey = args.getWeIdPrivateKey().getPrivateKey();
-            Sign.SignatureData sigData = DataToolUtils.signMessage(rawData, privateKey);
-            result.setSignature(
-                new String(
-                		DataToolUtils
-                        .base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-                    StandardCharsets.UTF_8)
-            );
+            String signature = DataToolUtils.sign(rawData, privateKey);
+            result.setSignature(signature);
 
             credentialPojoWrapper.setCredentialPojo(result);
             ResponseData<CredentialPojoWrapper> responseData = new ResponseData<>(
@@ -254,18 +248,10 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         }
 		
         //verify challenge
-        String rawData = String.valueOf(challenge);
 	    WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
-	    
-	    String signature = presentationE.getProof().get("signature");
-	    Sign.SignatureData signatureData =
-	            DataToolUtils.simpleSignatureDeserialization(
-	                    DataToolUtils.base64Decode(
-	                            signature.getBytes(StandardCharsets.UTF_8))
-	                    );
-	     
+	    String signature = presentationE.getSignature();
 	    ErrorCode errorCode = 
-	            DataToolUtils.verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+	            DataToolUtils.verifySignatureFromWeId(challenge.toRawData(), signature, weIdDocument);
 	    if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
 	    	logger.error("[verify] verify challenge {} failed.",challenge);
 	        return new ResponseData<Boolean>(false, errorCode);
@@ -327,13 +313,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 //		Map<String, Object>claim = credentialPojo.getClaim();
 //		String claimHash = CredentialPojoUtils.getClaimHash(credentialPojo, salt, null);
 		String rawData = CredentialPojoUtils.getCredentialThumbprintWithoutSig(credentialPojo, salt, null);
-		 Sign.SignatureData signatureData =
-	            	DataToolUtils.simpleSignatureDeserialization(
-	                	DataToolUtils.base64Decode(
-	                			credentialPojo.getSignature().getBytes(StandardCharsets.UTF_8))
-	                );
-		 
-		 String issuerWeid = credentialPojo.getIssuer();
+        String issuerWeid = credentialPojo.getIssuer();
 		 if (StringUtils.isEmpty(publicKey)) {
              // Fetch public key from chain
              ResponseData<WeIdDocument> innerResponseData =
@@ -346,13 +326,13 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
              } else {
                  WeIdDocument weIdDocument = innerResponseData.getResult();
                  return DataToolUtils
-                     .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+                     .verifySignatureFromWeId(rawData, credentialPojo.getSignature(), weIdDocument);
              }
          } else {
              boolean result;
 			try {
 				result = DataToolUtils
-				 .verifySignature(rawData, signatureData, new BigInteger(publicKey));
+				 .verifySignature(rawData, credentialPojo.getSignature(), new BigInteger(publicKey));
 			} catch (SignatureException e) {
 				return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
 			}
