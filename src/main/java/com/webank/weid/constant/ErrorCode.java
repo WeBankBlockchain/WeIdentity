@@ -231,7 +231,7 @@ public enum ErrorCode {
     /**
      * The weId of challenge don't match the user's weId.
      */
-    PRESENTATION_CHALLENGE_WEID_MISMATCH(100601, "the weId of challenge don't match the user's weId."),
+    PRESENTATION_CHALLENGE_WEID_MISMATCH(100601, "the weId of challenge does not match the user's weId."),
     
     /**
      * The presentation policy is invalid.
