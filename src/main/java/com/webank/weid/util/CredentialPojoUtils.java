@@ -343,7 +343,7 @@ public final class CredentialPojoUtils {
                 || presentationE.getProof() == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        if(StringUtils.isEmpty(presentationE.getProof().get("signature"))) {
+        if(StringUtils.isEmpty(presentationE.getSignature())) {
             return ErrorCode.CREDENTIAL_SIGNATURE_NOT_EXISTS;
         }
         return ErrorCode.SUCCESS;
