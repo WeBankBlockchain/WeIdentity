@@ -21,7 +21,6 @@ package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialPojoWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
@@ -34,7 +33,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author chaoxinhu 2018.12
  */
-public interface CredentialPojoService {
+public interface CredentialPojoService extends BaseClient{
 
     /**
      * Generate a credential for full claim content.

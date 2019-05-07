@@ -51,9 +51,14 @@ import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.amop.DirectPathRequestBody;
 import com.webank.weid.protocol.amop.DirectRouteBaseMsgArgs;
+import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
+import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
+import com.webank.weid.protocol.response.GetEncryptKeyResponse;
+import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.BaseClient;
 import com.webank.weid.rpc.callback.DirectRouteCallback;
 import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.util.DataToolUtils;
@@ -64,7 +69,7 @@ import com.webank.weid.util.PropertyUtils;
  *
  * @author tonychen
  */
-public abstract class BaseService {
+public abstract class BaseService implements BaseClient{
 
     private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
 
@@ -107,6 +112,7 @@ public abstract class BaseService {
     protected static Service getService() {
     	return service;
     }
+    
     private static boolean initWeb3j() {
     	
 //        Service service = context.getBean(Service.class);
@@ -359,10 +365,35 @@ public abstract class BaseService {
 	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
 	        );
 	}
+	
+	public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId, GetEncryptKeyArgs args) {
+		 return this.getImpl(
+	                fromOrgId,
+	                toOrgId,
+	                args,
+	                GetEncryptKeyArgs.class,
+	                GetEncryptKeyResponse.class,
+	                DirectRouteMsgType.GET_ENCRYPT_KEY,
+	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
+	        );
+	} 
+	
+	public ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(String toOrgId, GetPolicyAndChallengeArgs args) {
+		 return this.getImpl(
+	                fromOrgId,
+	                toOrgId,
+	                args,
+	                GetPolicyAndChallengeArgs.class,
+	                GetPolicyAndChallengeResponse.class,
+	                DirectRouteMsgType.GET_POLICY_AND_CHALLENGE,
+	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
+	        );
+	} 
 
-	public void registerCallback(DirectRouteMsgType directRouteMsgType, DirectRouteCallback directRouteCallback) {
+	@Override
+	public void registerCallback(Integer directRouteMsgType, DirectRouteCallback directRouteCallback) {
 		
 		OnNotifyCallback callback = (OnNotifyCallback)getService().getPushCallback();
-		callback.RegistRouteCallBack(directRouteCallback);
+		callback.RegistRouteCallBack(directRouteMsgType, directRouteCallback);
 	}
 }
