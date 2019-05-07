@@ -119,13 +119,13 @@ public class MysqlDriver implements DataDriver {
     		logger.error("[mysql->getData] the id of the data is empty.");
     		return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
     	}
-    	
+    	String dataKey = DataToolUtils.getHash(id);
         ResponseData<String> result = new ResponseData<String>();
         PreparedStatement ps;
         String data = null;
         try {
             ps = connection.prepareStatement(SQL_QUERY);
-            ps.setString(DataDriverConstant.SQL_INDEX_FIRST, id);
+            ps.setString(DataDriverConstant.SQL_INDEX_FIRST, dataKey);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 data = rs.getString(DataDriverConstant.SQL_COLUMN_DATA);
@@ -187,7 +187,8 @@ public class MysqlDriver implements DataDriver {
             		logger.error("[mysql->batchSave] the id of the {}rd data is empty.", i+1);
             		return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
             	}
-                psts.setString(DataDriverConstant.SQL_INDEX_FIRST, ids.get(i));
+            	String dataKey = DataToolUtils.getHash(ids.get(i));
+                psts.setString(DataDriverConstant.SQL_INDEX_FIRST, dataKey);
                 psts.setString(DataDriverConstant.SQL_INDEX_SECOND, dataList.get(i));
                 psts.addBatch();
             }
@@ -212,12 +213,12 @@ public class MysqlDriver implements DataDriver {
     		logger.error("[mysql->delete] the id of the data is empty.");
     		return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
     	}
-    	
+    	String dataKey = DataToolUtils.getHash(id);
         ResponseData<Integer> result = new ResponseData<Integer>();
         PreparedStatement ps;
         try {
             ps = connection.prepareStatement(SQL_DELETE);
-            ps.setString(DataDriverConstant.SQL_INDEX_FIRST, id);
+            ps.setString(DataDriverConstant.SQL_INDEX_FIRST, dataKey);
             int rs = ps.executeUpdate();
             ps.close();
             result.setErrorCode(ErrorCode.SUCCESS);
@@ -240,7 +241,7 @@ public class MysqlDriver implements DataDriver {
     		logger.error("[mysql->update] the id of the data is empty.");
     		return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
     	}
-    	
+    	String dataKey = DataToolUtils.getHash(id);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date = simpleDateFormat.format(new Date());
 
@@ -250,7 +251,7 @@ public class MysqlDriver implements DataDriver {
             ps = connection.prepareStatement(SQL_UPDATE);
             ps.setString(DataDriverConstant.SQL_INDEX_FIRST, data);
             ps.setString(DataDriverConstant.SQL_INDEX_SECOND, date);
-            ps.setString(DataDriverConstant.SQL_INDEX_THIRD, id);
+            ps.setString(DataDriverConstant.SQL_INDEX_THIRD, dataKey);
             int rs = ps.executeUpdate();
             ps.close();
             result.setErrorCode(ErrorCode.SUCCESS);
