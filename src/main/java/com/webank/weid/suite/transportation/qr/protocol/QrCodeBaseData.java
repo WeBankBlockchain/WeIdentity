@@ -139,7 +139,7 @@ public abstract class QrCodeBaseData {
                 String value = method.invoke(this, new Object[0]).toString();
                 //如果协议值中包含分割符则抛异常
                 if (value.indexOf(PROTOCOL_PARTITION) >= 0) {
-                    throw new ProtocolSuiteException(ErrorCode.PROTOCOL_FIELD_INVALID);
+                    throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID);
                 }
                 //将协议字段拼接成协议字符串
                 if (buffer.length() == 0) {
@@ -175,7 +175,7 @@ public abstract class QrCodeBaseData {
         String[] values = buffer.toString().split(PROTOCOL_PARTITION_DIVISION);
         //如果解析的协议字段数据数组和协议字段数组不匹配，则抛出异常协议数组错误
         if (values.length != protocols.length) {
-            throw new ProtocolSuiteException(ErrorCode.PROTOCOL_STRING_INVALID);
+            throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID);
         }
         try {
             //遍历协议字段数组
@@ -190,7 +190,7 @@ public abstract class QrCodeBaseData {
                     Method method = theFirstParamType.getMethod("getObject", String.class);
                     Object obj = method.invoke(theFirstParamType, value);
                     if (obj == null) {
-                        throw new ProtocolSuiteException(ErrorCode.PROTOCOL_STRING_INVALID);
+                        throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID);
                     }
                     setMethod.invoke(this, obj);
                 } else {
@@ -250,12 +250,12 @@ public abstract class QrCodeBaseData {
      */
     public static QrCodeVersion getQrCodeVersion(String transString) {
         if (StringUtils.isBlank(transString) || transString.indexOf(PROTOCOL_PARTITION) == -1) {
-            throw new ProtocolSuiteException(ErrorCode.PROTOCOL_STRING_INVALID);
+            throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID);
         }
         String version = transString.substring(0, transString.indexOf(PROTOCOL_PARTITION));
         QrCodeVersion metaVersion = QrCodeVersion.getObject(version);
         if (metaVersion == null) {
-            throw new ProtocolSuiteException(ErrorCode.PROTOCOL_VERSION_ERROR);
+            throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_VERSION_ERROR);
         }
         return metaVersion;
     }

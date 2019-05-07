@@ -29,5 +29,5 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class Version {
 
-    Integer version;
+    private Integer version;
 }

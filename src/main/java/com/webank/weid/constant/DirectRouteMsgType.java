@@ -21,8 +21,12 @@ package com.webank.weid.constant;
 
 import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
+import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
+import com.webank.weid.protocol.response.GetEncryptKeyResponse;
+import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.rpc.callback.DirectRouteCallback;
 import com.webank.weid.util.DataToolUtils;
 
@@ -99,9 +103,21 @@ public enum DirectRouteMsgType {
         }
         break;
         case TYPE_TRANSPORTATION: {
-        	//1.GET key
         	AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
         	AmopResponse result = directRouteCallback.onPush(args);
+            resultBodyStr = DataToolUtils.serialize(result);
+        }
+        case GET_ENCRYPT_KEY: {
+            // GET key
+            GetEncryptKeyArgs args = DataToolUtils.deserialize(msgBodyStr, GetEncryptKeyArgs.class);
+            GetEncryptKeyResponse result = directRouteCallback.onPush(args);
+            resultBodyStr = DataToolUtils.serialize(result);
+        }
+        break;
+        case GET_POLICY_AND_CHALLENGE: {
+            // GET POLICY AND CHALLENGE
+            GetPolicyAndChallengeArgs args = DataToolUtils.deserialize(msgBodyStr, GetPolicyAndChallengeArgs.class);
+            GetPolicyAndChallengeResponse result = directRouteCallback.onPush(args);
             resultBodyStr = DataToolUtils.serialize(result);
         }
         break;

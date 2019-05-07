@@ -27,22 +27,20 @@ import java.util.Map;
 import mockit.Mock;
 import mockit.MockUp;
 
-import com.webank.weid.connectivity.driver.DataDriver;
-import com.webank.weid.connectivity.driver.MysqlDriver;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.protocol.amop.AmopCommonArgs;
+import com.webank.weid.persistence.driver.DataDriver;
+import com.webank.weid.persistence.driver.MysqlDriver;
+import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialPojoWrapper;
 import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.HandleEntity;
-import com.webank.weid.protocol.response.AmopResponse;
+import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.transportation.qr.QrCodeTransportation;
 import com.webank.weid.suite.transportation.qr.QrCodeTransportationService;
-import com.webank.weid.util.DataToolUtils;
 
 public abstract class TestBaseTransportation extends TestBaseServcie {
 
@@ -53,17 +51,13 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
     protected ResponseData<PresentationE> mockCipherDeserialize(ResponseData<String> response) {
         MockUp<BaseService> mockBaseService = new MockUp<BaseService>() {
             @Mock
-            public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
-                HandleEntity entity = new HandleEntity();
-                entity.setErrorCode(ErrorCode.SUCCESS.getCode());
-                entity.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
-                String result = dataDriver.getData(args.getMessage()).getResult();
-                entity.setResult(result);
-                AmopResponse respone = new AmopResponse();
-                respone.setErrorCode(ErrorCode.SUCCESS.getCode());
-                respone.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
-                respone.setResult(DataToolUtils.serialize(entity));
-                return new ResponseData<>(respone, ErrorCode.SUCCESS);
+            public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId, GetEncryptKeyArgs args) {
+                GetEncryptKeyResponse getEncryptKeyResponse = new GetEncryptKeyResponse();
+                getEncryptKeyResponse.setErrorCode(ErrorCode.SUCCESS.getCode());
+                getEncryptKeyResponse.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
+                String result = dataDriver.getData(args.getKeyId()).getResult();
+                getEncryptKeyResponse.setEncryptKey(result);
+                return new ResponseData<>(getEncryptKeyResponse, ErrorCode.SUCCESS);
             }
         };
         ResponseData<PresentationE> wrapperRes =

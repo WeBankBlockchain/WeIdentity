@@ -61,6 +61,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.BaseClient;
 import com.webank.weid.rpc.callback.DirectRouteCallback;
 import com.webank.weid.rpc.callback.OnNotifyCallback;
+import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
 
@@ -89,9 +90,6 @@ public abstract class BaseService implements BaseClient{
     public static final int MAX_DIRECT_ROUTE_REQUEST_TIMEOUT = 50000;
     
     public static final int DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT = 5000;
-    
-    protected static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
-    
 
     static {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
@@ -103,7 +101,9 @@ public abstract class BaseService implements BaseClient{
 			logger.error("[BaseService] Load sdk.properties file failed.", e);
 		}
     }
-
+    
+    protected static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
+    
     public BaseService() {
     	if(web3j == null) {
     		initWeb3j();
@@ -143,8 +143,11 @@ public abstract class BaseService implements BaseClient{
         String orgId = PropertyUtils.getProperty("blockchain.orgId");
         
         OnNotifyCallback pushCallBack = new OnNotifyCallback();
-//        pushCallBack.se
         service.setPushCallback(pushCallBack);
+        pushCallBack.RegistRouteCallBack(
+            DirectRouteMsgType.GET_ENCRYPT_KEY.getValue(), 
+            new KeyManagerCallback()
+        );
         
     	//设置topic，支持多个topic
 		List<String> topics = new ArrayList<String>();
