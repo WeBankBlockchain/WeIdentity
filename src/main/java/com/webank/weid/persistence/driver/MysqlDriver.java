@@ -92,7 +92,7 @@ public class MysqlDriver implements DataDriver {
         try {
         	
         	//initialize jdbc properties.
-            PropertyUtils.loadProperties(DataDriverConstant.JDBC_PROPERTIES);
+            PropertyUtils.loadProperties("sdk.properties");
             String dbUrl = PropertyUtils.getProperty(DataDriverConstant.JDBC_URL);
             String userName = PropertyUtils.getProperty(DataDriverConstant.JDBC_USER_NAME);
             String passWord = PropertyUtils.getProperty(DataDriverConstant.JDBC_USER_PASSWORD);
