@@ -41,7 +41,17 @@ public enum DirectRouteMsgType {
 	/*
 	 * 
 	 */
-	TYPE_TRANSPORTATION(2);
+	TYPE_TRANSPORTATION(2),
+	
+	/*
+     * 获取对称秘钥
+     */
+    GET_ENCRYPT_KEY(3),
+	
+	/*
+     * 获取policy和challenge
+     */
+    GET_POLICY_AND_CHALLENGE(4);
 
 	
     private Integer value;

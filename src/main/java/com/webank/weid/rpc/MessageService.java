@@ -26,7 +26,7 @@ import com.webank.weid.protocol.response.ResponseData;
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
-public interface MessageService {
+public interface MessageService extends BaseClient{
 
     ResponseData<PolicyAndChellenge> getPresentationPolicy(String orgId, Integer policyId);
 
