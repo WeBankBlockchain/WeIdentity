@@ -36,10 +36,10 @@ public abstract class AbstractTransportation extends BaseService {
      */
     protected ErrorCode checkEncodeProperty(EncodeProperty encodeProperty) {
         if (encodeProperty == null) {
-            return ErrorCode.PROTOCOL_PROPERTY_ERROR;
+            return ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR;
         }
         if (encodeProperty.getEncodeType() == null) {
-            return ErrorCode.PROTOCOL_ENCODE_ERROR;
+            return ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
@@ -50,7 +50,7 @@ public abstract class AbstractTransportation extends BaseService {
      */
     protected ErrorCode checkProtocolData(Object obj) {
         if (obj == null) {
-            return ErrorCode.PROTOCOL_DATA_INVALID;
+            return ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID;
         }
         return ErrorCode.SUCCESS; 
     }

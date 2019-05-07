@@ -22,18 +22,14 @@ package com.webank.weid.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.webank.weid.constant.AmopServiceType;
+
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.protocol.amop.AmopCommonArgs;
-import com.webank.weid.protocol.base.PolicyAndChellenge;
-import com.webank.weid.protocol.response.HandleEntity;
-import com.webank.weid.protocol.response.AmopResponse;
+import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
+import com.webank.weid.protocol.base.PolicyAndChallenge;
+import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.MessageService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.suite.transportation.json.JsonTransportation;
-import com.webank.weid.suite.transportation.json.JsonTransportationService;
-import com.webank.weid.util.DataToolUtils;
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
@@ -42,57 +38,38 @@ public class MessageServiceImpl extends BaseService implements MessageService {
     
     private static final Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
 
-    private JsonTransportation jsonTransportationService = new JsonTransportationService();
-
     @Override
-    public ResponseData<PolicyAndChellenge> getPresentationPolicy(String orgId, Integer policyId) {
+    public ResponseData<PolicyAndChallenge> getPresentationPolicy(String orgId, Integer policyId) {
         try {
             if (StringUtils.isBlank(orgId)) {
                 logger.error("the orgId is null, policyId = {}", policyId);
-                return new ResponseData<PolicyAndChellenge>(null, ErrorCode.ILLEGAL_INPUT);
+                return new ResponseData<PolicyAndChallenge>(null, ErrorCode.ILLEGAL_INPUT);
             }
-            AmopCommonArgs args = new AmopCommonArgs();
+            GetPolicyAndChallengeArgs args = new GetPolicyAndChallengeArgs();
             args.setFromOrgId(fromOrgId);
             args.setToOrgId(orgId);
-            args.setMessage(String.valueOf(policyId));
+            args.setPolicyId(String.valueOf(policyId));
             args.setMessageId(getService().newSeq());
-            args.setServiceType(AmopServiceType.GET_POLICY.getTypeId().toString());
-            ResponseData<AmopResponse> retResponse = super.request(orgId, args);
+            ResponseData<GetPolicyAndChallengeResponse> retResponse = 
+                super.getPolicyAndChallenge(orgId, args);
             if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("AMOP response fail, policyId={}, errorCode={}, errorMessage={}",
                     policyId,
                     retResponse.getErrorCode(),
                     retResponse.getErrorMessage()
                 );
-                return new ResponseData<PolicyAndChellenge>(
+                return new ResponseData<PolicyAndChallenge>(
                     null, 
                     ErrorCode.getTypeByErrorCode(retResponse.getErrorCode().intValue())
                 );
             }
-            String result = retResponse.getResult().getResult();
-            HandleEntity entity = DataToolUtils.deserialize(result, HandleEntity.class);
+            GetPolicyAndChallengeResponse result = retResponse.getResult();
             ErrorCode errorCode = 
-                ErrorCode.getTypeByErrorCode(entity.getErrorCode().intValue());
-            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error(
-                    "getPresentationPolicy error, policyId={}, errorCode={}, errorMessage={}",
-                    policyId,
-                    entity.getErrorCode(),
-                    entity.getErrorMessage()
-                );
-                return new ResponseData<PolicyAndChellenge>(
-                    null, 
-                    errorCode
-                );
-            }
-            ResponseData<PolicyAndChellenge> policyResponse = jsonTransportationService.deserialize(
-                entity.getResult(),
-                PolicyAndChellenge.class
-            );
-            return policyResponse;
+                ErrorCode.getTypeByErrorCode(result.getErrorCode().intValue());
+            return new ResponseData<PolicyAndChallenge>(result.getPolicyAndChallenge(), errorCode);
         } catch (Exception e) {
             logger.error("getPresentationPolicy failed due to system error. ", e);
-            return new ResponseData<PolicyAndChellenge>(null, ErrorCode.UNKNOW_ERROR);
+            return new ResponseData<PolicyAndChallenge>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
 }

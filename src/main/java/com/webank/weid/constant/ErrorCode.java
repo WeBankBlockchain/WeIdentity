@@ -222,6 +222,94 @@ public enum ErrorCode {
      * The credential evidence id mismatch.
      */
     CREDENTIAL_EVIDENCE_ID_MISMATCH(100502, "credential evidence id mismatch"),
+    
+    /**
+     * The challenge is invalid.
+     */
+    PRESENTATION_CHALLENGE_INVALID(100600, "the challenge is invalid."),
+    
+    /**
+     * The weId of challenge don't match the user's weId.
+     */
+    PRESENTATION_CHALLENGE_WEID_MISMATCH(100601, "the weId of challenge does not match the user's weId."),
+    
+    /**
+     * The presentation policy is invalid.
+     */
+    PRESENTATION_POLICY_INVALID(100602, "the presentation policy is invalid."),
+    
+    /**
+     * the claim policy is invalid.
+     */
+    PRESENTATION_CLAIM_POLICY_INVALID(100603, "the claim policy is invalid."),
+    
+    /**
+     * the credentialList of presentation don't match the claim policy.
+     */
+    PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY(
+        100604, 
+        "the credentiallist of presentation don't match the claim policy."
+    ),
+    
+    /**
+     * the publicKeyId is invalid.
+     */
+    PRESENTATION_WEID_PUBLICKEY_ID_INVALID(100605, "the publicKeyId is invalid."),
+    
+    /**
+     * the encrypt key is not exists.
+     */
+    ENCRYPT_KEY_NOT_EXISTS(100700, "the encrypt key not exists."),
+    
+    /**
+     * the policy service is not exists.
+     */
+    POLICY_SERVICE_NOT_EXISTS(100701, "no policy service."),
+    
+    /**
+     * the policy service call fail.
+     */
+    POLICY_SERVICE_CALL_FAIL(100702, "the policy service call fail, please check the error log."),
+    
+    /**
+     * suite基本异常.
+     */
+    TRANSPORTATION_BASE_ERROR(100800, "suite baes exception error, please check the error log."),
+    
+    /**
+     * 协议配置不能为空.
+     */
+    TRANSPORTATION_PROTOCOL_PROPERTY_ERROR(100801, "the protocol property is error."),
+    
+    /**
+     * 协议版本不能为空.
+     */
+    TRANSPORTATION_PROTOCOL_VERSION_ERROR(100802, "the protocol version is error."),
+    
+    /**
+     * 协议编码方式不能为空.
+     */
+    TRANSPORTATION_PROTOCOL_ENCODE_ERROR(100803, "the protocol encode is error."),
+  
+    /**
+     * 无效的协议字符串.
+     */
+    TRANSPORTATION_PROTOCOL_STRING_INVALID(100804, "the protocol string is invalid."),   
+    
+    /**
+     * 协议数据无效.
+     */
+    TRANSPORTATION_PROTOCOL_DATA_INVALID(100805, "the protocol data is invalid."),
+    
+    /**
+     * 协议字段值不能包含"|".
+     */
+    TRANSPORTATION_PROTOCOL_FIELD_INVALID(100806, "the protocol field values cannot be included '|'."),
+    
+    /**
+     * 编解码异常.
+     */
+    TRANSPORTATION_ENCODE_BASE_ERROR(100807, "encode base error, please check the error log."),
 
     /**
      * Authority issuer main error code.
@@ -264,86 +352,6 @@ public enum ErrorCode {
         100207,
         "the authority issuer accumulator value is illegal (integer value required)"
     ),
-    
-    /**
-     * The challenge is invalid.
-     */
-    CHALLENGE_IS_INVALID(100300, "the challenge is invalid."),
-    
-    /**
-     * The weId of challenge does match the user's weId.
-     */
-    CHALLENGE_WEID_MISMATCH(100301, "the weId of challenge does match the user's weId."),
-    
-    /**
-     * The presentation policy is invalid.
-     */
-    PRESENTATION_POLICY_INVALID(100302, "the presentation policy is invalid."),
-    
-    /**
-     * The claim policy is not exists.
-     */
-    CLAIM_POLICY_NOT_EXISTS(100302, "the claim policy is not exists."),
-    
-    /**
-     * the encrypt key is not exists.
-     */
-    ENCRYPT_KEY_NOT_EXISTS(100400, "the encrypt key not exists."),
-    
-    /**
-     * the policy service is not exists.
-     */
-    POLICY_SERVICE_NOT_EXISTS(100401, "no policy service."),
-    
-    /**
-     * the policy service call fail.
-     */
-    POLICY_SERVICE_CALL_FAIL(100402, "the policy service call fail, please check the error log."),
-    
-    /**
-     * suite基本异常.
-     */
-    SUITE_BASE_ERROR(110000, "suite baes exception error, please check the error log."),
-    
-    /**
-     * 当前机构无效.
-     */
-    SUITE_CURRENT_ORG_INVALID(110001, "the current org is invalid."),
-    
-    /**
-     * 协议配置不能为空.
-     */
-    PROTOCOL_PROPERTY_ERROR(110002, "the protocol property is error."),
-    
-    /**
-     * 协议版本不能为空.
-     */
-    PROTOCOL_VERSION_ERROR(110003, "the protocol version is error."),
-    
-    /**
-     * 协议编码方式不能为空.
-     */
-    PROTOCOL_ENCODE_ERROR(110004, "the protocol encode is error."),
-  
-    /**
-     * 无效的协议字符串.
-     */
-    PROTOCOL_STRING_INVALID(110005, "the protocol string is invalid."),   
-    
-    /**
-     * 协议数据无效.
-     */
-    PROTOCOL_DATA_INVALID(110006, "the protocol data is invalid."),
-    
-    /**
-     * 协议字段值不能包含"|".
-     */
-    PROTOCOL_FIELD_INVALID(110007, "the protocol field values cannot be included '|'."),
-    
-    /**
-     * 编解码异常.
-     */
-    ENCODE_BASE_ERROR(110100, "encode base error, please check the error log."),
 
     /**
      * The Authority Issuer Contract level error: subject already exists.

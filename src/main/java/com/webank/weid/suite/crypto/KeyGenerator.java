@@ -19,7 +19,7 @@
 
 package com.webank.weid.suite.crypto;
 
-import com.webank.weid.util.UuIdUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * 秘钥生成器.
@@ -33,6 +33,6 @@ public class KeyGenerator {
      * @return 返回UUID字符串
      */
     public static String getKey() {
-        return UuIdUtils.getUuId32();   
+        return DataToolUtils.getUuId32();   
     }
 }
