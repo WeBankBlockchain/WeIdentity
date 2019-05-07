@@ -22,8 +22,12 @@ package com.webank.weid.rpc.callback;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
+import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
+import com.webank.weid.protocol.response.GetEncryptKeyResponse;
+import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 
 /**
  * Created by junqizhang on 08/07/2017.
@@ -39,16 +43,31 @@ public class DirectRouteCallback implements PushNotifyAllCallback {
     	DirectRouteNotifyMsgResult result = new DirectRouteNotifyMsgResult();
     	result.setMessage(MSG_HEALTH);
     	result.setErrorCode(ErrorCode.SUCCESS.getCode());
-//    	result.setMessage(ErrorCode.SUCCESS.getCodeDesc());
+    	result.setMessage(ErrorCode.SUCCESS.getCodeDesc());
         return result;
     }
 
     public AmopResponse onPush(AmopCommonArgs arg) {
     	
     	AmopResponse result = new AmopResponse();
-    	result.setResult("");
-    	result.setErrorCode(ErrorCode.SUCCESS.getCode());
-    	result.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
+    	result.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+    	result.setErrorMessage(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+        return result;
+    }
+    
+    public GetEncryptKeyResponse onPush(GetEncryptKeyArgs arg) {
+    	
+	 	GetEncryptKeyResponse result = new GetEncryptKeyResponse();
+    	result.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+    	result.setErrorMessage(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+        return result;
+    }
+    
+    public GetPolicyAndChallengeResponse onPush(GetPolicyAndChallengeArgs arg) {
+    	
+    	GetPolicyAndChallengeResponse result = new GetPolicyAndChallengeResponse();
+    	result.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+    	result.setErrorMessage(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
         return result;
     }
 }

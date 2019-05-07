@@ -30,7 +30,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author lingfenghe
  */
-public interface CptService {
+public interface CptService extends BaseClient{
 
     /**
      * Register a new CPT to the blockchain.

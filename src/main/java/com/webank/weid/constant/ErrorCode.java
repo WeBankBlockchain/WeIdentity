@@ -470,6 +470,11 @@ public enum ErrorCode {
      * sql execute failed.
      */
     SQL_EXECUTE_FAILED(160011, "sql execute failed."),
+    
+    /**
+     * sql execute failed.
+     */
+    DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(160012, "server side has no direct route callback."),
     /**
      * other uncatched exceptions or error.
      */

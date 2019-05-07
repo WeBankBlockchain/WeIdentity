@@ -19,7 +19,6 @@
 
 package com.webank.weid.rpc;
 
-import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdPublicKey;
@@ -31,7 +30,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author chaoxinhu 2018.12
  */
-public interface CredentialService {
+public interface CredentialService extends BaseClient{
 
     /**
      * Generate a credential for full claim content.
