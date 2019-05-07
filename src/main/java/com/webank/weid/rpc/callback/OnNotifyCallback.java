@@ -19,6 +19,9 @@
 
 package com.webank.weid.rpc.callback;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bcos.channel.client.ChannelPushCallback;
 import org.bcos.channel.dto.ChannelPush;
 import org.bcos.channel.dto.ChannelResponse;
@@ -36,15 +39,17 @@ public class OnNotifyCallback extends ChannelPushCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallback.class);
     
-    private DirectRouteCallback directRouteCallBack = new DirectRouteCallback();
+//    private DirectRouteCallback directRouteCallBack = new DirectRouteCallback();
+    private Map<Integer, DirectRouteCallback>directRouteCallBackMap = new HashMap<Integer, DirectRouteCallback>();
 
-    public void RegistRouteCallBack(DirectRouteCallback routeCallBack) {
-    	directRouteCallBack =  routeCallBack;
+    public void RegistRouteCallBack(Integer msgType, DirectRouteCallback routeCallBack) {
+//    	directRouteCallBack =  routeCallBack;
+    	directRouteCallBackMap.put(msgType, routeCallBack);
     }
     @Override
     public void onPush(ChannelPush push) {
     	
-        if (null == directRouteCallBack) {
+        if (0 == directRouteCallBackMap.size()) {
             ChannelResponse response = new ChannelResponse();
             response.setContent("directRouteCallback is null on server side!");
             response.setErrorCode(0);
@@ -55,6 +60,7 @@ public class OnNotifyCallback extends ChannelPushCallback {
         logger.info("received ChannelPush msg : " + push.getContent());
         DirectPathRequestBody directPathRequestBody = DataToolUtils.deserialize(push.getContent(), DirectPathRequestBody.class);
         DirectRouteMsgType msgType = directPathRequestBody.getMsgType();
+        DirectRouteCallback directRouteCallBack = directRouteCallBackMap.get(msgType.getValue());
         String messageBody = directPathRequestBody.getMsgBody();
         String result = msgType.callOnPush(directRouteCallBack, push.getMessageID(), messageBody);
 
