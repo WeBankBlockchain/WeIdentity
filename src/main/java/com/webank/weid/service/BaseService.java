@@ -306,9 +306,10 @@ public abstract class BaseService {
 
         ChannelRequest request = new ChannelRequest();
         if (timeOut > MAX_DIRECT_ROUTE_REQUEST_TIMEOUT || timeOut < 0) {
-        	request.setTimeout(timeOut);
-//            timeOut = MAX_DIRECT_ROUTE_REQUEST_TIMEOUT;
+        	request.setTimeout(MAX_DIRECT_ROUTE_REQUEST_TIMEOUT);
             logger.error("invalid timeOut : {}", timeOut);
+        }else {
+        	request.setTimeout(timeOut);
         }
         request.setToTopic(toOrgId);
         request.setMessageID(getSeq());
