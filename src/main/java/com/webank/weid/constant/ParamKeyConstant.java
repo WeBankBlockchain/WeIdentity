@@ -58,5 +58,13 @@ public final class ParamKeyConstant {
     public static final String CONTEXT = "context";
     public static final String CREDENTIAL_ID = "id";
     public static final String ISSURANCE_DATE = "issuranceDate";
-
+    
+    /**
+     * proof key.
+     */
+    public static final String TYPE = "type";
+    public static final String CREATED = "created";
+    public static final String VERIFICATION_METHOD = "verificationMethod";
+    public static final String NONCE = "nonce";
+    public static final String SIGNATUREVALUE = "signatureValue";
 }

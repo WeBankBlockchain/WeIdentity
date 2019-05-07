@@ -22,21 +22,19 @@ package com.webank.weid.protocol.base;
 import lombok.Getter;
 import lombok.Setter;
 
-import com.webank.weid.constant.WeIdConstant;
-
 /**
  * Created by Junqi Zhang on 2019/4/9.
  */
 @Getter
 @Setter
-public class Challenge extends Version {
+public class Challenge extends Version implements RawSerializer {
 
-    Integer challegeId;
+    private String challegeId;
 
     /**
      * Specify who you want to challenge.
      */
-    String weId;
+    private String weId;
 
     /**
      * Specify a random alphanumeric nonce and WeIdentity DID owner will sign a credential which
@@ -45,17 +43,10 @@ public class Challenge extends Version {
      * is also known as dynamic challenge.
      *
      */
-    String nonce;
+    private String nonce;
     
     @Override
-    public String toString() {
-        StringBuffer buffer = new StringBuffer(this.version);
-        buffer.append(WeIdConstant.PIPELINE)
-            .append(this.challegeId)
-            .append(WeIdConstant.PIPELINE)
-            .append(this.weId)
-            .append(WeIdConstant.PIPELINE)
-            .append(this.nonce);
-        return buffer.toString();
+    public String toRawData() {
+        return this.nonce;
     }
 }

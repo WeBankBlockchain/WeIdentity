@@ -19,7 +19,7 @@
 
 package com.webank.weid.suite.transportation.qr.protocol;
 
-import com.webank.weid.util.UuIdUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * 协议版本V1.
@@ -58,6 +58,6 @@ public class QrCodeVersion1 extends QrCodeBaseData {
             protocol.getVersion()
         );
         super.setOrgId(orgId);
-        super.setId(UuIdUtils.getUuId32());
+        super.setId(DataToolUtils.getUuId32());
     }
 }

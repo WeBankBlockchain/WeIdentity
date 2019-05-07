@@ -96,7 +96,7 @@ public class TestSerialize extends TestBaseTransportation {
             qrCodeTransportation.serialize(presentation, null);
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_PROPERTY_ERROR.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
@@ -111,7 +111,7 @@ public class TestSerialize extends TestBaseTransportation {
             qrCodeTransportation.serialize(presentation, new QrCodeProtocolProperty(null));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_ENCODE_ERROR.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
@@ -130,7 +130,7 @@ public class TestSerialize extends TestBaseTransportation {
             );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_DATA_INVALID.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
@@ -150,7 +150,7 @@ public class TestSerialize extends TestBaseTransportation {
             );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
-            ErrorCode.PROTOCOL_FIELD_INVALID.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
@@ -177,7 +177,7 @@ public class TestSerialize extends TestBaseTransportation {
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
-            ErrorCode.ENCODE_BASE_ERROR.getCode(),
+            ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());

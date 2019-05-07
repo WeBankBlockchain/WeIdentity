@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.JsonSerialize;
+import com.webank.weid.protocol.base.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
@@ -36,8 +36,8 @@ import com.webank.weid.suite.entity.JsonVersion;
 import com.webank.weid.suite.transportation.AbstractTransportation;
 import com.webank.weid.suite.transportation.json.protocol.JsonBaseData;
 import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
-import com.webank.weid.util.UuIdUtils;
 
 /**
  * JSON协议的传输.
@@ -53,7 +53,7 @@ public class JsonTransportationService
         LoggerFactory.getLogger(JsonTransportationService.class);
     
     @Override
-    public <T extends JsonSerialize> ResponseData<String> serialize(
+    public <T extends JsonSerializer> ResponseData<String> serialize(
         T object,
         JsonProtocolProperty property) {
 
@@ -106,12 +106,12 @@ public class JsonTransportationService
             return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
         } catch (Exception e) {
             logger.error("JsonTransportation serialization due to unknown error.", e);
-            return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.SUITE_BASE_ERROR);
+            return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
     }
 
     @Override
-    public <T extends JsonSerialize> ResponseData<T> deserialize(
+    public <T extends JsonSerializer> ResponseData<T> deserialize(
         String transString,
         Class<T> clazz) {
         
@@ -119,7 +119,7 @@ public class JsonTransportationService
         try {
             if (StringUtils.isBlank(transString)) {
                 logger.error("the transString is blank.");
-                return new ResponseData<T>(null, ErrorCode.PROTOCOL_DATA_INVALID);
+                return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID);
             }
             //将JSON字符串解析成JsonBaseData对象
             JsonBaseData jsonBaseData = JsonUtil.jsonStrToObj(JsonBaseData.class, transString);
@@ -146,7 +146,7 @@ public class JsonTransportationService
             EncodeType encodeType = 
                 EncodeType.getObject(String.valueOf(jsonBaseData.getEncodeType()));
             if (encodeType == null) {
-                return new ResponseData<T>(null, ErrorCode.PROTOCOL_ENCODE_ERROR);
+                return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
             }
             logger.info("decode by {}.", encodeType.name());
             //进行解码操作
@@ -163,7 +163,7 @@ public class JsonTransportationService
             return new ResponseData<T>(null, e.getErrorCode());
         } catch (Exception e) {
             logger.error("JsonTransportation deserialization due to unknown error.", e);
-            return new ResponseData<T>(null, ErrorCode.SUITE_BASE_ERROR);
+            return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
     }
 
@@ -175,7 +175,7 @@ public class JsonTransportationService
     private JsonBaseData buildJsonData(JsonProtocolProperty property) {
         JsonBaseData jsonBaseData = new JsonBaseData();
         jsonBaseData.setEncodeType(property.getEncodeType().getCode());
-        jsonBaseData.setId(UuIdUtils.getUuId32());
+        jsonBaseData.setId(DataToolUtils.getUuId32());
         jsonBaseData.setOrgId(fromOrgId);
         jsonBaseData.setVersion(property.getVersion().getCode());
         return jsonBaseData;
@@ -192,13 +192,13 @@ public class JsonTransportationService
             || StringUtils.isBlank(jsonBaseData.getOrgId())
             || jsonBaseData.getData() == null
             || StringUtils.isBlank(jsonBaseData.getData().toString())) {
-            return ErrorCode.PROTOCOL_DATA_INVALID;
+            return ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID;
         }
         if (JsonVersion.getJsonVersion(jsonBaseData.getVersion()) == null) {
-            return ErrorCode.PROTOCOL_VERSION_ERROR;
+            return ErrorCode.TRANSPORTATION_PROTOCOL_VERSION_ERROR;
         }
         if (EncodeType.getObject(String.valueOf(jsonBaseData.getEncodeType())) == null) {
-            return ErrorCode.PROTOCOL_ENCODE_ERROR;
+            return ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR;
         }
         return ErrorCode.SUCCESS;
     }

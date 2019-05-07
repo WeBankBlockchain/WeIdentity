@@ -1,6 +1,6 @@
 package com.webank.weid.protocol.response;
 
-import com.webank.weid.protocol.base.PolicyAndChellenge;
+import com.webank.weid.protocol.base.PolicyAndChallenge;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +18,7 @@ public class GetPolicyAndChallengeResponse {
 	/**
 	 * 返回的消息
 	 */
-	private PolicyAndChellenge policyAndChellenge;
+	private PolicyAndChallenge policyAndChallenge;
 	
 	/**
 	 * 错误码

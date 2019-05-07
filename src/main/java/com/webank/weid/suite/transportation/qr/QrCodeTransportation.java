@@ -19,7 +19,7 @@
 
 package com.webank.weid.suite.transportation.qr;
 
-import com.webank.weid.protocol.base.JsonSerialize;
+import com.webank.weid.protocol.base.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeProtocolProperty;
 
@@ -36,7 +36,7 @@ public interface QrCodeTransportation {
      * @param property 协议的配置对象
      * @return 二维码协议数据
      */
-    public <T extends JsonSerialize> ResponseData<String> serialize(
+    public <T extends JsonSerializer> ResponseData<String> serialize(
         T object,
         QrCodeProtocolProperty property
     );
@@ -47,7 +47,7 @@ public interface QrCodeTransportation {
      * @param clazz 需要转换成的Class类型
      * @return 返回解析出来的原数据
      */
-    public <T extends JsonSerialize> ResponseData<T> deserialize(
+    public <T extends JsonSerializer> ResponseData<T> deserialize(
         String transString,
         Class<T> clazz
     );

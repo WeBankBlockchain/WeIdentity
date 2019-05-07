@@ -19,22 +19,23 @@
 
 package com.webank.weid.protocol.base;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.service.impl.CredentialPojoServiceImpl;
@@ -47,11 +48,11 @@ import com.webank.weid.util.WeIdUtils;
  */
 @Data
 @EqualsAndHashCode
-public class PresentationE implements JsonSerialize {
+public class PresentationE implements JsonSerializer {
     
     private static final Logger logger = LoggerFactory.getLogger(PresentationE.class);
     
-    private static CredentialPojoService service = new CredentialPojoServiceImpl();
+    private static CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
     
     /**
      * Required: The context field.
@@ -66,13 +67,14 @@ public class PresentationE implements JsonSerialize {
 
     public PresentationE create(
         List<CredentialPojoWrapper> credentialList,
-        PolicyAndChellenge policyAndChellenge,
+        PresentationPolicyE presentationPolicyE,
+        Challenge challenge,
         WeIdAuthentication weIdAuthentication) {
         
         try {
             // 检查输入数据完整性
             ErrorCode errorCode = 
-                validateCreateArgs(credentialList, policyAndChellenge, weIdAuthentication);
+                validateCreateArgs(credentialList, presentationPolicyE, challenge, weIdAuthentication);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "check input error:{}-{}",
@@ -82,9 +84,9 @@ public class PresentationE implements JsonSerialize {
                 return null;
             }
             // 处理proof数据
-            processProof(policyAndChellenge.getChallenge(), weIdAuthentication);
+            processProof(challenge, weIdAuthentication);
             // 处理credentialList数据
-            errorCode = processCredentialList(credentialList, policyAndChellenge.getPresentationPolicyE());
+            errorCode = processCredentialList(credentialList, presentationPolicyE);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "process credentialList error:{}-{}",
@@ -94,7 +96,7 @@ public class PresentationE implements JsonSerialize {
                 return null;
             }
             context.add(CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
-            type.add("VerifiableCredential");
+            type.add(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
             return this;
         } catch (Exception e) {
             logger.error("create PresentationE error", e);
@@ -104,47 +106,57 @@ public class PresentationE implements JsonSerialize {
     
     private ErrorCode validateCreateArgs(
         List<CredentialPojoWrapper> credentialList,
-        PolicyAndChellenge policyAndChellenge,
+        PresentationPolicyE presentationPolicyE,
+        Challenge challenge,
         WeIdAuthentication weIdAuthentication) {
         
-        if (credentialList == null || policyAndChellenge == null || weIdAuthentication ==null) {
+        if (challenge == null || weIdAuthentication == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        Challenge challenge = policyAndChellenge.getChallenge();
-        if (challenge == null 
-            || StringUtils.isBlank(challenge.getWeId())
-            || StringUtils.isBlank(challenge.getNonce())
+        if (StringUtils.isBlank(challenge.getNonce())
             || challenge.getChallegeId() == null
             || challenge.getVersion() == null) {
-            return ErrorCode.CHALLENGE_IS_INVALID;
+            return ErrorCode.PRESENTATION_CHALLENGE_INVALID;
         }
         if (weIdAuthentication.getWeIdPrivateKey() == null 
             || !WeIdUtils.validatePrivateKeyWeIdMatches(
                weIdAuthentication.getWeIdPrivateKey(), weIdAuthentication.getWeId())) {
             return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
         }
-        if (!challenge.getWeId().equals(weIdAuthentication.getWeId())) {
-            return ErrorCode.CHALLENGE_WEID_MISMATCH;
+        if (!StringUtils.isBlank(challenge.getWeId()) 
+            && !challenge.getWeId().equals(weIdAuthentication.getWeId())) {
+            return ErrorCode.PRESENTATION_CHALLENGE_WEID_MISMATCH;
         }
-        return validateClaimPolicy(credentialList, policyAndChellenge.getPresentationPolicyE());
+        if (StringUtils.isBlank(weIdAuthentication.getPublicKeyId())) {
+            return ErrorCode.PRESENTATION_WEID_PUBLICKEY_ID_INVALID;
+        }
+        return validateClaimPolicy(credentialList, presentationPolicyE);
     }
     
     private ErrorCode validateClaimPolicy(
         List<CredentialPojoWrapper> credentialList,
         PresentationPolicyE presentationPolicyE) {
+        if (credentialList == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
         if (presentationPolicyE == null || presentationPolicyE.getPolicy() == null) {
             return ErrorCode.PRESENTATION_POLICY_INVALID;
         }
-        Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicyE.getPolicy();
+        List<Integer> cptList = new ArrayList<>();
         for (CredentialPojoWrapper credentialPojoWrapper : credentialList) {
-            if (credentialPojoWrapper.getCredentialPojo() == null) {
-                return ErrorCode.CHALLENGE_IS_INVALID;
+            cptList.add(credentialPojoWrapper.getCredentialPojo().getCptId());
+        } 
+        Set<Map.Entry<Integer,ClaimPolicy>> claimPolicyEntrySet =
+            presentationPolicyE.getPolicy().entrySet();
+        for (Map.Entry<Integer,ClaimPolicy> claimPolicyEntry : claimPolicyEntrySet) {
+            Integer key = claimPolicyEntry.getKey();
+            ClaimPolicy policy = claimPolicyEntry.getValue();
+            if (key.intValue() != policy.getCptId()) {
+                return ErrorCode.PRESENTATION_CLAIM_POLICY_INVALID;
             }
-            ClaimPolicy claimPolicy = 
-                    claimPolicyMap.get(credentialPojoWrapper.getCredentialPojo().getCptId());
-            if (claimPolicy == null) {
-                return ErrorCode.CLAIM_POLICY_NOT_EXISTS;
-            }
+            if (!cptList.contains(key)) {
+                return ErrorCode.PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY;
+            } 
         }
         return ErrorCode.SUCCESS;
     }
@@ -161,9 +173,13 @@ public class PresentationE implements JsonSerialize {
             // 根据原始证书获取对应的 claimPolicy
             ClaimPolicy claimPolicy = 
                 claimPolicyMap.get(credentialPojoWrapper.getCredentialPojo().getCptId());
+            if (claimPolicy == null) {
+                this.credentialList.add(credentialPojoWrapper);
+                continue;
+            }
             // 根据原始证书和claimPolicy去创建选择性披露凭证
             ResponseData<CredentialPojoWrapper>  res =
-                service.createSelectiveCredential(credentialPojoWrapper, claimPolicy);
+                credentialPojoService.createSelectiveCredential(credentialPojoWrapper, claimPolicy);
             if (res.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 this.credentialList = null;
                 return ErrorCode.getTypeByErrorCode(res.getErrorCode().intValue());
@@ -174,24 +190,48 @@ public class PresentationE implements JsonSerialize {
     }
     
     private void processProof(Challenge challenge, WeIdAuthentication weIdAuthentication) {
-       String challengeString = challenge.toString();
-       Sign.SignatureData sigData = 
-           DataToolUtils.signMessage(
-               challengeString,
+        
+       String signature = 
+           DataToolUtils.sign(
+               challenge.toRawData(), 
                weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
            );
        proof = new HashMap<String, String>();
-       String signature =
-           new String(
-               DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-               StandardCharsets.UTF_8
-           );
-       proof.put("signature", signature);
-       proof.put("type", "RsaSingature2018");
-       proof.put("nonce", challenge.getNonce());
-       proof.put("challegeId", challenge.getChallegeId().toString());
-       proof.put("createor", challenge.getWeId());
-       proof.put("created", DateUtils.getTimestamp(new Date()));
-       proof.put("version", challenge.getVersion().toString());
+       proof.put(ParamKeyConstant.TYPE, WeIdConstant.DEFAULT_SIGN_TYPE);
+       proof.put(ParamKeyConstant.CREATED, DateUtils.getTimestamp(new Date()));
+       proof.put(ParamKeyConstant.VERIFICATION_METHOD, weIdAuthentication.getPublicKeyId());
+       proof.put(ParamKeyConstant.NONCE, challenge.getNonce());
+       proof.put(ParamKeyConstant.SIGNATUREVALUE, signature);
+    }
+    
+    /**
+     * 获取公钥Id，用于验证的时候识别publicKey.
+     * @return
+     */
+    public String getVerificationMethod(){
+        return getValueFromProof(ParamKeyConstant.VERIFICATION_METHOD);
+    }
+    
+    /**
+     * 获取签名值Signature.
+     * @return 返回签名字符串Signature.
+     */
+    public String getSignature() {
+        return getValueFromProof(ParamKeyConstant.SIGNATUREVALUE);
+    }
+    
+    /**
+     * 获取challenge随机值.
+     * @return 返回challenge随机值.
+     */
+    public String getNonce() {
+        return getValueFromProof(ParamKeyConstant.NONCE);
+    }
+    
+    private String getValueFromProof(String key){
+        if (proof != null) {
+            return proof.get(key);
+        }
+        return StringUtils.EMPTY; 
     }
 }

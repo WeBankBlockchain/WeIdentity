@@ -30,7 +30,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PresentationPolicyE extends Version implements JsonSerialize {
+public class PresentationPolicyE extends Version implements JsonSerializer {
 
     /**
      * Policy ID.
