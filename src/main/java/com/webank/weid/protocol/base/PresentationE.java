@@ -115,7 +115,6 @@ public class PresentationE implements JsonSerializer {
             return ErrorCode.ILLEGAL_INPUT;
         }
         if (StringUtils.isBlank(challenge.getNonce())
-            || challenge.getChallegeId() == null
             || challenge.getVersion() == null) {
             return ErrorCode.PRESENTATION_CHALLENGE_INVALID;
         }
@@ -128,7 +127,7 @@ public class PresentationE implements JsonSerializer {
             && !challenge.getWeId().equals(weIdAuthentication.getWeId())) {
             return ErrorCode.PRESENTATION_CHALLENGE_WEID_MISMATCH;
         }
-        if (StringUtils.isBlank(weIdAuthentication.getPublicKeyId())) {
+        if (StringUtils.isBlank(weIdAuthentication.getWeIdPublicKeyId())) {
             return ErrorCode.PRESENTATION_WEID_PUBLICKEY_ID_INVALID;
         }
         return validateClaimPolicy(credentialList, presentationPolicyE);
@@ -192,7 +191,7 @@ public class PresentationE implements JsonSerializer {
        proof = new HashMap<String, String>();
        proof.put(ParamKeyConstant.TYPE, WeIdConstant.DEFAULT_SIGN_TYPE);
        proof.put(ParamKeyConstant.CREATED, DateUtils.getTimestamp(new Date()));
-       proof.put(ParamKeyConstant.VERIFICATION_METHOD, weIdAuthentication.getPublicKeyId());
+       proof.put(ParamKeyConstant.VERIFICATION_METHOD, weIdAuthentication.getWeIdPublicKeyId());
        proof.put(ParamKeyConstant.NONCE, challenge.getNonce());
        proof.put(ParamKeyConstant.SIGNATUREVALUE, signature);
     }
