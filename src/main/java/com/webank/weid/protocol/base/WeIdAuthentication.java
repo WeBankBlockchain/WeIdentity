@@ -37,7 +37,7 @@ public class WeIdAuthentication {
     /**
      * the public key Id.
      */
-    private String publicKeyId;
+    private String weIdPublicKeyId;
 
     /**
      * Required: The private key or The weIdentity DID.
