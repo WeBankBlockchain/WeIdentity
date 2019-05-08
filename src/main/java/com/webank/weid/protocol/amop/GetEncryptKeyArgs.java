@@ -9,7 +9,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class GetEncryptKeyArgs extends DirectRouteBaseMsgArgs{
+public class GetEncryptKeyArgs extends AmopBaseMsgArgs {
 
 	/**
 	 * 

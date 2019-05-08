@@ -2,18 +2,23 @@ package com.webank.weid.service.impl.callback;
 
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
+import com.webank.weid.rpc.AmopService;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.AmopServiceImpl;
 
 public abstract class PresentationPolicyService extends BaseService {
     
+    protected AmopService amopService = new AmopServiceImpl();
+    
+    private static PresentationCallback presentationCallback = new PresentationCallback();
+    
     public PresentationPolicyService() {
-        PresentationCallback presentationCallback = new PresentationCallback();
         presentationCallback.registPolicyService(this);
-        registerCallback(AmopMsgType.GET_POLICY_AND_CHALLENGE.getValue(), presentationCallback); 
+        amopService.registerCallback(AmopMsgType.GET_POLICY_AND_CHALLENGE.getValue(), presentationCallback);  
     }
 
     /**
-     * 获取PolicyAndChellenge.
+     * 获取PolicyAndChallenge.
      * @param policyId 策略编号
      * @return 返回PresentationPolicyE对象数据
      */

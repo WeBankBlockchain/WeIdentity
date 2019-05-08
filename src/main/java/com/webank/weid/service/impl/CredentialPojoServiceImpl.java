@@ -233,9 +233,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 	@Override
 	public ResponseData<Boolean> verify(String presenterWeId, PresentationPolicyE presentationPolicyE,
 			Challenge challenge, PresentationE presentationE) {
-        if ( challenge == null 
-                || !CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)) {
-                return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
+	    if (StringUtils.isBlank(presenterWeId) 
+	        || challenge == null 
+            || !CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)) {
+            return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
         }
 		
         ErrorCode checkPresentationE = CredentialPojoUtils.checkPresentationEValid(presentationE);
@@ -244,13 +245,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
 
         //verify presenterWeId
-        if (StringUtils.isNotBlank(presenterWeId)){
-        	if ( !WeIdUtils.isWeIdValid(presenterWeId)) {
-        		return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
-        	}
-        	if (!presenterWeId.equals(challenge.getWeId())){        		
-        		return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
-        	}
+        if (StringUtils.isNotBlank(challenge.getWeId()) 
+                && !presenterWeId.equals(challenge.getWeId())){      
+            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
         }
 		
         //verify challenge
@@ -358,12 +355,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             if (cptIdList == null || cptIdList.isEmpty()) {
                 return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
             }
-            
-            for (Integer cptId : policyMap.keySet()) {	    		
-                if(!cptIdList.contains(cptId)) {
-                    return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
-                }
-            }	
+            if (!cptIdList.containsAll(policyMap.keySet())) {
+                return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
+            }
         }
         return ErrorCode.SUCCESS;
     }
