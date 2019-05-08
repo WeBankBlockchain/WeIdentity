@@ -20,20 +20,20 @@
 package com.webank.weid.constant;
 
 import com.webank.weid.protocol.amop.AmopCommonArgs;
-import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
+import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.AmopResponse;
-import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
-import com.webank.weid.rpc.callback.DirectRouteCallback;
+import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.util.DataToolUtils;
 
 /**
  * Created by junqizhang on 12/06/2017.
  */
-public enum DirectRouteMsgType {
+public enum AmopMsgType {
 
     TYPE_ERROR(0),
 
@@ -60,7 +60,7 @@ public enum DirectRouteMsgType {
 	
     private Integer value;
     
-    private DirectRouteMsgType(Integer index) {
+    private AmopMsgType(Integer index) {
         this.value = index;
     }
 
@@ -68,56 +68,34 @@ public enum DirectRouteMsgType {
         return this.value;
     }
   
-    public Class getMsgBodyArgsClass() {
-
-        switch (this) {
-        case TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH:
-            return CheckDirectRouteMsgHealthArgs.class;
-            default:
-                break;
-        }
-
-        return null;
-    }
-
-    public Class getMsgBodyResultClass() {
-
-        switch (this) {
-        case TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH:
-            return DirectRouteNotifyMsgResult.class;
-            default:
-                return DirectRouteNotifyMsgResult.class;
-        }
-    }
-
-    public String callOnPush(DirectRouteCallback directRouteCallback, String messageId, String msgBodyStr) {
+    public String callOnPush(AmopCallback amopCallback, String messageId, String msgBodyStr) {
 
         String resultBodyStr = null;
 
         switch (this) {
         case TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH: {
-            CheckDirectRouteMsgHealthArgs args = DataToolUtils.deserialize(msgBodyStr, CheckDirectRouteMsgHealthArgs.class);
+            CheckAmopMsgHealthArgs args = DataToolUtils.deserialize(msgBodyStr, CheckAmopMsgHealthArgs.class);
             args.setMessageId(messageId);
-            DirectRouteNotifyMsgResult result = directRouteCallback.onPush(args);
+            AmopNotifyMsgResult result = amopCallback.onPush(args);
             resultBodyStr = DataToolUtils.serialize(result);
         }
         break;
         case TYPE_TRANSPORTATION: {
         	AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
-        	AmopResponse result = directRouteCallback.onPush(args);
+        	AmopResponse result = amopCallback.onPush(args);
             resultBodyStr = DataToolUtils.serialize(result);
         }
         case GET_ENCRYPT_KEY: {
             // GET key
             GetEncryptKeyArgs args = DataToolUtils.deserialize(msgBodyStr, GetEncryptKeyArgs.class);
-            GetEncryptKeyResponse result = directRouteCallback.onPush(args);
+            GetEncryptKeyResponse result = amopCallback.onPush(args);
             resultBodyStr = DataToolUtils.serialize(result);
         }
         break;
         case GET_POLICY_AND_CHALLENGE: {
             // GET POLICY AND CHALLENGE
             GetPolicyAndChallengeArgs args = DataToolUtils.deserialize(msgBodyStr, GetPolicyAndChallengeArgs.class);
-            GetPolicyAndChallengeResponse result = directRouteCallback.onPush(args);
+            GetPolicyAndChallengeResponse result = amopCallback.onPush(args);
             resultBodyStr = DataToolUtils.serialize(result);
         }
         break;
