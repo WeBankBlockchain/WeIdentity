@@ -197,6 +197,18 @@ public enum ErrorCode {
      * The credential presenterWeId notmatch.
      */
     CREDENTIAL_PRESENTERWEID_NOTMATCH(100426, "credential presenterWeId notmatch"),
+    
+    /**
+     * The credential evidence id mismatch.
+     */
+    CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM(100427, "credential disclosure format does not match claim"),
+    
+    
+    /**
+     * The credential evidence id mismatch.
+     */
+    CREDENTIAL_IS_NILL(100428, "credential is null"),
+    
     /**
      * The credential evidence contract failure: illegal input.
      */
@@ -204,6 +216,7 @@ public enum ErrorCode {
         500401,
         "credential evidence contract failure: illegal input"
     ),
+    
 
     /**
      * The credential evidence base error.
@@ -482,7 +495,7 @@ public enum ErrorCode {
     /**
      * sql execute failed.
      */
-    DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(160012, "server side has no direct route callback."),
+    AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(160012, "amop server side has no direct route callback."),
     /**
      * other uncatched exceptions or error.
      */

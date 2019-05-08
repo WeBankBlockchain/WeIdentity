@@ -19,8 +19,8 @@
 
 package com.webank.weid.rpc.callback;
 
-import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
-import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
+import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
+import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 
 /**
  * Created by junqizhang on 17/5/24.
@@ -35,5 +35,5 @@ public interface PushNotifyAllCallback {
      * @param arg echo arg
      * @return
      */
-    DirectRouteNotifyMsgResult onPush(CheckDirectRouteMsgHealthArgs arg);
+	AmopNotifyMsgResult onPush(CheckAmopMsgHealthArgs arg);
 }

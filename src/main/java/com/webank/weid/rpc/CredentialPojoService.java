@@ -33,7 +33,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author chaoxinhu 2018.12
  */
-public interface CredentialPojoService extends BaseClient{
+public interface CredentialPojoService {
 
     /**
      * Generate a credential for full claim content.

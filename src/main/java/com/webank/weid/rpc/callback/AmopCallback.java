@@ -24,8 +24,8 @@ import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
+import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.AmopResponse;
-import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 
@@ -33,14 +33,14 @@ import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
  * Created by junqizhang on 08/07/2017.
  * 业务方需要继承DirectRouteCallback，并实现需要实现的方法。
  */
-public class DirectRouteCallback implements PushNotifyAllCallback {
+public class AmopCallback implements PushNotifyAllCallback {
 
     static private final String MSG_HEALTH = "I am alive!";
     static private final String ERROR_MSG_NO_OVERRIDE = "server side have not handle this type of message!";
 
-    public DirectRouteNotifyMsgResult onPush(CheckDirectRouteMsgHealthArgs arg) {
+    public AmopNotifyMsgResult onPush(CheckDirectRouteMsgHealthArgs arg) {
     	
-    	DirectRouteNotifyMsgResult result = new DirectRouteNotifyMsgResult();
+    	AmopNotifyMsgResult result = new AmopNotifyMsgResult();
     	result.setMessage(MSG_HEALTH);
     	result.setErrorCode(ErrorCode.SUCCESS.getCode());
     	result.setMessage(ErrorCode.SUCCESS.getCodeDesc());
@@ -50,24 +50,24 @@ public class DirectRouteCallback implements PushNotifyAllCallback {
     public AmopResponse onPush(AmopCommonArgs arg) {
     	
     	AmopResponse result = new AmopResponse();
-    	result.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
-    	result.setErrorMessage(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+    	result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+    	result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
         return result;
     }
     
     public GetEncryptKeyResponse onPush(GetEncryptKeyArgs arg) {
     	
 	 	GetEncryptKeyResponse result = new GetEncryptKeyResponse();
-    	result.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
-    	result.setErrorMessage(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+    	result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+    	result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
         return result;
     }
     
     public GetPolicyAndChallengeResponse onPush(GetPolicyAndChallengeArgs arg) {
     	
     	GetPolicyAndChallengeResponse result = new GetPolicyAndChallengeResponse();
-    	result.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
-    	result.setErrorMessage(ErrorCode.DIRECT_ROUTE_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+    	result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+    	result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
         return result;
     }
 }
