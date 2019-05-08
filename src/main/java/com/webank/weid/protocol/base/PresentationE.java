@@ -22,6 +22,7 @@ package com.webank.weid.protocol.base;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -84,7 +85,7 @@ public class PresentationE implements JsonSerializer {
                 return null;
             }
             // 处理proof数据
-            processProof(challenge, weIdAuthentication);
+            generateProof(challenge, weIdAuthentication);
             // 处理credentialList数据
             errorCode = processCredentialList(credentialList, presentationPolicyE);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
@@ -142,21 +143,13 @@ public class PresentationE implements JsonSerializer {
         if (presentationPolicyE == null || presentationPolicyE.getPolicy() == null) {
             return ErrorCode.PRESENTATION_POLICY_INVALID;
         }
-        List<Integer> cptList = new ArrayList<>();
+        Set<Integer> cptSet = new HashSet<>();
         for (CredentialPojoWrapper credentialPojoWrapper : credentialList) {
-            cptList.add(credentialPojoWrapper.getCredentialPojo().getCptId());
+            cptSet.add(credentialPojoWrapper.getCredentialPojo().getCptId());
         } 
-        Set<Map.Entry<Integer,ClaimPolicy>> claimPolicyEntrySet =
-            presentationPolicyE.getPolicy().entrySet();
-        for (Map.Entry<Integer,ClaimPolicy> claimPolicyEntry : claimPolicyEntrySet) {
-            Integer key = claimPolicyEntry.getKey();
-            ClaimPolicy policy = claimPolicyEntry.getValue();
-            if (key.intValue() != policy.getCptId()) {
-                return ErrorCode.PRESENTATION_CLAIM_POLICY_INVALID;
-            }
-            if (!cptList.contains(key)) {
-                return ErrorCode.PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY;
-            } 
+        Set<Integer> claimPolicyCptSet = presentationPolicyE.getPolicy().keySet();
+        if (!cptSet.containsAll(claimPolicyCptSet)) {
+            return ErrorCode.PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY;
         }
         return ErrorCode.SUCCESS;
     }
@@ -189,7 +182,7 @@ public class PresentationE implements JsonSerializer {
         return ErrorCode.SUCCESS;
     }
     
-    private void processProof(Challenge challenge, WeIdAuthentication weIdAuthentication) {
+    private void generateProof(Challenge challenge, WeIdAuthentication weIdAuthentication) {
         
        String signature = 
            DataToolUtils.sign(
