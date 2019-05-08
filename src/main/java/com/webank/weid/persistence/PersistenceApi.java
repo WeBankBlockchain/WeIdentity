@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.persistence.driver;
+package com.webank.weid.persistence;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author tonychen 2019年3月18日
  */
-public interface DataDriver {
+public interface PersistenceApi {
 
     /**
      * save data to storage.
@@ -37,7 +37,7 @@ public interface DataDriver {
      * @param data which you want to store to the storage.
      * @return execute status of the "save" operation.
      */
-    public ResponseData<Integer> save(String id, String data);
+    public ResponseData<Integer> save(String domain, String id, String data);
 
     /**
      * batch save data to storage.
@@ -46,7 +46,7 @@ public interface DataDriver {
      * @param dataList list of data
      * @return execute status of the "save" operation.
      */
-    public ResponseData<Integer> batchSave(List<String> ids, List<String> dataList);
+    public ResponseData<Integer> batchSave(String domain, List<String> ids, List<String> dataList);
 
     /**
      * query data from storage by id.
@@ -54,7 +54,7 @@ public interface DataDriver {
      * @param id the key of the data.
      * @return the data you stored.
      */
-    public ResponseData<String> getData(String id);
+    public ResponseData<String> getData(String domain, String id);
 
     /**
      * delete data by id.
@@ -62,7 +62,7 @@ public interface DataDriver {
      * @param id the key of the data.
      * @return the data you stored.
      */
-    public ResponseData<Integer> delete(String id);
+    public ResponseData<Integer> delete(String domain, String id);
 
     /**
      * update data by id.
@@ -70,5 +70,5 @@ public interface DataDriver {
      * @param data the data you want to update into.
      * @return execute status of the "update" operation.
      */
-    public ResponseData<Integer> update(String id, String data);
+    public ResponseData<Integer> update(String domain, String id, String data);
 }
