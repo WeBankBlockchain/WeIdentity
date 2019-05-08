@@ -30,7 +30,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author chaoxinhu 2018.12
  */
-public interface CredentialService extends BaseClient{
+public interface CredentialService {
 
     /**
      * Generate a credential for full claim content.

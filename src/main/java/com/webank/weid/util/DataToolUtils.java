@@ -116,7 +116,7 @@ public final class DataToolUtils {
      * @param object the class instance to serialize
      * @return JSON String
      */
-    public static String serialize(Object object) {
+    public static <T> String serialize(T object) {
         Writer write = new StringWriter();
         try {
             objectMapper.writeValue(write, object);
@@ -330,7 +330,7 @@ public final class DataToolUtils {
      *
      * @param message This should be from the same plain-text source with the signature Data.
      * @param signatureData This must be in SignatureData. Caller should call deserialize.
-     * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
+     * @param publicKey This must be in BigInteger. Callseer should convert it to BigInt.
      * @return true if yes, false otherwise
      * @throws SignatureException Signature is the exception.
      */
