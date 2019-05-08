@@ -7,12 +7,12 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.persistence.driver.DataDriver;
 import com.webank.weid.persistence.driver.MysqlDriver;
-import com.webank.weid.rpc.callback.DirectRouteCallback;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.callback.AmopCallback;
 
-public class KeyManagerCallback extends DirectRouteCallback {
+public class KeyManagerCallback extends AmopCallback {
     
     private static final Logger logger =  LoggerFactory.getLogger(KeyManagerCallback.class);
     

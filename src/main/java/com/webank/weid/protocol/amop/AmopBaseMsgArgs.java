@@ -17,23 +17,39 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.response;
+package com.webank.weid.protocol.amop;
 
-import com.webank.weid.protocol.base.IResult;
+//import cn.webank.blockchain.spi.common.annoation.BlockChainDTO;
+//import cn.webank.blockchain.spi.common.annoation.BlockChainDTO.BindTypeEnum;
+//import cn.webank.blockchain.spi.common.dto.IArgs;
+import com.webank.weid.annoation.BlockChainDTO;
+import com.webank.weid.annoation.BlockChainDTO.BindTypeEnum;
+import com.webank.weid.protocol.base.IArgs;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+//import cn.webank.blockchain.spi.common.protocols.response.GetTransList;
 
 /**
- * Created by junqizhang on 15/08/2017.
+ * Created by junqizhang on 01/06/2017.
  */
 @Data
-public class DirectRouteNotifyMsgResult implements IResult {
+@BlockChainDTO(bindType = BindTypeEnum.Object)
+@EqualsAndHashCode(callSuper = false)
+public class AmopBaseMsgArgs implements IArgs {
 
     /*
-     * 错误信息
+     * 消息id，用于链上链下消息去重
      */
-    protected String message;
+    protected String messageId;
+
     /*
-     * 错误码：返回0表明成功收到通知；其他表明异常情况.
+     * 来源机构id
      */
-    private Integer errorCode;
+    protected String fromOrgId;
+
+    /*
+     * 目的机构id
+     */
+    protected String toOrgId;
 }

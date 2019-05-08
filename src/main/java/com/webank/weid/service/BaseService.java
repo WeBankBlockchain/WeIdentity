@@ -41,25 +41,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.webank.weid.constant.DirectRouteMsgType;
+import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
-import com.webank.weid.protocol.amop.AmopCommonArgs;
 import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
 import com.webank.weid.protocol.amop.DirectPathRequestBody;
 import com.webank.weid.protocol.amop.DirectRouteBaseMsgArgs;
-import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
-import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
-import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
-import com.webank.weid.protocol.response.GetEncryptKeyResponse;
-import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.BaseClient;
-import com.webank.weid.rpc.callback.DirectRouteCallback;
 import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.DataToolUtils;
@@ -70,7 +62,7 @@ import com.webank.weid.util.PropertyUtils;
  *
  * @author tonychen
  */
-public abstract class BaseService implements BaseClient{
+public abstract class BaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
 
@@ -145,7 +137,7 @@ public abstract class BaseService implements BaseClient{
         OnNotifyCallback pushCallBack = new OnNotifyCallback();
         service.setPushCallback(pushCallBack);
         pushCallBack.RegistRouteCallBack(
-            DirectRouteMsgType.GET_ENCRYPT_KEY.getValue(), 
+            AmopMsgType.GET_ENCRYPT_KEY.getValue(), 
             new KeyManagerCallback()
         );
         
@@ -295,7 +287,7 @@ public abstract class BaseService implements BaseClient{
                 arg,
                 CheckDirectRouteMsgHealthArgs.class,
                 DirectRouteNotifyMsgResult.class,
-                DirectRouteMsgType.TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH,
+                AmopMsgType.TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH,
                 DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
         );
 	}
@@ -306,7 +298,7 @@ public abstract class BaseService implements BaseClient{
             F arg,
             Class<F> argsClass,
             Class<T> resultClass,
-            DirectRouteMsgType msgType,
+            AmopMsgType msgType,
             int timeOut
     ) {
         
@@ -357,46 +349,4 @@ public abstract class BaseService implements BaseClient{
 		return responseStruct;
     }
 
-	public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
-		 return this.getImpl(
-	                fromOrgId,
-	                toOrgId,
-	                args,
-	                AmopCommonArgs.class,
-	                AmopResponse.class,
-	                DirectRouteMsgType.TYPE_TRANSPORTATION,
-	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
-	        );
-	}
-	
-	public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId, GetEncryptKeyArgs args) {
-		 return this.getImpl(
-	                fromOrgId,
-	                toOrgId,
-	                args,
-	                GetEncryptKeyArgs.class,
-	                GetEncryptKeyResponse.class,
-	                DirectRouteMsgType.GET_ENCRYPT_KEY,
-	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
-	        );
-	} 
-	
-	public ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(String toOrgId, GetPolicyAndChallengeArgs args) {
-		 return this.getImpl(
-	                fromOrgId,
-	                toOrgId,
-	                args,
-	                GetPolicyAndChallengeArgs.class,
-	                GetPolicyAndChallengeResponse.class,
-	                DirectRouteMsgType.GET_POLICY_AND_CHALLENGE,
-	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
-	        );
-	} 
-
-	@Override
-	public void registerCallback(Integer directRouteMsgType, DirectRouteCallback directRouteCallback) {
-		
-		OnNotifyCallback callback = (OnNotifyCallback)getService().getPushCallback();
-		callback.RegistRouteCallBack(directRouteMsgType, directRouteCallback);
-	}
 }
