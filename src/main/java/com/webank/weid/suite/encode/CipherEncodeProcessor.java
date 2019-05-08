@@ -29,7 +29,9 @@ import com.webank.weid.persistence.driver.MysqlDriver;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.AmopService;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.crypto.KeyGenerator;
 import com.webank.weid.suite.entity.CryptType;
@@ -47,6 +49,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
     private static final Logger logger = LoggerFactory.getLogger(CipherEncodeProcessor.class);
     
     private DataDriver dataDriver = new MysqlDriver();
+    
+    protected AmopService amopService = new AmopServiceImpl();
     
     /**
      * 密文编码处理：先进行压缩，然后进行AES加密.
@@ -132,7 +136,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         args.setMessageId(DataToolUtils.getUuId32());
         args.setToOrgId(encodeData.getOrgId());
         args.setFromOrgId(fromOrgId);
-        ResponseData<GetEncryptKeyResponse> resResponse = super.getEncryptKey(encodeData.getOrgId(), args);
+        ResponseData<GetEncryptKeyResponse> resResponse = amopService.getEncryptKey(encodeData.getOrgId(), args);
         if (resResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error("AMOP response fail, dataId={}, errorCode={}, errorMessage={}",
                 encodeData.getId(),
