@@ -28,9 +28,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Challenge extends Version implements RawSerializer {
-
-    private String challegeId;
-
+    
     /**
      * Specify who you want to challenge.
      */

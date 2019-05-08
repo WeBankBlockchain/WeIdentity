@@ -21,14 +21,11 @@ package com.webank.weid.protocol.amop;
 
 //import cn.webank.blockchain.spi.common.annoation.BlockChainDTO;
 //import cn.webank.blockchain.spi.common.annoation.BlockChainDTO.BindTypeEnum;
-//import cn.webank.blockchain.spi.common.dto.IArgs;
 import com.webank.weid.annoation.BlockChainDTO;
 import com.webank.weid.annoation.BlockChainDTO.BindTypeEnum;
 import com.webank.weid.protocol.base.IArgs;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-
-//import cn.webank.blockchain.spi.common.protocols.response.GetTransList;
 
 /**
  * Created by junqizhang on 01/06/2017.

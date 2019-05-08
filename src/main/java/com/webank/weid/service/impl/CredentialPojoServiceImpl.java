@@ -142,7 +142,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 			}
 			if (v instanceof Map) {
 				//递归检查
-				if(validCredentialMapArgs((HashMap) v, (HashMap) saltV, (HashMap) disclosureV)) {
+				if(!validCredentialMapArgs((HashMap) v, (HashMap) saltV, (HashMap) disclosureV)) {
 					return false;
 				}
 			}
@@ -172,7 +172,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
 		Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
-		if(! validCredentialMapArgs(claim,saltMap,disclosureMap)) {
+		if(!validCredentialMapArgs(claim,saltMap,disclosureMap)) {
 			return new ResponseData<CredentialPojoWrapper>(null, ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM);
 		}
 		addSelectSalt(disclosureMap, saltMap, claim);
