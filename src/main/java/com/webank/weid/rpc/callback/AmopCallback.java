@@ -21,7 +21,7 @@ package com.webank.weid.rpc.callback;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.amop.AmopCommonArgs;
-import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
+import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
@@ -38,7 +38,7 @@ public class AmopCallback implements PushNotifyAllCallback {
     static private final String MSG_HEALTH = "I am alive!";
     static private final String ERROR_MSG_NO_OVERRIDE = "server side have not handle this type of message!";
 
-    public AmopNotifyMsgResult onPush(CheckDirectRouteMsgHealthArgs arg) {
+    public AmopNotifyMsgResult onPush(CheckAmopMsgHealthArgs arg) {
     	
     	AmopNotifyMsgResult result = new AmopNotifyMsgResult();
     	result.setMessage(MSG_HEALTH);
