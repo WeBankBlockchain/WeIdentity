@@ -120,6 +120,6 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 	public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
 		
 		OnNotifyCallback callback = (OnNotifyCallback)getService().getPushCallback();
-		callback.RegistRouteCallBack(directRouteMsgType, directRouteCallback);
+		callback.registAmopCallback(directRouteMsgType, directRouteCallback);
 	}
 }

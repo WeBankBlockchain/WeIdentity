@@ -19,7 +19,6 @@
 
 package com.webank.weid.service;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -85,13 +84,7 @@ public abstract class BaseService {
 
     static {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        service = context.getBean(Service.class);
-        
-        try {
-			PropertyUtils.loadProperties("weidentity.properties");
-		} catch (IOException e) {
-			logger.error("[BaseService] Load sdk.properties file failed.", e);
-		}
+        service = context.getBean(Service.class);  
     }
     
     protected static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
@@ -136,7 +129,7 @@ public abstract class BaseService {
         
         OnNotifyCallback pushCallBack = new OnNotifyCallback();
         service.setPushCallback(pushCallBack);
-        pushCallBack.RegistRouteCallBack(
+        pushCallBack.registAmopCallback(
             AmopMsgType.GET_ENCRYPT_KEY.getValue(), 
             new KeyManagerCallback()
         );
