@@ -28,8 +28,8 @@ import org.bcos.channel.dto.ChannelResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DirectRouteMsgType;
-import com.webank.weid.protocol.amop.DirectPathRequestBody;
+import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.protocol.amop.AmopRequestBody;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -39,17 +39,16 @@ public class OnNotifyCallback extends ChannelPushCallback {
 
     private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallback.class);
     
-//    private DirectRouteCallback directRouteCallBack = new DirectRouteCallback();
-    private Map<Integer, DirectRouteCallback>directRouteCallBackMap = new HashMap<Integer, DirectRouteCallback>();
+    private Map<Integer, AmopCallback> amopCallBackMap = new HashMap<Integer, AmopCallback>();
 
-    public void RegistRouteCallBack(Integer msgType, DirectRouteCallback routeCallBack) {
-//    	directRouteCallBack =  routeCallBack;
-    	directRouteCallBackMap.put(msgType, routeCallBack);
+    public void RegistRouteCallBack(Integer msgType, AmopCallback routeCallBack) {
+
+    	amopCallBackMap.put(msgType, routeCallBack);
     }
     @Override
     public void onPush(ChannelPush push) {
     	
-        if (0 == directRouteCallBackMap.size()) {
+        if (0 == amopCallBackMap.size()) {
             ChannelResponse response = new ChannelResponse();
             response.setContent("directRouteCallback is null on server side!");
             response.setErrorCode(0);
@@ -58,11 +57,11 @@ public class OnNotifyCallback extends ChannelPushCallback {
         }
         
         logger.info("received ChannelPush msg : " + push.getContent());
-        DirectPathRequestBody directPathRequestBody = DataToolUtils.deserialize(push.getContent(), DirectPathRequestBody.class);
-        DirectRouteMsgType msgType = directPathRequestBody.getMsgType();
-        DirectRouteCallback directRouteCallBack = directRouteCallBackMap.get(msgType.getValue());
-        String messageBody = directPathRequestBody.getMsgBody();
-        String result = msgType.callOnPush(directRouteCallBack, push.getMessageID(), messageBody);
+        AmopRequestBody amopRequestBody = DataToolUtils.deserialize(push.getContent(), AmopRequestBody.class);
+        AmopMsgType msgType = amopRequestBody.getMsgType();
+        AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
+        String messageBody = amopRequestBody.getMsgBody();
+        String result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
 
         /*
          * 接收到以后需要给发送端回包

@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
-import com.webank.weid.rpc.callback.DirectRouteCallback;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
+import com.webank.weid.rpc.callback.AmopCallback;
 
 /**
  * 用于处理机构根据policyId获取policy的回调.
@@ -15,7 +15,7 @@ import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
  * @author v_wbgyang
  *
  */
-public class PresentationCallback extends DirectRouteCallback {
+public class PresentationCallback extends AmopCallback {
     
     private static final Logger logger = 
             LoggerFactory.getLogger(PresentationCallback.class);
