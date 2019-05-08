@@ -58,7 +58,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             args.setPolicyId(String.valueOf(policyId));
             args.setMessageId(getService().newSeq());
             ResponseData<GetPolicyAndChallengeResponse> retResponse = 
-                super.getPolicyAndChallenge(orgId, args);
+                this.getPolicyAndChallenge(orgId, args);
             if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("AMOP response fail, policyId={}, errorCode={}, errorMessage={}",
                     policyId,

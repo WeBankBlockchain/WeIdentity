@@ -47,10 +47,10 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
-import com.webank.weid.protocol.amop.CheckDirectRouteMsgHealthArgs;
-import com.webank.weid.protocol.amop.DirectPathRequestBody;
-import com.webank.weid.protocol.amop.DirectRouteBaseMsgArgs;
-import com.webank.weid.protocol.response.DirectRouteNotifyMsgResult;
+import com.webank.weid.protocol.amop.AmopBaseMsgArgs;
+import com.webank.weid.protocol.amop.AmopRequestBody;
+import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
+import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
@@ -88,7 +88,7 @@ public abstract class BaseService {
         service = context.getBean(Service.class);
         
         try {
-			PropertyUtils.loadProperties("sdk.properties");
+			PropertyUtils.loadProperties("weidentity.properties");
 		} catch (IOException e) {
 			logger.error("[BaseService] Load sdk.properties file failed.", e);
 		}
@@ -278,21 +278,21 @@ public abstract class BaseService {
         return (Contract) contract;
     }
     
-	public ResponseData<DirectRouteNotifyMsgResult> checkDirectRouteMsgHealth(String toOrgId,
-			CheckDirectRouteMsgHealthArgs arg) {
+	public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(String toOrgId,
+	    CheckAmopMsgHealthArgs arg) {
 		
         return this.getImpl(
                 fromOrgId,
                 toOrgId,
                 arg,
-                CheckDirectRouteMsgHealthArgs.class,
-                DirectRouteNotifyMsgResult.class,
+                CheckAmopMsgHealthArgs.class,
+                AmopNotifyMsgResult.class,
                 AmopMsgType.TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH,
                 DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
         );
 	}
 
-	protected <T, F extends DirectRouteBaseMsgArgs> ResponseData<T> getImpl(
+	protected <T, F extends AmopBaseMsgArgs> ResponseData<T> getImpl(
             String fromOrgId,
             String toOrgId,
             F arg,
@@ -317,10 +317,10 @@ public abstract class BaseService {
 
 //        String msgBody = jsonMapper.toJson(arg);
         String msgBody = DataToolUtils.serialize(arg);
-        DirectPathRequestBody directPathRequestBody = new DirectPathRequestBody();
-        directPathRequestBody.setMsgType(msgType);
-        directPathRequestBody.setMsgBody(msgBody);
-        String requestBodyStr = DataToolUtils.serialize(directPathRequestBody);
+        AmopRequestBody amopRequestBody = new AmopRequestBody();
+        amopRequestBody.setMsgType(msgType);
+        amopRequestBody.setMsgBody(msgBody);
+        String requestBodyStr = DataToolUtils.serialize(amopRequestBody);
         logger.info("direct route request, seq : {}, body ：{}", request.getMessageID(), requestBodyStr);
         request.setContent(requestBodyStr);
 

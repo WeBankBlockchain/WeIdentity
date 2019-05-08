@@ -12,6 +12,4 @@ public class AmopRequestBody implements IArgs {
     protected AmopMsgType msgType;
 
     protected String msgBody;
-
-    protected String message;
 }

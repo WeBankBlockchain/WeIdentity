@@ -252,22 +252,17 @@ public enum ErrorCode {
     PRESENTATION_POLICY_INVALID(100602, "the presentation policy is invalid."),
     
     /**
-     * the claim policy is invalid.
-     */
-    PRESENTATION_CLAIM_POLICY_INVALID(100603, "the claim policy is invalid."),
-    
-    /**
      * the credentialList of presentation don't match the claim policy.
      */
     PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY(
-        100604, 
+        100603, 
         "the credentiallist of presentation don't match the claim policy."
     ),
     
     /**
      * the publicKeyId is invalid.
      */
-    PRESENTATION_WEID_PUBLICKEY_ID_INVALID(100605, "the publicKeyId is invalid."),
+    PRESENTATION_WEID_PUBLICKEY_ID_INVALID(100604, "the publicKeyId is invalid."),
     
     /**
      * the encrypt key is not exists.
