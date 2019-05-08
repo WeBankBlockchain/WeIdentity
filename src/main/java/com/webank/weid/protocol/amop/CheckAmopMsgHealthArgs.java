@@ -27,7 +27,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class CheckDirectRouteMsgHealthArgs extends DirectRouteBaseMsgArgs {
+public class CheckAmopMsgHealthArgs extends AmopBaseMsgArgs {
 
     /*
      * 任意包体

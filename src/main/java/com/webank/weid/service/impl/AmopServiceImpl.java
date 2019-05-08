@@ -23,20 +23,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.protocol.amop.AmopCommonArgs;
+import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
+import com.webank.weid.protocol.response.AmopResponse;
+import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.MessageService;
+import com.webank.weid.rpc.AmopService;
+import com.webank.weid.rpc.callback.AmopCallback;
+import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.service.BaseService;
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
-public class MessageServiceImpl extends BaseService implements MessageService {
+public class AmopServiceImpl extends BaseService implements AmopService {
     
-    private static final Logger logger = LoggerFactory.getLogger(MessageServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(AmopServiceImpl.class);
 
     @Override
     public ResponseData<PolicyAndChallenge> getPresentationPolicy(String orgId, Integer policyId) {
@@ -72,4 +79,47 @@ public class MessageServiceImpl extends BaseService implements MessageService {
             return new ResponseData<PolicyAndChallenge>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
+    
+    
+    public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
+		 return this.getImpl(
+	                fromOrgId,
+	                toOrgId,
+	                args,
+	                AmopCommonArgs.class,
+	                AmopResponse.class,
+	                AmopMsgType.TYPE_TRANSPORTATION,
+	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
+	        );
+	}
+	
+	public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId, GetEncryptKeyArgs args) {
+		 return this.getImpl(
+	                fromOrgId,
+	                toOrgId,
+	                args,
+	                GetEncryptKeyArgs.class,
+	                GetEncryptKeyResponse.class,
+	                AmopMsgType.GET_ENCRYPT_KEY,
+	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
+	        );
+	} 
+	
+	public ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(String toOrgId, GetPolicyAndChallengeArgs args) {
+		 return this.getImpl(
+	                fromOrgId,
+	                toOrgId,
+	                args,
+	                GetPolicyAndChallengeArgs.class,
+	                GetPolicyAndChallengeResponse.class,
+	                AmopMsgType.GET_POLICY_AND_CHALLENGE,
+	                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
+	        );
+	} 
+
+	public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
+		
+		OnNotifyCallback callback = (OnNotifyCallback)getService().getPushCallback();
+		callback.RegistRouteCallBack(directRouteMsgType, directRouteCallback);
+	}
 }

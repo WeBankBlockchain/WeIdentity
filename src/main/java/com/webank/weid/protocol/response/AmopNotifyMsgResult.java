@@ -17,16 +17,23 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc;
+package com.webank.weid.protocol.response;
 
-import com.webank.weid.protocol.base.PolicyAndChallenge;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.base.IResult;
+import lombok.Data;
 
 /**
- * Created by Junqi Zhang on 2019/4/10.
+ * Created by junqizhang on 15/08/2017.
  */
-public interface MessageService extends BaseClient{
+@Data
+public class AmopNotifyMsgResult implements IResult {
 
-    ResponseData<PolicyAndChallenge> getPresentationPolicy(String orgId, Integer policyId);
-
+    /*
+     * 错误信息
+     */
+    protected String message;
+    /*
+     * 错误码：返回0表明成功收到通知；其他表明异常情况.
+     */
+    private Integer errorCode;
 }

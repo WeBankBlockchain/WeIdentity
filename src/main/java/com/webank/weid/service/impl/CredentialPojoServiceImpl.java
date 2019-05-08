@@ -137,15 +137,17 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 			Object v = entry.getValue();
 			Object saltV = salt.get(k);
 			Object disclosureV = disclosureMap.get(k);
-			if (saltV == null || disclosureV == null) {
+			if(!salt.containsKey(k) || !disclosureMap.containsKey(k)) {
 				return false;
 			}
 			if (v instanceof Map) {
 				//递归检查
-				validCredentialMapArgs((HashMap) v, (HashMap) saltV, (HashMap) disclosureV);
+				if(validCredentialMapArgs((HashMap) v, (HashMap) saltV, (HashMap) disclosureV)) {
+					return false;
+				}
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	/* (non-Javadoc)
@@ -157,11 +159,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 		
 		if (credentialPojoWrapper == null) {
 			logger.error("[createSelectiveCredential] credentialPojoWrapper is null.");
-			return new ResponseData<CredentialPojoWrapper>();
+			return new ResponseData<CredentialPojoWrapper>(null, ErrorCode.CREDENTIAL_IS_NILL);
 		}
 		if (claimPolicy == null) {
 			logger.error("[createSelectiveCredential] claimPolicy is null.");
-			return new ResponseData<CredentialPojoWrapper>(null,ErrorCode.CREDENTIAL_CLAIM_POLICY_NOT_EXIST);
+			return new ResponseData<CredentialPojoWrapper>(null, ErrorCode.CREDENTIAL_CLAIM_POLICY_NOT_EXIST);
 		}
 		CredentialPojo credentialPojo = credentialPojoWrapper.getCredentialPojo();
 		String disclosure = claimPolicy.getFieldsToBeDisclosed();
@@ -171,7 +173,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 		Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
 		if(! validCredentialMapArgs(claim,saltMap,disclosureMap)) {
-			return new ResponseData<CredentialPojoWrapper>();
+			return new ResponseData<CredentialPojoWrapper>(null, ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM);
 		}
 		addSelectSalt(disclosureMap, saltMap, claim);
 		credentialPojoWrapper.setSalt(saltMap);
@@ -198,7 +200,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 			} else {
 				if (((Integer) value).equals(CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus())) {
 					saltMap.put(claimKey, CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus());
-//					String hash = DataToolUtils.sha3(String.valueOf(value) + String.valueOf(saltV));
 					String hash = CredentialPojoUtils.getFieldSaltHash(String.valueOf(value), String.valueOf(saltV));
 					claim.put(claimKey, hash);
 				}

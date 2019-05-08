@@ -35,7 +35,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author tonychen
  */
-public interface WeIdService extends BaseClient{
+public interface WeIdService {
 
     /**
      * Create a WeIdentity DID without a keypair. SDK will generate a keypair for the caller.
