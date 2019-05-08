@@ -30,7 +30,7 @@ import mockit.MockUp;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.persistence.driver.DataDriver;
+import com.webank.weid.persistence.PersistenceApi;
 import com.webank.weid.persistence.driver.MysqlDriver;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.base.CredentialPojo;
@@ -46,7 +46,7 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
 
     protected QrCodeTransportation qrCodeTransportation = new QrCodeTransportationService();
 
-    protected DataDriver dataDriver = new MysqlDriver();
+    protected PersistenceApi dataDriver = new MysqlDriver();
 
     protected ResponseData<PresentationE> mockCipherDeserialize(ResponseData<String> response) {
         MockUp<BaseService> mockBaseService = new MockUp<BaseService>() {
@@ -55,7 +55,7 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
                 GetEncryptKeyResponse getEncryptKeyResponse = new GetEncryptKeyResponse();
                 getEncryptKeyResponse.setErrorCode(ErrorCode.SUCCESS.getCode());
                 getEncryptKeyResponse.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
-                String result = dataDriver.getData(args.getKeyId()).getResult();
+                String result = dataDriver.getData("transEncryption", args.getKeyId()).getResult();
                 getEncryptKeyResponse.setEncryptKey(result);
                 return new ResponseData<>(getEncryptKeyResponse, ErrorCode.SUCCESS);
             }
