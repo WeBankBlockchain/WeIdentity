@@ -41,7 +41,7 @@ public class OnNotifyCallback extends ChannelPushCallback {
     
     private Map<Integer, AmopCallback> amopCallBackMap = new HashMap<Integer, AmopCallback>();
 
-    public void RegistRouteCallBack(Integer msgType, AmopCallback routeCallBack) {
+    public void registAmopCallback(Integer msgType, AmopCallback routeCallBack) {
 
     	amopCallBackMap.put(msgType, routeCallBack);
     }

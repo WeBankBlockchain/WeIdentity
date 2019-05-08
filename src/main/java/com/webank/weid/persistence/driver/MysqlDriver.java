@@ -19,7 +19,6 @@
 
 package com.webank.weid.persistence.driver;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -35,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.persistence.PersistenceApi;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
@@ -44,7 +44,7 @@ import com.webank.weid.util.PropertyUtils;
  *
  * @author tonychen 2019年3月18日
  */
-public class MysqlDriver implements DataDriver {
+public class MysqlDriver implements PersistenceApi {
 
     private static final Logger logger = LoggerFactory.getLogger(MysqlDriver.class);
 
@@ -77,12 +77,6 @@ public class MysqlDriver implements DataDriver {
     public MysqlDriver() {
         init();
     }
-    
-//    public static Connection getConnection() {
-//    	if(connection == null) {
-//    		connection = DriverManager.getConnection(dbUrl, userName, passWord);
-//    	}
-//    }
 
     /**
      * initialize database connection.
@@ -91,8 +85,6 @@ public class MysqlDriver implements DataDriver {
 
         try {
         	
-        	//initialize jdbc properties.
-            PropertyUtils.loadProperties("sdk.properties");
             String dbUrl = PropertyUtils.getProperty(DataDriverConstant.JDBC_URL);
             String userName = PropertyUtils.getProperty(DataDriverConstant.JDBC_USER_NAME);
             String passWord = PropertyUtils.getProperty(DataDriverConstant.JDBC_USER_PASSWORD);
@@ -107,13 +99,11 @@ public class MysqlDriver implements DataDriver {
             logger.error("Initialize mysql connection with exception ", e);
         } catch (ClassNotFoundException e) {
             logger.error("Initialize failed with exception ", e);
-        } catch (IOException e) {
-        	logger.error("Initialize failed with exception ", e);
-		}
+        }
     }
 
     @Override
-    public ResponseData<String> getData(String id) {
+    public ResponseData<String> getData(String domain, String id) {
 
     	if(StringUtils.isEmpty(id)) {
     		logger.error("[mysql->getData] the id of the data is empty.");
@@ -146,7 +136,7 @@ public class MysqlDriver implements DataDriver {
      * @see com.webank.weid.connectivity.driver.DBDriver#save(java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Integer> save(String id, String data) {
+    public ResponseData<Integer> save(String domain, String id, String data) {
 
     	if(StringUtils.isEmpty(id)) {
     		logger.error("[mysql->save] the id of the data is empty.");
@@ -175,7 +165,7 @@ public class MysqlDriver implements DataDriver {
      * @see com.webank.weid.connectivity.driver.DBDriver#batchSave(java.util.List, java.util.List)
      */
     @Override
-    public ResponseData<Integer> batchSave(List<String> ids, List<String> dataList) {
+    public ResponseData<Integer> batchSave(String domain, List<String> ids, List<String> dataList) {
 
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
@@ -207,7 +197,7 @@ public class MysqlDriver implements DataDriver {
      * @see com.webank.weid.connectivity.driver.DBDriver#delete(java.lang.String)
      */
     @Override
-    public ResponseData<Integer> delete(String id) {
+    public ResponseData<Integer> delete(String domain, String id) {
 
     	if(StringUtils.isEmpty(id)) {
     		logger.error("[mysql->delete] the id of the data is empty.");
@@ -235,7 +225,7 @@ public class MysqlDriver implements DataDriver {
      * @see com.webank.weid.connectivity.driver.DBDriver#update(java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Integer> update(String id, String data) {
+    public ResponseData<Integer> update(String domain, String id, String data) {
 
     	if(StringUtils.isEmpty(id)) {
     		logger.error("[mysql->update] the id of the data is empty.");

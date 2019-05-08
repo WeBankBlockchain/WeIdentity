@@ -22,6 +22,8 @@ package com.webank.weid.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * tools for properties.
@@ -29,19 +31,30 @@ import java.util.Properties;
  * @author tonychen 2019年3月21日
  */
 public final class PropertyUtils {
-
+    
+    private static final Logger logger = LoggerFactory.getLogger(PropertyUtils.class);
+    
     private static Properties prop = new Properties();
+    
+    private static final String PROP_NAME = "weidentity.properties";
+    
+    static {
+        try {
+            loadProperties(PROP_NAME);
+        } catch (IOException e) {
+            logger.error("[PropertyUtils] Load weidentity.properties file failed.", e);
+        }
+    }
 
     /**
      * load properties from specific config file.
      *
      * @param filePath properties config file.
      */
-    public static void loadProperties(String filePath) throws IOException {
+    private static void loadProperties(String filePath) throws IOException {
 
         InputStream in;
         in = PropertyUtils.class.getClassLoader().getResourceAsStream(filePath);
-//        in = new FileInputStream(new File(filePath));
         prop.load(in);
         in.close();
     }

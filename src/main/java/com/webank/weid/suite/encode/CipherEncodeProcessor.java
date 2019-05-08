@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.EncodeSuiteException;
-import com.webank.weid.persistence.driver.DataDriver;
+import com.webank.weid.persistence.PersistenceApi;
 import com.webank.weid.persistence.driver.MysqlDriver;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
@@ -48,9 +48,11 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
     
     private static final Logger logger = LoggerFactory.getLogger(CipherEncodeProcessor.class);
     
-    private DataDriver dataDriver = new MysqlDriver();
+    private PersistenceApi dataDriver = new MysqlDriver();
     
     protected AmopService amopService = new AmopServiceImpl();
+    
+    private static final String TRANSENCRYPTIONDOMAIN = "transEncryption";
     
     /**
      * 密文编码处理：先进行压缩，然后进行AES加密.
@@ -66,7 +68,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
                     .getCryptService(CryptType.AES)
                     .encrypt(encodeData.getData(), key);
             //保存秘钥
-            ResponseData<Integer> response = this.dataDriver.save(encodeData.getId(), key);
+            ResponseData<Integer> response = 
+                this.dataDriver.save(TRANSENCRYPTIONDOMAIN, encodeData.getId(), key);
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
                     ErrorCode.getTypeByErrorCode(response.getErrorCode().intValue())
@@ -112,7 +115,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         //说明是当前机构，这个时候不适用于AMOP获取key，而是从本地数据库中获取key
         if (fromOrgId.equals(encodeData.getOrgId())) {
             //保存秘钥
-            ResponseData<String> response = this.dataDriver.getData(encodeData.getId());
+            ResponseData<String> response = 
+                this.dataDriver.getData(TRANSENCRYPTIONDOMAIN,encodeData.getId());
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
                     ErrorCode.getTypeByErrorCode(response.getErrorCode().intValue())
