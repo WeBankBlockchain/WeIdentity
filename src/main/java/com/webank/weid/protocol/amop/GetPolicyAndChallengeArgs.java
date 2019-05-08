@@ -10,7 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GetPolicyAndChallengeArgs extends DirectRouteBaseMsgArgs{
+public class GetPolicyAndChallengeArgs extends AmopBaseMsgArgs {
 
 	private String policyId;
 }
