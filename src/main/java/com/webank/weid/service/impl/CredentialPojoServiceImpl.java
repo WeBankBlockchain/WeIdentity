@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -231,9 +232,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 	@Override
 	public ResponseData<Boolean> verify(String presenterWeId, PresentationPolicyE presentationPolicyE,
 			Challenge challenge, PresentationE presentationE) {
-        if ( WeIdUtils.isWeIdValid(presenterWeId) 
-                || CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)
-                || challenge == null ) {
+        if ( challenge == null 
+                || !CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)) {
                 return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
         }
 		
@@ -243,12 +243,17 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
 
         //verify presenterWeId
-        if ( !presenterWeId.equals(challenge.getWeId())) {
-            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
+        if (StringUtils.isNotBlank(presenterWeId)){
+        	if ( !WeIdUtils.isWeIdValid(presenterWeId)) {
+        		return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
+        	}
+        	if (!presenterWeId.equals(challenge.getWeId())){        		
+        		return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
+        	}
         }
 		
         //verify challenge
-	    WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
+	    WeIdDocument weIdDocument = weIdService.getWeIdDocument(challenge.getWeId()).getResult();
 	    String signature = presentationE.getSignature();
 	    ErrorCode errorCode = 
 	            DataToolUtils.verifySignatureFromWeId(challenge.toRawData(), signature, weIdDocument);
@@ -260,22 +265,21 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 	    //verify cptId of presentationE
 	    List<CredentialPojoWrapper> credentialPojoWrapperlist = presentationE.getCredentialList();	   
 	    Map<Integer, ClaimPolicy> policyMap = presentationPolicyE.getPolicy();
-	    ResponseData<Boolean> verifyCptIdresult = 
+	    ErrorCode verifyCptIdresult = 
 	            this.verifyCptId(policyMap,credentialPojoWrapperlist);
-	    if (verifyCptIdresult.getErrorCode() != ErrorCode.SUCCESS.getCode() 
-	            || !verifyCptIdresult.getResult()) {
+	    if (verifyCptIdresult.getCode() != ErrorCode.SUCCESS.getCode()) {
 	        logger.error("[verify] verify cptId failed.");
-            return verifyCptIdresult;
+            return new ResponseData<Boolean>(false, verifyCptIdresult);
 	    }
 		
 	    for (CredentialPojoWrapper credentialPojoWrapper : credentialPojoWrapperlist) {
 	        //verify policy
-	        ResponseData<Boolean> verifypolicyResult = this.verifyPolicy(credentialPojoWrapper, 
-	            policyMap);
-	        if (verifypolicyResult.getErrorCode() != ErrorCode.SUCCESS.getCode() 
-	                || !verifypolicyResult.getResult()) {
+	    	Integer cptId = credentialPojoWrapper.getCredentialPojo().getCptId();
+	        ClaimPolicy claimPolicy = policyMap.get(cptId);
+	        ErrorCode verifypolicyResult = this.verifyPolicy(credentialPojoWrapper, claimPolicy);
+	        if (verifypolicyResult.getCode() != ErrorCode.SUCCESS.getCode()) {
 	            logger.error("[verify] verify policy {} failed.",policyMap);
-	            return verifypolicyResult;
+	            return new ResponseData<Boolean>(false, verifypolicyResult);
 	        }
 	    		
 	        //verify credential
@@ -343,64 +347,69 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
          }
 	}
 	
-    private ResponseData<Boolean> verifyCptId(Map<Integer, ClaimPolicy> policyMap,
-            List<CredentialPojoWrapper> credentialPojoWrapperlist){
-        if ( policyMap.size() != credentialPojoWrapperlist.size() ) {	    	
-            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_CPTID_NOTMATCH);
+    private ErrorCode verifyCptId(Map<Integer, ClaimPolicy> policyMap,
+            List<CredentialPojoWrapper> credentialPojoWrapperList){
+        if ( policyMap.size() > credentialPojoWrapperList.size() ) {	    	
+            return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
         } else {
-            for (CredentialPojoWrapper credentialPojoWrapper : credentialPojoWrapperlist) {	    		
-                if(!policyMap.containsKey(credentialPojoWrapper.getCredentialPojo().getCptId())) {
-                    return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_CPTID_NOTMATCH);
+            List<Integer> cptIdList = credentialPojoWrapperList.stream().map(
+                cpwl -> cpwl.getCredentialPojo().getCptId()).collect(Collectors.toList()); 
+            if (cptIdList == null || cptIdList.isEmpty()) {
+                return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
+            }
+            
+            for (Integer cptId : policyMap.keySet()) {	    		
+                if(!cptIdList.contains(cptId)) {
+                    return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
                 }
             }	
         }
-        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+        return ErrorCode.SUCCESS;
     }
     
-    private ResponseData<Boolean> verifyPolicy(CredentialPojoWrapper credentialPojoWrapper,
-		    Map<Integer, ClaimPolicy> policyMap) {
-        Map<String, Object> saltMap = credentialPojoWrapper.getSalt();
-		
-        Integer cptId = credentialPojoWrapper.getCredentialPojo().getCptId();
-        ClaimPolicy claimPolicy = policyMap.get(cptId);
-        String disclosure = claimPolicy.getFieldsToBeDisclosed();
-        Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
-		
+    private ErrorCode verifyDisclosureAndSalt(Map<String, Object> disclosureMap,Map<String, Object> saltMap){
         for (String disclosureK : disclosureMap.keySet()) {
             Object disclosureV = disclosureMap.get(disclosureK);
             Object saltV = saltMap.get(disclosureK);
-			
-            if (!((Integer) disclosureV).equals(
-                    CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
-                    && !((Integer) disclosureV).equals(
-                            CredentialFieldDisclosureValue.DISCLOSED.getStatus())){
-                logger.error("[verify] policy disclosureValue {} illegal.",policyMap);
-                return new ResponseData<Boolean>(false,
-                        ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);				 
-            }
-			
-            if (StringUtils.isEmpty(String.valueOf(saltV))) {
-                return new ResponseData<Boolean>(false,
-                        ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);
-            }
-            
-            if ((((Integer) disclosureV).equals(
-            		CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
-            		&& String.valueOf(saltV).length() > 1)
-        	    || (((Integer) disclosureV).equals(
-        	    		CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
-        	    		&& !((Integer) saltV).equals(
-        	    				CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()))) {
-                return new ResponseData<Boolean>(false,
-                		ErrorCode.CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE);
-            }
-
-            if (((Integer) disclosureV).equals(CredentialFieldDisclosureValue.DISCLOSED.getStatus()) 
-                    && String.valueOf(saltV).length() <= 1) {
-                return new ResponseData<Boolean>(false,
-                        ErrorCode.CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE);
+            if (disclosureV instanceof Map) {
+                this.verifyDisclosureAndSalt((HashMap) disclosureV,(HashMap) saltV);
+            } else {           	
+                if (!disclosureV.equals(
+                        CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
+                        && !disclosureV.equals(
+                                CredentialFieldDisclosureValue.DISCLOSED.getStatus())){
+                    logger.error("[verify] policy disclosureValue {} illegal.",disclosureMap);
+                    return ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL;				 
+                }
+            	
+                if (StringUtils.isEmpty(String.valueOf(saltV))) {
+                    return ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL;
+                }
+            	
+                if (( disclosureV.equals(
+                        CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
+                        && String.valueOf(saltV).length() > 1)
+                    || ( disclosureV.equals(
+                            CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()) 
+                            && !saltV.equals(
+                                    CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()))) {
+                    return ErrorCode.CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE;
+                }
+            	
+                if ( disclosureV.equals(CredentialFieldDisclosureValue.DISCLOSED.getStatus()) 
+                        && String.valueOf(saltV).length() <= 1) {
+                    return ErrorCode.CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE;
+                }
             }
         }
-        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+        return ErrorCode.SUCCESS;
+    }
+    
+    private ErrorCode verifyPolicy(CredentialPojoWrapper credentialPojoWrapper,
+        ClaimPolicy claimPolicy) {
+        Map<String, Object> saltMap = credentialPojoWrapper.getSalt();
+        String disclosure = claimPolicy.getFieldsToBeDisclosed();
+        Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
+        return this.verifyDisclosureAndSalt(disclosureMap,saltMap);
     }
 }
