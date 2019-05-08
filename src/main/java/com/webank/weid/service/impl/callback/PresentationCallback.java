@@ -20,7 +20,7 @@ public class PresentationCallback extends DirectRouteCallback {
     private static final Logger logger = 
             LoggerFactory.getLogger(PresentationCallback.class);
 
-    private static PresentationPolicyService policyService;
+    private PresentationPolicyService policyService;
     
     @Override
     public GetPolicyAndChallengeResponse onPush(GetPolicyAndChallengeArgs arg) {
@@ -47,7 +47,7 @@ public class PresentationCallback extends DirectRouteCallback {
         return response;
     }
 
-    public static void registPolicyService(PresentationPolicyService service) {
+    public void registPolicyService(PresentationPolicyService service) {
         policyService = service;
     }
 }
