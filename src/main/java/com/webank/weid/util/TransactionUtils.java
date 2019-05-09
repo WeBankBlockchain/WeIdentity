@@ -259,7 +259,7 @@ public class TransactionUtils {
         Map<String, Object> cptJsonSchemaMapNew = new HashMap<>();
         cptJsonSchemaMapNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
         cptJsonSchemaMapNew
-            .put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_OBJECT);
+            .put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
         cptJsonSchemaMapNew.putAll(cptJsonSchemaMapOld);
         return JsonUtil.objToJsonStr(cptJsonSchemaMapNew);
     }
