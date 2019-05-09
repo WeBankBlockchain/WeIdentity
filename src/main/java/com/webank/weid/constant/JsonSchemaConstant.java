@@ -25,22 +25,22 @@ public final class JsonSchemaConstant {
     /**
      * json schema: data type object.
      **/
-    public static final String DATE_TYPE_OBJECT = "object";
+    public static final String DATA_TYPE_OBJECT = "object";
 
     /**
      * json schema: data type string.
      **/
-    public static final String DATE_TYPE_STRING = "string";
+    public static final String DATA_TYPE_STRING = "string";
 
     /**
      * json schema: data type number.
      **/
-    public static final String DATE_TYPE_NUMBER = "number";
+    public static final String DATA_TYPE_NUMBER = "number";
 
     /**
      * json schema: data type enum.
      **/
-    public static final String DATE_TYPE_ENUM = "enum";
+    public static final String DATA_TYPE_ENUM = "enum";
 
     /**
      * json schema: title.
