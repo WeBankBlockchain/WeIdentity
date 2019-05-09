@@ -1,34 +1,16 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weidentity-java-sdk.
- *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package com.webank.weid.suite.transportation.json;
 
 import com.webank.weid.protocol.amop.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
+import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.transportation.Transportation;
+import com.webank.weid.suite.transportation.json.JsonTransportationService;
 
-/**
- * JSON协议的传输.
- * @author v_wbgyang
- *
- */
-public interface JsonTransportation {
+public class JsonTransportation {
+    
+    public static Transportation specifyVerifier(String weId) {
+        return newInstance().specifyVerifier(weId);
+    }
 
     /**
      * JSON协议传输序列化接口.
@@ -36,10 +18,12 @@ public interface JsonTransportation {
      * @param property 协议的配置对象
      * @return 返回协议字符串数据
      */
-    public <T extends JsonSerializer> ResponseData<String> serialize(
+    public static <T extends JsonSerializer> ResponseData<String> serialize(
         T object,
-        JsonProtocolProperty property
-    );
+        ProtocolProperty property
+    ) {
+        return newInstance().serialize(object, property);
+    }
 
     /**
      * JSON协议反序列化接口.
@@ -47,9 +31,13 @@ public interface JsonTransportation {
      * @param clazz 需要转换成的Class类型
      * @return 返回PresentationE对象数据
      */
-    public <T extends JsonSerializer> ResponseData<T> deserialize(
+    public static <T extends JsonSerializer> ResponseData<T> deserialize(
         String transString,
-        Class<T> clazz
-    );
+        Class<T> clazz) {
+        return newInstance().deserialize(transString, clazz);
+    }
     
+    private static Transportation newInstance() {
+        return new JsonTransportationService();
+    }
 }

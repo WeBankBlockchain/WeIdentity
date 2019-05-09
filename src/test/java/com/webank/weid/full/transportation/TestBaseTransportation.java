@@ -38,18 +38,15 @@ import com.webank.weid.protocol.base.CredentialPojoWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.suite.transportation.qr.QrCodeTransportation;
-import com.webank.weid.suite.transportation.qr.QrCodeTransportationService;
 
 public abstract class TestBaseTransportation extends TestBaseServcie {
-
-    protected QrCodeTransportation qrCodeTransportation = new QrCodeTransportationService();
 
     protected PersistenceApi dataDriver = new MysqlDriver();
 
     protected ResponseData<PresentationE> mockCipherDeserialize(ResponseData<String> response) {
-        MockUp<BaseService> mockBaseService = new MockUp<BaseService>() {
+        MockUp<AmopServiceImpl> mockBaseService = new MockUp<AmopServiceImpl>() {
             @Mock
             public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId, GetEncryptKeyArgs args) {
                 GetEncryptKeyResponse getEncryptKeyResponse = new GetEncryptKeyResponse();
@@ -61,7 +58,7 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
             }
         };
         ResponseData<PresentationE> wrapperRes =
-                qrCodeTransportation.deserialize(response.getResult(), PresentationE.class);
+                QrCodeTransportation.deserialize(response.getResult(), PresentationE.class);
         mockBaseService.tearDown();
         return wrapperRes;
     }

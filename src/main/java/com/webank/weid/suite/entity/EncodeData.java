@@ -43,6 +43,11 @@ public class EncodeData {
      * 待编解码字符串数据编号.
      */
     private String id;
+    
+    /**
+     * 协议数据指定用户
+     */
+    private String verifier;
    
     /**
      * 构建编解码对象.
@@ -50,9 +55,10 @@ public class EncodeData {
      * @param id 数据编号
      * @param data 需要编解码数据
      */
-    public EncodeData(String id, String orgId, String data) {
+    public EncodeData(String id, String orgId, String data, String verifier) {
         this.id = id;
         this.orgId = orgId;
         this.data = data;
+        this.verifier = verifier;
     }
 }

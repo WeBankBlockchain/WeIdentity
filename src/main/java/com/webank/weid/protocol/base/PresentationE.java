@@ -19,15 +19,14 @@
 
 package com.webank.weid.protocol.base;
 
-import com.webank.weid.protocol.amop.JsonSerializer;
+import com.webank.weid.protocol.amop.RawSerializer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
@@ -50,7 +49,7 @@ import com.webank.weid.util.WeIdUtils;
  */
 @Data
 @EqualsAndHashCode
-public class PresentationE implements JsonSerializer {
+public class PresentationE implements RawSerializer {
     
     private static final Logger logger = LoggerFactory.getLogger(PresentationE.class);
     
@@ -85,8 +84,6 @@ public class PresentationE implements JsonSerializer {
                 );
                 return null;
             }
-            // 处理proof数据
-            generateProof(challenge, weIdAuthentication);
             // 处理credentialList数据
             errorCode = processCredentialList(credentialList, presentationPolicyE);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
@@ -99,6 +96,8 @@ public class PresentationE implements JsonSerializer {
             }
             context.add(CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
             type.add(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
+            // 处理proof数据
+            generateProof(challenge, weIdAuthentication);
             return this;
         } catch (Exception e) {
             logger.error("create PresentationE error", e);
@@ -143,12 +142,10 @@ public class PresentationE implements JsonSerializer {
         if (presentationPolicyE == null || presentationPolicyE.getPolicy() == null) {
             return ErrorCode.PRESENTATION_POLICY_INVALID;
         }
-        Set<Integer> cptSet = new HashSet<>();
-        for (CredentialPojoWrapper credentialPojoWrapper : credentialList) {
-            cptSet.add(credentialPojoWrapper.getCredentialPojo().getCptId());
-        } 
+        List<Integer> cptIdList = credentialList.stream().map(
+                cpwl -> cpwl.getCredentialPojo().getCptId()).collect(Collectors.toList()); 
         Set<Integer> claimPolicyCptSet = presentationPolicyE.getPolicy().keySet();
-        if (!cptSet.containsAll(claimPolicyCptSet)) {
+        if (!cptIdList.containsAll(claimPolicyCptSet)) {
             return ErrorCode.PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY;
         }
         return ErrorCode.SUCCESS;
@@ -183,17 +180,17 @@ public class PresentationE implements JsonSerializer {
     }
     
     private void generateProof(Challenge challenge, WeIdAuthentication weIdAuthentication) {
-        
-       String signature = 
-           DataToolUtils.sign(
-               challenge.toRawData(), 
-               weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
-           );
+       
        proof = new HashMap<String, String>();
        proof.put(ParamKeyConstant.TYPE, WeIdConstant.DEFAULT_SIGN_TYPE);
        proof.put(ParamKeyConstant.CREATED, DateUtils.getTimestamp(new Date()));
        proof.put(ParamKeyConstant.VERIFICATION_METHOD, weIdAuthentication.getWeIdPublicKeyId());
        proof.put(ParamKeyConstant.NONCE, challenge.getNonce());
+       String signature = 
+           DataToolUtils.sign(
+               this.toRawData(), 
+               weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
+           );
        proof.put(ParamKeyConstant.SIGNATUREVALUE, signature);
     }
     

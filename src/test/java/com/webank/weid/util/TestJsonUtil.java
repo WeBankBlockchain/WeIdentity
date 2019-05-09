@@ -38,7 +38,7 @@ public class TestJsonUtil {
     public void testObjToJsonStr() {
 
         LinkedHashMap<String, Object> propertitesMap = new LinkedHashMap<String, Object>();
-        propertitesMap.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_STRING);
+        propertitesMap.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_STRING);
         propertitesMap.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is name");
 
         String propertites = JsonUtil.objToJsonStr(propertitesMap);

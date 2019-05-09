@@ -17,35 +17,25 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.transportation.qr.protocol;
-
-import com.webank.weid.suite.entity.EncodeProperty;
-import com.webank.weid.suite.entity.EncodeType;
-import com.webank.weid.suite.entity.QrCodeVersion;
+package com.webank.weid.suite.entity;
 
 /**
- * 协议属性配置.
+ * 编解码配置.
  * @author v_wbgyang
  *
  */
-public class QrCodeProtocolProperty extends EncodeProperty {
+public class ProtocolProperty {
     
     /**
-     * 协议默认版本.
+     * 协议编解码类型.
      */
-    private QrCodeVersion version = QrCodeVersion.V1;
+    private EncodeType encodeType;
 
-    public QrCodeVersion getVersion() {
-        return version;
-    }
-
-    public QrCodeProtocolProperty(EncodeType encodeType) {
-        super(encodeType);
+    public EncodeType getEncodeType() {
+        return encodeType;
     }
     
-    @Override
-    public String toString() {
-        return "QrCodeProtocolProperty [version=" + version + ",encodeType=" 
-            + super.getEncodeType().getCode() + "]";
-    } 
+    public ProtocolProperty(EncodeType encodeType) {
+        this.encodeType = encodeType;
+    }
 }

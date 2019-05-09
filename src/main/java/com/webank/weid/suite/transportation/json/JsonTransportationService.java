@@ -33,9 +33,10 @@ import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
 import com.webank.weid.suite.entity.EncodeType;
 import com.webank.weid.suite.entity.JsonVersion;
+import com.webank.weid.suite.entity.ProtocolProperty;
 import com.webank.weid.suite.transportation.AbstractTransportation;
+import com.webank.weid.suite.transportation.Transportation;
 import com.webank.weid.suite.transportation.json.protocol.JsonBaseData;
-import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
 
@@ -45,17 +46,19 @@ import com.webank.weid.util.JsonUtil;
  * @author v_wbgyang
  *
  */
-public class JsonTransportationService
+class JsonTransportationService
     extends AbstractTransportation
-    implements JsonTransportation {
+    implements Transportation {
 
     private static final Logger logger = 
         LoggerFactory.getLogger(JsonTransportationService.class);
     
+    private static final JsonVersion version = JsonVersion.V1;
+    
     @Override
     public <T extends JsonSerializer> ResponseData<String> serialize(
         T object,
-        JsonProtocolProperty property) {
+        ProtocolProperty property) {
 
         logger.info(
             "begin to execute JsonTransportationService serialization, property:{}.",
@@ -77,6 +80,7 @@ public class JsonTransportationService
         try {
             // 构建JSON协议数据
             JsonBaseData jsonBaseData = buildJsonData(property);
+            jsonBaseData.setVerifier(super.getVerifier());
             logger.info("encode by {}.", property.getEncodeType().name());
             // 如果是原文方式，则直接放对象,data为对象类型
             if (property.getEncodeType() == EncodeType.ORIGINAL) {
@@ -88,7 +92,8 @@ public class JsonTransportationService
                     new EncodeData(
                         jsonBaseData.getId(),
                         jsonBaseData.getOrgId(),
-                        object.toJson()
+                        object.toJson(),
+                        jsonBaseData.getVerifier()
                     );
                 
                 String data = 
@@ -140,7 +145,8 @@ public class JsonTransportationService
                 new EncodeData(
                     jsonBaseData.getId(),
                     jsonBaseData.getOrgId(),
-                    jsonBaseData.getData().toString()
+                    jsonBaseData.getData().toString(),
+                    jsonBaseData.getVerifier()
                 );
             //根据编解码类型获取编解码枚举对象
             EncodeType encodeType = 
@@ -172,12 +178,12 @@ public class JsonTransportationService
      * @param property 协议配置对象
      * @return 返回协议实体对象
      */
-    private JsonBaseData buildJsonData(JsonProtocolProperty property) {
+    private JsonBaseData buildJsonData(ProtocolProperty property) {
         JsonBaseData jsonBaseData = new JsonBaseData();
         jsonBaseData.setEncodeType(property.getEncodeType().getCode());
         jsonBaseData.setId(DataToolUtils.getUuId32());
         jsonBaseData.setOrgId(fromOrgId);
-        jsonBaseData.setVersion(property.getVersion().getCode());
+        jsonBaseData.setVersion(version.getCode());
         return jsonBaseData;
     }
     
