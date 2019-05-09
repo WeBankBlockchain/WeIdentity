@@ -38,8 +38,9 @@ import com.webank.weid.suite.crypto.CryptService;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.EncodeType;
+import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.transportation.qr.QrCodeTransportation;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
-import com.webank.weid.suite.transportation.qr.protocol.QrCodeProtocolProperty;
 
 /**
  * 二维码协议序列化测试.
@@ -63,9 +64,9 @@ public class TestSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase1() {
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.ORIGINAL)
+                new ProtocolProperty(EncodeType.ORIGINAL)
             );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -78,9 +79,9 @@ public class TestSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase2() {
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.CIPHER)
+                new ProtocolProperty(EncodeType.CIPHER)
             );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -93,7 +94,7 @@ public class TestSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase3() {
         ResponseData<String> response =
-            qrCodeTransportation.serialize(presentation, null);
+            QrCodeTransportation.serialize(presentation, null);
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR.getCode(),
@@ -108,7 +109,7 @@ public class TestSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase4() {
         ResponseData<String> response =
-            qrCodeTransportation.serialize(presentation, new QrCodeProtocolProperty(null));
+            QrCodeTransportation.serialize(presentation, new ProtocolProperty(null));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
@@ -124,9 +125,9 @@ public class TestSerialize extends TestBaseTransportation {
     public void testSerializeCase5() {
         PresentationE presentation = null;
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.ORIGINAL)
+                new ProtocolProperty(EncodeType.ORIGINAL)
             );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
@@ -144,9 +145,9 @@ public class TestSerialize extends TestBaseTransportation {
         PresentationE presentation = this.getPresentationE();
         presentation.getContext().add("value|v");
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.ORIGINAL)
+                new ProtocolProperty(EncodeType.ORIGINAL)
             );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
@@ -170,9 +171,9 @@ public class TestSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.CIPHER)
+                new ProtocolProperty(EncodeType.CIPHER)
             );
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
@@ -197,9 +198,9 @@ public class TestSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation, 
-                new QrCodeProtocolProperty(EncodeType.CIPHER)
+                new ProtocolProperty(EncodeType.CIPHER)
             );
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
@@ -224,9 +225,9 @@ public class TestSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.CIPHER)
+                new ProtocolProperty(EncodeType.CIPHER)
             );
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
