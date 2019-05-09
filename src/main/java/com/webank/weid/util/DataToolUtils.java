@@ -24,6 +24,17 @@ import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.core.report.ProcessingMessage;
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.main.JsonSchema;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
@@ -36,17 +47,6 @@ import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.report.ProcessingMessage;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchema;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.AuthenticationProperty;
@@ -56,16 +56,14 @@ import com.webank.weid.protocol.response.RsvSignature;
 
 /**
  * @author tonychen 2019年4月23日
- *
  */
 public final class DataToolUtils {
 
-	private static final Logger logger = LoggerFactory.getLogger(DataToolUtils.class);
-	private static ObjectMapper objectMapper = new ObjectMapper();
-	
-	private static final String SEPARATOR_CHAR = "-";
-	
-	/**
+    private static final Logger logger = LoggerFactory.getLogger(DataToolUtils.class);
+    private static final String SEPARATOR_CHAR = "-";
+    private static ObjectMapper objectMapper = new ObjectMapper();
+
+    /**
      * Keccak-256 hash function.
      *
      * @param hexInput hex encoded input data with optional 0x prefix
@@ -74,10 +72,11 @@ public final class DataToolUtils {
     public static String sha3(String hexInput) {
         return Hash.sha3(hexInput);
     }
-    
+
     public static String getHash(String hexInput) {
-    	return sha3(hexInput);
+        return sha3(hexInput);
     }
+
     /**
      * Sha 3.
      *
@@ -87,28 +86,29 @@ public final class DataToolUtils {
     public static byte[] sha3(byte[] input) {
         return Hash.sha3(input, 0, input.length);
     }
-    
+
     /**
      * generate random string
+     *
      * @return random string
      */
-	public static String getRandomSalt() {
+    public static String getRandomSalt() {
 
-		String length = PropertyUtils.getProperty("salt.length");
-		int saltLength = Integer.valueOf(length);
-		String base = "abcdefghijklmnopqrstuvwxyz0123456789";
-		int randomNum;
-		char randomChar;
-		Random random = new Random();
-		StringBuffer str = new StringBuffer();
+        String length = PropertyUtils.getProperty("salt.length");
+        int saltLength = Integer.valueOf(length);
+        String base = "abcdefghijklmnopqrstuvwxyz0123456789";
+        int randomNum;
+        char randomChar;
+        Random random = new Random();
+        StringBuffer str = new StringBuffer();
 
-		for (int i = 0; i < saltLength; i++) {
-			randomNum = random.nextInt(base.length());
-			randomChar = base.charAt(randomNum);
-			str.append(randomChar);
-		}
-		return str.toString();
-	}
+        for (int i = 0; i < saltLength; i++) {
+            randomNum = random.nextInt(base.length());
+            randomChar = base.charAt(randomNum);
+            str.append(randomChar);
+        }
+        return str.toString();
+    }
 
     /**
      * serialize a class instance to Json String.
@@ -129,7 +129,7 @@ public final class DataToolUtils {
         }
         return write.toString();
     }
-    
+
     /**
      * deserialize a JSON String to an class instance.
      *
@@ -149,14 +149,13 @@ public final class DataToolUtils {
         return (T) object;
     }
 
-    
+
     /**
      * 对象深度复制(对象必须是实现了Serializable接口)
      *
-     * @param obj
      * @return T
      * @author tonychen
-     * @date 2019/4/18 
+     * @date 2019/4/18
      */
     @SuppressWarnings("unchecked")
     public static <T extends Serializable> T clone(T obj) {
@@ -176,8 +175,8 @@ public final class DataToolUtils {
         }
         return clonedObj;
     }
-    
-    
+
+
     /**
      * Load Json Object. Can be used to return both Json Data and Json Schema.
      *
@@ -244,7 +243,7 @@ public final class DataToolUtils {
             && isValidJsonSchema(cptJsonSchema)
             && cptJsonSchema.length() <= WeIdConstant.JSON_SCHEMA_MAX_LENGTH;
     }
-    
+
     /**
      * Generate a new Key-pair.
      *
@@ -287,7 +286,7 @@ public final class DataToolUtils {
         ECKeyPair keyPair = new ECKeyPair(privateKey, publicKeyFromPrivate(privateKey));
         return Sign.signMessage(sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
     }
-    
+
     /**
      * Sign a object based on the given privateKey in Decimal String BigInt.
      *
@@ -343,7 +342,7 @@ public final class DataToolUtils {
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
     }
-    
+
     /**
      * Verify whether the message and the Signature matches the given public Key.
      *
@@ -358,7 +357,7 @@ public final class DataToolUtils {
         String signature,
         BigInteger publicKey)
         throws SignatureException {
-        
+
         Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
@@ -484,7 +483,7 @@ public final class DataToolUtils {
         Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
         return verifySignatureFromWeId(rawData, signatureData, weIdDocument);
     }
-    
+
     /**
      * Verify a signature based on the provided raw data, and the WeID Document from chain. This
      * will traverse each public key in the WeID Document and fetch all keys which belongs to the
@@ -561,18 +560,19 @@ public final class DataToolUtils {
             base64Decode(base64Signature.getBytes(StandardCharsets.UTF_8))
         );
     }
-    
+
     /**
      * Get the UUID and remove the '-'.
+     *
      * @return return the UUID of the length is 32
      */
     public static String getUuId32() {
-        return UUID.randomUUID().toString().replaceAll(SEPARATOR_CHAR, StringUtils.EMPTY);   
+        return UUID.randomUUID().toString().replaceAll(SEPARATOR_CHAR, StringUtils.EMPTY);
     }
-    
+
     /**
      * Compress JSON String.
-     * 
+     *
      * @param arg the compress string
      * @return return the value of compressed
      */
@@ -596,7 +596,7 @@ public final class DataToolUtils {
 
     /**
      * Decompression of String data.
-     * 
+     *
      * @param arg String data with decompression
      * @return return the value of decompression
      */
@@ -634,7 +634,7 @@ public final class DataToolUtils {
             }
         }
     }
-    
+
     private static void close(InputStream is) {
         if (is != null) {
             try {

@@ -63,50 +63,44 @@ import com.webank.weid.util.PropertyUtils;
  */
 public abstract class BaseService {
 
-    private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
-
-    protected static final ApplicationContext context;
-
-    private static Credentials credentials;
-
-    private static Web3j web3j;
-    
-    private static Service service;
-    
-    
-    /* 
+    /*
      * 链上链下最大超时时间
      * unit : millisecond
      */
-    public static final int MAX_DIRECT_ROUTE_REQUEST_TIMEOUT = 50000;
-    
-    public static final int DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT = 5000;
+    public static final int MAX_AMOP_REQUEST_TIMEOUT = 50000;
+    public static final int AMOP_REQUEST_TIMEOUT = Integer
+        .valueOf(PropertyUtils.getProperty("amop.request.timeout", "5000"));
+    protected static final ApplicationContext context;
+    private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
+    protected static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
+    private static Credentials credentials;
+    private static Web3j web3j;
+    private static Service service;
 
     static {
         context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        service = context.getBean(Service.class);  
+        service = context.getBean(Service.class);
     }
-    
-    protected static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
-    
+
     public BaseService() {
-    	if(web3j == null) {
-    		initWeb3j();
-    	}
+        if (web3j == null) {
+            initWeb3j();
+        }
     }
+
     protected static Service getService() {
-    	return service;
+        return service;
     }
-    
+
     private static boolean initWeb3j() {
-    	
+
 //        Service service = context.getBean(Service.class);
         //initialize amop
-		if (!initAmop(service)) {
-        	logger.error("[BaseService] initialize amop failed.");
-        	return false;
+        if (!initAmop(service)) {
+            logger.error("[BaseService] initialize amop failed.");
+            return false;
         }
-        
+
         try {
             service.run();
         } catch (Exception e) {
@@ -124,24 +118,25 @@ public abstract class BaseService {
     }
 
     private static boolean initAmop(Service service) {
-    	
+
         String orgId = PropertyUtils.getProperty("blockchain.orgId");
-        
+
         OnNotifyCallback pushCallBack = new OnNotifyCallback();
         service.setPushCallback(pushCallBack);
         pushCallBack.registAmopCallback(
-            AmopMsgType.GET_ENCRYPT_KEY.getValue(), 
+            AmopMsgType.GET_ENCRYPT_KEY.getValue(),
             new KeyManagerCallback()
         );
-        
-    	//设置topic，支持多个topic
-		List<String> topics = new ArrayList<String>();
-		topics.add(orgId);
-		service.setTopics(topics);
-		
-		return true;
-		
+
+        //设置topic，支持多个topic
+        List<String> topics = new ArrayList<String>();
+        topics.add(orgId);
+        service.setTopics(topics);
+
+        return true;
+
     }
+
     /**
      * Inits the credentials.
      *
@@ -172,8 +167,9 @@ public abstract class BaseService {
     }
 
     protected static String getSeq() {
-    	return service.newSeq();
+        return service.newSeq();
     }
+
     private static Object loadContract(
         String contractAddress,
         Credentials credentials,
@@ -270,40 +266,40 @@ public abstract class BaseService {
         }
         return (Contract) contract;
     }
-    
-	public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(String toOrgId,
-	    CheckAmopMsgHealthArgs arg) {
-		
-        return this.getImpl(
-                fromOrgId,
-                toOrgId,
-                arg,
-                CheckAmopMsgHealthArgs.class,
-                AmopNotifyMsgResult.class,
-                AmopMsgType.TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH,
-                DEFAULT_DIRECT_ROUTE_REQUEST_TIMEOUT
-        );
-	}
 
-	protected <T, F extends AmopBaseMsgArgs> ResponseData<T> getImpl(
-            String fromOrgId,
-            String toOrgId,
-            F arg,
-            Class<F> argsClass,
-            Class<T> resultClass,
-            AmopMsgType msgType,
-            int timeOut
+    public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(String toOrgId,
+        CheckAmopMsgHealthArgs arg) {
+
+        return this.getImpl(
+            fromOrgId,
+            toOrgId,
+            arg,
+            CheckAmopMsgHealthArgs.class,
+            AmopNotifyMsgResult.class,
+            AmopMsgType.TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH,
+            AMOP_REQUEST_TIMEOUT
+        );
+    }
+
+    protected <T, F extends AmopBaseMsgArgs> ResponseData<T> getImpl(
+        String fromOrgId,
+        String toOrgId,
+        F arg,
+        Class<F> argsClass,
+        Class<T> resultClass,
+        AmopMsgType msgType,
+        int timeOut
     ) {
-        
+
         arg.setFromOrgId(fromOrgId);
         arg.setToOrgId(toOrgId);
 
         ChannelRequest request = new ChannelRequest();
-        if (timeOut > MAX_DIRECT_ROUTE_REQUEST_TIMEOUT || timeOut < 0) {
-        	request.setTimeout(MAX_DIRECT_ROUTE_REQUEST_TIMEOUT);
+        if (timeOut > MAX_AMOP_REQUEST_TIMEOUT || timeOut < 0) {
+            request.setTimeout(MAX_AMOP_REQUEST_TIMEOUT);
             logger.error("invalid timeOut : {}", timeOut);
-        }else {
-        	request.setTimeout(timeOut);
+        } else {
+            request.setTimeout(timeOut);
         }
         request.setToTopic(toOrgId);
         request.setMessageID(getSeq());
@@ -314,20 +310,21 @@ public abstract class BaseService {
         amopRequestBody.setMsgType(msgType);
         amopRequestBody.setMsgBody(msgBody);
         String requestBodyStr = DataToolUtils.serialize(amopRequestBody);
-        logger.info("direct route request, seq : {}, body ：{}", request.getMessageID(), requestBodyStr);
+        logger.info("direct route request, seq : {}, body ：{}", request.getMessageID(),
+            requestBodyStr);
         request.setContent(requestBodyStr);
 
         ChannelResponse response = getService().sendChannelMessage2(request);
         logger.info("direct route response, seq : {}, errorCode : {}, body : {}",
-                response.getMessageID(),
-                response.getErrorCode(),
-                response.getContent()
+            response.getMessageID(),
+            response.getErrorCode(),
+            response.getContent()
         );
         ResponseData<T> responseStruct = new ResponseData<>();
 
         responseStruct.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         if (102 == response.getErrorCode()) {
-        	responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_REQUEST_TIMEOUT);
+            responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_REQUEST_TIMEOUT);
 //            return responseStruct;
         } else if (0 != response.getErrorCode()) {
             responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_BASE_ERROR);
@@ -336,10 +333,10 @@ public abstract class BaseService {
 //        T msgBodyObj = DirectRouteBodyParser.deserialize(response.getContent(), resultClass);
         T msgBodyObj = DataToolUtils.deserialize(response.getContent(), resultClass);
         if (null == msgBodyObj) {
-        	responseStruct.setErrorCode(ErrorCode.UNKNOW_ERROR);
-		}
-		responseStruct.setResult(msgBodyObj);
-		return responseStruct;
+            responseStruct.setErrorCode(ErrorCode.UNKNOW_ERROR);
+        }
+        responseStruct.setResult(msgBodyObj);
+        return responseStruct;
     }
 
 }
