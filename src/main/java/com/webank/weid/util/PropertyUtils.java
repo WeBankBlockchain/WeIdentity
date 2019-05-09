@@ -68,4 +68,13 @@ public final class PropertyUtils {
         return prop.getProperty(key);
     }
 
+    
+    /**
+     * get property value by specific key.
+     *
+     * @param key property key
+     */
+    public static String getProperty(String key, String defaultValue) {
+        return prop.getProperty(key, defaultValue);
+    }
 }
