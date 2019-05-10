@@ -149,7 +149,6 @@ public final class DataToolUtils {
         return (T) object;
     }
 
-
     /**
      * 对象深度复制(对象必须是实现了Serializable接口)
      *
@@ -175,7 +174,6 @@ public final class DataToolUtils {
         }
         return clonedObj;
     }
-
 
     /**
      * Load Json Object. Can be used to return both Json Data and Json Schema.
@@ -299,12 +297,10 @@ public final class DataToolUtils {
         String privateKeyString) {
 
         Sign.SignatureData sigData = signMessage(rawData, privateKeyString);
-        String signature =
-            new String(
-                base64Encode(simpleSignatureSerialization(sigData)),
-                StandardCharsets.UTF_8
-            );
-        return signature;
+        return new String(
+            base64Encode(simpleSignatureSerialization(sigData)),
+            StandardCharsets.UTF_8
+        );
     }
 
     /**

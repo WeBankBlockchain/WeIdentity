@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,13 +17,25 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.protocol.cpt;
 
-import com.webank.weid.util.JsonUtil;
+import lombok.Data;
 
-public interface JsonSerializer {
+/**
+ * Api endpoint address disclosure
+ *
+ * Created by Junqi Zhang on 2019/4/9.
+ */
+@Data
+public class Cpt105 {
 
-   default public String toJson() {
-       return JsonUtil.objToJsonStrWithNoPretty(this);
-   }
+    private String ownerWeId;
+
+    private String url;
+
+    private String port;
+
+    private Integer policyId;
+
+    private String orgId;
 }

@@ -17,15 +17,11 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base.cpt;
-
+package com.webank.weid.protocol.amop;
 
 /**
- * Created by Junqi Zhang on 2019/4/3.
+ * 结果
  */
-public class Cpt11 {
+public interface IResult {
 
-    Integer cptId;
-    String userId;
-    String userName;
 }

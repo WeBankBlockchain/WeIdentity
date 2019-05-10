@@ -2,7 +2,6 @@ package com.webank.weid.protocol.amop;
 
 
 import com.webank.weid.constant.AmopMsgType;
-import com.webank.weid.protocol.base.IArgs;
 
 import lombok.Data;
 
