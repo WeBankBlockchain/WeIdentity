@@ -869,7 +869,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private boolean verifySetAuthenticationArgs(SetAuthenticationArgs setAuthenticationArgs) {
 
         return !(setAuthenticationArgs == null
-            || setAuthenticationArgs.getType() == null
             || setAuthenticationArgs.getUserWeIdPrivateKey() == null
             || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey()));
     }
