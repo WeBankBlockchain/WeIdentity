@@ -37,8 +37,9 @@ import com.webank.weid.suite.crypto.CryptService;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.EncodeType;
+import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.transportation.qr.QrCodeTransportation;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
-import com.webank.weid.suite.transportation.qr.protocol.QrCodeProtocolProperty;
 
 /**
  * 二维码协议反序列化测试.
@@ -58,9 +59,9 @@ public class TestDeserialize extends TestBaseTransportation {
         if (presentation == null) {
             presentation = this.getPresentationE();
             original_transString = 
-                qrCodeTransportation.serialize(
+                QrCodeTransportation.serialize(
                     presentation, 
-                    new QrCodeProtocolProperty(EncodeType.ORIGINAL)
+                    new ProtocolProperty(EncodeType.ORIGINAL)
                 ).getResult();
         } 
     }
@@ -71,12 +72,12 @@ public class TestDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserializeCase1() {
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.ORIGINAL)
+                new ProtocolProperty(EncodeType.ORIGINAL)
             );
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(response.getResult(), PresentationE.class);
+            QrCodeTransportation.deserialize(response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
         Assert.assertEquals(presentation, wrapperRes.getResult());
@@ -88,9 +89,9 @@ public class TestDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserializeCase2() {
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.CIPHER)
+                new ProtocolProperty(EncodeType.CIPHER)
             );
         ResponseData<PresentationE> wrapperRes = super.mockCipherDeserialize(response);
         LogUtil.info(logger, "deserialize", wrapperRes);
@@ -107,7 +108,7 @@ public class TestDeserialize extends TestBaseTransportation {
     public void testDeserializeCase3() {
         String transString = null;
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(transString, PresentationE.class);
+            QrCodeTransportation.deserialize(transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
@@ -123,7 +124,7 @@ public class TestDeserialize extends TestBaseTransportation {
     public void testDeserializeCase4() {
         String transString = null;
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(transString, PresentationE.class);
+            QrCodeTransportation.deserialize(transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
@@ -139,7 +140,7 @@ public class TestDeserialize extends TestBaseTransportation {
     public void testDeserializeCase5() {
         String transString = "abcd";
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(transString, PresentationE.class);
+            QrCodeTransportation.deserialize(transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
@@ -155,7 +156,7 @@ public class TestDeserialize extends TestBaseTransportation {
     public void testDeserializeCase6() {
         String trans = changeTransString(original_transString, 1, "ab");
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(trans, PresentationE.class);
+            QrCodeTransportation.deserialize(trans, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_VERSION_ERROR.getCode(),
@@ -171,7 +172,7 @@ public class TestDeserialize extends TestBaseTransportation {
     public void testDeserializeCase7() {
         String trans = changeTransString(original_transString, 2, "ab");
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(trans, PresentationE.class);
+            QrCodeTransportation.deserialize(trans, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
@@ -185,9 +186,9 @@ public class TestDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase8() {
-        String trans = changeTransString(original_transString, 5, "ab");
+        String trans = changeTransString(original_transString, 6, "ab");
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(trans, PresentationE.class);
+            QrCodeTransportation.deserialize(trans, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.DATA_TYPE_CASE_ERROR.getCode(),
@@ -203,7 +204,7 @@ public class TestDeserialize extends TestBaseTransportation {
     public void testDeserializeCase9() {
         String trans = original_transString + "|" + "ab";
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(trans, PresentationE.class);
+            QrCodeTransportation.deserialize(trans, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
@@ -219,9 +220,9 @@ public class TestDeserialize extends TestBaseTransportation {
     public void testDeserializeCase10() {
         
         ResponseData<String> response =
-            qrCodeTransportation.serialize(
+            QrCodeTransportation.serialize(
                 presentation,
-                new QrCodeProtocolProperty(EncodeType.CIPHER)
+                new ProtocolProperty(EncodeType.CIPHER)
             );
         
         MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
@@ -254,7 +255,7 @@ public class TestDeserialize extends TestBaseTransportation {
         };
         
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(original_transString, PresentationE.class);
+            QrCodeTransportation.deserialize(original_transString, PresentationE.class);
         mockTest.tearDown();
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
@@ -281,7 +282,7 @@ public class TestDeserialize extends TestBaseTransportation {
         };
         
         ResponseData<PresentationE> wrapperRes =
-            qrCodeTransportation.deserialize(original_transString, PresentationE.class);
+            QrCodeTransportation.deserialize(original_transString, PresentationE.class);
         mockTest.tearDown();
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(

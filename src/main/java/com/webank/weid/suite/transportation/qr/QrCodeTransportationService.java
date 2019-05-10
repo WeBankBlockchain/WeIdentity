@@ -32,10 +32,11 @@ import com.webank.weid.protocol.amop.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
+import com.webank.weid.suite.entity.ProtocolProperty;
 import com.webank.weid.suite.entity.QrCodeVersion;
 import com.webank.weid.suite.transportation.AbstractTransportation;
+import com.webank.weid.suite.transportation.Transportation;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
-import com.webank.weid.suite.transportation.qr.protocol.QrCodeProtocolProperty;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeVersion1;
 import com.webank.weid.util.JsonUtil;
 
@@ -44,12 +45,14 @@ import com.webank.weid.util.JsonUtil;
  * @author v_wbgyang
  *
  */
-public class QrCodeTransportationService
+class QrCodeTransportationService
     extends AbstractTransportation
-    implements QrCodeTransportation {
+    implements Transportation {
 
     private static final Logger logger = 
         LoggerFactory.getLogger(QrCodeTransportationService.class);
+    
+    private static final QrCodeVersion version = QrCodeVersion.V1;
     
     /**
      * 支持的协议版本配置.
@@ -64,7 +67,7 @@ public class QrCodeTransportationService
     @Override
     public <T extends JsonSerializer> ResponseData<String> serialize(
         T object, 
-        QrCodeProtocolProperty property) {
+        ProtocolProperty property) {
         
         logger.info(
             "begin to execute QrCodeTransportationService serialization, property:{}",
@@ -86,7 +89,7 @@ public class QrCodeTransportationService
             // 根据协议版本生成协议实体对象
             QrCodeBaseData qrCodeData = 
                 QrCodeBaseData.newInstance(
-                    protocol_version_map.get(property.getVersion().name())
+                    protocol_version_map.get(version.name())
                 );
             // 构建协议header
             qrCodeData.buildQrCodeData(
@@ -98,7 +101,8 @@ public class QrCodeTransportationService
                 new EncodeData(
                     qrCodeData.getId(),
                     qrCodeData.getOrgId(),
-                    object.toJson()
+                    object.toJson(),
+                    qrCodeData.getVerifier()
                 );
             logger.info("encode by {}.", property.getEncodeType().name());
             // 进行编码处理
@@ -135,7 +139,12 @@ public class QrCodeTransportationService
             //将协议字符串构建成协议对象
             qrCodeData.buildData(transString);
             EncodeData encodeData = 
-                new EncodeData(qrCodeData.getId(), qrCodeData.getOrgId(), qrCodeData.getData());
+                new EncodeData(
+                    qrCodeData.getId(),
+                    qrCodeData.getOrgId(),
+                    qrCodeData.getData(),
+                    qrCodeData.getVerifier()
+                );
             logger.info("encode by {}.", qrCodeData.getEncodeType().name());
             //进行解码处理
             String data = 

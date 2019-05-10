@@ -203,7 +203,6 @@ public enum ErrorCode {
      */
     CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM(100427, "credential disclosure format does not match claim"),
     
-    
     /**
      * The credential evidence id mismatch.
      */
@@ -242,7 +241,7 @@ public enum ErrorCode {
     PRESENTATION_CHALLENGE_INVALID(100600, "the challenge is invalid."),
     
     /**
-     * The weId of challenge don't match the user's weId.
+     * The weId of challenge does not match the user's weId.
      */
     PRESENTATION_CHALLENGE_WEID_MISMATCH(100601, "the weId of challenge does not match the user's weId."),
     
@@ -263,6 +262,11 @@ public enum ErrorCode {
      * the publicKeyId is invalid.
      */
     PRESENTATION_WEID_PUBLICKEY_ID_INVALID(100604, "the publicKeyId is invalid."),
+    
+    /**
+     * The nonce of challenge does not match the nonce of presentation.
+     */
+    PRESENTATION_CHALLENGE_NONCE_MISMATCH(100605, "the nonce of challenge does not match the nonce of presentation."),
     
     /**
      * the encrypt key is not exists.
