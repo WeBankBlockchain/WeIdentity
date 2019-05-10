@@ -156,16 +156,16 @@ public class TestBaseUtil {
         cptJsonSchemaNew.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is a cpt template");
 
         HashMap<String, Object> propertitesMap1 = new HashMap<String, Object>(2);
-        propertitesMap1.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_STRING);
+        propertitesMap1.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_STRING);
         propertitesMap1.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is name");
 
         String[] genderEnum = {"F", "M"};
         HashMap<String, Object> propertitesMap2 = new HashMap<String, Object>(2);
-        propertitesMap2.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_STRING);
-        propertitesMap2.put(JsonSchemaConstant.DATE_TYPE_ENUM, genderEnum);
+        propertitesMap2.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_STRING);
+        propertitesMap2.put(JsonSchemaConstant.DATA_TYPE_ENUM, genderEnum);
 
         HashMap<String, Object> propertitesMap3 = new HashMap<String, Object>(2);
-        propertitesMap3.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_NUMBER);
+        propertitesMap3.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_NUMBER);
         propertitesMap3.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is age");
 
         HashMap<String, Object> cptJsonSchema = new HashMap<String, Object>(3);
