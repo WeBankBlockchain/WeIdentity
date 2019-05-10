@@ -17,25 +17,13 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base.cpt;
-
-import lombok.Data;
+package com.webank.weid.protocol.cpt;
 
 /**
- * Api endpoint address disclosure
+ * Credential for Challenge
  *
  * Created by Junqi Zhang on 2019/4/9.
  */
-@Data
-public class Cpt105 {
+public class Cpt102 {
 
-    private String ownerWeId;
-
-    private String url;
-
-    private String port;
-
-    private Integer policyId;
-
-    private String orgId;
 }

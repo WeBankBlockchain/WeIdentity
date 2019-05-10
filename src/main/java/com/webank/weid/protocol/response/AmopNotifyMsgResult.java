@@ -19,7 +19,7 @@
 
 package com.webank.weid.protocol.response;
 
-import com.webank.weid.protocol.base.IResult;
+import com.webank.weid.protocol.amop.IResult;
 import lombok.Data;
 
 /**

@@ -19,7 +19,7 @@
 
 package com.webank.weid.suite.transportation.json;
 
-import com.webank.weid.protocol.base.JsonSerializer;
+import com.webank.weid.protocol.amop.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.transportation.json.protocol.JsonProtocolProperty;
 
