@@ -30,6 +30,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.ProtocolSuiteException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.suite.entity.EncodeType;
+import com.webank.weid.suite.entity.ProtocolProperty;
 import com.webank.weid.suite.entity.QrCodeVersion;
 
 /**
@@ -75,6 +76,11 @@ public abstract class QrCodeBaseData {
      * 协议负载数据编码.
      */
     private String id;
+    
+    /**
+     * 协议数据所指定的用户.
+     */
+    private String verifier;
 
     /**
      * 协议负载.
@@ -95,6 +101,10 @@ public abstract class QrCodeBaseData {
         return extendData != null ? extendData : "?";
     }
 
+    public String getVerifier() {
+        return verifier != null ? verifier : "?";
+    }
+    
     /**
      * get TransString of Meta.
      * @return
@@ -104,7 +114,7 @@ public abstract class QrCodeBaseData {
     }
     
     public abstract void buildQrCodeData(
-        QrCodeProtocolProperty protocol, 
+        ProtocolProperty protocol, 
         String orgId
     );
     
