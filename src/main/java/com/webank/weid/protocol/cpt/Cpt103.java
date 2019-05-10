@@ -17,13 +17,19 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base.cpt;
+package com.webank.weid.protocol.cpt;
+
+import com.webank.weid.protocol.base.Challenge;
 
 /**
- * Credential for Challenge
+ * Credential for authentication. The answer to meet the challenge. We package the answer into a
+ * Credential(CPT104) so the verifier can verify this answer.
  *
  * Created by Junqi Zhang on 2019/4/9.
  */
-public class Cpt102 {
+public class Cpt103 {
 
+    private Challenge challenge;
+
+    private String proof;
 }

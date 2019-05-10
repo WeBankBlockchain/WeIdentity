@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,11 +17,13 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.protocol.amop;
 
-public interface RawSerializer extends JsonSerializer {
-    
-    default public String toRawData() {
-        return toJson();
-    } 
+import com.webank.weid.util.JsonUtil;
+
+public interface JsonSerializer {
+
+   default public String toJson() {
+       return JsonUtil.objToJsonStrWithNoPretty(this);
+   }
 }

@@ -23,7 +23,6 @@ package com.webank.weid.protocol.amop;
 //import cn.webank.blockchain.spi.common.annoation.BlockChainDTO.BindTypeEnum;
 import com.webank.weid.annoation.BlockChainDTO;
 import com.webank.weid.annoation.BlockChainDTO.BindTypeEnum;
-import com.webank.weid.protocol.base.IArgs;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

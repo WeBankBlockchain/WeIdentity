@@ -19,6 +19,7 @@
 
 package com.webank.weid.protocol.base;
 
+import com.webank.weid.protocol.amop.JsonSerializer;
 import java.util.Map;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
