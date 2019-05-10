@@ -239,7 +239,6 @@ public class TestBaseUtil {
         SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
         setAuthenticationArgs.setWeId(createWeId.getWeId());
         setAuthenticationArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-        setAuthenticationArgs.setType(TestData.AUTHENTICATION_TYPE);
         setAuthenticationArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
         setAuthenticationArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
