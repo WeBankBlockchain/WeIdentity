@@ -21,20 +21,22 @@ package com.webank.weid.suite.transportation;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.suite.entity.EncodeProperty;
+import com.webank.weid.suite.entity.ProtocolProperty;
 
 /**
  * 二维码传输协议抽象类定义.
  * @author v_wbgyang
  *
  */
-public abstract class AbstractTransportation extends BaseService {
+public abstract class AbstractTransportation extends BaseService implements Transportation {
+    
+    private String verifier;
     
     /**
      * 验证协议配置.
      * @param protocolProperty 协议配置实体
      */
-    protected ErrorCode checkEncodeProperty(EncodeProperty encodeProperty) {
+    protected ErrorCode checkEncodeProperty(ProtocolProperty encodeProperty) {
         if (encodeProperty == null) {
             return ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR;
         }
@@ -53,5 +55,18 @@ public abstract class AbstractTransportation extends BaseService {
             return ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID;
         }
         return ErrorCode.SUCCESS; 
+    }
+
+    public String getVerifier() {
+        return verifier;
+    }
+
+    public void setVerifier(String verifier) {
+        this.verifier = verifier;
+    }
+    
+    public Transportation specifyVerifier(String weId) {
+        this.setVerifier(weId);
+        return this;
     }
 }

@@ -19,6 +19,8 @@
 
 package com.webank.weid.suite.transportation.qr.protocol;
 
+import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.entity.QrCodeVersion;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -29,7 +31,7 @@ import com.webank.weid.util.DataToolUtils;
 public class QrCodeVersion1 extends QrCodeBaseData {
 
     private static final String protocol = 
-        PROTOCOL_VERSION + "encodeType|orgId|id|data|extendData";
+        PROTOCOL_VERSION + "encodeType|orgId|verifier|id|data|extendData";
     
     private static final String[] protocols;
     
@@ -50,12 +52,12 @@ public class QrCodeVersion1 extends QrCodeBaseData {
 
     @Override
     public void buildQrCodeData(
-        QrCodeProtocolProperty protocol,
+        ProtocolProperty protocol,
         String orgId
     ) {
         super.buildHead(
             protocol.getEncodeType(),
-            protocol.getVersion()
+            QrCodeVersion.V1
         );
         super.setOrgId(orgId);
         super.setId(DataToolUtils.getUuId32());

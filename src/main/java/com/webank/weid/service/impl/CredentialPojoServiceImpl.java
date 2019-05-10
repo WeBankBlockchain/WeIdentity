@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
@@ -272,6 +273,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Challenge challenge, PresentationE presentationE) {
         if (StringUtils.isBlank(presenterWeId)
             || challenge == null
+            || StringUtils.isBlank(challenge.getNonce())
             || !CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)) {
             return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
         }
@@ -286,12 +288,19 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             && !presenterWeId.equals(challenge.getWeId())) {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
         }
-
+        
         //verify challenge
+        if (!challenge.getNonce().equals(presentationE.getNonce())) {
+            return new ResponseData<Boolean>(false, ErrorCode.PRESENTATION_CHALLENGE_NONCE_MISMATCH);
+        }
+        
+        //verify Signature of PresentationE
         WeIdDocument weIdDocument = weIdService.getWeIdDocument(challenge.getWeId()).getResult();
         String signature = presentationE.getSignature();
+        //remove signatureValue
+        presentationE.getProof().remove(ParamKeyConstant.SIGNATUREVALUE);
         ErrorCode errorCode =
-            DataToolUtils.verifySignatureFromWeId(challenge.toRawData(), signature, weIdDocument);
+            DataToolUtils.verifySignatureFromWeId(presentationE.toRawData(), signature, weIdDocument);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[verify] verify challenge {} failed.", challenge);
             return new ResponseData<Boolean>(false, errorCode);
