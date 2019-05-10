@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base.cpt;
+package com.webank.weid.protocol.cpt;
 
 /**
  * Confirmation for Policy

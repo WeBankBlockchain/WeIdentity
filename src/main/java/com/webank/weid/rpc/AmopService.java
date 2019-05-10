@@ -34,20 +34,20 @@ import com.webank.weid.rpc.callback.AmopCallback;
  */
 public interface AmopService {
 
+    void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback);
+
+    ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args);
+
     ResponseData<PolicyAndChallenge> getPresentationPolicy(String orgId, Integer policyId);
 
-    public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback);
-
-    public ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(
+    ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(
         String toOrgId,
         GetPolicyAndChallengeArgs args
     );
 
-    public ResponseData<GetEncryptKeyResponse> getEncryptKey(
+    ResponseData<GetEncryptKeyResponse> getEncryptKey(
         String toOrgId,
         GetEncryptKeyArgs args
     );
-
-    ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args);
 
 }

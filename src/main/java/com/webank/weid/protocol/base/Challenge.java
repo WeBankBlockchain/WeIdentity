@@ -19,6 +19,7 @@
 
 package com.webank.weid.protocol.base;
 
+import com.webank.weid.protocol.amop.RawSerializer;
 import lombok.Getter;
 import lombok.Setter;
 

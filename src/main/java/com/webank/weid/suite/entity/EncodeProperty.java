@@ -31,11 +31,11 @@ public abstract class EncodeProperty {
      */
     private EncodeType encodeType;
 
-    public EncodeType getEncodeType() {
-        return encodeType;
-    }
-    
     public EncodeProperty(EncodeType encodeType) {
         this.encodeType = encodeType;
+    }
+
+    public EncodeType getEncodeType() {
+        return encodeType;
     }
 }

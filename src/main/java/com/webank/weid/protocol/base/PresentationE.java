@@ -19,6 +19,7 @@
 
 package com.webank.weid.protocol.base;
 
+import com.webank.weid.protocol.amop.JsonSerializer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -157,7 +158,7 @@ public class PresentationE implements JsonSerializer {
         List<CredentialPojoWrapper> credentialList, 
         PresentationPolicyE presentationPolicy) {
         
-        this.credentialList = new ArrayList<CredentialPojoWrapper>();
+        this.credentialList = new ArrayList<>();
         // 获取ClaimPolicyMap
         Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicy.getPolicy();
         // 遍历所有原始证书
