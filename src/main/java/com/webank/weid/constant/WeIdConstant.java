@@ -181,7 +181,7 @@ public final class WeIdConstant {
     public static final String BIG_BLOCK_LIMIT = "9999999999";
     
     /**
-     *  the default sign type.
+     * The Constant default Presentation type.
      */
-    public static final String DEFAULT_SIGN_TYPE = "RsaSignature2018";
+    public static final String DEFAULT_PRESENTATION_TYPE = "VerifiablePresentation";
 }

@@ -95,7 +95,7 @@ public class PresentationE implements RawSerializer {
                 return null;
             }
             context.add(CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
-            type.add(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
+            type.add(WeIdConstant.DEFAULT_PRESENTATION_TYPE);
             // 处理proof数据
             generateProof(challenge, weIdAuthentication);
             return this;
@@ -164,7 +164,6 @@ public class PresentationE implements RawSerializer {
             ClaimPolicy claimPolicy = 
                 claimPolicyMap.get(credentialPojoWrapper.getCredentialPojo().getCptId());
             if (claimPolicy == null) {
-                this.credentialList.add(credentialPojoWrapper);
                 continue;
             }
             // 根据原始证书和claimPolicy去创建选择性披露凭证
@@ -182,7 +181,7 @@ public class PresentationE implements RawSerializer {
     private void generateProof(Challenge challenge, WeIdAuthentication weIdAuthentication) {
        
        proof = new HashMap<String, String>();
-       proof.put(ParamKeyConstant.TYPE, WeIdConstant.DEFAULT_SIGN_TYPE);
+       proof.put(ParamKeyConstant.TYPE, "EcdsaSignature");
        proof.put(ParamKeyConstant.CREATED, DateUtils.getTimestamp(new Date()));
        proof.put(ParamKeyConstant.VERIFICATION_METHOD, weIdAuthentication.getWeIdPublicKeyId());
        proof.put(ParamKeyConstant.NONCE, challenge.getNonce());
