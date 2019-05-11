@@ -19,11 +19,14 @@
 
 package com.webank.weid.rpc;
 
+import java.util.List;
+
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojoWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -102,5 +105,20 @@ public interface CredentialPojoService {
      * @return the Credential Json value in String
      */
 //    ResponseData<String> getCredentialJson(CredentialPojo credential);
+    
+    /**
+     * packing according to original vouchers and disclosure strategies.
+     * @param credentialList original credential list
+     * @param presentationPolicyE the disclosure strategies.
+     * @param challenge used for authentication
+     * @param weIdAuthentication owner information
+     * @return
+     */
+    public ResponseData<PresentationE> createPresentation(
+        List<CredentialPojoWrapper> credentialList,
+        PresentationPolicyE presentationPolicyE,
+        Challenge challenge,
+        WeIdAuthentication weIdAuthentication
+    );
 
 }
