@@ -321,16 +321,14 @@ public abstract class BaseService {
             response.getContent()
         );
         ResponseData<T> responseStruct = new ResponseData<>();
-
-        responseStruct.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         if (102 == response.getErrorCode()) {
             responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_REQUEST_TIMEOUT);
-//            return responseStruct;
         } else if (0 != response.getErrorCode()) {
             responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_BASE_ERROR);
             return responseStruct;
+        } else {
+            responseStruct.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         }
-//        T msgBodyObj = DirectRouteBodyParser.deserialize(response.getContent(), resultClass);
         T msgBodyObj = DataToolUtils.deserialize(response.getContent(), resultClass);
         if (null == msgBodyObj) {
             responseStruct.setErrorCode(ErrorCode.UNKNOW_ERROR);
