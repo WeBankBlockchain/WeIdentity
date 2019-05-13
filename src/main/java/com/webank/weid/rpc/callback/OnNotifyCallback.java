@@ -61,7 +61,7 @@ public class OnNotifyCallback extends ChannelPushCallback {
         AmopMsgType msgType = amopRequestBody.getMsgType();
         AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
         String messageBody = amopRequestBody.getMsgBody();
-        String result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody)
+        String result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
         /*
          * 接收到以后需要给发送端回包
          */
