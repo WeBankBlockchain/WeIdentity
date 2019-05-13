@@ -22,6 +22,7 @@ package com.webank.weid.suite.transportation;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.transportation.inf.JsonTransportation;
 import java.util.List;
 
 /**
@@ -29,7 +30,8 @@ import java.util.List;
  * @author v_wbgyang
  *
  */
-public abstract class AbstractTransportation extends BaseService implements Transportation {
+public abstract class AbstractJsonTransportation extends BaseService implements
+    JsonTransportation {
     
     private List<String> verifierWeIdList;
     
@@ -66,7 +68,7 @@ public abstract class AbstractTransportation extends BaseService implements Tran
         this.verifierWeIdList = verifierWeIdList;
     }
 
-    public Transportation specify(List<String> verifierWeIdList) {
+    public JsonTransportation specify(List<String> verifierWeIdList) {
         this.setVerifier(verifierWeIdList);
         return this;
     }

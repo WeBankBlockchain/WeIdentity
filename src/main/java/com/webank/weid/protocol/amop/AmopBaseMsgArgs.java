@@ -36,6 +36,11 @@ import lombok.EqualsAndHashCode;
 public class AmopBaseMsgArgs implements IArgs {
 
     /*
+     * sdk functions version
+     */
+    protected Version version;
+
+    /*
      * 消息id，用于链上链下消息去重
      */
     protected String messageId;
@@ -49,9 +54,4 @@ public class AmopBaseMsgArgs implements IArgs {
      * 目的机构id
      */
     protected String toOrgId;
-
-    /*
-     * sdk functions version
-     */
-    protected Version version;
 }
