@@ -144,12 +144,12 @@ AuthorityIssuerService
    * - authorityIssuer
      - AuthorityIssuer
      - Y
-     - JavaBean
+     - 
      - AuthorityIssuer信息，见下
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -370,7 +370,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -673,7 +673,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - AuthorityIssuer
-     - JavaBean
+     - 
      - 授权机构信息，见下
 
 
@@ -839,7 +839,7 @@ com.webank.weid.protocol.base.WeIdAuthentication
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -879,7 +879,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
 
 
@@ -1088,7 +1088,7 @@ com.webank.weid.protocol.base.WeIdAuthentication
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -1128,7 +1128,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
 
 
@@ -1281,7 +1281,7 @@ com.webank.weid.protocol.base.CptBaseInfo
      - 
    * - result
      - Cpt
-     - JavaBean
+     - 
      - CPT内容，见下
 
 
@@ -1300,11 +1300,11 @@ com.webank.weid.protocol.base.Cpt
      - 
    * - cptBaseInfo
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
    * - cptMetaData
      - CptMetaData
-     - JavaBean
+     - 
      - CPT元数据内部类，见下
 
 
@@ -1519,7 +1519,7 @@ com.webank.weid.protocol.base.WeIdAuthentication
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -1559,7 +1559,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
 
 
@@ -1794,7 +1794,7 @@ com.webank.weid.protocol.base.WeIdAuthentication
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -1834,7 +1834,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
 
 
@@ -1994,7 +1994,7 @@ CredentialService
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 签名所用Issuer WeIdentity DID私钥，见下
 
 
@@ -2034,7 +2034,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CredentialWrapper
-     - JavaBean
+     - 
      - 见下
 
 com.webank.weid.protocol.base.CredentialWrapper
@@ -2076,7 +2076,7 @@ com.webank.weid.protocol.base.Credential
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -2244,7 +2244,7 @@ com.webank.weid.protocol.base.Credential
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -2470,12 +2470,12 @@ com.webank.weid.protocol.base.Credential
    * - credentialWrapper
      - CredentialWrapper
      - Y
-     - JavaBean
+     - 
      - 凭证信息，见下
    * - weIdPublicKey
      - WeIdPublicKey
      - Y
-     - JavaBean
+     - 
      - 公钥信息，见下
 
 com.webank.weid.protocol.base.CredentialWrapper
@@ -2518,7 +2518,7 @@ com.webank.weid.protocol.base.Credential
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -2730,7 +2730,7 @@ com.webank.weid.protocol.base.WeIdPublicKey
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -2892,7 +2892,7 @@ WeIDService
      - 
    * - result
      - CreateWeIdDataResult
-     - JavaBean
+     - 
      - 见下
 
 
@@ -2911,11 +2911,11 @@ com.webank.weid.protocol.response.CreateWeIdDataResult
      - 格式: did:weid:0x………………….
    * - userWeIdPublicKey
      - WeIdPublicKey
-     - JavaBean
+     - 
      - 
    * - userWeIdPrivateKey
      - WeIdPrivateKey
-     - JavaBean
+     - 
      - 
 
 
@@ -2945,7 +2945,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 如下调用示例返回，使用十进制数字表示
 
 
@@ -3042,7 +3042,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 后期鉴权使用
 
 
@@ -3057,7 +3057,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 
@@ -3355,7 +3355,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - WeIdDocument
-     - JavaBean
+     - 
      - 见下
 
 
@@ -3382,15 +3382,15 @@ com.webank.weid.protocol.base.WeIdDocument
      - 
    * - publicKey
      - List\ :raw-html-m2r:`<PublicKeyProperty>`
-     - JavaBean
+     - 
      - 列出公钥集合，见下
    * - authentication
      - List\ :raw-html-m2r:`<AuthenticationProperty>`
-     - JavaBean
+     - 
      - 认证方集合，见下
    * - service
      - List\ :raw-html-m2r:`<ServiceProperty>`
-     - JavaBean
+     - 
      - 服务端点集合，见下
 
 
@@ -3566,7 +3566,7 @@ com.webank.weid.protocol.base.ServiceProperty
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，后期鉴权使用，见下
 
 
@@ -3581,7 +3581,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 
@@ -3726,7 +3726,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，后期鉴权使用，见下
 
 
@@ -3741,7 +3741,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 
@@ -3890,7 +3890,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，后期鉴权使用，见下
 
 
@@ -3905,7 +3905,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 
@@ -4157,7 +4157,7 @@ com.webank.weid.protocol.base.Credential
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -4201,7 +4201,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
@@ -4495,7 +4495,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -4714,7 +4714,7 @@ CredentialPojoService
 
    接口名称:com.webank.weid.rpc.CredentialPojoService
    接口定义:<T> ResponseData<CredentialPojoWrapper> createCredential(CreateCredentialPojoArgs<T> args)
-   接口描述: 根据传入的claim对象生成凭证信息，生成的凭证有盐值处理。
+   接口描述: 根据传入的claim对象生成Credential。
 
 **接口入参**\ : 
 
@@ -4731,7 +4731,7 @@ com.webank.weid.protocol.request.CreateCredentialPojoArgs<T>
    * - cptId
      - Integer
      - Y
-     - CPT编号
+     - CPT ID
      - 
    * - issuer
      - String
@@ -4746,12 +4746,12 @@ com.webank.weid.protocol.request.CreateCredentialPojoArgs<T>
    * - claim
      - T
      - Y
-     - 创建凭证需要的claim数据
-     - 此对应为泛型, 通过build-tool工具根据CPT可以生成对应的jar包
+     - 创建凭证需要的claim数据，参数类型为泛型，为POJO对象（不同的CPT对应不同的POJO类）。
+     - 需要通过build-tool工具根据CPT ID生成对应的jar包，
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - 私钥信息
+     - 创建这个Credential的调用者（issuer）的私钥
      - 
 
 com.webank.weid.protocol.base.WeIdPrivateKey
@@ -4767,7 +4767,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - privateKey
      - String
      - Y
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<CredentialPojoWrapper>;
@@ -4803,12 +4803,12 @@ com.webank.weid.protocol.base.CredentialPojoWrapper
      - 备注
    * - credentialPojo
      - CredentialPojo
-     - 凭证pojo
-     - JavaBean
+     - Claim字段为POJO结构的Credential
+     - 
    * - salt
      - Map<String, Object>
-     - 盐值Map集合
-     - Map结构跟claim结构一致
+     -
+     -
 
 com.webank.weid.protocol.base.CredentialPojo
 
@@ -4821,11 +4821,11 @@ com.webank.weid.protocol.base.CredentialPojo
      - 备注
    * - context
      - String
-     - 版本
-     - 默认为v1
+     - 
+     -
    * - id
      - String
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -4833,7 +4833,7 @@ com.webank.weid.protocol.base.CredentialPojo
      - 
    * - issuer
      - String
-     - WeIdentity DID
+     - issuer 的 WeIdentity DID
      - 
    * - issuranceDate
      - Long
@@ -4924,7 +4924,7 @@ com.webank.weid.protocol.base.CredentialPojo
 
    接口名称:com.webank.weid.rpc.CredentialPojoService
    接口定义: ResponseData<CredentialPojoWrapper> createSelectiveCredential(CredentialPojoWrapper credentialPojoWrapper,ClaimPolicy claimPolicy)
-   接口描述: 通过原始凭证和披漏策略进行选择性披露。
+   接口描述: 通过原始凭证和披漏策略，创建选择性披露的Credential。
 
 **接口入参**\ : 
 
@@ -4941,64 +4941,14 @@ com.webank.weid.protocol.base.CredentialPojoWrapper
    * - credentialPojo
      - CredentialPojo
      - Y
-     - 凭证pojo
-     - JavaBean
+     - Claim字段为POJO结构的Credential
+     - 
    * - salt
      - Map<String, Object>
      - Y
-     - 盐值Map集合
+     - 
      - Map结构跟claim结构一致
 
-com.webank.weid.protocol.base.CredentialPojo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - context
-     - String
-     - Y
-     - 版本
-     - 默认为v1
-   * - id
-     - String
-     - Y
-     - 证书编号
-     - 
-   * - cptId
-     - Integer
-     - Y
-     - cptId
-     - 
-   * - issuer
-     - String
-     - Y
-     - WeIdentity DID
-     - 
-   * - issuranceDate
-     - Long
-     - Y
-     - 创建日期
-     - 
-   * - expirationDate
-     - Long
-     - Y
-     - 到期日期
-     - 
-   * - signature
-     - String
-     - Y
-     - 签名数据
-     - 
-   * - claim
-     - Map<String, Object>
-     - Y
-     - Claim数据
-     - 
 
 com.webank.weid.protocol.base.ClaimPolicy
 
@@ -5022,7 +4972,6 @@ com.webank.weid.protocol.base.ClaimPolicy
      - 根据claim匹配的结构，详见调用示例
 
 
-
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<CredentialPojoWrapper>;
 
 .. list-table::
@@ -5044,84 +4993,6 @@ com.webank.weid.protocol.base.ClaimPolicy
      - CredentialPojoWrapper
      - 凭证对象
      - 业务数据
-
-com.webank.weid.protocol.base.CredentialPojoWrapper
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - credentialPojo
-     - CredentialPojo
-     - 凭证pojo
-     - JavaBean
-   * - salt
-     - Map<String, Object>
-     - 盐值Map集合
-     - Map结构跟claim结构一致
-
-com.webank.weid.protocol.base.CredentialPojo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - credentialPojo
-     - CredentialPojo
-     - 凭证pojo
-     - JavaBean
-   * - salt
-     - Map<String, Object>
-     - 盐值Map集合
-     - Map结构跟claim结构一致
-
-com.webank.weid.protocol.base.Credential
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - context
-     - String
-     - 版本
-     - 默认为v1
-   * - id
-     - String
-     - 证书编号
-     - 
-   * - cptId
-     - Integer
-     - cptId
-     - 
-   * - issuer
-     - String
-     - WeIdentity DID
-     - 
-   * - issuranceDate
-     - Long
-     - 创建日期
-     - 
-   * - expirationDate
-     - Long
-     - 到期日期
-     - 
-   * - signature
-     - String
-     - 签名数据
-     - 
-   * - claim
-     - Map<String, Object>
-     - Claim数据
-     - 
 
 **此方法返回code**
 
@@ -5220,64 +5091,14 @@ com.webank.weid.protocol.base.CredentialPojoWrapper
    * - credentialPojo
      - CredentialPojo
      - Y
-     - 凭证pojo
-     - JavaBean
+     - Claim字段为POJO结构的Credential
+     - 
    * - salt
      - Map<String, Object>
      - Y
-     - 盐值Map集合
+     - 
      - Map结构跟claim结构一致
 
-com.webank.weid.protocol.base.CredentialPojo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - context
-     - String
-     - Y
-     - 版本
-     - 默认为v1
-   * - id
-     - String
-     - Y
-     - 证书编号
-     - 
-   * - cptId
-     - Integer
-     - Y
-     - cptId
-     - 
-   * - issuer
-     - String
-     - Y
-     - WeIdentity DID
-     - 
-   * - issuranceDate
-     - Long
-     - Y
-     - 创建日期
-     - 
-   * - expirationDate
-     - Long
-     - Y
-     - 到期日期
-     - 
-   * - signature
-     - String
-     - Y
-     - 签名数据
-     - 
-   * - claim
-     - Map<String, Object>
-     - Y
-     - Claim数据
-     - 
 
 java.lang.String
 
@@ -5368,64 +5189,14 @@ com.webank.weid.protocol.base.CredentialPojoWrapper
    * - credentialPojo
      - CredentialPojo
      - Y
-     - 凭证pojo
-     - JavaBean
+     - Claim字段为POJO结构的Credential
+     - 
    * - salt
      - Map<String, Object>
      - Y
-     - 盐值Map集合
+     - 
      - Map结构跟claim结构一致
 
-com.webank.weid.protocol.base.CredentialPojo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - context
-     - String
-     - Y
-     - 版本
-     - 默认为v1
-   * - id
-     - String
-     - Y
-     - 证书编号
-     - 
-   * - cptId
-     - Integer
-     - Y
-     - cptId
-     - 
-   * - issuer
-     - String
-     - Y
-     - WeIdentity DID
-     - 
-   * - issuranceDate
-     - Long
-     - Y
-     - 创建日期
-     - 
-   * - expirationDate
-     - Long
-     - Y
-     - 到期日期
-     - 
-   * - signature
-     - String
-     - Y
-     - 签名数据
-     - 
-   * - claim
-     - Map<String, Object>
-     - Y
-     - Claim数据
-     - 
 
 com.webank.weid.protocol.base.WeIdPublicKey
 
@@ -5614,77 +5385,7 @@ com.webank.weid.protocol.base.PresentationE
      - Y
      - Presentation的签名信息
      - 
-com.webank.weid.protocol.base.CredentialPojoWrapper
 
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - credentialPojo
-     - CredentialPojo
-     - Y
-     - 凭证pojo
-     - JavaBean
-   * - salt
-     - Map<String, Object>
-     - Y
-     - 盐值Map集合
-     - Map结构跟claim结构一致
-
-com.webank.weid.protocol.base.CredentialPojo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - context
-     - String
-     - Y
-     - 版本
-     - 默认为v1
-   * - id
-     - String
-     - Y
-     - 证书编号
-     - 
-   * - cptId
-     - Integer
-     - Y
-     - cptId
-     - 
-   * - issuer
-     - String
-     - Y
-     - WeIdentity DID
-     - 
-   * - issuranceDate
-     - Long
-     - Y
-     - 创建日期
-     - 
-   * - expirationDate
-     - Long
-     - Y
-     - 到期日期
-     - 
-   * - signature
-     - String
-     - Y
-     - 签名数据
-     - 
-   * - claim
-     - Map<String, Object>
-     - Y
-     - Claim数据
-     - 
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
 
@@ -5783,64 +5484,13 @@ com.webank.weid.protocol.base.CredentialPojoWrapper
    * - credentialPojo
      - CredentialPojo
      - Y
-     - 凭证pojo
-     - JavaBean
+     - Claim字段为POJO结构的Credential
+     - 
    * - salt
      - Map<String, Object>
      - Y
-     - 盐值Map集合
+     - 
      - Map结构跟claim结构一致
-
-com.webank.weid.protocol.base.CredentialPojo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - context
-     - String
-     - Y
-     - 版本
-     - 默认为v1
-   * - id
-     - String
-     - Y
-     - 证书编号
-     - 
-   * - cptId
-     - Integer
-     - Y
-     - cptId
-     - 
-   * - issuer
-     - String
-     - Y
-     - WeIdentity DID
-     - 
-   * - issuranceDate
-     - Long
-     - Y
-     - 创建日期
-     - 
-   * - expirationDate
-     - Long
-     - Y
-     - 到期日期
-     - 
-   * - signature
-     - String
-     - Y
-     - 签名数据
-     - 
-   * - claim
-     - Map<String, Object>
-     - Y
-     - Claim数据
-     - 
 
 com.webank.weid.protocol.base.PresentationPolicyE
 
@@ -5927,7 +5577,7 @@ com.webank.weid.protocol.base.WeIdAuthentication
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<PresentationE>;
@@ -5976,66 +5626,6 @@ com.webank.weid.protocol.base.PresentationE
    * - proof
      - Map<String, String>
      - Presentation的签名信息
-     - 
-
-com.webank.weid.protocol.base.CredentialPojoWrapper
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - credentialPojo
-     - CredentialPojo
-     - 凭证pojo
-     - JavaBean
-   * - salt
-     - Map<String, Object>
-     - 盐值Map集合
-     - Map结构跟claim结构一致
-
-com.webank.weid.protocol.base.CredentialPojo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - context
-     - String
-     - 版本
-     - 默认为v1
-   * - id
-     - String
-     - 证书编号
-     - 
-   * - cptId
-     - Integer
-     - cptId
-     - 
-   * - issuer
-     - String
-     - WeIdentity DID
-     - 
-   * - issuranceDate
-     - Long
-     - 创建日期
-     - 
-   * - expirationDate
-     - Long
-     - 到期日期
-     - 
-   * - signature
-     - String
-     - 签名数据
-     - 
-   * - claim
-     - Map<String, Object>
-     - Claim数据
      - 
 
 **此方法返回code**
