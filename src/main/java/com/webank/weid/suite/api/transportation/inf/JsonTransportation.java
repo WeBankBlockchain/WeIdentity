@@ -17,11 +17,11 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.transportation.inf;
+package com.webank.weid.suite.api.transportation.inf;
 
-import com.webank.weid.protocol.amop.JsonSerializer;
+import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import java.util.List;
 
 /**

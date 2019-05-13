@@ -17,13 +17,25 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.transportation.inf;
+package com.webank.weid.suite.api.transportation.params;
 
 /**
- * 协议的传输接口.
+ * 编解码配置.
  * @author v_wbgyang
  *
  */
-public interface QrCodeTransportation extends JsonTransportation {
+public class ProtocolProperty {
+    
+    /**
+     * 协议编解码类型.
+     */
+    private EncodeType encodeType;
 
+    public EncodeType getEncodeType() {
+        return encodeType;
+    }
+    
+    public ProtocolProperty(EncodeType encodeType) {
+        this.encodeType = encodeType;
+    }
 }

@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.protocol.amop.AmopCommonArgs;
+import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;

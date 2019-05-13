@@ -19,7 +19,7 @@
 
 package com.webank.weid.suite.transportation.qr.protocol;
 
-import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.entity.QrCodeVersion;
 import com.webank.weid.util.DataToolUtils;
 

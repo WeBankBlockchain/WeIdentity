@@ -17,13 +17,21 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.amop;
+package com.webank.weid.service.impl.base;
 
-import com.webank.weid.protocol.amop.JsonSerializer;
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
-public interface RawSerializer extends JsonSerializer {
-    
-    default public String toRawData() {
-        return toJson();
-    } 
+/**
+ * @author tonychen 2019年4月16日
+ */
+@Data
+@EqualsAndHashCode(callSuper = false)
+public class AmopCommonArgs extends AmopBaseMsgArgs {
+
+    /*
+     * 任意包体
+     */
+    private String message;
 }

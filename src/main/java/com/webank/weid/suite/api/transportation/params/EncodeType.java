@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.entity;
+package com.webank.weid.suite.api.transportation.params;
 
 /**
  * enumeration of supported coding types.

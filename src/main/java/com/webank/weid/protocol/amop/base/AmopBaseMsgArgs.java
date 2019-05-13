@@ -17,13 +17,14 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.amop;
+package com.webank.weid.protocol.amop.base;
 
 //import cn.webank.blockchain.spi.common.annoation.BlockChainDTO;
 //import cn.webank.blockchain.spi.common.annoation.BlockChainDTO.BindTypeEnum;
 import com.webank.weid.annoation.BlockChainDTO;
 import com.webank.weid.annoation.BlockChainDTO.BindTypeEnum;
 import com.webank.weid.protocol.base.Version;
+import com.webank.weid.protocol.inf.IArgs;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

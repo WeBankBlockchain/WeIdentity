@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.persistence;
+package com.webank.weid.suite.api.persistence;
 
 import java.util.List;
 
@@ -28,7 +28,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author tonychen 2019年3月18日
  */
-public interface PersistenceApi {
+public interface Persistence {
 
     /**
      * save data to storage.

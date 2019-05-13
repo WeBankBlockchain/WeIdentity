@@ -20,7 +20,7 @@
 package com.webank.weid.suite.transportation.qr.impl;
 
 import com.webank.weid.suite.transportation.AbstractJsonTransportation;
-import com.webank.weid.suite.transportation.inf.QrCodeTransportation;
+import com.webank.weid.suite.api.transportation.inf.QrCodeTransportation;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,11 +30,11 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.amop.JsonSerializer;
+import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
-import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.entity.QrCodeVersion;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeVersion1;

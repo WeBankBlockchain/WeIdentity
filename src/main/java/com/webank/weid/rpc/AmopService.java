@@ -19,7 +19,7 @@
 
 package com.webank.weid.rpc;
 
-import com.webank.weid.protocol.amop.AmopCommonArgs;
+import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;

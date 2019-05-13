@@ -17,10 +17,11 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.amop;
+package com.webank.weid.protocol.inf;
 
-/**
- * 请求体
- */
-public interface IArgs {
+public interface RawSerializer extends JsonSerializer {
+    
+    default public String toRawData() {
+        return toJson();
+    } 
 }

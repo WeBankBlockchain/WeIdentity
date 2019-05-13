@@ -17,23 +17,11 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.transportation;
-
-import com.webank.weid.suite.transportation.inf.JsonTransportation;
-import com.webank.weid.suite.transportation.inf.QrCodeTransportation;
-import com.webank.weid.suite.transportation.json.impl.JsonTransportationImpl;
-import com.webank.weid.suite.transportation.qr.impl.QrCodeJsonTransportationImpl;
+package com.webank.weid.protocol.inf;
 
 /**
- * Created by Junqi Zhang on 2019/5/13.
+ * 结果
  */
-public class TransportationFactory {
+public interface IResult {
 
-    public static JsonTransportation newJsonTransportation() {
-        return new JsonTransportationImpl();
-    }
-
-    public static QrCodeTransportation newQrCodeTransportation() {
-        return new QrCodeJsonTransportationImpl();
-    }
 }
