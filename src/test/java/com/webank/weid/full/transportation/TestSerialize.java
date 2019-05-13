@@ -34,12 +34,12 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.api.transportation.TransportationFactory;
+import com.webank.weid.suite.api.transportation.params.EncodeType;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.crypto.CryptService;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
-import com.webank.weid.suite.entity.EncodeType;
-import com.webank.weid.suite.entity.ProtocolProperty;
-import com.webank.weid.suite.transportation.TransportationFactory;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
 
 /**
