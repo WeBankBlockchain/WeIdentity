@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.transportation;
+package com.webank.weid.suite.transportation.inf;
 
 import com.webank.weid.protocol.amop.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
@@ -29,9 +29,9 @@ import java.util.List;
  * @author v_wbgyang
  *
  */
-public interface Transportation {
+public interface JsonTransportation {
     
-    Transportation specify(List<String> verifierWeIdList);
+    JsonTransportation specify(List<String> verifierWeIdList);
 
     /**
      * 协议传输序列化接口.
