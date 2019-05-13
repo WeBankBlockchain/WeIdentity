@@ -19,6 +19,8 @@
 
 package com.webank.weid.suite.transportation.qr.impl;
 
+import com.webank.weid.suite.transportation.AbstractJsonTransportation;
+import com.webank.weid.suite.transportation.inf.QrCodeTransportation;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,8 +36,6 @@ import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
 import com.webank.weid.suite.entity.ProtocolProperty;
 import com.webank.weid.suite.entity.QrCodeVersion;
-import com.webank.weid.suite.transportation.AbstractTransportation;
-import com.webank.weid.suite.transportation.Transportation;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeVersion1;
 import com.webank.weid.util.JsonUtil;
@@ -45,12 +45,12 @@ import com.webank.weid.util.JsonUtil;
  * @author v_wbgyang
  *
  */
-public class QrCodeTransportationImpl
-    extends AbstractTransportation
-    implements Transportation {
+public class QrCodeJsonTransportationImpl
+    extends AbstractJsonTransportation
+    implements QrCodeTransportation {
 
     private static final Logger logger = 
-        LoggerFactory.getLogger(QrCodeTransportationImpl.class);
+        LoggerFactory.getLogger(QrCodeJsonTransportationImpl.class);
     
     private static final QrCodeVersion version = QrCodeVersion.V1;
     
@@ -70,7 +70,7 @@ public class QrCodeTransportationImpl
         ProtocolProperty property) {
         
         logger.info(
-            "begin to execute QrCodeTransportationImpl serialization, property:{}",
+            "begin to execute QrCodeJsonTransportationImpl serialization, property:{}",
             property
         );
         // 验证协议配置
@@ -113,13 +113,13 @@ public class QrCodeTransportationImpl
             qrCodeData.setData(data);
             // 将协议实体转换成协议字符串数据
             String transString = qrCodeData.buildBuffer().getTransString();
-            logger.info("QrCodeTransportationImpl serialization finished.");
+            logger.info("QrCodeJsonTransportationImpl serialization finished.");
             return new ResponseData<String>(transString, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
-            logger.error("QrCodeTransportation serialization due to base error.", e);
+            logger.error("QrCodeJsonTransportationImpl serialization due to base error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
         } catch (Exception e) {
-            logger.error("QrCodeTransportation serialization due to unknown error.", e);
+            logger.error("QrCodeJsonTransportationImpl serialization due to unknown error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.UNKNOW_ERROR);
         }
     }  
@@ -129,7 +129,7 @@ public class QrCodeTransportationImpl
         String transString,
         Class<T> clazz) {
         
-        logger.info("begin to execute QrCodeTransportationImpl deserialization.");
+        logger.info("begin to execute QrCodeJsonTransportationImpl deserialization.");
         try {
             //解析协议版本
             QrCodeVersion version = QrCodeBaseData.getQrCodeVersion(transString);
@@ -153,13 +153,13 @@ public class QrCodeTransportationImpl
                     .decode(encodeData);
             //将解压出来的数据进行反序列化成原数据对象
             T presentation = JsonUtil.jsonStrToObj(clazz, data);
-            logger.info("QrCodeTransportationImpl deserialization finished.");
+            logger.info("QrCodeJsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(presentation, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
-            logger.error("QrCodeTransportation deserialization due to base error.", e);
+            logger.error("QrCodeJsonTransportationImpl deserialization due to base error.", e);
             return new ResponseData<T>(null, e.getErrorCode());
         } catch (Exception e) {
-            logger.error("QrCodeTransportation deserialization due to unknown error.", e);
+            logger.error("QrCodeJsonTransportationImpl deserialization due to unknown error.", e);
             return new ResponseData<T>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
