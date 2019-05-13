@@ -76,11 +76,6 @@ public abstract class QrCodeBaseData {
      * 协议负载数据编码.
      */
     private String id;
-    
-    /**
-     * 协议数据所指定的用户.
-     */
-    private String verifier;
 
     /**
      * 协议负载.
@@ -99,10 +94,6 @@ public abstract class QrCodeBaseData {
    
     public String getExtendData() {
         return extendData != null ? extendData : "?";
-    }
-
-    public String getVerifier() {
-        return verifier != null ? verifier : "?";
     }
     
     /**

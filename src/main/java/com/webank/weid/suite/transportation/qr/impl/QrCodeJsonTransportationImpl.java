@@ -102,7 +102,7 @@ public class QrCodeJsonTransportationImpl
                     qrCodeData.getId(),
                     qrCodeData.getOrgId(),
                     object.toJson(),
-                    qrCodeData.getVerifier()
+                    super.getVerifiers()
                 );
             logger.info("encode by {}.", property.getEncodeType().name());
             // 进行编码处理
@@ -143,7 +143,7 @@ public class QrCodeJsonTransportationImpl
                     qrCodeData.getId(),
                     qrCodeData.getOrgId(),
                     qrCodeData.getData(),
-                    qrCodeData.getVerifier()
+                    super.getVerifiers()
                 );
             logger.info("encode by {}.", qrCodeData.getEncodeType().name());
             //进行解码处理
