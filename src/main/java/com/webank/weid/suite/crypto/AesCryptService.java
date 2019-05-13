@@ -89,7 +89,10 @@ public class AesCryptService implements CryptService {
     private static SecretKeySpec getSecretKey(
         final String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         KeyGenerator kg = KeyGenerator.getInstance(KEY_ALGORITHM);
-        kg.init(KEY_LEN, new SecureRandom(password.getBytes(StandardCharsets.UTF_8.toString())));
+        
+        SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+        random.setSeed(password.getBytes(StandardCharsets.UTF_8.toString()));
+        kg.init(KEY_LEN, random);
         SecretKey secretKey = kg.generateKey();
         return new SecretKeySpec(secretKey.getEncoded(), KEY_ALGORITHM);
     }

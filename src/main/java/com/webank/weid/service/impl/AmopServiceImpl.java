@@ -22,6 +22,7 @@ package com.webank.weid.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
@@ -41,6 +42,7 @@ import com.webank.weid.service.BaseService;
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
+@Component
 public class AmopServiceImpl extends BaseService implements AmopService {
 
     private static final Logger logger = LoggerFactory.getLogger(AmopServiceImpl.class);
