@@ -250,8 +250,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
      * @see com.webank.weid.rpc.CredentialPojoService#verify(java.lang.String, com.webank.weid.protocol.base.CredentialPojoWrapper)
      */
     @Override
-    public ResponseData<Boolean> verify(CredentialPojoWrapper credentialWrapper,
-        String issuerWeId) {
+    public ResponseData<Boolean> verify(
+        String issuerWeId,
+        CredentialPojoWrapper credentialWrapper) {
 
         String issuerId = credentialWrapper.getCredentialPojo().getIssuer();
         if (!StringUtils.equals(issuerWeId, issuerId)) {
@@ -268,9 +269,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
      * @see com.webank.weid.rpc.CredentialPojoService#verify(java.lang.String, com.webank.weid.protocol.base.PresentationPolicyE, com.webank.weid.protocol.base.Challenge, com.webank.weid.protocol.base.PresentationE)
      */
     @Override
-    public ResponseData<Boolean> verify(String presenterWeId,
+    public ResponseData<Boolean> verify(
+        String presenterWeId,
         PresentationPolicyE presentationPolicyE,
         Challenge challenge, PresentationE presentationE) {
+
         if (StringUtils.isBlank(presenterWeId)
             || challenge == null
             || StringUtils.isBlank(challenge.getNonce())
@@ -342,8 +345,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
      * @see com.webank.weid.rpc.CredentialPojoService#verify(com.webank.weid.protocol.base.CredentialPojoWrapper, com.webank.weid.protocol.base.WeIdPublicKey)
      */
     @Override
-    public ResponseData<Boolean> verify(CredentialPojoWrapper credentialWrapper,
-        WeIdPublicKey issuerPublicKey) {
+    public ResponseData<Boolean> verify(
+        WeIdPublicKey issuerPublicKey,
+        CredentialPojoWrapper credentialWrapper) {
 
         String publicKey = issuerPublicKey.getPublicKey();
         if (StringUtils.isEmpty(publicKey)) {
@@ -356,8 +360,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
 
-    private ErrorCode verifyCptId(Map<Integer, ClaimPolicy> policyMap,
+    private ErrorCode verifyCptId(
+        Map<Integer, ClaimPolicy> policyMap,
         List<CredentialPojoWrapper> credentialPojoWrapperList) {
+
         if (policyMap.size() > credentialPojoWrapperList.size()) {
             return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
         } else {
@@ -373,8 +379,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         return ErrorCode.SUCCESS;
     }
 
-    private ErrorCode verifyDisclosureAndSalt(Map<String, Object> disclosureMap,
+    private ErrorCode verifyDisclosureAndSalt(
+        Map<String, Object> disclosureMap,
         Map<String, Object> saltMap) {
+
         for (String disclosureK : disclosureMap.keySet()) {
             Object disclosureV = disclosureMap.get(disclosureK);
             Object saltV = saltMap.get(disclosureK);

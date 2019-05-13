@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.EncodeSuiteException;
-import com.webank.weid.persistence.PersistenceApi;
-import com.webank.weid.persistence.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.PersistenceApi;
+import com.webank.weid.suite.persistence.driver.MysqlDriver;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
@@ -116,7 +116,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         if (fromOrgId.equals(encodeData.getOrgId())) {
             //保存秘钥
             ResponseData<String> response = 
-                this.dataDriver.getData(TRANSENCRYPTIONDOMAIN,encodeData.getId());
+                this.dataDriver.get(TRANSENCRYPTIONDOMAIN,encodeData.getId());
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
                     ErrorCode.getTypeByErrorCode(response.getErrorCode().intValue())

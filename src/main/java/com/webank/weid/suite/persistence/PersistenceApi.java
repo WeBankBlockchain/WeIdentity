@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.persistence;
+package com.webank.weid.suite.persistence;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public interface PersistenceApi {
      * @param id the key of the data.
      * @return the data you stored.
      */
-    public ResponseData<String> getData(String domain, String id);
+    public ResponseData<String> get(String domain, String id);
 
     /**
      * delete data by id.

@@ -4,12 +4,13 @@ import com.webank.weid.protocol.amop.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.entity.ProtocolProperty;
 import com.webank.weid.suite.transportation.Transportation;
-import com.webank.weid.suite.transportation.json.JsonTransportationService;
+import com.webank.weid.suite.transportation.json.impl.JsonTransportationImpl;
+import java.util.List;
 
 public class JsonTransportation {
-    
-    public static Transportation specifyVerifier(String weId) {
-        return newInstance().specifyVerifier(weId);
+
+    public static Transportation specify(List<String> verifierWeIdList) {
+        return newInstance().specify(verifierWeIdList);
     }
 
     /**
@@ -38,6 +39,6 @@ public class JsonTransportation {
     }
     
     private static Transportation newInstance() {
-        return new JsonTransportationService();
+        return new JsonTransportationImpl();
     }
 }

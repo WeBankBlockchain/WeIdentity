@@ -22,6 +22,7 @@ package com.webank.weid.suite.transportation;
 import com.webank.weid.protocol.amop.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.entity.ProtocolProperty;
+import java.util.List;
 
 /**
  * 协议的传输接口.
@@ -30,7 +31,7 @@ import com.webank.weid.suite.entity.ProtocolProperty;
  */
 public interface Transportation {
     
-    public Transportation specifyVerifier(String weId);
+    Transportation specify(List<String> verifierWeIdList);
 
     /**
      * 协议传输序列化接口.
@@ -38,7 +39,7 @@ public interface Transportation {
      * @param property 协议的配置对象
      * @return 返回协议字符串数据
      */
-    public <T extends JsonSerializer> ResponseData<String> serialize(
+    <T extends JsonSerializer> ResponseData<String> serialize(
         T object,
         ProtocolProperty property
     );
@@ -49,7 +50,7 @@ public interface Transportation {
      * @param clazz 需要转换成的Class类型
      * @return 返回PresentationE对象数据
      */
-    public <T extends JsonSerializer> ResponseData<T> deserialize(
+    <T extends JsonSerializer> ResponseData<T> deserialize(
         String transString,
         Class<T> clazz
     );
