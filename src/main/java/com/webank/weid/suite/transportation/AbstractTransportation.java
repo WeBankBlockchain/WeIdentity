@@ -22,6 +22,7 @@ package com.webank.weid.suite.transportation;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.entity.ProtocolProperty;
+import java.util.List;
 
 /**
  * 二维码传输协议抽象类定义.
@@ -30,7 +31,7 @@ import com.webank.weid.suite.entity.ProtocolProperty;
  */
 public abstract class AbstractTransportation extends BaseService implements Transportation {
     
-    private String verifier;
+    private List<String> verifierWeIdList;
     
     /**
      * 验证协议配置.
@@ -57,16 +58,16 @@ public abstract class AbstractTransportation extends BaseService implements Tran
         return ErrorCode.SUCCESS; 
     }
 
-    public String getVerifier() {
-        return verifier;
+    public List<String> getVerifier() {
+        return verifierWeIdList;
     }
 
-    public void setVerifier(String verifier) {
-        this.verifier = verifier;
+    public void setVerifier(List<String> verifierWeIdList) {
+        this.verifierWeIdList = verifierWeIdList;
     }
-    
-    public Transportation specifyVerifier(String weId) {
-        this.setVerifier(weId);
+
+    public Transportation specify(List<String> verifierWeIdList) {
+        this.setVerifier(verifierWeIdList);
         return this;
     }
 }
