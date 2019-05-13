@@ -21,8 +21,8 @@ package com.webank.weid.suite.transportation;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.suite.entity.ProtocolProperty;
-import com.webank.weid.suite.transportation.inf.JsonTransportation;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 import java.util.List;
 
 /**

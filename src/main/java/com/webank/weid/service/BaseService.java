@@ -46,7 +46,7 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
-import com.webank.weid.protocol.amop.AmopBaseMsgArgs;
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 import com.webank.weid.protocol.amop.AmopRequestBody;
 import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;

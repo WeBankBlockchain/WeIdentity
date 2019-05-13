@@ -29,8 +29,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.ProtocolSuiteException;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.suite.entity.EncodeType;
-import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.params.EncodeType;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.entity.QrCodeVersion;
 
 /**

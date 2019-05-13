@@ -17,13 +17,13 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.amop;
+package com.webank.weid.suite.api.transportation.inf;
 
-import com.webank.weid.util.JsonUtil;
+/**
+ * 协议的传输接口.
+ * @author v_wbgyang
+ *
+ */
+public interface QrCodeTransportation extends JsonTransportation {
 
-public interface JsonSerializer {
-
-   default public String toJson() {
-       return JsonUtil.objToJsonStrWithNoPretty(this);
-   }
 }

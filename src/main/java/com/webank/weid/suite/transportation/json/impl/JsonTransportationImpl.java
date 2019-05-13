@@ -20,7 +20,7 @@
 package com.webank.weid.suite.transportation.json.impl;
 
 import com.webank.weid.suite.transportation.AbstractJsonTransportation;
-import com.webank.weid.suite.transportation.inf.JsonTransportation;
+import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,13 +29,13 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.amop.JsonSerializer;
+import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
-import com.webank.weid.suite.entity.EncodeType;
+import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.entity.JsonVersion;
-import com.webank.weid.suite.entity.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.transportation.json.protocol.JsonBaseData;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
