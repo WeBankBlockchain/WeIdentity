@@ -60,7 +60,7 @@ public abstract class AbstractJsonTransportation extends BaseService implements
         return ErrorCode.SUCCESS; 
     }
 
-    public List<String> getVerifier() {
+    public List<String> getVerifiers() {
         return verifierWeIdList;
     }
 

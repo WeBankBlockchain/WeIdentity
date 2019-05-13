@@ -94,7 +94,7 @@ public class JsonTransportationImpl
                         jsonBaseData.getId(),
                         jsonBaseData.getOrgId(),
                         object.toJson(),
-                        jsonBaseData.getVerifier()
+                        super.getVerifiers()
                     );
                 
                 String data = 
@@ -147,7 +147,7 @@ public class JsonTransportationImpl
                     jsonBaseData.getId(),
                     jsonBaseData.getOrgId(),
                     jsonBaseData.getData().toString(),
-                    jsonBaseData.getVerifier()
+                    super.getVerifiers()
                 );
             //根据编解码类型获取编解码枚举对象
             EncodeType encodeType = 
