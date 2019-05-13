@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,25 +17,23 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.entity;
+package com.webank.weid.suite.api.transportation;
+
+import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
+import com.webank.weid.suite.api.transportation.inf.QrCodeTransportation;
+import com.webank.weid.suite.transportation.json.impl.JsonTransportationImpl;
+import com.webank.weid.suite.transportation.qr.impl.QrCodeJsonTransportationImpl;
 
 /**
- * 编解码配置.
- * @author v_wbgyang
- *
+ * Created by Junqi Zhang on 2019/5/13.
  */
-public class ProtocolProperty {
-    
-    /**
-     * 协议编解码类型.
-     */
-    private EncodeType encodeType;
+public class TransportationFactory {
 
-    public EncodeType getEncodeType() {
-        return encodeType;
+    public static JsonTransportation newJsonTransportation() {
+        return new JsonTransportationImpl();
     }
-    
-    public ProtocolProperty(EncodeType encodeType) {
-        this.encodeType = encodeType;
+
+    public static QrCodeTransportation newQrCodeTransportation() {
+        return new QrCodeJsonTransportationImpl();
     }
 }

@@ -17,20 +17,10 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.amop;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+package com.webank.weid.protocol.inf;
 
 /**
- * @author tonychen 2019年4月16日
+ * 请求体
  */
-@Data
-@EqualsAndHashCode(callSuper = false)
-public class AmopCommonArgs extends AmopBaseMsgArgs {
-
-    /*
-     * 任意包体
-     */
-    private String message;
+public interface IArgs {
 }

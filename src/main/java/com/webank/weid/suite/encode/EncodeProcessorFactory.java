@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weid.exception.EncodeSuiteException;
-import com.webank.weid.suite.entity.EncodeType;
+import com.webank.weid.suite.api.transportation.params.EncodeType;
 
 /**
  * 编解码工厂,用于获取编解码处理器.
