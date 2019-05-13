@@ -31,7 +31,7 @@ import com.webank.weid.util.DataToolUtils;
 public class QrCodeVersion1 extends QrCodeBaseData {
 
     private static final String protocol = 
-        PROTOCOL_VERSION + "encodeType|orgId|verifier|id|data|extendData";
+        PROTOCOL_VERSION + "encodeType|orgId|id|data|extendData";
     
     private static final String[] protocols;
     

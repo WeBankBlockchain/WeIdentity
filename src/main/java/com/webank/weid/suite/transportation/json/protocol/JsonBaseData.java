@@ -55,11 +55,6 @@ public class JsonBaseData {
      * 协议数据体.
      */
     private Object data;
-    
-    /**
-     * 协议数据所指定的用户.
-     */
-    private String verifier;
 
     /**
      * 协议通讯类型.
