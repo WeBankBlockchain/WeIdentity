@@ -39,7 +39,7 @@ import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.EncodeType;
 import com.webank.weid.suite.entity.ProtocolProperty;
-import com.webank.weid.suite.transportation.qr.QrCodeTransportation;
+import com.webank.weid.suite.transportation.TransportationFactory;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
 
 /**
@@ -64,7 +64,7 @@ public class TestSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase1() {
         ResponseData<String> response =
-            QrCodeTransportation.serialize(
+            TransportationFactory.newQrCodeTransportation().serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.ORIGINAL)
             );
@@ -79,7 +79,7 @@ public class TestSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase2() {
         ResponseData<String> response =
-            QrCodeTransportation.serialize(
+            TransportationFactory.newQrCodeTransportation().serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
@@ -94,7 +94,7 @@ public class TestSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase3() {
         ResponseData<String> response =
-            QrCodeTransportation.serialize(presentation, null);
+            TransportationFactory.newQrCodeTransportation().serialize(presentation, null);
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR.getCode(),
@@ -109,7 +109,7 @@ public class TestSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase4() {
         ResponseData<String> response =
-            QrCodeTransportation.serialize(presentation, new ProtocolProperty(null));
+            TransportationFactory.newQrCodeTransportation().serialize(presentation, new ProtocolProperty(null));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
@@ -125,7 +125,7 @@ public class TestSerialize extends TestBaseTransportation {
     public void testSerializeCase5() {
         PresentationE presentation = null;
         ResponseData<String> response =
-            QrCodeTransportation.serialize(
+            TransportationFactory.newQrCodeTransportation().serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.ORIGINAL)
             );
@@ -145,7 +145,7 @@ public class TestSerialize extends TestBaseTransportation {
         PresentationE presentation = this.getPresentationE();
         presentation.getContext().add("value|v");
         ResponseData<String> response =
-            QrCodeTransportation.serialize(
+            TransportationFactory.newQrCodeTransportation().serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.ORIGINAL)
             );
@@ -171,7 +171,7 @@ public class TestSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            QrCodeTransportation.serialize(
+            TransportationFactory.newQrCodeTransportation().serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
@@ -198,7 +198,7 @@ public class TestSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            QrCodeTransportation.serialize(
+            TransportationFactory.newQrCodeTransportation().serialize(
                 presentation, 
                 new ProtocolProperty(EncodeType.CIPHER)
             );
@@ -225,7 +225,7 @@ public class TestSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            QrCodeTransportation.serialize(
+            TransportationFactory.newQrCodeTransportation().serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );

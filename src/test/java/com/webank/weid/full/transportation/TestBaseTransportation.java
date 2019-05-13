@@ -39,7 +39,7 @@ import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.AmopServiceImpl;
-import com.webank.weid.suite.transportation.qr.QrCodeTransportation;
+import com.webank.weid.suite.transportation.TransportationFactory;
 
 public abstract class TestBaseTransportation extends TestBaseServcie {
 
@@ -52,13 +52,13 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
                 GetEncryptKeyResponse getEncryptKeyResponse = new GetEncryptKeyResponse();
                 getEncryptKeyResponse.setErrorCode(ErrorCode.SUCCESS.getCode());
                 getEncryptKeyResponse.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
-                String result = dataDriver.getData("transEncryption", args.getKeyId()).getResult();
+                String result = dataDriver.get("transEncryption", args.getKeyId()).getResult();
                 getEncryptKeyResponse.setEncryptKey(result);
                 return new ResponseData<>(getEncryptKeyResponse, ErrorCode.SUCCESS);
             }
         };
         ResponseData<PresentationE> wrapperRes =
-                QrCodeTransportation.deserialize(response.getResult(), PresentationE.class);
+            TransportationFactory.newQrCodeTransportation().deserialize(response.getResult(), PresentationE.class);
         mockBaseService.tearDown();
         return wrapperRes;
     }
