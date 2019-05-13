@@ -30,7 +30,8 @@ import mockit.MockUp;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.suite.persistence.PersistenceApi;
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.transportation.TransportationFactory;
 import com.webank.weid.suite.persistence.driver.MysqlDriver;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.base.CredentialPojo;
@@ -39,11 +40,10 @@ import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.AmopServiceImpl;
-import com.webank.weid.suite.transportation.TransportationFactory;
 
 public abstract class TestBaseTransportation extends TestBaseServcie {
 
-    protected PersistenceApi dataDriver = new MysqlDriver();
+    protected Persistence dataDriver = new MysqlDriver();
 
     protected ResponseData<PresentationE> mockCipherDeserialize(ResponseData<String> response) {
         MockUp<AmopServiceImpl> mockBaseService = new MockUp<AmopServiceImpl>() {
