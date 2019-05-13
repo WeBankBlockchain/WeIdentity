@@ -21,6 +21,7 @@ package com.webank.weid.suite.transportation;
 
 import com.webank.weid.suite.transportation.inf.JsonTransportation;
 import com.webank.weid.suite.transportation.inf.QrCodeTransportation;
+import com.webank.weid.suite.transportation.json.impl.JsonTransportationImpl;
 import com.webank.weid.suite.transportation.qr.impl.QrCodeJsonTransportationImpl;
 
 /**
@@ -29,7 +30,7 @@ import com.webank.weid.suite.transportation.qr.impl.QrCodeJsonTransportationImpl
 public class TransportationFactory {
 
     public static JsonTransportation newJsonTransportation() {
-        return new QrCodeJsonTransportationImpl();
+        return new JsonTransportationImpl();
     }
 
     public static QrCodeTransportation newQrCodeTransportation() {
