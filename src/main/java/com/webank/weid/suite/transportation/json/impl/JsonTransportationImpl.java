@@ -46,12 +46,12 @@ import com.webank.weid.util.JsonUtil;
  * @author v_wbgyang
  *
  */
-public class JsonJsonTransportationImpl
+public class JsonTransportationImpl
     extends AbstractJsonTransportation
     implements JsonTransportation {
 
     private static final Logger logger = 
-        LoggerFactory.getLogger(JsonJsonTransportationImpl.class);
+        LoggerFactory.getLogger(JsonTransportationImpl.class);
     
     private static final JsonVersion version = JsonVersion.V1;
     
@@ -61,7 +61,7 @@ public class JsonJsonTransportationImpl
         ProtocolProperty property) {
 
         logger.info(
-            "begin to execute JsonJsonTransportationImpl serialization, property:{}.",
+            "begin to execute JsonTransportationImpl serialization, property:{}.",
             property
         );
         // 检查协议配置完整性
@@ -105,7 +105,7 @@ public class JsonJsonTransportationImpl
             }
             // 将jsonBaseData转换成JSON字符串
             String jsonData = JsonUtil.objToJsonStrWithNoPretty(jsonBaseData);
-            logger.info("JsonJsonTransportationImpl serialization finished.");
+            logger.info("JsonTransportationImpl serialization finished.");
             return new ResponseData<String>(jsonData, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("JsonTransportationFactory serialization due to base error.", e);
@@ -121,7 +121,7 @@ public class JsonJsonTransportationImpl
         String transString,
         Class<T> clazz) {
         
-        logger.info("begin to execute JsonJsonTransportationImpl deserialization.");
+        logger.info("begin to execute JsonTransportationImpl deserialization.");
         try {
             if (StringUtils.isBlank(transString)) {
                 logger.error("the transString is blank.");
@@ -163,7 +163,7 @@ public class JsonJsonTransportationImpl
                     .decode(encodeData);
             T object = 
                 (T) JsonUtil.jsonStrToObj(clazz, presentationEStr);
-            logger.info("JsonJsonTransportationImpl deserialization finished.");
+            logger.info("JsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(object, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("JsonTransportationFactory deserialization due to base error.", e);
