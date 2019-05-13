@@ -17,11 +17,13 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.amop;
+package com.webank.weid.protocol.inf;
 
-/**
- * 结果
- */
-public interface IResult {
+import com.webank.weid.util.JsonUtil;
 
+public interface JsonSerializer {
+
+   default public String toJson() {
+       return JsonUtil.objToJsonStrWithNoPretty(this);
+   }
 }

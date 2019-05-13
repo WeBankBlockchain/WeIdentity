@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.suite.persistence.PersistenceApi;
+import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.persistence.driver.MysqlDriver;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
@@ -16,7 +16,7 @@ public class KeyManagerCallback extends AmopCallback {
     
     private static final Logger logger =  LoggerFactory.getLogger(KeyManagerCallback.class);
     
-    private PersistenceApi dataDriver = new MysqlDriver();
+    private Persistence dataDriver = new MysqlDriver();
     
     private static final String TRANSENCRYPTIONDOMAIN = "transEncryption";
     

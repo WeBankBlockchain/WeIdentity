@@ -1,5 +1,6 @@
 package com.webank.weid.protocol.amop;
 
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 import lombok.Getter;
 import lombok.Setter;
 

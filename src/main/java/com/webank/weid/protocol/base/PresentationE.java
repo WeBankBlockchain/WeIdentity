@@ -28,7 +28,7 @@ import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.protocol.amop.RawSerializer;
+import com.webank.weid.protocol.inf.RawSerializer;
 
 /**
  * Created by Junqi Zhang on 2019/4/4.

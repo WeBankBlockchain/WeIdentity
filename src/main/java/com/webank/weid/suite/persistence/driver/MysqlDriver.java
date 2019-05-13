@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.suite.persistence.PersistenceApi;
+import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
@@ -44,7 +44,7 @@ import com.webank.weid.util.PropertyUtils;
  *
  * @author tonychen 2019年3月18日
  */
-public class MysqlDriver implements PersistenceApi {
+public class MysqlDriver implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(MysqlDriver.class);
 
