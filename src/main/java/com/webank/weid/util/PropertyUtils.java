@@ -68,7 +68,6 @@ public final class PropertyUtils {
         return prop.getProperty(key);
     }
 
-    
     /**
      * get property value by specific key.
      *

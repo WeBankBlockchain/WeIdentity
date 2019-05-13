@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.transportation.json;
+package com.webank.weid.suite.transportation.json.impl;
 
 import java.util.Map;
 
@@ -46,12 +46,12 @@ import com.webank.weid.util.JsonUtil;
  * @author v_wbgyang
  *
  */
-class JsonTransportationService
+public class JsonTransportationImpl
     extends AbstractTransportation
     implements Transportation {
 
     private static final Logger logger = 
-        LoggerFactory.getLogger(JsonTransportationService.class);
+        LoggerFactory.getLogger(JsonTransportationImpl.class);
     
     private static final JsonVersion version = JsonVersion.V1;
     
@@ -61,7 +61,7 @@ class JsonTransportationService
         ProtocolProperty property) {
 
         logger.info(
-            "begin to execute JsonTransportationService serialization, property:{}.",
+            "begin to execute JsonTransportationImpl serialization, property:{}.",
             property
         );
         // 检查协议配置完整性
@@ -104,7 +104,7 @@ class JsonTransportationService
             }
             // 将jsonBaseData转换成JSON字符串
             String jsonData = JsonUtil.objToJsonStrWithNoPretty(jsonBaseData);
-            logger.info("JsonTransportationService serialization finished.");
+            logger.info("JsonTransportationImpl serialization finished.");
             return new ResponseData<String>(jsonData, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("JsonTransportation serialization due to base error.", e);
@@ -120,7 +120,7 @@ class JsonTransportationService
         String transString,
         Class<T> clazz) {
         
-        logger.info("begin to execute JsonTransportationService deserialization.");
+        logger.info("begin to execute JsonTransportationImpl deserialization.");
         try {
             if (StringUtils.isBlank(transString)) {
                 logger.error("the transString is blank.");
@@ -162,7 +162,7 @@ class JsonTransportationService
                     .decode(encodeData);
             T object = 
                 (T) JsonUtil.jsonStrToObj(clazz, presentationEStr);
-            logger.info("JsonTransportationService deserialization finished.");
+            logger.info("JsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(object, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("JsonTransportation deserialization due to base error.", e);
