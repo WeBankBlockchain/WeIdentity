@@ -23,6 +23,7 @@ package com.webank.weid.protocol.amop;
 //import cn.webank.blockchain.spi.common.annoation.BlockChainDTO.BindTypeEnum;
 import com.webank.weid.annoation.BlockChainDTO;
 import com.webank.weid.annoation.BlockChainDTO.BindTypeEnum;
+import com.webank.weid.protocol.base.Version;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -48,4 +49,9 @@ public class AmopBaseMsgArgs implements IArgs {
      * 目的机构id
      */
     protected String toOrgId;
+
+    /*
+     * sdk functions version
+     */
+    protected Version version;
 }

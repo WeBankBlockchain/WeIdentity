@@ -4,11 +4,13 @@ import com.webank.weid.protocol.amop.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.entity.ProtocolProperty;
 import com.webank.weid.suite.transportation.Transportation;
+import com.webank.weid.suite.transportation.qr.impl.QrCodeTransportationImpl;
+import java.util.List;
 
 public class QrCodeTransportation {
-    
-    public static Transportation specifyVerifier(String weId) {
-        return newInstance().specifyVerifier(weId);
+
+    public static Transportation specify(List<String> verifierWeIdList) {
+        return newInstance().specify(verifierWeIdList);
     }
 
     /**
@@ -37,6 +39,6 @@ public class QrCodeTransportation {
     }
     
     private static Transportation newInstance() {
-        return new QrCodeTransportationService();
+        return new QrCodeTransportationImpl();
     }
 }

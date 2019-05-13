@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.persistence.driver;
+package com.webank.weid.suite.persistence.driver;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.persistence.PersistenceApi;
+import com.webank.weid.suite.persistence.PersistenceApi;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
@@ -103,10 +103,10 @@ public class MysqlDriver implements PersistenceApi {
     }
 
     @Override
-    public ResponseData<String> getData(String domain, String id) {
+    public ResponseData<String> get(String domain, String id) {
 
     	if(StringUtils.isEmpty(id)) {
-    		logger.error("[mysql->getData] the id of the data is empty.");
+    		logger.error("[mysql->get] the id of the data is empty.");
     		return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
     	}
     	String dataKey = DataToolUtils.getHash(id);

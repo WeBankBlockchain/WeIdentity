@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,7 +17,7 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.transportation.qr;
+package com.webank.weid.suite.transportation.qr.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,12 +45,12 @@ import com.webank.weid.util.JsonUtil;
  * @author v_wbgyang
  *
  */
-class QrCodeTransportationService
+public class QrCodeTransportationImpl
     extends AbstractTransportation
     implements Transportation {
 
     private static final Logger logger = 
-        LoggerFactory.getLogger(QrCodeTransportationService.class);
+        LoggerFactory.getLogger(QrCodeTransportationImpl.class);
     
     private static final QrCodeVersion version = QrCodeVersion.V1;
     
@@ -70,7 +70,7 @@ class QrCodeTransportationService
         ProtocolProperty property) {
         
         logger.info(
-            "begin to execute QrCodeTransportationService serialization, property:{}",
+            "begin to execute QrCodeTransportationImpl serialization, property:{}",
             property
         );
         // 验证协议配置
@@ -113,7 +113,7 @@ class QrCodeTransportationService
             qrCodeData.setData(data);
             // 将协议实体转换成协议字符串数据
             String transString = qrCodeData.buildBuffer().getTransString();
-            logger.info("QrCodeTransportationService serialization finished.");
+            logger.info("QrCodeTransportationImpl serialization finished.");
             return new ResponseData<String>(transString, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("QrCodeTransportation serialization due to base error.", e);
@@ -129,7 +129,7 @@ class QrCodeTransportationService
         String transString,
         Class<T> clazz) {
         
-        logger.info("begin to execute QrCodeTransportationService deserialization.");
+        logger.info("begin to execute QrCodeTransportationImpl deserialization.");
         try {
             //解析协议版本
             QrCodeVersion version = QrCodeBaseData.getQrCodeVersion(transString);
@@ -153,7 +153,7 @@ class QrCodeTransportationService
                     .decode(encodeData);
             //将解压出来的数据进行反序列化成原数据对象
             T presentation = JsonUtil.jsonStrToObj(clazz, data);
-            logger.info("QrCodeTransportationService deserialization finished.");
+            logger.info("QrCodeTransportationImpl deserialization finished.");
             return new ResponseData<T>(presentation, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("QrCodeTransportation deserialization due to base error.", e);

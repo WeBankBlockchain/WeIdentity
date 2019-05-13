@@ -42,7 +42,7 @@ public class JsonBaseData {
     private int encodeType;
     
     /**
-     * 协议所属机构.
+     * user agent的机构ID.
      */
     private String orgId;
     

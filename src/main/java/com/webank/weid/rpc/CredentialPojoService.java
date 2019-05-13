@@ -62,20 +62,20 @@ public interface CredentialPojoService {
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
     ResponseData<Boolean> verify(
-        CredentialPojoWrapper credentialWrapper,
-        String issuerWeId
+        String issuerWeId,
+        CredentialPojoWrapper credentialWrapper
     );
 
     /**
      * Verify the validity of a credential. Public key must be provided.
      *
-     * @param credentialWrapper the credential wrapper
      * @param issuerPublicKey the specified public key which used to verify credential signature
+     * @param credentialWrapper the credential wrapper
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
     ResponseData<Boolean> verify(
-        CredentialPojoWrapper credentialWrapper,
-        WeIdPublicKey issuerPublicKey
+        WeIdPublicKey issuerPublicKey,
+        CredentialPojoWrapper credentialWrapper
     );
 
     ResponseData<Boolean> verify(
