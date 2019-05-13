@@ -132,11 +132,12 @@ public final class CredentialPojoUtils {
 			if (newClaimObj instanceof Map) {
 				addSaltAndGetHash((HashMap) newClaimObj, (HashMap) saltObj, (HashMap) disclosureObj);
 			} else {
-				if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(saltObj)
-						|| disclosureObj == null) {
-					((HashMap) newClaimObj).put(key,
-							getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj)));
-				}
+			    if (disclosureObj == null) {
+			        if (!CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().equals(saltObj)) {
+			            (claim).put(key,
+	                            getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj)));
+			        }
+			    }
 			}
 		}
     }
