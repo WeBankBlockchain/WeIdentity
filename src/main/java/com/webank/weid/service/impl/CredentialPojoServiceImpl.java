@@ -118,7 +118,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     .equals(CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus())) {
                     saltMap.put(claimKey, CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus());
                     String hash = CredentialPojoUtils
-                        .getFieldSaltHash(String.valueOf(value), String.valueOf(saltV));
+                        .getFieldSaltHash(String.valueOf(claimV), String.valueOf(saltV));
                     claim.put(claimKey, hash);
                 }
             }
@@ -338,7 +338,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             //verify credential
             ErrorCode verifyCredentialResult = verifyContent(credentialPojoWrapper, null);
-            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            if (verifyCredentialResult.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[verify] verify credential {} failed.", credentialPojoWrapper);
                 return new ResponseData<Boolean>(false, verifyCredentialResult);
