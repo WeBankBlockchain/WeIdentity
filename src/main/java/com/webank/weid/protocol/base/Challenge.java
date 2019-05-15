@@ -32,7 +32,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Challenge extends Version implements RawSerializer {
-    
+
     /**
      * Specify who you want to challenge.
      */
@@ -46,28 +46,36 @@ public class Challenge extends Version implements RawSerializer {
      *
      */
     private String nonce;
-    
-    @Override
-    public String toRawData() {
-        return this.nonce;
-    }
 
     /**
      * Factory function which can help to create a brand new challenge object.
      *
-     * @return
+     * @param userWeId Specify who you want to challenge. Most of the time you need to pass user's
+     * weId.
+     * @param seed
+     * @return Challenge
      */
-    public static Challenge create(String seed) {
-        Challenge challenge = new Challenge();
-        challenge.setVersion(1);
+    public static Challenge create(String userWeId, String seed) {
+
         SecureRandom random = new SecureRandom();
-        
         String randomSeed = seed + DataToolUtils.getUuId32();
         random.setSeed(randomSeed.getBytes());
         byte bytes[] = new byte[15];
         random.nextBytes(bytes);
         String nonce = Base64.encodeBase64String(bytes);
+
+        Challenge challenge = new Challenge();
         challenge.setNonce(nonce);
+        challenge.setWeId(userWeId);
         return challenge;
+    }
+
+    @Override
+    public String toRawData() {
+        return this.nonce;
+    }
+
+    private Challenge() {
+        this.setVersion(1);
     }
 }
