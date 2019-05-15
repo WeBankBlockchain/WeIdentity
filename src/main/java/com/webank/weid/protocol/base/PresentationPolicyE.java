@@ -52,4 +52,9 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
      * specify which properties in which credential are needed.
      */
     private Map<Integer, ClaimPolicy> policy;
+
+    /**
+     * extra data which policy presenter can use it store some specific business data.
+     */
+    private Map<String, String> extra;
 }
