@@ -19,11 +19,18 @@
 
 package com.webank.weid.suite.api.transportation.inf;
 
+import com.webank.weid.protocol.response.ResponseData;
+import java.util.stream.Stream;
+
 /**
  * 协议的传输接口.
  * @author v_wbgyang
  *
  */
 public interface QrCodeTransportation extends JsonTransportation {
+
+    ResponseData<Stream<Byte>> toPng(String qrCodeString);
+
+    ResponseData<Integer> toPng(String qrCodeString, String targetPath);
 
 }
