@@ -48,4 +48,13 @@ public class Challenge extends Version implements RawSerializer {
     public String toRawData() {
         return this.nonce;
     }
+
+    /**
+     * Factory function which can help to create a brand new challenge object.
+     *
+     * @return
+     */
+    public static Challenge create(String seed) {
+        return null;
+    }
 }
