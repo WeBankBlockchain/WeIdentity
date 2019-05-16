@@ -46,9 +46,9 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
-import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 import com.webank.weid.protocol.amop.AmopRequestBody;
 import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.OnNotifyCallback;
@@ -82,6 +82,9 @@ public abstract class BaseService {
         service = context.getBean(Service.class);
     }
 
+    /**
+     * 无参构造器.
+     */
     public BaseService() {
         if (web3j == null) {
             initWeb3j();
@@ -94,8 +97,6 @@ public abstract class BaseService {
 
     private static boolean initWeb3j() {
 
-//        Service service = context.getBean(Service.class);
-        //initialize amop
         if (!initAmop(service)) {
             logger.error("[BaseService] initialize amop failed.");
             return false;
@@ -267,7 +268,14 @@ public abstract class BaseService {
         return (Contract) contract;
     }
 
-    public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(String toOrgId,
+    /**
+     *  the checkDirectRouteMsgHealth。.
+     * @param toOrgId target orgId.
+     * @param arg the message
+     * @return return the health result
+     */
+    public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(
+        String toOrgId,
         CheckAmopMsgHealthArgs arg) {
 
         return this.getImpl(
@@ -304,7 +312,6 @@ public abstract class BaseService {
         request.setToTopic(toOrgId);
         request.setMessageID(getSeq());
 
-//        String msgBody = jsonMapper.toJson(arg);
         String msgBody = DataToolUtils.serialize(arg);
         AmopRequestBody amopRequestBody = new AmopRequestBody();
         amopRequestBody.setMsgType(msgType);

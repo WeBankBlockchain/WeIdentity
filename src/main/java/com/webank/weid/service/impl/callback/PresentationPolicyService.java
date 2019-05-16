@@ -12,9 +12,15 @@ public abstract class PresentationPolicyService extends BaseService {
     
     private static PresentationCallback presentationCallback = new PresentationCallback();
     
+    /**
+     * 无参构造器,自动注册callback.
+     */
     public PresentationPolicyService() {
         presentationCallback.registPolicyService(this);
-        amopService.registerCallback(AmopMsgType.GET_POLICY_AND_CHALLENGE.getValue(), presentationCallback);  
+        amopService.registerCallback(
+            AmopMsgType.GET_POLICY_AND_CHALLENGE.getValue(), 
+            presentationCallback
+        );
     }
 
     /**
@@ -22,5 +28,8 @@ public abstract class PresentationPolicyService extends BaseService {
      * @param policyId 策略编号
      * @return 返回PresentationPolicyE对象数据
      */
-    public abstract PolicyAndChallenge policyAndChallengeOnPush(String policyId, String targetUserWeId);
+    public abstract PolicyAndChallenge policyAndChallengeOnPush(
+        String policyId, 
+        String targetUserWeId
+    );
 }

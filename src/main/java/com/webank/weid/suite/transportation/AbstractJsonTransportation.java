@@ -19,19 +19,21 @@
 
 package com.webank.weid.suite.transportation;
 
+import java.util.List;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
-import java.util.List;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 
 /**
  * 二维码传输协议抽象类定义.
  * @author v_wbgyang
  *
  */
-public abstract class AbstractJsonTransportation extends BaseService implements
-    JsonTransportation {
+public abstract class AbstractJsonTransportation 
+    extends BaseService 
+    implements JsonTransportation {
     
     private List<String> verifierWeIdList;
     

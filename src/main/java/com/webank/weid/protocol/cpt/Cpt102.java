@@ -20,9 +20,9 @@
 package com.webank.weid.protocol.cpt;
 
 /**
- * Credential for Challenge
- *
- * Created by Junqi Zhang on 2019/4/9.
+ * Credential for Challenge.
+ * 
+ * @author Created by Junqi Zhang on 2019/4/9.
  */
 public class Cpt102 {
 

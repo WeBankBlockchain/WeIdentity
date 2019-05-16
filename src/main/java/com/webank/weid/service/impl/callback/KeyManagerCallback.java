@@ -5,12 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.driver.MysqlDriver;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.AmopCallback;
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.driver.MysqlDriver;
 
 public class KeyManagerCallback extends AmopCallback {
     

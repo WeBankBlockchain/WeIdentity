@@ -111,7 +111,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 );
             }
             credentialWrapper.setDisclosure(disclosureMap);
-
+            
             // Construct Credential Proof
             Map<String, String> credentialProof = CredentialUtils.buildCredentialProof(
                 result,
@@ -306,10 +306,11 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             Map<String, Object> disclosureMap = credentialWrapper.getDisclosure();
             String rawData = CredentialUtils
                 .getCredentialThumbprintWithoutSig(credential, disclosureMap);
-            String signatureValue = credential.getSignature();
             Sign.SignatureData signatureData =
                 DataToolUtils.simpleSignatureDeserialization(
-                    DataToolUtils.base64Decode(signatureValue.getBytes(StandardCharsets.UTF_8))
+                    DataToolUtils.base64Decode(
+                        credential.getSignature().getBytes(StandardCharsets.UTF_8)
+                    )
                 );
 
             if (StringUtils.isEmpty(publicKey)) {
@@ -326,14 +327,14 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     WeIdDocument weIdDocument = innerResponseData.getResult();
                     ErrorCode errorCode =  DataToolUtils
                         .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
-                    if(errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                    	return new ResponseData<>(false, errorCode);
+                    if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                        return new ResponseData<>(false, errorCode);
                     }
                     return new ResponseData<>(true, ErrorCode.SUCCESS);
                 }
             } else {
                 boolean result =
-                		DataToolUtils
+                    DataToolUtils
                         .verifySignature(rawData, signatureData, new BigInteger(publicKey));
                 if (!result) {
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);

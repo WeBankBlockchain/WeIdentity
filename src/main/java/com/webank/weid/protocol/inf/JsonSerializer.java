@@ -23,7 +23,7 @@ import com.webank.weid.util.JsonUtil;
 
 public interface JsonSerializer {
 
-   default public String toJson() {
-       return JsonUtil.objToJsonStrWithNoPretty(this);
-   }
+    public default String toJson() {
+        return JsonUtil.objToJsonStrWithNoPretty(this);
+    }
 }

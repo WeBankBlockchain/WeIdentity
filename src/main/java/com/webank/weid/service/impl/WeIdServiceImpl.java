@@ -420,55 +420,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         return new ResponseData<>(result, errorCode);
     }
 
-    private ErrorCode processCreateWeId(String weId, String publicKey, String privateKey) {
-        try {
-            WeIdContract weIdContract = (WeIdContract) reloadContract(
-                weIdContractAddress,
-                privateKey,
-                WeIdContract.class);
-
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-            DynamicBytes auth = DataTypetUtils.stringToDynamicBytes(
-                new StringBuffer()
-                    .append(publicKey)
-                    .append(WeIdConstant.SEPARATOR)
-                    .append(weAddress)
-                    .toString());
-            DynamicBytes created = DataTypetUtils
-                .stringToDynamicBytes(DateUtils.getCurrentTimeStampString());
-            Future<TransactionReceipt> future = weIdContract.createWeId(
-                new Address(weAddress),
-                auth,
-                created,
-                DateUtils.getCurrentTimeStampInt256()
-            );
-            TransactionReceipt receipt =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            List<WeIdAttributeChangedEventResponse> response =
-                WeIdContract.getWeIdAttributeChangedEvents(receipt);
-            if (CollectionUtils.isEmpty(response)) {
-                logger.error(
-                    "The input private key does not match the current weid, operation of "
-                        + "modifying weid is not allowed. weid is {}",
-                    weId
-                );
-                return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("Set authenticate failed. Error message :{}", e);
-            return ErrorCode.TRANSACTION_EXECUTE_ERROR;
-        } catch (TimeoutException e) {
-            return ErrorCode.TRANSACTION_TIMEOUT;
-        } catch (PrivateKeyIllegalException e) {
-            return e.getErrorCode();
-        } catch (LoadContractException e) {
-            return e.getErrorCode();
-        } catch (Exception e) {
-            return ErrorCode.UNKNOW_ERROR;
-        }
-        return ErrorCode.SUCCESS;
-    }
-
     /**
      * Create a WeIdentity DID.
      *
@@ -545,6 +496,55 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
     }
 
+    private ErrorCode processCreateWeId(String weId, String publicKey, String privateKey) {
+        try {
+            WeIdContract weIdContract = (WeIdContract) reloadContract(
+                weIdContractAddress,
+                privateKey,
+                WeIdContract.class);
+
+            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
+            DynamicBytes auth = DataTypetUtils.stringToDynamicBytes(
+                new StringBuffer()
+                    .append(publicKey)
+                    .append(WeIdConstant.SEPARATOR)
+                    .append(weAddress)
+                    .toString());
+            DynamicBytes created = DataTypetUtils
+                .stringToDynamicBytes(DateUtils.getCurrentTimeStampString());
+            Future<TransactionReceipt> future = weIdContract.createWeId(
+                new Address(weAddress),
+                auth,
+                created,
+                DateUtils.getCurrentTimeStampInt256()
+            );
+            TransactionReceipt receipt =
+                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            List<WeIdAttributeChangedEventResponse> response =
+                WeIdContract.getWeIdAttributeChangedEvents(receipt);
+            if (CollectionUtils.isEmpty(response)) {
+                logger.error(
+                    "The input private key does not match the current weid, operation of "
+                        + "modifying weid is not allowed. weid is {}",
+                    weId
+                );
+                return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Set authenticate failed. Error message :{}", e);
+            return ErrorCode.TRANSACTION_EXECUTE_ERROR;
+        } catch (TimeoutException e) {
+            return ErrorCode.TRANSACTION_TIMEOUT;
+        } catch (PrivateKeyIllegalException e) {
+            return e.getErrorCode();
+        } catch (LoadContractException e) {
+            return e.getErrorCode();
+        } catch (Exception e) {
+            return ErrorCode.UNKNOW_ERROR;
+        }
+        return ErrorCode.SUCCESS;
+    }
+    
     /**
      * Get a WeIdentity DID Document.
      *

@@ -19,16 +19,6 @@
 
 package com.webank.weid.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Splitter;
-
-import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.protocol.response.RsvSignature;
-import com.webank.weid.service.BaseService;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -40,6 +30,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicBytes;
@@ -54,6 +47,12 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.JsonSchemaConstant;
+import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.response.RsvSignature;
+import com.webank.weid.service.BaseService;
 
 /**
  * Transaction related utility functions. This class handles specific Transaction tasks, including
@@ -230,8 +229,10 @@ public class TransactionUtils {
             logger.error("Input cpt signature invalid: {}", cptSignature);
             return null;
         }
-        RsvSignature rsvSignature = DataToolUtils.convertSignatureDataToRsv(
-        		DataToolUtils.convertBase64StringToSignatureData(cptSignature));
+        RsvSignature rsvSignature = 
+            DataToolUtils.convertSignatureDataToRsv(
+                DataToolUtils.convertBase64StringToSignatureData(cptSignature)
+            );
 
         StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
