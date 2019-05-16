@@ -19,12 +19,14 @@
 
 package com.webank.weid.protocol.base;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * The base data structure to handle Credential info.
@@ -90,6 +92,25 @@ public class CredentialPojo {
      */
     public String getProofType() {
         return getValueFromProof(ParamKeyConstant.PROOF_TYPE);
+    }
+    
+    /**
+     * Directly extract the salt from credential.
+     *
+     * @return proof type
+     */
+    public Map<String, Object> getSalt() {
+        String salt = getValueFromProof(ParamKeyConstant.PROOF_SALT);
+        return DataToolUtils.deserialize(salt, new HashMap<String, Object>().getClass());
+    }
+    
+    /**
+     * put the salt into proof.
+     *
+     * @return proof type
+     */
+    public void setSalt(Map<String, Object> salt){
+        proof.put(ParamKeyConstant.PROOF_SALT, DataToolUtils.serialize(salt));
     }
 
     private String getValueFromProof(String key) {

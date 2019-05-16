@@ -61,6 +61,7 @@ import com.webank.weid.constant.WeIdEventConstant;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.exception.ResolveAttributeException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
@@ -416,29 +417,27 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     }
 
     private ErrorCode processCreateWeId(String weId, String publicKey, String privateKey) {
-
-        WeIdContract weIdContract = (WeIdContract) reloadContract(
-            weIdContractAddress,
-            privateKey,
-            WeIdContract.class);
-
-        String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-        DynamicBytes auth = DataTypetUtils.stringToDynamicBytes(
-            new StringBuffer()
-                .append(publicKey)
-                .append("/")
-                .append(weAddress)
-                .toString());
-        DynamicBytes created = DataTypetUtils
-            .stringToDynamicBytes(DateUtils.getCurrentTimeStampString());
-        Future<TransactionReceipt> future = weIdContract.createWeId(
-            new Address(weAddress),
-            auth,
-            created,
-            DateUtils.getCurrentTimeStampInt256()
-        );
-
         try {
+            WeIdContract weIdContract = (WeIdContract) reloadContract(
+                weIdContractAddress,
+                privateKey,
+                WeIdContract.class);
+
+            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
+            DynamicBytes auth = DataTypetUtils.stringToDynamicBytes(
+                new StringBuffer()
+                    .append(publicKey)
+                    .append("/")
+                    .append(weAddress)
+                    .toString());
+            DynamicBytes created = DataTypetUtils
+                .stringToDynamicBytes(DateUtils.getCurrentTimeStampString());
+            Future<TransactionReceipt> future = weIdContract.createWeId(
+                new Address(weAddress),
+                auth,
+                created,
+                DateUtils.getCurrentTimeStampInt256()
+            );
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             List<WeIdAttributeChangedEventResponse> response =
@@ -454,6 +453,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             return ErrorCode.TRANSACTION_EXECUTE_ERROR;
         } catch (TimeoutException e) {
             return ErrorCode.TRANSACTION_TIMEOUT;
+        } catch (PrivateKeyIllegalException e) {
+            return e.getErrorCode();
+        } catch (LoadContractException e) {
+            return e.getErrorCode();
         } catch (Exception e) {
             return ErrorCode.UNKNOW_ERROR;
         }

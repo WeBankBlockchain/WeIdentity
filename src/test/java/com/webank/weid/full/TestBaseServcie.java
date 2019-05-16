@@ -62,7 +62,7 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author v_wbgyang
  */
-public abstract class TestBaseServcie extends BaseTest {
+public abstract class TestBaseServcie extends BaseTest implements MockMysqlDriver {
 
     /**
      * log4j.
@@ -444,6 +444,15 @@ public abstract class TestBaseServcie extends BaseTest {
 
     protected MockUp<WeIdContract> mockSetAttribute(MockUp<Future<?>> mockFuture) {
         return new MockUp<WeIdContract>() {
+            @Mock
+            public Future<?> createWeId(
+                Address identity, 
+                DynamicBytes auth,
+                DynamicBytes created, 
+                Int256 updated) {
+                return mockFuture.getMockInstance();
+            }
+            
             @Mock
             public Future<?> setAttribute(
                 Address identity,

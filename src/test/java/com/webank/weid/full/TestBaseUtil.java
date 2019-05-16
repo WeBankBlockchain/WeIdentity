@@ -134,7 +134,7 @@ public class TestBaseUtil {
     /**
      * build weId authority.
      */
-    private static WeIdAuthentication buildWeIdAuthority(CreateWeIdDataResult createWeId) {
+    public static WeIdAuthentication buildWeIdAuthority(CreateWeIdDataResult createWeId) {
 
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeId.getWeId());
