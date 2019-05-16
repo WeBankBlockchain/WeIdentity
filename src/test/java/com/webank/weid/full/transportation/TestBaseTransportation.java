@@ -24,46 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import mockit.Mock;
-import mockit.MockUp;
-
-import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.api.transportation.TransportationFactory;
-import com.webank.weid.suite.persistence.driver.MysqlDriver;
-import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.CredentialPojoWrapper;
 import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.response.GetEncryptKeyResponse;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.impl.AmopServiceImpl;
 
 public abstract class TestBaseTransportation extends TestBaseServcie {
-
-    protected Persistence dataDriver = new MysqlDriver();
-
-    protected ResponseData<PresentationE> mockCipherDeserialize(ResponseData<String> response) {
-        MockUp<AmopServiceImpl> mockBaseService = new MockUp<AmopServiceImpl>() {
-            @Mock
-            public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId, GetEncryptKeyArgs args) {
-                GetEncryptKeyResponse getEncryptKeyResponse = new GetEncryptKeyResponse();
-                getEncryptKeyResponse.setErrorCode(ErrorCode.SUCCESS.getCode());
-                getEncryptKeyResponse.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
-                String result = dataDriver.get("transEncryption", args.getKeyId()).getResult();
-                getEncryptKeyResponse.setEncryptKey(result);
-                return new ResponseData<>(getEncryptKeyResponse, ErrorCode.SUCCESS);
-            }
-        };
-        ResponseData<PresentationE> wrapperRes =
-            TransportationFactory.newQrCodeTransportation().deserialize(response.getResult(), PresentationE.class);
-        mockBaseService.tearDown();
-        return wrapperRes;
-    }
-    
-    
 
     protected PresentationE getPresentationE() {
         
@@ -83,15 +49,13 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
         proof.put("key2", "value2");
         presentation.setProof(proof);
         
-        CredentialPojoWrapper wrapper = new CredentialPojoWrapper();
         CredentialPojo credentialPojo = new CredentialPojo();
         credentialPojo.setCptId(123);
         credentialPojo.setClaim(TestBaseUtil.buildCptJsonSchemaData());
-        wrapper.setCredentialPojo(credentialPojo);
         
-        List<CredentialPojoWrapper> credentialList = new ArrayList<>();
-        credentialList.add(wrapper);
-        presentation.setCredentialList(credentialList);
+        List<CredentialPojo> credentialList = new ArrayList<>();
+        credentialList.add(credentialPojo);
+        presentation.setVerifiableCredential(credentialList);
         return presentation;
     }
 }

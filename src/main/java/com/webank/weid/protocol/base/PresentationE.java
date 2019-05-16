@@ -44,7 +44,7 @@ public class PresentationE implements RawSerializer {
 
     private List<String> type = new ArrayList<String>();
 
-    private List<CredentialPojoWrapper> credentialList;
+    private List<CredentialPojo> verifiableCredential;
 
     private Map<String, String> proof;
 

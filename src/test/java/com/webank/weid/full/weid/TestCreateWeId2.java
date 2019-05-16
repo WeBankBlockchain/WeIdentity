@@ -233,7 +233,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
         ResponseData<String> response = createWeIdForMock(mockFuture);
         LogUtil.info(logger, "createWeId", response);
 
-        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
     }
