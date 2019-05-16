@@ -48,7 +48,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     private static final Logger logger = LoggerFactory.getLogger(AmopServiceImpl.class);
 
     @Override
-    public ResponseData<PolicyAndChallenge> getPresentationPolicy(String orgId, Integer policyId) {
+    public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(String orgId, Integer policyId, String targetUserWeId) {
         try {
             if (StringUtils.isBlank(orgId)) {
                 logger.error("the orgId is null, policyId = {}", policyId);
@@ -59,6 +59,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             args.setToOrgId(orgId);
             args.setPolicyId(String.valueOf(policyId));
             args.setMessageId(getService().newSeq());
+            args.setTargetUserWeId(targetUserWeId);
             ResponseData<GetPolicyAndChallengeResponse> retResponse =
                 this.getPolicyAndChallenge(orgId, args);
             if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
@@ -82,6 +83,19 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         }
     }
 
+    private ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(
+        String toOrgId,
+        GetPolicyAndChallengeArgs args) {
+        return this.getImpl(
+            fromOrgId,
+            toOrgId,
+            args,
+            GetPolicyAndChallengeArgs.class,
+            GetPolicyAndChallengeResponse.class,
+            AmopMsgType.GET_POLICY_AND_CHALLENGE,
+            AMOP_REQUEST_TIMEOUT
+        );
+    }
 
     public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
         return this.getImpl(
@@ -104,19 +118,6 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             GetEncryptKeyArgs.class,
             GetEncryptKeyResponse.class,
             AmopMsgType.GET_ENCRYPT_KEY,
-            AMOP_REQUEST_TIMEOUT
-        );
-    }
-
-    public ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(String toOrgId,
-        GetPolicyAndChallengeArgs args) {
-        return this.getImpl(
-            fromOrgId,
-            toOrgId,
-            args,
-            GetPolicyAndChallengeArgs.class,
-            GetPolicyAndChallengeResponse.class,
-            AmopMsgType.GET_POLICY_AND_CHALLENGE,
             AMOP_REQUEST_TIMEOUT
         );
     }
