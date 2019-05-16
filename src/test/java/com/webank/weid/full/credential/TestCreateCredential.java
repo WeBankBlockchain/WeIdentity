@@ -129,7 +129,7 @@ public class TestCreateCredential extends TestBaseServcie {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
-        createCredentialArgs.setCptId(100000);
+        createCredentialArgs.setCptId(999999999);
 
         ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);
