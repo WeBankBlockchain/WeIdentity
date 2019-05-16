@@ -19,11 +19,11 @@
 
 package com.webank.weid.protocol.request;
 
-import com.webank.weid.protocol.base.WeIdAuthentication;
-
 import java.util.Map;
 
 import lombok.Data;
+
+import com.webank.weid.protocol.base.WeIdAuthentication;
 
 /**
  * The Arguments for the SDK API register CPT. The cptJsonSchema is Map.

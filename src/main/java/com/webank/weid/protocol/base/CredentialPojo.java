@@ -97,7 +97,7 @@ public class CredentialPojo {
     /**
      * Directly extract the salt from credential.
      *
-     * @return proof type
+     * @return salt
      */
     public Map<String, Object> getSalt() {
         String salt = getValueFromProof(ParamKeyConstant.PROOF_SALT);
@@ -106,10 +106,8 @@ public class CredentialPojo {
     
     /**
      * put the salt into proof.
-     *
-     * @return proof type
      */
-    public void setSalt(Map<String, Object> salt){
+    public void setSalt(Map<String, Object> salt) {
         proof.put(ParamKeyConstant.PROOF_SALT, DataToolUtils.serialize(salt));
     }
 

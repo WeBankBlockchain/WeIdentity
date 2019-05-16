@@ -140,7 +140,9 @@ public abstract class QrCodeBaseData {
                 String value = method.invoke(this, new Object[0]).toString();
                 //如果协议值中包含分割符则抛异常
                 if (value.indexOf(PROTOCOL_PARTITION) >= 0) {
-                    throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID);
+                    throw new ProtocolSuiteException(
+                        ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID
+                    );
                 }
                 //将协议字段拼接成协议字符串
                 if (buffer.length() == 0) {
@@ -191,7 +193,9 @@ public abstract class QrCodeBaseData {
                     Method method = theFirstParamType.getMethod("getObject", String.class);
                     Object obj = method.invoke(theFirstParamType, value);
                     if (obj == null) {
-                        throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID);
+                        throw new ProtocolSuiteException(
+                            ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID
+                        );
                     }
                     setMethod.invoke(this, obj);
                 } else {

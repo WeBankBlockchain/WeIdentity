@@ -19,8 +19,6 @@
 
 package com.webank.weid.suite.transportation.json.impl;
 
-import com.webank.weid.suite.transportation.AbstractJsonTransportation;
-import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -31,11 +29,13 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
+import com.webank.weid.suite.api.transportation.params.EncodeType;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
-import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.entity.JsonVersion;
-import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
+import com.webank.weid.suite.transportation.AbstractJsonTransportation;
 import com.webank.weid.suite.transportation.json.protocol.JsonBaseData;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
@@ -80,8 +80,6 @@ public class JsonTransportationImpl
         try {
             // 构建JSON协议数据
             JsonBaseData jsonBaseData = buildJsonData(property);
-            //NOTE: commented out by junqizhang
-//            jsonBaseData.setVerifier(super.getVerifier());
             logger.info("encode by {}.", property.getEncodeType().name());
             // 如果是原文方式，则直接放对象,data为对象类型
             if (property.getEncodeType() == EncodeType.ORIGINAL) {

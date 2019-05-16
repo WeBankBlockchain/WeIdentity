@@ -26,7 +26,6 @@ import org.springframework.stereotype.Component;
 
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
@@ -38,6 +37,8 @@ import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.base.AmopCommonArgs;
+
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
@@ -48,7 +49,11 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     private static final Logger logger = LoggerFactory.getLogger(AmopServiceImpl.class);
 
     @Override
-    public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(String orgId, Integer policyId, String targetUserWeId) {
+    public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
+        String orgId,
+        Integer policyId,
+        String targetUserWeId
+    ) {
         try {
             if (StringUtils.isBlank(orgId)) {
                 logger.error("the orgId is null, policyId = {}", policyId);
@@ -97,6 +102,9 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         );
     }
 
+    /**
+     * 发送普通消息的AMOP请求接口.
+     */
     public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
         return this.getImpl(
             fromOrgId,
@@ -109,6 +117,9 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         );
     }
 
+    /**
+     *  通过AMOP获取秘钥请求接口.
+     */
     public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId,
         GetEncryptKeyArgs args) {
         return this.getImpl(
@@ -122,6 +133,9 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         );
     }
 
+    /**
+     * 注册回调函数接口.
+     */
     public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
 
         OnNotifyCallback callback = (OnNotifyCallback) getService().getPushCallback();

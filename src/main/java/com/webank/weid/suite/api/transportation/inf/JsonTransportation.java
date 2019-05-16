@@ -19,10 +19,11 @@
 
 package com.webank.weid.suite.api.transportation.inf;
 
+import java.util.List;
+
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import java.util.List;
 
 /**
  * 协议的传输接口.

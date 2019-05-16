@@ -19,9 +19,9 @@
 
 package com.webank.weid.protocol.request;
 
-import com.webank.weid.protocol.base.WeIdAuthentication;
-
 import lombok.Data;
+
+import com.webank.weid.protocol.base.WeIdAuthentication;
 
 /**
  * The Arguments for the following SDK API: createCredential().

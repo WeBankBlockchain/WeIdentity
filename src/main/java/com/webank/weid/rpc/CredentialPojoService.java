@@ -49,7 +49,7 @@ public interface CredentialPojoService {
     /**
      * Generate a selective disclosure credential with specified claim policy.
      *
-     * @param CredentialPojo the credential
+     * @param credential the credential
      * @param claimPolicy describe which fields in credential should be disclosed.
      * @return CredentialPojo
      */
@@ -81,9 +81,10 @@ public interface CredentialPojoService {
         Challenge challenge,
         PresentationE presentationE
     );
-    
+
     /**
      * packing according to original vouchers and disclosure strategies.
+     * 
      * @param credentialList original credential list
      * @param presentationPolicyE the disclosure strategies.
      * @param challenge used for authentication

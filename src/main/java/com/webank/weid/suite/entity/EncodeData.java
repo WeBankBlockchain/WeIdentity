@@ -20,6 +20,7 @@
 package com.webank.weid.suite.entity;
 
 import java.util.List;
+
 import lombok.Getter;
 
 /**
@@ -46,7 +47,7 @@ public class EncodeData {
     private String id;
     
     /**
-     * 协议数据指定用户
+     * 协议数据指定用户.
      */
     private List<String> verifiers;
    

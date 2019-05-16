@@ -71,6 +71,7 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.RsvSignature;
 
 /**
+ * 数据工具类.
  * @author tonychen 2019年4月23日
  */
 public final class DataToolUtils {
@@ -101,11 +102,7 @@ public final class DataToolUtils {
     public static String sha3(String hexInput) {
         return Hash.sha3(hexInput);
     }
-
-    public static String getHash(String hexInput) {
-        return sha3(hexInput);
-    }
-
+    
     /**
      * Sha 3.
      *
@@ -116,8 +113,12 @@ public final class DataToolUtils {
         return Hash.sha3(input, 0, input.length);
     }
 
+    public static String getHash(String hexInput) {
+        return sha3(hexInput);
+    }
+    
     /**
-     * generate random string
+     * generate random string.
      *
      * @return random string
      */
@@ -179,7 +180,7 @@ public final class DataToolUtils {
     }
 
     /**
-     * 对象深度复制(对象必须是实现了Serializable接口)
+     * 对象深度复制(对象必须是实现了Serializable接口).
      *
      * @return T
      * @author tonychen
@@ -769,7 +770,7 @@ public final class DataToolUtils {
         }
         return ErrorCode.UNKNOW_ERROR.getCode();
     }
-    
+
     /**
      * 生成不带LOGO的二维码并将二维码的字节输入到字节输出流中.
      * @param content 二维码字符串
