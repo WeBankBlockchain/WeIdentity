@@ -19,10 +19,12 @@
 
 package com.webank.weid.protocol.base;
 
-import com.webank.weid.protocol.inf.JsonSerializer;
 import java.util.Map;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import com.webank.weid.protocol.inf.JsonSerializer;
 
 /**
  * The base data structure to handle Credential info.

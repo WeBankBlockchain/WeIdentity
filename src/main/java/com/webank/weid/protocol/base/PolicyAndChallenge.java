@@ -19,9 +19,10 @@
 
 package com.webank.weid.protocol.base;
 
-import com.webank.weid.protocol.inf.JsonSerializer;
 import lombok.Getter;
 import lombok.Setter;
+
+import com.webank.weid.protocol.inf.JsonSerializer;
 
 /**
  * Created by Junqi Zhang on 2019/4/10.

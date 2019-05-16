@@ -45,7 +45,7 @@ public interface CredentialService {
      *
      * @param credential the credential
      * @param disclosure the setting of disclosure, such as: {@code{"name":1,"gender":0,"age":1}},
-     * which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
+     *     which means you WILL disclose "name" and "age", and "gender" WILL NOT be disclosed
      * @return CredentialWrapper
      */
     ResponseData<CredentialWrapper> createSelectiveCredential(

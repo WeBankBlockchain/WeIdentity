@@ -1,8 +1,8 @@
 package com.webank.weid.protocol.response;
 
-import com.webank.weid.constant.ResolveEventLogStatus;
-
 import lombok.Data;
+
+import com.webank.weid.constant.ResolveEventLogStatus;
 
 @Data
 public class ResolveEventLogResult {

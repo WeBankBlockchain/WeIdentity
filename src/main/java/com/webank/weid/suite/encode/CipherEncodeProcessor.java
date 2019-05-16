@@ -24,18 +24,18 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.EncodeSuiteException;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.driver.MysqlDriver;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
+import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.crypto.KeyGenerator;
 import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.EncodeData;
+import com.webank.weid.suite.persistence.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -116,7 +116,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         if (fromOrgId.equals(encodeData.getOrgId())) {
             //保存秘钥
             ResponseData<String> response = 
-                this.dataDriver.get(TRANSENCRYPTIONDOMAIN,encodeData.getId());
+                this.dataDriver.get(TRANSENCRYPTIONDOMAIN, encodeData.getId());
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
                     ErrorCode.getTypeByErrorCode(response.getErrorCode().intValue())
@@ -130,9 +130,9 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
     }
 
     /**
-     * 获取秘钥key
-     * @param encodeData
-     * @return
+     * 获取秘钥key.
+     * @param encodeData 编解码实体
+     * @return 返回秘钥
      */
     private String requestEncryptKeyByAmop(EncodeData encodeData) {
         GetEncryptKeyArgs args = new GetEncryptKeyArgs();
@@ -140,7 +140,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         args.setMessageId(DataToolUtils.getUuId32());
         args.setToOrgId(encodeData.getOrgId());
         args.setFromOrgId(fromOrgId);
-        ResponseData<GetEncryptKeyResponse> resResponse = amopService.getEncryptKey(encodeData.getOrgId(), args);
+        ResponseData<GetEncryptKeyResponse> resResponse = 
+            amopService.getEncryptKey(encodeData.getOrgId(), args);
         if (resResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error("AMOP response fail, dataId={}, errorCode={}, errorMessage={}",
                 encodeData.getId(),
@@ -161,7 +162,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
                 keyResponse.getErrorCode(),
                 keyResponse.getErrorMessage()
             );
-           new EncodeSuiteException(errorCode);
+            throw new EncodeSuiteException(errorCode);
         }
         return keyResponse.getEncryptKey();
     }
