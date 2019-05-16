@@ -41,6 +41,15 @@ public interface CptService {
     ResponseData<CptBaseInfo> registerCpt(CptMapArgs args);
 
     /**
+     * Register a new CPT with a pre-set CPT ID, to the blockchain.
+     *
+     * @param args the args
+     * @param cptId the CPT ID
+     * @return The registered CPT info
+     */
+    ResponseData<CptBaseInfo> registerCpt(CptMapArgs args, Integer cptId);
+
+    /**
      * Register a new CPT to the blockchain by sending preset transaction hex value.
      *
      * @param transactionHex the transaction hex value
@@ -55,6 +64,15 @@ public interface CptService {
      * @return The registered CPT info
      */
     ResponseData<CptBaseInfo> registerCpt(CptStringArgs args);
+
+    /**
+     * Register a new CPT with a pre-set CPT ID, to the blockchain.
+     *
+     * @param args the args
+     * @param cptId the CPT ID
+     * @return The registered CPT info
+     */
+    ResponseData<CptBaseInfo> registerCpt(CptStringArgs args, Integer cptId);
 
     /**
      * Query the latest CPT version.
