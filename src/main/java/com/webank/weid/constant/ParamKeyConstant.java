@@ -71,5 +71,6 @@ public final class ParamKeyConstant {
     public static final String PROOF_TYPE = "type";
     public static final String PROOF_CREATED = "created";
     public static final String PROOF_CREATOR = "creator";
+    public static final String PROOF_SALT = "salt";
 
 }

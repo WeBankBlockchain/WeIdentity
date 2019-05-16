@@ -27,6 +27,7 @@ import org.junit.Test;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
@@ -44,14 +45,16 @@ public class TestSpecificIssuer extends TestBaseServcie {
     @Test
     public void integrationSpecificIssuerTest() {
         // register an issue type (may already exist)
-        ResponseData<Boolean> response1 = authorityIssuerService.registerIssuerType(defaultType);
+        WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthority(createWeIdResult);
+        ResponseData<Boolean> response1 = 
+            authorityIssuerService.registerIssuerType(weIdAuthentication, defaultType);
         Assert.assertTrue(response1.getResult() || (response1.getErrorCode()
             == ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS.getCode()));
 
         CreateWeIdDataResult weIdResult = weIdService.createWeId().getResult();
 
         // add a WeId as an issuer into it with plain private key
-        WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+        weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(weIdResult.getWeId());
         weIdAuthentication.setWeIdPrivateKey(weIdResult.getUserWeIdPrivateKey());
         ResponseData<Boolean> response2 = authorityIssuerService
@@ -83,13 +86,15 @@ public class TestSpecificIssuer extends TestBaseServcie {
     @Test
     public void integrationSpecificIssuerListTest() {
         // register an issue type (may already exist)
-        ResponseData<Boolean> response1 = authorityIssuerService.registerIssuerType(defaultType);
+        WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthority(createWeIdResult);
+        ResponseData<Boolean> response1 = 
+            authorityIssuerService.registerIssuerType(weIdAuthentication, defaultType);
         Assert.assertTrue(response1.getResult() || (response1.getErrorCode()
             == ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS.getCode()));
 
         CreateWeIdDataResult weIdResult1 = weIdService.createWeId().getResult();
 
-        WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+        weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(weIdResult1.getWeId());
         weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
         weIdAuthentication.getWeIdPrivateKey().setPrivateKey(privateKey);
