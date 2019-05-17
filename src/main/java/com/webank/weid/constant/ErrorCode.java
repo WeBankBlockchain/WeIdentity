@@ -225,6 +225,12 @@ public enum ErrorCode {
      */
     CREDENTIAL_IS_NILL(100428, "credential is null"),
 
+
+    /**
+     * The credential signature broken.
+     */
+    CREDENTIAL_SIGNATURE_TYPE_ILLEGAL(100429, "credential signature type unknown"),
+
     /**
      * The credential evidence contract failure: illegal input.
      */
@@ -232,6 +238,7 @@ public enum ErrorCode {
         500401,
         "credential evidence contract failure: illegal input"
     ),
+
 
     /**
      * The credential evidence base error.
