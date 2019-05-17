@@ -19,24 +19,9 @@
 
 package com.webank.weid.service.impl;
 
-import com.webank.weid.config.ContractConfig;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.AuthorityIssuerController;
-import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
-import com.webank.weid.protocol.base.AuthorityIssuer;
-import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
-import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.AuthorityIssuerService;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataTypetUtils;
-import com.webank.weid.util.TransactionUtils;
-import com.webank.weid.util.WeIdUtils;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -51,10 +36,30 @@ import org.bcos.web3j.abi.datatypes.DynamicBytes;
 import org.bcos.web3j.abi.datatypes.Type;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.webank.weid.config.ContractConfig;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.AuthorityIssuerController;
+import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
+import com.webank.weid.contract.SpecificIssuerController;
+import com.webank.weid.contract.SpecificIssuerController.SpecificIssuerRetLogEventResponse;
+import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
+import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.AuthorityIssuerService;
+import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.BaseService;
+import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.TransactionUtils;
+import com.webank.weid.util.WeIdUtils;
 
 /**
  * Service implementations for operations on Authority Issuer.
@@ -68,6 +73,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
 
     private static AuthorityIssuerController authorityIssuerController;
     private static String authorityIssuerControllerAddress;
+    private static SpecificIssuerController specificIssuerController;
+    private static String specificIssuerControllerAddress;
 
     private WeIdService weIdService = new WeIdServiceImpl();
 
@@ -84,18 +91,29 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             (AuthorityIssuerController)
                 getContractService(config.getIssuerAddress(), AuthorityIssuerController.class);
         authorityIssuerControllerAddress = config.getIssuerAddress();
+        specificIssuerController = (SpecificIssuerController) getContractService(
+            config.getSpecificIssuerAddress(), SpecificIssuerController.class);
+        specificIssuerControllerAddress = config.getSpecificIssuerAddress();
     }
 
     /**
-     * Use the cpt publisher's private key to send the transaction to call the contract.
+     * Use the given private key to send the transaction to call the contract.
      *
      * @param privateKey the private key
      */
-    private static void reloadContract(String privateKey) {
+    private static void reloadAuthorityIssuerContract(String privateKey) {
         authorityIssuerController = (AuthorityIssuerController) reloadContract(
             authorityIssuerControllerAddress,
             privateKey,
             AuthorityIssuerController.class
+        );
+    }
+
+    private static void reloadSpecificIssuerContract(String privateKey) {
+        specificIssuerController = (SpecificIssuerController) reloadContract(
+            specificIssuerControllerAddress,
+            privateKey,
+            SpecificIssuerController.class
         );
     }
 
@@ -125,7 +143,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 .getAccValue()
                 .getBytes(StandardCharsets.UTF_8)
             );
-            reloadContract(args.getWeIdPrivateKey().getPrivateKey());
+            reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
             Future<TransactionReceipt> future = authorityIssuerController.addAuthorityIssuer(
                 addr,
                 DataTypetUtils.stringArrayToBytes32StaticArray(stringAttributes),
@@ -136,12 +154,13 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
                 TimeUnit.SECONDS
             );
-            ErrorCode errorCode = resolveRegisterAuthorityIssuerEvents(receipt);
-            if (errorCode.equals(ErrorCode.SUCCESS)) {
-                return new ResponseData<>(Boolean.TRUE, ErrorCode.SUCCESS);
-            } else {
-                return new ResponseData<>(Boolean.FALSE, errorCode);
-            }
+            List<AuthorityIssuerRetLogEventResponse> eventList =
+                AuthorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
+            AuthorityIssuerRetLogEventResponse event = eventList.get(0);
+            ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(event,
+                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE);
+            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
+                errorCode);
         } catch (TimeoutException e) {
             logger.error("register authority issuer failed due to system timeout. ", e);
             return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
@@ -171,35 +190,17 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             }
             TransactionReceipt transactionReceipt = TransactionUtils
                 .sendTransaction(getWeb3j(), transactionHex);
-            ErrorCode errorCode = resolveRegisterAuthorityIssuerEvents(transactionReceipt);
-            if (errorCode.equals(ErrorCode.SUCCESS)) {
-                return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS);
-            } else {
-                return new ResponseData<>(Boolean.FALSE.toString(), errorCode);
-            }
+            List<AuthorityIssuerRetLogEventResponse> eventList =
+                AuthorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
+            AuthorityIssuerRetLogEventResponse event = eventList.get(0);
+            ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(event,
+                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE);
+            Boolean result = errorCode.getCode() == ErrorCode.SUCCESS.getCode();
+            return new ResponseData<>(result.toString(), errorCode);
         } catch (Exception e) {
             logger.error("[registerAuthorityIssuer] register failed due to transaction error.", e);
         }
         return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-    }
-
-    private ErrorCode resolveRegisterAuthorityIssuerEvents(
-        TransactionReceipt transactionReceipt) {
-        List<AuthorityIssuerRetLogEventResponse> eventList =
-            AuthorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
-
-        AuthorityIssuerRetLogEventResponse event = eventList.get(0);
-        if (event != null) {
-            ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(
-                event,
-                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
-            );
-            return errorCode;
-        } else {
-            logger.error(
-                "register authority issuer failed due to transcation event decoding failure.");
-            return ErrorCode.AUTHORITY_ISSUER_ERROR;
-        }
     }
 
     /**
@@ -219,7 +220,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         String weId = args.getWeId();
         Address addr = new Address(WeIdUtils.convertWeIdToAddress(weId));
         try {
-            reloadContract(args.getWeIdPrivateKey().getPrivateKey());
+            reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
             Future<TransactionReceipt> future = authorityIssuerController
                 .removeAuthorityIssuer(addr);
             TransactionReceipt receipt =
@@ -342,6 +343,334 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
         return responseData;
+    }
+
+    /**
+     * Get all of the authority issuer.
+     *
+     * @param index start position
+     * @param num number of returned authority issuer in this request
+     * @return Execution result
+     */
+    @Override
+    public ResponseData<List<AuthorityIssuer>> getAllAuthorityIssuerList(Integer index,
+        Integer num) {
+        ErrorCode errorCode = isStartEndPosValid(index, num);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null, errorCode);
+        }
+        try {
+            List<Address> addressList = authorityIssuerController
+                .getAuthorityIssuerAddressList(new Uint256(index), new Uint256(num))
+                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
+                .getValue();
+            List<AuthorityIssuer> authorityIssuerList = new ArrayList<>();
+            for (Address address : addressList) {
+                String weId = WeIdUtils.convertAddressToWeId(address.toString());
+                ResponseData<AuthorityIssuer> innerResponseData
+                    = this.queryAuthorityIssuerInfo(weId);
+                if (innerResponseData.getResult() != null) {
+                    authorityIssuerList.add(innerResponseData.getResult());
+                }
+            }
+            return new ResponseData<>(authorityIssuerList, ErrorCode.SUCCESS);
+        } catch (TimeoutException e) {
+            logger.error("query authority issuer list failed due to system timeout. ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("query authority issuer list failed due to transaction error. ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            logger.error("query authority issuer list failed.", e);
+            return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+    }
+
+    /**
+     * Register a new issuer type.
+     *
+     * @param callerAuth the caller
+     * @param issuerType the specified issuer type
+     * @return Execution result
+     */
+    public ResponseData<Boolean> registerIssuerType(
+        WeIdAuthentication callerAuth,
+        String issuerType
+    ) {
+        ErrorCode innerCode = isIssuerTypeValid(issuerType);
+        if (innerCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(false, innerCode);
+        }
+        try {
+            reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
+            Future<TransactionReceipt> future = specificIssuerController
+                .registerIssuerType(DataTypetUtils.stringToBytes32(issuerType));
+            TransactionReceipt receipt =
+                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            // pass-in empty address
+            String emptyAddress = new Address(BigInteger.ZERO).toString();
+            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, true, emptyAddress);
+            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
+                errorCode);
+        } catch (TimeoutException e) {
+            logger.error("register issuer type failed due to system timeout. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("register issuer type failed due to transaction error. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            logger.error("register issuer type failed.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+    }
+
+
+    /**
+     * Marked an issuer as the specified issuer type.
+     *
+     * @param callerAuth the caller who have the access to modify this list
+     * @param issuerType the specified issuer type
+     * @param targetIssuerWeId the weId of the issuer who will be marked as a specific issuer type
+     * @return Execution result
+     */
+    public ResponseData<Boolean> addIssuerIntoIssuerType(
+        WeIdAuthentication callerAuth,
+        String issuerType,
+        String targetIssuerWeId
+    ) {
+        ErrorCode innerCode = isSpecificTypeIssuerArgsValid(callerAuth, issuerType,
+            targetIssuerWeId);
+        if (innerCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(false, innerCode);
+        }
+        try {
+            reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
+            String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
+            Future<TransactionReceipt> future = specificIssuerController
+                .addIssuer(DataTypetUtils.stringToBytes32(issuerType), new Address(issuerAddress));
+            TransactionReceipt receipt =
+                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, true, issuerAddress);
+            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
+                errorCode);
+        } catch (TimeoutException e) {
+            logger.error("add issuer into type failed due to system timeout. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("add issuer into type failed due to transaction error. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            logger.error("add issuer into type failed.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+    }
+
+    /**
+     * Removed an issuer from the specified issuer list.
+     *
+     * @param callerAuth the caller who have the access to modify this list
+     * @param issuerType the specified issuer type
+     * @param targetIssuerWeId the weId of the issuer to be removed from a specific issuer list
+     * @return Execution result
+     */
+    public ResponseData<Boolean> removeIssuerFromIssuerType(
+        WeIdAuthentication callerAuth,
+        String issuerType,
+        String targetIssuerWeId
+    ) {
+        ErrorCode innerCode = isSpecificTypeIssuerArgsValid(callerAuth, issuerType,
+            targetIssuerWeId);
+        if (innerCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(false, innerCode);
+        }
+        try {
+            reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
+            String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
+            Future<TransactionReceipt> future = specificIssuerController
+                .removeIssuer(DataTypetUtils.stringToBytes32(issuerType),
+                    new Address(issuerAddress));
+            TransactionReceipt receipt =
+                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, false, issuerAddress);
+            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
+                errorCode);
+        } catch (TimeoutException e) {
+            logger.error("remove issuer from type failed due to system timeout. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("remove issuer from type failed due to transaction error. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            logger.error("remove issuer from type failed.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+    }
+
+    /**
+     * Check if the given WeId is belonging to a specific issuer type.
+     *
+     * @param issuerType the issuer type
+     * @param targetIssuerWeId the WeId
+     * @return true if yes, false otherwise
+     */
+    public ResponseData<Boolean> isSpecificTypeIssuer(
+        String issuerType,
+        String targetIssuerWeId
+    ) {
+        ErrorCode errorCode = isIssuerTypeValid(issuerType);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(false, errorCode);
+        }
+        if (!weIdService.isWeIdExist(targetIssuerWeId).getResult()) {
+            return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
+        }
+        try {
+            Future<Bool> future = specificIssuerController
+                .isSpecificTypeIssuer(DataTypetUtils.stringToBytes32(issuerType),
+                    new Address(WeIdUtils.convertWeIdToAddress(targetIssuerWeId)));
+            Boolean result =
+                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS).getValue();
+            if (!result) {
+                return new ResponseData<>(result,
+                    ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST);
+            }
+            return new ResponseData<>(result, ErrorCode.SUCCESS);
+        } catch (TimeoutException e) {
+            logger.error("check issuer type failed due to system timeout. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("check issuer type failed due to transaction error. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            logger.error("check issuer type failed.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+    }
+
+    /**
+     * Get all specific typed issuer in a list.
+     *
+     * @param issuerType the issuer type
+     * @param index the start position index
+     * @param num the number of issuers
+     * @return the list
+     */
+    public ResponseData<List<String>> getAllSpecificTypeIssuerList(
+        String issuerType,
+        Integer index,
+        Integer num
+    ) {
+        ErrorCode errorCode = isIssuerTypeValid(issuerType);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null, errorCode);
+        }
+        errorCode = isStartEndPosValid(index, num);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null, errorCode);
+        }
+        try {
+            List<Address> addresses = specificIssuerController
+                .getSpecificTypeIssuerList(DataTypetUtils.stringToBytes32(issuerType),
+                    new Uint256(index), new Uint256(num))
+                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
+                .getValue();
+            List<String> addressList = new ArrayList<>();
+            for (Address addr : addresses) {
+                if (!WeIdUtils.isEmptyAddress(addr)) {
+                    addressList.add(addr.toString());
+                }
+            }
+            return new ResponseData<>(addressList, ErrorCode.SUCCESS);
+        } catch (TimeoutException e) {
+            logger.error("get all specific issuers failed due to system timeout. ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("get all specific issuers failed due to transaction error. ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            logger.error("get all specific issuers failed.", e);
+            return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+    }
+
+    private ErrorCode isStartEndPosValid(Integer index, Integer num) {
+        if (index == null || index < 0 || num == null || num <= 0
+            || num > WeIdConstant.MAX_AUTHORITY_ISSUER_LIST_SIZE) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        return ErrorCode.SUCCESS;
+    }
+
+    private ErrorCode isSpecificTypeIssuerArgsValid(
+        WeIdAuthentication callerAuth,
+        String issuerType,
+        String targetIssuerWeId
+    ) {
+        if (!weIdService.isWeIdExist(targetIssuerWeId).getResult()) {
+            return ErrorCode.WEID_DOES_NOT_EXIST;
+        }
+        ErrorCode errorCode = isCallerAuthValid(callerAuth);
+        if (errorCode.getCode() == ErrorCode.SUCCESS.getCode()) {
+            return isIssuerTypeValid(issuerType);
+        }
+        return errorCode;
+    }
+
+    private ErrorCode isCallerAuthValid(WeIdAuthentication callerAuth) {
+        if (callerAuth == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        if (callerAuth.getWeIdPrivateKey() == null
+            || StringUtils.isEmpty(callerAuth.getWeIdPrivateKey().getPrivateKey())) {
+            return ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL;
+        }
+        if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {
+            return ErrorCode.WEID_INVALID;
+        }
+        return ErrorCode.SUCCESS;
+    }
+
+    private ErrorCode resolveSpecificIssuerEvents(
+        TransactionReceipt transactionReceipt,
+        boolean isRegister,
+        String address) {
+        List<SpecificIssuerRetLogEventResponse> eventList =
+            SpecificIssuerController.getSpecificIssuerRetLogEvents(transactionReceipt);
+
+        SpecificIssuerRetLogEventResponse event = eventList.get(0);
+        if (event != null) {
+            if (isRegister) {
+                // this might be the register type, or the register specific issuer case
+                if (event.operation.getValue().intValue()
+                    != WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
+                    || !StringUtils.equalsIgnoreCase(event.addr.toString(), address)) {
+                    return ErrorCode.TRANSACTION_EXECUTE_ERROR;
+                }
+            } else {
+                // this is the remove specific issuer case
+                if (event.operation.getValue().intValue()
+                    != WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
+                    || !StringUtils.equalsIgnoreCase(event.addr.toString(), address)) {
+                    return ErrorCode.TRANSACTION_EXECUTE_ERROR;
+                }
+            }
+            Integer eventRetCode = event.retCode.getValue().intValue();
+            return ErrorCode.getTypeByErrorCode(eventRetCode);
+        } else {
+            logger.error(
+                "specific issuer type resolution failed due to event decoding failure.");
+            return ErrorCode.UNKNOW_ERROR;
+        }
+    }
+
+    private ErrorCode isIssuerTypeValid(String issuerType) {
+        if (StringUtils.isEmpty(issuerType)) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        if (issuerType.length() > WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH) {
+            return ErrorCode.SPECIFIC_ISSUER_TYPE_ILLEGAL;
+        }
+        return ErrorCode.SUCCESS;
     }
 
     private ErrorCode checkRegisterAuthorityIssuerArgs(

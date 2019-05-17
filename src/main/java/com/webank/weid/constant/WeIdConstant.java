@@ -179,9 +179,14 @@ public final class WeIdConstant {
      * The big-enough block limit number.
      */
     public static final String BIG_BLOCK_LIMIT = "9999999999";
-    
+
     /**
      * The Constant default Presentation type.
      */
     public static final String DEFAULT_PRESENTATION_TYPE = "VerifiablePresentation";
+
+    /**
+     * The default maximum authority issuer list size to fetch from blockchain.
+     */
+    public static final Integer MAX_AUTHORITY_ISSUER_LIST_SIZE = 50;
 }

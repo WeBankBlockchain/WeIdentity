@@ -34,6 +34,7 @@
         <prop key="cpt.contractaddress">${CPT_ADDRESS}</prop>
         <prop key="issuer.contractaddress">${ISSUER_ADDRESS}</prop>
         <prop key="evidence.contractaddress">${EVIDENCE_ADDRESS}</prop>
+        <prop key="specificissuer.contractaddress">${SPECIFICISSUER_ADDRESS}</prop>
       </props>
     </property>
     <!--  <property name="location" value="classpath:application.properties" />-->
