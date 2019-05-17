@@ -61,7 +61,7 @@ public class PresentationE implements RawSerializer {
      * @return 返回签名字符串Signature.
      */
     public String getSignature() {
-        return getValueFromProof(ParamKeyConstant.SIGNATUREVALUE);
+        return getValueFromProof(ParamKeyConstant.PRESENTATION_SIGNATURE);
     }
     
     /**

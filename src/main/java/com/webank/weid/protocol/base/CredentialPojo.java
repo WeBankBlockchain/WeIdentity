@@ -22,6 +22,9 @@ package com.webank.weid.protocol.base;
 import java.util.Map;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+
+import com.webank.weid.constant.ParamKeyConstant;
 
 /**
  * The base data structure to handle Credential info.
@@ -67,8 +70,32 @@ public class CredentialPojo {
     private Map<String, Object> claim;
 
     /**
-     * Required: The signature of the Credential. Selective Disclosure is supported together with
-     * Claim Data structure.
+     * Required: The credential proof data.
      */
-    private String signature;
+    private Map<String, String> proof;
+
+    /**
+     * Directly extract the signature value from credential.
+     *
+     * @return signature value
+     */
+    public String getSignature() {
+        return getValueFromProof(ParamKeyConstant.CREDENTIAL_SIGNATURE);
+    }
+
+    /**
+     * Directly extract the proof type from credential.
+     *
+     * @return proof type
+     */
+    public String getProofType() {
+        return getValueFromProof(ParamKeyConstant.PROOF_TYPE);
+    }
+
+    private String getValueFromProof(String key) {
+        if (proof != null) {
+            return proof.get(key);
+        }
+        return StringUtils.EMPTY;
+    }
 }
