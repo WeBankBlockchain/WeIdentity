@@ -54,6 +54,7 @@ import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -455,16 +456,7 @@ public abstract class TestBaseServcie extends BaseTest {
     }
 
     protected Credential copyCredential(Credential credential) {
-        Credential ct = new Credential();
-        ct.setSignature(credential.getSignature());
-        ct.setContext(credential.getContext());
-        ct.setClaim(credential.getClaim());
-        ct.setIssuranceDate(credential.getIssuranceDate());
-        ct.setCptId(credential.getCptId());
-        ct.setExpirationDate(credential.getExpirationDate());
-        ct.setIssuer(credential.getIssuer());
-        ct.setId(credential.getId());
-        return ct;
+        return CredentialUtils.copyCredential(credential);
     }
 
     protected CreateWeIdDataResult copyCreateWeId(CreateWeIdDataResult createWeId) {

@@ -58,7 +58,7 @@ public final class ParamKeyConstant {
     public static final String CONTEXT = "context";
     public static final String CREDENTIAL_ID = "id";
     public static final String ISSURANCE_DATE = "issuranceDate";
-    
+
     /**
      * proof key.
      */
@@ -66,5 +66,10 @@ public final class ParamKeyConstant {
     public static final String CREATED = "created";
     public static final String VERIFICATION_METHOD = "verificationMethod";
     public static final String NONCE = "nonce";
-    public static final String SIGNATUREVALUE = "signatureValue";
+    public static final String PRESENTATION_SIGNATURE = "signatureValue";
+    public static final String PROOF = "proof";
+    public static final String PROOF_TYPE = "type";
+    public static final String PROOF_CREATED = "created";
+    public static final String PROOF_CREATOR = "creator";
+
 }

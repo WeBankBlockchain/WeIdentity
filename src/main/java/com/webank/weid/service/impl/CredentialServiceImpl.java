@@ -99,7 +99,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setId(UUID.randomUUID().toString());
             result.setCptId(args.getCptId());
             result.setIssuer(args.getIssuer());
-            result.setIssuranceDate(DateUtils.getCurrentTimeStamp());
+            Long issuanceDate = DateUtils.getCurrentTimeStamp();
+            result.setIssuranceDate(issuanceDate);
             result.setExpirationDate(args.getExpirationDate());
             result.setClaim(args.getClaim());
             Map<String, Object> disclosureMap = new HashMap<>(args.getClaim());
@@ -110,16 +111,13 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 );
             }
             credentialWrapper.setDisclosure(disclosureMap);
-            String rawData = CredentialUtils
-                .getCredentialThumbprintWithoutSig(result, disclosureMap);
-            String privateKey = args.getWeIdPrivateKey().getPrivateKey();
-            Sign.SignatureData sigData = DataToolUtils.signMessage(rawData, privateKey);
-            result.setSignature(
-                new String(
-                		DataToolUtils
-                        .base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-                    StandardCharsets.UTF_8)
-            );
+
+            // Construct Credential Proof
+            Map<String, String> credentialProof = CredentialUtils.buildCredentialProof(
+                result,
+                args.getWeIdPrivateKey().getPrivateKey(),
+                disclosureMap);
+            result.setProof(credentialProof);
 
             credentialWrapper.setCredential(result);
             ResponseData<CredentialWrapper> responseData = new ResponseData<>(
@@ -145,8 +143,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         return verifyCredentialContent(credentialWrapper, null);
     }
 
-    /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialService#verify(com.webank.weid.protocol.base.Credential)
+    /**
+     * Verify Credential validity.
      */
     @Override
     public ResponseData<Boolean> verify(Credential credential) {
@@ -206,8 +204,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
 
         try {
             Credential credential = credentialWrapper.getCredential();
-            ErrorCode innerResponse = CredentialUtils
-                .isCredentialValid(credential);
+            ErrorCode innerResponse = CredentialUtils.isCredentialValid(credential);
             if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
                 logger.error("Credential input format error!");
                 return new ResponseData<>(false, innerResponse);
@@ -309,10 +306,10 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             Map<String, Object> disclosureMap = credentialWrapper.getDisclosure();
             String rawData = CredentialUtils
                 .getCredentialThumbprintWithoutSig(credential, disclosureMap);
+            String signatureValue = credential.getSignature();
             Sign.SignatureData signatureData =
-            	DataToolUtils.simpleSignatureDeserialization(
-                	DataToolUtils.base64Decode(
-                        credential.getSignature().getBytes(StandardCharsets.UTF_8))
+                DataToolUtils.simpleSignatureDeserialization(
+                    DataToolUtils.base64Decode(signatureValue.getBytes(StandardCharsets.UTF_8))
                 );
 
             if (StringUtils.isEmpty(publicKey)) {

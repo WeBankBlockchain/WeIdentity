@@ -2190,7 +2190,11 @@ com.webank.weid.protocol.base.Credential
             name: zhang san
             gender: F
             age: 18
-         signature: HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=
+         proof:(java.util.HashMap)
+            type: EcdsaSignature
+            created: 1551348312461
+            creator: did:weid:0x30404b47c6c5811d49e28ea2306c804d16618017
+            signature: HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=
       disclosure:(java.util.HashMap)
          name: 1
          gender: 1
@@ -2360,6 +2364,9 @@ com.webank.weid.protocol.base.Credential
    * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
      - 100419
      - 验证签名异常
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100420
+     - 验证签名类型异常
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -2382,9 +2389,15 @@ com.webank.weid.protocol.base.Credential
    credential.setCptId(155);
    credential.setIssuranceDate(1551348312461L);
    credential.setId("54bc3832-fce7-433a-80c7-ba284635c67a");// 系统生成
-   credential.setSignature("HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=");
    credential.setExpirationDate(1551434712408L);
    credential.setIssuer("did:weid:0x30404b47c6c5811d49e28ea2306c804d16618017");
+
+   Map<String, String> proof = new HashMap<>();
+   proof.put("created", "1551348312461");
+   proof.put("creator", "did:weid:0x30404b47c6c5811d49e28ea2306c804d16618017");
+   proof.put("type", CredentialProofType.ECDSA.getTypeName());
+   proof.put("signature", "HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=");
+   credential.setProof(proof);
 
    ResponseData<Boolean> response = credentialService.verify(credential);
 
@@ -2392,7 +2405,7 @@ com.webank.weid.protocol.base.Credential
 .. code-block:: text
 
    返回结果如：
-   result: false
+   result: true
    errorCode: 0
    errorMessage: success
 
@@ -2649,6 +2662,9 @@ com.webank.weid.protocol.base.WeIdPublicKey
    * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
      - 100419
      - 验证签名异常
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100420
+     - 验证签名类型异常
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -2671,14 +2687,20 @@ com.webank.weid.protocol.base.WeIdPublicKey
    credential.setCptId(175);
    credential.setIssuranceDate(1551415454745L);
    credential.setCredentialId("ce32d6d6-86e6-4740-b021-1b0d98de5400");// 系统生成
-   credential.setSignature("G9cMEPhilGbu4u33IlmCoDUYncGcodfX4jdpFHIjFwltITGYN/cheS8FB4BBpKJvu3quxmacyWEUo6Zw6WmPSr8=");
    credential.setExpirationDate(1551501854695L);
    credential.setIssuer("did:weid:0xd9a2536b81e19ced12af21fb6b2a8455bbe54001");
+
+   Map<String, String> proof = new HashMap<>();
+   proof.put("created", "1551348312461");
+   proof.put("creator", "did:weid:0x30404b47c6c5811d49e28ea2306c804d16618017");
+   proof.put("type", CredentialProofType.ECDSA.getTypeName());
+   proof.put("signature", "HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=");
+   credential.setProof(proof);
 
    CredentialWrapper credentialWrapper = new CredentialWrapper();
    credentialWrapper.setCredential(credential)
 
-   //属性是否纰漏，0:不披露 ,1:纰漏
+   //属性是否披露，0:不披露，1:披露
    HashMap<String, Object> disclosure = new HashMap<String, Object>(3);
    disclosure.put("name", 1);
    disclosure.put("gender", 1);
