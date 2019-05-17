@@ -43,4 +43,29 @@ public final class CredentialConstant {
      */
     public static final String DEFAULT_CREDENTIAL_TYPE = "VerifiableCredential";
 
+    /**
+     * The Credential Proof Type Enumerate.
+     */
+    public static enum CredentialProofType {
+        ECDSA("EcdsaSignature");
+
+        /**
+         * The Type Name of the Credential Proof.
+         */
+        private String typeName;
+
+        /**
+         * Constructor.
+         */
+        CredentialProofType(String typeName) {
+            this.typeName = typeName;
+        }
+
+        /**
+         * Getter.
+         */
+        public String getTypeName() {
+            return typeName;
+        }
+    }
 }

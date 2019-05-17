@@ -49,10 +49,11 @@ import com.webank.weid.protocol.request.CreateCredentialArgs;
  */
 public final class CredentialPojoUtils {
 
-	/**
+    /**
      * log4j object, for recording log.
      */
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoUtils.class);
+
     /**
      * Concat all fields of Credential info, without Signature, in Json format. This should be
      * invoked when calculating Credential Signature. Return null if credential format is illegal.
@@ -68,7 +69,9 @@ public final class CredentialPojoUtils {
         Map<String, Object> disclosures) {
         try {
             Map<String, Object> credMap = JsonUtil.objToMap(credential);
-            credMap.remove(ParamKeyConstant.CREDENTIAL_SIGNATURE);
+            // Preserve the same behavior as in CredentialUtils - will merge later
+            credMap.remove(ParamKeyConstant.PROOF);
+            credMap.put(ParamKeyConstant.PROOF, null);
             String claimHash = getClaimHash(credential, salt, disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return JsonUtil.mapToCompactJson(credMap);
@@ -84,11 +87,12 @@ public final class CredentialPojoUtils {
      * @param credential target Credential object
      * @return Hash value in String.
      */
-    public static String getCredentialThumbprint(CredentialPojo credential,Map<String, Object> salt,
+    public static String getCredentialThumbprint(CredentialPojo credential,
+        Map<String, Object> salt,
         Map<String, Object> disclosures) {
         try {
             Map<String, Object> credMap = JsonUtil.objToMap(credential);
-            String claimHash = getClaimHash(credential, salt,disclosures);
+            String claimHash = getClaimHash(credential, salt, disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return JsonUtil.mapToCompactJson(credMap);
         } catch (Exception e) {
@@ -103,48 +107,51 @@ public final class CredentialPojoUtils {
      * @param disclosures Disclosure Map
      * @return the unique claim hash value
      */
-    public static String getClaimHash(CredentialPojo credential, Map<String, Object> salt, Map<String, Object> disclosures) {
+    public static String getClaimHash(CredentialPojo credential, Map<String, Object> salt,
+        Map<String, Object> disclosures) {
 
-		Map<String, Object> claim = credential.getClaim();
-		Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
-        
-		addSaltAndGetHash(newClaim, salt, disclosures);
-		try {
-			String jsonData = JsonUtil.mapToCompactJson(newClaim);
-			return jsonData;
-		} catch (Exception e) {
-			logger.error("[getClaimHash] get claim hash failed. {}", e);
-		}
-		return StringUtils.EMPTY;
-    }
-    
-    private static void addSaltAndGetHash(Map<String, Object> claim, Map<String, Object> salt,Map<String, Object> disclosures) {
-    	    	
-		for (Map.Entry<String, Object> entry : claim.entrySet()) {
-			String key = entry.getKey();
-			Object disclosureObj = null;
-			if (disclosures != null) {
-				disclosureObj = disclosures.get(key);
-			}
-			Object saltObj = salt.get(key);
-			Object newClaimObj = claim.get(key);
+        Map<String, Object> claim = credential.getClaim();
+        Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
 
-			if (newClaimObj instanceof Map) {
-				addSaltAndGetHash((HashMap) newClaimObj, (HashMap) saltObj, (HashMap) disclosureObj);
-			} else {
-			    if (disclosureObj == null) {
-			        if (!CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().equals(saltObj)) {
-			            (claim).put(key,
-	                            getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj)));
-			        }
-			    }
-			}
-		}
+        addSaltAndGetHash(newClaim, salt, disclosures);
+        try {
+            String jsonData = JsonUtil.mapToCompactJson(newClaim);
+            return jsonData;
+        } catch (Exception e) {
+            logger.error("[getClaimHash] get claim hash failed. {}", e);
+        }
+        return StringUtils.EMPTY;
     }
-    
-    
+
+    private static void addSaltAndGetHash(Map<String, Object> claim, Map<String, Object> salt,
+        Map<String, Object> disclosures) {
+
+        for (Map.Entry<String, Object> entry : claim.entrySet()) {
+            String key = entry.getKey();
+            Object disclosureObj = null;
+            if (disclosures != null) {
+                disclosureObj = disclosures.get(key);
+            }
+            Object saltObj = salt.get(key);
+            Object newClaimObj = claim.get(key);
+
+            if (newClaimObj instanceof Map) {
+                addSaltAndGetHash((HashMap) newClaimObj, (HashMap) saltObj,
+                    (HashMap) disclosureObj);
+            } else {
+                if (disclosureObj == null) {
+                    if (!CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().equals(saltObj)) {
+                        (claim).put(key,
+                            getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj)));
+                    }
+                }
+            }
+        }
+    }
+
+
     /**
-     * convert a field to hash.
+     * Convert a field to hash.
      *
      * @param field which will be converted to hash.
      * @return hash value.
@@ -169,15 +176,7 @@ public final class CredentialPojoUtils {
      * @return GenerateCredentialArgs
      */
     public static CreateCredentialArgs extractCredentialMetadata(Credential arg) {
-        if (arg == null) {
-            return null;
-        }
-        CreateCredentialArgs generateCredentialArgs = new CreateCredentialArgs();
-        generateCredentialArgs.setCptId(arg.getCptId());
-        generateCredentialArgs.setIssuer(arg.getIssuer());
-        generateCredentialArgs.setExpirationDate(arg.getExpirationDate());
-        generateCredentialArgs.setClaim(arg.getClaim());
-        return generateCredentialArgs;
+        return CredentialUtils.extractCredentialMetadata(arg);
     }
 
     /**
@@ -189,7 +188,7 @@ public final class CredentialPojoUtils {
      * @return Hash in byte array
      */
     public static String getCredentialHash(CredentialPojo arg) {
-        String rawData = getCredentialThumbprint(arg, null,null);
+        String rawData = getCredentialThumbprint(arg, null, null);
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
@@ -203,12 +202,7 @@ public final class CredentialPojoUtils {
      * @return a Bytes32 object
      */
     public static Bytes32 convertCredentialIdToBytes32(String id) {
-		if (!isValidUuid(id)) {
-            return new Bytes32(new byte[32]);
-        }
-        String mergedId = id.replaceAll(WeIdConstant.UUID_SEPARATOR, StringUtils.EMPTY);
-        byte[] uuidBytes = mergedId.getBytes(StandardCharsets.UTF_8);
-        return DataTypetUtils.bytesArrayToBytes32(uuidBytes);
+        return CredentialUtils.convertCredentialIdToBytes32(id);
     }
 
     /**
@@ -218,8 +212,7 @@ public final class CredentialPojoUtils {
      * @return true if yes, false otherwise
      */
     public static boolean isValidUuid(String id) {
-        Pattern p = Pattern.compile(WeIdConstant.UUID_PATTERN);
-        return p.matcher(id).matches();
+        return CredentialUtils.isValidUuid(id);
     }
 
     /**
@@ -230,25 +223,7 @@ public final class CredentialPojoUtils {
      */
     public static ErrorCode isCreateCredentialArgsValid(
         CreateCredentialArgs args) {
-        if (args == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (args.getCptId() == null || args.getCptId().intValue() < 0) {
-            return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
-        }
-        if (!WeIdUtils.isWeIdValid(args.getIssuer())) {
-            return ErrorCode.CREDENTIAL_ISSUER_INVALID;
-        }
-        Long expirationDate = args.getExpirationDate();
-        if (expirationDate == null
-            || expirationDate.longValue() < 0
-            || expirationDate.longValue() == 0) {
-            return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
-        }
-        if (args.getClaim() == null || args.getClaim().isEmpty()) {
-            return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
-        }
-        return ErrorCode.SUCCESS;
+        return CredentialUtils.isCreateCredentialArgsValid(args);
     }
 
     /**
@@ -258,19 +233,7 @@ public final class CredentialPojoUtils {
      * @return true if yes, false otherwise
      */
     public static ErrorCode isCredentialValid(Credential args) {
-        if (args == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        CreateCredentialArgs createCredentialArgs = extractCredentialMetadata(args);
-        ErrorCode metadataResponseData = isCreateCredentialArgsValid(createCredentialArgs);
-        if (ErrorCode.SUCCESS.getCode() != metadataResponseData.getCode()) {
-            return metadataResponseData;
-        }
-        ErrorCode contentResponseData = isCredentialContentValid(args);
-        if (ErrorCode.SUCCESS.getCode() != contentResponseData.getCode()) {
-            return contentResponseData;
-        }
-        return ErrorCode.SUCCESS;
+        return CredentialUtils.isCredentialValid(args);
     }
 
     /**
@@ -280,26 +243,7 @@ public final class CredentialPojoUtils {
      * @return true if yes, false otherwise
      */
     public static ErrorCode isCredentialContentValid(Credential args) {
-        String credentialId = args.getId();
-        if (StringUtils.isEmpty(credentialId) || !CredentialPojoUtils.isValidUuid(credentialId)) {
-            return ErrorCode.CREDENTIAL_ID_NOT_EXISTS;
-        }
-        String context = args.getContext();
-        if (StringUtils.isEmpty(context)) {
-            return ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS;
-        }
-        Long issuranceDate = args.getIssuranceDate();
-        if (issuranceDate == null) {
-            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
-        }
-        if (issuranceDate.longValue() > args.getExpirationDate().longValue()) {
-            return ErrorCode.CREDENTIAL_EXPIRED;
-        }
-        String signature = args.getSignature();
-        if (StringUtils.isEmpty(signature) || !DataToolUtils.isValidBase64String(signature)) {
-            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
-        }
-        return ErrorCode.SUCCESS;
+        return CredentialUtils.isCredentialContentValid(args);
     }
 
     /**
@@ -312,58 +256,63 @@ public final class CredentialPojoUtils {
     public static ErrorCode isCreateEvidenceArgsValid(
         Credential credential,
         WeIdPrivateKey weIdPrivateKey) {
-        if (credential == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
-            return ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS;
-        }
-        return ErrorCode.SUCCESS;
+        return CredentialUtils.isCreateEvidenceArgsValid(credential, weIdPrivateKey);
     }
-    
-    
-	public static String getCredentialPojoHash(CredentialPojoWrapper credentialWrapper) {
-		
-		String rawData = getCredentialThumbprint(credentialWrapper.getCredentialPojo(), credentialWrapper.getSalt(),
-				null);
-		if (StringUtils.isEmpty(rawData)) {
-			return StringUtils.EMPTY;
-		}
-		return DataToolUtils.sha3(rawData);
-	}
-	
+
     /**
-     * Check the credential and proof of presentationE
-     * 
-     * @param presentationE
-     * @return
+     * Get the hash value of the credential pojo based on its credential value and salt value.
+     *
+     * @param credentialWrapper the credential pojo wrapper
+     * @return hash value
+     */
+    public static String getCredentialPojoHash(CredentialPojoWrapper credentialWrapper) {
+        String rawData = getCredentialThumbprint(credentialWrapper.getCredentialPojo(),
+            credentialWrapper.getSalt(),
+            null);
+        if (StringUtils.isEmpty(rawData)) {
+            return StringUtils.EMPTY;
+        }
+        return DataToolUtils.sha3(rawData);
+    }
+
+    /**
+     * Check the validity of a given credential and its proof of presentationE.
+     *
+     * @param presentationE the presentationE
+     * @return true if yes, false otherwise
      */
     public static ErrorCode checkPresentationEValid(PresentationE presentationE) {
-        if(presentationE == null || presentationE.getCredentialList() == null 
-                || presentationE.getCredentialList().isEmpty() 
-                || presentationE.getProof() == null) {
+        if (presentationE == null || presentationE.getCredentialList() == null
+            || presentationE.getCredentialList().isEmpty()
+            || presentationE.getProof() == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        if(StringUtils.isEmpty(presentationE.getSignature())) {
+        if (StringUtils.isEmpty(presentationE.getSignature())) {
             return ErrorCode.CREDENTIAL_SIGNATURE_NOT_EXISTS;
         }
         return ErrorCode.SUCCESS;
     }
-	
+
     /**
-     * Check the policy of PresentationPolicyE 
-     * 
-     * @param presentationPolicyE
-     * @return
+     * Check the validity of a given policy of PresentationPolicyE.
+     *
+     * @param presentationPolicyE the presentationPolicyE
+     * @return true if yes, false otherwise
      */
     public static boolean checkPresentationPolicyEValid(PresentationPolicyE presentationPolicyE) {
-        return (presentationPolicyE != null 
-                && presentationPolicyE.getPolicy() != null 
-                && presentationPolicyE.getPolicy().size() != 0);
+        return (presentationPolicyE != null
+            && presentationPolicyE.getPolicy() != null
+            && presentationPolicyE.getPolicy().size() != 0);
     }
-    
-    
+
+    /**
+     * Get per-field salted hash value.
+     *
+     * @param field the field value
+     * @param salt the salt value
+     * @return the hash value
+     */
     public static String getFieldSaltHash(String field, String salt) {
-    	return DataToolUtils.sha3(String.valueOf(field) + String.valueOf(salt));
+        return DataToolUtils.sha3(String.valueOf(field) + String.valueOf(salt));
     }
 }
