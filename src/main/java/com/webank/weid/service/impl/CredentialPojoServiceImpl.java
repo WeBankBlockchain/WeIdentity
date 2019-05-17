@@ -15,7 +15,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
 import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
@@ -200,8 +202,15 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             String rawData = CredentialPojoUtils
                 .getCredentialThumbprintWithoutSig(result, saltMap, null);
             String privateKey = args.getWeIdPrivateKey().getPrivateKey();
+
             String signature = DataToolUtils.sign(rawData, privateKey);
-            result.setSignature(signature);
+
+            Map<String, String> proof = new HashMap<>();
+            proof.put(ParamKeyConstant.PROOF_CREATED, result.getIssuranceDate().toString());
+            proof.put(ParamKeyConstant.PROOF_CREATOR, result.getIssuer());
+            proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
+            proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, signature);
+            result.setProof(proof);
 
             credentialPojoWrapper.setCredentialPojo(result);
             ResponseData<CredentialPojoWrapper> responseData = new ResponseData<>(
@@ -298,19 +307,21 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             && !presenterWeId.equals(challenge.getWeId())) {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
         }
-        
+
         //verify challenge
         if (!challenge.getNonce().equals(presentationE.getNonce())) {
-            return new ResponseData<Boolean>(false, ErrorCode.PRESENTATION_CHALLENGE_NONCE_MISMATCH);
+            return new ResponseData<Boolean>(false,
+                ErrorCode.PRESENTATION_CHALLENGE_NONCE_MISMATCH);
         }
-        
+
         //verify Signature of PresentationE
         WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
         String signature = presentationE.getSignature();
         //remove signatureValue
-        presentationE.getProof().remove(ParamKeyConstant.SIGNATUREVALUE);
+        presentationE.getProof().remove(ParamKeyConstant.PRESENTATION_SIGNATURE);
         ErrorCode errorCode =
-            DataToolUtils.verifySignatureFromWeId(presentationE.toRawData(), signature, weIdDocument);
+            DataToolUtils
+                .verifySignatureFromWeId(presentationE.toRawData(), signature, weIdDocument);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[verify] verify challenge {} failed.", challenge);
             return new ResponseData<Boolean>(false, errorCode);
@@ -441,12 +452,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         PresentationPolicyE presentationPolicyE,
         Challenge challenge,
         WeIdAuthentication weIdAuthentication) {
-        
+
         PresentationE presentation = new PresentationE();
         try {
             // 检查输入数据完整性
-            ErrorCode errorCode = 
-                validateCreateArgs(credentialList, presentationPolicyE, challenge, weIdAuthentication);
+            ErrorCode errorCode =
+                validateCreateArgs(credentialList, presentationPolicyE, challenge,
+                    weIdAuthentication);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "check input error:{}-{}",
@@ -468,20 +480,20 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             presentation.getContext().add(CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
             presentation.getType().add(WeIdConstant.DEFAULT_PRESENTATION_TYPE);
             // 处理proof数据
-            generateProof(challenge, weIdAuthentication, presentation);
+            generatePresentationProof(challenge, weIdAuthentication, presentation);
             return new ResponseData<PresentationE>(presentation, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("create PresentationE error", e);
             return new ResponseData<PresentationE>(null, ErrorCode.UNKNOW_ERROR);
-        } 
+        }
     }
-    
+
     private ErrorCode validateCreateArgs(
         List<CredentialPojoWrapper> credentialList,
         PresentationPolicyE presentationPolicyE,
         Challenge challenge,
         WeIdAuthentication weIdAuthentication) {
-        
+
         if (challenge == null || weIdAuthentication == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
@@ -489,12 +501,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             || challenge.getVersion() == null) {
             return ErrorCode.PRESENTATION_CHALLENGE_INVALID;
         }
-        if (weIdAuthentication.getWeIdPrivateKey() == null 
+        if (weIdAuthentication.getWeIdPrivateKey() == null
             || !WeIdUtils.validatePrivateKeyWeIdMatches(
-               weIdAuthentication.getWeIdPrivateKey(), weIdAuthentication.getWeId())) {
+            weIdAuthentication.getWeIdPrivateKey(), weIdAuthentication.getWeId())) {
             return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
         }
-        if (!StringUtils.isBlank(challenge.getWeId()) 
+        if (!StringUtils.isBlank(challenge.getWeId())
             && !challenge.getWeId().equals(weIdAuthentication.getWeId())) {
             return ErrorCode.PRESENTATION_CHALLENGE_WEID_MISMATCH;
         }
@@ -503,7 +515,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return validateClaimPolicy(credentialList, presentationPolicyE);
     }
-    
+
     private ErrorCode validateClaimPolicy(
         List<CredentialPojoWrapper> credentialList,
         PresentationPolicyE presentationPolicyE) {
@@ -514,32 +526,32 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             return ErrorCode.PRESENTATION_POLICY_INVALID;
         }
         List<Integer> cptIdList = credentialList.stream().map(
-                cpwl -> cpwl.getCredentialPojo().getCptId()).collect(Collectors.toList()); 
+            cpwl -> cpwl.getCredentialPojo().getCptId()).collect(Collectors.toList());
         Set<Integer> claimPolicyCptSet = presentationPolicyE.getPolicy().keySet();
         if (!cptIdList.containsAll(claimPolicyCptSet)) {
             return ErrorCode.PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY;
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     private ErrorCode processCredentialList(
-        List<CredentialPojoWrapper> credentialList, 
+        List<CredentialPojoWrapper> credentialList,
         PresentationPolicyE presentationPolicy,
         PresentationE presentation) {
-        
+
         List<CredentialPojoWrapper> newcredentialList = new ArrayList<>();
         // 获取ClaimPolicyMap
         Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicy.getPolicy();
         // 遍历所有原始证书
         for (CredentialPojoWrapper credentialPojoWrapper : credentialList) {
             // 根据原始证书获取对应的 claimPolicy
-            ClaimPolicy claimPolicy = 
+            ClaimPolicy claimPolicy =
                 claimPolicyMap.get(credentialPojoWrapper.getCredentialPojo().getCptId());
             if (claimPolicy == null) {
                 continue;
             }
             // 根据原始证书和claimPolicy去创建选择性披露凭证
-            ResponseData<CredentialPojoWrapper>  res =
+            ResponseData<CredentialPojoWrapper> res =
                 this.createSelectiveCredential(credentialPojoWrapper, claimPolicy);
             if (res.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 return ErrorCode.getTypeByErrorCode(res.getErrorCode().intValue());
@@ -549,23 +561,23 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         presentation.setCredentialList(newcredentialList);
         return ErrorCode.SUCCESS;
     }
-    
-    private void generateProof(
-        Challenge challenge, 
+
+    private void generatePresentationProof(
+        Challenge challenge,
         WeIdAuthentication weIdAuthentication,
         PresentationE presentation) {
-       
-       Map<String, String> proof = new HashMap<String, String>();
-       proof.put(ParamKeyConstant.TYPE, "EcdsaSignature");
-       proof.put(ParamKeyConstant.CREATED, DateUtils.getTimestamp(new Date()));
-       proof.put(ParamKeyConstant.VERIFICATION_METHOD, weIdAuthentication.getWeIdPublicKeyId());
-       proof.put(ParamKeyConstant.NONCE, challenge.getNonce());
-       presentation.setProof(proof);
-       String signature = 
-           DataToolUtils.sign(
-               presentation.toRawData(), 
-               weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
-           );
-       proof.put(ParamKeyConstant.SIGNATUREVALUE, signature);
+
+        Map<String, String> proof = new HashMap<String, String>();
+        proof.put(ParamKeyConstant.TYPE, CredentialProofType.ECDSA.getTypeName());
+        proof.put(ParamKeyConstant.CREATED, DateUtils.getTimestamp(new Date()));
+        proof.put(ParamKeyConstant.VERIFICATION_METHOD, weIdAuthentication.getWeIdPublicKeyId());
+        proof.put(ParamKeyConstant.NONCE, challenge.getNonce());
+        presentation.setProof(proof);
+        String signature =
+            DataToolUtils.sign(
+                presentation.toRawData(),
+                weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
+            );
+        proof.put(ParamKeyConstant.PRESENTATION_SIGNATURE, signature);
     }
 }
