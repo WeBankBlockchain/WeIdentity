@@ -19,7 +19,10 @@
 
 package com.webank.weid.rpc;
 
+import java.util.List;
+
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -75,4 +78,76 @@ public interface AuthorityIssuerService {
      * @return authority issuer info
      */
     ResponseData<AuthorityIssuer> queryAuthorityIssuerInfo(String weId);
+
+    /**
+     * Get all of the authority issuer.
+     *
+     * @param index start position
+     * @param num number of returned authority issuer in this request
+     * @return Execution result
+     */
+    ResponseData<List<AuthorityIssuer>> getAllAuthorityIssuerList(Integer index, Integer num);
+
+    /**
+     * Register a new issuer type.
+     *
+     * @param callerAuth the caller
+     * @param issuerType the specified issuer type
+     * @return Execution result
+     */
+    ResponseData<Boolean> registerIssuerType(WeIdAuthentication callerAuth, String issuerType);
+
+    /**
+     * Marked an issuer as the specified issuer type.
+     *
+     * @param callerAuth the caller who have the access to modify this list
+     * @param issuerType the specified issuer type
+     * @param targetIssuerWeId the weId of the issuer who will be marked as a specific issuer type
+     * @return Execution result
+     */
+    ResponseData<Boolean> addIssuerIntoIssuerType(
+        WeIdAuthentication callerAuth,
+        String issuerType,
+        String targetIssuerWeId
+    );
+
+    /**
+     * Removed an issuer from the specified issuer list.
+     *
+     * @param callerAuth the caller who have the access to modify this list
+     * @param issuerType the specified issuer type
+     * @param targetIssuerWeId the weId of the issuer to be removed from a specific issuer list
+     * @return Execution result
+     */
+    ResponseData<Boolean> removeIssuerFromIssuerType(
+        WeIdAuthentication callerAuth,
+        String issuerType,
+        String targetIssuerWeId
+    );
+
+    /**
+     * Check if the given WeId is belonging to a specific issuer type.
+     *
+     * @param issuerType the issuer type
+     * @param targetIssuerWeId the WeId
+     * @return true if yes, false otherwise
+     */
+    ResponseData<Boolean> isSpecificTypeIssuer(
+        String issuerType,
+        String targetIssuerWeId
+    );
+
+    /**
+     * Get all specific typed issuer in a list.
+     *
+     * @param issuerType the issuer type
+     * @param index the start position index
+     * @param num the number of issuers
+     * @return the list
+     */
+    ResponseData<List<String>> getAllSpecificTypeIssuerList(
+        String issuerType,
+        Integer index,
+        Integer num
+    );
 }

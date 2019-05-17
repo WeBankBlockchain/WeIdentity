@@ -280,8 +280,15 @@ public abstract class TestBaseServcie extends BaseTest {
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
 
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
         logger.info("registerAuthorityIssuer result:");
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
@@ -459,7 +466,7 @@ public abstract class TestBaseServcie extends BaseTest {
         ct.setId(credential.getId());
         return ct;
     }
-    
+
     protected CreateWeIdDataResult copyCreateWeId(CreateWeIdDataResult createWeId) {
         CreateWeIdDataResult copyWeId = new CreateWeIdDataResult();
         copyWeId.setWeId(createWeId.getWeId());
