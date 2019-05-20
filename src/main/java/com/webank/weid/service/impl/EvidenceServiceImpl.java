@@ -40,7 +40,6 @@ import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
@@ -66,7 +65,6 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author chaoxinhu 2019.1
  */
-@Component
 public class EvidenceServiceImpl extends BaseService implements EvidenceService {
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
@@ -87,7 +85,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
     }
 
     private static void init() {
-        ContractConfig config = context.getBean(ContractConfig.class);
+        ContractConfig config = buildContractConfig();
         evidenceFactoryAddress = config.getEvidenceAddress();
         evidenceFactory = (EvidenceFactory) getContractService(
             evidenceFactoryAddress,
