@@ -40,7 +40,6 @@ import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
@@ -67,7 +66,6 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author chaoxinhu 2018.10
  */
-@Component
 public class AuthorityIssuerServiceImpl extends BaseService implements AuthorityIssuerService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerServiceImpl.class);
@@ -87,7 +85,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
     }
 
     private static void init() {
-        ContractConfig config = context.getBean(ContractConfig.class);
+        ContractConfig config = buildContractConfig();
         authorityIssuerController =
             (AuthorityIssuerController)
                 getContractService(config.getIssuerAddress(), AuthorityIssuerController.class);

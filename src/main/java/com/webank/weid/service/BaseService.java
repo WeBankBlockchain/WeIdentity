@@ -28,7 +28,6 @@ import java.util.List;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.dto.ChannelRequest;
 import org.bcos.channel.dto.ChannelResponse;
-import org.bcos.contract.tools.ToolConf;
 import org.bcos.web3j.crypto.Credentials;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.GenCredential;
@@ -37,9 +36,9 @@ import org.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.bcos.web3j.tx.Contract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.webank.weid.config.ContractConfig;
+import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -55,6 +54,7 @@ import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
+import com.webank.weid.util.TransactionUtils;
 
 /**
  * The BaseService for other RPC classes.
@@ -64,26 +64,29 @@ import com.webank.weid.util.PropertyUtils;
 public abstract class BaseService {
 
     /*
-     * 链上链下最大超时时间
-     * unit : millisecond
+     * Maximum Timeout period in milliseconds.
      */
     public static final int MAX_AMOP_REQUEST_TIMEOUT = 50000;
     public static final int AMOP_REQUEST_TIMEOUT = Integer
         .valueOf(PropertyUtils.getProperty("amop.request.timeout", "5000"));
-    protected static final ApplicationContext context;
-    private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
     protected static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
+
+    private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
+
+    protected static FiscoConfig fiscoConfig;
     private static Credentials credentials;
     private static Web3j web3j;
     private static Service service;
 
     static {
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
-        service = context.getBean(Service.class);
+        fiscoConfig = new FiscoConfig();
+        if (!fiscoConfig.load()) {
+            logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
+        }
     }
 
     /**
-     * 无参构造器.
+     * Constructor.
      */
     public BaseService() {
         if (web3j == null) {
@@ -91,16 +94,23 @@ public abstract class BaseService {
         }
     }
 
-    protected static Service getService() {
-        return service;
-    }
-
     private static boolean initWeb3j() {
 
-        if (!initAmop(service)) {
-            logger.error("[BaseService] initialize amop failed.");
-            return false;
-        }
+        logger.info("[BaseService] begin to init web3j instance..");
+        service = TransactionUtils.buildFiscoBcosService(fiscoConfig);
+
+        String orgId = PropertyUtils.getProperty("blockchain.orgId");
+        OnNotifyCallback pushCallBack = new OnNotifyCallback();
+        service.setPushCallback(pushCallBack);
+        pushCallBack.registAmopCallback(
+            AmopMsgType.GET_ENCRYPT_KEY.getValue(),
+            new KeyManagerCallback()
+        );
+
+        // Set topics for AMOP
+        List<String> topics = new ArrayList<String>();
+        topics.add(orgId);
+        service.setTopics(topics);
 
         try {
             service.run();
@@ -108,6 +118,7 @@ public abstract class BaseService {
             logger.error("[BaseService] Service init failed. ", e);
             throw new InitWeb3jException(e);
         }
+
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setChannelService(service);
         web3j = Web3j.build(channelEthereumService);
@@ -118,35 +129,14 @@ public abstract class BaseService {
         return true;
     }
 
-    private static boolean initAmop(Service service) {
-
-        String orgId = PropertyUtils.getProperty("blockchain.orgId");
-
-        OnNotifyCallback pushCallBack = new OnNotifyCallback();
-        service.setPushCallback(pushCallBack);
-        pushCallBack.registAmopCallback(
-            AmopMsgType.GET_ENCRYPT_KEY.getValue(),
-            new KeyManagerCallback()
-        );
-
-        //设置topic，支持多个topic
-        List<String> topics = new ArrayList<String>();
-        topics.add(orgId);
-        service.setTopics(topics);
-
-        return true;
-
-    }
-
     /**
      * Inits the credentials.
      *
      * @return true, if successful
      */
     private static boolean initCredentials() {
-        ToolConf toolConf = context.getBean(ToolConf.class);
-        logger.info("begin to init credentials");
-        credentials = GenCredential.create(toolConf.getPrivKey());
+        logger.info("[BaseService] begin to init credentials..");
+        credentials = GenCredential.create();
 
         if (credentials == null) {
             logger.error("[BaseService] credentials init failed. ");
@@ -167,8 +157,37 @@ public abstract class BaseService {
         return web3j;
     }
 
-    protected static String getSeq() {
+    /**
+     * Get the service instance.
+     *
+     * @return the service
+     */
+    protected static Service getService() {
+        return service;
+    }
+
+    /**
+     * Get the Sequence parameter.
+     *
+     * @return the seq
+     */
+    private static String getSeq() {
         return service.newSeq();
+    }
+
+    /**
+     * On-demand build the contract config info.
+     *
+     * @return the contractConfig instance
+     */
+    protected static ContractConfig buildContractConfig() {
+        ContractConfig contractConfig = new ContractConfig();
+        contractConfig.setWeIdAddress(fiscoConfig.getWeIdAddress());
+        contractConfig.setCptAddress(fiscoConfig.getCptAddress());
+        contractConfig.setIssuerAddress(fiscoConfig.getIssuerAddress());
+        contractConfig.setEvidenceAddress(fiscoConfig.getEvidenceAddress());
+        contractConfig.setSpecificIssuerAddress(fiscoConfig.getSpecificIssuerAddress());
+        return contractConfig;
     }
 
     private static Object loadContract(
@@ -269,7 +288,8 @@ public abstract class BaseService {
     }
 
     /**
-     *  the checkDirectRouteMsgHealth。.
+     * the checkDirectRouteMsgHealth。.
+     *
      * @param toOrgId target orgId.
      * @param arg the message
      * @return return the health result

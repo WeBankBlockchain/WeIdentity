@@ -51,7 +51,6 @@ import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
@@ -88,7 +87,6 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author tonychen 2018.10
  */
-@Component
 public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     /**
@@ -146,7 +144,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private static void init() {
 
         // initialize the WeIdentity DID contract
-        ContractConfig config = context.getBean(ContractConfig.class);
+        ContractConfig config = buildContractConfig();
         weIdContractAddress = config.getWeIdAddress();
         weIdContract = (WeIdContract) getContractService(weIdContractAddress, WeIdContract.class);
     }

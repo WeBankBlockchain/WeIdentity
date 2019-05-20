@@ -6,8 +6,8 @@ java_source_code_dir=$2
 temp_file=$(date +%s)".temp"
 config_file=${java_source_code_dir}/dist/bin/run.config
 app_xml_config_dir=${java_source_code_dir}/dist/conf/
-app_xml_config_tpl=${java_source_code_dir}/src/main/resources/applicationContext.xml.tpl
-app_xml_config=${java_source_code_dir}/src/main/resources/applicationContext.xml
+app_xml_config_tpl=${java_source_code_dir}/src/main/resources/fisco.properties.tpl
+app_xml_config=${java_source_code_dir}/src/main/resources/fisco.properties
 
 CLASSPATH=${java_source_code_dir}/dist/conf
 
@@ -122,7 +122,7 @@ function gradle_build_sdk()
 		if [ ! -z ${content} ];then
 		content="${content}\n"
 		fi
-        content="${content}<value>WeIdentity@$var</value>"
+        content="${content}WeIdentity@$var;"
     done
 	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
 	export WEID_ADDRESS="0x0"

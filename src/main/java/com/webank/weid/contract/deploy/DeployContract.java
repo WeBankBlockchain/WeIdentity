@@ -33,7 +33,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
-import org.bcos.contract.tools.ToolConf;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.Credentials;
 import org.bcos.web3j.crypto.GenCredential;
@@ -42,9 +41,8 @@ import org.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.AuthorityIssuerController;
 import com.webank.weid.contract.AuthorityIssuerData;
@@ -57,6 +55,8 @@ import com.webank.weid.contract.RoleController;
 import com.webank.weid.contract.SpecificIssuerController;
 import com.webank.weid.contract.SpecificIssuerData;
 import com.webank.weid.contract.WeIdContract;
+import com.webank.weid.exception.InitWeb3jException;
+import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -77,9 +77,9 @@ public class DeployContract {
     private static final Integer DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS = 15;
 
     /**
-     * The context.
+     * The Fisco Config bundle.
      */
-    protected static final ApplicationContext context;
+    protected static final FiscoConfig fiscoConfig;
 
     /**
      * The credentials.
@@ -92,7 +92,11 @@ public class DeployContract {
     private static Web3j web3j;
 
     static {
-        context = new ClassPathXmlApplicationContext("applicationContext.xml");
+        fiscoConfig = new FiscoConfig();
+        if (!fiscoConfig.load()) {
+            logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
+        }
+        loadConfig();
     }
 
     /**
@@ -112,12 +116,17 @@ public class DeployContract {
      * @return true, if successful
      */
     private static boolean loadConfig() {
+        return (initWeb3j() && initCredentials());
+    }
 
-        Service service = context.getBean(Service.class);
+    private static boolean initWeb3j() {
+        logger.info("[BaseService] begin to init web3j instance..");
+        Service service = TransactionUtils.buildFiscoBcosService(fiscoConfig);
         try {
             service.run();
         } catch (Exception e) {
             logger.error("[BaseService] Service init failed. ", e);
+            throw new InitWeb3jException(e);
         }
 
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
@@ -127,17 +136,24 @@ public class DeployContract {
             logger.error("[BaseService] web3j init failed. ");
             return false;
         }
+        return true;
+    }
 
-        ToolConf toolConf = context.getBean(ToolConf.class);
-
-        logger.info("begin init credentials");
-        credentials = GenCredential.create(toolConf.getPrivKey());
+    /**
+     * Inits the credentials.
+     *
+     * @return true, if successful
+     */
+    private static boolean initCredentials() {
+        logger.info("[BaseService] begin to init credentials..");
+        credentials = GenCredential.create();
 
         if (credentials == null) {
             logger.error("[BaseService] credentials init failed. ");
             return false;
         }
-
+        String privateKey = credentials.getEcKeyPair().getPrivateKey().toString();
+        writeAddressToFile(privateKey, "privateKey.txt");
         return true;
     }
 
