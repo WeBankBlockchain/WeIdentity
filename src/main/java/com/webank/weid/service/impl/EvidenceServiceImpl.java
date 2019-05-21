@@ -96,6 +96,19 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
     }
 
     /**
+     * Use the evidence creator's private key to send the transaction to call the contract.
+     *
+     * @param privateKey the private key
+     */
+    private static void reloadContract(String privateKey) {
+        evidenceFactory = (EvidenceFactory) reloadContract(
+            evidenceFactoryAddress,
+            privateKey,
+            EvidenceFactory.class
+        );
+    }
+
+    /**
      * Create a new evidence to the blockchain and store its address into the credential.
      */
     @Override
@@ -138,6 +151,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             List<Address> signer = new ArrayList<>();
             signer.add(new Address(Keys.getAddress(SignatureUtils
                 .createKeyPairFromPrivate(new BigInteger(weIdPrivateKey.getPrivateKey())))));
+            reloadContract(weIdPrivateKey.getPrivateKey());
             Future<TransactionReceipt> future = evidenceFactory.createEvidence(
                 new DynamicArray<Bytes32>(generateBytes32List(hashAttributes)),
                 new DynamicArray<Address>(signer),
