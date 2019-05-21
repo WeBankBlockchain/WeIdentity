@@ -39,9 +39,9 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
 
 执行如下命令将dist.zip解压：
 
-.. code-block:: text
+.. code-block:: bash
 
-   unzip dist.zip
+   $ unzip dist.zip
 
 可以得到如下结构：
 
@@ -63,7 +63,7 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
 
 合约地址修改示例：更新下列属性中weId、cpt、issuer、evidence合约地址的值
 
-.. code-block:: text
+.. code-block:: xml
 
     <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"
       id="appConfig">
@@ -79,7 +79,7 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
 
 区块链节点信息修改示例：更新value列表的值，注意每一条value记录都应包含区块链用户、节点IP、节点channel端口地址信息
 
-.. code-block:: text
+.. code-block:: xml
 
     <bean class="org.bcos.channel.handler.ChannelConnections">
     ...
@@ -93,7 +93,7 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
 
 * 修改 ``dist/conf/application.properties`` ，确认Server监听端口地址（此即为RestServer的HTTP端口地址）及HTTP重定向地址已设置且未被其他程序占用，否则请修改之。示例：
 
-.. code-block:: text
+.. code-block:: bash
 
     # Server监听端口地址
     server.port=20191
@@ -108,16 +108,16 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
 
 进入dist目录执行以下应用以启动或停止RestServer：
 
-.. code-block:: text
+.. code-block:: bash
 
     # 为脚本文件增加权限
-    chmod +x *.sh
+    $ chmod +x *.sh
     # 启动应用
-    ./start.sh
+    $ ./start.sh
     # 观察应用状态
-    ./server_status.sh
+    $ ./server_status.sh
     # 停止应用
-    ./stop.sh 停止应用
+    $ ./stop.sh 停止应用
 
 执行 ``./start.sh`` 之后会输出以下提示，表示RestServer已经顺利启动：
 
@@ -148,8 +148,9 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
 
 RestServer支持任何使用标准HTTP/HTTPS协议的RESTful API客户端访问，详细接口说明可见API文档。我们提供了一套Postman的环境与请求集供快速集成。使用步骤如下：
 
-* 导入环境文件 ``weidentity-restservice.postman_environment.json``
-* 修改环境变量host属性的值为安装部署RestServer的机器地址
-* 修改环境变量httpport属性的值为1.3节中的Server监听端口地址
-* 导入请求集 ``invoke.postman_collection.json``
-* 接下来，你便可以在Postman的Collections - Invoke中调用各类API了
+* 点击Postman的Import按钮，导入环境文件 ``weidentity-restservice.postman_environment.json`` 和请求集 ``invoke.postman_collection.json``
+* 首先确认weidentity-restservice这个Environment已导入成功，它包含两个变量host和httpport
+    * 修改环境变量host属性的值为安装部署RestServer的服务器地址
+    * 修改环境变量httpport属性的值为1.3节中的Server监听端口地址
+* 接下来确认Invoke这个Collection已导入成功，可以从侧边栏中找到
+* 现在，可以调用Invoke这个Collection中的各类API了。您可以从无参数请求CreateWeId开始——看看返回结果是不是和API文档中一致，成功创建一个WeIdentity DID

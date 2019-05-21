@@ -1,0 +1,10 @@
+{
+  "@context": {
+    "id": "@id",
+    "type": "@type",
+
+    "weidentity": "https://fintech.webank.com/weidentity/vocab",
+
+    "EcdsaSignature": "weidentity:EcdsaSignature"
+  }
+}
