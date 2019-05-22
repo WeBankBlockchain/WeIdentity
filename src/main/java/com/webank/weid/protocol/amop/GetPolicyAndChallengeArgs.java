@@ -14,4 +14,6 @@ import lombok.Setter;
 public class GetPolicyAndChallengeArgs extends AmopBaseMsgArgs {
 
 	private String policyId;
+	
+	private String targetUserWeId;
 }
