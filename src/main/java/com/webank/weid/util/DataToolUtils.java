@@ -1,3 +1,22 @@
+/*
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *
+ *       This file is part of weidentity-java-sdk.
+ *
+ *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.webank.weid.util;
 
 import java.awt.BasicStroke;
@@ -25,20 +44,31 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
 import javax.imageio.ImageIO;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
@@ -52,7 +82,13 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.abi.datatypes.DynamicArray;
+import org.bcos.web3j.abi.datatypes.DynamicBytes;
+import org.bcos.web3j.abi.datatypes.StaticArray;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Hash;
@@ -65,6 +101,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -72,26 +109,53 @@ import com.webank.weid.protocol.response.RsvSignature;
 
 /**
  * 数据工具类.
+ *
  * @author tonychen 2019年4月23日
  */
 public final class DataToolUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(DataToolUtils.class);
     private static final String SEPARATOR_CHAR = "-";
-    private static ObjectMapper objectMapper = new ObjectMapper();
-    
+    //private static ObjectMapper objectMapper = new ObjectMapper();
+
     private static final String CHARSET = StandardCharsets.UTF_8.toString();
-    
+
     private static final String FORMAT_NAME = "JPG";
-    
+
     // 二维码尺寸
     private static final int QRCODE_SIZE = 300;
-    
+
     // LOGO宽度
     private static final int LOGO_WIDTH = 60;
-    
+
     // LOGO高度
     private static final int LOGO_HEIGHT = 60;
+
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    //private static final ObjectWriter OBJECT_WRITER;
+    //private static final ObjectReader OBJECT_READER;
+    private static final ObjectWriter OBJECT_WRITER_UN_PRETTY_PRINTER;
+
+    static {
+        // sort by letter
+        OBJECT_MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+        // when map is serialization, sort by key
+        OBJECT_MAPPER.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
+        // ignore mismatched fields
+        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+        // use field for serialize and deSerialize
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+
+        OBJECT_WRITER_UN_PRETTY_PRINTER = OBJECT_MAPPER.writer();
+
+        //OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
+        //OBJECT_READER = OBJECT_MAPPER.reader();
+    }
 
     /**
      * Keccak-256 hash function.
@@ -102,7 +166,7 @@ public final class DataToolUtils {
     public static String sha3(String hexInput) {
         return Hash.sha3(hexInput);
     }
-    
+
     /**
      * Sha 3.
      *
@@ -116,7 +180,7 @@ public final class DataToolUtils {
     public static String getHash(String hexInput) {
         return sha3(hexInput);
     }
-    
+
     /**
      * generate random string.
      *
@@ -149,7 +213,7 @@ public final class DataToolUtils {
     public static <T> String serialize(T object) {
         Writer write = new StringWriter();
         try {
-            objectMapper.writeValue(write, object);
+            OBJECT_MAPPER.writeValue(write, object);
         } catch (JsonGenerationException e) {
             logger.error("JsonGenerationException when serialize object to json", e);
         } catch (JsonMappingException e) {
@@ -168,7 +232,7 @@ public final class DataToolUtils {
     public static <T> T deserialize(String json, Class<T> clazz) {
         Object object = null;
         try {
-            object = objectMapper.readValue(json, TypeFactory.rawClass(clazz));
+            object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));
         } catch (JsonParseException e) {
             logger.error("JsonParseException when serialize object to json", e);
         } catch (JsonMappingException e) {
@@ -177,6 +241,44 @@ public final class DataToolUtils {
             logger.error("IOException when serialize object to json", e);
         }
         return (T) object;
+    }
+
+
+    /**
+     * Object to Json String.
+     *
+     * @param obj Object
+     * @return String
+     */
+    public static String objToJsonStrWithNoPretty(Object obj) {
+
+        try {
+            return OBJECT_WRITER_UN_PRETTY_PRINTER.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new DataTypeCastException(e);
+        }
+    }
+
+    /**
+     * Convert a Map to compact Json output, with keys ordered. Use Jackson JsonNode toString() to
+     * ensure key order and compact output.
+     *
+     * @param map input map
+     * @return JsonString
+     */
+    public static String mapToCompactJson(Map<String, Object> map) throws Exception {
+        return OBJECT_MAPPER.readTree(serialize(map)).toString();
+    }
+
+    /**
+     * Convert a POJO to Map.
+     *
+     * @param object POJO
+     * @return Map
+     */
+    public static Map<String, Object> objToMap(Object object) throws Exception {
+        JsonNode jsonNode = OBJECT_MAPPER.readTree(serialize(object));
+        return (HashMap<String, Object>) OBJECT_MAPPER.convertValue(jsonNode, HashMap.class);
     }
 
     /**
@@ -565,9 +667,9 @@ public final class DataToolUtils {
      */
     public static RsvSignature convertSignatureDataToRsv(
         SignatureData signatureData) {
-        Uint8 v = DataTypetUtils.intToUnt8(Integer.valueOf(signatureData.getV()));
-        Bytes32 r = DataTypetUtils.bytesArrayToBytes32(signatureData.getR());
-        Bytes32 s = DataTypetUtils.bytesArrayToBytes32(signatureData.getS());
+        Uint8 v = intToUnt8(Integer.valueOf(signatureData.getV()));
+        Bytes32 r = bytesArrayToBytes32(signatureData.getR());
+        Bytes32 s = bytesArrayToBytes32(signatureData.getS());
         RsvSignature rsvSignature = new RsvSignature();
         rsvSignature.setV(v);
         rsvSignature.setR(r);
@@ -670,19 +772,19 @@ public final class DataToolUtils {
             }
         }
     }
-    
+
     private static BufferedImage createImage(
         String content,
         String imgPath,
         ErrorCorrectionLevel errorCorrectionLevel,
         boolean needCompress)
-        throws WriterException, IOException  {
-        
+        throws WriterException, IOException {
+
         Hashtable<EncodeHintType, Object> hints = new Hashtable<EncodeHintType, Object>();
         hints.put(EncodeHintType.ERROR_CORRECTION, errorCorrectionLevel);
         hints.put(EncodeHintType.CHARACTER_SET, CHARSET);
         hints.put(EncodeHintType.MARGIN, 1);
-        BitMatrix bitMatrix = 
+        BitMatrix bitMatrix =
             new MultiFormatWriter()
                 .encode(content, BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE, hints);
         int width = bitMatrix.getWidth();
@@ -700,10 +802,10 @@ public final class DataToolUtils {
         insertImage(image, imgPath, needCompress);
         return image;
     }
-    
+
     private static void insertImage(BufferedImage source, String imgPath, boolean needCompress)
         throws IOException {
-        
+
         File file = new File(imgPath);
         if (!file.exists()) {
             logger.error("imgPath:[{}] is not exists.", imgPath);
@@ -742,15 +844,16 @@ public final class DataToolUtils {
         String imgPath,
         String destPath,
         ErrorCorrectionLevel errorCorrectionLevel,
-        boolean needCompress) 
+        boolean needCompress)
         throws WriterException, IOException {
-        
+
         BufferedImage image = createImage(content, imgPath, errorCorrectionLevel, needCompress);
         ImageIO.write(image, FORMAT_NAME, new File(destPath));
     }
-    
+
     /**
      * 生成不带LOGO的二维码并保存到指定文件中.
+     *
      * @param content 二维码字符串
      * @param destPath 二维码图片保存文件路径
      * @param errorCorrectionLevel 容错级别
@@ -759,7 +862,7 @@ public final class DataToolUtils {
         String content,
         ErrorCorrectionLevel errorCorrectionLevel,
         String destPath) {
-        
+
         try {
             qrCodeEncode(content, null, destPath, errorCorrectionLevel, false);
             return ErrorCode.SUCCESS.getCode();
@@ -773,6 +876,7 @@ public final class DataToolUtils {
 
     /**
      * 生成不带LOGO的二维码并将二维码的字节输入到字节输出流中.
+     *
      * @param content 二维码字符串
      * @param errorCorrectionLevel 容错级别
      */
@@ -792,4 +896,261 @@ public final class DataToolUtils {
         }
         return ErrorCode.UNKNOW_ERROR.getCode();
     }
+
+
+    /**
+     * Bytes array to bytes 32.
+     *
+     * @param byteValue the byte value
+     * @return the bytes 32
+     */
+    public static Bytes32 bytesArrayToBytes32(byte[] byteValue) {
+
+        byte[] byteValueLen32 = new byte[32];
+        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
+        return new Bytes32(byteValueLen32);
+    }
+
+    /**
+     * String to bytes 32.
+     *
+     * @param string the string
+     * @return the bytes 32
+     */
+    public static Bytes32 stringToBytes32(String string) {
+
+        byte[] byteValueLen32 = new byte[32];
+        if (StringUtils.isEmpty(string)) {
+            return new Bytes32(byteValueLen32);
+        }
+        byte[] byteValue = string.getBytes(StandardCharsets.UTF_8);
+        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
+
+        return new Bytes32(byteValueLen32);
+    }
+
+    /**
+     * Bytes 32 to bytes array.
+     *
+     * @param bytes32 the bytes 32
+     * @return the byte[]
+     */
+    public static byte[] bytes32ToBytesArray(Bytes32 bytes32) {
+
+        byte[] bytesArray = new byte[32];
+        byte[] bytes32Value = bytes32.getValue();
+        System.arraycopy(bytes32Value, 0, bytesArray, 0, 32);
+        return bytesArray;
+    }
+
+    /**
+     * Convert a Byte32 data to Java String. IMPORTANT NOTE: Byte to String is not 1:1 mapped. So -
+     * Know your data BEFORE do the actual transform! For example, Deximal Bytes, or ASCII Bytes are
+     * OK to be in Java String, but Encrypted Data, or raw Signature, are NOT OK.
+     *
+     * @param bytes32 the bytes 32
+     * @return String
+     */
+    public static String bytes32ToString(Bytes32 bytes32) {
+
+        return new String(bytes32.getValue(), StandardCharsets.UTF_8).trim();
+    }
+
+    /**
+     * Bytes 32 to string without trim.
+     *
+     * @param bytes32 the bytes 32
+     * @return the string
+     */
+    public static String bytes32ToStringWithoutTrim(Bytes32 bytes32) {
+
+        byte[] strs = bytes32.getValue();
+        return new String(strs, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Int to uint 256.
+     *
+     * @param value the value
+     * @return the uint 256
+     */
+    public static Uint256 intToUint256(int value) {
+        return new Uint256(new BigInteger(String.valueOf(value)));
+    }
+
+    /**
+     * Uint 256 to int.
+     *
+     * @param value the value
+     * @return the int
+     */
+    public static int uint256ToInt(Uint256 value) {
+        return value.getValue().intValue();
+    }
+
+    /**
+     * String to dynamic bytes.
+     *
+     * @param input the input
+     * @return the dynamic bytes
+     */
+    public static DynamicBytes stringToDynamicBytes(String input) {
+
+        return new DynamicBytes(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Dynamic bytes to string.
+     *
+     * @param input the input
+     * @return the string
+     */
+    public static String dynamicBytesToString(DynamicBytes input) {
+        return new String(input.getValue(), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Int to int 256.
+     *
+     * @param value the value
+     * @return the int 256
+     */
+    public static Int256 intToInt256(int value) {
+        return new Int256(value);
+    }
+
+    /**
+     * Int 256 to int.
+     *
+     * @param value the value
+     * @return the int
+     */
+    public static int int256ToInt(Int256 value) {
+        return value.getValue().intValue();
+    }
+
+    /**
+     * Int to unt 8.
+     *
+     * @param value the value
+     * @return the uint 8
+     */
+    public static Uint8 intToUnt8(int value) {
+        return new Uint8(value);
+    }
+
+    /**
+     * Uint 8 to int.
+     *
+     * @param value the value
+     * @return the int
+     */
+    public static int uint8ToInt(Uint8 value) {
+        return value.getValue().intValue();
+    }
+
+    /**
+     * Long to int 256.
+     *
+     * @param value the value
+     * @return the int 256
+     */
+    public static Int256 longToInt256(long value) {
+        return new Int256(value);
+    }
+
+    /**
+     * Int 256 to long.
+     *
+     * @param value the value
+     * @return the long
+     */
+    public static long int256ToLong(Int256 value) {
+        return value.getValue().longValue();
+    }
+
+    /**
+     * Long array to int 256 static array.
+     *
+     * @param longArray the long array
+     * @return the static array
+     */
+    public static StaticArray<Int256> longArrayToInt256StaticArray(long[] longArray) {
+        List<Int256> int256List = new ArrayList<Int256>();
+        for (int i = 0; i < longArray.length; i++) {
+            int256List.add(longToInt256(longArray[i]));
+        }
+        StaticArray<Int256> in256StaticArray = new StaticArray<Int256>(int256List);
+        return in256StaticArray;
+    }
+
+    /**
+     * String array to bytes 32 static array.
+     *
+     * @param stringArray the string array
+     * @return the static array
+     */
+    public static StaticArray<Bytes32> stringArrayToBytes32StaticArray(String[] stringArray) {
+
+        List<Bytes32> bytes32List = new ArrayList<Bytes32>();
+        for (int i = 0; i < stringArray.length; i++) {
+            if (StringUtils.isNotEmpty(stringArray[i])) {
+                bytes32List.add(stringToBytes32(stringArray[i]));
+            } else {
+                bytes32List.add(stringToBytes32(StringUtils.EMPTY));
+            }
+        }
+        StaticArray<Bytes32> bytes32StaticArray = new StaticArray<Bytes32>(bytes32List);
+        return bytes32StaticArray;
+    }
+
+    /**
+     * String array to bytes 32 static array.
+     *
+     * @param addressArray the string array
+     * @return the static array
+     */
+    public static StaticArray<Address> addressArrayToAddressStaticArray(Address[] addressArray) {
+
+        List<Address> addressList = new ArrayList<>();
+        for (int i = 0; i < addressArray.length; i++) {
+            addressList.add(addressArray[i]);
+        }
+        StaticArray<Address> addressStaticArray = new StaticArray<Address>(addressList);
+        return addressStaticArray;
+    }
+
+    /**
+     * Bytes 32 dynamic array to string array without trim.
+     *
+     * @param bytes32DynamicArray the bytes 32 dynamic array
+     * @return the string[]
+     */
+    public static String[] bytes32DynamicArrayToStringArrayWithoutTrim(
+        DynamicArray<Bytes32> bytes32DynamicArray) {
+
+        List<Bytes32> bytes32List = bytes32DynamicArray.getValue();
+        String[] stringArray = new String[bytes32List.size()];
+        for (int i = 0; i < bytes32List.size(); i++) {
+            stringArray[i] = bytes32ToStringWithoutTrim(bytes32List.get(i));
+        }
+        return stringArray;
+    }
+
+    /**
+     * Int 256 dynamic array to long array.
+     *
+     * @param int256DynamicArray the int 256 dynamic array
+     * @return the long[]
+     */
+    public static long[] int256DynamicArrayToLongArray(DynamicArray<Int256> int256DynamicArray) {
+
+        List<Int256> int256list = int256DynamicArray.getValue();
+        long[] longArray = new long[int256list.size()];
+        for (int i = 0; i < int256list.size(); i++) {
+            longArray[i] = int256ToLong(int256list.get(i));
+        }
+        return longArray;
+    }
+
 }

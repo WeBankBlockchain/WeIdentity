@@ -58,7 +58,7 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -136,9 +136,9 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             extraValueList.add(StringUtils.EMPTY);
             Sign.SignatureData sigData = DataToolUtils
                 .signMessage(credentialHash, weIdPrivateKey.getPrivateKey());
-            Bytes32 r = DataTypetUtils.bytesArrayToBytes32(sigData.getR());
-            Bytes32 s = DataTypetUtils.bytesArrayToBytes32(sigData.getS());
-            Uint8 v = DataTypetUtils.intToUnt8(Integer.valueOf(sigData.getV()));
+            Bytes32 r = DataToolUtils.bytesArrayToBytes32(sigData.getR());
+            Bytes32 s = DataToolUtils.bytesArrayToBytes32(sigData.getS());
+            Uint8 v = DataToolUtils.intToUnt8(Integer.valueOf(sigData.getV()));
             List<Address> signer = new ArrayList<>();
             signer.add(new Address(Keys.getAddress(DataToolUtils
                 .createKeyPairFromPrivate(new BigInteger(weIdPrivateKey.getPrivateKey())))));
@@ -190,7 +190,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         int desiredLength = bytes32List.size();
         List<Bytes32> finalList = new ArrayList<>();
         for (int i = 0; i < desiredLength; i++) {
-            finalList.add(DataTypetUtils.stringToBytes32(bytes32List.get(i)));
+            finalList.add(DataToolUtils.stringToBytes32(bytes32List.get(i)));
         }
         return finalList;
     }
@@ -225,9 +225,9 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
 
             EvidenceInfo evidenceInfoData = new EvidenceInfo();
             evidenceInfoData.setCredentialHash(
-                WeIdConstant.HEX_PREFIX + DataTypetUtils
+                WeIdConstant.HEX_PREFIX + DataToolUtils
                     .bytes32ToString(credentialHashList.get(0))
-                    + DataTypetUtils.bytes32ToString(credentialHashList.get(1)));
+                    + DataToolUtils.bytes32ToString(credentialHashList.get(1)));
 
             List<String> signerStringList = new ArrayList<>();
             for (Address addr : issuerList) {

@@ -38,7 +38,7 @@ import com.webank.weid.suite.entity.QrCodeVersion;
 import com.webank.weid.suite.transportation.AbstractJsonTransportation;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
 import com.webank.weid.suite.transportation.qr.protocol.QrCodeVersion1;
-import com.webank.weid.util.JsonUtil;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * 二维码传输协议业务处理类.
@@ -152,7 +152,8 @@ public class QrCodeJsonTransportationImpl
                     .getEncodeProcessor(qrCodeData.getEncodeType())
                     .decode(encodeData);
             //将解压出来的数据进行反序列化成原数据对象
-            T presentation = JsonUtil.jsonStrToObj(clazz, data);
+            //T presentation = JsonUtil.jsonStrToObj(clazz, data);
+            T presentation = DataToolUtils.deserialize(data, clazz);
             logger.info("QrCodeJsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(presentation, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {

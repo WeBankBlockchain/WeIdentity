@@ -48,7 +48,7 @@ public class TestTransactionUtils {
         StaticArray<Int256> array = TransactionUtils.getParamCreated(8);
         Map<String, Object> cptJsonSchemaMap = new LinkedHashMap<>();
         cptJsonSchemaMap.put("title", "a CPT schema");
-        String cptJsonSchemaStr = JsonUtil.objToJsonStr(cptJsonSchemaMap);
+        String cptJsonSchemaStr = DataToolUtils.serialize(cptJsonSchemaMap);
         String completeStr = TransactionUtils.complementCptJsonSchema(cptJsonSchemaStr);
         StaticArray<Bytes32> array1 = TransactionUtils.getParamJsonSchema(completeStr);
         Assert.assertNotNull(nonce);

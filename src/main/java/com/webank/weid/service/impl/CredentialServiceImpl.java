@@ -51,7 +51,6 @@ import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.JsonUtil;
 
 /**
  * Service implementations for operations on Credential.
@@ -253,13 +252,15 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     private ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim) {
 
         try {
-            String claimStr = JsonUtil.objToJsonStr(claim);
+            //String claimStr = JsonUtil.objToJsonStr(claim);
+            String claimStr = DataToolUtils.serialize(claim);
             Cpt cpt = cptService.queryCpt(cptId).getResult();
             if (cpt == null) {
                 logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
             }
-            String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
+            //String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
+            String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
 
             if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
                 logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
@@ -365,8 +366,9 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         Credential credential,
         String disclosure) {
 
-        Map<String, Object> disclosureMap = (Map<String, Object>) JsonUtil.jsonStrToObj(
-            new HashMap<String, Object>(), disclosure);
+        //Map<String, Object> disclosureMap = (Map<String, Object>) JsonUtil.jsonStrToObj(
+        //    new HashMap<String, Object>(), disclosure);
+        Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
         //setp 1: check if the input args is illegal.
         CredentialWrapper credentialResult = new CredentialWrapper();
@@ -415,7 +417,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         }
         // Convert timestamp into UTC timezone
         try {
-            Map<String, Object> credMap = JsonUtil.objToMap(credential);
+            Map<String, Object> credMap = DataToolUtils.objToMap(credential);
             String issuranceDate = DateUtils.convertTimestampToUtc(credential.getIssuranceDate());
             String expirationDate = DateUtils.convertTimestampToUtc(credential.getExpirationDate());
             credMap.put(ParamKeyConstant.ISSURANCE_DATE, issuranceDate);
@@ -423,7 +425,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             credMap.remove(ParamKeyConstant.CONTEXT);
             credMap.put(CredentialConstant.CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD,
                 CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
-            String credentialString = JsonUtil.mapToCompactJson(credMap);
+            String credentialString = DataToolUtils.mapToCompactJson(credMap);
             return new ResponseData<>(credentialString, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("Json conversion failed in getCredentialJson: ", e);
