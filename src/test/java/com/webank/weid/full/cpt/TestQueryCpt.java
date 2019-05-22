@@ -44,7 +44,7 @@ import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * queryCpt method for testing CptService.
@@ -201,7 +201,7 @@ public class TestQueryCpt extends TestBaseServcie {
     @Test
     public void testQueryCptCase8() {
 
-        MockUp<DataTypetUtils> mockTest = new MockUp<DataTypetUtils>() {
+        MockUp<DataToolUtils> mockTest = new MockUp<DataToolUtils>() {
             @Mock
             public String[] bytes32DynamicArrayToStringArrayWithoutTrim(
                 DynamicArray<Bytes32> bytes32DynamicArray)

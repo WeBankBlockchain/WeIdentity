@@ -79,7 +79,7 @@ import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -118,7 +118,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         topicMap = new HashMap<String, String>();
         final Event event =
             new Event(
-                WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE,
+                WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE,
                 Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
                 }),
                 Arrays.<TypeReference<?>>asList(
@@ -133,7 +133,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             );
         topicMap.put(
             EventEncoder.encode(event),
-            WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
+            WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
     }
 
@@ -185,8 +185,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 return response;
             }
 
-            String key = DataTypetUtils.bytes32ToString(res.key);
-            String value = DataTypetUtils.dynamicBytesToString(res.value);
+            String key = DataToolUtils.bytes32ToString(res.key);
+            String value = DataToolUtils.dynamicBytesToString(res.value);
             previousBlock = res.previousBlock.getValue().intValue();
             buildupWeIdAttribute(key, value, weId, result);
         }
@@ -298,7 +298,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
         if (StringUtils.isNotBlank(event)) {
             switch (event) {
-                case WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE:
+                case WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE:
                     return resolveAttributeEvent(weId, receipt, result);
                 default:
             }
@@ -504,13 +504,13 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 WeIdContract.class);
 
             String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-            DynamicBytes auth = DataTypetUtils.stringToDynamicBytes(
+            DynamicBytes auth = DataToolUtils.stringToDynamicBytes(
                 new StringBuffer()
                     .append(publicKey)
                     .append(WeIdConstant.SEPARATOR)
                     .append(weAddress)
                     .toString());
-            DynamicBytes created = DataTypetUtils
+            DynamicBytes created = DataToolUtils
                 .stringToDynamicBytes(DateUtils.getCurrentTimeStampString());
             Future<TransactionReceipt> future = weIdContract.createWeId(
                 new Address(weAddress),
@@ -691,8 +691,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             Future<TransactionReceipt> future =
                 weIdContract.setAttribute(
                     new Address(weAddress),
-                    DataTypetUtils.stringToBytes32(attributeKey),
-                    DataTypetUtils.stringToDynamicBytes(
+                    DataToolUtils.stringToBytes32(attributeKey),
+                    DataToolUtils.stringToDynamicBytes(
                         new StringBuffer().append(pubKey).append("/").append(owner).toString()),
                     DateUtils.getCurrentTimeStampInt256()
                 );
@@ -754,10 +754,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 Future<TransactionReceipt> future =
                     weIdContract.setAttribute(
                         new Address(WeIdUtils.convertWeIdToAddress(weId)),
-                        DataTypetUtils.stringToBytes32(
+                        DataToolUtils.stringToBytes32(
                             WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
                                 + serviceType),
-                        DataTypetUtils.stringToDynamicBytes(serviceEndpoint),
+                        DataToolUtils.stringToDynamicBytes(serviceEndpoint),
                         DateUtils.getCurrentTimeStampInt256());
 
                 TransactionReceipt receipt =
@@ -832,8 +832,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 Future<TransactionReceipt> future =
                     weIdContract.setAttribute(
                         new Address(weAddress),
-                        DataTypetUtils.stringToBytes32(WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX),
-                        DataTypetUtils.stringToDynamicBytes(
+                        DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX),
+                        DataToolUtils.stringToDynamicBytes(
                             new StringBuffer()
                                 .append(setAuthenticationArgs.getPublicKey())
                                 .append(WeIdConstant.SEPARATOR)
