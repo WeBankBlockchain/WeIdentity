@@ -19,6 +19,8 @@
 
 package com.webank.weid.util;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -55,6 +57,11 @@ public class JsonUtil {
         // ignore mismatched fields
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
+        // use field for serialize and deSerialize
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
+        OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        
         OBJECT_WRITER_UN_PRETTY_PRINTER = OBJECT_MAPPER.writer();
 
         OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();

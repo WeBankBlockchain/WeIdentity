@@ -36,7 +36,6 @@ import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.CredentialPojoWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -87,7 +86,8 @@ public final class CredentialPojoUtils {
      * @param credential target Credential object
      * @return Hash value in String.
      */
-    public static String getCredentialThumbprint(CredentialPojo credential,
+    public static String getCredentialThumbprint(
+        CredentialPojo credential,
         Map<String, Object> salt,
         Map<String, Object> disclosures) {
         try {
@@ -262,13 +262,11 @@ public final class CredentialPojoUtils {
     /**
      * Get the hash value of the credential pojo based on its credential value and salt value.
      *
-     * @param credentialWrapper the credential pojo wrapper
+     * @param credential the credential
      * @return hash value
      */
-    public static String getCredentialPojoHash(CredentialPojoWrapper credentialWrapper) {
-        String rawData = getCredentialThumbprint(credentialWrapper.getCredentialPojo(),
-            credentialWrapper.getSalt(),
-            null);
+    public static String getCredentialPojoHash(CredentialPojo credential) {
+        String rawData = getCredentialThumbprint(credential, credential.getSalt(), null);
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
@@ -282,8 +280,8 @@ public final class CredentialPojoUtils {
      * @return true if yes, false otherwise
      */
     public static ErrorCode checkPresentationEValid(PresentationE presentationE) {
-        if (presentationE == null || presentationE.getCredentialList() == null
-            || presentationE.getCredentialList().isEmpty()
+        if (presentationE == null || presentationE.getVerifiableCredential() == null
+            || presentationE.getVerifiableCredential().isEmpty()
             || presentationE.getProof() == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }

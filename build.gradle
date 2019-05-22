@@ -87,11 +87,12 @@ List web3sdk = [
     "org.fisco-bcos:web3sdk:1.2.5"
 ]
 
-// In this section you declare the dependencies for your production and test code
-
+List zxing = [
+    "com.google.zxing:core:3.3.0"
+]
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile logger, spring, lombok, apache_commons, json, web3sdk, weidentity_contract, mysql_driver
+    compile logger, spring, lombok, apache_commons, json, web3sdk, weidentity_contract, mysql_driver, zxing
     testCompile logger, spring, lombok, apache_commons, json, web3sdk, junit, jmockit
 }
 
