@@ -90,6 +90,7 @@ List web3sdk = [
 List zxing = [
     "com.google.zxing:core:3.3.0"
 ]
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compile logger, spring, lombok, apache_commons, json, web3sdk, weidentity_contract, mysql_driver, zxing

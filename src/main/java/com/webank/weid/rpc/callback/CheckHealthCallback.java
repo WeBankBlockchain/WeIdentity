@@ -20,6 +20,7 @@
 package com.webank.weid.rpc.callback;
 
 /**
+ * 心跳检查回调.
  * @author tonychen 2019年4月16日
  *
  */

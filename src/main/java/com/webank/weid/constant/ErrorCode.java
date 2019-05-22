@@ -193,23 +193,31 @@ public enum ErrorCode {
     /**
      * The credential private key not exists.
      */
-    CREDENTIAL_PUBLIC_KEY_NOT_EXISTS(100421, "public key for verifying credential signature does not exist"),
+    CREDENTIAL_PUBLIC_KEY_NOT_EXISTS(
+        100421, 
+        "public key for verifying credential signature does not exist"
+    ),
+    
     /**
      * The signature for verifying credential does not exist.
      */
     CREDENTIAL_SIGNATURE_NOT_EXISTS(100422, "signature for verifying credential does not exist"),
+    
     /**
      * The credential policy disclosurevalue illegal.
      */
     CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL(100423, "policy disclosurevalue illegal"),
+    
     /**
      * The credential disclosurevalue notmatch saltvalue.
      */
     CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE(100424, "disclosurevalue notmatch saltvalue"),
+    
     /**
      * The credential cptId notmatch.
      */
     CREDENTIAL_CPTID_NOTMATCH(100425, "credential cptId notmatch"),
+    
     /**
      * The credential presenterWeId notmatch.
      */
@@ -218,7 +226,10 @@ public enum ErrorCode {
     /**
      * The credential evidence id mismatch.
      */
-    CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM(100427, "credential disclosure format does not match claim"),
+    CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM(
+        100427,
+        "credential disclosure format does not match claim"
+    ),
 
     /**
      * The credential evidence id mismatch.
@@ -236,9 +247,8 @@ public enum ErrorCode {
      */
     CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT(
         500401,
-        "credential evidence contract failure: illegal input"
+        "credential evidence contract failure: illegal input."
     ),
-
 
     /**
      * The credential evidence base error.
@@ -266,7 +276,10 @@ public enum ErrorCode {
     /**
      * The weId of challenge does not match the user's weId.
      */
-    PRESENTATION_CHALLENGE_WEID_MISMATCH(100601, "the weId of challenge does not match the user's weId."),
+    PRESENTATION_CHALLENGE_WEID_MISMATCH(
+        100601,
+        "the weId of challenge does not match the user's weId."
+    ),
 
     /**
      * The presentation policy is invalid.
@@ -289,7 +302,10 @@ public enum ErrorCode {
     /**
      * The nonce of challenge does not match the nonce of presentation.
      */
-    PRESENTATION_CHALLENGE_NONCE_MISMATCH(100605, "the nonce of challenge does not match the nonce of presentation."),
+    PRESENTATION_CHALLENGE_NONCE_MISMATCH(
+        100605,
+        "the nonce of challenge does not match the nonce of presentation."
+    ),
 
     /**
      * the encrypt key is not exists.
@@ -339,7 +355,10 @@ public enum ErrorCode {
     /**
      * 协议字段值不能包含"|".
      */
-    TRANSPORTATION_PROTOCOL_FIELD_INVALID(100806, "the protocol field values cannot be included '|'."),
+    TRANSPORTATION_PROTOCOL_FIELD_INVALID(
+        100806, 
+        "the protocol field values cannot be included '|'."
+    ),
 
     /**
      * 编解码异常.
@@ -539,10 +558,13 @@ public enum ErrorCode {
     SQL_EXECUTE_FAILED(160011, "sql execute failed."),
 
     /**
-     * sql execute failed.
+     * AMOP server side has no direct route callback.
      */
-    AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(160012, "amop server side has no direct route callback."),
-
+    AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(
+        160012, 
+        "amop server side has no direct route callback."
+    ),
+    
     /**
      * other uncatched exceptions or error.
      */

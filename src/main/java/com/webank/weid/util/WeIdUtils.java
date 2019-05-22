@@ -19,8 +19,6 @@
 
 package com.webank.weid.util;
 
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,6 +30,8 @@ import org.bcos.web3j.crypto.WalletUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 
 /**
  * The WeIdentity DID Utils.

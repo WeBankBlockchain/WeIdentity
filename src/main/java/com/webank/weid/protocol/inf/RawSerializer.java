@@ -21,7 +21,7 @@ package com.webank.weid.protocol.inf;
 
 public interface RawSerializer extends JsonSerializer {
     
-    default public String toRawData() {
+    public default String toRawData() {
         return toJson();
     } 
 }

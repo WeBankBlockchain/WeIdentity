@@ -20,9 +20,9 @@
 package com.webank.weid.protocol.cpt;
 
 /**
- * Confirmation for Policy
+ * Confirmation for Policy.
  *
- * Created by Junqi Zhang on 2019/4/9.
+ * @author Created by Junqi Zhang on 2019/4/9.
  */
 public class Cpt104 {
 

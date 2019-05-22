@@ -20,11 +20,14 @@
 package com.webank.weid.protocol.cpt;
 
 /**
- * Created by Junqi Zhang on 2019/4/3.
+ * the CPT for test.
+ * @author Created by Junqi Zhang on 2019/4/3.
  */
 public class Cpt11Salt {
 
     String cptId;
+    
     String userId;
+    
     String userName;
 }

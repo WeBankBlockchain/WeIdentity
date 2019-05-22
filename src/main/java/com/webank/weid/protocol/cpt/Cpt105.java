@@ -22,9 +22,9 @@ package com.webank.weid.protocol.cpt;
 import lombok.Data;
 
 /**
- * Api endpoint address disclosure
+ * Api endpoint address disclosure.
  *
- * Created by Junqi Zhang on 2019/4/9.
+ * @author Created by Junqi Zhang on 2019/4/9.
  */
 @Data
 public class Cpt105 {

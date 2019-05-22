@@ -19,22 +19,29 @@
 
 package com.webank.weid.annoation;
 
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({FIELD})
-@Retention(RUNTIME)
+@Target({ElementType.FIELD})
+@Retention(RetentionPolicy.RUNTIME)
 public @interface IndexField {
 
+    /**
+     * the file name.
+     * @return
+     */
     String name() default "";
 
+    /**
+     * convert null to ''.
+     * @return
+     */
     String nullAs() default "";
 
     /**
-     * start from 0
+     * start from 0.
      */
     int index();
 }

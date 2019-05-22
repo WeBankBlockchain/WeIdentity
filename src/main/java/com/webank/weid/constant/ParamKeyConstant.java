@@ -62,8 +62,6 @@ public final class ParamKeyConstant {
     /**
      * proof key.
      */
-    public static final String TYPE = "type";
-    public static final String CREATED = "created";
     public static final String VERIFICATION_METHOD = "verificationMethod";
     public static final String NONCE = "nonce";
     public static final String PRESENTATION_SIGNATURE = "signatureValue";
