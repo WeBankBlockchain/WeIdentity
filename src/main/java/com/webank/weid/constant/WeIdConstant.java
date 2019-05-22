@@ -194,4 +194,9 @@ public final class WeIdConstant {
      * The default maximum authority issuer list size to fetch from blockchain.
      */
     public static final Integer MAX_AUTHORITY_ISSUER_LIST_SIZE = 50;
+
+    /**
+     * The Constant WeIdentity DID Event Attribute Change String Name.
+     */
+    public static final String WEID_EVENT_ATTRIBUTE_CHANGE = "WeIdAttributeChanged";
 }

@@ -57,7 +57,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -146,8 +146,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
             Future<TransactionReceipt> future = authorityIssuerController.addAuthorityIssuer(
                 addr,
-                DataTypetUtils.stringArrayToBytes32StaticArray(stringAttributes),
-                DataTypetUtils.longArrayToInt256StaticArray(longAttributes),
+                DataToolUtils.stringArrayToBytes32StaticArray(stringAttributes),
+                DataToolUtils.longArrayToInt256StaticArray(longAttributes),
                 accValue
             );
             TransactionReceipt receipt = future.get(
@@ -404,7 +404,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         try {
             reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
             Future<TransactionReceipt> future = specificIssuerController
-                .registerIssuerType(DataTypetUtils.stringToBytes32(issuerType));
+                .registerIssuerType(DataToolUtils.stringToBytes32(issuerType));
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             // pass-in empty address
@@ -447,7 +447,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
             Future<TransactionReceipt> future = specificIssuerController
-                .addIssuer(DataTypetUtils.stringToBytes32(issuerType), new Address(issuerAddress));
+                .addIssuer(DataToolUtils.stringToBytes32(issuerType), new Address(issuerAddress));
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, true, issuerAddress);
@@ -487,7 +487,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
             Future<TransactionReceipt> future = specificIssuerController
-                .removeIssuer(DataTypetUtils.stringToBytes32(issuerType),
+                .removeIssuer(DataToolUtils.stringToBytes32(issuerType),
                     new Address(issuerAddress));
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
@@ -526,7 +526,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             Future<Bool> future = specificIssuerController
-                .isSpecificTypeIssuer(DataTypetUtils.stringToBytes32(issuerType),
+                .isSpecificTypeIssuer(DataToolUtils.stringToBytes32(issuerType),
                     new Address(WeIdUtils.convertWeIdToAddress(targetIssuerWeId)));
             Boolean result =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS).getValue();
@@ -570,7 +570,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             List<Address> addresses = specificIssuerController
-                .getSpecificTypeIssuerList(DataTypetUtils.stringToBytes32(issuerType),
+                .getSpecificTypeIssuerList(DataToolUtils.stringToBytes32(issuerType),
                     new Uint256(index), new Uint256(num))
                 .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
                 .getValue();
@@ -772,7 +772,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         StringBuffer name = new StringBuffer();
         int maxLength = WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH / 32;
         for (int i = 0; i < maxLength; i++) {
-            name.append(DataTypetUtils.bytes32ToString(bytes32Array.get(i)));
+            name.append(DataToolUtils.bytes32ToString(bytes32Array.get(i)));
         }
         return name.toString();
     }

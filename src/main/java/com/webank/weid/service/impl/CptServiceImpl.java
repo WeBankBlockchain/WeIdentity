@@ -62,8 +62,6 @@ import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.DataTypetUtils;
-import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -115,11 +113,13 @@ public class CptServiceImpl extends BaseService implements CptService {
         try {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
+            // cptMapArgs.setCptJsonSchema(
+            //     (Map<String, Object>) JsonUtil.jsonStrToObj(
+            //         new HashMap<String, Object>(),
+            //         args.getCptJsonSchema())
+            // );
             cptMapArgs.setCptJsonSchema(
-                (Map<String, Object>) JsonUtil.jsonStrToObj(
-                    new HashMap<String, Object>(),
-                    args.getCptJsonSchema())
-            );
+                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
             return this.registerCpt(cptMapArgs, cptId);
         } catch (Exception e) {
             logger.error("[registerCpt1] register cpt failed due to unknown error. ", e);
@@ -145,10 +145,12 @@ public class CptServiceImpl extends BaseService implements CptService {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             cptMapArgs.setCptJsonSchema(
-                (Map<String, Object>) JsonUtil.jsonStrToObj(
-                    new HashMap<String, Object>(),
-                    args.getCptJsonSchema())
-            );
+                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
+            //cptMapArgs.setCptJsonSchema(
+            //    (Map<String, Object>) JsonUtil.jsonStrToObj(
+            //        new HashMap<String, Object>(),
+            //        args.getCptJsonSchema())
+            //);
             return this.registerCpt(cptMapArgs);
         } catch (Exception e) {
             logger.error("[registerCpt1] register cpt failed due to unknown error. ", e);
@@ -261,7 +263,8 @@ public class CptServiceImpl extends BaseService implements CptService {
                 .sendTransaction(getWeb3j(), transactionHex);
             CptBaseInfo cptBaseInfo = this.resolveRegisterCptEvents(transactionReceipt).getResult();
             if (cptBaseInfo != null) {
-                return new ResponseData<>(JsonUtil.objToJsonStr(cptBaseInfo), ErrorCode.SUCCESS);
+                //return new ResponseData<>(JsonUtil.objToJsonStr(cptBaseInfo), ErrorCode.SUCCESS);
+                return new ResponseData<>(DataToolUtils.serialize(cptBaseInfo), ErrorCode.SUCCESS);
             }
         } catch (Exception e) {
             logger.error("[registerCpt] register failed due to unknown transaction error. ", e);
@@ -283,7 +286,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             }
 
             List<Type> typeList = cptController
-                .queryCpt(DataTypetUtils.intToUint256(cptId))
+                .queryCpt(DataToolUtils.intToUint256(cptId))
                 .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
             if (typeList == null || typeList.isEmpty()) {
@@ -301,7 +304,7 @@ public class CptServiceImpl extends BaseService implements CptService {
                 WeIdUtils.convertAddressToWeId(((Address) typeList.get(0)).toString())
             );
 
-            long[] longArray = DataTypetUtils.int256DynamicArrayToLongArray(
+            long[] longArray = DataToolUtils.int256DynamicArrayToLongArray(
                 (DynamicArray<Int256>) typeList.get(1)
             );
             cpt.setCptVersion((int) longArray[0]);
@@ -309,7 +312,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             cpt.setUpdated(longArray[2]);
 
             String[] jsonSchemaArray =
-                DataTypetUtils.bytes32DynamicArrayToStringArrayWithoutTrim(
+                DataToolUtils.bytes32DynamicArrayToStringArrayWithoutTrim(
                     (DynamicArray<Bytes32>) typeList.get(3)
                 );
             StringBuffer jsonSchema = new StringBuffer();
@@ -317,16 +320,18 @@ public class CptServiceImpl extends BaseService implements CptService {
                 jsonSchema.append(jsonSchemaArray[i]);
             }
 
-            Map<String, Object> jsonSchemaMap =
-                (Map<String, Object>) JsonUtil.jsonStrToObj(
-                    new HashMap<String, Object>(),
-                    jsonSchema.toString().trim()
-                );
+            // Map<String, Object> jsonSchemaMap =
+            //     (Map<String, Object>) JsonUtil.jsonStrToObj(
+            //         new HashMap<String, Object>(),
+            //         jsonSchema.toString().trim()
+            //     );
+            Map<String, Object> jsonSchemaMap = DataToolUtils
+                .deserialize(jsonSchema.toString().trim(), HashMap.class);
             cpt.setCptJsonSchema(jsonSchemaMap);
 
-            int v = DataTypetUtils.uint8ToInt((Uint8) typeList.get(4));
-            byte[] r = DataTypetUtils.bytes32ToBytesArray((Bytes32) typeList.get(5));
-            byte[] s = DataTypetUtils.bytes32ToBytesArray((Bytes32) typeList.get(6));
+            int v = DataToolUtils.uint8ToInt((Uint8) typeList.get(4));
+            byte[] r = DataToolUtils.bytes32ToBytesArray((Bytes32) typeList.get(5));
+            byte[] s = DataToolUtils.bytes32ToBytesArray((Bytes32) typeList.get(6));
             Sign.SignatureData signatureData = DataToolUtils
                 .rawSignatureDeserialization(v, r, s);
             String cptSignature =
@@ -368,11 +373,13 @@ public class CptServiceImpl extends BaseService implements CptService {
 
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
+            // cptMapArgs.setCptJsonSchema(
+            //     (Map<String, Object>) JsonUtil.jsonStrToObj(
+            //         new HashMap<String, Object>(),
+            //         args.getCptJsonSchema())
+            // );
             cptMapArgs.setCptJsonSchema(
-                (Map<String, Object>) JsonUtil.jsonStrToObj(
-                    new HashMap<String, Object>(),
-                    args.getCptJsonSchema())
-            );
+                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
             return this.updateCpt(cptMapArgs, cptId);
         } catch (Exception e) {
             logger.error("[updateCpt1] update cpt failed due to unkown error. ", e);
@@ -454,7 +461,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             cptJsonSchemaNew,
             weIdPrivateKey);
 
-        StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
+        StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
 
@@ -462,7 +469,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         if (isUpdate) {
             // the case to update a CPT. Requires a valid CPT ID
             return cptController.updateCpt(
-                DataTypetUtils.intToUint256(cptId),
+                DataToolUtils.intToUint256(cptId),
                 new Address(WeIdUtils.convertWeIdToAddress(weId)),
                 TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
                 bytes32Array,
@@ -486,7 +493,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             } else {
                 // the case to register a CPT with a pre-set CPT ID
                 return cptController.registerCpt(
-                    DataTypetUtils.intToUint256(cptId),
+                    DataToolUtils.intToUint256(cptId),
                     new Address(WeIdUtils.convertWeIdToAddress(weId)),
                     TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
                     bytes32Array,
@@ -505,44 +512,44 @@ public class CptServiceImpl extends BaseService implements CptService {
         Int256 cptVersion) {
 
         // register
-        if (DataTypetUtils.uint256ToInt(retCode)
+        if (DataToolUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
             logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}",
-                DataTypetUtils.uint256ToInt(cptId));
+                DataToolUtils.uint256ToInt(cptId));
             return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX);
         }
 
-        if (DataTypetUtils.uint256ToInt(retCode) == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
+        if (DataToolUtils.uint256ToInt(retCode) == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
             logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
-                DataTypetUtils.uint256ToInt(cptId));
+                DataToolUtils.uint256ToInt(cptId));
             return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST);
         }
 
-        if (DataTypetUtils.uint256ToInt(retCode) == ErrorCode.CPT_NO_PERMISSION.getCode()) {
+        if (DataToolUtils.uint256ToInt(retCode) == ErrorCode.CPT_NO_PERMISSION.getCode()) {
             logger.error("[getResultByResolveEvent] no permission. cptId:{}",
-                DataTypetUtils.uint256ToInt(cptId));
+                DataToolUtils.uint256ToInt(cptId));
             return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION);
         }
 
         // register and update
-        if (DataTypetUtils.uint256ToInt(retCode)
+        if (DataToolUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
             logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}",
-                DataTypetUtils.uint256ToInt(cptId));
+                DataToolUtils.uint256ToInt(cptId));
             return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST);
         }
 
         // update
-        if (DataTypetUtils.uint256ToInt(retCode)
+        if (DataToolUtils.uint256ToInt(retCode)
             == ErrorCode.CPT_NOT_EXISTS.getCode()) {
             logger.error("[getResultByResolveEvent] cpt id : {} does not exist.",
-                DataTypetUtils.uint256ToInt(cptId));
+                DataToolUtils.uint256ToInt(cptId));
             return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
         }
 
         CptBaseInfo result = new CptBaseInfo();
-        result.setCptId(DataTypetUtils.uint256ToInt(cptId));
-        result.setCptVersion(DataTypetUtils.int256ToInt(cptVersion));
+        result.setCptId(DataToolUtils.uint256ToInt(cptId));
+        result.setCptVersion(DataToolUtils.int256ToInt(cptVersion));
 
         ResponseData<CptBaseInfo> responseData = new ResponseData<>(result, ErrorCode.SUCCESS);
         return responseData;
@@ -581,7 +588,8 @@ public class CptServiceImpl extends BaseService implements CptService {
             logger.error("Input cpt json schema is null.");
             return ErrorCode.CPT_JSON_SCHEMA_NULL;
         }
-        String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
+        //String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
+        String cptJsonSchema = DataToolUtils.serialize(cptJsonSchemaMap);
         if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
             logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaMap);
             return ErrorCode.CPT_JSON_SCHEMA_INVALID;
@@ -615,7 +623,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         cptJsonSchemaNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
         cptJsonSchemaNew.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
         cptJsonSchemaNew.putAll(cptJsonSchema);
-        return JsonUtil.objToJsonStr(cptJsonSchemaNew);
+        return DataToolUtils.serialize(cptJsonSchemaNew);
     }
 
     private ResponseData<CptBaseInfo> resolveRegisterCptEvents(

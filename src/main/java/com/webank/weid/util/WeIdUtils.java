@@ -39,7 +39,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
  * @author tonychen
  */
 public final class WeIdUtils {
-    
+
     /**
      * log4j object, for recording log.
      */
@@ -151,10 +151,10 @@ public final class WeIdUtils {
     public static boolean isEmptyAddress(Address addr) {
         return addr.getValue().equals(BigInteger.ZERO);
     }
-    
+
     /**
      * check the weId is match the private key.
-     * 
+     *
      * @param privateKey the private key
      * @param weId the weId
      * @return true if match, false mismatch
@@ -174,7 +174,7 @@ public final class WeIdUtils {
             logger.error("Validate private key We Id matches failed. Error message :{}", e);
             return isMatch;
         }
-        
+
         return isMatch;
     }
 }

@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -16,6 +16,7 @@
  *       You should have received a copy of the GNU Lesser General Public License
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 
 package com.webank.weid.protocol.amop;
 

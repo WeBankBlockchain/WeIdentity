@@ -32,13 +32,11 @@ import org.slf4j.LoggerFactory;
  * @author tonychen 2019年3月21日
  */
 public final class PropertyUtils {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(PropertyUtils.class);
-    
-    private static Properties prop = new Properties();
-    
     private static final String PROP_NAME = "weidentity.properties";
-    
+    private static Properties prop = new Properties();
+
     static {
         try {
             loadProperties(PROP_NAME);

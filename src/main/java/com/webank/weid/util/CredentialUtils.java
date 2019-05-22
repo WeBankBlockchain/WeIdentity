@@ -105,13 +105,17 @@ public final class CredentialUtils {
         ct.setContext(credential.getContext());
 
         Map<String, String> originalProof = credential.getProof();
-        Map<String, String> proof = (HashMap<String, String>) JsonUtil
-            .jsonStrToObj(new HashMap<String, String>(), JsonUtil.objToJsonStr(originalProof));
-        ct.setProof(proof);
+        //Map<String, String> proof = (HashMap<String, String>) JsonUtil
+        //    .jsonStrToObj(new HashMap<String, String>(), JsonUtil.objToJsonStr(originalProof));
+        //ct.setProof(proof);
+        Map<String, String> proof = DataToolUtils
+            .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
 
         Map<String, Object> originalClaim = credential.getClaim();
-        Map<String, Object> claim = (HashMap<String, Object>) JsonUtil
-            .jsonStrToObj(new HashMap<String, Object>(), JsonUtil.objToJsonStr(originalClaim));
+        //Map<String, Object> claim = (HashMap<String, Object>) JsonUtil
+        //    .jsonStrToObj(new HashMap<String, Object>(), JsonUtil.objToJsonStr(originalClaim));
+        Map<String, Object> claim = DataToolUtils
+            .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
         ct.setClaim(claim);
 
         ct.setIssuranceDate(credential.getIssuranceDate());
@@ -135,10 +139,10 @@ public final class CredentialUtils {
         Credential credential,
         Map<String, Object> disclosures) {
         try {
-            Map<String, Object> credMap = JsonUtil.objToMap(credential);
+            Map<String, Object> credMap = DataToolUtils.objToMap(credential);
             String claimHash = getClaimHash(credential, disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
-            return JsonUtil.mapToCompactJson(credMap);
+            return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
@@ -281,7 +285,7 @@ public final class CredentialUtils {
         }
         String mergedId = id.replaceAll(WeIdConstant.UUID_SEPARATOR, StringUtils.EMPTY);
         byte[] uuidBytes = mergedId.getBytes(StandardCharsets.UTF_8);
-        return DataTypetUtils.bytesArrayToBytes32(uuidBytes);
+        return DataToolUtils.bytesArrayToBytes32(uuidBytes);
     }
 
     /**

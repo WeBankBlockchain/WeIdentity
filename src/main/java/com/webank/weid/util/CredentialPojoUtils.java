@@ -23,20 +23,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.request.CreateCredentialArgs;
 
 /**
  * The Class CredentialUtils.
@@ -64,13 +59,13 @@ public final class CredentialPojoUtils {
         Map<String, Object> salt,
         Map<String, Object> disclosures) {
         try {
-            Map<String, Object> credMap = JsonUtil.objToMap(credential);
+            Map<String, Object> credMap = DataToolUtils.objToMap(credential);
             // Preserve the same behavior as in CredentialUtils - will merge later
             credMap.remove(ParamKeyConstant.PROOF);
             credMap.put(ParamKeyConstant.PROOF, null);
             String claimHash = getClaimHash(credential, salt, disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
-            return JsonUtil.mapToCompactJson(credMap);
+            return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
@@ -89,10 +84,10 @@ public final class CredentialPojoUtils {
         Map<String, Object> disclosures
     ) {
         try {
-            Map<String, Object> credMap = JsonUtil.objToMap(credential);
+            Map<String, Object> credMap = DataToolUtils.objToMap(credential);
             String claimHash = getClaimHash(credential, salt, disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
-            return JsonUtil.mapToCompactJson(credMap);
+            return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
@@ -115,14 +110,14 @@ public final class CredentialPojoUtils {
         Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
         addSaltAndGetHash(newClaim, salt, disclosures);
         try {
-            String jsonData = JsonUtil.mapToCompactJson(newClaim);
+            String jsonData = DataToolUtils.mapToCompactJson(newClaim);
             return jsonData;
         } catch (Exception e) {
             logger.error("[getClaimHash] get claim hash failed. {}", e);
         }
         return StringUtils.EMPTY;
     }
-    
+
     private static void addSaltAndGetHash(
         Map<String, Object> claim,
         Map<String, Object> salt,
@@ -139,15 +134,15 @@ public final class CredentialPojoUtils {
 
             if (newClaimObj instanceof Map) {
                 addSaltAndGetHash(
-                    (HashMap)newClaimObj,
-                    (HashMap)saltObj,
-                    (HashMap)disclosureObj
+                    (HashMap) newClaimObj,
+                    (HashMap) saltObj,
+                    (HashMap) disclosureObj
                 );
             } else {
                 if (disclosureObj == null) {
                     if (!CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().equals(saltObj)) {
                         claim.put(
-                            key, 
+                            key,
                             getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj))
                         );
                     }
@@ -157,131 +152,8 @@ public final class CredentialPojoUtils {
     }
 
     /**
-     * Convert a field to hash.
-     *
-     * @param field which will be converted to hash.
-     * @return hash value.
-     */
-    public static String getFieldHash(Object field) {
-        return DataToolUtils.sha3(String.valueOf(field));
-    }
-
-    /**
-     * Get default Credential Context String.
-     *
-     * @return Context value in String.
-     */
-    public static String getDefaultCredentialContext() {
-        return CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT;
-    }
-
-    /**
-     * Extract GenerateCredentialArgs from Credential.
-     *
-     * @param arg the arg
-     * @return GenerateCredentialArgs
-     */
-    public static CreateCredentialArgs extractCredentialMetadata(Credential arg) {
-        return CredentialUtils.extractCredentialMetadata(arg);
-    }
-
-    /**
-     * Create a full Credential Hash for a Credential based on all its fields. This should be
-     * invoked when getting Credential Evidence. Please note: the result is a String with fixed
-     * length 66 bytes including the first two bytes ("0x") and 64 bytes Hash value..
-     *
-     * @param arg the args
-     * @return Hash in byte array
-     */
-    public static String getCredentialHash(CredentialPojo arg) {
-        String rawData = getCredentialThumbprint(arg, null, null);
-        if (StringUtils.isEmpty(rawData)) {
-            return StringUtils.EMPTY;
-        }
-        return DataToolUtils.sha3(rawData);
-    }
-
-    /**
-     * Convert a Credential ID to a Bytes32 object. The "-" connector will be removed.
-     *
-     * @param id the Credential id
-     * @return a Bytes32 object
-     */
-    public static Bytes32 convertCredentialIdToBytes32(String id) {
-        return CredentialUtils.convertCredentialIdToBytes32(id);
-    }
-
-    /**
-     * Check whether the given String is a valid UUID.
-     *
-     * @param id the Credential id
-     * @return true if yes, false otherwise
-     */
-    public static boolean isValidUuid(String id) {
-        return CredentialUtils.isValidUuid(id);
-    }
-
-    /**
-     * Check the given CreateCredentialArgs validity based on its input params.
-     *
-     * @param args CreateCredentialArgs
-     * @return true if yes, false otherwise
-     */
-    public static ErrorCode isCreateCredentialArgsValid(
-        CreateCredentialArgs args) {
-        return CredentialUtils.isCreateCredentialArgsValid(args);
-    }
-
-    /**
-     * Check the given Credential validity based on its input params.
-     *
-     * @param args Credential
-     * @return true if yes, false otherwise
-     */
-    public static ErrorCode isCredentialValid(Credential args) {
-        return CredentialUtils.isCredentialValid(args);
-    }
-
-    /**
-     * Check the given Credential content fields validity excluding metadata, based on its input.
-     *
-     * @param args Credential
-     * @return true if yes, false otherwise
-     */
-    public static ErrorCode isCredentialContentValid(Credential args) {
-        return CredentialUtils.isCredentialContentValid(args);
-    }
-
-    /**
-     * Check the given CreateEvidenceArgs validity based on its input params.
-     *
-     * @param credential the given credential
-     * @param weIdPrivateKey the signer WeID's private key
-     * @return evidence address. Return empty string if failed due to any reason.
-     */
-    public static ErrorCode isCreateEvidenceArgsValid(
-        Credential credential,
-        WeIdPrivateKey weIdPrivateKey) {
-        return CredentialUtils.isCreateEvidenceArgsValid(credential, weIdPrivateKey);
-    }
-
-    /**
-     * Get the hash value of the credential pojo based on its credential value and salt value.
-     *
-     * @param credential the credential
-     * @return hash value
-     */
-    public static String getCredentialPojoHash(CredentialPojo credential) {
-        String rawData = getCredentialThumbprint(credential, credential.getSalt(), null);
-        if (StringUtils.isEmpty(rawData)) {
-            return StringUtils.EMPTY;
-        }
-        return DataToolUtils.sha3(rawData);
-    }
-
-    /**
      * Check the credential and proof of presentationE.
-     * 
+     *
      * @param presentationE the presentation
      * @return return the check code
      */

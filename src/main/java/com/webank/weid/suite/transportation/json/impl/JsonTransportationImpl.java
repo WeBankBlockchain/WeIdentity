@@ -38,23 +38,21 @@ import com.webank.weid.suite.entity.JsonVersion;
 import com.webank.weid.suite.transportation.AbstractJsonTransportation;
 import com.webank.weid.suite.transportation.json.protocol.JsonBaseData;
 import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.JsonUtil;
 
 /**
  * JSON协议的传输.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class JsonTransportationImpl
     extends AbstractJsonTransportation
     implements JsonTransportation {
 
-    private static final Logger logger = 
+    private static final Logger logger =
         LoggerFactory.getLogger(JsonTransportationImpl.class);
-    
+
     private static final JsonVersion version = JsonVersion.V1;
-    
+
     @Override
     public <T extends JsonSerializer> ResponseData<String> serialize(
         T object,
@@ -76,7 +74,7 @@ public class JsonTransportationImpl
             logger.error("checkProtocolData fail, errorCode:{}.", errorCode);
             return new ResponseData<String>(StringUtils.EMPTY, errorCode);
         }
-        
+
         try {
             // 构建JSON协议数据
             JsonBaseData jsonBaseData = buildJsonData(property);
@@ -84,25 +82,25 @@ public class JsonTransportationImpl
             // 如果是原文方式，则直接放对象,data为对象类型
             if (property.getEncodeType() == EncodeType.ORIGINAL) {
                 jsonBaseData.setData(object);
-            } else { 
+            } else {
                 // 非原文格式，根据data进行编解码，data为字符串类型
                 // 创建编解码实体对象，对此实体中的data编码操作
-                EncodeData encodeData = 
+                EncodeData encodeData =
                     new EncodeData(
                         jsonBaseData.getId(),
                         jsonBaseData.getOrgId(),
                         object.toJson(),
                         super.getVerifiers()
                     );
-                
-                String data = 
+
+                String data =
                     EncodeProcessorFactory
                         .getEncodeProcessor(property.getEncodeType())
                         .encode(encodeData);
                 jsonBaseData.setData(data);
             }
             // 将jsonBaseData转换成JSON字符串
-            String jsonData = JsonUtil.objToJsonStrWithNoPretty(jsonBaseData);
+            String jsonData = DataToolUtils.objToJsonStrWithNoPretty(jsonBaseData);
             logger.info("JsonTransportationImpl serialization finished.");
             return new ResponseData<String>(jsonData, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
@@ -118,7 +116,7 @@ public class JsonTransportationImpl
     public <T extends JsonSerializer> ResponseData<T> deserialize(
         String transString,
         Class<T> clazz) {
-        
+
         logger.info("begin to execute JsonTransportationImpl deserialization.");
         try {
             if (StringUtils.isBlank(transString)) {
@@ -126,21 +124,23 @@ public class JsonTransportationImpl
                 return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID);
             }
             //将JSON字符串解析成JsonBaseData对象
-            JsonBaseData jsonBaseData = JsonUtil.jsonStrToObj(JsonBaseData.class, transString);
+            //JsonBaseData jsonBaseData = JsonUtil.jsonStrToObj(JsonBaseData.class, transString);
+            JsonBaseData jsonBaseData = DataToolUtils.deserialize(transString, JsonBaseData.class);
             //检查JsonBaseData合法性
             ErrorCode errorCode = checkJsonBaseData(jsonBaseData);
             if (errorCode != ErrorCode.SUCCESS) {
                 logger.error("checkJsonBaseData fail, errorCode:{}.", errorCode);
                 return new ResponseData<T>(null, errorCode);
             }
-            
+
             Object data = jsonBaseData.getData();
             // 如果解析出来的data为map类型，则说明 data存放的为对象，而非字符串
             if (data instanceof Map) {
-                jsonBaseData.setData(JsonUtil.objToJsonStrWithNoPretty(jsonBaseData.getData()));
+                jsonBaseData
+                    .setData(DataToolUtils.objToJsonStrWithNoPretty(jsonBaseData.getData()));
             }
             //创建编解码实体对象，对此实体中的data解码操作
-            EncodeData encodeData = 
+            EncodeData encodeData =
                 new EncodeData(
                     jsonBaseData.getId(),
                     jsonBaseData.getOrgId(),
@@ -148,19 +148,21 @@ public class JsonTransportationImpl
                     super.getVerifiers()
                 );
             //根据编解码类型获取编解码枚举对象
-            EncodeType encodeType = 
+            EncodeType encodeType =
                 EncodeType.getObject(String.valueOf(jsonBaseData.getEncodeType()));
             if (encodeType == null) {
                 return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
             }
             logger.info("decode by {}.", encodeType.name());
             //进行解码操作
-            String presentationEStr = 
+            String presentationEStr =
                 EncodeProcessorFactory
                     .getEncodeProcessor(encodeType)
                     .decode(encodeData);
-            T object = 
-                (T) JsonUtil.jsonStrToObj(clazz, presentationEStr);
+            //T object =
+            //      (T) DataToolUtils.jsonStrToObj(clazz, presentationEStr);
+            T object =
+                (T) DataToolUtils.deserialize(presentationEStr, clazz);
             logger.info("JsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(object, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
@@ -174,6 +176,7 @@ public class JsonTransportationImpl
 
     /**
      * 构建协议实体数据.
+     *
      * @param property 协议配置对象
      * @return 返回协议实体对象
      */
@@ -185,15 +188,16 @@ public class JsonTransportationImpl
         jsonBaseData.setVersion(version.getCode());
         return jsonBaseData;
     }
-    
+
     /**
      * 检查jsonBaseData合法性.
+     *
      * @param jsonBaseData JSON协议实体数据
      * @return 返回错误码
      */
     private ErrorCode checkJsonBaseData(JsonBaseData jsonBaseData) {
-        if (jsonBaseData == null 
-            || StringUtils.isBlank(jsonBaseData.getId()) 
+        if (jsonBaseData == null
+            || StringUtils.isBlank(jsonBaseData.getId())
             || StringUtils.isBlank(jsonBaseData.getOrgId())
             || jsonBaseData.getData() == null
             || StringUtils.isBlank(jsonBaseData.getData().toString())) {

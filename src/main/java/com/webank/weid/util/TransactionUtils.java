@@ -131,8 +131,8 @@ public class TransactionUtils {
         // We do not check WeID existence in this case since it does not really affect the outcome.
         return Arrays.<Type>asList(
             new Address(addr),
-            DataTypetUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
-            DataTypetUtils.stringToDynamicBytes(DateUtils.getCurrentTimeStampString()),
+            DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
+            DataToolUtils.stringToDynamicBytes(DateUtils.getCurrentTimeStampString()),
             DateUtils.getCurrentTimeStampInt256()
         );
     }
@@ -174,7 +174,7 @@ public class TransactionUtils {
     private static StaticArray<Bytes32> getParamName(String name) {
         String[] nameArray = new String[WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH];
         nameArray[0] = name;
-        return DataTypetUtils.stringArrayToBytes32StaticArray(nameArray);
+        return DataToolUtils.stringArrayToBytes32StaticArray(nameArray);
     }
 
     /**
@@ -214,9 +214,13 @@ public class TransactionUtils {
 
         String cptJsonSchema = cptJsonSchemaNode.toString();
         String cptJsonSchemaNew = complementCptJsonSchema(cptJsonSchema);
-        Map<String, Object> cptJsonSchemaMap = (HashMap<String, Object>) JsonUtil.jsonStrToObj(
-            new HashMap<String, Object>(),
-            cptJsonSchemaNew);
+        // Map<String, Object> cptJsonSchemaMap = (HashMap<String, Object>) JsonUtil.jsonStrToObj(
+        //     new HashMap<String, Object>(),
+        //     cptJsonSchemaNew);
+        Map<String, Object> cptJsonSchemaMap = DataToolUtils.deserialize(
+            cptJsonSchemaNew,
+            HashMap.class
+        );
         if (cptJsonSchemaMap == null
             || cptJsonSchemaMap.isEmpty()
             || !DataToolUtils.isCptJsonSchemaValid(cptJsonSchemaNew)) {
@@ -229,12 +233,12 @@ public class TransactionUtils {
             logger.error("Input cpt signature invalid: {}", cptSignature);
             return null;
         }
-        RsvSignature rsvSignature = 
+        RsvSignature rsvSignature =
             DataToolUtils.convertSignatureDataToRsv(
                 DataToolUtils.convertBase64StringToSignatureData(cptSignature)
             );
 
-        StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
+        StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
         return Arrays.<Type>asList(
@@ -254,15 +258,20 @@ public class TransactionUtils {
      * @return the new string
      */
     public static String complementCptJsonSchema(String cptJsonSchemaOld) {
-        Map<String, Object> cptJsonSchemaMapOld = (Map<String, Object>) JsonUtil.jsonStrToObj(
-            new HashMap<String, Object>(),
-            cptJsonSchemaOld);
+        // Map<String, Object> cptJsonSchemaMapOld = (Map<String, Object>) JsonUtil.jsonStrToObj(
+        //     new HashMap<String, Object>(),
+        //     cptJsonSchemaOld);
+        Map<String, Object> cptJsonSchemaMapOld = DataToolUtils.deserialize(
+            cptJsonSchemaOld,
+            HashMap.class
+        );
         Map<String, Object> cptJsonSchemaMapNew = new HashMap<>();
         cptJsonSchemaMapNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
         cptJsonSchemaMapNew
             .put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
         cptJsonSchemaMapNew.putAll(cptJsonSchemaMapOld);
-        return JsonUtil.objToJsonStr(cptJsonSchemaMapNew);
+        // return JsonUtil.objToJsonStr(cptJsonSchemaMapNew);
+        return DataToolUtils.serialize(cptJsonSchemaMapNew);
     }
 
     /**
@@ -274,7 +283,7 @@ public class TransactionUtils {
         long[] longArray = new long[length];
         long created = System.currentTimeMillis();
         longArray[0] = created;
-        return DataTypetUtils.longArrayToInt256StaticArray(longArray);
+        return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
 
     /**
@@ -292,7 +301,7 @@ public class TransactionUtils {
         for (int i = 0; i < stringList.size(); i++) {
             jsonSchemaArray[i] = stringList.get(i);
         }
-        return DataTypetUtils.stringArrayToBytes32StaticArray(jsonSchemaArray);
+        return DataToolUtils.stringArrayToBytes32StaticArray(jsonSchemaArray);
     }
 
     /**
