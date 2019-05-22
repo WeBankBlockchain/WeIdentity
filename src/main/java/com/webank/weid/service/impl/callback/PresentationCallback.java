@@ -34,7 +34,8 @@ public class PresentationCallback extends AmopCallback {
         }
         PolicyAndChallenge policyAndChallenge;
         try {
-            policyAndChallenge = policyService.policyAndChallengeOnPush(arg.getPolicyId(), arg.getTargetUserWeId());
+            policyAndChallenge = 
+                policyService.policyAndChallengeOnPush(arg.getPolicyId(), arg.getTargetUserWeId());
         } catch (Exception e) {
             logger.error("the policy service call fail, please check the error log.", e);
             response.setErrorCode(ErrorCode.POLICY_SERVICE_CALL_FAIL.getCode());

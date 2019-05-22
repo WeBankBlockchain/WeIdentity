@@ -43,11 +43,12 @@ public class OnNotifyCallback extends ChannelPushCallback {
 
     public void registAmopCallback(Integer msgType, AmopCallback routeCallBack) {
 
-    	amopCallBackMap.put(msgType, routeCallBack);
+        amopCallBackMap.put(msgType, routeCallBack);
     }
+    
     @Override
     public void onPush(ChannelPush push) {
-    	
+
         if (0 == amopCallBackMap.size()) {
             ChannelResponse response = new ChannelResponse();
             response.setContent("directRouteCallback is null on server side!");
@@ -57,7 +58,8 @@ public class OnNotifyCallback extends ChannelPushCallback {
         }
         
         logger.info("received ChannelPush msg : " + push.getContent());
-        AmopRequestBody amopRequestBody = DataToolUtils.deserialize(push.getContent(), AmopRequestBody.class);
+        AmopRequestBody amopRequestBody = 
+            DataToolUtils.deserialize(push.getContent(), AmopRequestBody.class);
         AmopMsgType msgType = amopRequestBody.getMsgType();
         AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
         String messageBody = amopRequestBody.getMsgBody();

@@ -1,19 +1,22 @@
 package com.webank.weid.protocol.amop;
 
-import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 import lombok.Getter;
 import lombok.Setter;
 
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
+
 /**
- * @author tonychen 2019年5月7日
+ * the request body for get EncryptKey.
+ * 
+ * @author tonychen 2019年5月7日.
  *
  */
 @Getter
 @Setter
 public class GetEncryptKeyArgs extends AmopBaseMsgArgs {
 
-	/**
-	 * 
-	 */
-	private String keyId;
+    /**
+     * the encrypKey Id.
+     */
+    private String keyId;
 }

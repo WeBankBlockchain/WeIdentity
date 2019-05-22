@@ -105,5 +105,4 @@ public interface WeIdService {
      * @return true if exists, false otherwise.
      */
     ResponseData<Boolean> isWeIdExist(String weId);
-
 }
