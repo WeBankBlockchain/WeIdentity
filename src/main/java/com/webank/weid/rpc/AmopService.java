@@ -21,11 +21,9 @@ package com.webank.weid.rpc;
 
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
-import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
-import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.AmopCallback;
 
@@ -38,12 +36,7 @@ public interface AmopService {
 
     ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args);
 
-    ResponseData<PolicyAndChallenge> getPresentationPolicy(String orgId, Integer policyId);
-
-    ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(
-        String toOrgId,
-        GetPolicyAndChallengeArgs args
-    );
+    ResponseData<PolicyAndChallenge> getPolicyAndChallenge(String orgId, Integer policyId, String targetUserWeId);
 
     ResponseData<GetEncryptKeyResponse> getEncryptKey(
         String toOrgId,

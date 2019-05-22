@@ -542,6 +542,7 @@ public enum ErrorCode {
      * sql execute failed.
      */
     AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(160012, "amop server side has no direct route callback."),
+
     /**
      * other uncatched exceptions or error.
      */

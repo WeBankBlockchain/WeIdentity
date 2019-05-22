@@ -19,7 +19,10 @@
 
 package com.webank.weid.protocol.base;
 
+import java.security.SecureRandom;
+import org.apache.commons.codec.binary.Base64;
 import com.webank.weid.protocol.inf.RawSerializer;
+import com.webank.weid.util.DataToolUtils;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -55,6 +58,16 @@ public class Challenge extends Version implements RawSerializer {
      * @return
      */
     public static Challenge create(String seed) {
-        return null;
+        Challenge challenge = new Challenge();
+        challenge.setVersion(1);
+        SecureRandom random = new SecureRandom();
+        
+        String randomSeed = seed + DataToolUtils.getUuId32();
+        random.setSeed(randomSeed.getBytes());
+        byte bytes[] = new byte[15];
+        random.nextBytes(bytes);
+        String nonce = Base64.encodeBase64String(bytes);
+        challenge.setNonce(nonce);
+        return challenge;
     }
 }
