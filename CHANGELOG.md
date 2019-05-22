@@ -1,4 +1,13 @@
-v1.1.1 (2019-03-29)
+### v1.1.2 (2019-05-22)
+
+- Features:
+1. ResponseData now contains blockchain transaction information
+
+- Bugfixes:
+1. CreateEvidence should use input DID instead of default private key for authentication
+2. WeIdentity Contract dependency now targets to specific instead of latest versions
+
+### v1.1.1 (2019-03-29)
 
 - Features:
 1. Add adaption of new changes in RestAPI service.
@@ -13,15 +22,15 @@ v1.1.1 (2019-03-29)
 
 ### v1.1.0 (2019-01-31)
 
-Features:
-1.The first version implementation of selective disclosure.
-2.The first version implementation of evidence.
-3.Download weidentity-contract.jar from maven instead of local.
-4.Use JSON string as parameter in class cptServiceImpl and credentialServiceImpl instead of plain string.
+- Features:
+1. The first version implementation of selective disclosure.
+2. The first version implementation of evidence.
+3. Download weidentity-contract.jar from maven instead of local.
+4. Use JSON string as parameter in class cptServiceImpl and credentialServiceImpl instead of plain string.
 
-Documents modifications:
-1.Move SDK document from WeIdentity project to this project.
-2.Use embedded mermaidjs plugin to render sequences diagram instead of PNG files.
+- Documents modifications:
+1. Move SDK document from WeIdentity project to this project.
+2. Use embedded mermaidjs plugin to render sequences diagram instead of PNG files.
 
 ### v1.0.3 (2018-12-20)
 
