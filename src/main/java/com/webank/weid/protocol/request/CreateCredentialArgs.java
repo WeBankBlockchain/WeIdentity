@@ -19,12 +19,11 @@
 
 package com.webank.weid.protocol.request;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-
 import java.util.Map;
 
 import lombok.Data;
 
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 
 /**
  * The Arguments for the following SDK API: createCredential().

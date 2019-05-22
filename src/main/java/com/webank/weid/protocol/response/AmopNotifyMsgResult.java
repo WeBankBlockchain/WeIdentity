@@ -19,8 +19,9 @@
 
 package com.webank.weid.protocol.response;
 
-import com.webank.weid.protocol.inf.IResult;
 import lombok.Data;
+
+import com.webank.weid.protocol.inf.IResult;
 
 /**
  * Created by junqizhang on 15/08/2017.

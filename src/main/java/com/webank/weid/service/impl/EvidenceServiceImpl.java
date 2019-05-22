@@ -247,10 +247,13 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 r = rlist.get(index).getValue();
                 s = slist.get(index).getValue();
                 SignatureData sigData = new SignatureData(v, r, s);
-                signaturesList.add(new String(
-                		DataToolUtils
-                        .base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-                    StandardCharsets.UTF_8)
+                signaturesList.add(
+                    new String(
+                        DataToolUtils.base64Encode(
+                            DataToolUtils.simpleSignatureSerialization(sigData)
+                        ),
+                        StandardCharsets.UTF_8
+                    )
                 );
             }
             evidenceInfoData.setSignatures(signaturesList);
@@ -322,9 +325,9 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                     break;
                 }
                 SignatureData signatureData =
-                	DataToolUtils.simpleSignatureDeserialization(
-                			DataToolUtils.base64Decode(
-                            signature.getBytes(StandardCharsets.UTF_8)));
+                    DataToolUtils.simpleSignatureDeserialization(
+                        DataToolUtils.base64Decode(signature.getBytes(StandardCharsets.UTF_8))
+                    );
 
                 ResponseData<Boolean> innerResponseData = verifySignatureToSigner(
                     hashOffChain,
@@ -355,8 +358,11 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         return ErrorCode.SUCCESS;
     }
 
-    private ResponseData<Boolean> verifySignatureToSigner(String rawData,
-        String signerWeId, SignatureData signatureData) {
+    private ResponseData<Boolean> verifySignatureToSigner(
+        String rawData,
+        String signerWeId, 
+        SignatureData signatureData
+    ) {
 
         try {
             ResponseData<WeIdDocument> innerResponseData =
@@ -370,8 +376,8 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             WeIdDocument weIdDocument = innerResponseData.getResult();
             ErrorCode errorCode = DataToolUtils
                 .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
-            if(errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            	return new ResponseData<>(false, errorCode);
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false, errorCode);
             }
             return new ResponseData<>(true, ErrorCode.SUCCESS);
         } catch (Exception e) {

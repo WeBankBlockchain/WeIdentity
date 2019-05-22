@@ -19,40 +19,39 @@
 
 package com.webank.weid.protocol.amop.base;
 
-//import cn.webank.blockchain.spi.common.annoation.BlockChainDTO;
-//import cn.webank.blockchain.spi.common.annoation.BlockChainDTO.BindTypeEnum;
-import com.webank.weid.annoation.BlockChainDTO;
-import com.webank.weid.annoation.BlockChainDTO.BindTypeEnum;
-import com.webank.weid.protocol.base.Version;
-import com.webank.weid.protocol.inf.IArgs;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import com.webank.weid.annoation.BlockChainDto;
+import com.webank.weid.annoation.BlockChainDto.BindTypeEnum;
+import com.webank.weid.protocol.base.Version;
+import com.webank.weid.protocol.inf.IArgs;
 
 /**
  * Created by junqizhang on 01/06/2017.
  */
 @Data
-@BlockChainDTO(bindType = BindTypeEnum.Object)
+@BlockChainDto(bindType = BindTypeEnum.Object)
 @EqualsAndHashCode(callSuper = false)
 public class AmopBaseMsgArgs implements IArgs {
 
-    /*
-     * sdk functions version
+    /**
+     * sdk functions version.
      */
     protected Version version;
 
-    /*
-     * 消息id，用于链上链下消息去重
+    /**
+     * 消息id，用于链上链下消息去重.
      */
     protected String messageId;
 
-    /*
-     * 来源机构id
+    /**
+     * 来源机构id.
      */
     protected String fromOrgId;
 
-    /*
-     * 目的机构id
+    /**
+     * 目的机构id.
      */
     protected String toOrgId;
 }

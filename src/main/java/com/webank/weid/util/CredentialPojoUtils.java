@@ -19,10 +19,8 @@
 
 package com.webank.weid.util;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
@@ -33,7 +31,6 @@ import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
@@ -89,7 +86,8 @@ public final class CredentialPojoUtils {
     public static String getCredentialThumbprint(
         CredentialPojo credential,
         Map<String, Object> salt,
-        Map<String, Object> disclosures) {
+        Map<String, Object> disclosures
+    ) {
         try {
             Map<String, Object> credMap = JsonUtil.objToMap(credential);
             String claimHash = getClaimHash(credential, salt, disclosures);
@@ -107,12 +105,14 @@ public final class CredentialPojoUtils {
      * @param disclosures Disclosure Map
      * @return the unique claim hash value
      */
-    public static String getClaimHash(CredentialPojo credential, Map<String, Object> salt,
-        Map<String, Object> disclosures) {
+    public static String getClaimHash(
+        CredentialPojo credential,
+        Map<String, Object> salt,
+        Map<String, Object> disclosures
+    ) {
 
         Map<String, Object> claim = credential.getClaim();
         Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
-
         addSaltAndGetHash(newClaim, salt, disclosures);
         try {
             String jsonData = JsonUtil.mapToCompactJson(newClaim);
@@ -122,10 +122,12 @@ public final class CredentialPojoUtils {
         }
         return StringUtils.EMPTY;
     }
-
-    private static void addSaltAndGetHash(Map<String, Object> claim, Map<String, Object> salt,
-        Map<String, Object> disclosures) {
-
+    
+    private static void addSaltAndGetHash(
+        Map<String, Object> claim,
+        Map<String, Object> salt,
+        Map<String, Object> disclosures
+    ) {
         for (Map.Entry<String, Object> entry : claim.entrySet()) {
             String key = entry.getKey();
             Object disclosureObj = null;
@@ -136,19 +138,23 @@ public final class CredentialPojoUtils {
             Object newClaimObj = claim.get(key);
 
             if (newClaimObj instanceof Map) {
-                addSaltAndGetHash((HashMap) newClaimObj, (HashMap) saltObj,
-                    (HashMap) disclosureObj);
+                addSaltAndGetHash(
+                    (HashMap)newClaimObj,
+                    (HashMap)saltObj,
+                    (HashMap)disclosureObj
+                );
             } else {
                 if (disclosureObj == null) {
                     if (!CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().equals(saltObj)) {
-                        (claim).put(key,
-                            getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj)));
+                        claim.put(
+                            key, 
+                            getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj))
+                        );
                     }
                 }
             }
         }
     }
-
 
     /**
      * Convert a field to hash.
@@ -274,10 +280,10 @@ public final class CredentialPojoUtils {
     }
 
     /**
-     * Check the validity of a given credential and its proof of presentationE.
-     *
-     * @param presentationE the presentationE
-     * @return true if yes, false otherwise
+     * Check the credential and proof of presentationE.
+     * 
+     * @param presentationE the presentation
+     * @return return the check code
      */
     public static ErrorCode checkPresentationEValid(PresentationE presentationE) {
         if (presentationE == null || presentationE.getVerifiableCredential() == null

@@ -25,7 +25,7 @@ import com.webank.weid.protocol.base.Challenge;
  * Credential for authentication. The answer to meet the challenge. We package the answer into a
  * Credential(CPT104) so the verifier can verify this answer.
  *
- * Created by Junqi Zhang on 2019/4/9.
+ * @author Created by Junqi Zhang on 2019/4/9.
  */
 public class Cpt103 {
 
