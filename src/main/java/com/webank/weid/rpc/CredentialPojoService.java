@@ -23,7 +23,7 @@ import java.util.List;
 
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.CredentialPojoWrapper;
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -42,44 +42,38 @@ public interface CredentialPojoService {
      * Generate a credential for full claim content.
      *
      * @param args the args
-     * @return credential wrapper
+     * @return CredentialPojo
      */
-    ResponseData<CredentialPojoWrapper> createCredential(CreateCredentialPojoArgs args);
+    ResponseData<CredentialPojo> createCredential(CreateCredentialPojoArgs args);
 
     /**
      * Generate a selective disclosure credential with specified claim policy.
      *
-     * @param credentialPojoWrapper the credential
+     * @param CredentialPojo the credential
      * @param claimPolicy describe which fields in credential should be disclosed.
-     * @return CredentialWrapper
+     * @return CredentialPojo
      */
-    ResponseData<CredentialPojoWrapper> createSelectiveCredential(
-        CredentialPojoWrapper credentialPojoWrapper,
+    ResponseData<CredentialPojo> createSelectiveCredential(
+        CredentialPojo credential,
         ClaimPolicy claimPolicy
     );
 
     /**
      * Verify the validity of a credential. Public key will be fetched from chain.
      *
-     * @param credentialWrapper the credentialWrapper
+     * @param credential the credential
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
-    ResponseData<Boolean> verify(
-        String issuerWeId,
-        CredentialPojoWrapper credentialWrapper
-    );
+    ResponseData<Boolean> verify(String issuerWeId, CredentialPojo credential);
 
     /**
      * Verify the validity of a credential. Public key must be provided.
      *
      * @param issuerPublicKey the specified public key which used to verify credential signature
-     * @param credentialWrapper the credential wrapper
+     * @param credential the credential
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
-    ResponseData<Boolean> verify(
-        WeIdPublicKey issuerPublicKey,
-        CredentialPojoWrapper credentialWrapper
-    );
+    ResponseData<Boolean> verify(WeIdPublicKey issuerPublicKey, CredentialPojo credential);
 
     ResponseData<Boolean> verify(
         String presenterWeId,
@@ -87,24 +81,6 @@ public interface CredentialPojoService {
         Challenge challenge,
         PresentationE presentationE
     );
-
-    /**
-     * Get the full hash value of a Credential. All fields in the Credential will be included. This
-     * method should be called when creating and verifying the Credential Evidence.
-     *
-     * @param credential the args
-     * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
-     */
-//    ResponseData<String> getCredentialHash(CredentialPojo credential);
-
-    /**
-     * Get the Json String of a Credential. All fields in the Credential will be included. This also
-     * supports the selectively disclosed Credential.
-     *
-     * @param credential the credential
-     * @return the Credential Json value in String
-     */
-//    ResponseData<String> getCredentialJson(CredentialPojo credential);
     
     /**
      * packing according to original vouchers and disclosure strategies.
@@ -115,7 +91,7 @@ public interface CredentialPojoService {
      * @return
      */
     public ResponseData<PresentationE> createPresentation(
-        List<CredentialPojoWrapper> credentialList,
+        List<CredentialPojo> credentialList,
         PresentationPolicyE presentationPolicyE,
         Challenge challenge,
         WeIdAuthentication weIdAuthentication

@@ -241,8 +241,8 @@ public class TestVerifyEvidence extends TestBaseServcie {
         ResponseData<Boolean> responseData2 = evidenceService
             .verify(evidenceCredential, responseData1.getResult());
         Assert.assertEquals(responseData2.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode());
-        Assert.assertFalse(responseData2.getResult());
+            ErrorCode.SUCCESS.getCode());
+        Assert.assertTrue(responseData2.getResult());
     }
 
     /**

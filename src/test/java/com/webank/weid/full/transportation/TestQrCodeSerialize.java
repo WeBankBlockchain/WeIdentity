@@ -47,14 +47,15 @@ import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
  * @author v_wbgyang
  *
  */
-public class TestSerialize extends TestBaseTransportation {
+public class TestQrCodeSerialize extends TestBaseTransportation {
     
-    private static final Logger logger = LoggerFactory.getLogger(TestSerialize.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestQrCodeSerialize.class);
     
     private PresentationE presentation;
     
     @Override
     public synchronized void testInit() {
+        mockMysqlDriver();
         presentation = getPresentationE();
     }
     
@@ -93,6 +94,7 @@ public class TestSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase3() {
+        long startTime = System.currentTimeMillis();
         ResponseData<String> response =
             TransportationFactory.newQrCodeTransportation().serialize(presentation, null);
         LogUtil.info(logger, "serialize", response);
@@ -101,6 +103,7 @@ public class TestSerialize extends TestBaseTransportation {
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+        System.out.println("time:" + (System.currentTimeMillis() - startTime) );
     }
     
     /**

@@ -25,7 +25,6 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.CredentialPojoWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -127,15 +126,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
     }
 
-    private static ErrorCode verifyContent(CredentialPojoWrapper credentialWrapper,
+    private static ErrorCode verifyContent(CredentialPojo credential,
         String publicKey) {
-        Map<String, Object> salt = credentialWrapper.getSalt();
-        CredentialPojo credentialPojo = credentialWrapper.getCredentialPojo();
-//		Map<String, Object>claim = credentialPojo.getClaim();
-//		String claimHash = CredentialPojoUtils.getClaimHash(credentialPojo, salt, null);
+        Map<String, Object> salt = credential.getSalt();
         String rawData = CredentialPojoUtils
-            .getCredentialThumbprintWithoutSig(credentialPojo, salt, null);
-        String issuerWeid = credentialPojo.getIssuer();
+            .getCredentialThumbprintWithoutSig(credential, salt, null);
+        String issuerWeid = credential.getIssuer();
         if (StringUtils.isEmpty(publicKey)) {
             // Fetch public key from chain
             ResponseData<WeIdDocument> innerResponseData =
@@ -148,14 +144,17 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             } else {
                 WeIdDocument weIdDocument = innerResponseData.getResult();
                 return DataToolUtils
-                    .verifySignatureFromWeId(rawData, credentialPojo.getSignature(), weIdDocument);
+                    .verifySignatureFromWeId(rawData, credential.getSignature(), weIdDocument);
             }
         } else {
             boolean result;
             try {
                 result = DataToolUtils
-                    .verifySignature(rawData, credentialPojo.getSignature(),
-                        new BigInteger(publicKey));
+                    .verifySignature(
+                        rawData, 
+                        credential.getSignature(),
+                        new BigInteger(publicKey)
+                    );
             } catch (SignatureException e) {
                 return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
             }
@@ -170,9 +169,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
      * @see com.webank.weid.rpc.CredentialPojoService#createCredential(com.webank.weid.protocol.request.CreateCredentialPojoArgs)
      */
     @Override
-    public ResponseData<CredentialPojoWrapper> createCredential(CreateCredentialPojoArgs args) {
+    public ResponseData<CredentialPojo> createCredential(CreateCredentialPojoArgs args) {
 
-        CredentialPojoWrapper credentialPojoWrapper = new CredentialPojoWrapper();
         try {
 
             Object claimObject = args.getClaim();
@@ -187,18 +185,16 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             String className = "Cpt" + args.getCptId();
             if (!StringUtils.equals(className, claimObject.getClass().getSimpleName())) {
                 logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
-                return new ResponseData<CredentialPojoWrapper>(null,
+                return new ResponseData<CredentialPojo>(null,
                     ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL);
             }
 
             String claimStr = DataToolUtils.serialize(args.getClaim());
             HashMap<String, Object> claimMap = DataToolUtils.deserialize(claimStr, HashMap.class);
-//            result.setClaim(args.getClaim());
             result.setClaim(claimMap);
 
             Map<String, Object> saltMap = DataToolUtils.clone(claimMap);
             generateSalt(saltMap);
-            credentialPojoWrapper.setSalt(saltMap);
             String rawData = CredentialPojoUtils
                 .getCredentialThumbprintWithoutSig(result, saltMap, null);
             String privateKey = args.getWeIdPrivateKey().getPrivateKey();
@@ -211,10 +207,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
             proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, signature);
             result.setProof(proof);
+            result.setSalt(saltMap);
 
-            credentialPojoWrapper.setCredentialPojo(result);
-            ResponseData<CredentialPojoWrapper> responseData = new ResponseData<>(
-                credentialPojoWrapper,
+            ResponseData<CredentialPojo> responseData = new ResponseData<>(
+                result,
                 ErrorCode.SUCCESS
             );
 
@@ -226,55 +222,52 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#createSelectiveCredential(com.webank.weid.protocol.base.CredentialPojoWrapper, com.webank.weid.protocol.base.ClaimPolicy)
+     * @see com.webank.weid.rpc.CredentialPojoService#createSelectiveCredential(com.webank.weid.protocol.base.CredentialPojo, com.webank.weid.protocol.base.ClaimPolicy)
      */
     @Override
-    public ResponseData<CredentialPojoWrapper> createSelectiveCredential(
-        CredentialPojoWrapper credentialPojoWrapper,
+    public ResponseData<CredentialPojo> createSelectiveCredential(
+        CredentialPojo credential,
         ClaimPolicy claimPolicy) {
 
-        if (credentialPojoWrapper == null) {
-            logger.error("[createSelectiveCredential] credentialPojoWrapper is null.");
-            return new ResponseData<CredentialPojoWrapper>(null, ErrorCode.CREDENTIAL_IS_NILL);
+        if (credential == null) {
+            logger.error("[createSelectiveCredential] credential is null.");
+            return new ResponseData<CredentialPojo>(null, ErrorCode.CREDENTIAL_IS_NILL);
         }
         if (claimPolicy == null) {
             logger.error("[createSelectiveCredential] claimPolicy is null.");
-            return new ResponseData<CredentialPojoWrapper>(null,
+            return new ResponseData<CredentialPojo>(null,
                 ErrorCode.CREDENTIAL_CLAIM_POLICY_NOT_EXIST);
         }
-        CredentialPojo credentialPojo = credentialPojoWrapper.getCredentialPojo();
         String disclosure = claimPolicy.getFieldsToBeDisclosed();
-        Map<String, Object> saltMap = credentialPojoWrapper.getSalt();
-        Map<String, Object> claim = credentialPojo.getClaim();
+        Map<String, Object> saltMap = credential.getSalt();
+        Map<String, Object> claim = credential.getClaim();
 
         Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
         if (!validCredentialMapArgs(claim, saltMap, disclosureMap)) {
-            return new ResponseData<CredentialPojoWrapper>(null,
+            return new ResponseData<CredentialPojo>(null,
                 ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM);
         }
         addSelectSalt(disclosureMap, saltMap, claim);
-        credentialPojoWrapper.setSalt(saltMap);
+        credential.setSalt(saltMap);
 
-        ResponseData<CredentialPojoWrapper> response = new ResponseData<CredentialPojoWrapper>();
-        response.setResult(credentialPojoWrapper);
+        ResponseData<CredentialPojo> response = new ResponseData<CredentialPojo>();
+        response.setResult(credential);
         response.setErrorCode(ErrorCode.SUCCESS);
         return response;
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#verify(java.lang.String, com.webank.weid.protocol.base.CredentialPojoWrapper)
+     * @see com.webank.weid.rpc.CredentialPojoService#verify(java.lang.String, com.webank.weid.protocol.base.CredentialPojo)
      */
     @Override
-    public ResponseData<Boolean> verify(
-        String issuerWeId,
-        CredentialPojoWrapper credentialWrapper) {
+    public ResponseData<Boolean> verify(String issuerWeId, CredentialPojo credential) {
 
-        String issuerId = credentialWrapper.getCredentialPojo().getIssuer();
+        String issuerId = credential.getIssuer();
         if (!StringUtils.equals(issuerWeId, issuerId)) {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
         }
-        ErrorCode errorCode = verifyContent(credentialWrapper, null);
+        ErrorCode errorCode = verifyContent(credential, null);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<Boolean>(false, errorCode);
         }
@@ -328,30 +321,30 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
 
         //verify cptId of presentationE
-        List<CredentialPojoWrapper> credentialPojoWrapperlist = presentationE.getCredentialList();
+        List<CredentialPojo> credentialList = presentationE.getVerifiableCredential();
         Map<Integer, ClaimPolicy> policyMap = presentationPolicyE.getPolicy();
         ErrorCode verifyCptIdresult =
-            this.verifyCptId(policyMap, credentialPojoWrapperlist);
+            this.verifyCptId(policyMap, credentialList);
         if (verifyCptIdresult.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[verify] verify cptId failed.");
             return new ResponseData<Boolean>(false, verifyCptIdresult);
         }
 
-        for (CredentialPojoWrapper credentialPojoWrapper : credentialPojoWrapperlist) {
+        for (CredentialPojo credential : credentialList) {
             //verify policy
-            Integer cptId = credentialPojoWrapper.getCredentialPojo().getCptId();
+            Integer cptId = credential.getCptId();
             ClaimPolicy claimPolicy = policyMap.get(cptId);
-            ErrorCode verifypolicyResult = this.verifyPolicy(credentialPojoWrapper, claimPolicy);
+            ErrorCode verifypolicyResult = this.verifyPolicy(credential, claimPolicy);
             if (verifypolicyResult.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("[verify] verify policy {} failed.", policyMap);
                 return new ResponseData<Boolean>(false, verifypolicyResult);
             }
 
             //verify credential
-            ErrorCode verifyCredentialResult = verifyContent(credentialPojoWrapper, null);
+            ErrorCode verifyCredentialResult = verifyContent(credential, null);
             if (verifyCredentialResult.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
-                    "[verify] verify credential {} failed.", credentialPojoWrapper);
+                    "[verify] verify credential {} failed.", credential);
                 return new ResponseData<Boolean>(false, verifyCredentialResult);
             }
         }
@@ -360,12 +353,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#verify(com.webank.weid.protocol.base.CredentialPojoWrapper, com.webank.weid.protocol.base.WeIdPublicKey)
+     * @see com.webank.weid.rpc.CredentialPojoService#verify(com.webank.weid.protocol.base.CredentialPojo, com.webank.weid.protocol.base.WeIdPublicKey)
      */
     @Override
     public ResponseData<Boolean> verify(
         WeIdPublicKey issuerPublicKey,
-        CredentialPojoWrapper credentialWrapper) {
+        CredentialPojo credentialWrapper) {
 
         String publicKey = issuerPublicKey.getPublicKey();
         if (StringUtils.isEmpty(publicKey)) {
@@ -380,13 +373,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     private ErrorCode verifyCptId(
         Map<Integer, ClaimPolicy> policyMap,
-        List<CredentialPojoWrapper> credentialPojoWrapperList) {
+        List<CredentialPojo> credentialList) {
 
-        if (policyMap.size() > credentialPojoWrapperList.size()) {
+        if (policyMap.size() > credentialList.size()) {
             return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
         } else {
-            List<Integer> cptIdList = credentialPojoWrapperList.stream().map(
-                cpwl -> cpwl.getCredentialPojo().getCptId()).collect(Collectors.toList());
+            List<Integer> cptIdList = credentialList.stream().map(
+                cpwl -> cpwl.getCptId()).collect(Collectors.toList());
             if (cptIdList == null || cptIdList.isEmpty()) {
                 return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
             }
@@ -438,9 +431,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         return ErrorCode.SUCCESS;
     }
 
-    private ErrorCode verifyPolicy(CredentialPojoWrapper credentialPojoWrapper,
-        ClaimPolicy claimPolicy) {
-        Map<String, Object> saltMap = credentialPojoWrapper.getSalt();
+    private ErrorCode verifyPolicy(CredentialPojo credential, ClaimPolicy claimPolicy) {
+        Map<String, Object> saltMap = credential.getSalt();
         String disclosure = claimPolicy.getFieldsToBeDisclosed();
         Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
         return this.verifyDisclosureAndSalt(disclosureMap, saltMap);
@@ -448,7 +440,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     @Override
     public ResponseData<PresentationE> createPresentation(
-        List<CredentialPojoWrapper> credentialList,
+        List<CredentialPojo> credentialList,
         PresentationPolicyE presentationPolicyE,
         Challenge challenge,
         WeIdAuthentication weIdAuthentication) {
@@ -489,7 +481,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     private ErrorCode validateCreateArgs(
-        List<CredentialPojoWrapper> credentialList,
+        List<CredentialPojo> credentialList,
         PresentationPolicyE presentationPolicyE,
         Challenge challenge,
         WeIdAuthentication weIdAuthentication) {
@@ -517,7 +509,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     private ErrorCode validateClaimPolicy(
-        List<CredentialPojoWrapper> credentialList,
+        List<CredentialPojo> credentialList,
         PresentationPolicyE presentationPolicyE) {
         if (credentialList == null) {
             return ErrorCode.ILLEGAL_INPUT;
@@ -526,7 +518,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             return ErrorCode.PRESENTATION_POLICY_INVALID;
         }
         List<Integer> cptIdList = credentialList.stream().map(
-            cpwl -> cpwl.getCredentialPojo().getCptId()).collect(Collectors.toList());
+            cpwl -> cpwl.getCptId()).collect(Collectors.toList());
         Set<Integer> claimPolicyCptSet = presentationPolicyE.getPolicy().keySet();
         if (!cptIdList.containsAll(claimPolicyCptSet)) {
             return ErrorCode.PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY;
@@ -535,30 +527,29 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     private ErrorCode processCredentialList(
-        List<CredentialPojoWrapper> credentialList,
+        List<CredentialPojo> credentialList,
         PresentationPolicyE presentationPolicy,
         PresentationE presentation) {
 
-        List<CredentialPojoWrapper> newcredentialList = new ArrayList<>();
+        List<CredentialPojo> newCredentialList = new ArrayList<>();
         // 获取ClaimPolicyMap
         Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicy.getPolicy();
         // 遍历所有原始证书
-        for (CredentialPojoWrapper credentialPojoWrapper : credentialList) {
+        for (CredentialPojo credential : credentialList) {
             // 根据原始证书获取对应的 claimPolicy
-            ClaimPolicy claimPolicy =
-                claimPolicyMap.get(credentialPojoWrapper.getCredentialPojo().getCptId());
+            ClaimPolicy claimPolicy = claimPolicyMap.get(credential.getCptId());
             if (claimPolicy == null) {
                 continue;
             }
             // 根据原始证书和claimPolicy去创建选择性披露凭证
-            ResponseData<CredentialPojoWrapper> res =
-                this.createSelectiveCredential(credentialPojoWrapper, claimPolicy);
+            ResponseData<CredentialPojo> res =
+                this.createSelectiveCredential(credential, claimPolicy);
             if (res.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 return ErrorCode.getTypeByErrorCode(res.getErrorCode().intValue());
             }
-            newcredentialList.add(res.getResult());
+            newCredentialList.add(res.getResult());
         }
-        presentation.setCredentialList(newcredentialList);
+        presentation.setVerifiableCredential(newCredentialList);
         return ErrorCode.SUCCESS;
     }
 

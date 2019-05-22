@@ -46,9 +46,9 @@ import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
  * @author v_wbgyang
  *
  */
-public class TestDeserialize extends TestBaseTransportation {
+public class TestQrCodeDeserialize extends TestBaseTransportation {
     
-    private static final Logger logger = LoggerFactory.getLogger(TestDeserialize.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestQrCodeDeserialize.class);
     
     private static PresentationE presentation;
     
@@ -56,6 +56,7 @@ public class TestDeserialize extends TestBaseTransportation {
     
     @Override
     public synchronized void testInit() {
+        mockMysqlDriver();
         if (presentation == null) {
             presentation = this.getPresentationE();
             original_transString = 
@@ -77,7 +78,8 @@ public class TestDeserialize extends TestBaseTransportation {
                 new ProtocolProperty(EncodeType.ORIGINAL)
             );
         ResponseData<PresentationE> wrapperRes =
-            TransportationFactory.newQrCodeTransportation().deserialize(response.getResult(), PresentationE.class);
+            TransportationFactory.newQrCodeTransportation()
+                .deserialize(response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
         Assert.assertEquals(presentation, wrapperRes.getResult());
@@ -93,7 +95,9 @@ public class TestDeserialize extends TestBaseTransportation {
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
-        ResponseData<PresentationE> wrapperRes = super.mockCipherDeserialize(response);
+        ResponseData<PresentationE> wrapperRes = 
+            TransportationFactory.newQrCodeTransportation()
+                .deserialize(response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
         Assert.assertEquals(presentation, wrapperRes.getResult());
@@ -232,7 +236,9 @@ public class TestDeserialize extends TestBaseTransportation {
             }
         };
 
-        ResponseData<PresentationE> wrapperRes = super.mockCipherDeserialize(response);
+        ResponseData<PresentationE> wrapperRes = 
+            TransportationFactory.newQrCodeTransportation()
+                .deserialize(response.getResult(), PresentationE.class);
         mockTest.tearDown();
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
