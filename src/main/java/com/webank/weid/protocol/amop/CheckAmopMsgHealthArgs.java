@@ -19,9 +19,10 @@
 
 package com.webank.weid.protocol.amop;
 
-import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 
 /**
  * Created by junqizhang on 08/07/2017.

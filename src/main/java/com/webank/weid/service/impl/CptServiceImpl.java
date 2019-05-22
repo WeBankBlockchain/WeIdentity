@@ -331,8 +331,9 @@ public class CptServiceImpl extends BaseService implements CptService {
                 .rawSignatureDeserialization(v, r, s);
             String cptSignature =
                 new String(
-                		DataToolUtils.base64Encode(
-                				DataToolUtils.simpleSignatureSerialization(signatureData)),
+                    DataToolUtils.base64Encode(
+                        DataToolUtils.simpleSignatureSerialization(signatureData)
+                    ),
                     StandardCharsets.UTF_8
                 );
             cpt.setCptSignature(cptSignature);
@@ -557,7 +558,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
         SignatureData signatureData =
-        	DataToolUtils.signMessage(sb.toString(), cptPublisherPrivateKey.getPrivateKey());
+            DataToolUtils.signMessage(sb.toString(), cptPublisherPrivateKey.getPrivateKey());
         return DataToolUtils.convertSignatureDataToRsv(signatureData);
     }
 

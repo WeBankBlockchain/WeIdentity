@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
 
@@ -84,7 +84,7 @@ public class MysqlDriver implements Persistence {
     public void init() {
 
         try {
-        	
+            
             String dbUrl = PropertyUtils.getProperty(DataDriverConstant.JDBC_URL);
             String userName = PropertyUtils.getProperty(DataDriverConstant.JDBC_USER_NAME);
             String passWord = PropertyUtils.getProperty(DataDriverConstant.JDBC_USER_PASSWORD);
@@ -105,11 +105,15 @@ public class MysqlDriver implements Persistence {
     @Override
     public ResponseData<String> get(String domain, String id) {
 
-    	if(StringUtils.isEmpty(id)) {
-    		logger.error("[mysql->get] the id of the data is empty.");
-    		return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
-    	}
-    	String dataKey = DataToolUtils.getHash(id);
+        if (StringUtils.isEmpty(id)) {
+            logger.error("[mysql->get] the id of the data is empty.");
+            return 
+                new ResponseData<String>(
+                    StringUtils.EMPTY,
+                    ErrorCode.PRESISTENCE_DATA_KEY_INVALID
+                );
+        }
+        String dataKey = DataToolUtils.getHash(id);
         ResponseData<String> result = new ResponseData<String>();
         PreparedStatement ps;
         String data = null;
@@ -138,11 +142,11 @@ public class MysqlDriver implements Persistence {
     @Override
     public ResponseData<Integer> save(String domain, String id, String data) {
 
-    	if(StringUtils.isEmpty(id)) {
-    		logger.error("[mysql->save] the id of the data is empty.");
-    		return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
-    	}
-    	String dataKey = DataToolUtils.getHash(id);
+        if (StringUtils.isEmpty(id)) {
+            logger.error("[mysql->save] the id of the data is empty.");
+            return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
+        }
+        String dataKey = DataToolUtils.getHash(id);
         ResponseData<Integer> result = new ResponseData<Integer>();
         PreparedStatement ps;
         try {
@@ -172,12 +176,12 @@ public class MysqlDriver implements Persistence {
             connection.setAutoCommit(false);
             PreparedStatement psts = connection.prepareStatement(SQL_SAVE);
             for (int i = 0; i < ids.size(); i++) {
-            	String id = ids.get(i);
-            	if(StringUtils.isEmpty(id)) {
-            		logger.error("[mysql->batchSave] the id of the {}rd data is empty.", i+1);
-            		return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
-            	}
-            	String dataKey = DataToolUtils.getHash(ids.get(i));
+                String id = ids.get(i);
+                if (StringUtils.isEmpty(id)) {
+                    logger.error("[mysql->batchSave] the id of the {}rd data is empty.", i + 1);
+                    return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
+                }
+                String dataKey = DataToolUtils.getHash(ids.get(i));
                 psts.setString(DataDriverConstant.SQL_INDEX_FIRST, dataKey);
                 psts.setString(DataDriverConstant.SQL_INDEX_SECOND, dataList.get(i));
                 psts.addBatch();
@@ -199,11 +203,11 @@ public class MysqlDriver implements Persistence {
     @Override
     public ResponseData<Integer> delete(String domain, String id) {
 
-    	if(StringUtils.isEmpty(id)) {
-    		logger.error("[mysql->delete] the id of the data is empty.");
-    		return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
-    	}
-    	String dataKey = DataToolUtils.getHash(id);
+        if (StringUtils.isEmpty(id)) {
+            logger.error("[mysql->delete] the id of the data is empty.");
+            return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
+        }
+        String dataKey = DataToolUtils.getHash(id);
         ResponseData<Integer> result = new ResponseData<Integer>();
         PreparedStatement ps;
         try {
@@ -227,11 +231,11 @@ public class MysqlDriver implements Persistence {
     @Override
     public ResponseData<Integer> update(String domain, String id, String data) {
 
-    	if(StringUtils.isEmpty(id)) {
-    		logger.error("[mysql->update] the id of the data is empty.");
-    		return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
-    	}
-    	String dataKey = DataToolUtils.getHash(id);
+        if (StringUtils.isEmpty(id)) {
+            logger.error("[mysql->update] the id of the data is empty.");
+            return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
+        }
+        String dataKey = DataToolUtils.getHash(id);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String date = simpleDateFormat.format(new Date());
 

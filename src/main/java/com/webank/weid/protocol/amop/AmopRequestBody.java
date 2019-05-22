@@ -1,10 +1,9 @@
 package com.webank.weid.protocol.amop;
 
+import lombok.Data;
 
 import com.webank.weid.constant.AmopMsgType;
-
 import com.webank.weid.protocol.inf.IArgs;
-import lombok.Data;
 
 @Data
 public class AmopRequestBody implements IArgs {

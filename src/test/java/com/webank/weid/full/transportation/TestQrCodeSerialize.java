@@ -65,10 +65,8 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase1() {
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.ORIGINAL)
-            );
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -80,10 +78,8 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase2() {
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.CIPHER)
-            );
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -94,16 +90,15 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase3() {
-        long startTime = System.currentTimeMillis();
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(presentation, null);
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, null);
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
-        System.out.println("time:" + (System.currentTimeMillis() - startTime) );
     }
     
     /**
@@ -112,7 +107,8 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase4() {
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(presentation, new ProtocolProperty(null));
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, new ProtocolProperty(null));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
@@ -128,10 +124,8 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     public void testSerializeCase5() {
         PresentationE presentation = null;
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.ORIGINAL)
-            );
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID.getCode(),
@@ -148,10 +142,8 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         PresentationE presentation = this.getPresentationE();
         presentation.getContext().add("value|v");
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.ORIGINAL)
-            );
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID.getCode(),
@@ -174,10 +166,8 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.CIPHER)
-            );
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
@@ -201,10 +191,8 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
-                presentation, 
-                new ProtocolProperty(EncodeType.CIPHER)
-            );
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
@@ -228,10 +216,8 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.CIPHER)
-            );
+            TransportationFactory.newQrCodeTransportation()
+                .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(

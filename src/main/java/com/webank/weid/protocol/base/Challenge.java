@@ -20,11 +20,13 @@
 package com.webank.weid.protocol.base;
 
 import java.security.SecureRandom;
-import org.apache.commons.codec.binary.Base64;
-import com.webank.weid.protocol.inf.RawSerializer;
-import com.webank.weid.util.DataToolUtils;
+
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.codec.binary.Base64;
+
+import com.webank.weid.protocol.inf.RawSerializer;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * Created by Junqi Zhang on 2019/4/9.
@@ -51,8 +53,8 @@ public class Challenge extends Version implements RawSerializer {
      * Factory function which can help to create a brand new challenge object.
      *
      * @param userWeId Specify who you want to challenge. Most of the time you need to pass user's
-     * weId.
-     * @param seed
+     *     weId.
+     * @param seed the verify seed
      * @return Challenge
      */
     public static Challenge create(String userWeId, String seed) {
@@ -60,7 +62,7 @@ public class Challenge extends Version implements RawSerializer {
         SecureRandom random = new SecureRandom();
         String randomSeed = seed + DataToolUtils.getUuId32();
         random.setSeed(randomSeed.getBytes());
-        byte bytes[] = new byte[15];
+        byte[] bytes = new byte[15];
         random.nextBytes(bytes);
         String nonce = Base64.encodeBase64String(bytes);
 

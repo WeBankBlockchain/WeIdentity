@@ -159,7 +159,11 @@ public class DeployContract {
         Map<String, String> addrList = deployIssuerContracts(roleControllerAddress);
         if (addrList.containsKey("AuthorityIssuerData")) {
             String authorityIssuerDataAddress = addrList.get("AuthorityIssuerData");
-            deployCptContracts(authorityIssuerDataAddress, weIdContractAddress, roleControllerAddress);
+            deployCptContracts(
+                authorityIssuerDataAddress,
+                weIdContractAddress,
+                roleControllerAddress
+            );
         }
         deployEvidenceContracts();
     }

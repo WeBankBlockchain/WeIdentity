@@ -52,7 +52,7 @@ public class PresentationE implements RawSerializer {
      * 获取公钥Id，用于验证的时候识别publicKey.
      * @return
      */
-    public String getVerificationMethod(){
+    public String getVerificationMethod() {
         return getValueFromProof(ParamKeyConstant.VERIFICATION_METHOD);
     }
     
@@ -72,7 +72,7 @@ public class PresentationE implements RawSerializer {
         return getValueFromProof(ParamKeyConstant.NONCE);
     }
     
-    private String getValueFromProof(String key){
+    private String getValueFromProof(String key) {
         if (proof != null) {
             return proof.get(key);
         }
