@@ -19,11 +19,11 @@
 
 package com.webank.weid.protocol.inf;
 
-import com.webank.weid.util.JsonUtil;
+import com.webank.weid.util.DataToolUtils;
 
 public interface JsonSerializer {
 
     public default String toJson() {
-        return JsonUtil.objToJsonStrWithNoPretty(this);
+        return DataToolUtils.objToJsonStrWithNoPretty(this);
     }
 }
