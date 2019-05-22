@@ -19,9 +19,9 @@
 
 package com.webank.weid.protocol.request;
 
-import lombok.Data;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 
-import com.webank.weid.protocol.base.WeIdPrivateKey;
+import lombok.Data;
 
 /**
  * The Arguments for the following SDK API: createCredential().
@@ -54,5 +54,5 @@ public class CreateCredentialPojoArgs<T> {
     /**
      * Required: The private key structure used for signing.
      */
-    private WeIdPrivateKey weIdPrivateKey;
+    private WeIdAuthentication weIdAuthentication;
 }
