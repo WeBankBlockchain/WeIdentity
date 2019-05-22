@@ -411,6 +411,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         result.setWeId(weId);
         ErrorCode errorCode = processCreateWeId(weId, publicKey, privateKey);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[createWeId] Create weId failed. error message is :{}",
+                errorCode.getCodeDesc()
+            );
             return new ResponseData<>(null, errorCode);
         }
         return new ResponseData<>(result, errorCode);
@@ -427,7 +431,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             DynamicBytes auth = DataTypetUtils.stringToDynamicBytes(
                 new StringBuffer()
                     .append(publicKey)
-                    .append("/")
+                    .append(WeIdConstant.SEPARATOR)
                     .append(weAddress)
                     .toString());
             DynamicBytes created = DataTypetUtils
@@ -445,7 +449,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             if (CollectionUtils.isEmpty(response)) {
                 logger.error(
                     "The input private key does not match the current weid, operation of "
-                        + "modifying weid is not allowed.");
+                        + "modifying weid is not allowed. weid is {}",
+                    weId
+                );
                 return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -492,12 +498,19 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
             ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
             if (isWeIdExistResp.getResult() == null || isWeIdExistResp.getResult()) {
+                logger
+                    .error("[createWeId]: create weid failed, the weid :{} is already exist", weId);
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
             responseData.setResult(weId);
             ErrorCode errorCode = processCreateWeId(weId, publicKey, privateKey);
 
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                    "[createWeId]: create weid failed. error message is :{}, public key is {}",
+                    errorCode.getCodeDesc(),
+                    publicKey
+                );
                 return new ResponseData<>(StringUtils.EMPTY, errorCode);
             }
         } else {
@@ -663,9 +676,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         String attributeKey =
             new StringBuffer()
                 .append(WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)
-                .append("/")
+                .append(WeIdConstant.SEPARATOR)
                 .append(setPublicKeyArgs.getType())
-                .append("/")
+                .append(WeIdConstant.SEPARATOR)
                 .append("base64")
                 .toString();
         String privateKey = setPublicKeyArgs.getUserWeIdPrivateKey().getPrivateKey();
@@ -742,7 +755,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     weIdContract.setAttribute(
                         new Address(WeIdUtils.convertWeIdToAddress(weId)),
                         DataTypetUtils.stringToBytes32(
-                            WeIdConstant.WEID_DOC_SERVICE_PREFIX + "/" + serviceType),
+                            WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
+                                + serviceType),
                         DataTypetUtils.stringToDynamicBytes(serviceEndpoint),
                         DateUtils.getCurrentTimeStampInt256());
 
@@ -805,7 +819,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 if (WeIdUtils.isWeIdValid(owner)) {
                     owner = WeIdUtils.convertWeIdToAddress(owner);
                 } else {
-                    logger.error("setPublicKey: owner : {} is invalid.", owner);
+                    logger.error("[setAuthentication]: owner : {} is invalid.", owner);
                     return new ResponseData<>(false, ErrorCode.WEID_INVALID);
                 }
             }
@@ -822,7 +836,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                         DataTypetUtils.stringToDynamicBytes(
                             new StringBuffer()
                                 .append(setAuthenticationArgs.getPublicKey())
-                                .append("/")
+                                .append(WeIdConstant.SEPARATOR)
                                 .append(owner)
                                 .toString()),
                         DateUtils.getCurrentTimeStampInt256());
@@ -833,19 +847,25 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 if (CollectionUtils.isNotEmpty(response)) {
                     return new ResponseData<>(true, ErrorCode.SUCCESS);
                 } else {
+                    logger.error("Set authenticate failed. Error message :{}",
+                        ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCodeDesc());
                     return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 logger.error("Set authenticate failed. Error message :{}", e);
                 return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
             } catch (TimeoutException e) {
+                logger.error("Set authenticate timeout. Error message :{}", e);
                 return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
             } catch (PrivateKeyIllegalException e) {
+                logger.error("Set authenticate with private key exception. Error message :{}", e);
                 return new ResponseData<>(false, e.getErrorCode());
             } catch (Exception e) {
+                logger.error("Set authenticate failed. Error message :{}", e);
                 return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
             }
         } else {
+            logger.error("Set authenticate failed. weid : {} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
     }
@@ -874,11 +894,14 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             Boolean result = isExist.getValue();
             return new ResponseData<>(result, ErrorCode.SUCCESS);
-        } catch (InterruptedException | ExecutionException e1) {
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("[isWeIdExist] execute failed. Error message :{}", e);
             return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
+            logger.error("[isWeIdExist] execute with timeout. Error message :{}", e);
             return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
         } catch (Exception e) {
+            logger.error("[isWeIdExist] execute failed. Error message :{}", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
     }

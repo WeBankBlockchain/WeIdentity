@@ -151,7 +151,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             try {
                 result = DataToolUtils
                     .verifySignature(
-                        rawData, 
+                        rawData,
                         credential.getSignature(),
                         new BigInteger(publicKey)
                     );
@@ -197,13 +197,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             generateSalt(saltMap);
             String rawData = CredentialPojoUtils
                 .getCredentialThumbprintWithoutSig(result, saltMap, null);
-            String privateKey = args.getWeIdPrivateKey().getPrivateKey();
+            String privateKey = args.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey();
 
             String signature = DataToolUtils.sign(rawData, privateKey);
 
             Map<String, String> proof = new HashMap<>();
             proof.put(ParamKeyConstant.PROOF_CREATED, result.getIssuranceDate().toString());
-            proof.put(ParamKeyConstant.PROOF_CREATOR, result.getIssuer());
+            proof.put(ParamKeyConstant.PROOF_CREATOR,
+                args.getWeIdAuthentication().getWeIdPublicKeyId());
             proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
             proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, signature);
             result.setProof(proof);
@@ -245,6 +246,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
         if (!validCredentialMapArgs(claim, saltMap, disclosureMap)) {
+            logger.error(
+                "[createSelectiveCredential] create failed. message is {}",
+                ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM.getCodeDesc()
+            );
             return new ResponseData<CredentialPojo>(null,
                 ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM);
         }
@@ -265,10 +270,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
         String issuerId = credential.getIssuer();
         if (!StringUtils.equals(issuerWeId, issuerId)) {
+            logger.error("[verify] The input issuer weid is not match the credential's.");
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
         }
         ErrorCode errorCode = verifyContent(credential, null);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error("[verify] credential verify failed. error message :{}", errorCode);
             return new ResponseData<Boolean>(false, errorCode);
         }
         return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
@@ -287,22 +294,30 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             || challenge == null
             || StringUtils.isBlank(challenge.getNonce())
             || !CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)) {
+            logger.error("[verify] presentation verify failed, please check your input.");
             return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
         }
 
-        ErrorCode checkPresentationE = CredentialPojoUtils.checkPresentationEValid(presentationE);
-        if (checkPresentationE.getCode() != ErrorCode.SUCCESS.getCode()) {
-            return new ResponseData<Boolean>(false, checkPresentationE);
+        ErrorCode errorCode = CredentialPojoUtils.checkPresentationEValid(presentationE);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[verify] presentation verify failed, error message : {}",
+                errorCode.getCodeDesc()
+            );
+            return new ResponseData<Boolean>(false, errorCode);
         }
 
         //verify presenterWeId
         if (StringUtils.isNotBlank(challenge.getWeId())
             && !presenterWeId.equals(challenge.getWeId())) {
+            logger.error("[verify] The input issuer weid is not match the presentian's.");
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
         }
 
         //verify challenge
         if (!challenge.getNonce().equals(presentationE.getNonce())) {
+            logger
+                .error("[verify] The nonce of challenge is not matched with the presentationE's.");
             return new ResponseData<Boolean>(false,
                 ErrorCode.PRESENTATION_CHALLENGE_NONCE_MISMATCH);
         }
@@ -312,12 +327,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         String signature = presentationE.getSignature();
         //remove signatureValue
         presentationE.getProof().remove(ParamKeyConstant.PRESENTATION_SIGNATURE);
-        ErrorCode errorCode =
+        ErrorCode errorCode1 =
             DataToolUtils
                 .verifySignatureFromWeId(presentationE.toRawData(), signature, weIdDocument);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[verify] verify challenge {} failed.", challenge);
-            return new ResponseData<Boolean>(false, errorCode);
+            return new ResponseData<Boolean>(false, errorCode1);
         }
 
         //verify cptId of presentationE
@@ -358,13 +373,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     @Override
     public ResponseData<Boolean> verify(
         WeIdPublicKey issuerPublicKey,
-        CredentialPojo credentialWrapper) {
+        CredentialPojo credential) {
 
         String publicKey = issuerPublicKey.getPublicKey();
         if (StringUtils.isEmpty(publicKey)) {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
         }
-        ErrorCode errorCode = verifyContent(credentialWrapper, publicKey);
+        ErrorCode errorCode = verifyContent(credential, publicKey);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<Boolean>(false, errorCode);
         }
@@ -404,7 +419,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus())
                     && !disclosureV.equals(
                     CredentialFieldDisclosureValue.DISCLOSED.getStatus())) {
-                    logger.error("[verify] policy disclosureValue {} illegal.", disclosureMap);
+                    logger.error("[verifyDisclosureAndSalt] policy disclosureValue {} illegal.", disclosureMap);
                     return ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL;
                 }
 
