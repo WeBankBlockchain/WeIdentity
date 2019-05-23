@@ -67,7 +67,11 @@ public class TestWeIdUtils {
         result = WeIdUtils.isWeIdValid(weid);
         Assert.assertFalse(result);
 
-        weid = "did:weid:0xce84646754976464646";
+        weid = "did:weid:0x123471623125358127679*";
+        result = WeIdUtils.isWeIdValid(weid);
+        Assert.assertFalse(result);
+
+        weid = "did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431";
         result = WeIdUtils.isWeIdValid(weid);
         Assert.assertTrue(result);
     }

@@ -20,6 +20,7 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -80,7 +81,8 @@ public final class WeIdUtils {
     public static boolean isWeIdValid(String weId) {
         return (StringUtils.isNotEmpty(weId)
             && StringUtils.startsWith(weId, WeIdConstant.WEID_PREFIX)
-            && StringUtils.isNotEmpty(StringUtils.splitByWholeSeparator(weId, ":")[2]));
+            && StringUtils.isNotEmpty(StringUtils.splitByWholeSeparator(weId, ":")[2]))
+            && isValidAddress(convertWeIdToAddress(weId));
     }
 
     /**
@@ -90,11 +92,15 @@ public final class WeIdUtils {
      * @return WeIdentity DID
      */
     public static String convertPublicKeyToWeId(String publicKey) {
-        String address = Keys.getAddress(new BigInteger(publicKey));
-        String weId =
-            new StringBuffer().append(WeIdConstant.WEID_PREFIX).append("0x").append(address)
-                .toString();
-        return weId;
+        try {
+            String address = Keys.getAddress(new BigInteger(publicKey));
+            String weId =
+                new StringBuffer().append(WeIdConstant.WEID_PREFIX).append("0x").append(address)
+                    .toString();
+            return weId;
+        } catch (Exception e) {
+            return StringUtils.EMPTY;
+        }
     }
 
     /**
@@ -132,7 +138,8 @@ public final class WeIdUtils {
      * @return true if yes, false otherwise.
      */
     public static boolean isValidAddress(String addr) {
-        if (StringUtils.isEmpty(addr)) {
+        if (StringUtils.isEmpty(addr)
+            || !Pattern.compile(WeIdConstant.FISCO_BCOS_ADDRESS_PATTERN).matcher(addr).matches()) {
             return false;
         }
         try {

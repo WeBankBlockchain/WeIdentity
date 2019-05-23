@@ -80,7 +80,7 @@ public class TestGetCredentialJson extends TestBaseServcie {
         credential.setCptId(Integer.valueOf(1002));
         credential.setExpirationDate(System.currentTimeMillis() + 10000L);
         credential.setId(UUID.randomUUID().toString());
-        credential.setIssuer("did:weid:0x0000000000000001");
+        credential.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
         credential.setIssuranceDate(System.currentTimeMillis());
         Map<String, String> proof = new HashMap<>();
         proof.put(ParamKeyConstant.PROOF_CREATOR, credential.getIssuer());

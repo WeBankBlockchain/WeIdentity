@@ -48,14 +48,6 @@ public interface AuthorityIssuerService {
     ResponseData<Boolean> registerAuthorityIssuer(RegisterAuthorityIssuerArgs args);
 
     /**
-     * Register a new Authority Issuer on Chain by sending preset transaction hex value.
-     *
-     * @param transactionHex the transaction hex value
-     * @return true if succeeds, false otherwise
-     */
-    ResponseData<String> registerAuthorityIssuer(String transactionHex);
-
-    /**
      * Remove a new Authority Issuer on Chain.
      *
      * @param args the args
