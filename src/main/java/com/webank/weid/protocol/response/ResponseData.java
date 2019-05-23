@@ -63,4 +63,12 @@ public class ResponseData<T> {
         this.errorMessage = errorCode.getCodeDesc();
     }
 
+    /**
+     * Instantiates a new Response data based on the error code and error message.
+     */
+    public ResponseData(T result, Integer errorCode, String errorMessage) {
+        this.result = result;
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+    }
 }

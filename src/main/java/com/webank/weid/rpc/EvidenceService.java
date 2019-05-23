@@ -25,7 +25,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * Service interface for operations on Evidence for Credentials.
+ * Service inf for operations on Evidence for Credentials.
  *
  * @author chaoxinhu 2019.1
  */

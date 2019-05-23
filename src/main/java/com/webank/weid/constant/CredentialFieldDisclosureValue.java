@@ -21,6 +21,7 @@ package com.webank.weid.constant;
 
 /**
  * credential field disclosure status.
+ *
  * @author tonychen
  */
 public enum CredentialFieldDisclosureValue {
@@ -46,6 +47,7 @@ public enum CredentialFieldDisclosureValue {
 
     /**
      * get field disclosure status.
+     *
      * @return disclosure status of the field.
      */
     public Integer getStatus() {

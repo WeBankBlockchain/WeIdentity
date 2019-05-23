@@ -54,6 +54,7 @@ import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -61,7 +62,7 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author v_wbgyang
  */
-public abstract class TestBaseServcie extends BaseTest {
+public abstract class TestBaseServcie extends BaseTest implements MockMysqlDriver {
 
     /**
      * log4j.
@@ -280,8 +281,15 @@ public abstract class TestBaseServcie extends BaseTest {
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
 
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
         logger.info("registerAuthorityIssuer result:");
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
@@ -437,6 +445,15 @@ public abstract class TestBaseServcie extends BaseTest {
     protected MockUp<WeIdContract> mockSetAttribute(MockUp<Future<?>> mockFuture) {
         return new MockUp<WeIdContract>() {
             @Mock
+            public Future<?> createWeId(
+                Address identity, 
+                DynamicBytes auth,
+                DynamicBytes created, 
+                Int256 updated) {
+                return mockFuture.getMockInstance();
+            }
+            
+            @Mock
             public Future<?> setAttribute(
                 Address identity,
                 Bytes32 key,
@@ -448,18 +465,9 @@ public abstract class TestBaseServcie extends BaseTest {
     }
 
     protected Credential copyCredential(Credential credential) {
-        Credential ct = new Credential();
-        ct.setSignature(credential.getSignature());
-        ct.setContext(credential.getContext());
-        ct.setClaim(credential.getClaim());
-        ct.setIssuranceDate(credential.getIssuranceDate());
-        ct.setCptId(credential.getCptId());
-        ct.setExpirationDate(credential.getExpirationDate());
-        ct.setIssuer(credential.getIssuer());
-        ct.setId(credential.getId());
-        return ct;
+        return CredentialUtils.copyCredential(credential);
     }
-    
+
     protected CreateWeIdDataResult copyCreateWeId(CreateWeIdDataResult createWeId) {
         CreateWeIdDataResult copyWeId = new CreateWeIdDataResult();
         copyWeId.setWeId(createWeId.getWeId());
