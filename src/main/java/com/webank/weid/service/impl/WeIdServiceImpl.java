@@ -57,7 +57,6 @@ import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.constant.WeIdEventConstant;
 import com.webank.weid.contract.WeIdContract;
 import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.DataTypeCastException;
@@ -81,7 +80,6 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -470,32 +468,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         return responseData;
     }
 
-    /**
-     * Create a WeIdentity DID from the provided public key, with preset transaction hex value.
-     *
-     * @param transactionHex the transaction hex value
-     * @return Error message if any
-     */
-    @Override
-    public ResponseData<String> createWeId(String transactionHex) {
-        try {
-            if (StringUtils.isEmpty(transactionHex)) {
-                logger.error("WeID transaction error");
-                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-            }
-            TransactionReceipt transactionReceipt = TransactionUtils
-                .sendTransaction(getWeb3j(), transactionHex);
-            List<WeIdAttributeChangedEventResponse> response =
-                WeIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
-            if (!CollectionUtils.isEmpty(response)) {
-                return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS);
-            }
-        } catch (Exception e) {
-            logger.error("[createWeId] create failed due to unknown transaction error. ", e);
-        }
-        return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-    }
-
     private ErrorCode processCreateWeId(String weId, String publicKey, String privateKey) {
         try {
             WeIdContract weIdContract = (WeIdContract) reloadContract(
@@ -544,7 +516,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     /**
      * Get a WeIdentity DID Document.
      *
