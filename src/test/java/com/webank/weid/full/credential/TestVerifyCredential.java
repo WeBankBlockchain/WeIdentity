@@ -545,7 +545,7 @@ public class TestVerifyCredential extends TestBaseServcie {
     public void testVerifyCredentialCase30() {
 
         String issuer = credential.getIssuer();
-        credential.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
+        credential.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797441");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
         LogUtil.info(logger, "verifyCredential", response);
