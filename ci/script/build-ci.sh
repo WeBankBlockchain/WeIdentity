@@ -21,6 +21,7 @@ function modify_config()
     MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${java_source_code_dir}/src/test/resources/
+    cp ${java_source_code_dir}/src/main/resources/weidentity.properties ${java_source_code_dir}/src/test/resources/
     #cat $app_xml_config
     echo "modify sdk config finished..."
 }
