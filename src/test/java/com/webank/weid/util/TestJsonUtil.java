@@ -81,4 +81,18 @@ public class TestJsonUtil {
         Credential newcred = DataToolUtils.deserialize(json, Credential.class);
         Assert.assertNotNull(newcred);
     }
+
+    @Test
+    public void testCptGenerator() throws Exception {
+        String cptSchema = DataToolUtils.generateDefaultCptJsonSchema(11);
+        Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
+        cptSchema = DataToolUtils.generateDefaultCptJsonSchema(101);
+        Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
+        cptSchema = DataToolUtils.generateDefaultCptJsonSchema(103);
+        Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
+        cptSchema = DataToolUtils.generateDefaultCptJsonSchema(105);
+        Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
+        cptSchema = DataToolUtils.generateUnformattedCptJsonSchema();
+        Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
+    }
 }
