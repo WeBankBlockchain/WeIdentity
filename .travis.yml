@@ -5,13 +5,13 @@ dist: trusty
 branches:
   except:
   - /^release.*/
-  - /^feature.*/
 
 # safelist
 branches:
   only:
   - master
   - develop
+  - feature/macau
   - /^v\d+\.\d+\.\d+$/
 
 language: java

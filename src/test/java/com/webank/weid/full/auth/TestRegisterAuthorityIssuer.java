@@ -489,7 +489,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         mockTest.tearDown();
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
