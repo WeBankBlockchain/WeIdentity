@@ -23,6 +23,7 @@ import com.webank.weid.constant.ErrorCode;
 
 /**
  * Private Key IllegalException.
+ *
  * @author tonychen
  */
 @SuppressWarnings("serial")

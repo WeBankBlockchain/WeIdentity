@@ -70,33 +70,31 @@ List jmockit = [
     "org.jmockit:jmockit:1.9"
 ]
 
-List jackson = [
-    "com.fasterxml.jackson.core:jackson-databind:2.8.8.1"
+List json = [
+    "com.fasterxml.jackson.core:jackson-databind:2.8.8.1",
+    "com.github.fge:json-schema-validator:2.2.6"
 ]
 
 List weidentity_contract = [
     "com.webank:weidentity-contract-java:1.+"
 ]
 
-// In this section you declare the dependencies for your production and test code
-List web3sdk_dependencies = [
-    "io.netty:netty-all:4.1.15.Final",
-    "io.netty:netty-tcnative:2.0.0.Final",
-    "com.google.guava:guava:19.0",
-    "com.github.fge:json-schema-validator:2.2.6",
-    "org.apache.httpcomponents:httpclient:4.5.2",
-    "org.bouncycastle:bcprov-jdk15on:1.54",
-    "com.lambdaworks:scrypt:1.4.0",
-    "com.squareup:javapoet:1.7.0",
-    "io.reactivex:rxjava:1.2.4",
-    "com.github.jnr:jnr-unixsocket:0.15"
+List mysql_driver = [
+    "mysql:mysql-connector-java:5.1.44"
+]
+
+List web3sdk = [
+    "org.fisco-bcos:web3sdk:1.2.5"
+]
+
+List zxing = [
+    "com.google.zxing:core:3.3.0"
 ]
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile logger, spring, lombok, apache_commons, jackson, web3sdk_dependencies, weidentity_contract
-    testCompile logger, spring, lombok, apache_commons, jackson, web3sdk_dependencies, junit, jmockit
-    compile files("lib/web3sdk.jar")
+    compile logger, spring, lombok, apache_commons, json, web3sdk, weidentity_contract, mysql_driver, zxing
+    testCompile logger, spring, lombok, apache_commons, json, web3sdk, junit, jmockit
 }
 
 jacocoTestReport {
