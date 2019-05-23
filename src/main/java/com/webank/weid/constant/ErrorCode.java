@@ -32,6 +32,14 @@ public enum ErrorCode {
     SUCCESS(0, "success"),
 
     /**
+     * No Permission to perform contract level tasks.
+     */
+    CONTRACT_ERROR_NO_PERMISSION(
+        500000,
+        "contract error: no permission to perform this task"
+    ),
+
+    /**
      * The cpt not exists.
      */
     CPT_NOT_EXISTS(500301, "cpt does not exist"),
@@ -48,6 +56,16 @@ public enum ErrorCode {
      * cpt publisher does not exist.
      */
     CPT_PUBLISHER_NOT_EXIST(500303, "cpt publisher does not exist"),
+
+    /**
+     * This cpt id already exists on chain.
+     */
+    CPT_ALREADY_EXIST(500304, "cpt already exist on chain"),
+
+    /**
+     * No permission to perform this CPT task.
+     */
+    CPT_NO_PERMISSION(500305, "no permission to perform this cpt task"),
 
     /**
      * The cpt json schema invalid.
@@ -166,13 +184,70 @@ public enum ErrorCode {
      * The credential credential verify signature is exception.
      */
     CREDENTIAL_EXCEPTION_VERIFYSIGNATURE(100419, "credential verify signature exception"),
+
+    /**
+     * claim policy is null.
+     */
+    CREDENTIAL_CLAIM_POLICY_NOT_EXIST(100420, "claim policy is null"),
+
+    /**
+     * The credential private key not exists.
+     */
+    CREDENTIAL_PUBLIC_KEY_NOT_EXISTS(
+        100421, 
+        "public key for verifying credential signature does not exist"
+    ),
     
+    /**
+     * The signature for verifying credential does not exist.
+     */
+    CREDENTIAL_SIGNATURE_NOT_EXISTS(100422, "signature for verifying credential does not exist"),
+    
+    /**
+     * The credential policy disclosurevalue illegal.
+     */
+    CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL(100423, "policy disclosurevalue illegal"),
+    
+    /**
+     * The credential disclosurevalue notmatch saltvalue.
+     */
+    CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE(100424, "disclosurevalue notmatch saltvalue"),
+    
+    /**
+     * The credential cptId notmatch.
+     */
+    CREDENTIAL_CPTID_NOTMATCH(100425, "credential cptId notmatch"),
+    
+    /**
+     * The credential presenterWeId notmatch.
+     */
+    CREDENTIAL_PRESENTERWEID_NOTMATCH(100426, "credential presenterWeId notmatch"),
+
+    /**
+     * The credential evidence id mismatch.
+     */
+    CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM(
+        100427,
+        "credential disclosure format does not match claim"
+    ),
+
+    /**
+     * The credential evidence id mismatch.
+     */
+    CREDENTIAL_IS_NILL(100428, "credential is null"),
+
+
+    /**
+     * The credential signature broken.
+     */
+    CREDENTIAL_SIGNATURE_TYPE_ILLEGAL(100429, "credential signature type unknown"),
+
     /**
      * The credential evidence contract failure: illegal input.
      */
     CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT(
         500401,
-        "credential evidence contract failure: illegal input"
+        "credential evidence contract failure: illegal input."
     ),
 
     /**
@@ -192,6 +267,103 @@ public enum ErrorCode {
      * The credential evidence id mismatch.
      */
     CREDENTIAL_EVIDENCE_ID_MISMATCH(100502, "credential evidence id mismatch"),
+
+    /**
+     * The challenge is invalid.
+     */
+    PRESENTATION_CHALLENGE_INVALID(100600, "the challenge is invalid."),
+
+    /**
+     * The weId of challenge does not match the user's weId.
+     */
+    PRESENTATION_CHALLENGE_WEID_MISMATCH(
+        100601,
+        "the weId of challenge does not match the user's weId."
+    ),
+
+    /**
+     * The presentation policy is invalid.
+     */
+    PRESENTATION_POLICY_INVALID(100602, "the presentation policy is invalid."),
+
+    /**
+     * the credentialList of presentation don't match the claim policy.
+     */
+    PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY(
+        100603,
+        "the credentiallist of presentation don't match the claim policy."
+    ),
+
+    /**
+     * the publicKeyId is invalid.
+     */
+    PRESENTATION_WEID_PUBLICKEY_ID_INVALID(100604, "the publicKeyId is invalid."),
+
+    /**
+     * The nonce of challenge does not match the nonce of presentation.
+     */
+    PRESENTATION_CHALLENGE_NONCE_MISMATCH(
+        100605,
+        "the nonce of challenge does not match the nonce of presentation."
+    ),
+
+    /**
+     * the encrypt key is not exists.
+     */
+    ENCRYPT_KEY_NOT_EXISTS(100700, "the encrypt key not exists."),
+
+    /**
+     * the policy service is not exists.
+     */
+    POLICY_SERVICE_NOT_EXISTS(100701, "no policy service."),
+
+    /**
+     * the policy service call fail.
+     */
+    POLICY_SERVICE_CALL_FAIL(100702, "the policy service call fail, please check the error log."),
+
+    /**
+     * suite基本异常.
+     */
+    TRANSPORTATION_BASE_ERROR(100800, "suite baes exception error, please check the error log."),
+
+    /**
+     * 协议配置不能为空.
+     */
+    TRANSPORTATION_PROTOCOL_PROPERTY_ERROR(100801, "the protocol property is error."),
+
+    /**
+     * 协议版本不能为空.
+     */
+    TRANSPORTATION_PROTOCOL_VERSION_ERROR(100802, "the protocol version is error."),
+
+    /**
+     * 协议编码方式不能为空.
+     */
+    TRANSPORTATION_PROTOCOL_ENCODE_ERROR(100803, "the protocol encode is error."),
+
+    /**
+     * 无效的协议字符串.
+     */
+    TRANSPORTATION_PROTOCOL_STRING_INVALID(100804, "the protocol string is invalid."),
+
+    /**
+     * 协议数据无效.
+     */
+    TRANSPORTATION_PROTOCOL_DATA_INVALID(100805, "the protocol data is invalid."),
+
+    /**
+     * 协议字段值不能包含"|".
+     */
+    TRANSPORTATION_PROTOCOL_FIELD_INVALID(
+        100806, 
+        "the protocol field values cannot be included '|'."
+    ),
+
+    /**
+     * 编解码异常.
+     */
+    TRANSPORTATION_ENCODE_BASE_ERROR(100807, "encode base error, please check the error log."),
 
     /**
      * Authority issuer main error code.
@@ -236,6 +408,22 @@ public enum ErrorCode {
     ),
 
     /**
+     * The specific issuer type illegal.
+     */
+    SPECIFIC_ISSUER_TYPE_ILLEGAL(
+        100208,
+        "the specific issuer type is illegal"
+    ),
+
+    /**
+     * The Authority Issuer Contract level error: subject already exists.
+     */
+    PRESISTENCE_DATA_KEY_INVALID(
+        100901,
+        "the key of the data is empty."
+    ),
+
+    /**
      * The Authority Issuer Contract level error: subject already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST(
@@ -252,11 +440,27 @@ public enum ErrorCode {
     ),
 
     /**
-     * The Authority Issuer Contract level error: no permission.
+     * The Authority Issuer Contract level error: name already exists.
      */
-    AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION(
-        500203,
-        "the authority issuer contract error: no permission"
+    AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS(
+        500204,
+        "the authority issuer name already exists."
+    ),
+
+    /**
+     * The Specific Issuer Contract level error: already exists.
+     */
+    SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS(
+        500501,
+        "the specific issuer type or address already exists."
+    ),
+
+    /**
+     * The Specific Issuer Contract level error: already exists.
+     */
+    SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST(
+        500502,
+        "the specific issuer type or address does not exist."
     ),
 
     /**
@@ -345,6 +549,22 @@ public enum ErrorCode {
      */
     DATA_TYPE_CASE_ERROR(160008, "data type cast exception error, please check the error log."),
 
+    DIRECT_ROUTE_REQUEST_TIMEOUT(160009, "amop timeout"),
+    DIRECT_ROUTE_MSG_BASE_ERROR(160010, "amop timeout"),
+
+    /**
+     * sql execute failed.
+     */
+    SQL_EXECUTE_FAILED(160011, "sql execute failed."),
+
+    /**
+     * AMOP server side has no direct route callback.
+     */
+    AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(
+        160012, 
+        "amop server side has no direct route callback."
+    ),
+    
     /**
      * other uncatched exceptions or error.
      */

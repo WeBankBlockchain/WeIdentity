@@ -28,7 +28,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 
@@ -72,7 +74,15 @@ public class TestCredentialUtils {
         claim.put("sfsfs", "sfsfs");
         claim.put("SampleAttrib", 10);
         arg.setClaim(claim);
-        arg.setSignature("T5Fb");
+        Map<String, String> proof = new HashMap<>();
+        proof.put(ParamKeyConstant.PROOF_CREATOR, arg.getIssuer());
+        proof.put(ParamKeyConstant.PROOF_CREATED, arg.getIssuranceDate().toString());
+        proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
+        proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, "xxxxxxxxxxx");
+        arg.setProof(proof);
+        String privateKey =
+            "58317564669857453586637110679746575832914889677346283755719850144028639639651";
+        Assert.assertNotNull(CredentialUtils.getCredentialSignature(arg, privateKey, null));
         String fh = CredentialUtils.getFieldHash(arg);
         Assert.assertNotNull(fh);
         result = CredentialUtils.extractCredentialMetadata(arg);

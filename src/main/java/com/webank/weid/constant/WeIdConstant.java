@@ -123,6 +123,11 @@ public final class WeIdConstant {
      * The Constant pipeline character.
      */
     public static final String PIPELINE = "|";
+    
+    /**
+     * The Constant separator character.
+     */
+    public static final String SEPARATOR = "/";
 
     /**
      * The Constant Max authority issuer name length in Chars.
@@ -179,4 +184,24 @@ public final class WeIdConstant {
      * The big-enough block limit number.
      */
     public static final String BIG_BLOCK_LIMIT = "9999999999";
+
+    /**
+     * The Constant default Presentation type.
+     */
+    public static final String DEFAULT_PRESENTATION_TYPE = "VerifiablePresentation";
+
+    /**
+     * The default maximum authority issuer list size to fetch from blockchain.
+     */
+    public static final Integer MAX_AUTHORITY_ISSUER_LIST_SIZE = 50;
+
+    /**
+     * The Constant WeIdentity DID Event Attribute Change String Name.
+     */
+    public static final String WEID_EVENT_ATTRIBUTE_CHANGE = "WeIdAttributeChanged";
+
+    /**
+     * The FISCO-BCOS Address pattern.
+     */
+    public static final String FISCO_BCOS_ADDRESS_PATTERN = "0x[a-fA-f0-9]{40}";
 }

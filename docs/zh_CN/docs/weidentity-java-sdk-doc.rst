@@ -85,6 +85,13 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 本接口提供凭证的签发和验证操作。
 
 
+* CredentialPojoService
+
+凭证签发相关功能的核心接口(操作Pojo)。
+
+本接口提供凭证的签发和验证操作。
+
+
 * WeIdService
 
 WeIdentity DID相关功能的核心接口。
@@ -97,6 +104,13 @@ WeIdentity DID相关功能的核心接口。
 凭证存证上链的相关接口。
 
 本接口提供凭证的Hash存证的生成上链、链上查询及校验等操作。
+
+
+* AmopService
+
+AMOP通讯相关接口。
+
+本接口提供AMOP的请求和注册。
 
 
 接口列表
@@ -130,12 +144,12 @@ AuthorityIssuerService
    * - authorityIssuer
      - AuthorityIssuer
      - Y
-     - JavaBean
+     - 
      - AuthorityIssuer信息，见下
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -356,7 +370,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -659,7 +673,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - AuthorityIssuer
-     - JavaBean
+     - 
      - 授权机构信息，见下
 
 
@@ -817,10 +831,15 @@ com.webank.weid.protocol.base.WeIdAuthentication
      - Y
      - CPT发布者的WeIdentity DID
      - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -860,7 +879,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
 
 
@@ -1061,10 +1080,15 @@ com.webank.weid.protocol.base.WeIdAuthentication
      - Y
      - CPT发布者的WeIdentity DID
      - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -1104,7 +1128,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
 
 
@@ -1257,7 +1281,7 @@ com.webank.weid.protocol.base.CptBaseInfo
      - 
    * - result
      - Cpt
-     - JavaBean
+     - 
      - CPT内容，见下
 
 
@@ -1276,11 +1300,11 @@ com.webank.weid.protocol.base.Cpt
      - 
    * - cptBaseInfo
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
    * - cptMetaData
      - CptMetaData
-     - JavaBean
+     - 
      - CPT元数据内部类，见下
 
 
@@ -1487,10 +1511,15 @@ com.webank.weid.protocol.base.WeIdAuthentication
      - Y
      - CPT发布者的WeIdentity DID
      - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -1530,7 +1559,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
 
 
@@ -1757,10 +1786,15 @@ com.webank.weid.protocol.base.WeIdAuthentication
      - Y
      - CPT发布者的WeIdentity DID
      - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，见下
 
 
@@ -1800,7 +1834,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CptBaseInfo
-     - JavaBean
+     - 
      - CPT基础数据，见下
 
 
@@ -1960,7 +1994,7 @@ CredentialService
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 签名所用Issuer WeIdentity DID私钥，见下
 
 
@@ -2000,7 +2034,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - CredentialWrapper
-     - JavaBean
+     - 
      - 见下
 
 com.webank.weid.protocol.base.CredentialWrapper
@@ -2042,7 +2076,7 @@ com.webank.weid.protocol.base.Credential
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -2156,7 +2190,11 @@ com.webank.weid.protocol.base.Credential
             name: zhang san
             gender: F
             age: 18
-         signature: HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=
+         proof:(java.util.HashMap)
+            type: EcdsaSignature
+            created: 1551348312461
+            creator: did:weid:0x30404b47c6c5811d49e28ea2306c804d16618017
+            signature: HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=
       disclosure:(java.util.HashMap)
          name: 1
          gender: 1
@@ -2210,7 +2248,7 @@ com.webank.weid.protocol.base.Credential
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -2326,6 +2364,9 @@ com.webank.weid.protocol.base.Credential
    * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
      - 100419
      - 验证签名异常
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100420
+     - 验证签名类型异常
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -2348,9 +2389,15 @@ com.webank.weid.protocol.base.Credential
    credential.setCptId(155);
    credential.setIssuranceDate(1551348312461L);
    credential.setId("54bc3832-fce7-433a-80c7-ba284635c67a");// 系统生成
-   credential.setSignature("HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=");
    credential.setExpirationDate(1551434712408L);
    credential.setIssuer("did:weid:0x30404b47c6c5811d49e28ea2306c804d16618017");
+
+   Map<String, String> proof = new HashMap<>();
+   proof.put("created", "1551348312461");
+   proof.put("creator", "did:weid:0x30404b47c6c5811d49e28ea2306c804d16618017");
+   proof.put("type", CredentialProofType.ECDSA.getTypeName());
+   proof.put("signature", "HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=");
+   credential.setProof(proof);
 
    ResponseData<Boolean> response = credentialService.verify(credential);
 
@@ -2358,7 +2405,7 @@ com.webank.weid.protocol.base.Credential
 .. code-block:: text
 
    返回结果如：
-   result: false
+   result: true
    errorCode: 0
    errorMessage: success
 
@@ -2436,12 +2483,12 @@ com.webank.weid.protocol.base.Credential
    * - credentialWrapper
      - CredentialWrapper
      - Y
-     - JavaBean
+     - 
      - 凭证信息，见下
    * - weIdPublicKey
      - WeIdPublicKey
      - Y
-     - JavaBean
+     - 
      - 公钥信息，见下
 
 com.webank.weid.protocol.base.CredentialWrapper
@@ -2484,7 +2531,7 @@ com.webank.weid.protocol.base.Credential
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -2615,6 +2662,9 @@ com.webank.weid.protocol.base.WeIdPublicKey
    * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
      - 100419
      - 验证签名异常
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100420
+     - 验证签名类型异常
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -2637,14 +2687,20 @@ com.webank.weid.protocol.base.WeIdPublicKey
    credential.setCptId(175);
    credential.setIssuranceDate(1551415454745L);
    credential.setCredentialId("ce32d6d6-86e6-4740-b021-1b0d98de5400");// 系统生成
-   credential.setSignature("G9cMEPhilGbu4u33IlmCoDUYncGcodfX4jdpFHIjFwltITGYN/cheS8FB4BBpKJvu3quxmacyWEUo6Zw6WmPSr8=");
    credential.setExpirationDate(1551501854695L);
    credential.setIssuer("did:weid:0xd9a2536b81e19ced12af21fb6b2a8455bbe54001");
+
+   Map<String, String> proof = new HashMap<>();
+   proof.put("created", "1551348312461");
+   proof.put("creator", "did:weid:0x30404b47c6c5811d49e28ea2306c804d16618017");
+   proof.put("type", CredentialProofType.ECDSA.getTypeName());
+   proof.put("signature", "HGBhyAwy+q5C7MjXhRssZNiVOXmGwzNIypzrleEwEZKgeOV1bpmm3v/wl0z6ACdIUGHkIJiCDlLS9NhDwVf/1nY=");
+   credential.setProof(proof);
 
    CredentialWrapper credentialWrapper = new CredentialWrapper();
    credentialWrapper.setCredential(credential)
 
-   //属性是否纰漏，0:不披露 ,1:纰漏
+   //属性是否披露，0:不披露，1:披露
    HashMap<String, Object> disclosure = new HashMap<String, Object>(3);
    disclosure.put("name", 1);
    disclosure.put("gender", 1);
@@ -2696,7 +2752,7 @@ com.webank.weid.protocol.base.WeIdPublicKey
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -2858,7 +2914,7 @@ WeIDService
      - 
    * - result
      - CreateWeIdDataResult
-     - JavaBean
+     - 
      - 见下
 
 
@@ -2877,11 +2933,11 @@ com.webank.weid.protocol.response.CreateWeIdDataResult
      - 格式: did:weid:0x………………….
    * - userWeIdPublicKey
      - WeIdPublicKey
-     - JavaBean
+     - 
      - 
    * - userWeIdPrivateKey
      - WeIdPrivateKey
-     - JavaBean
+     - 
      - 
 
 
@@ -2911,7 +2967,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 如下调用示例返回，使用十进制数字表示
 
 
@@ -3008,7 +3064,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 后期鉴权使用
 
 
@@ -3023,7 +3079,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 
@@ -3321,7 +3377,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 
    * - result
      - WeIdDocument
-     - JavaBean
+     - 
      - 见下
 
 
@@ -3348,15 +3404,15 @@ com.webank.weid.protocol.base.WeIdDocument
      - 
    * - publicKey
      - List\ :raw-html-m2r:`<PublicKeyProperty>`
-     - JavaBean
+     - 
      - 列出公钥集合，见下
    * - authentication
      - List\ :raw-html-m2r:`<AuthenticationProperty>`
-     - JavaBean
+     - 
      - 认证方集合，见下
    * - service
      - List\ :raw-html-m2r:`<ServiceProperty>`
-     - JavaBean
+     - 
      - 服务端点集合，见下
 
 
@@ -3532,7 +3588,7 @@ com.webank.weid.protocol.base.ServiceProperty
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，后期鉴权使用，见下
 
 
@@ -3547,7 +3603,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 
@@ -3692,7 +3748,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，后期鉴权使用，见下
 
 
@@ -3707,7 +3763,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 
@@ -3856,7 +3912,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - userWeIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - JavaBean
+     - 
      - 交易私钥，后期鉴权使用，见下
 
 
@@ -3871,7 +3927,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 
@@ -3976,7 +4032,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
 
 ----
 
-7. isWeIdExist
+8. isWeIdExist
 ~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
@@ -4123,7 +4179,7 @@ com.webank.weid.protocol.base.Credential
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -4167,7 +4223,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 备注
    * - privateKey
      - String
-     - 数字私钥
+     - 私钥
      - 使用十进制数字表示
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
@@ -4190,7 +4246,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - result
      - String
      - 创建的凭证合约地址
-     - 为空则表示失败
+     - 业务数据
 
 **此方法返回code**
 
@@ -4461,7 +4517,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - id
      - String
      - Y
-     - 证书编号
+     - 证书ID
      - 
    * - cptId
      - Integer
@@ -4666,3 +4722,1568 @@ String：以地址形式存在的String，会进行入参检查
    EvidenceService-->>调用者: 返回验证失败，报错并退出
    end
    EvidenceService-->>调用者: 返回验证成功
+   
+   
+CredentialPojoService
+^^^^^^^^^^^^^^^^^
+
+1. createCredential
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口定义:<T> ResponseData<CredentialPojoWrapper> createCredential(CreateCredentialPojoArgs<T> args)
+   接口描述: 根据传入的claim对象生成Credential。
+
+**接口入参**\ : 
+
+com.webank.weid.protocol.request.CreateCredentialPojoArgs<T>
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - cptId
+     - Integer
+     - Y
+     - CPT ID
+     - 
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     - 
+   * - expirationDate
+     - Long
+     - Y
+     - 到期时间
+     - 
+   * - claim
+     - T
+     - Y
+     - 创建凭证需要的claim数据，参数类型为泛型，为POJO对象（不同的CPT对应不同的POJO类）。
+     - 需要通过build-tool工具根据CPT ID生成对应的jar包，
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     - 创建这个Credential的调用者（issuer）的私钥
+     - 
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - Y
+     - 私钥
+     - 使用十进制数字表示
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<CredentialPojoWrapper>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - CredentialPojoWrapper
+     - 凭证对象
+     - 业务数据
+
+com.webank.weid.protocol.base.CredentialPojoWrapper
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - credentialPojo
+     - CredentialPojo
+     - Claim字段为POJO结构的Credential
+     - 
+   * - salt
+     - Map<String, Object>
+     -
+     -
+
+com.webank.weid.protocol.base.CredentialPojo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - context
+     - String
+     - 
+     -
+   * - id
+     - String
+     - 证书ID
+     - 
+   * - cptId
+     - Integer
+     - cptId
+     - 
+   * - issuer
+     - String
+     - issuer 的 WeIdentity DID
+     - 
+   * - issuranceDate
+     - Long
+     - 创建日期
+     - 
+   * - expirationDate
+     - Long
+     - 到期日期
+     - 
+   * - signature
+     - String
+     - 签名数据
+     - 
+   * - claim
+     - Map<String, Object>
+     - Claim数据
+     - 
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ERROR
+     - 100400
+     - credential处理未知异常
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim非法
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+   CreateCredentialPojoArgs<Cpt124> createCredentialPojoArgs = new CreateCredentialPojoArgs<Cpt124>();
+   createCredentialPojoArgs.setCptId(124);
+   createCredentialPojoArgs.setIssuer("did:weid:0x9bb64f70b78c0ee97313e755419bb1a129e91709");
+   createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
+        
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("114671041317062660391064424306481351452764499198453999363607501353119933901176");
+   createCredentialPojoArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   Cpt124 claim124 = new Cpt124();
+   claim124.setName("zhangsan");
+   claim124.setGender(Gender.F);
+   claim124.setAge(22);
+   createCredentialPojoArgs.setClaim(claim124);
+        
+   ResponseData<CredentialPojoWrapper> response = credentialPojoService.createCredential(createCredentialPojoArgs);
+.. code-block:: text
+
+   返回结果如：
+   result:(com.webank.weid.protocol.base.CredentialPojoWrapper)
+     credentialPojo:(com.webank.weid.protocol.base.CredentialPojo)
+       context: https://www.w3.org/2018/credentials/v1
+       id: 18487687-a6f1-4ff4-a557-ea474d217f26
+       cptId: 124
+       issuer: did:weid:0x9bb64f70b78c0ee97313e755419bb1a129e91709
+       issuranceDate: 1557738583427
+       expirationDate: 1557788648835
+       claim:(java.util.HashMap)
+          gender: F
+          name: zhangsan
+          age: 22
+       signature: HMEjlS5DEbozZn5XkIGz5fRrr6gkTCHihx0P+SVblH2kAz9r2f8SMAGTgiqeIi9hVx+Ev1rTcr2Ts6pIVmXb/5c=
+    salt:(java.util.HashMap)
+       gender: xqyye
+       name: mt3j4
+       age: niwse
+   errorCode: 0
+   errorMessage: success
+----
+
+2. createSelectiveCredential
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口定义: ResponseData<CredentialPojoWrapper> createSelectiveCredential(CredentialPojoWrapper credentialPojoWrapper,ClaimPolicy claimPolicy)
+   接口描述: 通过原始凭证和披漏策略，创建选择性披露的Credential。
+
+**接口入参**\ : 
+
+com.webank.weid.protocol.base.CredentialPojoWrapper
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - credentialPojo
+     - CredentialPojo
+     - Y
+     - Claim字段为POJO结构的Credential
+     - 
+   * - salt
+     - Map<String, Object>
+     - Y
+     - 
+     - Map结构跟claim结构一致
+
+
+com.webank.weid.protocol.base.ClaimPolicy
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - cptId
+     - Integer
+     - N
+     - CPT编号
+     - 
+   * - fieldsToBeDisclosed
+     - String
+     - Y
+     - 披露配置
+     - 根据claim匹配的结构，详见调用示例
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<CredentialPojoWrapper>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - CredentialPojoWrapper
+     - 凭证对象
+     - 业务数据
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_IS_NILL
+     - 100428
+     - credential为null
+   * - CREDENTIAL_CLAIM_POLICY_NOT_EXIST
+     - 100420
+     - 披露策略为null   
+   * - CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM
+     - 100427
+     - 披露策略与Claim不匹配
+     
+**调用示例**
+
+.. code-block:: java
+
+   CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+   CreateCredentialPojoArgs<Cpt124> createCredentialPojoArgs = new CreateCredentialPojoArgs<Cpt124>();
+   createCredentialPojoArgs.setCptId(124);
+   createCredentialPojoArgs.setIssuer("did:weid:0x9bb64f70b78c0ee97313e755419bb1a129e91709");
+   createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
+        
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("114671041317062660391064424306481351452764499198453999363607501353119933901176");
+   createCredentialPojoArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   Cpt124 claim124 = new Cpt124();
+   claim124.setName("zhangsan");
+   claim124.setGender(Gender.F);
+   claim124.setAge(22);
+   createCredentialPojoArgs.setClaim(claim124);
+        
+   ResponseData<CredentialPojoWrapper> response = credentialPojoService.createCredential(createCredentialPojoArgs);
+   
+   ClaimPolicy claimPolicy = new ClaimPolicy();
+   claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1}");  
+   ResponseData<CredentialPojoWrapper> selectiveResponse = credentialPojoService.createSelectiveCredential(response.getResult(), claimPolicy);
+
+.. code-block:: text
+
+   返回结果如：
+  result:(com.webank.weid.protocol.base.CredentialPojoWrapper)
+    credentialPojo:(com.webank.weid.protocol.base.CredentialPojo)
+       context: https://www.w3.org/2018/credentials/v1
+       id: 376a5c61-189b-48d7-beaa-c27ae826e29d
+       cptId: 124
+       issuer: did:weid:0x9bb64f70b78c0ee97313e755419bb1a129e91709
+       issuranceDate: 1557738845583
+       expirationDate: 1557788910991
+       claim:(java.util.HashMap)
+          gender: 0xf7fc8eb67a403a9fe288418afcdcdadbeb32c4e41fa0962c6b92132566823f61
+          name: zhangsan
+          age: 22.0
+       signature: HMEjlS5DEbozZn5XkIGz5fRrr6gkTCHihx0P+SVblH2kAz9r2f8SMAGTgiqeIi9hVx+Ev1rTcr2Ts6pIVmXb/5c=
+    salt:(java.util.HashMap)
+       gender: 0
+       name: eaqx9
+       age: qfar9
+  errorCode: 0
+  errorMessage: success
+----
+
+3. verify
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口定义: ResponseData<Boolean> verify(CredentialPojoWrapper credentialWrapper,String issuerWeId)
+   接口描述: 验证credentialWrapper。
+
+**接口入参**\ : 
+
+com.webank.weid.protocol.base.CredentialPojoWrapper
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - credentialPojo
+     - CredentialPojo
+     - Y
+     - Claim字段为POJO结构的Credential
+     - 
+   * - salt
+     - Map<String, Object>
+     - Y
+     - 
+     - Map结构跟claim结构一致
+
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - issuerWeId
+     - String
+     - Y
+     - WeIdentity DID
+     - 
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Boolean
+     - 验证结果
+     - 业务数据
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
+     - 100417
+     - 获取weIdDocument异常
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名验证不通过
+   * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
+     - 100419
+     - 签名验证异常
+----
+
+4. verify
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口定义: ResponseData<Boolean> verify(CredentialPojoWrapper credentialWrapper, WeIdPublicKey issuerPublicKey)
+   接口描述: 使用指定公钥验证credentialWrapper。
+
+**接口入参**\ : 
+
+com.webank.weid.protocol.base.CredentialPojoWrapper
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - credentialPojo
+     - CredentialPojo
+     - Y
+     - Claim字段为POJO结构的Credential
+     - 
+   * - salt
+     - Map<String, Object>
+     - Y
+     - 
+     - Map结构跟claim结构一致
+
+
+com.webank.weid.protocol.base.WeIdPublicKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - publicKey
+     - String
+     - Y
+     - 公钥
+     - 
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Boolean
+     - 验证结果
+     - 业务数据
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
+     - 100417
+     - 获取weIdDocument异常
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名验证不通过
+   * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
+     - 100419
+     - 签名验证异常
+   * - CREDENTIAL_PUBLIC_KEY_NOT_EXISTS
+     - 100421
+     - 公钥不存在
+----    
+
+5. verify
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口定义: ResponseData<Boolean> verify(String presenterWeId,PresentationPolicyE presentationPolicyE,Challenge challenge,PresentationE presentationE)
+   接口描述: 验证Presentation。
+
+**接口入参**\ : 
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - presenterWeId
+     - String
+     - Y
+     - WeIdentity DID
+     - 用户的WeIdentity DID
+
+com.webank.weid.protocol.base.PresentationPolicyE
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - id
+     - Integer
+     - Y
+     - polcyId
+     - 策略编号
+   * - orgId
+     - String
+     - Y
+     - 机构编号
+     - 
+   * - version
+     - Integer
+     - Y
+     - 版本
+     -  
+   * - weId
+     - String
+     - Y
+     - WeIdentity DID
+     - 创建policy机构的WeIdentity DID
+   * - policy
+     - Map<Integer, ClaimPolicy>
+     - Y
+     - 策略配置
+     - 
+
+com.webank.weid.protocol.base.Challenge
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - N
+     - WeIdentity DID
+     - policy提供给指定的WeIdentity DID
+   * - version
+     - Integer
+     - Y
+     - 版本
+     -  
+   * - nonce
+     - String
+     - Y
+     - 随机字符串
+     - 
+
+com.webank.weid.protocol.base.PresentationE
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 上下文
+     - 
+   * - type
+     - String
+     - Y
+     - Presentation Type
+     -  
+   * - credentialList
+     - List<CredentialPojoWrapper>
+     - Y
+     - 凭证列表
+     - 
+   * - proof
+     - Map<String, String>
+     - Y
+     - Presentation的签名信息
+     - 
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Boolean
+     - 验证结果
+     - 业务数据
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - CREDENTIAL_SIGNATURE_NOT_EXISTS
+     - 100422
+     - 签名不存在
+   * - CREDENTIAL_PRESENTERWEID_NOTMATCH
+     - 100426
+     - presenterWeId跟challenge不匹配
+   * - PRESENTATION_CHALLENGE_NONCE_MISMATCH
+     - 100605
+     - challenge随机数不匹配  
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
+     - 100417
+     - 获取weIdDocument异常
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名验证不通过
+   * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
+     - 100419
+     - 签名验证异常
+   * - CREDENTIAL_CPTID_NOTMATCH
+     - 100425
+     - CPT不匹配
+   * - CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL
+     - 100423
+     - policy披露信息非法
+   * - CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE
+     - 100424
+     - Credential披露信息跟盐信息不一致
+
+----
+
+6. createPresentation
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口定义: ResponseData<PresentationE> createPresentation(List<CredentialPojoWrapper> credentialList, PresentationPolicyE presentationPolicyE, Challenge challenge, WeIdAuthentication weIdAuthentication)
+   接口描述: 创建Presentation。
+
+**接口入参**\ : 
+
+java.uitl.List<com.webank.weid.protocol.base.CredentialPojoWrapper>
+
+com.webank.weid.protocol.base.CredentialPojoWrapper
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - credentialPojo
+     - CredentialPojo
+     - Y
+     - Claim字段为POJO结构的Credential
+     - 
+   * - salt
+     - Map<String, Object>
+     - Y
+     - 
+     - Map结构跟claim结构一致
+
+com.webank.weid.protocol.base.PresentationPolicyE
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - id
+     - Integer
+     - Y
+     - polcyId
+     - 策略编号
+   * - orgId
+     - String
+     - Y
+     - 机构编号
+     - 
+   * - version
+     - Integer
+     - Y
+     - 版本
+     -  
+   * - weId
+     - String
+     - Y
+     - WeIdentity DID
+     - 创建policy机构的WeIdentity DID
+   * - policy
+     - Map<Integer, ClaimPolicy>
+     - Y
+     - 策略配置
+     - 
+
+com.webank.weid.protocol.base.Challenge
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - N
+     - WeIdentity DID
+     - policy提供给指定的WeIdentity DID
+   * - version
+     - Integer
+     - Y
+     - 版本
+     -  
+   * - nonce
+     - String
+     - Y
+     - 随机字符串
+     - 
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - CPT发布者的WeIdentity DID
+     - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - Y
+     - 公钥Id
+     - 
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     - 
+     - 交易私钥，见下
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<PresentationE>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - PresentationE
+     - 创建的Presentation
+     - 业务数据
+
+com.webank.weid.protocol.base.PresentationE
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - context
+     - String
+     - 上下文
+     - 
+   * - type
+     - String
+     - Presentation Type
+     -  
+   * - credentialList
+     - List<CredentialPojoWrapper>
+     - 凭证列表
+     - 
+   * - proof
+     - Map<String, String>
+     - Presentation的签名信息
+     - 
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - PRESENTATION_CHALLENGE_INVALID
+     - 100600
+     - challenge无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 用户weId不匹配其私钥
+   * - PRESENTATION_CHALLENGE_WEID_MISMATCH
+     - 100601
+     - challenge中的weId不匹配用户的weId
+   * - PRESENTATION_WEID_PUBLICKEY_ID_INVALID
+     - 100604
+     - 公钥编号无效
+   * - PRESENTATION_POLICY_INVALID
+     - 100602
+     - policy无效
+   * - PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY
+     - 100603
+     - credentialList不匹配Policy
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - CREDENTIAL_IS_NILL
+     - 100428
+     - credential为null
+   * - CREDENTIAL_CLAIM_POLICY_NOT_EXIST
+     - 100420
+     - 披露策略为null
+   * - CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM
+     - 100427
+     - 披露策略与Claim不匹配 
+
+----
+
+
+AmopService
+^^^^^^^^^^^^^^^^^
+
+1. registerCallback
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.AmopService
+   接口定义:void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback)
+   接口描述: 注册AMOP回调处理。
+
+**接口入参**\ : 
+
+java.lang.Integer
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - directRouteMsgType
+     - Integer
+     - Y
+     - AMOP消息类型
+     - 
+
+com.webank.weid.rpc.callback.AmopCallback
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - object
+     - AmopCallback
+     - 处理消息的callback对象
+     - 机构需继承并且重写onPush(AmopCommonArgs arg)
+
+**接口返回**\ :   无;
+
+----
+
+2. request
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AmopService
+   接口定义: ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args)
+   接口描述: AMOP请求Server。
+
+**接口入参**\ : 
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - toOrgId
+     - String
+     - Y
+     - 目标机构编码
+     - 
+
+com.webank.weid.protocol.amop.AmopCommonArgs
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - messageId
+     - String
+     - Y
+     - 消息编号
+     - 
+   * - fromOrgId
+     - String
+     - Y
+     - 消息来源机构编号
+     - 
+   * - toOrgId
+     - String
+     - Y
+     - 消息目标机构编号
+     - 
+   * - message
+     - String
+     - Y
+     - 请求body
+     - 
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<AmopResponse>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - AmopResponse
+     - AMOP响应
+     - 业务数据
+
+com.webank.weid.protocol.response.AmopResponse
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - result
+     - String
+     - AMOP消息响应body
+     - 
+   * - errorCode
+     - Integer
+     - 业务结果编码
+     -  
+   * - errorMessage
+     - String
+     - 业务结果描述
+     - 
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+----
+
+3. getPresentationPolicy
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AmopService
+   接口定义: ResponseData<PolicyAndChallenge> getPresentationPolicy(String orgId, Integer policyId)
+   接口描述: 通过AMOP获取PolicyAndChallenge。
+
+**接口入参**\ : 
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - toOrgId
+     - String
+     - Y
+     - 目标机构编码
+     - 
+
+java.lang.Integer
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - policyId
+     - String
+     - Y
+     - 策略编号
+     - 
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<PolicyAndChallenge>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - PolicyAndChallenge
+     - 
+     - 业务数据
+
+com.webank.weid.protocol.base.PolicyAndChallenge
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - presentationPolicyE
+     - PresentationPolicyE
+     - 策略信息
+     - 
+   * - challenge
+     - Challenge
+     - 业务结果编码
+     -  
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - POLICY_SERVICE_NOT_EXISTS
+     - 100701
+     - policyService不存在
+   * - POLICY_SERVICE_CALL_FAIL
+     - 100701
+     - policyService调用未知异常
+----
+
+
+
+JsonTransportation
+^^^^^^^^^^^^^^^^^
+
+1. specify
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation
+   接口定义: JsonTransportation specify(List<String> verifierWeIdList)
+   接口描述: 指定transportation的认证者,用于权限控制。
+
+**接口入参**\ : 
+
+java.util.List<java.lang.String>
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - verifierWeIdList
+     - List<String> 
+     - N
+     - verifierWeId列表
+     - 
+**接口返回**\ :   com.webank.weid.suite.api.transportation.inf.JsonTransportation;
+
+**调用示例**
+
+.. code-block:: java
+
+   JsonTransportation jsonTransportation =TransportationFactory.newJsonTransportation();
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   jsonTransportation = jsonTransportation.specify(verifierWeIdList);
+   
+---
+
+2. serialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation
+   接口定义: <T extends JsonSerializer> ResponseData<String> serialize(T object,ProtocolProperty property)
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     - 
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     - 
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - String
+     - 序列化后的字符串数据
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
+     - 100805
+     - 协议数据无效
+   * - TRANSPORTATION_PROTOCOL_FIELD_INVALID
+     - 100806
+     - 协议字段无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   
+   PresentationE presentation;
+   
+   //原文方式调用
+   ResponseData<String> result1 = 
+       TransportationFactory
+           .newJsonTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL));
+   
+   //密文方式调用
+   ResponseData<String> result2 = 
+      TransportationFactory
+           .newJsonTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
+---
+
+3. deserialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation
+   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(String transString,Class<T> clazz)
+   接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - transString
+     - String
+     - Y
+     - 待序列化对象
+     - 
+   * - clazz
+     - Class<T>
+     - Y
+     - 目标类型
+     - 
+
+**接口返回**\ :  <T extends JsonSerializer> com.webank.weid.protocol.response.ResponseData\<T>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - <T extends JsonSerializer>
+     - 反序列化后的对象
+     - 业务数据
+     
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - ENCRYPT_KEY_NOT_EXISTS
+     - 100700
+     - 无法获取秘钥
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_VERSION_ERROR
+     - 100802
+     - 协议版本错误
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常 
+   * - TRANSPORTATION_PROTOCOL_STRING_INVALID
+     - 100804
+     - 协议字符串无效
+   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
+     - 100805
+     - 协议数据无效
+   * - TRANSPORTATION_PROTOCOL_FIELD_INVALID
+     - 100806
+     - 协议字段无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   
+   String transString="";
+   
+   //原文方式调用反序列化
+   ResponseData<PresentationE> result1 = 
+       TransportationFactory
+           .newJsonTransportation()
+           .specify(verifierWeIdList)
+           .deserialize(transString,PresentationE.class);
+   
+   //密文方式调用反序列化
+   ResponseData<PresentationE> result2 = 
+      TransportationFactory
+           .newJsonTransportation()
+           .specify(verifierWeIdList)
+           .deserialize(transString,PresentationE.class);
+---

@@ -2,7 +2,7 @@ coverage:
   status:
     project:
       default:
-       target: 65%
+       target: 50%
        threshold: null
        if_not_found: success
     patch:

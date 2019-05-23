@@ -46,6 +46,8 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.RawTransactionService;
+import com.webank.weid.service.impl.RawTransactionServiceImpl;
 
 /**
  * registerAuthorityIssuer method for testing AuthorityIssuerService.
@@ -163,8 +165,15 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         registerAuthorityIssuerArgs.getAuthorityIssuer()
             .setCreated(System.currentTimeMillis() + 4000);
 
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -201,8 +210,15 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
 
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -220,8 +236,15 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
 
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -466,7 +489,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         mockTest.tearDown();
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -497,7 +520,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     @Test
     public void testRegisterAuthorityIssuerCase22() {
         String hex = StringUtils.EMPTY;
-        ResponseData<String> response = authorityIssuerService.registerAuthorityIssuer(hex);
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.registerAuthorityIssuer(hex);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
@@ -509,7 +533,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     @Test
     public void testRegisterAuthorityIssuerCase23() {
         String hex = "11111";
-        ResponseData<String> response = authorityIssuerService.registerAuthorityIssuer(hex);
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.registerAuthorityIssuer(hex);
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
