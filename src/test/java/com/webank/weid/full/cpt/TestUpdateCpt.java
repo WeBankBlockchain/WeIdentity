@@ -55,9 +55,8 @@ import com.webank.weid.util.WeIdUtils;
 
 /**
  * updateCpt method for testing CptService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestUpdateCpt extends TestBaseServcie {
 
@@ -170,7 +169,7 @@ public class TestUpdateCpt extends TestBaseServcie {
             cptBaseInfo.getCptId());
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_NULL.getCode(),
+        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
@@ -421,9 +420,8 @@ public class TestUpdateCpt extends TestBaseServcie {
     }
 
     /**
-     * case： privateKey belongs to new WeIdentity DID , cptPublisher is a new WeId.
-     * [TIP] update success,we will deal with the two issue.
-     *
+     * case： privateKey belongs to new WeIdentity DID , cptPublisher is a new WeId. [TIP] update
+     * success,we will deal with the two issue.
      */
     @Test
     public void testUpdateCptCase18() {
@@ -614,7 +612,10 @@ public class TestUpdateCpt extends TestBaseServcie {
             cptBaseInfo.getCptId());
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(
+            ErrorCode.UNKNOW_ERROR.getCode(),
+            response.getErrorCode().intValue()
+        );
         Assert.assertNull(response.getResult());
     }
 

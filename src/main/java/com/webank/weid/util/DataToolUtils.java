@@ -235,8 +235,10 @@ public final class DataToolUtils {
             object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));
         } catch (JsonParseException e) {
             logger.error("JsonParseException when serialize object to json", e);
+            throw new DataTypeCastException(e);
         } catch (JsonMappingException e) {
             logger.error("JsonMappingException when serialize object to json", e);
+            new DataTypeCastException(e);
         } catch (IOException e) {
             logger.error("IOException when serialize object to json", e);
         }
