@@ -199,4 +199,9 @@ public final class WeIdConstant {
      * The Constant WeIdentity DID Event Attribute Change String Name.
      */
     public static final String WEID_EVENT_ATTRIBUTE_CHANGE = "WeIdAttributeChanged";
+
+    /**
+     * The FISCO-BCOS Address pattern.
+     */
+    public static final String FISCO_BCOS_ADDRESS_PATTERN = "0x[a-fA-f0-9]{40}";
 }

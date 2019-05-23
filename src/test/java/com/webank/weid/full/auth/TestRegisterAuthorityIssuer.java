@@ -46,6 +46,8 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.RawTransactionService;
+import com.webank.weid.service.impl.RawTransactionServiceImpl;
 
 /**
  * registerAuthorityIssuer method for testing AuthorityIssuerService.
@@ -518,7 +520,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     @Test
     public void testRegisterAuthorityIssuerCase22() {
         String hex = StringUtils.EMPTY;
-        ResponseData<String> response = authorityIssuerService.registerAuthorityIssuer(hex);
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.registerAuthorityIssuer(hex);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
@@ -530,7 +533,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     @Test
     public void testRegisterAuthorityIssuerCase23() {
         String hex = "11111";
-        ResponseData<String> response = authorityIssuerService.registerAuthorityIssuer(hex);
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.registerAuthorityIssuer(hex);
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));

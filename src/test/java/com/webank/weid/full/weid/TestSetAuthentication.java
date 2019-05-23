@@ -113,7 +113,7 @@ public class TestSetAuthentication extends TestBaseServcie {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setWeId("did:weid:0xbb");
+        setAuthenticationArgs.setWeId("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
         LogUtil.info(logger, "setAuthentication", response);

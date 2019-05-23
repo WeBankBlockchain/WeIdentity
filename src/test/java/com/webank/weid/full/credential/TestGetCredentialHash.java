@@ -59,7 +59,7 @@ public class TestGetCredentialHash extends TestBaseServcie {
         credential.setCptId(Integer.valueOf(1001));
         credential.setExpirationDate(System.currentTimeMillis() + 1000L);
         credential.setId(UUID.randomUUID().toString());
-        credential.setIssuer("did:weid:0x0000000000000000");
+        credential.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
         credential.setIssuranceDate(System.currentTimeMillis());
         Map<String, String> proof = new HashMap<>();
         proof.put(ParamKeyConstant.PROOF_CREATOR, credential.getIssuer());
