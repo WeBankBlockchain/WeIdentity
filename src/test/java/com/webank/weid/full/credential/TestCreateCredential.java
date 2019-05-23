@@ -205,7 +205,7 @@ public class TestCreateCredential extends TestBaseServcie {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
-        createCredentialArgs.setIssuer("did:weid:0x1111111111");
+        createCredentialArgs.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
 
         ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);

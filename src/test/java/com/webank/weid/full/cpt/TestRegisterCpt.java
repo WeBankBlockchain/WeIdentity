@@ -52,6 +52,8 @@ import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.RawTransactionService;
+import com.webank.weid.service.impl.RawTransactionServiceImpl;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -216,7 +218,8 @@ public class TestRegisterCpt extends TestBaseServcie {
     public void testRegisterCptCase8() {
 
         CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
-        cptMapArgs.getWeIdAuthentication().setWeId("did:weid:0xaaaaaaaaaaaaaaaa");
+        cptMapArgs.getWeIdAuthentication()
+            .setWeId("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         LogUtil.info(logger, "registerCpt", response);
@@ -547,7 +550,8 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase28() {
         String hex = StringUtils.EMPTY;
-        ResponseData<String> response = cptService.registerCpt(hex);
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.registerCpt(hex);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
@@ -559,7 +563,8 @@ public class TestRegisterCpt extends TestBaseServcie {
     @Test
     public void testRegisterCptCase29() {
         String hex = "11111";
-        ResponseData<String> response = cptService.registerCpt(hex);
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.registerCpt(hex);
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));

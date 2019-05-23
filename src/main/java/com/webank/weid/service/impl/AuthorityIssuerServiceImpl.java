@@ -157,7 +157,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             List<AuthorityIssuerRetLogEventResponse> eventList =
                 AuthorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
             AuthorityIssuerRetLogEventResponse event = eventList.get(0);
-            ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(event,
+            ErrorCode errorCode = TransactionUtils.verifyAuthorityIssuerRelatedEvent(event,
                 WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE);
             return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
                 errorCode);
@@ -171,36 +171,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             logger.error("register authority issuer failed.", e);
         }
         return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
-    }
-
-    /**
-     * Register a new Authority Issuer on Chain with preset transaction hex value. The inputParam is
-     * a Json String, with two keys: WeIdentity DID and Name. Parameters will be ordered as
-     * mentioned after validity check; then transactionHex will be sent to blockchain.
-     *
-     * @param transactionHex the transaction hex value
-     * @return true if succeeds, false otherwise
-     */
-    @Override
-    public ResponseData<String> registerAuthorityIssuer(String transactionHex) {
-        try {
-            if (StringUtils.isEmpty(transactionHex)) {
-                logger.error("AuthorityIssuer transaction error");
-                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-            }
-            TransactionReceipt transactionReceipt = TransactionUtils
-                .sendTransaction(getWeb3j(), transactionHex);
-            List<AuthorityIssuerRetLogEventResponse> eventList =
-                AuthorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
-            AuthorityIssuerRetLogEventResponse event = eventList.get(0);
-            ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(event,
-                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE);
-            Boolean result = errorCode.getCode() == ErrorCode.SUCCESS.getCode();
-            return new ResponseData<>(result.toString(), errorCode);
-        } catch (Exception e) {
-            logger.error("[registerAuthorityIssuer] register failed due to transaction error.", e);
-        }
-        return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
     }
 
     /**
@@ -230,7 +200,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
 
             AuthorityIssuerRetLogEventResponse event = eventList.get(0);
             if (event != null) {
-                ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(
+                ErrorCode errorCode = TransactionUtils.verifyAuthorityIssuerRelatedEvent(
                     event,
                     WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
                 );
@@ -736,23 +706,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
 
         return ErrorCode.SUCCESS;
-    }
-
-    private ErrorCode verifyAuthorityIssuerRelatedEvent(
-        AuthorityIssuerRetLogEventResponse event,
-        Integer opcode) {
-
-        if (event.addr == null || event.operation == null || event.retCode == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        Integer eventOpcode = event.operation.getValue().intValue();
-        if (eventOpcode.equals(opcode)) {
-            Integer eventRetCode = event.retCode.getValue().intValue();
-            return ErrorCode.getTypeByErrorCode(eventRetCode);
-        } else {
-            return ErrorCode.AUTHORITY_ISSUER_OPCODE_MISMATCH;
-        }
-
     }
 
     private boolean isValidAuthorityIssuerName(String name) {

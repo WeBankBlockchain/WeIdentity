@@ -283,7 +283,8 @@ public class TestUpdateCpt extends TestBaseServcie {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
-        cptMapArgs.getWeIdAuthentication().setWeId("did:weid:0xaaaaaaaaaaaaaa");
+        cptMapArgs.getWeIdAuthentication()
+            .setWeId("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
 
         ResponseData<CptBaseInfo> response = cptService.updateCpt(
             cptMapArgs,
