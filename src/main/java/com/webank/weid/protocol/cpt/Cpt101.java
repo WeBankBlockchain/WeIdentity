@@ -19,25 +19,22 @@
 
 package com.webank.weid.protocol.cpt;
 
+import java.util.List;
+
 import com.github.reinert.jjschema.Attributes;
 import lombok.Data;
 
 /**
- * Api endpoint address disclosure.
- *
- * @author Created by Junqi Zhang on 2019/4/9.
+ * CPT for authorization.
+ * @author chaoxinhu 2019.5
  */
 @Data
-@Attributes(title = "API Endpoint", description = "API Endpoint address disclosure")
-public class Cpt105 {
-    @Attributes(required = true, description = "The WeIdentity DID of owner")
-    private String ownerWeId;
-    @Attributes(required = true, description = "The URL")
-    private String url;
-    @Attributes(required = true, description = "The port")
-    private String port;
-    @Attributes(required = true, description = "The policy ID")
-    private Integer policyId;
-    @Attributes(required = true, description = "The org ID")
-    private String orgId;
+@Attributes(title = "Authorization token", description = "Basic Authorization Token Template")
+public class Cpt101 {
+    @Attributes(required = true, description = "The one granting authorization")
+    private String delegator;
+    @Attributes(required = true, description = "The one receiving authorization")
+    private String receiver;
+    @Attributes(required = true, description = "Subjects to be authorized", minItems = 1)
+    private List<String> subjects;
 }

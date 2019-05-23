@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -19,14 +19,27 @@
 
 package com.webank.weid.protocol.cpt;
 
+import java.util.List;
+
+import com.github.reinert.jjschema.Attributes;
+import lombok.Data;
 
 /**
  * the CPT for test.
  * @author Created by Junqi Zhang on 2019/4/3.
  */
+@Data
+@Attributes(title = "test CPT", description = "Reserved CPT 11")
 public class Cpt11 {
 
-    Integer cptId;
-    String userId;
-    String userName;
+    @Attributes(required = true, description = "CPT ID", minimum = 1)
+    private Integer cptId;
+    @Attributes(required = true, description = "User ID")
+    private String userId;
+    @Attributes(required = true, description = "User Name", maxLength = 30)
+    private String userName;
+    @Attributes(required = true, description = "Registered Tags", minItems = 1)
+    private List<String> tags;
+    @Attributes(required = true, description = "Gender", enums = {"MALE", "FEMALE"})
+    private String gender;
 }
