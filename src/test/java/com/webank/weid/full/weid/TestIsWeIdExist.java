@@ -91,20 +91,6 @@ public class TestIsWeIdExist extends TestBaseServcie {
     }
 
     /**
-     * case: WeIdentity DID is not exist.
-     *
-     */
-    @Test
-    public void testIsWeIdExistCase4() {
-
-        ResponseData<Boolean> response1 = weIdService.isWeIdExist("did:weid:xxxxxx");
-        LogUtil.info(logger, "isWeIdExist", response1);
-
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response1.getErrorCode().intValue());
-        Assert.assertEquals(false, response1.getResult());
-    }
-
-    /**
      * case: WeIdentity DID is Exist.
      *
      */
