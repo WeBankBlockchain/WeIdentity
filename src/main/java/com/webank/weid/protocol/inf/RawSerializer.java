@@ -17,37 +17,11 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.util;
+package com.webank.weid.protocol.inf;
 
-import org.bcos.web3j.crypto.Hash;
-
-/**
- * The Hash related Utils class. Based on SHA3 algorithm.
- *
- * <p>Most implementations are re-factors or wrappers based on FISCO-BCOS web3j and Ethereumj. The
- * future support of SM2/SM3 is under construction.
- *
- * @author chaoxinhu 2018.10
- */
-public class HashUtils {
-
-    /**
-     * Keccak-256 hash function.
-     *
-     * @param hexInput hex encoded input data with optional 0x prefix
-     * @return hash value as hex encoded string
-     */
-    public static String sha3(String hexInput) {
-        return Hash.sha3(hexInput);
-    }
-
-    /**
-     * Sha 3.
-     *
-     * @param input the input
-     * @return the byte[]
-     */
-    public static byte[] sha3(byte[] input) {
-        return Hash.sha3(input, 0, input.length);
-    }
+public interface RawSerializer extends JsonSerializer {
+    
+    public default String toRawData() {
+        return toJson();
+    } 
 }

@@ -24,6 +24,7 @@ import java.util.Map;
 
 import mockit.Mock;
 import mockit.MockUp;
+import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -42,7 +44,7 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.util.SignatureUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * verifyCredential method for testing CredentialService.
@@ -50,7 +52,7 @@ import com.webank.weid.util.SignatureUtils;
  * @author v_wbgyang
  */
 public class TestVerifyCredential extends TestBaseServcie {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestVerifyCredential.class);
 
     protected PasswordKey passwordKey = null;
@@ -78,6 +80,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
     }
+
 
     /**
      * case: context is null.
@@ -327,8 +330,7 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /**
-     * case: claim is null.
-     * test error,Please add check.
+     * case: claim is null. test error,Please add check.
      */
     // @Test
     public void testVerifyCredentialCase19() {
@@ -346,12 +348,11 @@ public class TestVerifyCredential extends TestBaseServcie {
 
     /**
      * case: mock SignatureException.
-     *
      */
     @Test
     public void testVerifyCredentialCase20() {
 
-        MockUp<SignatureUtils> mockTest = new MockUp<SignatureUtils>() {
+        MockUp<DataToolUtils> mockTest = new MockUp<DataToolUtils>() {
             @Mock
             public Sign.SignatureData simpleSignatureDeserialization(
                 byte[] serializedSignatureData) throws SignatureException {
@@ -368,20 +369,37 @@ public class TestVerifyCredential extends TestBaseServcie {
         Assert.assertEquals(false, response.getResult());
     }
 
+    /**
+     * case: signature is empty.
+     */
+    @Test
+    public void testVerifyCredentialCase21() {
+        Credential newCredential = copyCredential(credential);
+        Map<String, String> proof = newCredential.getProof();
+        proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, StringUtils.EMPTY);
+        newCredential.setProof(proof);
+
+        ResponseData<Boolean> response = super.verifyCredential(newCredential);
+        LogUtil.info(logger, "verifyCredential", response);
+
+        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
 
     /**
      * case: signature is null.
      */
     @Test
     public void testVerifyCredentialCase22() {
+        Credential newCredential = copyCredential(credential);
+        Map<String, String> proof = newCredential.getProof();
+        proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, null);
+        newCredential.setProof(proof);
 
-        String signature = credential.getSignature();
-        credential.setSignature(null);
-
-        ResponseData<Boolean> response = super.verifyCredential(credential);
+        ResponseData<Boolean> response = super.verifyCredential(newCredential);
         LogUtil.info(logger, "verifyCredential", response);
 
-        credential.setSignature(signature);
         Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -393,13 +411,14 @@ public class TestVerifyCredential extends TestBaseServcie {
     @Test
     public void testVerifyCredentialCase23() {
 
-        String signature = credential.getSignature();
-        credential.setSignature("xxxxxxxxxxxxxxx");
+        Credential newCredential = copyCredential(credential);
+        Map<String, String> proof = newCredential.getProof();
+        proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, "xxxxxxxxxxx");
+        newCredential.setProof(proof);
 
-        ResponseData<Boolean> response = super.verifyCredential(credential);
+        ResponseData<Boolean> response = super.verifyCredential(newCredential);
         LogUtil.info(logger, "verifyCredential", response);
 
-        credential.setSignature(signature);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -469,7 +488,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setIssuranceDate(issuranceDate);
         credential.setExpirationDate(expirationDate);
         LogUtil.info(logger, "verifyCredential", response);
-        
+
         Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -501,13 +520,32 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /**
+     * case: proof creator and created are null - this is OK.
+     */
+    @Test
+    public void testVerifyCredentialCase29() {
+
+        Credential newCredential = copyCredential(credential);
+        Map<String, String> proof = newCredential.getProof();
+        proof.put(ParamKeyConstant.PROOF_CREATOR, null);
+        newCredential.setProof(proof);
+
+        ResponseData<Boolean> response = super.verifyCredential(newCredential);
+        LogUtil.info(logger, "verifyCredential", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
      * case: issuer is not exists.
      */
     @Test
     public void testVerifyCredentialCase30() {
 
         String issuer = credential.getIssuer();
-        credential.setIssuer("did:weid:0x111111111111111");
+        credential.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797441");
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
         LogUtil.info(logger, "verifyCredential", response);
@@ -516,5 +554,62 @@ public class TestVerifyCredential extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: proof type illegal.
+     */
+    @Test
+    public void testVerifyCredentialCase31() {
+
+        Credential newCredential = copyCredential(credential);
+        Map<String, String> proof = newCredential.getProof();
+        proof.put(ParamKeyConstant.PROOF_TYPE, null);
+        newCredential.setProof(proof);
+
+        ResponseData<Boolean> response = super.verifyCredential(newCredential);
+        LogUtil.info(logger, "verifyCredential", response);
+
+        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_TYPE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: proof is missing signature key at all - fail.
+     */
+    @Test
+    public void testVerifyCredentialCase32() {
+
+        Credential newCredential = copyCredential(credential);
+        Map<String, String> proof = newCredential.getProof();
+        proof.remove(ParamKeyConstant.CREDENTIAL_SIGNATURE);
+        newCredential.setProof(proof);
+
+        ResponseData<Boolean> response = super.verifyCredential(newCredential);
+        LogUtil.info(logger, "verifyCredential", response);
+
+        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: proof is missing creator key at all - should be fine.
+     */
+    @Test
+    public void testVerifyCredentialCase33() {
+
+        Credential newCredential = copyCredential(credential);
+        Map<String, String> proof = newCredential.getProof();
+        proof.remove(ParamKeyConstant.PROOF_CREATOR);
+        newCredential.setProof(proof);
+
+        ResponseData<Boolean> response = super.verifyCredential(newCredential);
+        LogUtil.info(logger, "verifyCredential", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
     }
 }

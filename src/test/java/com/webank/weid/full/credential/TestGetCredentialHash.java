@@ -20,13 +20,16 @@
 package com.webank.weid.full.credential;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.response.ResponseData;
@@ -56,9 +59,14 @@ public class TestGetCredentialHash extends TestBaseServcie {
         credential.setCptId(Integer.valueOf(1001));
         credential.setExpirationDate(System.currentTimeMillis() + 1000L);
         credential.setId(UUID.randomUUID().toString());
-        credential.setIssuer("did:weid:0x0000000000000000");
+        credential.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
         credential.setIssuranceDate(System.currentTimeMillis());
-        credential.setSignature("xxxxxxxxxxx");
+        Map<String, String> proof = new HashMap<>();
+        proof.put(ParamKeyConstant.PROOF_CREATOR, credential.getIssuer());
+        proof.put(ParamKeyConstant.PROOF_CREATED, credential.getIssuranceDate().toString());
+        proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
+        proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, "xxxxxxxxxxx");
+        credential.setProof(proof);
         return credential;
     }
 }

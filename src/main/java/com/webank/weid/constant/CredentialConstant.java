@@ -37,5 +37,35 @@ public final class CredentialConstant {
      * The Constant default Credential Context field name in Credential Json String.
      */
     public static final String CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD = "@context";
+    
+    /**
+     * The Constant default Credential type.
+     */
+    public static final String DEFAULT_CREDENTIAL_TYPE = "VerifiableCredential";
 
+    /**
+     * The Credential Proof Type Enumerate.
+     */
+    public static enum CredentialProofType {
+        ECDSA("EcdsaSignature");
+
+        /**
+         * The Type Name of the Credential Proof.
+         */
+        private String typeName;
+
+        /**
+         * Constructor.
+         */
+        CredentialProofType(String typeName) {
+            this.typeName = typeName;
+        }
+
+        /**
+         * Getter.
+         */
+        public String getTypeName() {
+            return typeName;
+        }
+    }
 }
