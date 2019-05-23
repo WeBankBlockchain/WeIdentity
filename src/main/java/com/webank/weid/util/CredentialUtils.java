@@ -110,7 +110,7 @@ public final class CredentialUtils {
         //ct.setProof(proof);
         Map<String, String> proof = DataToolUtils
             .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
-
+        ct.setProof(proof);
         Map<String, Object> originalClaim = credential.getClaim();
         //Map<String, Object> claim = (HashMap<String, Object>) JsonUtil
         //    .jsonStrToObj(new HashMap<String, Object>(), JsonUtil.objToJsonStr(originalClaim));

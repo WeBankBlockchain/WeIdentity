@@ -585,8 +585,8 @@ public class CptServiceImpl extends BaseService implements CptService {
         }
 
         if (cptJsonSchemaMap == null || cptJsonSchemaMap.isEmpty()) {
-            logger.error("Input cpt json schema is null.");
-            return ErrorCode.CPT_JSON_SCHEMA_NULL;
+            logger.error("Input cpt json schema is invalid.");
+            return ErrorCode.CPT_JSON_SCHEMA_INVALID;
         }
         //String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
         String cptJsonSchema = DataToolUtils.serialize(cptJsonSchemaMap);

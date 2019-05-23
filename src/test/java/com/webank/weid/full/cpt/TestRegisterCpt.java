@@ -116,7 +116,7 @@ public class TestRegisterCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         LogUtil.info(logger, "registerCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_NULL.getCode(),
+        Assert.assertEquals(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
@@ -501,7 +501,10 @@ public class TestRegisterCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.registerCpt(cptStringArgs);
         LogUtil.info(logger, "registerCpt", response);
 
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(
+            ErrorCode.UNKNOW_ERROR.getCode(),
+            response.getErrorCode().intValue()
+        );
         Assert.assertNull(response.getResult());
     }
 
