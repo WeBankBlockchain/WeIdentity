@@ -99,7 +99,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setCptId(args.getCptId());
             result.setIssuer(args.getIssuer());
             Long issuanceDate = DateUtils.getCurrentTimeStamp();
-            result.setIssuranceDate(issuanceDate);
+            result.setIssuanceDate(issuanceDate);
             result.setExpirationDate(args.getExpirationDate());
             result.setClaim(args.getClaim());
             Map<String, Object> disclosureMap = new HashMap<>(args.getClaim());
@@ -418,9 +418,9 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         // Convert timestamp into UTC timezone
         try {
             Map<String, Object> credMap = DataToolUtils.objToMap(credential);
-            String issuranceDate = DateUtils.convertTimestampToUtc(credential.getIssuranceDate());
+            String issuanceDate = DateUtils.convertTimestampToUtc(credential.getIssuanceDate());
             String expirationDate = DateUtils.convertTimestampToUtc(credential.getExpirationDate());
-            credMap.put(ParamKeyConstant.ISSURANCE_DATE, issuranceDate);
+            credMap.put(ParamKeyConstant.ISSUANCE_DATE, issuanceDate);
             credMap.put(ParamKeyConstant.EXPIRATION_DATE, expirationDate);
             credMap.remove(ParamKeyConstant.CONTEXT);
             credMap.put(CredentialConstant.CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD,

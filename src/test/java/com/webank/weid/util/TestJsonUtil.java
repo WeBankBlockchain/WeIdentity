@@ -64,7 +64,7 @@ public class TestJsonUtil {
         String uuid = UUID.randomUUID().toString();
         Credential cred = new Credential();
         cred.setIssuer("did:weid:0x00000011111111111");
-        cred.setIssuranceDate(System.currentTimeMillis());
+        cred.setIssuanceDate(System.currentTimeMillis());
         cred.setExpirationDate(System.currentTimeMillis() + new Long(10000));
         cred.setContext(CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
         cred.setId(uuid);
