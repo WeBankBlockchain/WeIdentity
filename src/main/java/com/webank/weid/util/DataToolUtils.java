@@ -62,6 +62,7 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -103,6 +104,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.RsvSignature;
@@ -245,6 +247,29 @@ public final class DataToolUtils {
         return (T) object;
     }
 
+    /**
+     * deserialize a JSON String to List.
+     *
+     * @return class instance
+     */
+    public static <T> List<T> deserializeToList(String json, Class<T> clazz) {
+        List<T> object = null;
+        try {
+            JavaType javaType = 
+                OBJECT_MAPPER.getTypeFactory()
+                    .constructParametricType(ArrayList.class, TypeFactory.rawClass(clazz));
+            object = OBJECT_MAPPER.readValue(json, javaType);
+        } catch (JsonParseException e) {
+            logger.error("JsonParseException when serialize object to json", e);
+            throw new DataTypeCastException(e);
+        } catch (JsonMappingException e) {
+            logger.error("JsonMappingException when serialize object to json", e);
+            new DataTypeCastException(e);
+        } catch (IOException e) {
+            logger.error("IOException when serialize object to json", e);
+        }
+        return object;
+    }
 
     /**
      * Object to Json String.

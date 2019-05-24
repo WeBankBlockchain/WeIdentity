@@ -65,10 +65,10 @@ public class TestCredentialUtils {
         arg.setCptId(14356);
         arg.setIssuer("gdsgshher");
         arg.setExpirationDate(Long.valueOf(System.currentTimeMillis()));
-        arg.setIssuranceDate(Long.valueOf(System.currentTimeMillis()));
+        arg.setIssuanceDate(Long.valueOf(System.currentTimeMillis()));
         Assert.assertNotEquals(CredentialUtils.isCredentialValid(arg), ErrorCode.SUCCESS);
         arg.setExpirationDate(Long.valueOf(System.currentTimeMillis()) + new Long(1000));
-        arg.setIssuranceDate(Long.valueOf(System.currentTimeMillis()));
+        arg.setIssuanceDate(Long.valueOf(System.currentTimeMillis()));
         Assert.assertNotEquals(CredentialUtils.isCredentialValid(arg), ErrorCode.SUCCESS);
         LinkedHashMap<String, Object> claim = new LinkedHashMap<>();
         claim.put("sfsfs", "sfsfs");
@@ -76,7 +76,7 @@ public class TestCredentialUtils {
         arg.setClaim(claim);
         Map<String, String> proof = new HashMap<>();
         proof.put(ParamKeyConstant.PROOF_CREATOR, arg.getIssuer());
-        proof.put(ParamKeyConstant.PROOF_CREATED, arg.getIssuranceDate().toString());
+        proof.put(ParamKeyConstant.PROOF_CREATED, arg.getIssuanceDate().toString());
         proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
         proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, "xxxxxxxxxxx");
         arg.setProof(proof);

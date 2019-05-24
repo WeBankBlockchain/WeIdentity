@@ -156,7 +156,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
     @Test
     public void testVerifyEvidenceCase8() {
         Credential credential = copyCredential(evidenceCredential);
-        credential.setIssuranceDate(System.currentTimeMillis());
+        credential.setIssuanceDate(System.currentTimeMillis());
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase8 result :" + responseData);
