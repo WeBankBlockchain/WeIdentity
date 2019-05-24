@@ -31,7 +31,5 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class ClaimPolicy extends Version {
 
-    private Integer cptId;
-
     private String fieldsToBeDisclosed;
 }
