@@ -44,7 +44,7 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
         types.add("type2");
         presentation.setType(types);
         
-        Map<String, String> proof = new HashMap<String, String>();
+        Map<String, Object> proof = new HashMap<String, Object>();
         proof.put("key1", "value1");
         proof.put("key2", "value2");
         presentation.setProof(proof);

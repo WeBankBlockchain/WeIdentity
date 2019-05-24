@@ -226,36 +226,36 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /**
-     * case: issuranceDate < = 0.
+     * case: IssuanceDate < = 0.
      */
     @Test
     public void testVerifyCredentialCase13() {
 
-        Long issuranceDate = credential.getIssuranceDate();
-        credential.setIssuranceDate(-1L);
+        Long issuanceDate = credential.getIssuanceDate();
+        credential.setIssuanceDate(-1L);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
         LogUtil.info(logger, "verifyCredential", response);
 
-        credential.setIssuranceDate(issuranceDate);
+        credential.setIssuanceDate(issuanceDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
     /**
-     * case: issuranceDate > now.
+     * case: IssuanceDate > now.
      */
     @Test
     public void testVerifyCredentialCase14() {
 
-        Long issuranceDate = credential.getIssuranceDate();
-        credential.setIssuranceDate(System.currentTimeMillis() + 100000);
+        Long issuanceDate = credential.getIssuanceDate();
+        credential.setIssuanceDate(System.currentTimeMillis() + 100000);
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
         LogUtil.info(logger, "verifyCredential", response);
 
-        credential.setIssuranceDate(issuranceDate);
+        credential.setIssuanceDate(issuanceDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -313,17 +313,17 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /**
-     * case: issuranceDate is null.
+     * case: IssuanceDate is null.
      */
     @Test
     public void testVerifyCredentialCase18() {
 
-        Long issuranceDate = credential.getIssuranceDate();
-        credential.setIssuranceDate(null);
+        Long issuanceDate = credential.getIssuanceDate();
+        credential.setIssuanceDate(null);
         ResponseData<Boolean> response = super.verifyCredential(credential);
         LogUtil.info(logger, "verifyCredential", response);
 
-        credential.setIssuranceDate(issuranceDate);
+        credential.setIssuanceDate(issuanceDate);
         Assert.assertEquals(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
@@ -475,17 +475,17 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /**
-     * case: issuranceDate < now && expirationDate < now  && issuranceDate < expirationDate.
+     * case: IssuanceDate < now && expirationDate < now  && IssuanceDate < expirationDate.
      */
     @Test
     public void testVerifyCredentialCase27() {
 
-        Long issuranceDate = credential.getIssuranceDate();
+        Long issuanceDate = credential.getIssuanceDate();
         Long expirationDate = credential.getExpirationDate();
-        credential.setIssuranceDate(System.currentTimeMillis() - 12000);
+        credential.setIssuanceDate(System.currentTimeMillis() - 12000);
         credential.setExpirationDate(System.currentTimeMillis() - 10000);
         ResponseData<Boolean> response = super.verifyCredential(credential);
-        credential.setIssuranceDate(issuranceDate);
+        credential.setIssuanceDate(issuanceDate);
         credential.setExpirationDate(expirationDate);
         LogUtil.info(logger, "verifyCredential", response);
 

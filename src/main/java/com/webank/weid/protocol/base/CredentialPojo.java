@@ -19,13 +19,15 @@
 
 package com.webank.weid.protocol.base;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
-import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.protocol.inf.IProof;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -34,7 +36,7 @@ import com.webank.weid.util.DataToolUtils;
  * @author junqizhang 2019.04
  */
 @Data
-public class CredentialPojo {
+public class CredentialPojo implements IProof {
 
     /**
      * Required: The context field.
@@ -59,7 +61,7 @@ public class CredentialPojo {
     /**
      * Required: The create date.
      */
-    private Long issuranceDate;
+    private Long issuanceDate;
 
     /**
      * Required: The expire date.
@@ -74,7 +76,23 @@ public class CredentialPojo {
     /**
      * Required: The credential proof data.
      */
-    private Map<String, String> proof;
+    private Map<String, Object> proof;
+    
+    /**
+     * Required: The credential type default is VerifiableCredential.
+     */
+    private List<String> type;
+    
+    /**
+     * 添加type.
+     * @param typeValue the typeValue
+     */
+    public void addType(String typeValue) {
+        if (type == null) {
+            type = new ArrayList<String>();
+        }
+        type.add(typeValue);
+    }
 
     /**
      * Directly extract the signature value from credential.
@@ -82,7 +100,7 @@ public class CredentialPojo {
      * @return signature value
      */
     public String getSignature() {
-        return getValueFromProof(ParamKeyConstant.CREDENTIAL_SIGNATURE);
+        return getValueFromProof(proof, ParamKeyConstant.PROOF_SIGNATURE).toString();
     }
 
     /**
@@ -91,7 +109,7 @@ public class CredentialPojo {
      * @return proof type
      */
     public String getProofType() {
-        return getValueFromProof(ParamKeyConstant.PROOF_TYPE);
+        return getValueFromProof(proof, ParamKeyConstant.PROOF_TYPE).toString();
     }
     
     /**
@@ -100,7 +118,7 @@ public class CredentialPojo {
      * @return salt
      */
     public Map<String, Object> getSalt() {
-        String salt = getValueFromProof(ParamKeyConstant.PROOF_SALT);
+        String salt = getValueFromProof(proof, ParamKeyConstant.PROOF_SALT).toString();
         return DataToolUtils.deserialize(salt, new HashMap<String, Object>().getClass());
     }
     
@@ -108,13 +126,18 @@ public class CredentialPojo {
      * put the salt into proof.
      */
     public void setSalt(Map<String, Object> salt) {
-        proof.put(ParamKeyConstant.PROOF_SALT, DataToolUtils.serialize(salt));
+        putProofValue(ParamKeyConstant.PROOF_SALT, DataToolUtils.serialize(salt));
     }
 
-    private String getValueFromProof(String key) {
-        if (proof != null) {
-            return proof.get(key);
+    /**
+     *  put the key-value into proof.
+     * @param key the key of proof
+     * @param value the value of proof
+     */
+    public void putProofValue(String key, Object value) {
+        if (proof == null) {
+            proof = new HashMap<>(); 
         }
-        return StringUtils.EMPTY;
+        proof.put(key, value);
     }
 }

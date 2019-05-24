@@ -60,10 +60,10 @@ public class TestGetCredentialHash extends TestBaseServcie {
         credential.setExpirationDate(System.currentTimeMillis() + 1000L);
         credential.setId(UUID.randomUUID().toString());
         credential.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
-        credential.setIssuranceDate(System.currentTimeMillis());
+        credential.setIssuanceDate(System.currentTimeMillis());
         Map<String, String> proof = new HashMap<>();
         proof.put(ParamKeyConstant.PROOF_CREATOR, credential.getIssuer());
-        proof.put(ParamKeyConstant.PROOF_CREATED, credential.getIssuranceDate().toString());
+        proof.put(ParamKeyConstant.PROOF_CREATED, credential.getIssuanceDate().toString());
         proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
         proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, "xxxxxxxxxxx");
         credential.setProof(proof);
