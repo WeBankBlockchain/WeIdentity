@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -17,19 +17,31 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.base;
+package com.webank.weid.protocol.inf;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * The base data structure to handle Credential info.
+ * proof接口.
+ * 
+ * @author v_wbgyang
  *
- * @author junqizhang 2019.04
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
-
-    private String fieldsToBeDisclosed;
+public interface IProof {
+    
+    /**
+     * 从proof中获取key对应value.
+     * @param proof proofMap数据
+     * @param key 要获取的数据的key
+     * @return 返回key的数据
+     */
+    public default Object getValueFromProof(Map<String, Object> proof, String key) {
+        if (proof != null) {
+            Object value = proof.get(key);
+            return value != null ? value : StringUtils.EMPTY;
+        }
+        return StringUtils.EMPTY;
+    }
 }

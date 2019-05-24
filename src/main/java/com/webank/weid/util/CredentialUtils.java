@@ -85,7 +85,7 @@ public final class CredentialUtils {
         String privateKey,
         Map<String, Object> disclosureMap) {
         Map<String, String> proof = new HashMap<>();
-        proof.put(ParamKeyConstant.PROOF_CREATED, credential.getIssuranceDate().toString());
+        proof.put(ParamKeyConstant.PROOF_CREATED, credential.getIssuanceDate().toString());
         proof.put(ParamKeyConstant.PROOF_CREATOR, credential.getIssuer());
         proof.put(ParamKeyConstant.PROOF_TYPE, getDefaultCredentialProofType());
         proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE,
@@ -118,7 +118,7 @@ public final class CredentialUtils {
             .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
         ct.setClaim(claim);
 
-        ct.setIssuranceDate(credential.getIssuranceDate());
+        ct.setIssuanceDate(credential.getIssuanceDate());
         ct.setCptId(credential.getCptId());
         ct.setExpirationDate(credential.getExpirationDate());
         ct.setIssuer(credential.getIssuer());
@@ -365,11 +365,11 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(context)) {
             return ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS;
         }
-        Long issuranceDate = args.getIssuranceDate();
-        if (issuranceDate == null) {
+        Long issuanceDate = args.getIssuanceDate();
+        if (issuanceDate == null) {
             return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
         }
-        if (issuranceDate.longValue() > args.getExpirationDate().longValue()) {
+        if (issuanceDate.longValue() > args.getExpirationDate().longValue()) {
             return ErrorCode.CREDENTIAL_EXPIRED;
         }
         Map<String, String> proof = args.getProof();

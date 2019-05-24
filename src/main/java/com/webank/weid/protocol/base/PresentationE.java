@@ -20,14 +20,15 @@
 package com.webank.weid.protocol.base;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.protocol.inf.IProof;
 import com.webank.weid.protocol.inf.RawSerializer;
 
 /**
@@ -35,7 +36,7 @@ import com.webank.weid.protocol.inf.RawSerializer;
  */
 @Data
 @EqualsAndHashCode
-public class PresentationE implements RawSerializer {
+public class PresentationE implements RawSerializer, IProof {
 
     /**
      * Required: The context field.
@@ -46,22 +47,14 @@ public class PresentationE implements RawSerializer {
 
     private List<CredentialPojo> verifiableCredential;
 
-    private Map<String, String> proof;
+    private Map<String, Object> proof;
 
     /**
      * 获取公钥Id，用于验证的时候识别publicKey.
      * @return
      */
     public String getVerificationMethod() {
-        return getValueFromProof(ParamKeyConstant.VERIFICATION_METHOD);
-    }
-    
-    /**
-     * 获取签名值Signature.
-     * @return 返回签名字符串Signature.
-     */
-    public String getSignature() {
-        return getValueFromProof(ParamKeyConstant.PRESENTATION_SIGNATURE);
+        return getValueFromProof(proof, ParamKeyConstant.PROOF_VERIFICATION_METHOD).toString();
     }
     
     /**
@@ -69,13 +62,26 @@ public class PresentationE implements RawSerializer {
      * @return 返回challenge随机值.
      */
     public String getNonce() {
-        return getValueFromProof(ParamKeyConstant.NONCE);
+        return getValueFromProof(proof, ParamKeyConstant.PROOF_NONCE).toString();
+    }
+
+    /**
+     * 获取签名值Signature.
+     * @return 返回签名字符串Signature.
+     */
+    public String getSignature() {
+        return getValueFromProof(proof, ParamKeyConstant.PROOF_SIGNATURE).toString();
     }
     
-    private String getValueFromProof(String key) {
-        if (proof != null) {
-            return proof.get(key);
+    /**
+     * 向proof中添加key-value.
+     * @param key proof中的 key
+     * @param value proof中key的value
+     */
+    public void putProofValue(String key, Object value) {
+        if (proof == null) {
+            proof = new HashMap<>();
         }
-        return StringUtils.EMPTY; 
+        proof.put(key, value);
     }
 }
