@@ -182,8 +182,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             result.setId(UUID.randomUUID().toString());
             result.setCptId(args.getCptId());
             result.setIssuer(args.getIssuer());
-            result.setIssuranceDate(DateUtils.getCurrentTimeStamp());
+            result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
             result.setExpirationDate(args.getExpirationDate());
+            result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
             String className = "Cpt" + args.getCptId();
             Object claimObject = args.getClaim();
             if (!StringUtils.equals(className, claimObject.getClass().getSimpleName())) {
@@ -204,13 +205,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             String signature = DataToolUtils.sign(rawData, privateKey);
 
-            Map<String, String> proof = new HashMap<>();
-            proof.put(ParamKeyConstant.PROOF_CREATED, result.getIssuranceDate().toString());
-            proof.put(ParamKeyConstant.PROOF_CREATOR,
-                args.getWeIdAuthentication().getWeIdPublicKeyId());
-            proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
-            proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, signature);
-            result.setProof(proof);
+            result.putProofValue(ParamKeyConstant.PROOF_CREATED, result.getIssuanceDate());
+            
+            String weIdPublicKeyId = args.getWeIdAuthentication().getWeIdPublicKeyId();
+            result.putProofValue(ParamKeyConstant.PROOF_CREATOR, weIdPublicKeyId);
+            
+            String  proofType = CredentialProofType.ECDSA.getTypeName();
+            result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
+            result.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
             result.setSalt(saltMap);
 
             ResponseData<CredentialPojo> responseData = new ResponseData<>(
@@ -340,7 +342,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
         String signature = presentationE.getSignature();
         //remove signatureValue
-        presentationE.getProof().remove(ParamKeyConstant.PRESENTATION_SIGNATURE);
+        presentationE.getProof().remove(ParamKeyConstant.PROOF_SIGNATURE);
         ErrorCode errorCode1 =
             DataToolUtils
                 .verifySignatureFromWeId(presentationE.toRawData(), signature, weIdDocument);
@@ -597,17 +599,20 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         WeIdAuthentication weIdAuthentication,
         PresentationE presentation) {
 
-        Map<String, String> proof = new HashMap<String, String>();
-        proof.put(ParamKeyConstant.PROOF_TYPE, CredentialProofType.ECDSA.getTypeName());
-        proof.put(ParamKeyConstant.PROOF_CREATED, DateUtils.getTimestamp(new Date()));
-        proof.put(ParamKeyConstant.VERIFICATION_METHOD, weIdAuthentication.getWeIdPublicKeyId());
-        proof.put(ParamKeyConstant.NONCE, challenge.getNonce());
-        presentation.setProof(proof);
+        String proofType = CredentialProofType.ECDSA.getTypeName();
+        presentation.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
+        
+        Long proofCreated = DateUtils.getCurrentTimeStamp();
+        presentation.putProofValue(ParamKeyConstant.PROOF_CREATED, proofCreated);
+        
+        String weIdPublicKeyId = weIdAuthentication.getWeIdPublicKeyId();
+        presentation.putProofValue(ParamKeyConstant.PROOF_VERIFICATION_METHOD, weIdPublicKeyId);
+        presentation.putProofValue(ParamKeyConstant.PROOF_NONCE, challenge.getNonce());
         String signature = 
             DataToolUtils.sign(
                 presentation.toRawData(), 
                 weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
             );
-        proof.put(ParamKeyConstant.PRESENTATION_SIGNATURE, signature);
+        presentation.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
     }
 }
