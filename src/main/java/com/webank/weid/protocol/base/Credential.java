@@ -57,7 +57,7 @@ public class Credential {
     /**
      * Required: The create date.
      */
-    private Long issuranceDate;
+    private Long issuanceDate;
 
     /**
      * Required: The expire date.
