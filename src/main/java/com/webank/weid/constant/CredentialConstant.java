@@ -42,6 +42,16 @@ public final class CredentialConstant {
      * The Constant default Credential type.
      */
     public static final String DEFAULT_CREDENTIAL_TYPE = "VerifiableCredential";
+    
+    /**
+     * The Constant is an field in PresentationPolicyE.
+     */
+    public static final String CLAIM_POLICY_FIELD = "policy";
+    
+    /**
+     * The Constant is an field in claimPolicy.
+     */
+    public static final String CLAIM_POLICY_DISCLOSED_FIELD = "fieldsToBeDisclosed";
 
     /**
      * The Credential Proof Type Enumerate.
