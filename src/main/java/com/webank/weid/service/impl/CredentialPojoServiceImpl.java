@@ -3,7 +3,6 @@ package com.webank.weid.service.impl;
 import java.math.BigInteger;
 import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,15 +184,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
             result.setExpirationDate(args.getExpirationDate());
             result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
-            String className = "Cpt" + args.getCptId();
             Object claimObject = args.getClaim();
-            if (!StringUtils.equals(className, claimObject.getClass().getSimpleName())) {
-                logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
-                return new ResponseData<CredentialPojo>(null,
-                    ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL);
+            String claimStr = null;
+            if (!(claimObject instanceof String)) {
+                claimStr = DataToolUtils.serialize(claimObject); 
+            } else {
+                claimStr = (String)claimObject;
             }
-
-            String claimStr = DataToolUtils.serialize(args.getClaim());
+            
             HashMap<String, Object> claimMap = DataToolUtils.deserialize(claimStr, HashMap.class);
             result.setClaim(claimMap);
 
