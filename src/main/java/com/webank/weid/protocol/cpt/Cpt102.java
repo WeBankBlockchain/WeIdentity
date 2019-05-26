@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -19,11 +19,14 @@
 
 package com.webank.weid.protocol.cpt;
 
+import lombok.Data;
+
 /**
  * Credential for Challenge.
  * 
  * @author Created by Junqi Zhang on 2019/4/9.
  */
+@Data
 public class Cpt102 {
 
 }

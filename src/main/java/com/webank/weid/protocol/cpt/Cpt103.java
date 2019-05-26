@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2019) WeBank Co., Ltd.
  *
  *       This file is part of weidentity-java-sdk.
  *
@@ -19,6 +19,9 @@
 
 package com.webank.weid.protocol.cpt;
 
+import com.github.reinert.jjschema.Attributes;
+import lombok.Data;
+
 import com.webank.weid.protocol.base.Challenge;
 
 /**
@@ -27,9 +30,12 @@ import com.webank.weid.protocol.base.Challenge;
  *
  * @author Created by Junqi Zhang on 2019/4/9.
  */
+@Data
+@Attributes(title = "Authentication Answer", description = "Answer to meet the challenge")
 public class Cpt103 {
 
+    @Attributes(required = true, description = "The challenge")
     private Challenge challenge;
-
+    @Attributes(required = true, description = "The proof")
     private String proof;
 }

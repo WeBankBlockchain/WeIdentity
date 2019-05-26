@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -75,6 +76,7 @@ import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import com.github.reinert.jjschema.v1.JsonSchemaV4Factory;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -100,6 +102,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
@@ -253,7 +256,7 @@ public final class DataToolUtils {
     public static <T> List<T> deserializeToList(String json, Class<T> clazz) {
         List<T> object = null;
         try {
-            JavaType javaType = 
+            JavaType javaType =
                 OBJECT_MAPPER.getTypeFactory()
                     .constructParametricType(ArrayList.class, TypeFactory.rawClass(clazz));
             object = OBJECT_MAPPER.readValue(json, javaType);
@@ -1178,4 +1181,62 @@ public final class DataToolUtils {
         return longArray;
     }
 
+    /**
+     * Generate Default CPT Json Schema based on a given CPT ID.
+     *
+     * @param cptId the CPT ID
+     * @return CPT Schema in Json String
+     */
+    public static String generateDefaultCptJsonSchema(Integer cptId) {
+        String cptClassStr = "com.webank.weid.protocol.cpt.Cpt" + cptId;
+        try {
+            return generateDefaultCptJsonSchema(Class.forName(cptClassStr));
+        } catch (Exception e) {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    /**
+     * Generate Default CPT Json Schema based on a given class, to support external invocation.
+     *
+     * @param myClass the CPT ID
+     * @return CPT Schema in Json String
+     */
+    public static String generateDefaultCptJsonSchema(Class myClass) {
+        try {
+            com.github.reinert.jjschema.v1.JsonSchemaFactory schemaFactory
+                = new JsonSchemaV4Factory();
+            schemaFactory.setAutoPutDollarSchema(true);
+            JsonNode cptSchema = schemaFactory.createSchema(myClass);
+            return DataToolUtils.objToJsonStrWithNoPretty(cptSchema);
+        } catch (Exception e) {
+            return StringUtils.EMPTY;
+        }
+    }
+
+    /**
+     * Generate unformatted CPT which allows any format, to support external invocation.
+     *
+     * @return CPT Schema in Json String
+     */
+    public static String generateUnformattedCptJsonSchema() {
+        List<Map<String, String>> anyStringList = new ArrayList<>();
+        Map<String, String> stringMap = new HashMap<>();
+        stringMap.put("type", "string");
+        anyStringList.add(stringMap);
+        Map<String, String> nullMap = new HashMap<>();
+        nullMap.put("type", "null");
+        anyStringList.add(nullMap);
+        Map<String, Object> anyMap = new LinkedHashMap<>();
+        anyMap.put("anyOf", anyStringList);
+        Map<String, Object> patternMap = new LinkedHashMap<>();
+        patternMap.put("^.*$", anyMap);
+        Map<String, Object> cptSchemaMap = new LinkedHashMap<>();
+        cptSchemaMap.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
+        cptSchemaMap.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
+        cptSchemaMap.put("title", "Unformatted CPT");
+        cptSchemaMap.put("description", "Universal unformatted CPT template");
+        cptSchemaMap.put("patternProperties", patternMap);
+        return DataToolUtils.objToJsonStrWithNoPretty(cptSchemaMap);
+    }
 }
