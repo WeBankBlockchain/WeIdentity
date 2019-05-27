@@ -1,18 +1,20 @@
 /*
- * Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- * This file is part of weidentity-java-sdk.
+ *       This file is part of weidentity-java-sdk.
  *
- * weidentity-java-sdk is free software: you can redistribute it and/or modify it under the terms of
- * the GNU Lesser General Public License as published by the Free Software Foundation, either
- * version 3 of the License, or (at your option) any later version.
+ *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
  *
- * weidentity-java-sdk is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
+ *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Lesser General Public License along with
- * weidentity-java-sdk. If not, see <https://www.gnu.org/licenses/>.
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.protocol.base;
@@ -76,20 +78,20 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
     }
 
     /**
-     * create the PresentationPolicyE with policyId, please make sure the JSON file in your 
-     * classPath and the name with the policyId.
+     * create the PresentationPolicyE with policyFileName, 
+     * please make sure the JSON file in your classPath.
      * 
-     * @param policyId the policyId
+     * @param policyFileName the policyFileName
      * @return the PresentationPolicyE
      */
     @SuppressWarnings("unchecked")
-    public static PresentationPolicyE create(String policyId) {
+    public static PresentationPolicyE create(String policyFileName) {
         PresentationPolicyE policy = null;
         try {
             //获取policyJson文件 转换成JsonNode
-            JsonNode jsonNode = JsonLoader.fromResource("/" + policyId + ".json");
+            JsonNode jsonNode = JsonLoader.fromResource("/" + policyFileName);
             if (jsonNode == null) {
-                logger.error("can not find the {}.json file in your classpath.", policyId);
+                logger.error("can not find the {} file in your classpath.", policyFileName);
                 return policy;
             }
             //将Json转换成Map
