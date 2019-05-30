@@ -5340,7 +5340,7 @@ com.webank.weid.protocol.base.PresentationPolicyE
      - Y
      - 版本
      -  
-   * - weId
+   * - policyPublisherWeId
      - String
      - Y
      - WeIdentity DID
@@ -5539,7 +5539,7 @@ com.webank.weid.protocol.base.PresentationPolicyE
      - Y
      - 版本
      -  
-   * - weId
+   * - policyPublisherWeId
      - String
      - Y
      - WeIdentity DID
