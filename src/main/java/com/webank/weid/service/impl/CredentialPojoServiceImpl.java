@@ -51,19 +51,49 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
 
     private static WeIdService weIdService = new WeIdServiceImpl();
-
-    private static void generateSalt(Map<String, Object> map) {
+    
+    /**
+     * 验证生成器.
+     * @param map 传入的Map
+     */
+    public static void generateSalt(Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             Object value = entry.getValue();
             if (value instanceof Map) {
-                generateSalt((HashMap) value);
+                generateSalt((HashMap)value);
+            } else if (value instanceof List) {
+                boolean isMapOrList = generateSaltFromList((ArrayList<Object>)value);
+                if (!isMapOrList) {
+                    addSalt(entry);
+                }
             } else {
-                String salt = DataToolUtils.getRandomSalt();
-                entry.setValue(salt);
+                addSalt(entry);
             }
         }
     }
-
+    
+    private static void addSalt(Map.Entry<String, Object> entry) {
+        String salt = DataToolUtils.getRandomSalt();
+        entry.setValue(salt);
+    }
+    
+    private static boolean generateSaltFromList(List<Object> objList) {
+        List<Object> list = (List<Object>)objList;
+        for (Object obj : list) {
+            if (obj instanceof Map) {
+                generateSalt((HashMap)obj);
+            } else if (obj instanceof List) {
+                boolean result = generateSaltFromList((ArrayList<Object>)obj);
+                if (!result) {
+                    return result;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * 校验claim、salt和disclosureMap的格式是否一致.
      */
@@ -85,53 +115,207 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
 
         //检查key值是否一致
-        for (Map.Entry<String, Object> entry : claim.entrySet()) {
+        for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
             String k = entry.getKey();
             Object v = entry.getValue();
             Object saltV = salt.get(k);
-            Object disclosureV = disclosureMap.get(k);
+            Object claimV = claim.get(k);
             if (!salt.containsKey(k) || !disclosureMap.containsKey(k)) {
                 return false;
             }
             if (v instanceof Map) {
                 //递归检查
-                if (!validCredentialMapArgs((HashMap) v, (HashMap) saltV, (HashMap) disclosureV)) {
+                if (!validCredentialMapArgs((HashMap)claimV, (HashMap)saltV, (HashMap)v)) {
+                    return false;
+                }
+            } else if (v instanceof List) {
+                if (!validCredentialListArgs(
+                        (ArrayList<Object>)claimV,
+                        (ArrayList<Object>)saltV,
+                        (ArrayList<Object>)v
+                    )) {
                     return false;
                 }
             }
         }
         return true;
     }
+    
+    private static boolean validCredentialListArgs(
+        List<Object> claimList,
+        List<Object> saltList, 
+        List<Object> disclosureList) {
+        //检查是否为空
+        if (claimList == null || saltList == null || disclosureList == null) {
+            return false;
+        }
+        if (claimList.size() != saltList.size()) {
+            return false;
+        }
+        for (int i = 0; i < disclosureList.size(); i++) {
+            Object disclosureObj = disclosureList.get(i);
+            Object claimObj = claimList.get(i);
+            Object saltObj = saltList.get(i);
+            if (disclosureObj instanceof Map) {
+                boolean result = 
+                    validCredentialListArgs(
+                        claimList,
+                        saltList,
+                        (HashMap)disclosureObj
+                    );
+                if (!result) {
+                    return result;
+                }
+            } else if (disclosureObj instanceof List) {
+                boolean result = 
+                    validCredentialListArgs(
+                        (ArrayList<Object>)claimObj,
+                        (ArrayList<Object>)saltObj,
+                        (ArrayList<Object>)disclosureObj
+                    );
+                if (!result) {
+                    return result;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean validCredentialListArgs(
+        List<Object> claimList,
+        List<Object> saltList, 
+        Map<String, Object> disclosure
+    ) {
+        
+        if (claimList == null || saltList == null || saltList.size() != claimList.size()) {
+            return false;
+        }
+        
+        for (int i = 0; i < claimList.size(); i++) {
+            Object claim = claimList.get(i);
+            Object salt = saltList.get(i);
+            if (claim instanceof Map) {
+                boolean result = validCredentialMapArgs((HashMap)claim, (HashMap)salt, disclosure);
+                if (!result) {
+                    return result;
+                }
+            }
+        } 
+        return true;
+    }
 
     private static void addSelectSalt(
         Map<String, Object> disclosureMap,
         Map<String, Object> saltMap,
-        Map<String, Object> claim) {
+        Map<String, Object> claim
+    ) {
         for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
-            String claimKey = entry.getKey();
+            String disclosureKey = entry.getKey();
             Object value = entry.getValue();
-            Object saltV = saltMap.get(claimKey);
-            Object claimV = claim.get(claimKey);
-
+            Object saltV = saltMap.get(disclosureKey);
+            Object claimV = claim.get(disclosureKey);
             if (value instanceof Map) {
                 addSelectSalt((HashMap) value, (HashMap) saltV, (HashMap) claimV);
-            } else {
-                if (((Integer) value)
-                    .equals(CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus())) {
-                    saltMap.put(claimKey, CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus());
-                    String hash = CredentialPojoUtils
-                        .getFieldSaltHash(String.valueOf(claimV), String.valueOf(saltV));
-                    claim.put(claimKey, hash);
+            } else if (value instanceof List) { 
+                boolean isSalt = 
+                    addSaltForList(
+                        (ArrayList<Object>)value,
+                        (ArrayList<Object>)saltV,
+                        (ArrayList<Object>)claimV
+                    );
+                if (!isSalt) {
+                    addHashToClaim(saltMap, claim, disclosureKey, value, saltV, claimV);
                 }
+            } else {
+                addHashToClaim(saltMap, claim, disclosureKey, value, saltV, claimV);
             }
         }
     }
 
+    private static void addHashToClaim(
+        Map<String, Object> saltMap,
+        Map<String, Object> claim,
+        String disclosureKey,
+        Object value,
+        Object saltV,
+        Object claimV
+    ) {
+        if (((Integer) value)
+                .equals(CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus())) {
+            saltMap.put(
+                disclosureKey,
+                CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus()
+            );
+            String hash = 
+                CredentialPojoUtils.getFieldSaltHash(
+                    String.valueOf(claimV),
+                    String.valueOf(saltV)
+                );
+            claim.put(disclosureKey, hash);
+        }
+    }
+
+    private static boolean addSaltForList(List<Object> disclosures, List<Object> salt,
+            List<Object> claim) {
+        for (int i = 0; claim != null && i < disclosures.size(); i++) {
+            Object disclosureObj = disclosures.get(i);
+            Object claimObj = claim.get(i);
+            Object saltObj = salt.get(i);
+            if (disclosureObj instanceof Map) {
+                boolean result = addSaltForList((HashMap) disclosureObj, salt, claim);
+                if (!result) {
+                    return result;
+                }
+            } else if (disclosureObj instanceof List) {
+                boolean result = 
+                    addSaltForList(
+                        (ArrayList<Object>) disclosureObj,
+                        (ArrayList<Object>) saltObj,
+                        (ArrayList<Object>) claimObj
+                    );
+                if (!result) {
+                    return result;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private static boolean addSaltForList(
+        Map<String, Object> disclosures,
+        List<Object> salt,
+        List<Object> claim
+    ) {
+        for (int i = 0; claim != null && i < claim.size(); i++) {
+            Object claimObj = claim.get(i);
+            Object saltObj = salt.get(i);
+            if (claimObj instanceof Map) {
+                addSelectSalt(disclosures, (HashMap)saltObj, (HashMap)claimObj);
+            } else if (claimObj instanceof List) {
+                boolean result = 
+                    addSaltForList(
+                        disclosures,
+                        (ArrayList<Object>)saltObj,
+                        (ArrayList<Object>)claimObj
+                    );
+                if (!result) {
+                    return result;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     private static ErrorCode verifyContent(CredentialPojo credential,
         String publicKey) {
         Map<String, Object> salt = credential.getSalt();
         String rawData = CredentialPojoUtils
             .getCredentialThumbprintWithoutSig(credential, salt, null);
+        System.err.println(rawData);
         String issuerWeid = credential.getIssuer();
         if (StringUtils.isEmpty(publicKey)) {
             // Fetch public key from chain
@@ -199,6 +383,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             generateSalt(saltMap);
             String rawData = CredentialPojoUtils
                 .getCredentialThumbprintWithoutSig(result, saltMap, null);
+            System.err.println(rawData);
             String privateKey = args.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey();
 
             String signature = DataToolUtils.sign(rawData, privateKey);
@@ -220,6 +405,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             return responseData;
         } catch (Exception e) {
+            e.printStackTrace();
             logger.error("Generate Credential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }
@@ -430,7 +616,16 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             Object disclosureV = disclosureMap.get(disclosureK);
             Object saltV = saltMap.get(disclosureK);
             if (disclosureV instanceof Map) {
-                this.verifyDisclosureAndSalt((HashMap) disclosureV, (HashMap) saltV);
+                ErrorCode code = verifyDisclosureAndSalt((HashMap)disclosureV, (HashMap)saltV);
+                if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    return code;
+                }
+            } else if (disclosureV instanceof List) { 
+                ArrayList<Object> disclosurs = (ArrayList<Object>) disclosureV;
+                ErrorCode code = verifyDisclosureAndSaltList(disclosurs, (ArrayList<Object>)saltV);
+                if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    return code;
+                }
             } else {
                 if (!disclosureV.equals(
                     CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus())
@@ -465,7 +660,62 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return ErrorCode.SUCCESS;
     }
-
+    
+    private ErrorCode verifyDisclosureAndSaltList(
+        List<Object> disclosureList,
+        List<Object> saltList
+    ) {
+        for (int i = 0; i < disclosureList.size(); i++) {
+            Object disclosure = disclosureList.get(i);
+            Object saltV = saltList.get(i);
+            if (disclosure instanceof Map) {
+                ErrorCode code = 
+                    verifyDisclosureAndSaltList(
+                        (HashMap) disclosure,
+                        (ArrayList<Object>)saltList
+                    );
+                if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    return code;
+                }
+            } else if (disclosure instanceof List) {
+                ErrorCode code = 
+                    verifyDisclosureAndSaltList(
+                        (ArrayList<Object>)disclosure,
+                        (ArrayList<Object>)saltV
+                    );
+                if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    return code;
+                }
+            }
+        }
+        return ErrorCode.SUCCESS;
+    }
+    
+    private ErrorCode verifyDisclosureAndSaltList(
+        Map<String, Object> disclosure,
+        List<Object> saltList
+    ) {
+        for (int i = 0; i < saltList.size(); i++) {
+            Object saltV = saltList.get(i);
+            if (saltV instanceof Map) {
+                ErrorCode code = verifyDisclosureAndSalt((HashMap)disclosure, (HashMap) saltV);
+                if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    return code;
+                }
+            } else if (saltV instanceof List) {
+                ErrorCode code = 
+                    verifyDisclosureAndSaltList(
+                        disclosure,
+                        (ArrayList<Object>)saltV
+                    );
+                if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    return code;
+                }
+            }
+        }
+        return ErrorCode.SUCCESS;
+    }
+    
     private ErrorCode verifyPolicy(CredentialPojo credential, ClaimPolicy claimPolicy) {
         Map<String, Object> saltMap = credential.getSalt();
         String disclosure = claimPolicy.getFieldsToBeDisclosed();

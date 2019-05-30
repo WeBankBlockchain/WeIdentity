@@ -19,7 +19,9 @@
 
 package com.webank.weid.util;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -67,6 +69,7 @@ public final class CredentialPojoUtils {
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
+            e.printStackTrace();
             return StringUtils.EMPTY;
         }
     }
@@ -123,7 +126,7 @@ public final class CredentialPojoUtils {
         Map<String, Object> salt,
         Map<String, Object> disclosures
     ) {
-        for (Map.Entry<String, Object> entry : claim.entrySet()) {
+        for (Map.Entry<String, Object> entry : salt.entrySet()) {
             String key = entry.getKey();
             Object disclosureObj = null;
             if (disclosures != null) {
@@ -132,23 +135,90 @@ public final class CredentialPojoUtils {
             Object saltObj = salt.get(key);
             Object newClaimObj = claim.get(key);
 
-            if (newClaimObj instanceof Map) {
+            if (saltObj instanceof Map) {
                 addSaltAndGetHash(
                     (HashMap) newClaimObj,
                     (HashMap) saltObj,
                     (HashMap) disclosureObj
                 );
-            } else {
-                if (disclosureObj == null) {
-                    if (!CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().equals(saltObj)) {
-                        claim.put(
-                            key,
-                            getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj))
-                        );
-                    }
+            } else if (saltObj instanceof List) {
+                ArrayList<Object> disclosureObjList = null;
+                if (disclosureObj != null) {
+                    disclosureObjList = (ArrayList<Object>)disclosureObj;
                 }
+                boolean isMapOrList = 
+                    addSaltAndGetHashForList(
+                        (ArrayList<Object>)newClaimObj,
+                        (ArrayList<Object>)saltObj,
+                        disclosureObjList
+                    );
+                if (!isMapOrList) {
+                    addSaltByDisclose(claim, key, disclosureObj, saltObj, newClaimObj);
+                } 
+            } else {
+                addSaltByDisclose(claim, key, disclosureObj, saltObj, newClaimObj);
             }
         }
+    }
+
+    private static void addSaltByDisclose(
+        Map<String, Object> claim,
+        String key,
+        Object disclosureObj,
+        Object saltObj,
+        Object newClaimObj
+    ) {
+        if (disclosureObj == null) {
+            if (!CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().equals(saltObj)) {
+                claim.put(
+                    key,
+                    getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj))
+                );
+            }
+        } else if (CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().equals(disclosureObj)) {
+            claim.put(
+                key,
+                getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj))
+            );
+        }
+    }
+    
+    private static boolean addSaltAndGetHashForList(
+        List<Object> claim,
+        List<Object> salt,
+        List<Object> disclosures
+    ) {
+        for (int i = 0; claim != null && i < claim.size(); i++) {
+            Object obj = claim.get(i);
+            Object saltObj = salt.get(i);
+            if (obj instanceof Map) {
+                Object disclosureObj = null;
+                if (disclosures != null) {
+                    disclosureObj = disclosures.get(0);
+                }
+                addSaltAndGetHash((HashMap)obj, (HashMap)saltObj, (HashMap)disclosureObj);
+            } else if (obj instanceof List) {
+                ArrayList<Object> disclosureObjList = null;
+                if (disclosures != null) {
+                    Object disclosureObj = disclosures.get(i);
+                    if (disclosureObj != null) {
+                        disclosureObjList = (ArrayList<Object>)disclosureObj;
+                    }
+                }
+                boolean result = 
+                    addSaltAndGetHashForList(
+                        (ArrayList<Object>)obj,
+                        (ArrayList<Object>)saltObj,
+                        disclosureObjList
+                    );
+                if (!result) {
+                    return result;
+                }
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
