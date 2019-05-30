@@ -20,7 +20,6 @@
 package com.webank.weid.protocol.base;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 /**
  * The base data structure to handle Credential info.
@@ -28,8 +27,7 @@ import lombok.EqualsAndHashCode;
  * @author junqizhang 2019.04
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class ClaimPolicy extends Version {
+public class ClaimPolicy {
 
     private String fieldsToBeDisclosed;
 }

@@ -59,7 +59,7 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
     /**
      * represent who publish this presentation policy.
      */
-    private String weId;
+    private String policyPublisherWeId;
 
     /**
      * specify which properties in which credential are needed.
