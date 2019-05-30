@@ -32,7 +32,7 @@ public final class WeIdConstant {
      * The Constant WeIdentity DID Document Protocol Version.
      */
     public static final String WEID_DOC_PROTOCOL_VERSION =
-        "\"@context\" : \"https://w3id.org/did/v1\",";
+        "\"@context\" : \"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1\",";
 
     /**
      * The Constant GAS_PRICE.

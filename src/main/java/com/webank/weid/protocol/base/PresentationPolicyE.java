@@ -44,6 +44,11 @@ import com.webank.weid.util.DataToolUtils;
 @EqualsAndHashCode(callSuper = true)
 public class PresentationPolicyE extends Version implements JsonSerializer {
     
+    /**
+     * the serialVersionUID.
+     */
+    private static final long serialVersionUID = 3607089314849566766L;
+
     private static final Logger logger = LoggerFactory.getLogger(PresentationPolicyE.class);
 
     /**
@@ -84,7 +89,6 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
      * @param policyFileName the policyFileName
      * @return the PresentationPolicyE
      */
-    @SuppressWarnings("unchecked")
     public static PresentationPolicyE create(String policyFileName) {
         PresentationPolicyE policy = null;
         try {
@@ -94,9 +98,25 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
                 logger.error("can not find the {} file in your classpath.", policyFileName);
                 return policy;
             }
+            policy = createByJson(jsonNode.toString());
+        } catch (IOException e) {
+            logger.error("create PresentationPolicyE has error, please check the log.", e);
+        }
+        return policy;
+    }
+    
+    /**
+     * create the PresentationPolicyE with JSON String.
+     * 
+     * @param json the JSON String
+     * @return the PresentationPolicyE
+     */
+    public static PresentationPolicyE createByJson(String json) {
+        PresentationPolicyE policy = null;
+        try {
             //将Json转换成Map
             HashMap<String, Object> policyMap = 
-                DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
+                DataToolUtils.deserialize(json, HashMap.class);
             //获取policyJson中的policy 转换成Map
             HashMap<Integer, Object> claimMap = 
                 (HashMap<Integer, Object>)policyMap.get(CredentialConstant.CLAIM_POLICY_FIELD);
@@ -119,8 +139,8 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
             //重新序列化为policyJson
             String value = DataToolUtils.serialize(policyMap);
             //反序列化policyJson为PresentationPolicyE
-            policy = DataToolUtils.deserialize(value, PresentationPolicyE.class);
-        } catch (IOException e) {
+            return DataToolUtils.deserialize(value, PresentationPolicyE.class);
+        } catch (Exception e) {
             logger.error("create PresentationPolicyE has error, please check the log.", e);
         }
         return policy;
