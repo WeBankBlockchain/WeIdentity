@@ -36,6 +36,11 @@ import com.webank.weid.util.DataToolUtils;
 public class Challenge extends Version implements RawSerializer {
 
     /**
+     * the serialVersionUID.
+     */
+    private static final long serialVersionUID = 3783172794625195471L;
+
+    /**
      * Specify who you want to challenge.
      */
     private String weId;

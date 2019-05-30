@@ -28,6 +28,7 @@ import lombok.Data;
 
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.inf.IProof;
+import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -36,7 +37,12 @@ import com.webank.weid.util.DataToolUtils;
  * @author junqizhang 2019.04
  */
 @Data
-public class CredentialPojo implements IProof {
+public class CredentialPojo implements IProof, JsonSerializer {
+
+    /**
+     * the serialVersionUID.
+     */
+    private static final long serialVersionUID = 8197843857223846978L;
 
     /**
      * Required: The context field.
@@ -118,15 +124,14 @@ public class CredentialPojo implements IProof {
      * @return salt
      */
     public Map<String, Object> getSalt() {
-        String salt = getValueFromProof(proof, ParamKeyConstant.PROOF_SALT).toString();
-        return DataToolUtils.deserialize(salt, new HashMap<String, Object>().getClass());
+        return (Map<String, Object>)getValueFromProof(proof, ParamKeyConstant.PROOF_SALT);
     }
     
     /**
      * put the salt into proof.
      */
     public void setSalt(Map<String, Object> salt) {
-        putProofValue(ParamKeyConstant.PROOF_SALT, DataToolUtils.serialize(salt));
+        putProofValue(ParamKeyConstant.PROOF_SALT, salt);
     }
 
     /**
@@ -139,5 +144,9 @@ public class CredentialPojo implements IProof {
             proof = new HashMap<>(); 
         }
         proof.put(key, value);
+    }
+    
+    public static CredentialPojo create(String json) {
+        return DataToolUtils.deserialize(json, CredentialPojo.class);
     }
 }

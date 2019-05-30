@@ -31,7 +31,7 @@ public final class CredentialConstant {
      * The Constant default Credential Context.
      */
     public static final String DEFAULT_CREDENTIAL_CONTEXT =
-        "https://www.w3.org/2018/credentials/v1";
+        "https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1";
 
     /**
      * The Constant default Credential Context field name in Credential Json String.

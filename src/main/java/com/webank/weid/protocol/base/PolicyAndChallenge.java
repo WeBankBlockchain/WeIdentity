@@ -31,6 +31,11 @@ import com.webank.weid.protocol.inf.JsonSerializer;
 @Getter
 public class PolicyAndChallenge implements JsonSerializer {
 
+    /**
+     * the serialVersionUID.
+     */
+    private static final long serialVersionUID = -7730049255207201464L;
+
     private PresentationPolicyE presentationPolicyE;
 
     private Challenge challenge;

@@ -39,6 +39,11 @@ import com.webank.weid.protocol.inf.RawSerializer;
 public class PresentationE implements RawSerializer, IProof {
 
     /**
+     * the serialVersionUID.
+     */
+    private static final long serialVersionUID = -595605743843891841L;
+
+    /**
      * Required: The context field.
      */
     private List<String> context = new ArrayList<String>();
