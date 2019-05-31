@@ -194,11 +194,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         for (int i = 0; i < claimList.size(); i++) {
             Object claim = claimList.get(i);
             Object salt = saltList.get(i);
-            if (claim instanceof Map) {
-                boolean result = validCredentialMapArgs((HashMap)claim, (HashMap)salt, disclosure);
-                if (!result) {
-                    return result;
-                }
+            boolean result = validCredentialMapArgs((HashMap)claim, (HashMap)salt, disclosure);
+            if (!result) {
+                return result;
             }
         } 
         return true;
@@ -217,15 +215,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             if (value instanceof Map) {
                 addSelectSalt((HashMap) value, (HashMap) saltV, (HashMap) claimV);
             } else if (value instanceof List) { 
-                boolean isSalt = 
-                    addSaltForList(
-                        (ArrayList<Object>)value,
-                        (ArrayList<Object>)saltV,
-                        (ArrayList<Object>)claimV
-                    );
-                if (!isSalt) {
-                    addHashToClaim(saltMap, claim, disclosureKey, value, saltV, claimV);
-                }
+                addSaltForList(
+                    (ArrayList<Object>)value,
+                    (ArrayList<Object>)saltV,
+                    (ArrayList<Object>)claimV
+                );
             } else {
                 addHashToClaim(saltMap, claim, disclosureKey, value, saltV, claimV);
             }
@@ -255,35 +249,25 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
     }
 
-    private static boolean addSaltForList(List<Object> disclosures, List<Object> salt,
+    private static void addSaltForList(List<Object> disclosures, List<Object> salt,
             List<Object> claim) {
         for (int i = 0; claim != null && i < disclosures.size(); i++) {
             Object disclosureObj = disclosures.get(i);
             Object claimObj = claim.get(i);
             Object saltObj = salt.get(i);
             if (disclosureObj instanceof Map) {
-                boolean result = addSaltForList((HashMap) disclosureObj, salt, claim);
-                if (!result) {
-                    return result;
-                }
+                addSaltForList((HashMap) disclosureObj, salt, claim);
             } else if (disclosureObj instanceof List) {
-                boolean result = 
-                    addSaltForList(
-                        (ArrayList<Object>) disclosureObj,
-                        (ArrayList<Object>) saltObj,
-                        (ArrayList<Object>) claimObj
-                    );
-                if (!result) {
-                    return result;
-                }
-            } else {
-                return false;
+                addSaltForList(
+                    (ArrayList<Object>) disclosureObj,
+                    (ArrayList<Object>) saltObj,
+                    (ArrayList<Object>) claimObj
+                );
             }
         }
-        return true;
     }
     
-    private static boolean addSaltForList(
+    private static void addSaltForList(
         Map<String, Object> disclosures,
         List<Object> salt,
         List<Object> claim
@@ -291,23 +275,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         for (int i = 0; claim != null && i < claim.size(); i++) {
             Object claimObj = claim.get(i);
             Object saltObj = salt.get(i);
-            if (claimObj instanceof Map) {
-                addSelectSalt(disclosures, (HashMap)saltObj, (HashMap)claimObj);
-            } else if (claimObj instanceof List) {
-                boolean result = 
-                    addSaltForList(
-                        disclosures,
-                        (ArrayList<Object>)saltObj,
-                        (ArrayList<Object>)claimObj
-                    );
-                if (!result) {
-                    return result;
-                }
-            } else {
-                return false;
-            }
+            addSelectSalt(disclosures, (HashMap)saltObj, (HashMap)claimObj);
         }
-        return true;
     }
     
     private static ErrorCode verifyContent(CredentialPojo credential,
@@ -315,7 +284,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Map<String, Object> salt = credential.getSalt();
         String rawData = CredentialPojoUtils
             .getCredentialThumbprintWithoutSig(credential, salt, null);
-        System.err.println(rawData);
         String issuerWeid = credential.getIssuer();
         if (StringUtils.isEmpty(publicKey)) {
             // Fetch public key from chain
@@ -383,7 +351,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             generateSalt(saltMap);
             String rawData = CredentialPojoUtils
                 .getCredentialThumbprintWithoutSig(result, saltMap, null);
-            System.err.println(rawData);
             String privateKey = args.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey();
 
             String signature = DataToolUtils.sign(rawData, privateKey);
@@ -421,37 +388,43 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     public ResponseData<CredentialPojo> createSelectiveCredential(
         CredentialPojo credential,
         ClaimPolicy claimPolicy) {
-
-        if (credential == null) {
-            logger.error("[createSelectiveCredential] credential is null.");
-            return new ResponseData<CredentialPojo>(null, ErrorCode.CREDENTIAL_IS_NILL);
+        try { 
+            if (credential == null) {
+                logger.error("[createSelectiveCredential] credential is null.");
+                return new ResponseData<CredentialPojo>(null, ErrorCode.CREDENTIAL_IS_NILL);
+            }
+            if (claimPolicy == null) {
+                logger.error("[createSelectiveCredential] claimPolicy is null.");
+                return new ResponseData<CredentialPojo>(null,
+                    ErrorCode.CREDENTIAL_CLAIM_POLICY_NOT_EXIST);
+            }
+            String disclosure = claimPolicy.getFieldsToBeDisclosed();
+            Map<String, Object> saltMap = credential.getSalt();
+            Map<String, Object> claim = credential.getClaim();
+    
+            Map<String, Object> disclosureMap = 
+                DataToolUtils.deserialize(disclosure, HashMap.class);
+    
+            if (!validCredentialMapArgs(claim, saltMap, disclosureMap)) {
+                logger.error(
+                    "[createSelectiveCredential] create failed. message is {}",
+                    ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM.getCodeDesc()
+                );
+                return new ResponseData<CredentialPojo>(null,
+                    ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM);
+            }
+            addSelectSalt(disclosureMap, saltMap, claim);
+            credential.setSalt(saltMap);
+    
+            ResponseData<CredentialPojo> response = new ResponseData<CredentialPojo>();
+            response.setResult(credential);
+            response.setErrorCode(ErrorCode.SUCCESS);
+            return response;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("Generate SelectiveCredential failed due to system error. ", e);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }
-        if (claimPolicy == null) {
-            logger.error("[createSelectiveCredential] claimPolicy is null.");
-            return new ResponseData<CredentialPojo>(null,
-                ErrorCode.CREDENTIAL_CLAIM_POLICY_NOT_EXIST);
-        }
-        String disclosure = claimPolicy.getFieldsToBeDisclosed();
-        Map<String, Object> saltMap = credential.getSalt();
-        Map<String, Object> claim = credential.getClaim();
-
-        Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
-
-        if (!validCredentialMapArgs(claim, saltMap, disclosureMap)) {
-            logger.error(
-                "[createSelectiveCredential] create failed. message is {}",
-                ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM.getCodeDesc()
-            );
-            return new ResponseData<CredentialPojo>(null,
-                ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM);
-        }
-        addSelectSalt(disclosureMap, saltMap, claim);
-        credential.setSalt(saltMap);
-
-        ResponseData<CredentialPojo> response = new ResponseData<CredentialPojo>();
-        response.setResult(credential);
-        response.setErrorCode(ErrorCode.SUCCESS);
-        return response;
     }
 
     /* (non-Javadoc)
@@ -544,27 +517,31 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             logger.error("[verify] verify cptId failed.");
             return new ResponseData<Boolean>(false, verifyCptIdresult);
         }
-
-        for (CredentialPojo credential : credentialList) {
-            //verify policy
-            Integer cptId = credential.getCptId();
-            ClaimPolicy claimPolicy = policyMap.get(cptId);
-            ErrorCode verifypolicyResult = this.verifyPolicy(credential, claimPolicy);
-            if (verifypolicyResult.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[verify] verify policy {} failed.", policyMap);
-                return new ResponseData<Boolean>(false, verifypolicyResult);
+        try {
+            for (CredentialPojo credential : credentialList) {
+                //verify policy
+                Integer cptId = credential.getCptId();
+                ClaimPolicy claimPolicy = policyMap.get(cptId);
+                ErrorCode verifypolicyResult = this.verifyPolicy(credential, claimPolicy);
+                if (verifypolicyResult.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    logger.error("[verify] verify policy {} failed.", policyMap);
+                    return new ResponseData<Boolean>(false, verifypolicyResult);
+                }
+    
+                //verify credential
+                ErrorCode verifyCredentialResult = verifyContent(credential, null);
+                if (verifyCredentialResult.getCode() != ErrorCode.SUCCESS.getCode()) {
+                    logger.error(
+                        "[verify] verify credential {} failed.", credential);
+                    return new ResponseData<Boolean>(false, verifyCredentialResult);
+                }
             }
-
-            //verify credential
-            ErrorCode verifyCredentialResult = verifyContent(credential, null);
-            if (verifyCredentialResult.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error(
-                    "[verify] verify credential {} failed.", credential);
-                return new ResponseData<Boolean>(false, verifyCredentialResult);
-            }
+            return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error(
+                "[verify] verify credential error.", e);
+            return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
-
-        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
 
     /* (non-Javadoc)
@@ -697,20 +674,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     ) {
         for (int i = 0; i < saltList.size(); i++) {
             Object saltV = saltList.get(i);
-            if (saltV instanceof Map) {
-                ErrorCode code = verifyDisclosureAndSalt((HashMap)disclosure, (HashMap) saltV);
-                if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
-                    return code;
-                }
-            } else if (saltV instanceof List) {
-                ErrorCode code = 
-                    verifyDisclosureAndSaltList(
-                        disclosure,
-                        (ArrayList<Object>)saltV
-                    );
-                if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
-                    return code;
-                }
+            ErrorCode code = verifyDisclosureAndSalt((HashMap)disclosure, (HashMap) saltV);
+            if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
+                return code;
             }
         }
         return ErrorCode.SUCCESS;
