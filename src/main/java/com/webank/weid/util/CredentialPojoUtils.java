@@ -69,7 +69,7 @@ public final class CredentialPojoUtils {
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("get Credential Thumbprint WithoutSig error.", e);
             return StringUtils.EMPTY;
         }
     }
@@ -92,6 +92,7 @@ public final class CredentialPojoUtils {
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
+            logger.error("get Credential Thumbprint error.", e);
             return StringUtils.EMPTY;
         }
     }
@@ -146,15 +147,11 @@ public final class CredentialPojoUtils {
                 if (disclosureObj != null) {
                     disclosureObjList = (ArrayList<Object>)disclosureObj;
                 }
-                boolean isMapOrList = 
-                    addSaltAndGetHashForList(
-                        (ArrayList<Object>)newClaimObj,
-                        (ArrayList<Object>)saltObj,
-                        disclosureObjList
-                    );
-                if (!isMapOrList) {
-                    addSaltByDisclose(claim, key, disclosureObj, saltObj, newClaimObj);
-                } 
+                addSaltAndGetHashForList(
+                    (ArrayList<Object>)newClaimObj,
+                    (ArrayList<Object>)saltObj,
+                    disclosureObjList
+                );
             } else {
                 addSaltByDisclose(claim, key, disclosureObj, saltObj, newClaimObj);
             }
@@ -183,7 +180,7 @@ public final class CredentialPojoUtils {
         }
     }
     
-    private static boolean addSaltAndGetHashForList(
+    private static void addSaltAndGetHashForList(
         List<Object> claim,
         List<Object> salt,
         List<Object> disclosures
@@ -205,20 +202,13 @@ public final class CredentialPojoUtils {
                         disclosureObjList = (ArrayList<Object>)disclosureObj;
                     }
                 }
-                boolean result = 
-                    addSaltAndGetHashForList(
-                        (ArrayList<Object>)obj,
-                        (ArrayList<Object>)saltObj,
-                        disclosureObjList
-                    );
-                if (!result) {
-                    return result;
-                }
-            } else {
-                return false;
+                addSaltAndGetHashForList(
+                    (ArrayList<Object>)obj,
+                    (ArrayList<Object>)saltObj,
+                    disclosureObjList
+                );
             }
         }
-        return true;
     }
 
     /**
