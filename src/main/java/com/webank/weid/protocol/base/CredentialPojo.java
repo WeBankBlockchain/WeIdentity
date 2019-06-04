@@ -129,6 +129,8 @@ public class CredentialPojo implements IProof, JsonSerializer {
     
     /**
      * put the salt into proof.
+     * 
+     * @param salt map of salt
      */
     public void setSalt(Map<String, Object> salt) {
         putProofValue(ParamKeyConstant.PROOF_SALT, salt);

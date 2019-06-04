@@ -33,6 +33,7 @@ public interface Persistence {
     /**
      * save data to storage.
      *
+     * @param domain the domain of the data.
      * @param id the key of the data.
      * @param data which you want to store to the storage.
      * @return execute status of the "save" operation.
@@ -42,6 +43,7 @@ public interface Persistence {
     /**
      * batch save data to storage.
      *
+     * @param domain the domain of the data.
      * @param ids list of keys
      * @param dataList list of data
      * @return execute status of the "save" operation.
@@ -51,6 +53,7 @@ public interface Persistence {
     /**
      * query data from storage by id.
      *
+     * @param domain the domain of the data.
      * @param id the key of the data.
      * @return the data you stored.
      */
@@ -59,6 +62,7 @@ public interface Persistence {
     /**
      * delete data by id.
      * 
+     * @param domain the domain of the data.
      * @param id the key of the data.
      * @return the data you stored.
      */
@@ -66,6 +70,8 @@ public interface Persistence {
 
     /**
      * update data by id.
+     * 
+     * @param domain the domain of the data.
      * @param id the key you store with.
      * @param data the data you want to update into.
      * @return execute status of the "update" operation.

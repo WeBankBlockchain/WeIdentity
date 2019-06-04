@@ -31,7 +31,7 @@ public @interface BlockChainDto {
     /**
      * object or list.
      *
-     * @return
+     * @return type Enum
      */
     public BindTypeEnum bindType();
 
