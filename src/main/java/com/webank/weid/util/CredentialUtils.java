@@ -58,6 +58,7 @@ public final class CredentialUtils {
      * without any extra space or linebreaks, to avoid different Json format beautification.
      *
      * @param credential target Credential object
+     * @param disclosures disclosures of the credential
      * @return Hash value in String.
      */
     public static String getCredentialThumbprintWithoutSig(

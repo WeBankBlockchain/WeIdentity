@@ -56,7 +56,7 @@ public class PresentationE implements RawSerializer, IProof {
 
     /**
      * 获取公钥Id，用于验证的时候识别publicKey.
-     * @return
+     * @return publicKeyId
      */
     public String getVerificationMethod() {
         return getValueFromProof(proof, ParamKeyConstant.PROOF_VERIFICATION_METHOD).toString();
