@@ -56,6 +56,7 @@ public class EncodeData {
      * @param orgId 协议所属机构
      * @param id 数据编号
      * @param data 需要编解码数据
+     * @param verifiers 协议数据指定用户
      */
     public EncodeData(String id, String orgId, String data, List<String> verifiers) {
         this.id = id;

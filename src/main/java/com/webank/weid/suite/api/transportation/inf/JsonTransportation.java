@@ -37,6 +37,7 @@ public interface JsonTransportation {
     /**
      * 协议传输序列化接口.
      * @param object 协议存储的实体数据对象
+     * @param <T> the type of the element
      * @param property 协议的配置对象
      * @return 返回协议字符串数据
      */
@@ -49,6 +50,7 @@ public interface JsonTransportation {
      * 协议反序列化接口.
      * @param transString JSON格式的协议数据字符串
      * @param clazz 需要转换成的Class类型
+     * @param <T> the type of the element
      * @return 返回PresentationE对象数据
      */
     <T extends JsonSerializer> ResponseData<T> deserialize(

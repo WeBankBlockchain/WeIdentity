@@ -62,6 +62,7 @@ public final class PropertyUtils {
      * get property value by specific key.
      *
      * @param key property key
+     * @return value of the key
      */
     public static String getProperty(String key) {
         return prop.getProperty(key);
@@ -70,7 +71,9 @@ public final class PropertyUtils {
     /**
      * get property value by specific key.
      *
-     * @param key property key
+     * @param key property keys
+     * @param defaultValue default value
+     * @return value of the key
      */
     public static String getProperty(String key, String defaultValue) {
         return prop.getProperty(key, defaultValue);

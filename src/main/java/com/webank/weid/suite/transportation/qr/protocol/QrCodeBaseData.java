@@ -98,7 +98,7 @@ public abstract class QrCodeBaseData {
     
     /**
      * get TransString of Meta.
-     * @return
+     * @return transString of Meta
      */
     public String getTransString() {
         return this.buffer.toString();
@@ -127,7 +127,7 @@ public abstract class QrCodeBaseData {
     
     /**
      * 序列化协议对象.
-     * @param protocol 协议模板字符串
+     * @param protocols 协议模板字符串
      */
     protected void buildBuffer(String[] protocols) {
         buffer.setLength(0);
@@ -168,7 +168,7 @@ public abstract class QrCodeBaseData {
     
     /**
      * 根据协议字符串数据构建协议对象数据.
-     * @param protocol  协议模板字符串
+     * @param protocols  协议模板字符串
      * @param transString 协议字符串数据
      */
     protected void buildData(String[] protocols, String transString) {
@@ -213,7 +213,7 @@ public abstract class QrCodeBaseData {
      * 获取对应字段的get方法.
      * @param cls 类型名
      * @param fieldName 字段名
-     * @return
+     * @return Method
      */
     private Method getGetterMethod(Class<?> cls, String fieldName) throws NoSuchMethodException {
         return cls.getMethod("get"
@@ -242,7 +242,7 @@ public abstract class QrCodeBaseData {
     /**
      * build Meta instance by Class.
      * @param cls class Type
-     * @return
+     * @return Object of QrCodeBaseData
      */
     public static QrCodeBaseData newInstance(Class<?> cls) throws ReflectiveOperationException {
         return (QrCodeBaseData)cls.newInstance();
@@ -250,8 +250,9 @@ public abstract class QrCodeBaseData {
     
     /**
      * get the MetaVersion by transString.
+     * 
      * @param transString this is transString
-     * @return
+     * @return Object of QrCodeVersion
      */
     public static QrCodeVersion getQrCodeVersion(String transString) {
         if (StringUtils.isBlank(transString) || transString.indexOf(PROTOCOL_PARTITION) == -1) {

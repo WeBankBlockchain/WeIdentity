@@ -73,6 +73,7 @@ public final class CredentialConstant {
 
         /**
          * Getter.
+         * @return typeName
          */
         public String getTypeName() {
             return typeName;

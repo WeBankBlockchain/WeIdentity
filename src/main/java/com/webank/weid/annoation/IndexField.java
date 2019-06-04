@@ -30,18 +30,19 @@ public @interface IndexField {
 
     /**
      * the file name.
-     * @return
+     * @return name
      */
     String name() default "";
 
     /**
      * convert null to ''.
-     * @return
-     */
+     * @return ''
+     */ 
     String nullAs() default "";
 
     /**
      * start from 0.
+     * @return index
      */
     int index();
 }

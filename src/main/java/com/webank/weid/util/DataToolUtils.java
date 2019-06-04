@@ -211,6 +211,7 @@ public final class DataToolUtils {
      * serialize a class instance to Json String.
      *
      * @param object the class instance to serialize
+     * @param <T> the type of the element
      * @return JSON String
      */
     public static <T> String serialize(T object) {
@@ -230,6 +231,9 @@ public final class DataToolUtils {
     /**
      * deserialize a JSON String to an class instance.
      *
+     * @param json json string
+     * @param clazz Class.class
+     * @param <T> the type of the element
      * @return class instance
      */
     public static <T> T deserialize(String json, Class<T> clazz) {
@@ -250,7 +254,10 @@ public final class DataToolUtils {
 
     /**
      * deserialize a JSON String to List.
-     *
+     * 
+     * @param json json string
+     * @param clazz Class.class
+     * @param <T> the type of the element
      * @return class instance
      */
     public static <T> List<T> deserializeToList(String json, Class<T> clazz) {
@@ -293,6 +300,7 @@ public final class DataToolUtils {
      *
      * @param map input map
      * @return JsonString
+     * @throws Exception IOException
      */
     public static String mapToCompactJson(Map<String, Object> map) throws Exception {
         return OBJECT_MAPPER.readTree(serialize(map)).toString();
@@ -303,6 +311,7 @@ public final class DataToolUtils {
      *
      * @param object POJO
      * @return Map
+     * @throws Exception IOException
      */
     public static Map<String, Object> objToMap(Object object) throws Exception {
         JsonNode jsonNode = OBJECT_MAPPER.readTree(serialize(object));
@@ -312,9 +321,9 @@ public final class DataToolUtils {
     /**
      * 对象深度复制(对象必须是实现了Serializable接口).
      *
-     * @return T
-     * @author tonychen
-     * @date 2019/4/18
+     * @param obj pojo
+     * @param <T> the type of the element
+     * @return Object clonedObj
      */
     @SuppressWarnings("unchecked")
     public static <T extends Serializable> T clone(T obj) {
@@ -731,6 +740,7 @@ public final class DataToolUtils {
      *
      * @param arg the compress string
      * @return return the value of compressed
+     * @throws IOException IOException
      */
     public static String compress(String arg) throws IOException {
         if (null == arg || arg.length() <= 0) {
@@ -755,6 +765,7 @@ public final class DataToolUtils {
      *
      * @param arg String data with decompression
      * @return return the value of decompression
+     * @throws IOException IOException
      */
     public static String unCompress(String arg) throws IOException {
         if (null == arg || arg.length() <= 0) {
@@ -885,6 +896,7 @@ public final class DataToolUtils {
      * @param content 二维码字符串
      * @param destPath 二维码图片保存文件路径
      * @param errorCorrectionLevel 容错级别
+     * @return code of ErrorCode
      */
     public static Integer generateQrCode(
         String content,
@@ -907,6 +919,8 @@ public final class DataToolUtils {
      *
      * @param content 二维码字符串
      * @param errorCorrectionLevel 容错级别
+     * @param stream 字节输出流
+     * @return code of ErrorCode
      */
     public static Integer generateQrCode(
         String content,
