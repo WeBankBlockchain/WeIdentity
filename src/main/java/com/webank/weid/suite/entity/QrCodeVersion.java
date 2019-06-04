@@ -40,7 +40,7 @@ public enum QrCodeVersion {
     /**
      * get MetaVersion by code.
      * @param value code value
-     * @return
+     * @return QrCodeVersion
      */
     public static QrCodeVersion getObject(String value) {
         for (QrCodeVersion version : QrCodeVersion.values()) {
