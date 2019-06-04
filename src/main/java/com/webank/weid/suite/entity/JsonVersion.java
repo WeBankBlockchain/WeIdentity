@@ -42,6 +42,7 @@ public enum JsonVersion {
      * get JsonVersion By code.
      *
      * @param code the JsonVersion
+     * @return JsonVersion
      */
     public static JsonVersion getJsonVersion(int code) {
         for (JsonVersion version : JsonVersion.values()) {

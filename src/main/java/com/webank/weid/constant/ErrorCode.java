@@ -631,6 +631,7 @@ public enum ErrorCode {
      * get ErrorType By errcode.
      *
      * @param errorCode the ErrorCode
+     * @return errorCode
      */
     public static ErrorCode getTypeByErrorCode(int errorCode) {
         for (ErrorCode type : ErrorCode.values()) {
