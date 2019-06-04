@@ -12,13 +12,16 @@ function modify_config()
     cpt_address=$(cat cptController.address)
     issuer_address=$(cat authorityIssuer.address)
     evidence_address=$(cat evidenceController.address)
+    specificissuer_address=$(cat specificIssuer.address)
     export WEID_ADDRESS=${weid_address}
     export CPT_ADDRESS=${cpt_address}
     export ISSUER_ADDRESS=${issuer_address}
     export EVIDENCE_ADDRESS=${evidence_address}
-    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}'
+    export SPECIFICISSUER_ADDRESS=${specificissuer_address}
+    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${java_source_code_dir}/src/test/resources/
+    cp ${java_source_code_dir}/src/main/resources/weidentity.properties ${java_source_code_dir}/src/test/resources/
     #cat $app_xml_config
     echo "modify sdk config finished..."
 }
@@ -34,7 +37,8 @@ function gradle_build_sdk()
     export CPT_ADDRESS="0x0"
     export ISSUER_ADDRESS="0x0"
     export EVIDENCE_ADDRESS="0x0"
-    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}'
+    export SPECIFICISSUER_ADDRESS="0x0"
+    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
 
     echo "Begin to compile java code......"
