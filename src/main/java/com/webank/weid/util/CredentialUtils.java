@@ -31,8 +31,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.crypto.Sign;
 
 import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
@@ -49,10 +51,11 @@ import com.webank.weid.protocol.request.CreateCredentialArgs;
 public final class CredentialUtils {
 
     /**
-     * Concat all fields of Credential info, without Signature, in Json format. This should be
-     * invoked when calculating Credential Signature. Return null if credential format is illegal.
-     * Note that: 1. Keys should be dict-ordered; 2. Claim should use standard getClaimHash() to
-     * support selective disclosure; 3. Use compact output to avoid Json format confusion.
+     * Concat all fields of Credential info, without Proof, in Json format. This should be invoked
+     * when calculating Credential Signature as the raw message. Return null if credential format is
+     * illegal. The Json return value satisfy the following format: 1. Keys are dict-ordered; 2.
+     * Claim comes from standard getClaimHash() to support selective disclosure; 3. Compact output
+     * without any extra space or linebreaks, to avoid different Json format beautification.
      *
      * @param credential target Credential object
      * @return Hash value in String.
@@ -61,30 +64,85 @@ public final class CredentialUtils {
         Credential credential,
         Map<String, Object> disclosures) {
         try {
-            Map<String, Object> credMap = JsonUtil.objToMap(credential);
-            credMap.remove(ParamKeyConstant.CREDENTIAL_SIGNATURE);
-            String claimHash = getClaimHash(credential, disclosures);
-            credMap.put(ParamKeyConstant.CLAIM, claimHash);
-            return JsonUtil.mapToCompactJson(credMap);
+            Credential rawCredential = copyCredential(credential);
+            rawCredential.setProof(null);
+            return getCredentialThumbprint(rawCredential, disclosures);
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
     }
 
     /**
-     * Concat all fields of Credential info, with signature. This should be invoked when calculating
-     * Credential Evidence. Return null if credential format is illegal.
+     * Build the credential Proof.
+     *
+     * @param credential the credential
+     * @param privateKey the privatekey
+     * @param disclosureMap the disclosureMap
+     * @return the Proof structure
+     */
+    public static Map<String, String> buildCredentialProof(
+        Credential credential,
+        String privateKey,
+        Map<String, Object> disclosureMap) {
+        Map<String, String> proof = new HashMap<>();
+        proof.put(ParamKeyConstant.PROOF_CREATED, credential.getIssuanceDate().toString());
+        proof.put(ParamKeyConstant.PROOF_CREATOR, credential.getIssuer());
+        proof.put(ParamKeyConstant.PROOF_TYPE, getDefaultCredentialProofType());
+        proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE,
+            getCredentialSignature(credential, privateKey, disclosureMap));
+        return proof;
+    }
+
+    /**
+     * A clean deep copy method of a Credential which pays special attention on Map object. todo:
+     * preserve the claim key order
      *
      * @param credential target Credential object
+     * @return new credential
+     */
+    public static Credential copyCredential(Credential credential) {
+        Credential ct = new Credential();
+        ct.setContext(credential.getContext());
+
+        Map<String, String> originalProof = credential.getProof();
+        //Map<String, String> proof = (HashMap<String, String>) JsonUtil
+        //    .jsonStrToObj(new HashMap<String, String>(), JsonUtil.objToJsonStr(originalProof));
+        //ct.setProof(proof);
+        Map<String, String> proof = DataToolUtils
+            .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
+        ct.setProof(proof);
+        Map<String, Object> originalClaim = credential.getClaim();
+        //Map<String, Object> claim = (HashMap<String, Object>) JsonUtil
+        //    .jsonStrToObj(new HashMap<String, Object>(), JsonUtil.objToJsonStr(originalClaim));
+        Map<String, Object> claim = DataToolUtils
+            .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
+        ct.setClaim(claim);
+
+        ct.setIssuanceDate(credential.getIssuanceDate());
+        ct.setCptId(credential.getCptId());
+        ct.setExpirationDate(credential.getExpirationDate());
+        ct.setIssuer(credential.getIssuer());
+        ct.setId(credential.getId());
+        return ct;
+    }
+
+    /**
+     * Concat all fields of Credential info, with signature. This should be invoked when calculating
+     * credential hash value for Credential Evidence. Return null if credential format is illegal.
+     * The Json return value satisfy the same standard as the thumbprint without signature.
+     *
+     * @param credential target Credential object
+     * @param disclosures the disclosure map
      * @return Hash value in String.
      */
-    public static String getCredentialThumbprint(Credential credential,
+    public static String getCredentialThumbprint(
+        Credential credential,
         Map<String, Object> disclosures) {
         try {
-            Map<String, Object> credMap = JsonUtil.objToMap(credential);
+            Map<String, Object> credMap = DataToolUtils.objToMap(credential);
             String claimHash = getClaimHash(credential, disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
-            return JsonUtil.mapToCompactJson(credMap);
+            return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
@@ -149,7 +207,7 @@ public final class CredentialUtils {
      * @return hash value.
      */
     public static String getFieldHash(Object field) {
-        return HashUtils.sha3(String.valueOf(field));
+        return DataToolUtils.sha3(String.valueOf(field));
     }
 
     /**
@@ -180,6 +238,26 @@ public final class CredentialUtils {
     }
 
     /**
+     * Create the signature for this Credential. The original signature value, will be set empty
+     * whether its original value is already empty or not. The rawData input for the signature
+     * creation is the credential thumbprint result based on an empty signature value filled in.
+     *
+     * @param credential target credential object
+     * @param privateKey the privatekey for signing
+     * @param disclosureMap the disclosure map
+     * @return the String signature value
+     */
+    public static String getCredentialSignature(Credential credential, String privateKey,
+        Map<String, Object> disclosureMap) {
+        String rawData = CredentialUtils
+            .getCredentialThumbprintWithoutSig(credential, disclosureMap);
+        Sign.SignatureData sigData = DataToolUtils.signMessage(rawData, privateKey);
+        return new String(
+            DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
+            StandardCharsets.UTF_8);
+    }
+
+    /**
      * Create a full Credential Hash for a Credential based on all its fields. This should be
      * invoked when getting Credential Evidence. Please note: the result is a String with fixed
      * length 66 bytes including the first two bytes ("0x") and 64 bytes Hash value..
@@ -192,7 +270,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        return HashUtils.sha3(rawData);
+        return DataToolUtils.sha3(rawData);
     }
 
     /**
@@ -207,7 +285,7 @@ public final class CredentialUtils {
         }
         String mergedId = id.replaceAll(WeIdConstant.UUID_SEPARATOR, StringUtils.EMPTY);
         byte[] uuidBytes = mergedId.getBytes(StandardCharsets.UTF_8);
-        return DataTypetUtils.bytesArrayToBytes32(uuidBytes);
+        return DataToolUtils.bytesArrayToBytes32(uuidBytes);
     }
 
     /**
@@ -287,18 +365,64 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(context)) {
             return ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS;
         }
-        Long issuranceDate = args.getIssuranceDate();
-        if (issuranceDate == null) {
+        Long issuanceDate = args.getIssuanceDate();
+        if (issuanceDate == null) {
             return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
         }
-        if (issuranceDate.longValue() > args.getExpirationDate().longValue()) {
+        if (issuanceDate.longValue() > args.getExpirationDate().longValue()) {
             return ErrorCode.CREDENTIAL_EXPIRED;
         }
-        String signature = args.getSignature();
-        if (StringUtils.isEmpty(signature) || !SignatureUtils.isValidBase64String(signature)) {
-            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
+        Map<String, String> proof = args.getProof();
+        return isCredentialProofValid(proof);
+    }
+
+    private static ErrorCode isCredentialProofValid(Map<String, String> proof) {
+        if (proof == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        String type = proof.get(ParamKeyConstant.PROOF_TYPE);
+        if (!isCredentialProofTypeValid(type)) {
+            return ErrorCode.CREDENTIAL_SIGNATURE_TYPE_ILLEGAL;
+        }
+        // Created is not obligatory
+        Long created = Long.valueOf(proof.get(ParamKeyConstant.PROOF_CREATED));
+        if (created.longValue() <= 0) {
+            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+        }
+        // Creator is not obligatory either
+        String creator = proof.get(ParamKeyConstant.PROOF_CREATOR);
+        if (!StringUtils.isEmpty(creator) && !WeIdUtils.isWeIdValid(creator)) {
+            return ErrorCode.CREDENTIAL_ISSUER_INVALID;
+        }
+        // If the Proof type is ECDSA or other signature based scheme, check signature
+        if (type.equalsIgnoreCase(CredentialProofType.ECDSA.getTypeName())) {
+            String signature = proof.get(ParamKeyConstant.CREDENTIAL_SIGNATURE);
+            if (StringUtils.isEmpty(signature) || !DataToolUtils.isValidBase64String(signature)) {
+                return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
+            }
         }
         return ErrorCode.SUCCESS;
+    }
+
+    /**
+     * Get default Credential Credential Proof Type String.
+     *
+     * @return Context value in String.
+     */
+    public static String getDefaultCredentialProofType() {
+        return CredentialConstant.CredentialProofType.ECDSA.getTypeName();
+    }
+
+    private static boolean isCredentialProofTypeValid(String type) {
+        // Proof type must be one of the pre-defined types.
+        if (!StringUtils.isEmpty(type)) {
+            for (CredentialProofType proofType : CredentialConstant.CredentialProofType.values()) {
+                if (StringUtils.equalsIgnoreCase(type, proofType.getTypeName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

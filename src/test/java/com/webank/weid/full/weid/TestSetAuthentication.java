@@ -113,31 +113,13 @@ public class TestSetAuthentication extends TestBaseServcie {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setWeId("did:weid:0xbb");
+        setAuthenticationArgs.setWeId("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
         LogUtil.info(logger, "setAuthentication", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
             response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: type is null or other string.
-     *
-     */
-    @Test
-    public void testSetAuthenticationCase5() {
-
-        SetAuthenticationArgs setAuthenticationArgs =
-            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setType(null);
-
-        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        LogUtil.info(logger, "setAuthentication", response);
-
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 

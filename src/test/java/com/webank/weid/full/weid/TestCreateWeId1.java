@@ -44,22 +44,22 @@ import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.RawTransactionService;
+import com.webank.weid.service.impl.RawTransactionServiceImpl;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
  * non parametric createWeId method for testing WeIdService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestCreateWeId1 extends TestBaseServcie {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestCreateWeId1.class);
 
     /**
      * case: create WeId success.
-     *
      */
     @Test
     public void testCreateWeIdCase1() {
@@ -77,9 +77,8 @@ public class TestCreateWeId1 extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation throws an TimeoutException when calling the
-     *       getWeIdAttributeChangedEvents method.
-     *
+     * case: Simulation throws an TimeoutException when calling the getWeIdAttributeChangedEvents
+     * method.
      */
     @Test
     public void testCreateWeIdCase2() {
@@ -96,8 +95,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
 
     /**
      * case: Simulation throws an InterruptedException when calling the
-     *       getWeIdAttributeChangedEvents method.
-     *
+     * getWeIdAttributeChangedEvents method.
      */
     @Test
     public void testCreateWeIdCase3() {
@@ -113,7 +111,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
     }
 
     private ResponseData<CreateWeIdDataResult> createWeIdForMock(MockUp<Future<?>> mockFuture) {
-        
+
         MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
@@ -123,9 +121,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation returns null when invoking the getWeIdAttributeChangedEvents
-     *       method.
-     *
+     * case: Simulation returns null when invoking the getWeIdAttributeChangedEvents method.
      */
     @Test
     public void testCreateWeIdCase4() {
@@ -150,8 +146,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
 
     /**
      * case: Simulation throws an NullPointerException when calling the
-     *       getWeIdAttributeChangedEvents method.
-     *
+     * getWeIdAttributeChangedEvents method.
      */
     @Test
     public void testCreateWeIdCase5() {
@@ -174,9 +169,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation throws an exception when calling the createEcKeyPair
-     *       method.
-     *
+     * case: Simulation throws an exception when calling the createEcKeyPair method.
      */
     @Test
     public void testCreateWeIdCase6() {
@@ -185,7 +178,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
             @Mock
             public ECKeyPair createEcKeyPair()
                 throws NoSuchProviderException {
-                
+
                 throw new NoSuchProviderException();
             }
         };
@@ -206,7 +199,8 @@ public class TestCreateWeId1 extends TestBaseServcie {
     @Test
     public void testCreateWeIdCase7() {
         String hex = StringUtils.EMPTY;
-        ResponseData<String> response = weIdService.createWeId(hex);
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.createWeId(hex);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
@@ -218,7 +212,8 @@ public class TestCreateWeId1 extends TestBaseServcie {
     @Test
     public void testCreateWeIdCase8() {
         String hex = "11111";
-        ResponseData<String> response = weIdService.createWeId(hex);
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.createWeId(hex);
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));

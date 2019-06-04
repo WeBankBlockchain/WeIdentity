@@ -33,8 +33,7 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.webank.weid.constant.CredentialConstant;
-import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 
 /**
@@ -50,7 +49,7 @@ public class TestTransactionUtils {
         StaticArray<Int256> array = TransactionUtils.getParamCreated(8);
         Map<String, Object> cptJsonSchemaMap = new LinkedHashMap<>();
         cptJsonSchemaMap.put("title", "a CPT schema");
-        String cptJsonSchemaStr = JsonUtil.objToJsonStr(cptJsonSchemaMap);
+        String cptJsonSchemaStr = DataToolUtils.serialize(cptJsonSchemaMap);
         String completeStr = TransactionUtils.complementCptJsonSchema(cptJsonSchemaStr);
         StaticArray<Bytes32> array1 = TransactionUtils.getParamJsonSchema(completeStr);
         Assert.assertNotNull(nonce);
@@ -68,12 +67,15 @@ public class TestTransactionUtils {
             + "c/ls=\",\"weId\":\"did:weid:0xc0594581636589876d8bf3455e1844f0cc0d8c19\"}";
         String auInput = "{\"name\":\"Sample College\",\"weId\":\"did:weid:0xc5ead7a40f13a8b7b6"
             + "111691043f5936537a55ac\"}";
-        List<Type> weidList = TransactionUtils.buildCreateWeIdInputParameters(weidInput);
-        List<Type> cptList = TransactionUtils.buildRegisterCptInputParameters(cptInput);
-        List<Type> auList = TransactionUtils.buildAuthorityIssuerInputParameters(auInput);
-        Assert.assertNotNull(weidList);
-        Assert.assertNotNull(cptList);
-        Assert.assertNotNull(auList);
+        ResponseData<List<Type>> weidList = TransactionUtils
+            .buildCreateWeIdInputParameters(weidInput);
+        ResponseData<List<Type>> cptList = TransactionUtils
+            .buildRegisterCptInputParameters(cptInput);
+        ResponseData<List<Type>> auList = TransactionUtils
+            .buildAuthorityIssuerInputParameters(auInput);
+        Assert.assertNotNull(weidList.getResult());
+        Assert.assertNotNull(cptList.getResult());
+        Assert.assertNotNull(auList.getResult());
         weidInput = "{\"privateKey\":\"70537665785763632951200438731252630131035197449894"
             + "31221067702996992390039255438365261578388688523991111186187372079349839639924734"
             + "406270591552495358668267\"}";
@@ -85,16 +87,9 @@ public class TestTransactionUtils {
         weidList = TransactionUtils.buildCreateWeIdInputParameters(weidInput);
         cptList = TransactionUtils.buildRegisterCptInputParameters(cptInput);
         auList = TransactionUtils.buildAuthorityIssuerInputParameters(auInput);
-        Assert.assertNull(weidList);
-        Assert.assertNull(cptList);
-        Assert.assertNull(auList);
-        Assert.assertNotNull(ParamKeyConstant.CLAIM);
-        Assert.assertNotNull(ParamKeyConstant.WEID);
-        Assert.assertNotNull(ParamKeyConstant.CONTEXT);
-        Assert.assertNotNull(ParamKeyConstant.AUTHORITY_ISSUER_NAME);
-        Assert.assertNotNull(ParamKeyConstant.CPT_JSON_SCHEMA);
-        Assert.assertNotNull(ParamKeyConstant.CPT_SIGNATURE);
-        Assert.assertNotNull(CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
+        Assert.assertNull(weidList.getResult());
+        Assert.assertNull(cptList.getResult());
+        Assert.assertNull(auList.getResult());
         TransactionReceipt receipt = new TransactionReceipt();
         receipt.setBlockNumber("1010");
         receipt.setTransactionHash("bcbd");

@@ -47,17 +47,15 @@ import com.webank.weid.service.BaseService;
 
 /**
  * a parametric createWeId method for testing WeIdService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestCreateWeId2 extends TestBaseServcie {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestCreateWeId2.class);
 
     /**
      * case: create success.
-     *
      */
     @Test
     public void testCreateWeIdCase1() {
@@ -72,7 +70,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: createWeIdArgs is null.
-     *
      */
     @Test
     public void testCreateWeIdCase2() {
@@ -86,7 +83,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: publicKey is null.
-     *
      */
     @Test
     public void testCreateWeIdCase3() {
@@ -104,7 +100,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: publicKey is Non integer string.
-     *
      */
     @Test
     public void testCreateWeIdCase4() {
@@ -122,7 +117,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: weIdPrivateKey is null.
-     *
      */
     @Test
     public void testCreateWeIdCase5() {
@@ -140,7 +134,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: privateKey is null.
-     *
      */
     @Test
     public void testCreateWeIdCase6() {
@@ -158,7 +151,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: privateKey is invalid.
-     *
      */
     @Test
     public void testCreateWeIdCase7() {
@@ -176,7 +168,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: privateKey and publicKey misMatch.
-     *
      */
     @Test
     public void testCreateWeIdCase8() {
@@ -194,9 +185,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation returns null when invoking the getWeIdAttributeChangedEvents
-     *       method.
-     *
+     * case: Simulation returns null when invoking the getWeIdAttributeChangedEvents method.
      */
     @Test
     public void testCreateWeIdCase9() {
@@ -222,24 +211,23 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: Simulation throws an InterruptedException when calling the
-     *       getWeIdAttributeChangedEvents method.
-     *
+     * getWeIdAttributeChangedEvents method.
      */
     @Test
     public void testCreateWeIdCase10() {
 
         MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-        
+
         ResponseData<String> response = createWeIdForMock(mockFuture);
         LogUtil.info(logger, "createWeId", response);
 
-        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
     }
 
     private ResponseData<String> createWeIdForMock(MockUp<Future<?>> mockFuture) {
-        
+
         MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
@@ -250,9 +238,8 @@ public class TestCreateWeId2 extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation throws an TimeoutException when calling the
-     *       getWeIdAttributeChangedEvents method.
-     *
+     * case: Simulation throws an TimeoutException when calling the getWeIdAttributeChangedEvents
+     * method.
      */
     @Test
     public void testCreateWeIdCase11() {
@@ -269,8 +256,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: Simulation throws an NullPointerException when calling the
-     *       getWeIdAttributeChangedEvents method.
-     *
+     * getWeIdAttributeChangedEvents method.
      */
     @Test
     public void testCreateWeIdCase12() {
@@ -294,9 +280,8 @@ public class TestCreateWeId2 extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation throws an PrivateKeyIllegalException when calling the
-     *       reloadContract method.
-     *  
+     * case: Simulation throws an PrivateKeyIllegalException when calling the reloadContract
+     * method.
      */
     @Test
     public void testCreateWeIdCase13() {
@@ -307,7 +292,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
             @Mock
             public Contract reloadContract(String contractAddress, String privateKey, Class<?> cls)
                 throws PrivateKeyIllegalException {
-                
+
                 throw new PrivateKeyIllegalException();
             }
         };
@@ -324,7 +309,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
     /**
      * case: create again.
-     *
      */
     @Test
     public void testCreateWeIdCase14() {

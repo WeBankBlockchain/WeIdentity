@@ -44,31 +44,29 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.util.DataTypetUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * getWeIdDocument method for testing WeIdService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestGetWeIdDocument extends TestBaseServcie {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestGetWeIdDocument.class);
-    
+
     private static CreateWeIdDataResult createWeIdForGetDoc = null;
-    
+
     @Override
     public synchronized void testInit() {
         super.testInit();
         if (createWeIdForGetDoc == null) {
-            createWeIdForGetDoc = super.createWeIdWithSetAttr(); 
+            createWeIdForGetDoc = super.createWeIdWithSetAttr();
         }
     }
 
     /**
      * case: set and get weIdDom.
-     *
      */
     @Test
     public void testGetWeIdDocumentCase1() {
@@ -85,7 +83,6 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
     /**
      * case: set many times and get the weIdDom.
-     *
      */
     @Test
     public void testGetWeIdDocumentCase2() {
@@ -112,7 +109,6 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is invalid.
-     * 
      */
     @Test
     public void testGetWeIdDocumentCase3() {
@@ -126,7 +122,6 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is null.
-     *
      */
     @Test
     public void testGetWeIdDocumentCase4() {
@@ -140,7 +135,6 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is not exists.
-     * 
      */
     @Test
     public void testGetWeIdDocumentCase5() {
@@ -155,9 +149,8 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation throws an InterruptedException when calling the getLatestRelatedBlock 
-     *       method.
-     * 
+     * case: Simulation throws an InterruptedException when calling the getLatestRelatedBlock
+     * method.
      */
     @Test
     public void testGetWeIdDocumentCase6() {
@@ -174,7 +167,6 @@ public class TestGetWeIdDocument extends TestBaseServcie {
 
     /**
      * case: Simulation throws an TimeoutException when calling the getLatestRelatedBlock method.
-     * 
      */
     @Test
     public void testGetWeIdDocumentCase7() {
@@ -206,9 +198,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     }
 
     /**
-     * case: mock WeIdContract.getWeIdAttributeChangedEvents
-     *      for WeIdServiceImpl.resolveAttributeEvent().
-     * 
+     * case: mock WeIdContract.getWeIdAttributeChangedEvents for resolveAttributeEvent().
      */
     @Test
     public void testGetWeIdDocumentCase8() {
@@ -216,15 +206,15 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                    TransactionReceipt transactionReceipt) {
-                List<WeIdAttributeChangedEventResponse> eventlog = 
+                TransactionReceipt transactionReceipt) {
+                List<WeIdAttributeChangedEventResponse> eventlog =
                     new ArrayList<WeIdContract.WeIdAttributeChangedEventResponse>();
                 eventlog.add(new WeIdAttributeChangedEventResponse());
                 return eventlog;
             }
         };
 
-        ResponseData<WeIdDocument> weIdDoc = 
+        ResponseData<WeIdDocument> weIdDoc =
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         mockTest.tearDown();
         LogUtil.info(logger, "getWeIdDocument", weIdDoc);
@@ -232,11 +222,9 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             weIdDoc.getErrorCode().intValue());
     }
-    
+
     /**
-     * case: mock WeIdContract.getWeIdAttributeChangedEvents 
-     * for WeIdServiceImpl.resolveAttributeEvent().
-     * 
+     * case: mock WeIdContract.getWeIdAttributeChangedEvents for resolveAttributeEvent().
      */
     @Test
     public void testGetWeIdDocumentCase9() {
@@ -244,12 +232,12 @@ public class TestGetWeIdDocument extends TestBaseServcie {
         MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
             @Mock
             public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                    TransactionReceipt transactionReceipt) {
+                TransactionReceipt transactionReceipt) {
                 return null;
             }
         };
 
-        ResponseData<WeIdDocument> weIdDoc = 
+        ResponseData<WeIdDocument> weIdDoc =
             weIdService.getWeIdDocument(createWeIdForGetDoc.getWeId());
         mockTest.tearDown();
         LogUtil.info(logger, "getWeIdDocument", weIdDoc);
@@ -264,7 +252,7 @@ public class TestGetWeIdDocument extends TestBaseServcie {
     @Test
     public void testGetWeIdDocumentCase10() {
 
-        MockUp<DataTypetUtils> mockTest = new MockUp<DataTypetUtils>() {
+        MockUp<DataToolUtils> mockTest = new MockUp<DataToolUtils>() {
             @Mock
             public String bytes32ToString(Bytes32 bytes32) {
                 WeIdBaseException e = new WeIdBaseException(

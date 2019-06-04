@@ -20,6 +20,7 @@
 package com.webank.weid.protocol.response;
 
 import lombok.Data;
+
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
 
