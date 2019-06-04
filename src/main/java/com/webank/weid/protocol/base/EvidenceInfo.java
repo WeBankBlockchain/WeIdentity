@@ -42,9 +42,9 @@ public class EvidenceInfo {
     private List<String> signers;
 
     /**
-     * Required: The signatures of each signers with the same order.
-     * In JavaBean object, the signatures will be encoded in Base64.
-     * On the blockchain, the signatures will be stored in its r, s, v.
+     * Required: The signatures of each signers with the same order. In JavaBean object, the
+     * signatures will be encoded in Base64. On the blockchain, the signatures will be stored in its
+     * r, s, v.
      */
     private List<String> signatures;
 }
