@@ -37,11 +37,6 @@ public class SetAuthenticationArgs {
     private String weId;
 
     /**
-     * Required: The type.
-     */
-    private String type;
-
-    /**
      * Required: The owner.
      */
     private String owner;

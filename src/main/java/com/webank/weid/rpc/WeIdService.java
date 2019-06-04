@@ -27,8 +27,9 @@ import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
+
 /**
- * Service interface for operations on WeIdentity DID.
+ * Service inf for operations on WeIdentity DID.
  *
  * @author tonychen
  */
@@ -48,14 +49,6 @@ public interface WeIdService {
      * @return WeIdentity DID
      */
     ResponseData<String> createWeId(CreateWeIdArgs createWeIdArgs);
-
-    /**
-     * Create a WeIdentity DID by sending preset transaction hex value to chain.
-     *
-     * @param transactionHex the transaction hex value
-     * @return Error message if any
-     */
-    ResponseData<String> createWeId(String transactionHex);
 
     /**
      * Query WeIdentity DID document.
