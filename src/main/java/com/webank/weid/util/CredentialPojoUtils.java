@@ -54,6 +54,8 @@ public final class CredentialPojoUtils {
      * support selective disclosure; 3. Use compact output to avoid Json format confusion.
      *
      * @param credential target Credential object
+     * @param salt Salt Map
+     * @param disclosures Disclosure Map
      * @return Hash value in String.
      */
     public static String getCredentialThumbprintWithoutSig(
@@ -79,6 +81,8 @@ public final class CredentialPojoUtils {
      * Credential Evidence. Return null if credential format is illegal.
      *
      * @param credential target Credential object
+     * @param salt Salt Map
+     * @param disclosures Disclosure Map
      * @return Hash value in String.
      */
     public static String getCredentialThumbprint(
@@ -101,6 +105,7 @@ public final class CredentialPojoUtils {
      * Get the claim hash. This is irrelevant to selective disclosure.
      *
      * @param credential Credential
+     * @param salt Salt Map
      * @param disclosures Disclosure Map
      * @return the unique claim hash value
      */

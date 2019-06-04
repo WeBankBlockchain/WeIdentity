@@ -61,6 +61,7 @@ public interface CredentialPojoService {
     /**
      * Verify the validity of a credential. Public key will be fetched from chain.
      *
+     * @param issuerWeId the issuer WeId
      * @param credential the credential
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
@@ -89,7 +90,7 @@ public interface CredentialPojoService {
      * @param presentationPolicyE the disclosure strategies.
      * @param challenge used for authentication
      * @param weIdAuthentication owner information
-     * @return
+     * @return PresentationE presentationE
      */
     public ResponseData<PresentationE> createPresentation(
         List<CredentialPojo> credentialList,
