@@ -78,6 +78,7 @@ public interface CptService {
      * Update the data fields of a registered CPT.
      *
      * @param args the args
+     * @param cptId the cpt id
      * @return The updated CPT info
      */
     ResponseData<CptBaseInfo> updateCpt(CptMapArgs args, Integer cptId);
@@ -86,6 +87,7 @@ public interface CptService {
      * Update the data fields of a registered CPT.
      *
      * @param args the args
+     * @param cptId the cpt id
      * @return The updated CPT info
      */
     ResponseData<CptBaseInfo> updateCpt(CptStringArgs args, Integer cptId);

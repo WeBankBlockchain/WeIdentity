@@ -32,7 +32,7 @@ public interface PushNotifyAllCallback {
      * 链上链下health check, 不需要覆盖实现.
      *
      * @param arg echo arg
-     * @return
+     * @return amopNotifyMsgResult
      */
     AmopNotifyMsgResult onPush(CheckAmopMsgHealthArgs arg);
 }

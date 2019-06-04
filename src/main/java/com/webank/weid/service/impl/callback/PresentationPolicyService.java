@@ -26,6 +26,7 @@ public abstract class PresentationPolicyService extends BaseService {
     /**
      * 获取PolicyAndChallenge.
      * @param policyId 策略编号
+     * @param targetUserWeId user WeId
      * @return 返回PresentationPolicyE对象数据
      */
     public abstract PolicyAndChallenge policyAndChallengeOnPush(

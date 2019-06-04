@@ -127,6 +127,7 @@ public class TransactionUtils {
      *
      * @param inputParam the input param json
      * @return the StaticArray
+     * @throws Exception IOException
      */
     public static ResponseData<List<Type>> buildCreateWeIdInputParameters(String inputParam)
         throws Exception {
@@ -163,6 +164,7 @@ public class TransactionUtils {
      *
      * @param inputParam the input Param json
      * @return the StaticArray
+     * @throws Exception IOException
      */
     public static ResponseData<List<Type>> buildAuthorityIssuerInputParameters(String inputParam)
         throws Exception {
@@ -223,6 +225,7 @@ public class TransactionUtils {
      *
      * @param inputParam the input Param json
      * @return the StaticArray
+     * @throws Exception IOException
      */
     public static ResponseData<List<Type>> buildRegisterCptInputParameters(String inputParam)
         throws Exception {
@@ -302,6 +305,7 @@ public class TransactionUtils {
     /**
      * Get the current timestamp as the param "created".  Used by Restful API service.
      *
+     * @param length length
      * @return the StaticArray
      */
     public static StaticArray<Int256> getParamCreated(int length) {
@@ -430,6 +434,7 @@ public class TransactionUtils {
      * @param retCode the retCode
      * @param cptId the CptId
      * @param cptVersion the CptVersion
+     * @param receipt the transactionReceipt
      * @return the result
      */
     public static ResponseData<CptBaseInfo> getResultByResolveEvent(
