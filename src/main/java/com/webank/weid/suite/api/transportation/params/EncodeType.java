@@ -58,7 +58,7 @@ public enum EncodeType {
     /**
      * get EncodeType by code.
      * @param value code value
-     * @return
+     * @return codeType
      */
     public static EncodeType getObject(String value) {
         for (EncodeType codeType : EncodeType.values()) {
