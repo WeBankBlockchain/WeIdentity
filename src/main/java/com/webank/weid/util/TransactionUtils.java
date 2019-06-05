@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bcos.channel.client.Service;
+import org.bcos.channel.handler.ChannelConnections;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicBytes;
 import org.bcos.web3j.abi.datatypes.StaticArray;
@@ -54,7 +57,9 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.ParamKeyConstant;
@@ -524,6 +529,43 @@ public class TransactionUtils {
             return null;
         }
         return getTransactionFromList(transactionList, info);
+    }
+
+    /**
+     * Build a FISCO-BCOS Service instance based on the given FISCO-BCOS config bundle.
+     *
+     * @param fiscoConfig the FiscoConfig
+     * @return Service instance client
+     */
+    public static Service buildFiscoBcosService(FiscoConfig fiscoConfig) {
+        Service service = new Service();
+        service.setOrgID(fiscoConfig.getOrgId());
+        service.setConnectSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkTimeout()));
+
+        // connection params
+        ChannelConnections channelConnections = new ChannelConnections();
+        channelConnections.setCaCertPath("classpath:" + fiscoConfig.getV1CaCrtPath());
+        channelConnections.setClientCertPassWord(fiscoConfig.getV1ClientCrtPassword());
+        channelConnections
+            .setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
+        channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
+        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
+        ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
+            new ConcurrentHashMap<>();
+        allChannelConnections.put(fiscoConfig.getOrgId(), channelConnections);
+        service.setAllChannelConnections(allChannelConnections);
+
+        // thread pool params
+        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+        pool.setBeanName("web3sdk");
+        pool.setCorePoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkCorePoolSize()));
+        pool.setMaxPoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkMaxPoolSize()));
+        pool.setQueueCapacity(Integer.valueOf(fiscoConfig.getWeb3sdkQueueSize()));
+        pool.setKeepAliveSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkKeepAliveSeconds()));
+        pool.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
+        pool.initialize();
+        service.setThreadPool(pool);
+        return service;
     }
 
     private static List<Transaction> getTransactionListFromBlock(EthBlock ethBlock) {

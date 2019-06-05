@@ -123,7 +123,7 @@ public final class WeIdConstant {
      * The Constant pipeline character.
      */
     public static final String PIPELINE = "|";
-    
+
     /**
      * The Constant separator character.
      */

@@ -49,8 +49,6 @@ List spring = [
     "org.springframework:spring-core:$spring_version",
     "org.springframework:spring-beans:$spring_version",
     "org.springframework:spring-context:$spring_version",
-    "org.springframework:spring-tx:$spring_version",
-    "org.springframework:spring-jdbc:$spring_version",
     "org.springframework:spring-test:$spring_version"
 ]
 

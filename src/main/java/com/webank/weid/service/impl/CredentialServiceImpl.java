@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
@@ -57,7 +56,6 @@ import com.webank.weid.util.DateUtils;
  *
  * @author chaoxinhu 2019.1
  */
-@Component
 public class CredentialServiceImpl extends BaseService implements CredentialService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialServiceImpl.class);
