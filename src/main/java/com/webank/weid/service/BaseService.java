@@ -25,6 +25,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.dto.ChannelRequest;
 import org.bcos.channel.dto.ChannelResponse;
@@ -69,7 +70,7 @@ public abstract class BaseService {
     public static final int MAX_AMOP_REQUEST_TIMEOUT = 50000;
     public static final int AMOP_REQUEST_TIMEOUT = Integer
         .valueOf(PropertyUtils.getProperty("amop.request.timeout", "5000"));
-    protected static String fromOrgId = PropertyUtils.getProperty("blockchain.orgId");
+    protected static String currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
 
     private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
 
@@ -82,6 +83,9 @@ public abstract class BaseService {
         fiscoConfig = new FiscoConfig();
         if (!fiscoConfig.load()) {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
+        }
+        if (StringUtils.isEmpty(currentOrgId)) {
+            logger.error("[BaseService] the blockchain orgId is blank.");
         }
     }
 
@@ -99,7 +103,6 @@ public abstract class BaseService {
         logger.info("[BaseService] begin to init web3j instance..");
         service = TransactionUtils.buildFiscoBcosService(fiscoConfig);
 
-        String orgId = PropertyUtils.getProperty("blockchain.orgId");
         OnNotifyCallback pushCallBack = new OnNotifyCallback();
         service.setPushCallback(pushCallBack);
         pushCallBack.registAmopCallback(
@@ -109,7 +112,7 @@ public abstract class BaseService {
 
         // Set topics for AMOP
         List<String> topics = new ArrayList<String>();
-        topics.add(orgId);
+        topics.add(currentOrgId);
         service.setTopics(topics);
 
         try {
@@ -299,7 +302,7 @@ public abstract class BaseService {
         CheckAmopMsgHealthArgs arg) {
 
         return this.getImpl(
-            fromOrgId,
+            currentOrgId,
             toOrgId,
             arg,
             CheckAmopMsgHealthArgs.class,

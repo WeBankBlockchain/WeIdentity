@@ -98,7 +98,7 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
                 logger.error("can not find the {} file in your classpath.", policyFileName);
                 return policy;
             }
-            policy = createByJson(jsonNode.toString());
+            policy = fromJson(jsonNode.toString());
         } catch (IOException e) {
             logger.error("create PresentationPolicyE has error, please check the log.", e);
         }
@@ -111,7 +111,7 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
      * @param json the JSON String
      * @return the PresentationPolicyE
      */
-    public static PresentationPolicyE createByJson(String json) {
+    public static PresentationPolicyE fromJson(String json) {
         PresentationPolicyE policy = null;
         try {
             //将Json转换成Map
@@ -144,5 +144,23 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
             logger.error("create PresentationPolicyE has error, please check the log.", e);
         }
         return policy;
+    }
+    
+    @Override
+    public String toJson() {
+        String jsonString = DataToolUtils.serialize(this);
+        HashMap<String, Object> policyEMap = DataToolUtils.deserialize(jsonString, HashMap.class);
+        Map<String, Object> policy1 = 
+            (HashMap<String, Object>)policyEMap.get(CredentialConstant.CLAIM_POLICY_FIELD);
+        for (Map.Entry<String, Object> entry : policy1.entrySet()) {
+            HashMap<String, Object> claimPolicyMap = (HashMap<String, Object>)entry.getValue();
+            HashMap<String, Object> disclosureMap = 
+                DataToolUtils.deserialize(
+                    (String)claimPolicyMap.get(CredentialConstant.CLAIM_POLICY_DISCLOSED_FIELD),
+                    HashMap.class
+                );
+            claimPolicyMap.put(CredentialConstant.CLAIM_POLICY_DISCLOSED_FIELD, disclosureMap);
+        }
+        return DataToolUtils.serialize(policyEMap);
     }
 }

@@ -30,6 +30,7 @@ import lombok.EqualsAndHashCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.inf.IProof;
 import com.webank.weid.protocol.inf.RawSerializer;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * Created by Junqi Zhang on 2019/4/4.
@@ -88,5 +89,48 @@ public class PresentationE implements RawSerializer, IProof {
             proof = new HashMap<>();
         }
         proof.put(key, value);
+    }
+    
+    /**
+     * create PresentationE with JSON String.
+     * @param presentationJson the presentation JSON String
+     * @return PresentationE
+     */
+    public static PresentationE fromJson(String presentationJson) {
+        return DataToolUtils.deserialize(presentationJson, PresentationE.class);
+    }
+    
+    /**
+     * push the CredentialPojo into PresentationE.
+     * @param credentialPojo the credential
+     * @return true is success, others fail
+     */
+    public boolean push(CredentialPojo credentialPojo) {
+        if (verifiableCredential == null) {
+            return false;
+        }
+        verifiableCredential.add(credentialPojo);
+        return true;
+    }
+    
+    /**
+     * commit the credential to sign.
+     * @param weIdAuthentication the authentication
+     * @return true is success, others fail
+     */
+    public boolean commit(WeIdAuthentication weIdAuthentication) {
+        if (weIdAuthentication == null
+                || !weIdAuthentication.getWeIdPublicKeyId().equals(this.getVerificationMethod())) {
+            return false;
+        }
+        // 更新proof里面的签名
+        this.proof.remove(ParamKeyConstant.PROOF_SIGNATURE);
+        String signature = 
+            DataToolUtils.sign(
+                this.toRawData(),
+                weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
+            );
+        this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
+        return true;
     }
 }

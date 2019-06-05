@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
@@ -45,7 +44,6 @@ import com.webank.weid.util.WeIdUtils;
  * 
  * @author tonychen 2019年4月17日
  */
-@Component
 public class CredentialPojoServiceImpl extends BaseService implements CredentialPojoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
@@ -463,51 +461,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         PresentationPolicyE presentationPolicyE,
         Challenge challenge, PresentationE presentationE) {
 
-        if (StringUtils.isBlank(presenterWeId)
-            || challenge == null
-            || StringUtils.isBlank(challenge.getNonce())
-            || !CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)) {
-            logger.error("[verify] presentation verify failed, please check your input.");
-            return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
-        }
-
-        ErrorCode errorCode = CredentialPojoUtils.checkPresentationEValid(presentationE);
+        ErrorCode errorCode = 
+            checkInputArgs(presenterWeId, presentationPolicyE, challenge, presentationE);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            logger.error(
-                "[verify] presentation verify failed, error message : {}",
-                errorCode.getCodeDesc()
-            );
+            logger.error("[verify] checkInputArgs fail.");
             return new ResponseData<Boolean>(false, errorCode);
         }
-
-        //verify presenterWeId
-        if (StringUtils.isNotBlank(challenge.getWeId())
-            && !presenterWeId.equals(challenge.getWeId())) {
-            logger.error("[verify] The input issuer weid is not match the presentian's.");
-            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH);
-        }
-
-        //verify challenge
-        if (!challenge.getNonce().equals(presentationE.getNonce())) {
-            logger
-                .error("[verify] The nonce of challenge is not matched with the presentationE's.");
-            return new ResponseData<Boolean>(false,
-                ErrorCode.PRESENTATION_CHALLENGE_NONCE_MISMATCH);
-        }
-
-        //verify Signature of PresentationE
-        WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
-        String signature = presentationE.getSignature();
-        //remove signatureValue
-        presentationE.getProof().remove(ParamKeyConstant.PROOF_SIGNATURE);
-        ErrorCode errorCode1 =
-            DataToolUtils
-                .verifySignatureFromWeId(presentationE.toRawData(), signature, weIdDocument);
-        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            logger.error("[verify] verify challenge {} failed.", challenge);
-            return new ResponseData<Boolean>(false, errorCode1);
-        }
-
+        
         //verify cptId of presentationE
         List<CredentialPojo> credentialList = presentationE.getVerifiableCredential();
         Map<Integer, ClaimPolicy> policyMap = presentationPolicyE.getPolicy();
@@ -522,12 +482,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 //verify policy
                 Integer cptId = credential.getCptId();
                 ClaimPolicy claimPolicy = policyMap.get(cptId);
-                ErrorCode verifypolicyResult = this.verifyPolicy(credential, claimPolicy);
-                if (verifypolicyResult.getCode() != ErrorCode.SUCCESS.getCode()) {
-                    logger.error("[verify] verify policy {} failed.", policyMap);
-                    return new ResponseData<Boolean>(false, verifypolicyResult);
+                if (claimPolicy != null) {
+                    ErrorCode verifypolicyResult = this.verifyPolicy(credential, claimPolicy);
+                    if (verifypolicyResult.getCode() != ErrorCode.SUCCESS.getCode()) {
+                        logger.error("[verify] verify policy {} failed.", policyMap);
+                        return new ResponseData<Boolean>(false, verifypolicyResult);
+                    }
                 }
-    
                 //verify credential
                 ErrorCode verifyCredentialResult = verifyContent(credential, null);
                 if (verifyCredentialResult.getCode() != ErrorCode.SUCCESS.getCode()) {
@@ -565,7 +526,62 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
+    
+    private ErrorCode checkInputArgs(
+        String presenterWeId,
+        PresentationPolicyE presentationPolicyE,
+        Challenge challenge,
+        PresentationE presentationE) {
+        
+        if (StringUtils.isBlank(presenterWeId)
+            || challenge == null
+            || StringUtils.isBlank(challenge.getNonce())
+            || !CredentialPojoUtils.checkPresentationPolicyEValid(presentationPolicyE)) {
+            logger.error("[verify] presentation verify failed, please check your input.");
+            return ErrorCode.ILLEGAL_INPUT;
+        }
 
+        ErrorCode errorCode = CredentialPojoUtils.checkPresentationEValid(presentationE);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[verify] presentation verify failed, error message : {}",
+                errorCode.getCodeDesc()
+            );
+            return errorCode;
+        }
+
+        //verify presenterWeId
+        if (StringUtils.isNotBlank(challenge.getWeId())
+            && !presenterWeId.equals(challenge.getWeId())) {
+            logger.error("[verify] The input issuer weid is not match the presentian's.");
+            return ErrorCode.CREDENTIAL_PRESENTERWEID_NOTMATCH;
+        }
+
+        //verify challenge
+        if (!challenge.getNonce().equals(presentationE.getNonce())) {
+            logger
+                .error("[verify] The nonce of challenge is not matched with the presentationE's.");
+            return ErrorCode.PRESENTATION_CHALLENGE_NONCE_MISMATCH;
+        }
+
+        //verify Signature of PresentationE
+        WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
+        String signature = presentationE.getSignature();
+        //remove signatureValue
+        presentationE.getProof().remove(ParamKeyConstant.PROOF_SIGNATURE);
+        errorCode =
+            DataToolUtils
+                .verifySignatureFromWeId(presentationE.toRawData(), signature, weIdDocument);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[verify] verify presentation signature failed, error message : {}.",
+                errorCode.getCodeDesc()
+            );
+            return ErrorCode.PRESENTATION_SIGNATURE_MISMATCH;
+        }
+        return ErrorCode.SUCCESS;
+    }
+    
     private ErrorCode verifyCptId(
         Map<Integer, ClaimPolicy> policyMap,
         List<CredentialPojo> credentialList) {

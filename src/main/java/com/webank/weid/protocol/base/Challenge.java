@@ -76,7 +76,16 @@ public class Challenge extends Version implements RawSerializer {
         challenge.setWeId(userWeId);
         return challenge;
     }
-
+    
+    /**
+     * create Challenge with JSON String.
+     * @param challengeJson the challenge JSON String
+     * @return Challenge
+     */
+    public static Challenge fromJson(String challengeJson) {
+        return DataToolUtils.deserialize(challengeJson, Challenge.class);
+    }
+    
     @Override
     public String toRawData() {
         return this.nonce;
