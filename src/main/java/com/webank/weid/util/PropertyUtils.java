@@ -34,12 +34,14 @@ import org.slf4j.LoggerFactory;
 public final class PropertyUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(PropertyUtils.class);
-    private static final String PROP_NAME = "weidentity.properties";
+    private static final String WEIDENTITY_PROP_NAME = "weidentity.properties";
+    private static final String FISCO_PROP_NAME = "fisco.properties";
     private static Properties prop = new Properties();
 
     static {
         try {
-            loadProperties(PROP_NAME);
+            loadProperties(WEIDENTITY_PROP_NAME);
+            loadProperties(FISCO_PROP_NAME);
         } catch (IOException e) {
             logger.error("[PropertyUtils] Load weidentity.properties file failed.", e);
         }
