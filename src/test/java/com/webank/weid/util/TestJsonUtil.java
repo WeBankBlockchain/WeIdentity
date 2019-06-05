@@ -20,8 +20,10 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +32,10 @@ import org.junit.Test;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.JsonSchemaConstant;
+import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.cpt.Cpt101;
+import com.webank.weid.protocol.cpt.Cpt103;
 
 public class TestJsonUtil {
 
@@ -55,7 +60,7 @@ public class TestJsonUtil {
         // LinkedHashMap<String, Object> propertitesMap =
         //     (LinkedHashMap<String, Object>)JsonUtil.jsonStrToObj(map, s);
         LinkedHashMap<String, Object> propertitesMap =
-                DataToolUtils.deserialize(s, LinkedHashMap.class);
+            DataToolUtils.deserialize(s, LinkedHashMap.class);
         Assert.assertNotNull(propertitesMap);
     }
 
@@ -88,8 +93,23 @@ public class TestJsonUtil {
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
         cptSchema = DataToolUtils.generateDefaultCptJsonSchema(101);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
+        Cpt101 cpt101 = new Cpt101();
+        cpt101.setDelegator("aaa");
+        cpt101.setReceiver("bbb");
+        List<String> stringList = new ArrayList<>();
+        stringList.add("ccc");
+        cpt101.setSubjects(stringList);
+        Assert.assertTrue(DataToolUtils
+            .isValidateJsonVersusSchema(DataToolUtils.objToJsonStrWithNoPretty(cpt101), cptSchema));
+
         cptSchema = DataToolUtils.generateDefaultCptJsonSchema(103);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
+        Cpt103 cpt103 = new Cpt103();
+        cpt103.setChallenge(Challenge.create("did:weid:0x11111", "abcd"));
+        cpt103.setProof("aaa");
+        Assert.assertTrue(DataToolUtils
+            .isValidateJsonVersusSchema(DataToolUtils.objToJsonStrWithNoPretty(cpt103), cptSchema));
+
         cptSchema = DataToolUtils.generateDefaultCptJsonSchema(105);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
         cptSchema = DataToolUtils.generateUnformattedCptJsonSchema();
