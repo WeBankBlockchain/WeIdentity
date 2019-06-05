@@ -148,7 +148,12 @@ public class CredentialPojo implements IProof, JsonSerializer {
         proof.put(key, value);
     }
     
-    public static CredentialPojo create(String json) {
-        return DataToolUtils.deserialize(json, CredentialPojo.class);
+    /**
+     * create CredentialPojo with JSON String.
+     * @param credentialJson the CredentialPojo JSON String
+     * @return CredentialPojo
+     */
+    public static CredentialPojo fromJson(String credentialJson) {
+        return DataToolUtils.deserialize(credentialJson, CredentialPojo.class);
     }
 }
