@@ -184,7 +184,7 @@ public class JsonTransportationImpl
         JsonBaseData jsonBaseData = new JsonBaseData();
         jsonBaseData.setEncodeType(property.getEncodeType().getCode());
         jsonBaseData.setId(DataToolUtils.getUuId32());
-        jsonBaseData.setOrgId(fromOrgId);
+        jsonBaseData.setOrgId(currentOrgId);
         jsonBaseData.setVersion(version.getCode());
         return jsonBaseData;
     }

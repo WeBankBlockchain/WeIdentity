@@ -136,6 +136,7 @@ public class TransactionUtils {
      */
     public static ResponseData<List<Type>> buildCreateWeIdInputParameters(String inputParam)
         throws Exception {
+        
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode inputParamNode = objectMapper.readTree(inputParam);
         JsonNode publicKeyNode = inputParamNode.get(ParamKeyConstant.PUBLIC_KEY);
@@ -538,8 +539,10 @@ public class TransactionUtils {
      * @return Service instance client
      */
     public static Service buildFiscoBcosService(FiscoConfig fiscoConfig) {
+        
+        String currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
         Service service = new Service();
-        service.setOrgID(fiscoConfig.getOrgId());
+        service.setOrgID(currentOrgId);
         service.setConnectSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkTimeout()));
 
         // connection params
@@ -552,7 +555,7 @@ public class TransactionUtils {
         channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
         ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
             new ConcurrentHashMap<>();
-        allChannelConnections.put(fiscoConfig.getOrgId(), channelConnections);
+        allChannelConnections.put(currentOrgId, channelConnections);
         service.setAllChannelConnections(allChannelConnections);
 
         // thread pool params

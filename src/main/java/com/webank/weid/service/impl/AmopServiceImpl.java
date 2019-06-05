@@ -22,7 +22,6 @@ package com.webank.weid.service.impl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
@@ -43,30 +42,29 @@ import com.webank.weid.service.impl.base.AmopCommonArgs;
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
-@Component
 public class AmopServiceImpl extends BaseService implements AmopService {
 
     private static final Logger logger = LoggerFactory.getLogger(AmopServiceImpl.class);
 
     @Override
     public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
-        String orgId,
+        String targetOrgId,
         Integer policyId,
         String targetUserWeId
     ) {
         try {
-            if (StringUtils.isBlank(orgId)) {
+            if (StringUtils.isBlank(currentOrgId)) {
                 logger.error("the orgId is null, policyId = {}", policyId);
                 return new ResponseData<PolicyAndChallenge>(null, ErrorCode.ILLEGAL_INPUT);
             }
             GetPolicyAndChallengeArgs args = new GetPolicyAndChallengeArgs();
-            args.setFromOrgId(fromOrgId);
-            args.setToOrgId(orgId);
+            args.setFromOrgId(currentOrgId);
+            args.setToOrgId(targetOrgId);
             args.setPolicyId(String.valueOf(policyId));
             args.setMessageId(getService().newSeq());
             args.setTargetUserWeId(targetUserWeId);
             ResponseData<GetPolicyAndChallengeResponse> retResponse =
-                this.getPolicyAndChallenge(orgId, args);
+                this.getPolicyAndChallenge(targetOrgId, args);
             if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("AMOP response fail, policyId={}, errorCode={}, errorMessage={}",
                     policyId,
@@ -92,7 +90,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String toOrgId,
         GetPolicyAndChallengeArgs args) {
         return this.getImpl(
-            fromOrgId,
+            currentOrgId,
             toOrgId,
             args,
             GetPolicyAndChallengeArgs.class,
@@ -107,7 +105,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      */
     public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
         return this.getImpl(
-            fromOrgId,
+            currentOrgId,
             toOrgId,
             args,
             AmopCommonArgs.class,
@@ -123,7 +121,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId,
         GetEncryptKeyArgs args) {
         return this.getImpl(
-            fromOrgId,
+            currentOrgId,
             toOrgId,
             args,
             GetEncryptKeyArgs.class,
