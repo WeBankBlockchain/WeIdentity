@@ -134,7 +134,7 @@ public class TestBaseUtil {
     /**
      * build weId authority.
      */
-    private static WeIdAuthentication buildWeIdAuthority(CreateWeIdDataResult createWeId) {
+    public static WeIdAuthentication buildWeIdAuthority(CreateWeIdDataResult createWeId) {
 
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeId.getWeId());
@@ -156,16 +156,16 @@ public class TestBaseUtil {
         cptJsonSchemaNew.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is a cpt template");
 
         HashMap<String, Object> propertitesMap1 = new HashMap<String, Object>(2);
-        propertitesMap1.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_STRING);
+        propertitesMap1.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_STRING);
         propertitesMap1.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is name");
 
         String[] genderEnum = {"F", "M"};
         HashMap<String, Object> propertitesMap2 = new HashMap<String, Object>(2);
-        propertitesMap2.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_STRING);
-        propertitesMap2.put(JsonSchemaConstant.DATE_TYPE_ENUM, genderEnum);
+        propertitesMap2.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_STRING);
+        propertitesMap2.put(JsonSchemaConstant.DATA_TYPE_ENUM, genderEnum);
 
         HashMap<String, Object> propertitesMap3 = new HashMap<String, Object>(2);
-        propertitesMap3.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_NUMBER);
+        propertitesMap3.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_NUMBER);
         propertitesMap3.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is age");
 
         HashMap<String, Object> cptJsonSchema = new HashMap<String, Object>(3);
@@ -239,7 +239,6 @@ public class TestBaseUtil {
         SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
         setAuthenticationArgs.setWeId(createWeId.getWeId());
         setAuthenticationArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-        setAuthenticationArgs.setType(TestData.AUTHENTICATION_TYPE);
         setAuthenticationArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
         setAuthenticationArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
@@ -398,5 +397,70 @@ public class TestBaseUtil {
             }
         }
         return passwordKey;
+    }
+
+
+    /**
+     * Read key form file.
+     * @param fileName filename
+     * @return private key
+     */
+    public static String readPrivateKeyFromFile(String fileName) {
+
+        BufferedReader br = null;
+        FileInputStream fis = null;
+        InputStreamReader isr = null;
+        StringBuffer privateKey = new StringBuffer();
+
+        URL fileUrl = TestBaseUtil.class.getClassLoader().getResource(fileName);
+        if (fileUrl == null) {
+            return privateKey.toString();
+        }
+
+        String filePath = fileUrl.getFile();
+        if (filePath == null) {
+            return privateKey.toString();
+        }
+
+        try {
+            fis = new FileInputStream(fileUrl.getFile());
+            isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+            br = new BufferedReader(isr);
+
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                privateKey.append(line);
+            }
+        } catch (Exception e) {
+            logger.error("read privateKey from {} failed, error:{}", fileName, e);
+        } finally {
+            closeStream(br, fis, isr);
+        }
+
+        return privateKey.toString();
+    }
+
+    private static void closeStream(BufferedReader br, FileInputStream fis, InputStreamReader isr) {
+        if (br != null) {
+            try {
+                br.close();
+            } catch (IOException e) {
+                logger.error("BufferedReader close error:", e);
+            }
+        }
+        if (isr != null) {
+            try {
+                isr.close();
+            } catch (IOException e) {
+                logger.error("InputStreamReader close error:", e);
+            }
+        }
+        if (fis != null) {
+            try {
+                fis.close();
+            } catch (IOException e) {
+                logger.error("FileInputStream close error:", e);
+            }
+        }
     }
 }

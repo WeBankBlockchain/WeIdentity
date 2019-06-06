@@ -26,7 +26,7 @@ import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * Service interface for operations on Credentials.
+ * Service inf for operations on Credentials.
  *
  * @author chaoxinhu 2018.12
  */
@@ -91,11 +91,12 @@ public interface CredentialService {
     ResponseData<String> getCredentialHash(Credential credential);
 
     /**
-     * Get the Json String of a Credential. All fields in the Credential will be included. This
-     * also supports the selectively disclosed Credential.
+     * Get the Json String of a Credential. All fields in the Credential will be included. This also
+     * supports the selectively disclosed Credential.
      *
      * @param credential the credential
      * @return the Credential Json value in String
      */
     ResponseData<String> getCredentialJson(Credential credential);
+
 }
