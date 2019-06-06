@@ -29,19 +29,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bcos.channel.client.Service;
+import org.bcos.channel.handler.ChannelConnections;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicBytes;
 import org.bcos.web3j.abi.datatypes.StaticArray;
 import org.bcos.web3j.abi.datatypes.Type;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
 import org.bcos.web3j.protocol.core.methods.response.EthBlock;
@@ -52,10 +57,18 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.bcos.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import com.webank.weid.config.FiscoConfig;
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
+import com.webank.weid.contract.CptController;
+import com.webank.weid.contract.CptController.RegisterCptRetLogEventResponse;
+import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.BaseService;
@@ -114,61 +127,77 @@ public class TransactionUtils {
     }
 
     /**
-     * Check validity and build input params for createWeId (with attributes - public key)
-     * function.
+     * Check validity and build input params for createWeId (with attributes - public key) function.
+     * Used by Restful API service.
      *
      * @param inputParam the input param json
      * @return the StaticArray
+     * @throws Exception IOException
      */
-    public static List<Type> buildCreateWeIdInputParameters(String inputParam) throws Exception {
+    public static ResponseData<List<Type>> buildCreateWeIdInputParameters(String inputParam)
+        throws Exception {
+        
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode inputParamNode = objectMapper.readTree(inputParam);
         JsonNode publicKeyNode = inputParamNode.get(ParamKeyConstant.PUBLIC_KEY);
         if (publicKeyNode == null) {
-            return null;
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
         String publicKey = publicKeyNode.textValue();
+        if (StringUtils.isEmpty(publicKey)) {
+            logger.error("[createWeId]: input parameter publickey is null.");
+            return new ResponseData<>(null, ErrorCode.WEID_PUBLICKEY_INVALID);
+        }
         String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
         String addr = WeIdUtils.convertWeIdToAddress(weId);
-        if (!StringUtils.isNotBlank(publicKey) || !WeIdUtils.isValidAddress(addr)) {
+        if (!WeIdUtils.isValidAddress(addr)) {
             logger.error("[createWeId]: input parameter publickey is invalid.");
-            return null;
+            return new ResponseData<>(null, ErrorCode.WEID_PUBLICKEY_INVALID);
         }
-        // We do not check WeID existence in this case since it does not really affect the outcome.
-        return Arrays.<Type>asList(
+        // We do not check DID existence in this case since it does not really affect the outcome.
+        List<Type> result = Arrays.<Type>asList(
             new Address(addr),
-            DataTypetUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
-            DataTypetUtils.stringToDynamicBytes(DateUtils.getCurrentTimeStampString()),
+            DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
+            DataToolUtils.stringToDynamicBytes(DateUtils.getCurrentTimeStampString()),
             DateUtils.getCurrentTimeStampInt256()
         );
+        return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
 
     /**
-     * Check validity and build input params for registerAuthorityIssuer function.
+     * Check validity and build input params for registerAuthorityIssuer function. Used by Restful
+     * API service.
      *
      * @param inputParam the input Param json
      * @return the StaticArray
+     * @throws Exception IOException
      */
-    public static List<Type> buildAuthorityIssuerInputParameters(String inputParam)
+    public static ResponseData<List<Type>> buildAuthorityIssuerInputParameters(String inputParam)
         throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode inputParamNode = objectMapper.readTree(inputParam);
         JsonNode weIdNode = inputParamNode.get(ParamKeyConstant.WEID);
         JsonNode nameNode = inputParamNode.get(ParamKeyConstant.AUTHORITY_ISSUER_NAME);
         if (weIdNode == null || nameNode == null) {
-            return null;
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
         String weId = weIdNode.textValue();
         if (!WeIdUtils.isWeIdValid(weId)) {
-            logger.error("Input cpt publisher : {} is invalid.", weId);
-            return null;
+            return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         }
+
         String name = nameNode.textValue();
-        return Arrays.<Type>asList(
+        if (StringUtils.isEmpty(name)
+            || name.length() > WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH) {
+            logger.error("Input cpt publisher : {} is invalid.", name);
+            return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL);
+        }
+        List<Type> result = Arrays.<Type>asList(
             new Address(WeIdUtils.convertWeIdToAddress(weId)),
             getParamName(name),
             getParamCreated(WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH),
             getDefaultAccValue());
+        return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
 
     /**
@@ -180,7 +209,7 @@ public class TransactionUtils {
     private static StaticArray<Bytes32> getParamName(String name) {
         String[] nameArray = new String[WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH];
         nameArray[0] = name;
-        return DataTypetUtils.stringArrayToBytes32StaticArray(nameArray);
+        return DataToolUtils.stringArrayToBytes32StaticArray(nameArray);
     }
 
     /**
@@ -197,51 +226,55 @@ public class TransactionUtils {
     }
 
     /**
-     * Check validity and build input params for registerCpt blockchain function.
+     * Check validity and build input params for registerCpt blockchain function. Used by Restful
+     * API service.
      *
      * @param inputParam the input Param json
      * @return the StaticArray
+     * @throws Exception IOException
      */
-    public static List<Type> buildRegisterCptInputParameters(String inputParam) throws Exception {
+    public static ResponseData<List<Type>> buildRegisterCptInputParameters(String inputParam)
+        throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode inputParamNode = objectMapper.readTree(inputParam);
         JsonNode weIdNode = inputParamNode.get(ParamKeyConstant.WEID);
         JsonNode cptJsonSchemaNode = inputParamNode.get(ParamKeyConstant.CPT_JSON_SCHEMA);
         JsonNode cptSignatureNode = inputParamNode.get(ParamKeyConstant.CPT_SIGNATURE);
         if (weIdNode == null || cptJsonSchemaNode == null || cptSignatureNode == null) {
-            return null;
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
 
         String weId = weIdNode.textValue();
         if (!WeIdUtils.isWeIdValid(weId)) {
-            logger.error("Input cpt publisher : {} is invalid.", weId);
-            return null;
+            return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         }
 
         String cptJsonSchema = cptJsonSchemaNode.toString();
         String cptJsonSchemaNew = complementCptJsonSchema(cptJsonSchema);
-        Map<String, Object> cptJsonSchemaMap = (HashMap<String, Object>) JsonUtil.jsonStrToObj(
-            new HashMap<String, Object>(),
-            cptJsonSchemaNew);
-        if (cptJsonSchemaMap == null
-            || cptJsonSchemaMap.isEmpty()
-            || !JsonSchemaValidatorUtils.isCptJsonSchemaValid(cptJsonSchemaNew)) {
+        Map<String, Object> cptJsonSchemaMap = DataToolUtils.deserialize(
+            cptJsonSchemaNew,
+            HashMap.class
+        );
+        if (StringUtils.isEmpty(cptJsonSchemaNew)
+            || !DataToolUtils.isCptJsonSchemaValid(cptJsonSchemaNew)) {
             logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaNew);
-            return null;
+            return new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
         }
 
         String cptSignature = cptSignatureNode.textValue();
-        if (!SignatureUtils.isValidBase64String(cptSignature)) {
+        if (!DataToolUtils.isValidBase64String(cptSignature)) {
             logger.error("Input cpt signature invalid: {}", cptSignature);
-            return null;
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        RsvSignature rsvSignature = SignatureUtils.convertSignatureDataToRsv(
-            SignatureUtils.convertBase64StringToSignatureData(cptSignature));
+        RsvSignature rsvSignature =
+            DataToolUtils.convertSignatureDataToRsv(
+                DataToolUtils.convertBase64StringToSignatureData(cptSignature)
+            );
 
-        StaticArray<Bytes32> bytes32Array = DataTypetUtils.stringArrayToBytes32StaticArray(
+        StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
-        return Arrays.<Type>asList(
+        List<Type> result = Arrays.<Type>asList(
             new Address(WeIdUtils.convertWeIdToAddress(weId)),
             getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
             bytes32Array,
@@ -249,6 +282,7 @@ public class TransactionUtils {
             rsvSignature.getV(),
             rsvSignature.getR(),
             rsvSignature.getS());
+        return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
 
     /**
@@ -258,31 +292,37 @@ public class TransactionUtils {
      * @return the new string
      */
     public static String complementCptJsonSchema(String cptJsonSchemaOld) {
-        Map<String, Object> cptJsonSchemaMapOld = (Map<String, Object>) JsonUtil.jsonStrToObj(
-            new HashMap<String, Object>(),
-            cptJsonSchemaOld);
-        Map<String, Object> cptJsonSchemaMapNew = new HashMap<>();
-        cptJsonSchemaMapNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
-        cptJsonSchemaMapNew
-            .put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATE_TYPE_OBJECT);
-        cptJsonSchemaMapNew.putAll(cptJsonSchemaMapOld);
-        return JsonUtil.objToJsonStr(cptJsonSchemaMapNew);
+        try {
+            Map<String, Object> cptJsonSchemaMapOld = DataToolUtils.deserialize(
+                cptJsonSchemaOld,
+                HashMap.class
+            );
+            Map<String, Object> cptJsonSchemaMapNew = new HashMap<>();
+            cptJsonSchemaMapNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
+            cptJsonSchemaMapNew
+                .put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
+            cptJsonSchemaMapNew.putAll(cptJsonSchemaMapOld);
+            return DataToolUtils.serialize(cptJsonSchemaMapNew);
+        } catch (Exception e) {
+            return StringUtils.EMPTY;
+        }
     }
 
     /**
-     * Get the current timestamp as the param "created". May be called elsewhere.
+     * Get the current timestamp as the param "created".  Used by Restful API service.
      *
+     * @param length length
      * @return the StaticArray
      */
     public static StaticArray<Int256> getParamCreated(int length) {
         long[] longArray = new long[length];
         long created = System.currentTimeMillis();
         longArray[0] = created;
-        return DataTypetUtils.longArrayToInt256StaticArray(longArray);
+        return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
 
     /**
-     * Get the cpt json schema as the param "cptJsonSchema".
+     * Get the cpt json schema as the param "cptJsonSchema". Used by Restful API service.
      *
      * @param cptJsonSchema the cptJsonSchema String
      * @return the StaticArray
@@ -296,7 +336,7 @@ public class TransactionUtils {
         for (int i = 0; i < stringList.size(); i++) {
             jsonSchemaArray[i] = stringList.get(i);
         }
-        return DataTypetUtils.stringArrayToBytes32StaticArray(jsonSchemaArray);
+        return DataToolUtils.stringArrayToBytes32StaticArray(jsonSchemaArray);
     }
 
     /**
@@ -320,7 +360,7 @@ public class TransactionUtils {
     }
 
     /**
-     * Get a random Nonce for a transaction.
+     * Get a random Nonce for a transaction. Used by Restful API service.
      *
      * @return nonce in BigInt.
      */
@@ -330,7 +370,7 @@ public class TransactionUtils {
     }
 
     /**
-     * Get a default blocklimit for a transaction.
+     * Get a default blocklimit for a transaction. Used by Restful API service.
      *
      * @return blocklimit in BigInt.
      */
@@ -342,6 +382,115 @@ public class TransactionUtils {
             //Send a large enough block limit number
             return new BigInteger(WeIdConstant.BIG_BLOCK_LIMIT);
         }
+    }
+
+    /**
+     * Verify Authority Issuer related events.
+     *
+     * @param event the Event
+     * @param opcode the Opcode
+     * @return the ErrorCode
+     */
+    public static ErrorCode verifyAuthorityIssuerRelatedEvent(
+        AuthorityIssuerRetLogEventResponse event,
+        Integer opcode) {
+        if (event == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        if (event.addr == null || event.operation == null || event.retCode == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        Integer eventOpcode = event.operation.getValue().intValue();
+        if (eventOpcode.equals(opcode)) {
+            Integer eventRetCode = event.retCode.getValue().intValue();
+            return ErrorCode.getTypeByErrorCode(eventRetCode);
+        } else {
+            return ErrorCode.AUTHORITY_ISSUER_OPCODE_MISMATCH;
+        }
+    }
+
+    /**
+     * Verify Register CPT related events.
+     *
+     * @param transactionReceipt the TransactionReceipt
+     * @return the ErrorCode
+     */
+    public static ResponseData<CptBaseInfo> resolveRegisterCptEvents(
+        TransactionReceipt transactionReceipt) {
+        List<RegisterCptRetLogEventResponse> event = CptController.getRegisterCptRetLogEvents(
+            transactionReceipt
+        );
+
+        if (CollectionUtils.isEmpty(event)) {
+            logger.error("[registerCpt] event is empty");
+            return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
+        }
+
+        return getResultByResolveEvent(
+            event.get(0).retCode,
+            event.get(0).cptId,
+            event.get(0).cptVersion,
+            transactionReceipt
+        );
+    }
+
+    /**
+     * Resolve CPT Event.
+     *
+     * @param retCode the retCode
+     * @param cptId the CptId
+     * @param cptVersion the CptVersion
+     * @param receipt the transactionReceipt
+     * @return the result
+     */
+    public static ResponseData<CptBaseInfo> getResultByResolveEvent(
+        Uint256 retCode,
+        Uint256 cptId,
+        Int256 cptVersion,
+        TransactionReceipt receipt) {
+
+        TransactionInfo info = new TransactionInfo(receipt);
+        // register
+        if (DataToolUtils.uint256ToInt(retCode)
+            == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
+            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}",
+                DataToolUtils.uint256ToInt(cptId));
+            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
+        }
+
+        if (DataToolUtils.uint256ToInt(retCode) == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
+                DataToolUtils.uint256ToInt(cptId));
+            return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST, info);
+        }
+
+        if (DataToolUtils.uint256ToInt(retCode) == ErrorCode.CPT_NO_PERMISSION.getCode()) {
+            logger.error("[getResultByResolveEvent] no permission. cptId:{}",
+                DataToolUtils.uint256ToInt(cptId));
+            return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION, info);
+        }
+
+        // register and update
+        if (DataToolUtils.uint256ToInt(retCode)
+            == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}",
+                DataToolUtils.uint256ToInt(cptId));
+            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
+        }
+
+        // update
+        if (DataToolUtils.uint256ToInt(retCode)
+            == ErrorCode.CPT_NOT_EXISTS.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.",
+                DataToolUtils.uint256ToInt(cptId));
+            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
+        }
+
+        CptBaseInfo result = new CptBaseInfo();
+        result.setCptId(DataToolUtils.uint256ToInt(cptId));
+        result.setCptVersion(DataToolUtils.int256ToInt(cptVersion));
+
+        return new ResponseData<>(result, ErrorCode.SUCCESS, info);
     }
 
     /**
@@ -381,6 +530,45 @@ public class TransactionUtils {
             return null;
         }
         return getTransactionFromList(transactionList, info);
+    }
+
+    /**
+     * Build a FISCO-BCOS Service instance based on the given FISCO-BCOS config bundle.
+     *
+     * @param fiscoConfig the FiscoConfig
+     * @return Service instance client
+     */
+    public static Service buildFiscoBcosService(FiscoConfig fiscoConfig) {
+        
+        String currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
+        Service service = new Service();
+        service.setOrgID(currentOrgId);
+        service.setConnectSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkTimeout()));
+
+        // connection params
+        ChannelConnections channelConnections = new ChannelConnections();
+        channelConnections.setCaCertPath("classpath:" + fiscoConfig.getV1CaCrtPath());
+        channelConnections.setClientCertPassWord(fiscoConfig.getV1ClientCrtPassword());
+        channelConnections
+            .setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
+        channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
+        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
+        ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
+            new ConcurrentHashMap<>();
+        allChannelConnections.put(currentOrgId, channelConnections);
+        service.setAllChannelConnections(allChannelConnections);
+
+        // thread pool params
+        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
+        pool.setBeanName("web3sdk");
+        pool.setCorePoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkCorePoolSize()));
+        pool.setMaxPoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkMaxPoolSize()));
+        pool.setQueueCapacity(Integer.valueOf(fiscoConfig.getWeb3sdkQueueSize()));
+        pool.setKeepAliveSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkKeepAliveSeconds()));
+        pool.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
+        pool.initialize();
+        service.setThreadPool(pool);
+        return service;
     }
 
     private static List<Transaction> getTransactionListFromBlock(EthBlock ethBlock) {

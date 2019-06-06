@@ -2,6 +2,7 @@ package com.webank.weid.exception;
 
 /**
  * get weId document, resolve attribute Exception.
+ *
  * @author darwindu
  */
 @SuppressWarnings("serial")
@@ -12,6 +13,7 @@ public class ResolveAttributeException extends RuntimeException {
 
     /**
      * constructor.
+     *
      * @param errorCode exception error code.
      * @param errorMessage exception error messave.
      */

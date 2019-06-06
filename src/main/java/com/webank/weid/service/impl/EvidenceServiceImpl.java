@@ -40,7 +40,6 @@ import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
@@ -58,8 +57,7 @@ import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
-import com.webank.weid.util.DataTypetUtils;
-import com.webank.weid.util.SignatureUtils;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -67,7 +65,6 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author chaoxinhu 2019.1
  */
-@Component
 public class EvidenceServiceImpl extends BaseService implements EvidenceService {
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
@@ -88,7 +85,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
     }
 
     private static void init() {
-        ContractConfig config = context.getBean(ContractConfig.class);
+        ContractConfig config = buildContractConfig();
         evidenceFactoryAddress = config.getEvidenceAddress();
         evidenceFactory = (EvidenceFactory) getContractService(
             evidenceFactoryAddress,
@@ -143,13 +140,13 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 ));
             List<String> extraValueList = new ArrayList<>();
             extraValueList.add(StringUtils.EMPTY);
-            Sign.SignatureData sigData = SignatureUtils
+            Sign.SignatureData sigData = DataToolUtils
                 .signMessage(credentialHash, weIdPrivateKey.getPrivateKey());
-            Bytes32 r = DataTypetUtils.bytesArrayToBytes32(sigData.getR());
-            Bytes32 s = DataTypetUtils.bytesArrayToBytes32(sigData.getS());
-            Uint8 v = DataTypetUtils.intToUnt8(Integer.valueOf(sigData.getV()));
+            Bytes32 r = DataToolUtils.bytesArrayToBytes32(sigData.getR());
+            Bytes32 s = DataToolUtils.bytesArrayToBytes32(sigData.getS());
+            Uint8 v = DataToolUtils.intToUnt8(Integer.valueOf(sigData.getV()));
             List<Address> signer = new ArrayList<>();
-            signer.add(new Address(Keys.getAddress(SignatureUtils
+            signer.add(new Address(Keys.getAddress(DataToolUtils
                 .createKeyPairFromPrivate(new BigInteger(weIdPrivateKey.getPrivateKey())))));
             reloadContract(weIdPrivateKey.getPrivateKey());
             Future<TransactionReceipt> future = evidenceFactory.createEvidence(
@@ -198,7 +195,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         int desiredLength = bytes32List.size();
         List<Bytes32> finalList = new ArrayList<>();
         for (int i = 0; i < desiredLength; i++) {
-            finalList.add(DataTypetUtils.stringToBytes32(bytes32List.get(i)));
+            finalList.add(DataToolUtils.stringToBytes32(bytes32List.get(i)));
         }
         return finalList;
     }
@@ -233,9 +230,9 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
 
             EvidenceInfo evidenceInfoData = new EvidenceInfo();
             evidenceInfoData.setCredentialHash(
-                WeIdConstant.HEX_PREFIX + DataTypetUtils
+                WeIdConstant.HEX_PREFIX + DataToolUtils
                     .bytes32ToString(credentialHashList.get(0))
-                    + DataTypetUtils.bytes32ToString(credentialHashList.get(1)));
+                    + DataToolUtils.bytes32ToString(credentialHashList.get(1)));
 
             List<String> signerStringList = new ArrayList<>();
             for (Address addr : issuerList) {
@@ -255,10 +252,13 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 r = rlist.get(index).getValue();
                 s = slist.get(index).getValue();
                 SignatureData sigData = new SignatureData(v, r, s);
-                signaturesList.add(new String(
-                    SignatureUtils
-                        .base64Encode(SignatureUtils.simpleSignatureSerialization(sigData)),
-                    StandardCharsets.UTF_8)
+                signaturesList.add(
+                    new String(
+                        DataToolUtils.base64Encode(
+                            DataToolUtils.simpleSignatureSerialization(sigData)
+                        ),
+                        StandardCharsets.UTF_8
+                    )
                 );
             }
             evidenceInfoData.setSignatures(signaturesList);
@@ -330,9 +330,9 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                     break;
                 }
                 SignatureData signatureData =
-                    SignatureUtils.simpleSignatureDeserialization(
-                        SignatureUtils.base64Decode(
-                            signature.getBytes(StandardCharsets.UTF_8)));
+                    DataToolUtils.simpleSignatureDeserialization(
+                        DataToolUtils.base64Decode(signature.getBytes(StandardCharsets.UTF_8))
+                    );
 
                 ResponseData<Boolean> innerResponseData = verifySignatureToSigner(
                     hashOffChain,
@@ -363,8 +363,11 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         return ErrorCode.SUCCESS;
     }
 
-    private ResponseData<Boolean> verifySignatureToSigner(String rawData,
-        String signerWeId, SignatureData signatureData) {
+    private ResponseData<Boolean> verifySignatureToSigner(
+        String rawData,
+        String signerWeId, 
+        SignatureData signatureData
+    ) {
 
         try {
             ResponseData<WeIdDocument> innerResponseData =
@@ -376,8 +379,12 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
-            return SignatureUtils
+            ErrorCode errorCode = DataToolUtils
                 .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false, errorCode);
+            }
+            return new ResponseData<>(true, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("error occurred during verifying signatures from chain: ", e);
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);

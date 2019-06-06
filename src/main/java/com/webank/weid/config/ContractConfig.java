@@ -21,14 +21,12 @@ package com.webank.weid.config;
 
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * contract address config.
  *
  * @author tonychen 2018.9.29
  */
-@Component("ContractConfig")
 @Data
 public class ContractConfig {
 
@@ -55,4 +53,10 @@ public class ContractConfig {
      */
     @Value("${evidence.contractaddress}")
     private String evidenceAddress;
+
+    /**
+     * The Specific issuer Contract address.
+     */
+    @Value("${specificissuer.contractaddress}")
+    private String specificIssuerAddress;
 }

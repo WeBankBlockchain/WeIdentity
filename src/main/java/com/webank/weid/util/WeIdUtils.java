@@ -20,6 +20,7 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -27,10 +28,12 @@ import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.WalletUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
-
 
 /**
  * The WeIdentity DID Utils.
@@ -40,21 +43,32 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 public final class WeIdUtils {
 
     /**
+     * log4j object, for recording log.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
+    
+    /**
+     * read the chainId from properties.
+     */
+    private static final String CHAIN_ID = PropertyUtils.getProperty("chain.id");
+
+    /**
      * Convert a WeIdentity DID to a fisco account address.
      *
-     * @param weid the WeIdentity DID
+     * @param weId the WeIdentity DID
      * @return weId related address, empty if input WeIdentity DID is illegal
      */
-    public static String convertWeIdToAddress(String weid) {
-        if (StringUtils.isEmpty(weid) || !StringUtils.contains(weid, WeIdConstant.WEID_PREFIX)) {
+    public static String convertWeIdToAddress(String weId) {
+        if (StringUtils.isEmpty(weId) || !StringUtils.contains(weId, WeIdConstant.WEID_PREFIX)) {
             return StringUtils.EMPTY;
         }
-        return StringUtils.splitByWholeSeparator(weid, ":")[2];
+        String[] weIdFields = StringUtils.splitByWholeSeparator(weId, ":");
+        return weIdFields[weIdFields.length - 1];
     }
 
     /**
      * Convert an account address to WeIdentity DID.
-     *
+     * 
      * @param address the address
      * @return a related WeIdentity DID, or empty string if the input is illegal.
      */
@@ -62,7 +76,7 @@ public final class WeIdUtils {
         if (StringUtils.isEmpty(address)) {
             return StringUtils.EMPTY;
         }
-        return new StringBuffer().append(WeIdConstant.WEID_PREFIX).append(address).toString();
+        return buildWeIdByAddress(address);
     }
 
     /**
@@ -72,9 +86,9 @@ public final class WeIdUtils {
      * @return true if the WeIdentity DID is legal, false otherwise.
      */
     public static boolean isWeIdValid(String weId) {
-        return (StringUtils.isNotEmpty(weId)
+        return StringUtils.isNotEmpty(weId)
             && StringUtils.startsWith(weId, WeIdConstant.WEID_PREFIX)
-            && StringUtils.isNotEmpty(StringUtils.splitByWholeSeparator(weId, ":")[2]));
+            && isValidAddress(convertWeIdToAddress(weId));
     }
 
     /**
@@ -84,11 +98,28 @@ public final class WeIdUtils {
      * @return WeIdentity DID
      */
     public static String convertPublicKeyToWeId(String publicKey) {
-        String address = Keys.getAddress(new BigInteger(publicKey));
-        String weId =
-            new StringBuffer().append(WeIdConstant.WEID_PREFIX).append("0x").append(address)
-                .toString();
-        return weId;
+        try {
+            String address = Keys.getAddress(new BigInteger(publicKey));
+            return buildWeIdByAddress(address);
+        } catch (Exception e) {
+            logger.error("convert publicKey to weId error.", e);
+            return StringUtils.EMPTY;
+        }
+    }
+    
+    private static String buildWeIdByAddress(String address) {
+        if (StringUtils.isEmpty(CHAIN_ID)) {
+            throw new WeIdBaseException("the chain Id is illegal.");
+        }
+        StringBuffer weId = new StringBuffer();
+        weId.append(WeIdConstant.WEID_PREFIX)
+            .append(CHAIN_ID)
+            .append(WeIdConstant.WEID_SEPARATOR);
+        if (!StringUtils.contains(address, WeIdConstant.HEX_PREFIX)) {
+            weId.append(WeIdConstant.HEX_PREFIX);
+        }
+        weId.append(address);
+        return weId.toString();
     }
 
     /**
@@ -126,7 +157,8 @@ public final class WeIdUtils {
      * @return true if yes, false otherwise.
      */
     public static boolean isValidAddress(String addr) {
-        if (StringUtils.isEmpty(addr)) {
+        if (StringUtils.isEmpty(addr)
+            || !Pattern.compile(WeIdConstant.FISCO_BCOS_ADDRESS_PATTERN).matcher(addr).matches()) {
             return false;
         }
         try {
@@ -144,5 +176,31 @@ public final class WeIdUtils {
      */
     public static boolean isEmptyAddress(Address addr) {
         return addr.getValue().equals(BigInteger.ZERO);
+    }
+
+    /**
+     * check the weId is match the private key.
+     *
+     * @param privateKey the private key
+     * @param weId the weId
+     * @return true if match, false mismatch
+     */
+    public static boolean validatePrivateKeyWeIdMatches(WeIdPrivateKey privateKey, String weId) {
+        boolean isMatch = false;
+
+        try {
+            BigInteger publicKey = DataToolUtils
+                .publicKeyFromPrivate(new BigInteger(privateKey.getPrivateKey()));
+            String address1 = "0x" + Keys.getAddress(publicKey);
+            String address2 = WeIdUtils.convertWeIdToAddress(weId);
+            if (address1.equals(address2)) {
+                isMatch = true;
+            }
+        } catch (Exception e) {
+            logger.error("Validate private key We Id matches failed. Error message :{}", e);
+            return isMatch;
+        }
+
+        return isMatch;
     }
 }

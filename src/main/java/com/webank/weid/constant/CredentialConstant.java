@@ -31,11 +31,52 @@ public final class CredentialConstant {
      * The Constant default Credential Context.
      */
     public static final String DEFAULT_CREDENTIAL_CONTEXT =
-        "https://www.w3.org/2018/credentials/v1";
+        "https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1";
 
     /**
      * The Constant default Credential Context field name in Credential Json String.
      */
     public static final String CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD = "@context";
+    
+    /**
+     * The Constant default Credential type.
+     */
+    public static final String DEFAULT_CREDENTIAL_TYPE = "VerifiableCredential";
+    
+    /**
+     * The Constant is an field in PresentationPolicyE.
+     */
+    public static final String CLAIM_POLICY_FIELD = "policy";
+    
+    /**
+     * The Constant is an field in claimPolicy.
+     */
+    public static final String CLAIM_POLICY_DISCLOSED_FIELD = "fieldsToBeDisclosed";
 
+    /**
+     * The Credential Proof Type Enumerate.
+     */
+    public static enum CredentialProofType {
+        ECDSA("EcdsaSignature");
+
+        /**
+         * The Type Name of the Credential Proof.
+         */
+        private String typeName;
+
+        /**
+         * Constructor.
+         */
+        CredentialProofType(String typeName) {
+            this.typeName = typeName;
+        }
+
+        /**
+         * Getter.
+         * @return typeName
+         */
+        public String getTypeName() {
+            return typeName;
+        }
+    }
 }

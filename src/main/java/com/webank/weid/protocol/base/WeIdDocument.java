@@ -24,13 +24,21 @@ import java.util.List;
 
 import lombok.Data;
 
+import com.webank.weid.protocol.inf.JsonSerializer;
+import com.webank.weid.util.DataToolUtils;
+
 /**
  * The base data structure to handle WeIdentity DID Document info.
  *
  * @author tonychen 2018.9.29
  */
 @Data
-public class WeIdDocument {
+public class WeIdDocument implements JsonSerializer {
+
+    /**
+     *  the serialVersionUID.
+     */
+    private static final long serialVersionUID = 411522771907189878L;
 
     /**
      * Required: The id.
@@ -61,4 +69,13 @@ public class WeIdDocument {
      * Required: The service list.
      */
     private List<ServiceProperty> service = new ArrayList<>();
+    
+    /**
+     * create WeIdDocument with JSON String.
+     * @param weIdDocumentJson the weIdDocument JSON String
+     * @return WeIdDocument
+     */
+    public static WeIdDocument fromJson(String weIdDocumentJson) {
+        return DataToolUtils.deserialize(weIdDocumentJson, WeIdDocument.class);
+    }
 }
