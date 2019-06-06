@@ -158,6 +158,11 @@ public final class WeIdConstant {
      * UUID Separator.
      */
     public static final String UUID_SEPARATOR = "-";
+    
+    /**
+     * WeId Separator.
+     */
+    public static final String WEID_SEPARATOR = ":";
 
     /**
      * UUID Pattern.
