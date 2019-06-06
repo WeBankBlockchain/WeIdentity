@@ -19,6 +19,8 @@
 
 package com.webank.weid.full.evidence;
 
+import java.util.Map;
+
 import mockit.Mock;
 import mockit.MockUp;
 import org.bcos.web3j.crypto.Sign.SignatureData;
@@ -28,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
@@ -153,7 +156,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
     @Test
     public void testVerifyEvidenceCase8() {
         Credential credential = copyCredential(evidenceCredential);
-        credential.setIssuranceDate(System.currentTimeMillis());
+        credential.setIssuanceDate(System.currentTimeMillis());
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase8 result :" + responseData);
@@ -181,7 +184,10 @@ public class TestVerifyEvidence extends TestBaseServcie {
     @Test
     public void testVerifyEvidenceCase11() {
         Credential credential = copyCredential(evidenceCredential);
-        credential.setSignature(credential.getSignature() + "x");
+        Map<String, String> proof = credential.getProof();
+        String sigValue = proof.get(ParamKeyConstant.CREDENTIAL_SIGNATURE);
+        proof.put(ParamKeyConstant.CREDENTIAL_SIGNATURE, sigValue + "x");
+        credential.setProof(proof);
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase11 result :" + responseData);
@@ -235,8 +241,8 @@ public class TestVerifyEvidence extends TestBaseServcie {
         ResponseData<Boolean> responseData2 = evidenceService
             .verify(evidenceCredential, responseData1.getResult());
         Assert.assertEquals(responseData2.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode());
-        Assert.assertFalse(responseData2.getResult());
+            ErrorCode.SUCCESS.getCode());
+        Assert.assertTrue(responseData2.getResult());
     }
 
     /**

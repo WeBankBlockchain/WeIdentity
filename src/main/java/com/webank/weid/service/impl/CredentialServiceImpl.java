@@ -31,7 +31,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
@@ -49,17 +48,14 @@ import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.JsonSchemaValidatorUtils;
-import com.webank.weid.util.JsonUtil;
-import com.webank.weid.util.SignatureUtils;
 
 /**
  * Service implementations for operations on Credential.
  *
  * @author chaoxinhu 2019.1
  */
-@Component
 public class CredentialServiceImpl extends BaseService implements CredentialService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialServiceImpl.class);
@@ -100,7 +96,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setId(UUID.randomUUID().toString());
             result.setCptId(args.getCptId());
             result.setIssuer(args.getIssuer());
-            result.setIssuranceDate(DateUtils.getCurrentTimeStamp());
+            Long issuanceDate = DateUtils.getCurrentTimeStamp();
+            result.setIssuanceDate(issuanceDate);
             result.setExpirationDate(args.getExpirationDate());
             result.setClaim(args.getClaim());
             Map<String, Object> disclosureMap = new HashMap<>(args.getClaim());
@@ -111,16 +108,13 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 );
             }
             credentialWrapper.setDisclosure(disclosureMap);
-            String rawData = CredentialUtils
-                .getCredentialThumbprintWithoutSig(result, disclosureMap);
-            String privateKey = args.getWeIdPrivateKey().getPrivateKey();
-            Sign.SignatureData sigData = SignatureUtils.signMessage(rawData, privateKey);
-            result.setSignature(
-                new String(
-                    SignatureUtils
-                        .base64Encode(SignatureUtils.simpleSignatureSerialization(sigData)),
-                    StandardCharsets.UTF_8)
-            );
+            
+            // Construct Credential Proof
+            Map<String, String> credentialProof = CredentialUtils.buildCredentialProof(
+                result,
+                args.getWeIdPrivateKey().getPrivateKey(),
+                disclosureMap);
+            result.setProof(credentialProof);
 
             credentialWrapper.setCredential(result);
             ResponseData<CredentialWrapper> responseData = new ResponseData<>(
@@ -146,8 +140,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         return verifyCredentialContent(credentialWrapper, null);
     }
 
-    /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialService#verify(com.webank.weid.protocol.base.Credential)
+    /**
+     * Verify Credential validity.
      */
     @Override
     public ResponseData<Boolean> verify(Credential credential) {
@@ -182,7 +176,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     }
 
     /**
-     * The only standardized interface to create a full Credential Hash for a given Credential.
+     * The only standardized inf to create a full Credential Hash for a given Credential.
      *
      * @param args the args
      * @return the Boolean response data
@@ -207,8 +201,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
 
         try {
             Credential credential = credentialWrapper.getCredential();
-            ErrorCode innerResponse = CredentialUtils
-                .isCredentialValid(credential);
+            ErrorCode innerResponse = CredentialUtils.isCredentialValid(credential);
             if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
                 logger.error("Credential input format error!");
                 return new ResponseData<>(false, innerResponse);
@@ -257,19 +250,21 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     private ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim) {
 
         try {
-            String claimStr = JsonUtil.objToJsonStr(claim);
+            //String claimStr = JsonUtil.objToJsonStr(claim);
+            String claimStr = DataToolUtils.serialize(claim);
             Cpt cpt = cptService.queryCpt(cptId).getResult();
             if (cpt == null) {
                 logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
             }
-            String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
+            //String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
+            String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
 
-            if (!JsonSchemaValidatorUtils.isCptJsonSchemaValid(cptJsonSchema)) {
+            if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
                 logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
                 return ErrorCode.CPT_JSON_SCHEMA_INVALID;
             }
-            if (!JsonSchemaValidatorUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
+            if (!DataToolUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
                 logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
             }
@@ -311,9 +306,10 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             String rawData = CredentialUtils
                 .getCredentialThumbprintWithoutSig(credential, disclosureMap);
             Sign.SignatureData signatureData =
-                SignatureUtils.simpleSignatureDeserialization(
-                    SignatureUtils.base64Decode(
-                        credential.getSignature().getBytes(StandardCharsets.UTF_8))
+                DataToolUtils.simpleSignatureDeserialization(
+                    DataToolUtils.base64Decode(
+                        credential.getSignature().getBytes(StandardCharsets.UTF_8)
+                    )
                 );
 
             if (StringUtils.isEmpty(publicKey)) {
@@ -328,12 +324,16 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
                 } else {
                     WeIdDocument weIdDocument = innerResponseData.getResult();
-                    return SignatureUtils
+                    ErrorCode errorCode =  DataToolUtils
                         .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+                    if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                        return new ResponseData<>(false, errorCode);
+                    }
+                    return new ResponseData<>(true, ErrorCode.SUCCESS);
                 }
             } else {
                 boolean result =
-                    SignatureUtils
+                    DataToolUtils
                         .verifySignature(rawData, signatureData, new BigInteger(publicKey));
                 if (!result) {
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
@@ -364,8 +364,9 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         Credential credential,
         String disclosure) {
 
-        Map<String, Object> disclosureMap = (Map<String, Object>) JsonUtil.jsonStrToObj(
-            new HashMap<String, Object>(), disclosure);
+        //Map<String, Object> disclosureMap = (Map<String, Object>) JsonUtil.jsonStrToObj(
+        //    new HashMap<String, Object>(), disclosure);
+        Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
         //setp 1: check if the input args is illegal.
         CredentialWrapper credentialResult = new CredentialWrapper();
@@ -414,15 +415,15 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         }
         // Convert timestamp into UTC timezone
         try {
-            Map<String, Object> credMap = JsonUtil.objToMap(credential);
-            String issuranceDate = DateUtils.convertTimestampToUtc(credential.getIssuranceDate());
+            Map<String, Object> credMap = DataToolUtils.objToMap(credential);
+            String issuanceDate = DateUtils.convertTimestampToUtc(credential.getIssuanceDate());
             String expirationDate = DateUtils.convertTimestampToUtc(credential.getExpirationDate());
-            credMap.put(ParamKeyConstant.ISSURANCE_DATE, issuranceDate);
+            credMap.put(ParamKeyConstant.ISSUANCE_DATE, issuanceDate);
             credMap.put(ParamKeyConstant.EXPIRATION_DATE, expirationDate);
             credMap.remove(ParamKeyConstant.CONTEXT);
             credMap.put(CredentialConstant.CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD,
                 CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
-            String credentialString = JsonUtil.mapToCompactJson(credMap);
+            String credentialString = DataToolUtils.mapToCompactJson(credMap);
             return new ResponseData<>(credentialString, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("Json conversion failed in getCredentialJson: ", e);

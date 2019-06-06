@@ -20,25 +20,28 @@
 package com.webank.weid;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
-import org.bcos.contract.tools.ToolConf;
 import org.bcos.web3j.protocol.core.Response;
 import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.AuthorityIssuerServiceImpl;
+import com.webank.weid.service.impl.CptServiceImpl;
+import com.webank.weid.service.impl.CredentialServiceImpl;
+import com.webank.weid.service.impl.EvidenceServiceImpl;
+import com.webank.weid.service.impl.WeIdServiceImpl;
 
 /**
  * Test base class.
@@ -46,50 +49,39 @@ import com.webank.weid.service.BaseService;
  * @author v_wbgyang
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(
-    locations = {"classpath:SpringApplicationContext-test.xml", "classpath:applicationContext.xml"})
+@ContextConfiguration(locations = {"classpath:SpringApplicationContext-test.xml"})
 public abstract class BaseTest extends BaseService {
 
-    @Autowired
     protected AuthorityIssuerService authorityIssuerService;
-
-    @Autowired
     protected CptService cptService;
-
-    @Autowired
     protected WeIdService weIdService;
-
-    @Autowired
     protected CredentialService credentialService;
-    
-    @Autowired
     protected EvidenceService evidenceService;
 
-    @Autowired
-    protected ToolConf toolConf;
-
     /**
-     * the private key of sdk is a BigInteger,which needs to be used
-     * when registering authority.
-     *
+     * the private key of sdk is a BigInteger,which needs to be used when registering authority.
      */
     protected String privateKey;
 
     /**
-     *  initialization some for test.
-     *
+     * initialization some for test.
      */
     @Before
     public void setUp() {
 
-        privateKey = new BigInteger(toolConf.getPrivKey(), 16).toString();
+        authorityIssuerService = new AuthorityIssuerServiceImpl();
+        cptService = new CptServiceImpl();
+        weIdService = new WeIdServiceImpl();
+        credentialService = new CredentialServiceImpl();
+        evidenceService = new EvidenceServiceImpl();
+
+        privateKey = TestBaseUtil.readPrivateKeyFromFile("privateKey.txt");
 
         testInit();
     }
 
     /**
-     *  tearDown some for test.
-     *
+     * tearDown some for test.
      */
     @After
     public void tearDown() {
@@ -98,7 +90,7 @@ public abstract class BaseTest extends BaseService {
         cptService = null;
         weIdService = null;
         credentialService = null;
-        toolConf = null;
+        evidenceService = null;
 
         testFinalize();
     }
@@ -112,14 +104,15 @@ public abstract class BaseTest extends BaseService {
     }
 
     /**
-     *  get current blockNumber.
+     * get current blockNumber.
+     *
      * @return return blockNumber
      * @throws IOException possible exceptions to sending transactions
      */
     public int getBlockNumber() throws IOException {
         Response<String> response = super.getWeb3j().ethBlockNumber().send();
         if (response instanceof EthBlockNumber) {
-            EthBlockNumber ethBlockNumber = (EthBlockNumber)response;
+            EthBlockNumber ethBlockNumber = (EthBlockNumber) response;
             return ethBlockNumber.getBlockNumber().intValue();
         }
         return 0;

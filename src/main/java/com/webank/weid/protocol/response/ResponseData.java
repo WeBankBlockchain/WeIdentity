@@ -79,6 +79,7 @@ public class ResponseData<T> {
      *
      * @param result the result
      * @param errorCode the return code
+     * @param transactionInfo transactionInfo
      */
     public ResponseData(T result, ErrorCode errorCode, TransactionInfo transactionInfo) {
         this.result = result;
@@ -93,6 +94,8 @@ public class ResponseData<T> {
 
     /**
      * set a ErrorCode type errorCode.
+     * 
+     * @param errorCode the errorCode
      */
     public void setErrorCode(ErrorCode errorCode) {
         if (errorCode != null) {
@@ -101,4 +104,16 @@ public class ResponseData<T> {
         }
     }
 
+    /**
+     * Instantiates a new Response data based on the error code and error message.
+     * 
+     * @param result the result
+     * @param errorCode code number
+     * @param errorMessage errorMessage
+     */
+    public ResponseData(T result, Integer errorCode, String errorMessage) {
+        this.result = result;
+        this.errorCode = errorCode;
+        this.errorMessage = errorMessage;
+    }
 }
