@@ -6,8 +6,8 @@ java_source_code_dir=$2
 temp_file=$(date +%s)".temp"
 config_file=${java_source_code_dir}/dist/bin/run.config
 app_xml_config_dir=${java_source_code_dir}/dist/conf/
-app_xml_config_tpl=${java_source_code_dir}/src/main/resources/applicationContext.xml.tpl
-app_xml_config=${java_source_code_dir}/src/main/resources/applicationContext.xml
+app_xml_config_tpl=${java_source_code_dir}/src/main/resources/fisco.properties.tpl
+app_xml_config=${java_source_code_dir}/src/main/resources/fisco.properties
 
 CLASSPATH=${java_source_code_dir}/dist/conf
 
@@ -75,11 +75,13 @@ function modify_config()
     cpt_address=$(cat cptController.address)
     issuer_address=$(cat authorityIssuer.address)
     evidence_address=$(cat evidenceController.address)
+    specificissuer_address=$(cat specificIssuer.address)
     export WEID_ADDRESS=${weid_address}
     export CPT_ADDRESS=${cpt_address}
     export ISSUER_ADDRESS=${issuer_address}
     export EVIDENCE_ADDRESS=${evidence_address}
-    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}'
+    export SPECIFICISSUER_ADDRESS=${specificissuer_address}
+    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${app_xml_config_dir}
     echo "modify sdk config finished..."
@@ -120,14 +122,15 @@ function gradle_build_sdk()
 		if [ ! -z ${content} ];then
 		content="${content}\n"
 		fi
-        content="${content}<value>WeIdentity@$var</value>"
+        content="${content}WeIdentity@$var;"
     done
 	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
 	export WEID_ADDRESS="0x0"
     export CPT_ADDRESS="0x0"
     export ISSUER_ADDRESS="0x0"
     export EVIDENCE_ADDRESS="0x0"
-    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}'
+    export SPECIFICISSUER_ADDRESS="0x0"
+    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
 	
     cd ${java_source_code_dir}/
