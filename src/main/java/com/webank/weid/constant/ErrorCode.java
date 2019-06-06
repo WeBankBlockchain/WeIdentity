@@ -451,7 +451,7 @@ public enum ErrorCode {
      * The Authority Issuer Contract level error: name already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS(
-        500204,
+        500203,
         "the authority issuer name already exists."
     ),
 
