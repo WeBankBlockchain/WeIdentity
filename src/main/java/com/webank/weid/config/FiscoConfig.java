@@ -29,9 +29,6 @@ public class FiscoConfig {
     @Value("${bcos.version:}")
     private String version;
 
-    @Value("${orgid:}")
-    private String orgId;
-
     @Value("${nodes:}")
     private String nodes;
 
@@ -49,6 +46,9 @@ public class FiscoConfig {
 
     @Value("${specificissuer.contractaddress:}")
     private String specificIssuerAddress;
+    
+    @Value("${chain.id:}")
+    private String chainId;
 
     @Value("${web3sdk.timeout:10000}")
     private String web3sdkTimeout;

@@ -243,6 +243,7 @@ public abstract class QrCodeBaseData {
      * build Meta instance by Class.
      * @param cls class Type
      * @return Object of QrCodeBaseData
+     * @throws ReflectiveOperationException 实例创建失败
      */
     public static QrCodeBaseData newInstance(Class<?> cls) throws ReflectiveOperationException {
         return (QrCodeBaseData)cls.newInstance();

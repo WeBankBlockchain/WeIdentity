@@ -300,11 +300,19 @@ public enum ErrorCode {
     PRESENTATION_WEID_PUBLICKEY_ID_INVALID(100604, "the publicKeyId is invalid."),
 
     /**
-     * The nonce of challenge does not match the nonce of presentation.
+     * the nonce of challenge does not match the nonce of presentation.
      */
     PRESENTATION_CHALLENGE_NONCE_MISMATCH(
         100605,
         "the nonce of challenge does not match the nonce of presentation."
+    ),
+    
+    /**
+     * the signature of presentation does not match the presenter.
+     */
+    PRESENTATION_SIGNATURE_MISMATCH(
+        100606,
+        "the signature of presentation does not match the presenter."
     ),
 
     /**
