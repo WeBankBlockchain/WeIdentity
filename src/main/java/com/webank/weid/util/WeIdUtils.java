@@ -32,6 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 
 /**
@@ -45,23 +46,29 @@ public final class WeIdUtils {
      * log4j object, for recording log.
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
+    
+    /**
+     * read the chainId from properties.
+     */
+    private static final String CHAIN_ID = PropertyUtils.getProperty("chain.id");
 
     /**
      * Convert a WeIdentity DID to a fisco account address.
      *
-     * @param weid the WeIdentity DID
+     * @param weId the WeIdentity DID
      * @return weId related address, empty if input WeIdentity DID is illegal
      */
-    public static String convertWeIdToAddress(String weid) {
-        if (StringUtils.isEmpty(weid) || !StringUtils.contains(weid, WeIdConstant.WEID_PREFIX)) {
+    public static String convertWeIdToAddress(String weId) {
+        if (StringUtils.isEmpty(weId) || !StringUtils.contains(weId, WeIdConstant.WEID_PREFIX)) {
             return StringUtils.EMPTY;
         }
-        return StringUtils.splitByWholeSeparator(weid, ":")[2];
+        String[] weIdFields = StringUtils.splitByWholeSeparator(weId, ":");
+        return weIdFields[weIdFields.length - 1];
     }
 
     /**
      * Convert an account address to WeIdentity DID.
-     *
+     * 
      * @param address the address
      * @return a related WeIdentity DID, or empty string if the input is illegal.
      */
@@ -69,7 +76,7 @@ public final class WeIdUtils {
         if (StringUtils.isEmpty(address)) {
             return StringUtils.EMPTY;
         }
-        return new StringBuffer().append(WeIdConstant.WEID_PREFIX).append(address).toString();
+        return buildWeIdByAddress(address);
     }
 
     /**
@@ -79,9 +86,8 @@ public final class WeIdUtils {
      * @return true if the WeIdentity DID is legal, false otherwise.
      */
     public static boolean isWeIdValid(String weId) {
-        return (StringUtils.isNotEmpty(weId)
+        return StringUtils.isNotEmpty(weId)
             && StringUtils.startsWith(weId, WeIdConstant.WEID_PREFIX)
-            && StringUtils.isNotEmpty(StringUtils.splitByWholeSeparator(weId, ":")[2]))
             && isValidAddress(convertWeIdToAddress(weId));
     }
 
@@ -94,13 +100,26 @@ public final class WeIdUtils {
     public static String convertPublicKeyToWeId(String publicKey) {
         try {
             String address = Keys.getAddress(new BigInteger(publicKey));
-            String weId =
-                new StringBuffer().append(WeIdConstant.WEID_PREFIX).append("0x").append(address)
-                    .toString();
-            return weId;
+            return buildWeIdByAddress(address);
         } catch (Exception e) {
+            logger.error("convert publicKey to weId error.", e);
             return StringUtils.EMPTY;
         }
+    }
+    
+    private static String buildWeIdByAddress(String address) {
+        if (StringUtils.isEmpty(CHAIN_ID)) {
+            throw new WeIdBaseException("the chain Id is illegal.");
+        }
+        StringBuffer weId = new StringBuffer();
+        weId.append(WeIdConstant.WEID_PREFIX)
+            .append(CHAIN_ID)
+            .append(WeIdConstant.WEID_SEPARATOR);
+        if (!StringUtils.contains(address, WeIdConstant.HEX_PREFIX)) {
+            weId.append(WeIdConstant.HEX_PREFIX);
+        }
+        weId.append(address);
+        return weId.toString();
     }
 
     /**
