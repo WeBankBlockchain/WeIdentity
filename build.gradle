@@ -44,18 +44,9 @@ List logger = [
     "org.apache.logging.log4j:log4j-web:2.1"
 ]
 
-def spring_version = "4.1.8.RELEASE"
-List spring = [
-    "org.springframework:spring-core:$spring_version",
-    "org.springframework:spring-beans:$spring_version",
-    "org.springframework:spring-context:$spring_version",
-    "org.springframework:spring-test:$spring_version"
-]
-
 // junit test
 List junit = [
-    "junit:junit:4.12",
-    "org.springframework:spring-test:$spring_version"
+    "junit:junit:4.12"
 ]
 
 List apache_commons = [
@@ -78,7 +69,7 @@ List weidentity_contract = [
     "com.webank:weidentity-contract-java:1.2.2"
 ]
 
-List db_driver = [
+List mysql_driver = [
     "mysql:mysql-connector-java:5.1.44",
     "org.apache.commons:commons-dbcp2:2.5.0"
 ]
@@ -93,8 +84,8 @@ List zxing = [
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile logger, spring, lombok, apache_commons, json, web3sdk, weidentity_contract, db_driver, zxing
-    testCompile logger, spring, lombok, apache_commons, json, web3sdk, junit, jmockit
+    compile logger, lombok, apache_commons, json, web3sdk, weidentity_contract, mysql_driver, zxing
+    testCompile logger, lombok, apache_commons, json, web3sdk, junit, jmockit
 }
 
 jacocoTestReport {
