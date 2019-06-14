@@ -96,8 +96,12 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setId(UUID.randomUUID().toString());
             result.setCptId(args.getCptId());
             result.setIssuer(args.getIssuer());
-            Long issuanceDate = DateUtils.getCurrentTimeStamp();
-            result.setIssuanceDate(issuanceDate);
+            Long issuanceDate = args.getIssuanceDate();
+            if (issuanceDate == null) {
+                result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
+            } else {
+                result.setIssuanceDate(issuanceDate);
+            }
             result.setExpirationDate(args.getExpirationDate());
             result.setClaim(args.getClaim());
             Map<String, Object> disclosureMap = new HashMap<>(args.getClaim());
