@@ -8,6 +8,8 @@ config_file=${java_source_code_dir}/dist/bin/run.config
 app_xml_config_dir=${java_source_code_dir}/dist/conf/
 app_xml_config_tpl=${java_source_code_dir}/src/main/resources/fisco.properties.tpl
 app_xml_config=${java_source_code_dir}/src/main/resources/fisco.properties
+weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties.tpl
+weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
 
 CLASSPATH=${java_source_code_dir}/dist/conf
 
@@ -81,9 +83,12 @@ function modify_config()
     export ISSUER_ADDRESS=${issuer_address}
     export EVIDENCE_ADDRESS=${evidence_address}
     export SPECIFICISSUER_ADDRESS=${specificissuer_address}
-    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
+    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${app_xml_config_dir}
+    NODEVAR='${BLOCKCHIAN_NODE_INFO}'
+    envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
+    cp ${weid_config} ${app_xml_config_dir}
     echo "modify sdk config finished..."
 }
 
@@ -119,10 +124,7 @@ function gradle_build_sdk()
 	content=
     for var in ${array[@]}
     do
-		if [ ! -z ${content} ];then
-		content="${content}\n"
-		fi
-        content="${content}WeIdentity@$var;"
+      content="${content}WeIdentity@$var,"
     done
 	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
 	export WEID_ADDRESS="0x0"
@@ -130,8 +132,10 @@ function gradle_build_sdk()
     export ISSUER_ADDRESS="0x0"
     export EVIDENCE_ADDRESS="0x0"
     export SPECIFICISSUER_ADDRESS="0x0"
-    MYVARS='${BLOCKCHIAN_NODE_INFO}:${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
+    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
+    NODEVAR='${BLOCKCHIAN_NODE_INFO}'
+    envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
 	
     cd ${java_source_code_dir}/
     if [ -d dist/ ];then
