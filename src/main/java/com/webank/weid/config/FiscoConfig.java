@@ -32,6 +32,8 @@ public class FiscoConfig {
     private String web3sdkMaxPoolSize;
     private String web3sdkQueueSize;
     private String web3sdkKeepAliveSeconds;
+    private String groupId;
+    private String encryptType;
     private String v1CaCrtPath;
     private String v1ClientCrtPassword;
     private String v1ClientKeyStorePath;
@@ -47,41 +49,33 @@ public class FiscoConfig {
      */
     public boolean load() {
         try {
-            version = PropertyUtils.getProperty("bcos.version");
+            // node info is obtained from weidentity.properties
             nodes = PropertyUtils.getProperty("nodes");
+
+            version = PropertyUtils.getProperty("bcos.version");
             weIdAddress = PropertyUtils.getProperty("weId.contractaddress");
             cptAddress = PropertyUtils.getProperty("cpt.contractaddress");
             issuerAddress = PropertyUtils.getProperty("issuer.contractaddress");
             evidenceAddress = PropertyUtils.getProperty("evidence.contractaddress");
             specificIssuerAddress = PropertyUtils.getProperty("specificissuer.contractaddress");
             chainId = PropertyUtils.getProperty("chain.id");
-            web3sdkTimeout = PropertyUtils
-                .getProperty("web3sdkTimeout", "10000");
-            web3sdkCorePoolSize = PropertyUtils
-                .getProperty("web3sdk.core-pool-size", "100");
-            web3sdkMaxPoolSize = PropertyUtils
-                .getProperty("web3sdk.max-pool-size", "200");
-            web3sdkQueueSize = PropertyUtils
-                .getProperty("web3sdk.queue-capacity", "1000");
-            web3sdkKeepAliveSeconds = PropertyUtils
-                .getProperty("web3sdk.keep-alive-seconds", "60");
-            v1CaCrtPath = PropertyUtils
-                .getProperty("v1.ca-crt-path", "ca.crt");
-            v1ClientCrtPassword = PropertyUtils
-                .getProperty("v1.client-crt-password", "123456");
-            v1ClientKeyStorePath = PropertyUtils
-                .getProperty("v1.client-key-store-path", "client.keystore");
-            v1KeyStorePassword = PropertyUtils
-                .getProperty("v1.key-store-password", "123456");
-            v2CaCrtPath = PropertyUtils
-                .getProperty("v2.ca-crt-path", "./v2/ca.crt");
-            v2NodeCrtPath = PropertyUtils
-                .getProperty("v2.node-crt-path", "./v2/node.crt");
-            v2NodeKeyPath = PropertyUtils
-                .getProperty("v2.node-key-path", "./v2/node.key");
+            web3sdkTimeout = PropertyUtils.getProperty("web3sdk.timeout");
+            web3sdkCorePoolSize = PropertyUtils.getProperty("web3sdk.core-pool-size");
+            web3sdkMaxPoolSize = PropertyUtils.getProperty("web3sdk.max-pool-size");
+            web3sdkQueueSize = PropertyUtils.getProperty("web3sdk.queue-capacity");
+            web3sdkKeepAliveSeconds = PropertyUtils.getProperty("web3sdk.keep-alive-seconds");
+            groupId = PropertyUtils.getProperty("group.id");
+            encryptType = PropertyUtils.getProperty("encrypt.type");
+            v1CaCrtPath = PropertyUtils.getProperty("v1.ca-crt-path");
+            v1ClientCrtPassword = PropertyUtils.getProperty("v1.client-crt-password");
+            v1ClientKeyStorePath = PropertyUtils.getProperty("v1.client-key-store-path");
+            v1KeyStorePassword = PropertyUtils.getProperty("v1.key-store-password");
+            v2CaCrtPath = PropertyUtils.getProperty("v2.ca-crt-path");
+            v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
+            v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
             return true;
         } catch (Exception e) {
-            logger.error("Error occurred during loading Fisco-Bcos properties: " + e.getMessage());
+            logger.error("Error occurred during loading Fisco-Bcos properties: ", e);
             return false;
         }
     }
