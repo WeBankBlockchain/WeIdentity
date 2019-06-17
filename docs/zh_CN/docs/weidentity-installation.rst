@@ -42,5 +42,5 @@ WeIdentity JAVA SDK安装部署文档
 
 我们提供两种方式安装部署SDK：   
 
+* `安装部署工具方式 <https://weidentity.readthedocs.io/projects/buildtools/zh_CN/latest/docs/weidentity-build-tools-doc.html>`_ （推荐方式）   
 * `源码方式 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-installation-by-sourcecode.html>`_   
-* `安装部署工具方式 <https://weidentity.readthedocs.io/projects/buildtools/zh_CN/latest/docs/weidentity-build-tools-doc.html>`_
