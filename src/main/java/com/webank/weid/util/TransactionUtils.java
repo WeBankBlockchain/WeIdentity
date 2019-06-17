@@ -317,10 +317,23 @@ public class TransactionUtils {
     public static StaticArray<Int256> getParamCreated(int length) {
         long[] longArray = new long[length];
         long created = System.currentTimeMillis();
-        longArray[0] = created;
+        longArray[1] = created;
         return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
-
+    
+    /**
+     * Get the current timestamp as the param "updated".  Used by Restful API service.
+     *
+     * @param length length
+     * @return the StaticArray
+     */
+    public static StaticArray<Int256> getParamUpdated(int length) {
+        long[] longArray = new long[length];
+        long created = System.currentTimeMillis();
+        longArray[2] = created;
+        return DataToolUtils.longArrayToInt256StaticArray(longArray);
+    }
+    
     /**
      * Get the cpt json schema as the param "cptJsonSchema". Used by Restful API service.
      *
