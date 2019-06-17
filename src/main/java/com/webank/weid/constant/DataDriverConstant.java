@@ -45,11 +45,76 @@ public final class DataDriverConstant {
      * jdbc user password properties.
      */
     public static final String JDBC_USER_PASSWORD = "jdbc.password";
-
+    
+    /**
+     * jdbc maxActive properties.
+     */
+    public static final String JDBC_MAX_ACTIVE = "jdbc.maxActive";
+    
+    /**
+     * jdbc minIdle properties.
+     */
+    public static final String JDBC_MIN_IDLE = "jdbc.minIdle";
+    
+    /**
+     * jdbc minIdle properties.
+     */
+    public static final String JDBC_MAX_IDLE = "jdbc.maxIdle";
+    
+    /**
+     * jdbc maxWait properties.
+     */
+    public static final String JDBC_MAX_WAIT = "jdbc.maxWait";
+    
+    /**
+     * jdbc timeBetweenEvictionRunsMillis properties.
+     */
+    public static final String JDBC_TIME_BETWEEN_ERM = "jdbc.timeBetweenEvictionRunsMillis";
+    
+    /**
+     * jdbc numTestsPerEvictionRun properties.
+     */
+    public static final String JDBC_NUM_TEST_PER_ER = "jdbc.numTestsPerEvictionRun";
+    
+    /**
+     * jdbc maxWait properties.
+     */
+    public static final String JDBC_MIN_EITM = "jdbc.minEvictableIdleTimeMillis";
+    
+    /**
+     * jdbc driverClassName.
+     */
+    public static final String JDBC_MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
+   
+    /**
+     * jdbc removeAbandoned.
+     */
+    public static final String JDBC_REMOVE_ABANDONED = "true";
+    
+    /**
+     * jdbc removeAbandonedTimeout.
+     */
+    public static final String JDBC_REMOVE_ABANDONED_TIMEOUT = "180";
+    
+    /**
+     * jdbc testOnBorrow.
+     */
+    public static final String JDBC_TEST_ON_BORROW = "false";
+    
+    /**
+     * jdbc testOnWhile.
+     */
+    public static final String JDBC_TEST_ON_WHILE = "true";
+    
+    /**
+     * jdbc validationQuery.
+     */
+    public static final String JDBC_VALIDATION_QUERY = "SELECT 1";
+    
     /**
      * sql execute status.
      */
-    public static final Integer SQL_EXECUTE_FAILED_STATUS = -1;
+    public static final Integer SQL_EXECUTE_FAILED_STATUS = 0;
 
     /**
      * jdbc user password properties.
@@ -70,4 +135,27 @@ public final class DataDriverConstant {
      * sql index.
      */
     public static final int SQL_INDEX_THIRD = 3;
+    
+    /**
+     * the key of ConnectionPool.
+     */
+    public static final String POOL_DRIVER_CLASS_NAME = "driverClassName";
+    public static final String POOL_URL = "url";
+    public static final String POOL_USERNAME = "username";
+    public static final String POOL_PASSWORD = "password";
+    public static final String POOL_MAX_ACTIVE = "maxActive";
+    public static final String POOL_MIN_IDLE = "minIdle";
+    public static final String POOL_MAX_IDLE = "maxIdle";
+    public static final String POOL_MAX_WAIT = "maxWait";
+    public static final String POOL_MAX_REMOVE_ABANDONED = "removeAbandoned";
+    public static final String POOL_MAX_REMOVE_ABANDONED_TIMEOUT = "removeAbandonedTimeout";
+    public static final String POOL_TEST_ON_BORROW = "testOnBorrow";
+    public static final String POOL_TEST_ON_WHILE = "testWhileIdle";
+    public static final String POOL_TIME_BETWEEN_ERM = "timeBetweenEvictionRunsMillis";
+    public static final String POOL_NUM_TEST_PER_ER = "numTestsPerEvictionRun";
+    public static final String POOL_VALIDATION_QUERY = "validationQuery";
+    public static final String POOL_MIN_EITM = "minEvictableIdleTimeMillis";
+    
+    
+    
 }

@@ -97,6 +97,7 @@ import org.bcos.web3j.crypto.Hash;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.bcos.web3j.utils.Numeric;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,11 +164,11 @@ public final class DataToolUtils {
     /**
      * Keccak-256 hash function.
      *
-     * @param hexInput hex encoded input data with optional 0x prefix
+     * @param utfString the utfString
      * @return hash value as hex encoded string
      */
-    public static String sha3(String hexInput) {
-        return Hash.sha3(hexInput);
+    public static String sha3(String utfString) {
+        return Numeric.toHexString(sha3(utfString.getBytes(StandardCharsets.UTF_8)));
     }
 
     /**
