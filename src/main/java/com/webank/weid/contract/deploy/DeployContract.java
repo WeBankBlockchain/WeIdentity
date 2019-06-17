@@ -95,6 +95,7 @@ public class DeployContract {
         fiscoConfig = new FiscoConfig();
         if (!fiscoConfig.load()) {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
+            System.exit(1);
         }
         loadConfig();
     }
@@ -121,7 +122,12 @@ public class DeployContract {
 
     private static boolean initWeb3j() {
         logger.info("[BaseService] begin to init web3j instance..");
-        Service service = TransactionUtils.buildFiscoBcosService(fiscoConfig);
+        Service service;
+        if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+            service = TransactionUtils.buildFiscoBcosService(fiscoConfig);
+        } else {
+            return false;
+        }
         try {
             service.run();
         } catch (Exception e) {
