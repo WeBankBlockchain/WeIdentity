@@ -20,7 +20,6 @@
 package com.webank.weid.config;
 
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 
 /**
  * contract address config.
@@ -33,30 +32,25 @@ public class ContractConfig {
     /**
      * The WeIdentity DID Contract address.
      */
-    @Value("${weId.contractaddress}")
     private String weIdAddress;
 
     /**
      * The CPT Contract address.
      */
-    @Value("${cpt.contractaddress}")
     private String cptAddress;
 
     /**
      * The AuthorityIssuerController Contract address.
      */
-    @Value("${issuer.contractaddress}")
     private String issuerAddress;
 
     /**
      * The EvidenceController Contract address.
      */
-    @Value("${evidence.contractaddress}")
     private String evidenceAddress;
 
     /**
      * The Specific issuer Contract address.
      */
-    @Value("${specificissuer.contractaddress}")
     private String specificIssuerAddress;
 }
