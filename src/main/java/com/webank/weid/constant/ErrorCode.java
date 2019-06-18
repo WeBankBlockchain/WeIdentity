@@ -574,6 +574,14 @@ public enum ErrorCode {
     ),
     
     /**
+     * can not get the connection from pool.
+     */
+    SQL_GET_CONNECTION_ERROR(
+        160013, 
+        "can not get the connection from pool, please check the error log."
+    ),
+    
+    /**
      * other uncatched exceptions or error.
      */
     UNKNOW_ERROR(160003, "unknow error, please check the error log.");
