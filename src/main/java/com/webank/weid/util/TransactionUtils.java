@@ -565,7 +565,7 @@ public class TransactionUtils {
         channelConnections
             .setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
         channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
-        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
+        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(",")));
         ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
             new ConcurrentHashMap<>();
         allChannelConnections.put(currentOrgId, channelConnections);

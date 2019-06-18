@@ -23,6 +23,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.URI;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -34,12 +36,12 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
+import org.springframework.util.ClassUtils;
 
 /**
  * debug class for output object information.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class BeanUtil {
 
@@ -82,7 +84,7 @@ public class BeanUtil {
                         + f[i].getName().substring(0, 1).toUpperCase(Locale.getDefault())
                         + f[i].getName().substring(1), new Class[0]);
                     Object left = f[i].getName();
-                    Object right = m.invoke(obj, new Object[] {});
+                    Object right = m.invoke(obj, new Object[]{});
                     formatByType(blank, left, right, beanStr);
                 }
             } catch (NoSuchMethodException ex) {
@@ -160,14 +162,20 @@ public class BeanUtil {
     }
 
     private static boolean isSimpleValueType(Object obj) {
-        
+        Class clazz = obj.getClass();
         if (obj == null) {
             return false;
         }
-        if (Date.class.isAssignableFrom(obj.getClass())) {
+        if (Date.class.isAssignableFrom(clazz)) {
             return false;
         }
-        return BeanUtils.isSimpleValueType(obj.getClass());
+        return (ClassUtils.isPrimitiveOrWrapper(clazz)
+            || Enum.class.isAssignableFrom(clazz)
+            || CharSequence.class.isAssignableFrom(clazz)
+            || Number.class.isAssignableFrom(clazz)
+            || Date.class.isAssignableFrom(clazz)
+            || URI.class == clazz || URL.class == clazz
+            || Locale.class == clazz || Class.class == clazz);
     }
 
     private static void formatByType(
@@ -175,7 +183,7 @@ public class BeanUtil {
         Object left,
         Object right,
         StringBuilder beanStr) {
-        
+
         Object leftObj = left;
         if (right == null) {
             beanStr.append(blank)
@@ -247,7 +255,8 @@ public class BeanUtil {
     }
 
     /**
-     *  converting objects into strings.
+     * converting objects into strings.
+     *
      * @param obj objects requiring format conversion
      */
     public static String objToString(Object obj) {
