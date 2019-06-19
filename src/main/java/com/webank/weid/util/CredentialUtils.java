@@ -317,10 +317,16 @@ public final class CredentialUtils {
         if (!WeIdUtils.isWeIdValid(args.getIssuer())) {
             return ErrorCode.CREDENTIAL_ISSUER_INVALID;
         }
+        Long issuanceDate = args.getIssuanceDate();
+        if (issuanceDate != null && issuanceDate <= 0) {
+            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+        }
         Long expirationDate = args.getExpirationDate();
         if (expirationDate == null
             || expirationDate.longValue() < 0
-            || expirationDate.longValue() == 0) {
+            || expirationDate.longValue() == 0
+            || (issuanceDate != null && expirationDate < issuanceDate)
+            || (issuanceDate == null && expirationDate < System.currentTimeMillis())) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
         }
         if (args.getClaim() == null || args.getClaim().isEmpty()) {
