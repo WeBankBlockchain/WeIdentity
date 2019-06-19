@@ -26,9 +26,6 @@ import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.rpc.AuthorityIssuerService;
@@ -48,8 +45,6 @@ import com.webank.weid.service.impl.WeIdServiceImpl;
  *
  * @author v_wbgyang
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"classpath:SpringApplicationContext-test.xml"})
 public abstract class BaseTest extends BaseService {
 
     protected AuthorityIssuerService authorityIssuerService;

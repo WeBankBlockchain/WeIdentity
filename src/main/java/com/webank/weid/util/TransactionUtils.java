@@ -317,10 +317,23 @@ public class TransactionUtils {
     public static StaticArray<Int256> getParamCreated(int length) {
         long[] longArray = new long[length];
         long created = System.currentTimeMillis();
-        longArray[0] = created;
+        longArray[1] = created;
         return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
-
+    
+    /**
+     * Get the current timestamp as the param "updated".  Used by Restful API service.
+     *
+     * @param length length
+     * @return the StaticArray
+     */
+    public static StaticArray<Int256> getParamUpdated(int length) {
+        long[] longArray = new long[length];
+        long created = System.currentTimeMillis();
+        longArray[2] = created;
+        return DataToolUtils.longArrayToInt256StaticArray(longArray);
+    }
+    
     /**
      * Get the cpt json schema as the param "cptJsonSchema". Used by Restful API service.
      *
@@ -539,7 +552,10 @@ public class TransactionUtils {
      * @return Service instance client
      */
     public static Service buildFiscoBcosService(FiscoConfig fiscoConfig) {
-        
+        if (!fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+            logger.error("Only 1.x version FISCO-BCOS chain configurations are allowed. Abort.");
+            return null;
+        }
         String currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
         Service service = new Service();
         service.setOrgID(currentOrgId);
@@ -552,7 +568,7 @@ public class TransactionUtils {
         channelConnections
             .setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
         channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
-        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
+        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(",")));
         ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
             new ConcurrentHashMap<>();
         allChannelConnections.put(currentOrgId, channelConnections);
