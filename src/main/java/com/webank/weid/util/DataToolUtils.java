@@ -335,7 +335,7 @@ public final class DataToolUtils {
             clonedObj = (T) ois.readObject();
             ois.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("clone object has error.", e);
         }
         return clonedObj;
     }
