@@ -15,7 +15,7 @@ import com.webank.weid.suite.persistence.driver.MysqlDriver;
 public class KeyManagerCallback extends AmopCallback {
     
     private static final Logger logger =  LoggerFactory.getLogger(KeyManagerCallback.class);
-    
+
     private Persistence dataDriver = new MysqlDriver();
     
     private static final String TRANSENCRYPTIONDOMAIN = "transEncryption";
