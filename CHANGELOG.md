@@ -1,3 +1,15 @@
+### v1.2.1 (2019-06-19)
+
+- Features:
+1. Remove spring dependencies for weidentity-java-sdk.
+2. Optimize weidentity.properties and fisco.properties files.
+3. Modify random salt generator.
+4. Support connection pool for presistence.
+5. Modify docs.
+
+- Bugfixes:
+1. Fixed issue of printing exception log.
+
 ### v1.2.0 (2019-06-6)
 
 - Features:
