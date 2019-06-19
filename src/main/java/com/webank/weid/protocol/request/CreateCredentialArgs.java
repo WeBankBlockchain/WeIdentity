@@ -57,4 +57,9 @@ public class CreateCredentialArgs {
      * Required: The private key structure used for signing.
      */
     private WeIdPrivateKey weIdPrivateKey;
+
+    /**
+     * Optional: The issuance date of the credential.
+     */
+    private Long issuanceDate = null;
 }

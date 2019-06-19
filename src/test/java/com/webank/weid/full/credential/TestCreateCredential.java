@@ -215,6 +215,24 @@ public class TestCreateCredential extends TestBaseServcie {
         Assert.assertNotNull(response.getResult());
     }
 
+
+    /**
+     * case: test issuance date changes.
+     */
+    @Test
+    public void createCredentialWithIssuanceDateTest() {
+        CreateCredentialArgs createCredentialArgs =
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
+        createCredentialArgs.setIssuanceDate(0L);
+        ResponseData<CredentialWrapper> response =
+            credentialService.createCredential(createCredentialArgs);
+        LogUtil.info(logger, "createCredential", response);
+
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
     /**
      * case： expirationDate <= 0.
      */
@@ -248,8 +266,9 @@ public class TestCreateCredential extends TestBaseServcie {
             credentialService.createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
     }
 
     /**
