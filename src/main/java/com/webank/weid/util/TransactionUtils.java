@@ -552,7 +552,10 @@ public class TransactionUtils {
      * @return Service instance client
      */
     public static Service buildFiscoBcosService(FiscoConfig fiscoConfig) {
-        
+        if (!fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+            logger.error("Only 1.x version FISCO-BCOS chain configurations are allowed. Abort.");
+            return null;
+        }
         String currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
         Service service = new Service();
         service.setOrgID(currentOrgId);
