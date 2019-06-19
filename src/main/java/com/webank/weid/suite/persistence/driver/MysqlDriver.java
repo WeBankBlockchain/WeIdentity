@@ -19,13 +19,7 @@
 
 package com.webank.weid.suite.persistence.driver;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -36,15 +30,15 @@ import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.DbBase;
 import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.PropertyUtils;
 
 /**
  * mysql operations.
  *
  * @author tonychen 2019年3月18日
  */
-public class MysqlDriver implements Persistence {
+public class MysqlDriver extends DbBase implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(MysqlDriver.class);
 
@@ -61,8 +55,8 @@ public class MysqlDriver implements Persistence {
     /**
      * sql for update.
      */
-    private static final String SQL_UPDATE = "update sdk_all_data set data = ?, updated=? where "
-        + "id = ?";
+    private static final String SQL_UPDATE = "update sdk_all_data set data = ?, updated=now() "
+        + "where id = ?";
 
     /**
      * sql for delete.
@@ -70,36 +64,10 @@ public class MysqlDriver implements Persistence {
     private static final String SQL_DELETE = "delete from sdk_all_data where id = ?";
 
     /**
-     * Mysql connection.
+     * 根据驱动类型构造对象.
      */
-    private static Connection connection;
-
     public MysqlDriver() {
-        init();
-    }
-
-    /**
-     * initialize database connection.
-     */
-    public void init() {
-
-        try {
-            
-            String dbUrl = PropertyUtils.getProperty(DataDriverConstant.JDBC_URL);
-            String userName = PropertyUtils.getProperty(DataDriverConstant.JDBC_USER_NAME);
-            String passWord = PropertyUtils.getProperty(DataDriverConstant.JDBC_USER_PASSWORD);
-            
-            // 1. initialize mysql jdbc driver
-            Class.forName("com.mysql.jdbc.Driver");
-
-            // 2. initialize mysql connection
-            connection = DriverManager.getConnection(dbUrl, userName, passWord);
-
-        } catch (SQLException e) {
-            logger.error("Initialize mysql connection with exception ", e);
-        } catch (ClassNotFoundException e) {
-            logger.error("Initialize failed with exception ", e);
-        }
+        super(DataDriverConstant.JDBC_MYSQL_DRIVER_CLASS_NAME);
     }
 
     @Override
@@ -114,26 +82,7 @@ public class MysqlDriver implements Persistence {
                 );
         }
         String dataKey = DataToolUtils.getHash(id);
-        ResponseData<String> result = new ResponseData<String>();
-        PreparedStatement ps;
-        String data = null;
-        try {
-            ps = connection.prepareStatement(SQL_QUERY);
-            ps.setString(DataDriverConstant.SQL_INDEX_FIRST, dataKey);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                data = rs.getString(DataDriverConstant.SQL_COLUMN_DATA);
-            }
-            rs.close();
-            ps.close();
-            result.setErrorCode(ErrorCode.SUCCESS);
-            result.setResult(data);
-        } catch (SQLException e) {
-            logger.error("Query data from mysql with exception", e);
-            result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(StringUtils.EMPTY);
-        }
-        return result;
+        return super.executeQuery(SQL_QUERY, dataKey);
     }
 
     /* (non-Javadoc)
@@ -144,25 +93,14 @@ public class MysqlDriver implements Persistence {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[mysql->save] the id of the data is empty.");
-            return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
+            return 
+                new ResponseData<Integer>(
+                    DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                    ErrorCode.PRESISTENCE_DATA_KEY_INVALID
+                );
         }
         String dataKey = DataToolUtils.getHash(id);
-        ResponseData<Integer> result = new ResponseData<Integer>();
-        PreparedStatement ps;
-        try {
-            ps = connection.prepareStatement(SQL_SAVE);
-            ps.setString(DataDriverConstant.SQL_INDEX_FIRST, dataKey);
-            ps.setString(DataDriverConstant.SQL_INDEX_SECOND, data);
-            int rs = ps.executeUpdate();
-            ps.close();
-            result.setErrorCode(ErrorCode.SUCCESS);
-            result.setResult(rs);
-        } catch (SQLException e) {
-            logger.error("Save data to mysql with exception", e);
-            result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
-        }
-        return result;
+        return super.execute(SQL_SAVE, dataKey, data);
     }
 
     /* (non-Javadoc)
@@ -170,31 +108,14 @@ public class MysqlDriver implements Persistence {
      */
     @Override
     public ResponseData<Integer> batchSave(String domain, List<String> ids, List<String> dataList) {
-
-        ResponseData<Integer> result = new ResponseData<Integer>();
-        try {
-            connection.setAutoCommit(false);
-            PreparedStatement psts = connection.prepareStatement(SQL_SAVE);
-            for (int i = 0; i < ids.size(); i++) {
-                String id = ids.get(i);
-                if (StringUtils.isEmpty(id)) {
-                    logger.error("[mysql->batchSave] the id of the {}rd data is empty.", i + 1);
-                    return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
-                }
-                String dataKey = DataToolUtils.getHash(ids.get(i));
-                psts.setString(DataDriverConstant.SQL_INDEX_FIRST, dataKey);
-                psts.setString(DataDriverConstant.SQL_INDEX_SECOND, dataList.get(i));
-                psts.addBatch();
-            }
-
-            psts.executeBatch();
-            connection.commit();
-        } catch (SQLException e) {
-            logger.error("Batch save data to mysql with exception", e);
-            result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
+        List<List<String>> dataLists = new ArrayList<List<String>>();
+        List<String> idHashList = new ArrayList<>();
+        for (String id : ids) {
+            idHashList.add(DataToolUtils.getHash(id));
         }
-        return result;
+        dataLists.add(idHashList);
+        dataLists.add(dataList);
+        return super.batchSave(SQL_SAVE, dataLists);
     }
 
     /* (non-Javadoc)
@@ -205,24 +126,14 @@ public class MysqlDriver implements Persistence {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[mysql->delete] the id of the data is empty.");
-            return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
+            return 
+                new ResponseData<Integer>(
+                    DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                    ErrorCode.PRESISTENCE_DATA_KEY_INVALID
+                );
         }
         String dataKey = DataToolUtils.getHash(id);
-        ResponseData<Integer> result = new ResponseData<Integer>();
-        PreparedStatement ps;
-        try {
-            ps = connection.prepareStatement(SQL_DELETE);
-            ps.setString(DataDriverConstant.SQL_INDEX_FIRST, dataKey);
-            int rs = ps.executeUpdate();
-            ps.close();
-            result.setErrorCode(ErrorCode.SUCCESS);
-            result.setResult(rs);
-        } catch (SQLException e) {
-            logger.error("Delete data from mysql with exception", e);
-            result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
-        }
-        return result;
+        return super.execute(SQL_DELETE, dataKey);
     }
 
     /* (non-Javadoc)
@@ -233,41 +144,13 @@ public class MysqlDriver implements Persistence {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[mysql->update] the id of the data is empty.");
-            return new ResponseData<Integer>(-1, ErrorCode.PRESISTENCE_DATA_KEY_INVALID);
+            return 
+                new ResponseData<Integer>(
+                    DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                    ErrorCode.PRESISTENCE_DATA_KEY_INVALID
+                );
         }
         String dataKey = DataToolUtils.getHash(id);
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String date = simpleDateFormat.format(new Date());
-
-        ResponseData<Integer> result = new ResponseData<Integer>();
-        PreparedStatement ps;
-        try {
-            ps = connection.prepareStatement(SQL_UPDATE);
-            ps.setString(DataDriverConstant.SQL_INDEX_FIRST, data);
-            ps.setString(DataDriverConstant.SQL_INDEX_SECOND, date);
-            ps.setString(DataDriverConstant.SQL_INDEX_THIRD, dataKey);
-            int rs = ps.executeUpdate();
-            ps.close();
-            result.setErrorCode(ErrorCode.SUCCESS);
-            result.setResult(rs);
-        } catch (SQLException e) {
-            logger.error("Update data into mysql with exception", e);
-            result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
-        }
-        return result;
-    }
-
-    /**
-     * close mysql connection.
-     */
-    public void close() {
-
-        try {
-            connection.close();
-            logger.info("successfully closed the connection.");
-        } catch (SQLException e) {
-            logger.error("close connection failed with exception. ", e);
-        }
+        return super.execute(SQL_UPDATE, data, dataKey);
     }
 }
