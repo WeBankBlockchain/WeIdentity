@@ -55,4 +55,9 @@ public class CreateCredentialPojoArgs<T> {
      * Required: The private key structure used for signing.
      */
     private WeIdAuthentication weIdAuthentication;
+
+    /**
+     * Optional: The issuance date of the credential.
+     */
+    private Long issuanceDate = null;
 }

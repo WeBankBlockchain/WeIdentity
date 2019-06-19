@@ -50,7 +50,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -83,6 +82,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicArray;
@@ -97,6 +97,7 @@ import org.bcos.web3j.crypto.Hash;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.bcos.web3j.utils.Numeric;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -124,6 +125,11 @@ public final class DataToolUtils {
     private static final String CHARSET = StandardCharsets.UTF_8.toString();
 
     private static final String FORMAT_NAME = "JPG";
+
+    /**
+     * default salt length.
+     */
+    private static final String DEFAULT_SALT_LENGTH = "5";
 
     // 二维码尺寸
     private static final int QRCODE_SIZE = 300;
@@ -163,11 +169,11 @@ public final class DataToolUtils {
     /**
      * Keccak-256 hash function.
      *
-     * @param hexInput hex encoded input data with optional 0x prefix
+     * @param utfString the utfString
      * @return hash value as hex encoded string
      */
-    public static String sha3(String hexInput) {
-        return Hash.sha3(hexInput);
+    public static String sha3(String utfString) {
+        return Numeric.toHexString(sha3(utfString.getBytes(StandardCharsets.UTF_8)));
     }
 
     /**
@@ -191,20 +197,10 @@ public final class DataToolUtils {
      */
     public static String getRandomSalt() {
 
-        String length = PropertyUtils.getProperty("salt.length");
+        String length = PropertyUtils.getProperty("salt.length", DEFAULT_SALT_LENGTH);
         int saltLength = Integer.valueOf(length);
-        String base = "abcdefghijklmnopqrstuvwxyz0123456789";
-        int randomNum;
-        char randomChar;
-        Random random = new Random();
-        StringBuffer str = new StringBuffer();
-
-        for (int i = 0; i < saltLength; i++) {
-            randomNum = random.nextInt(base.length());
-            randomChar = base.charAt(randomNum);
-            str.append(randomChar);
-        }
-        return str.toString();
+        String salt = RandomStringUtils.random(saltLength, true, true);
+        return salt;
     }
 
     /**
@@ -254,7 +250,7 @@ public final class DataToolUtils {
 
     /**
      * deserialize a JSON String to List.
-     * 
+     *
      * @param json json string
      * @param clazz Class.class
      * @param <T> the type of the element
@@ -339,7 +335,7 @@ public final class DataToolUtils {
             clonedObj = (T) ois.readObject();
             ois.close();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("clone object has error.", e);
         }
         return clonedObj;
     }

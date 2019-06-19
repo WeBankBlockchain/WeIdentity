@@ -101,8 +101,9 @@ public abstract class BaseService {
     private static boolean initWeb3j() {
 
         logger.info("[BaseService] begin to init web3j instance..");
-        service = TransactionUtils.buildFiscoBcosService(fiscoConfig);
-
+        if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+            service = TransactionUtils.buildFiscoBcosService(fiscoConfig);
+        }
         OnNotifyCallback pushCallBack = new OnNotifyCallback();
         service.setPushCallback(pushCallBack);
         pushCallBack.registAmopCallback(

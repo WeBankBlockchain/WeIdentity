@@ -330,8 +330,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             result.setContext(context);
             result.setId(UUID.randomUUID().toString());
             result.setCptId(args.getCptId());
+            Long issuanceDate = args.getIssuanceDate();
+            if (issuanceDate == null) {
+                result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
+            } else {
+                result.setIssuanceDate(issuanceDate);
+            }
             result.setIssuer(args.getIssuer());
-            result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
             result.setExpirationDate(args.getExpirationDate());
             result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
             Object claimObject = args.getClaim();
@@ -370,7 +375,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             return responseData;
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Generate Credential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }
@@ -419,7 +423,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             response.setErrorCode(ErrorCode.SUCCESS);
             return response;
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Generate SelectiveCredential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }

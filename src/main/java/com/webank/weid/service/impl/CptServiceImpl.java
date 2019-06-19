@@ -428,7 +428,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             return cptController.updateCpt(
                 DataToolUtils.intToUint256(cptId),
                 new Address(WeIdUtils.convertWeIdToAddress(weId)),
-                TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
+                TransactionUtils.getParamUpdated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
                 bytes32Array,
                 TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
                 rsvSignature.getV(),
