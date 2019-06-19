@@ -19,9 +19,12 @@
 
 package com.webank.weid.protocol.inf;
 
+import com.webank.weid.util.DataToolUtils;
+
 public interface RawSerializer extends JsonSerializer {
     
     public default String toRawData() {
-        return toJson();
+        //return toJson();
+        return DataToolUtils.serialize(this);
     } 
 }
