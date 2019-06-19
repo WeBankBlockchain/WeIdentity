@@ -19,6 +19,7 @@
 
 package com.webank.weid.suite.transportation;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import com.webank.weid.constant.ErrorCode;
@@ -75,5 +76,23 @@ public abstract class AbstractJsonTransportation
     public JsonTransportation specify(List<String> verifierWeIdList) {
         this.setVerifier(verifierWeIdList);
         return this;
+    }
+    
+    /**
+     * getFromJsonMethod.
+     * @param clazz Class
+     * @return Method
+     */
+    public Method getFromJsonMethod(Class<?> clazz) {
+        Method[] methods = clazz.getMethods();
+        Method targetMethod = null;
+        for (Method method : methods) {
+            if (method.getName().equals("fromJson") 
+                && method.getParameterTypes().length == 1
+                && method.getParameterTypes()[0] == String.class) {
+                targetMethod = method;
+            }
+        }
+        return targetMethod;
     }
 }
