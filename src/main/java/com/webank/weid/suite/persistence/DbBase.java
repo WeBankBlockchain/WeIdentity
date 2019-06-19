@@ -261,7 +261,6 @@ public class DbBase {
             }
             result.setResult(count);
         } catch (SQLException e) {
-            e.printStackTrace();
             logger.error("Batch save data to mysql with exception", e);
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
             result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
