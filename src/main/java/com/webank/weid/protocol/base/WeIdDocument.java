@@ -23,7 +23,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.util.DataToolUtils;
 
@@ -34,6 +38,8 @@ import com.webank.weid.util.DataToolUtils;
  */
 @Data
 public class WeIdDocument implements JsonSerializer {
+
+    private static final Logger logger = LoggerFactory.getLogger(WeIdDocument.class);
 
     /**
      *  the serialVersionUID.
@@ -70,12 +76,26 @@ public class WeIdDocument implements JsonSerializer {
      */
     private List<ServiceProperty> service = new ArrayList<>();
     
+    @Override
+    public String toJson() {
+        return DataToolUtils.addTagFromToJson(DataToolUtils.serialize(this));
+    }
+   
     /**
      * create WeIdDocument with JSON String.
      * @param weIdDocumentJson the weIdDocument JSON String
      * @return WeIdDocument
      */
     public static WeIdDocument fromJson(String weIdDocumentJson) {
-        return DataToolUtils.deserialize(weIdDocumentJson, WeIdDocument.class);
+        if (StringUtils.isBlank(weIdDocumentJson)) {
+            logger.error("create WeIdDocument with JSON String failed, "
+                + "the WeIdDocument JSON String is null");
+            throw new DataTypeCastException("the WeIdDocument JSON String is null.");
+        }
+        String weIdDocumentString = weIdDocumentJson;
+        if (DataToolUtils.isValidFromToJson(weIdDocumentJson)) {
+            weIdDocumentString = DataToolUtils.removeTagFromToJson(weIdDocumentJson);
+        }
+        return DataToolUtils.deserialize(weIdDocumentString, WeIdDocument.class);
     }
 }
