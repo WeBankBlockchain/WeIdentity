@@ -370,7 +370,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             return responseData;
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Generate Credential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }
@@ -419,7 +418,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             response.setErrorCode(ErrorCode.SUCCESS);
             return response;
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("Generate SelectiveCredential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }
