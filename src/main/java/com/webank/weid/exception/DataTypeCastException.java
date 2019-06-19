@@ -40,6 +40,15 @@ public class DataTypeCastException extends WeIdBaseException {
     }
 
     /**
+     * constructor.
+     *
+     * @param message message
+     */
+    public DataTypeCastException(String message) {
+        super(ErrorCode.DATA_TYPE_CASE_ERROR.getCodeDesc());
+    }
+    
+    /**
      * get associated error code.
      */
     public ErrorCode getErrorCode() {

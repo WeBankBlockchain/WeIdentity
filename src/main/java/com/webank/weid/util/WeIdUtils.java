@@ -20,6 +20,8 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +54,9 @@ public final class WeIdUtils {
      * read the chainId from properties.
      */
     private static final String CHAIN_ID = PropertyUtils.getProperty("chain.id");
+    
+    private static final String WEID = "weid";
+    private static final String PROPERTIES = "properties";
 
     /**
      * Convert a WeIdentity DID to a fisco account address.
@@ -223,5 +228,24 @@ public final class WeIdUtils {
         }
 
         return isMatch;
+    }
+    
+    /**
+     * check if the given map contain correct WeId.
+     * @param map map
+     * @return boolean
+     */
+    public static boolean validateContainWeIdKey(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) {
+            return false;
+        }
+        if (map.containsKey(WEID)) {   
+            return map.containsKey(WEID);
+        } else if (map.containsKey(PROPERTIES)) {
+            HashMap<String, Object> propertiesMap = (HashMap<String, Object>) map.get(PROPERTIES);
+            return propertiesMap.containsKey(WEID);        
+        } else {
+            return false;
+        }
     }
 }
