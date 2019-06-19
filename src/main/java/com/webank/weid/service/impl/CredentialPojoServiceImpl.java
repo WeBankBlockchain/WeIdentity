@@ -330,8 +330,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             result.setContext(context);
             result.setId(UUID.randomUUID().toString());
             result.setCptId(args.getCptId());
+            Long issuanceDate = args.getIssuanceDate();
+            if (issuanceDate == null) {
+                result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
+            } else {
+                result.setIssuanceDate(issuanceDate);
+            }
             result.setIssuer(args.getIssuer());
-            result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
             result.setExpirationDate(args.getExpirationDate());
             result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
             Object claimObject = args.getClaim();
