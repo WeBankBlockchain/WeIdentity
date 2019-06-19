@@ -64,15 +64,10 @@ public class FiscoConfig {
             web3sdkMaxPoolSize = PropertyUtils.getProperty("web3sdk.max-pool-size");
             web3sdkQueueSize = PropertyUtils.getProperty("web3sdk.queue-capacity");
             web3sdkKeepAliveSeconds = PropertyUtils.getProperty("web3sdk.keep-alive-seconds");
-            groupId = PropertyUtils.getProperty("group.id");
-            encryptType = PropertyUtils.getProperty("encrypt.type");
             v1CaCrtPath = PropertyUtils.getProperty("v1.ca-crt-path");
             v1ClientCrtPassword = PropertyUtils.getProperty("v1.client-crt-password");
             v1ClientKeyStorePath = PropertyUtils.getProperty("v1.client-key-store-path");
             v1KeyStorePassword = PropertyUtils.getProperty("v1.key-store-password");
-            v2CaCrtPath = PropertyUtils.getProperty("v2.ca-crt-path");
-            v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
-            v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
             return true;
         } catch (Exception e) {
             logger.error("Error occurred during loading Fisco-Bcos properties: ", e);
