@@ -31,7 +31,10 @@ if (!gradle.startParameter.isOffline()) {
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
     apply plugin: "com.github.spotbugs"
+    apply plugin: 'signing'
 }
+
+group 'com.webank'
 
 version = "1.2.1"
 
@@ -109,7 +112,6 @@ configurations {
     localDeps
 }
 
-// In this section you declare the dependencies for your production and test code
 dependencies {
     localDeps 'org.projectlombok:lombok:1.16.14'
     if (gradleVer.startsWith("4")) {
@@ -161,7 +163,24 @@ processResources {
     exclude '**/**'
 }
 
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+artifacts {
+    archives jar
+    archives sourcesJar
+    archives javadocJar
+}
+
 jar {
+    baseName = project.name
     destinationDir file('dist/app')
     archiveName project.name + '-' + version + '.jar'
 
@@ -234,3 +253,68 @@ if (!gradle.startParameter.isOffline()) {
         }
     }
 }
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
+            }
+
+            pom.project {
+                name project.name
+                packaging 'jar'
+                description 'Java sdk for WeIdentity.'
+                url 'https://github.com/WeBankFinTech/weid-java-sdk'
+
+                scm {
+                    url 'scm:git@github.com:WeBankFinTech/weid-java-sdk.git'
+                    connection 'scm:git@github.com:WeBankFinTech/weid-java-sdk.git'
+                    developerConnection 'git@github.com:WeBankFinTech/weid-java-sdk.git'
+                }
+
+                licenses {
+                    license {
+                        name 'GNU Lesser General Public License version 3'
+                        url 'https://opensource.org/licenses/LGPL-3.0'
+                        distribution 'repo'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'tonychen'
+                        name 'tonychen'
+                    }
+                }
+            }
+        }
+    }
+}
+
+import org.gradle.plugins.signing.Sign
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.allTasks.any { it instanceof Sign }) {
+        allprojects { ext."signing.keyId" = System.getenv('GPG_KEY_ID') }
+        allprojects { ext."signing.secretKeyRingFile" = System.getenv('GPG_KEY_LOCATION') }
+        allprojects { ext."signing.password" = System.getenv('GPG_PASSPHRASE') }
+    }
+    // Do not sign archives by default (a local build without gpg keyring should succeed)
+    if (taskGraph.allTasks.any { it.name == 'build' || it.name == 'assemble' }) {
+        tasks.findAll { it.name == 'signArchives' || it.name == 'signDocsJar' || it.name == 'signTestJar' }.each { task ->
+            task.enabled = false
+        }
+    }
+}
+
+signing
+{
+    required { gradle.taskGraph.hasTask("uploadArchives") }
+    sign configurations.archives
+}
+
