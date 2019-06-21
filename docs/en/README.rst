@@ -98,7 +98,7 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
             <th width="40%">Status</th>
          </tr>
          <tr>
-            <td style="text-align:center"><a href="https://github.com/WeBankFinTech/weidentity-java-sdk">JAVA SDK</a></td>
+            <td style="text-align:center"><a href="https://github.com/WeBankFinTech/weid-java-sdk">JAVA SDK</a></td>
             <td>
                <ul>
                  <li><a href="https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-installation.html">Installation and Deployment Guide (Chinese Version)</a></li>
@@ -110,7 +110,7 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
                <a href="https://github.com/WeBankFinTech/weidentity-java-sdk/releases/latest"><img src="https://img.shields.io/github/release/WeBankFinTech/weidentity-java-sdk.svg" /></a>
                <a href="https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%22weidentity-java-sdk%22"><img src="https://img.shields.io/maven-central/v/com.webank/weidentity-java-sdk.svg?label=Maven%20Central" /></a>
                <a href="https://app.codacy.com/app/webankadmin/weidentity-java-sdk?utm_source=github.com&utm_medium=referral&utm_content=WeBankFinTech/weidentity-java-sdk&utm_campaign=Badge_Grade_Dashboard"><img src="https://api.codacy.com/project/badge/Grade/9fc044b36fff4985bd69f1232380d5ee" /></a>
-               <a href="https://www.codefactor.io/repository/github/WeBankFinTech/weidentity-java-sdk"><img src="https://www.codefactor.io/repository/github/WeBankFinTech/weidentity-java-sdk/badge" /></a>
+               <a href="https://www.codefactor.io/repository/github/WeBankFinTech/weid-java-sdk"><img src="https://www.codefactor.io/repository/github/WeBankFinTech/weid-java-sdk/badge" /></a>
                <a href="https://codecov.io/gh/WeBankFinTech/weidentity-java-sdk"><img src="https://codecov.io/gh/WeBankFinTech/weidentity-java-sdk/branch/master/graph/badge.svg" /></a>
                <a href="https://www.gnu.org/licenses/lgpl-3.0"><img src="https://img.shields.io/badge/license-GNU%20LGPL%20v3.0-blue.svg" /></a>
             </td>

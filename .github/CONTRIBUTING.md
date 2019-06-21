@@ -24,7 +24,7 @@
 
 #### 分支管理
 
-代码类工程我们使用 [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) 进行分支管理。包括这些工程： [weidentity-java-sdk](https://github.com/WeBankFinTech/weidentity-java-sdk)， [weidentity-contract](https://github.com/WeBankFinTech/weidentity-contract)。  
+代码类工程我们使用 [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) 进行分支管理。包括这些工程： [weid-java-sdk](https://github.com/WeBankFinTech/weid-java-sdk)， [weid-contract](https://github.com/WeBankFinTech/weid-contract)。
 文档类工程我们使用 [github-flow](http://scottchacon.com/2011/08/31/github-flow.html) 进行分支管理。包括这些工程： [WeIdentity](https://github.com/WeBankFinTech/WeIdentity)。
 
 #### 代码规范
@@ -40,7 +40,7 @@
 使用英文简要描述修改点，每一行描述一个修改点，并以 `*` 开头，如下所示：
 
 ```text
-first release for weidentity-contract
+first release for weid-contract
 
 * Smart Contract for DID identity management, allowing external
 addresses which satisfy FISCO-BCOS specifications to be used as the
@@ -55,7 +55,7 @@ data & logic contracts.
 
 ### 3.2 流程
 
-1. Fork 希望提交代码修改的 repository 。例如，如果想要修改 [weidentity-java-sdk](https://github.com/WeBankFinTech/weidentity-java-sdk) ，则 Fork 这个 repository。
+1. Fork 希望提交代码修改的 repository 。例如，如果想要修改 [weid-java-sdk](https://github.com/WeBankFinTech/weid-java-sdk) ，则 Fork 这个 repository。
 
 2. 创建新的分支，例如分支取名为 `feature/add-verfiy-logic` （分支名请使用 `feature/` 开头）。
 

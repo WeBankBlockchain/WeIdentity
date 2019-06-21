@@ -26,19 +26,19 @@ RestService架构包括以下模块：
 
 * 用户应用：用户的业务app应用，发送HTTP请求
 * rest-server：Server服务器端
-* weidentity-java-sdk：WeIdentity的SDK
+* weid-java-sdk：WeIdentity的SDK
 
 2.2 交易模型
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 过去的做法是：
 
-* 用户传入接口参数（包括私钥），直接调用RESTful接口，weidentity-http-service调用sdk然后发送交易；
+* 用户传入接口参数（包括私钥），直接调用RESTful接口，weid-http-service调用sdk然后发送交易；
 
 改造后：
 
-* 用户应用调传入自己的私钥索引以指明自己使用哪个私钥，然后POST /weid/api/invokeTransaction，发送请求给weidentity-http-service
-* weidentity-http-service接受请求，依据索引载入所托管的私钥，调用weidentity-java-sdk的对应方法，发送交易给区块链节点
+* 用户应用调传入自己的私钥索引以指明自己使用哪个私钥，然后POST /weid/api/invokeTransaction，发送请求给weid-http-service
+* weid-http-service接受请求，依据索引载入所托管的私钥，调用weid-java-sdk的对应方法，发送交易给区块链节点
 
 3. 调用时序说明
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
