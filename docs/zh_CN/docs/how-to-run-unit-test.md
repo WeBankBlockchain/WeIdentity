@@ -8,7 +8,7 @@
   
 ### 流程
 
-下载源代码后，以 `weidentity-java-sdk` 根目录为起点：
+下载源代码后，以 `weid-java-sdk` 根目录为起点：
 
 1, 进入dist/conf目录。
 
