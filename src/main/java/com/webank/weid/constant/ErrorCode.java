@@ -655,6 +655,6 @@ public enum ErrorCode {
                 return type;
             }
         }
-        return null;
+        return ErrorCode.UNKNOW_ERROR;
     }
 }
