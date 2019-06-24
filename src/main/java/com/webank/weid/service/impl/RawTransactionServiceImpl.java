@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.AuthorityIssuerController;
-import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
-import com.webank.weid.contract.WeIdContract;
-import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.contract.v1.AuthorityIssuerController;
+import com.webank.weid.contract.v1.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
+import com.webank.weid.contract.v1.WeIdContract;
+import com.webank.weid.contract.v1.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.RawTransactionService;
