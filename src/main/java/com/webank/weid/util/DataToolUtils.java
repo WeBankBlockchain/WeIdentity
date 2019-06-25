@@ -1323,6 +1323,28 @@ public final class DataToolUtils {
     }
 
     /**
+     * convert list to BigInteger list.
+     * @param list BigInteger list
+     * @param size size
+     * @return result
+     */
+    public static List<BigInteger> listToListBigInteger(List<BigInteger> list, int size) {
+        List<BigInteger> bigIntegerList = new ArrayList<>();
+        for (BigInteger bs : list) {
+            bigIntegerList.add(bs);
+        }
+
+        List<BigInteger> addList = new ArrayList<>();
+        if (bigIntegerList.size() < size) {
+            for (int i = 0; i < size - bigIntegerList.size(); i++) {
+                addList.add(BigInteger.ZERO);
+            }
+            bigIntegerList.addAll(addList);
+        }
+        return bigIntegerList;
+    }
+    
+    /**
      * Generate Default CPT Json Schema based on a given CPT ID.
      *
      * @param cptId the CPT ID
@@ -1380,4 +1402,56 @@ public final class DataToolUtils {
         cptSchemaMap.put("patternProperties", patternMap);
         return DataToolUtils.objToJsonStrWithNoPretty(cptSchemaMap);
     }
+    
+    
+    /**
+     * convert byte32List to String.
+     * @param bytesList list
+     * @param size size
+     * @return reuslt
+     */
+    public static synchronized String byte32ListToString(List<byte[]> bytesList, int size) {
+        if (bytesList.isEmpty()) {
+            return "";
+        }
+
+        int zeroCount = 0;
+        for (int i = 0; i < bytesList.size(); i++) {
+            for (int j = 0; j < bytesList.get(i).length; j++) {
+                if (bytesList.get(i)[j] == 0) {
+                    zeroCount++;
+                }
+            }
+        }
+
+        if (WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH * size - zeroCount == 0) {
+            return "";
+        }
+
+        byte[] newByte = new byte[WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH * size - zeroCount];
+        int index = 0;
+        for (int i = 0; i < bytesList.size(); i++) {
+            for (int j = 0; j < bytesList.get(i).length; j++) {
+                if (bytesList.get(i)[j] != 0) {
+                    newByte[index] = bytesList.get(i)[j];
+                    index++;
+                }
+            }
+        }
+
+        return (new String(newByte)).toString();
+    }
+    
+    /**
+     * Get the current timestamp as the param "created". May be called elsewhere.
+     *
+     * @return the StaticArray
+     */
+    public static List<BigInteger> getParamCreatedList(int length) {
+        long created = System.currentTimeMillis();
+        List<BigInteger> createdList = new ArrayList<>();
+        createdList.add(BigInteger.valueOf(created));
+        return createdList;
+    }
 }
+

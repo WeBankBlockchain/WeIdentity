@@ -398,31 +398,6 @@ public class TransactionUtils {
     }
 
     /**
-     * Verify Authority Issuer related events.
-     *
-     * @param event the Event
-     * @param opcode the Opcode
-     * @return the ErrorCode
-     */
-    public static ErrorCode verifyAuthorityIssuerRelatedEvent(
-        AuthorityIssuerRetLogEventResponse event,
-        Integer opcode) {
-        if (event == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (event.addr == null || event.operation == null || event.retCode == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        Integer eventOpcode = event.operation.getValue().intValue();
-        if (eventOpcode.equals(opcode)) {
-            Integer eventRetCode = event.retCode.getValue().intValue();
-            return ErrorCode.getTypeByErrorCode(eventRetCode);
-        } else {
-            return ErrorCode.AUTHORITY_ISSUER_OPCODE_MISMATCH;
-        }
-    }
-
-    /**
      * Verify Register CPT related events.
      *
      * @param transactionReceipt the TransactionReceipt
