@@ -35,7 +35,7 @@ import com.webank.weid.util.DataToolUtils;
 /**
  * Created by junqizhang on 08/07/2017.
  */
-public class OnNotifyCallback extends ChannelPushCallback {
+public class OnNotifyCallback extends ChannelPushCallback implements RegistCallBack {
 
     private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallback.class);
     
