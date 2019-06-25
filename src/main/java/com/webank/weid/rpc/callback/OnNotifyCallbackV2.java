@@ -22,9 +22,9 @@ package com.webank.weid.rpc.callback;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.bcos.channel.client.ChannelPushCallback;
-import org.bcos.channel.dto.ChannelPush;
-import org.bcos.channel.dto.ChannelResponse;
+import org.fisco.bcos.channel.client.ChannelPushCallback;
+import org.fisco.bcos.channel.dto.ChannelPush;
+import org.fisco.bcos.channel.dto.ChannelResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,20 +35,20 @@ import com.webank.weid.util.DataToolUtils;
 /**
  * Created by junqizhang on 08/07/2017.
  */
-public class OnNotifyCallback extends ChannelPushCallback implements RegistCallBack {
+public class OnNotifyCallbackV2 extends ChannelPushCallback implements RegistCallBack {
 
-    private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallback.class);
+    private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallbackV2.class);
     
     private Map<Integer, AmopCallback> amopCallBackMap = new HashMap<Integer, AmopCallback>();
 
     public void registAmopCallback(Integer msgType, AmopCallback routeCallBack) {
-
         amopCallBackMap.put(msgType, routeCallBack);
     }
     
     @Override
     public void onPush(ChannelPush push) {
-
+        
+        logger.info("received ChannelPush v2 msg : " + push.getContent());
         if (0 == amopCallBackMap.size()) {
             ChannelResponse response = new ChannelResponse();
             response.setContent("directRouteCallback is null on server side!");
@@ -56,14 +56,14 @@ public class OnNotifyCallback extends ChannelPushCallback implements RegistCallB
             push.sendResponse(response);
             return;
         }
-        
-        logger.info("received ChannelPush msg : " + push.getContent());
+
         AmopRequestBody amopRequestBody = 
             DataToolUtils.deserialize(push.getContent(), AmopRequestBody.class);
         AmopMsgType msgType = amopRequestBody.getMsgType();
         AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
         String messageBody = amopRequestBody.getMsgBody();
         String result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
+        
         /*
          * 接收到以后需要给发送端回包
          */
