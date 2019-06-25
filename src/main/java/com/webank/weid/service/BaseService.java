@@ -45,7 +45,6 @@ import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.PropertyUtils;
 
 /**
  * The BaseService for other RPC classes.
@@ -53,9 +52,7 @@ import com.webank.weid.util.PropertyUtils;
  * @author tonychen
  */
 public abstract class BaseService {
-
-    public static final String currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
-
+    
     private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
 
     protected static FiscoConfig fiscoConfig;
@@ -64,11 +61,10 @@ public abstract class BaseService {
 
     static {
         fiscoConfig = new FiscoConfig();
-        fiscoConfig.setCurrentOrgId(currentOrgId);
         if (!fiscoConfig.load()) {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
         }
-        if (StringUtils.isEmpty(currentOrgId)) {
+        if (StringUtils.isEmpty(fiscoConfig.getCurrentOrgId())) {
             logger.error("[BaseService] the blockchain orgId is blank.");
         }
     }
@@ -267,7 +263,7 @@ public abstract class BaseService {
         CheckAmopMsgHealthArgs arg) {
 
         return this.getImpl(
-            currentOrgId,
+            fiscoConfig.getCurrentOrgId(),
             toOrgId,
             arg,
             CheckAmopMsgHealthArgs.class,
