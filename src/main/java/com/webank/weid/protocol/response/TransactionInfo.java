@@ -89,4 +89,10 @@ public class TransactionInfo {
             this.transactionIndex = receipt.getTransactionIndex();
         }
     }
+    
+    public TransactionInfo(BigInteger blockNumber, String transactionHash, BigInteger transactionIndex) {
+            this.blockNumber = blockNumber;
+            this.transactionHash = transactionHash;
+            this.transactionIndex = transactionIndex;
+    }
 }
