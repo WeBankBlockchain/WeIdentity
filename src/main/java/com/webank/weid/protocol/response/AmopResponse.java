@@ -47,4 +47,9 @@ public class AmopResponse implements IResult {
      * 错误信息.
      */
     protected String errorMessage;
+    
+    /**
+     * 消息编号.
+     */
+    protected String messageId;
 }
