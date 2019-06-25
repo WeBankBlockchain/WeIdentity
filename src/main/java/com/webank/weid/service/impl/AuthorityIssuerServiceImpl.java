@@ -20,23 +20,11 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.Bool;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,20 +33,18 @@ import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.AuthorityIssuerController;
-import com.webank.weid.contract.v1.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
 import com.webank.weid.contract.v1.SpecificIssuerController;
 import com.webank.weid.contract.v1.SpecificIssuerController.SpecificIssuerRetLogEventResponse;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
+import com.webank.weid.protocol.response.EngineResultData;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.TransactionUtils;
+import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -75,6 +61,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
     private static SpecificIssuerController specificIssuerController;
     private static String specificIssuerControllerAddress;
 
+    private AuthorityIssuerServiceEngine engine = new AuthorityIssuerServiceEngine();
     private WeIdService weIdService = new WeIdServiceImpl();
 
     /**
@@ -130,46 +117,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerResponseData);
         }
 
-        AuthorityIssuer authorityIssuer = args.getAuthorityIssuer();
-        String weAddress = WeIdUtils.convertWeIdToAddress(authorityIssuer.getWeId());
-        String[] stringAttributes = loadNameToStringAttributes(authorityIssuer.getName());
-        long[] longAttributes = new long[16];
-        Long createDate = System.currentTimeMillis();
-        longAttributes[0] = createDate;
-        Address addr = new Address(weAddress);
-        try {
-            DynamicBytes accValue = new DynamicBytes(authorityIssuer
-                .getAccValue()
-                .getBytes(StandardCharsets.UTF_8)
-            );
-            reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
-            Future<TransactionReceipt> future = authorityIssuerController.addAuthorityIssuer(
-                addr,
-                DataToolUtils.stringArrayToBytes32StaticArray(stringAttributes),
-                DataToolUtils.longArrayToInt256StaticArray(longAttributes),
-                accValue
-            );
-            TransactionReceipt receipt = future.get(
-                WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
-                TimeUnit.SECONDS
-            );
-            TransactionInfo info = new TransactionInfo(receipt);
-            List<AuthorityIssuerRetLogEventResponse> eventList =
-                AuthorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
-            AuthorityIssuerRetLogEventResponse event = eventList.get(0);
-            ErrorCode errorCode = TransactionUtils.verifyAuthorityIssuerRelatedEvent(event,
-                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE);
-            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
-                errorCode, info);
-        } catch (TimeoutException e) {
-            logger.error("register authority issuer failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("register authority issuer failed due to transaction error. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (Exception e) {
-            logger.error("register authority issuer failed.", e);
-        }
+        EngineResultData<Boolean>  result = engine.addAuthorityIssuer(args);
         return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
     }
 
@@ -190,37 +138,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         String weId = args.getWeId();
         Address addr = new Address(WeIdUtils.convertWeIdToAddress(weId));
         try {
-            reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
-            Future<TransactionReceipt> future = authorityIssuerController
-                .removeAuthorityIssuer(addr);
-            TransactionReceipt receipt =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            List<AuthorityIssuerRetLogEventResponse> eventList =
-                AuthorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
-
-            TransactionInfo info = new TransactionInfo(receipt);
-            AuthorityIssuerRetLogEventResponse event = eventList.get(0);
-            if (event != null) {
-                ErrorCode errorCode = TransactionUtils.verifyAuthorityIssuerRelatedEvent(
-                    event,
-                    WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
-                );
-                if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
-                    return new ResponseData<>(false, errorCode, info);
-                } else {
-                    return new ResponseData<>(true, errorCode, info);
-                }
-            } else {
-                logger.error("remove authority issuer failed, transcation event decoding failure.");
-                return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR, info);
-            }
-        } catch (TimeoutException e) {
-            logger.error("remove authority issuer failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("remove authority issuer failed due to transaction error. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (Exception e) {
+        	EngineResultData<Boolean> result = engine.removeAuthorityIssuer(args);
+        	return new ResponseData<>(true, ErrorCode.SUCCESS);
+           } catch (Exception e) {
             logger.error("remove authority issuer failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
@@ -239,28 +159,15 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         if (!WeIdUtils.isWeIdValid(weId)) {
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
-        Address addr = new Address(WeIdUtils.convertWeIdToAddress(weId));
+        String addr = WeIdUtils.convertWeIdToAddress(weId);
         try {
-            Future<Bool> future = authorityIssuerController.isAuthorityIssuer(addr);
-            Boolean result =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS).getValue();
-            responseData.setResult(result);
-            if (result) {
-                responseData.setErrorCode(ErrorCode.SUCCESS);
-            } else {
-                responseData.setErrorCode(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS);
-            }
-        } catch (TimeoutException e) {
-            logger.error("check authority issuer id failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("check authority issuer id failed due to transaction error. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (Exception e) {
+        	EngineResultData<Boolean> result = engine.isAuthorityIssuer(addr);
+        	return new ResponseData<>(true, ErrorCode.SUCCESS);
+        }
+            catch (Exception e) {
             logger.error("check authority issuer id failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
-        return responseData;
     }
 
     /**
@@ -277,38 +184,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         Address addr = new Address(WeIdUtils.convertWeIdToAddress(weId));
         try {
-            List<Type> rawResult =
-                authorityIssuerController
-                    .getAuthorityIssuerInfoNonAccValue(addr)
-                    .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            if (rawResult == null) {
-                return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
-            }
-
-            DynamicArray<Bytes32> bytes32Attributes = (DynamicArray<Bytes32>) rawResult.get(0);
-            DynamicArray<Int256> int256Attributes = (DynamicArray<Int256>) rawResult.get(1);
-
-            AuthorityIssuer result = new AuthorityIssuer();
-            result.setWeId(weId);
-            String name = extractNameFromBytes32Attributes(bytes32Attributes.getValue());
-            Long createDate = Long
-                .valueOf(int256Attributes.getValue().get(0).getValue().longValue());
-            if (StringUtils.isEmpty(name) && createDate.equals(WeIdConstant.LONG_VALUE_ZERO)) {
-                return new ResponseData<>(
-                    null, ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS
-                );
-            }
-            result.setName(name);
-            result.setCreated(createDate);
-            // Accumulator Value is unable to load due to Solidity 0.4.4 restrictions - left blank.
-            result.setAccValue("");
-            responseData.setResult(result);
-        } catch (TimeoutException e) {
-            logger.error("query authority issuer failed due to system timeout. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("query authority issuer failed due to transaction error. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        	EngineResultData<AuthorityIssuer> resultData = engine.getAuthorityIssuerInfoNonAccValue(weId);
+            
         } catch (Exception e) {
             logger.error("query authority issuer failed.", e);
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -331,13 +208,14 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(null, errorCode);
         }
         try {
-            List<Address> addressList = authorityIssuerController
-                .getAuthorityIssuerAddressList(new Uint256(index), new Uint256(num))
-                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
-                .getValue();
+        	List<String> addrList = engine.getAuthorityIssuerAddressList(index, num);
+//            List<Address> addressList = authorityIssuerController
+//                .getAuthorityIssuerAddressList(new Uint256(index), new Uint256(num))
+//                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
+//                .getValue();
             List<AuthorityIssuer> authorityIssuerList = new ArrayList<>();
-            for (Address address : addressList) {
-                String weId = WeIdUtils.convertAddressToWeId(address.toString());
+            for (String address : addrList) {
+                String weId = WeIdUtils.convertAddressToWeId(address);
                 ResponseData<AuthorityIssuer> innerResponseData
                     = this.queryAuthorityIssuerInfo(weId);
                 if (innerResponseData.getResult() != null) {
@@ -345,12 +223,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 }
             }
             return new ResponseData<>(authorityIssuerList, ErrorCode.SUCCESS);
-        } catch (TimeoutException e) {
-            logger.error("query authority issuer list failed due to system timeout. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("query authority issuer list failed due to transaction error. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
             logger.error("query authority issuer list failed.", e);
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -373,23 +245,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerCode);
         }
         try {
-            reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
-            Future<TransactionReceipt> future = specificIssuerController
-                .registerIssuerType(DataToolUtils.stringToBytes32(issuerType));
-            TransactionReceipt receipt =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            TransactionInfo info = new TransactionInfo(receipt);
-            // pass-in empty address
-            String emptyAddress = new Address(BigInteger.ZERO).toString();
-            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, true, emptyAddress);
-            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
-                errorCode, info);
-        } catch (TimeoutException e) {
-            logger.error("register issuer type failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("register issuer type failed due to transaction error. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        	EngineResultData<Boolean> resultData = engine.registerIssuerType(issuerType);
+        	return new ResponseData<>(false, innerCode);
         } catch (Exception e) {
             logger.error("register issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -416,21 +273,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerCode);
         }
         try {
-            reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
-            String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            Future<TransactionReceipt> future = specificIssuerController
-                .addIssuer(DataToolUtils.stringToBytes32(issuerType), new Address(issuerAddress));
-            TransactionReceipt receipt =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            TransactionInfo info = new TransactionInfo(receipt);
-            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, true, issuerAddress);
-            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
-                errorCode, info);
-        } catch (TimeoutException e) {
-            logger.error("add issuer into type failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("add issuer into type failed due to transaction error. ", e);
+        	String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
+        	EngineResultData<Boolean> resultData = engine.addIssuer(issuerType, issuerAddress);
             return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
             logger.error("add issuer into type failed.", e);
@@ -457,22 +301,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerCode);
         }
         try {
-            reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
+//            reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            Future<TransactionReceipt> future = specificIssuerController
-                .removeIssuer(DataToolUtils.stringToBytes32(issuerType),
-                    new Address(issuerAddress));
-            TransactionReceipt receipt =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            TransactionInfo info = new TransactionInfo(receipt);
-            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, false, issuerAddress);
-            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
-                errorCode, info);
-        } catch (TimeoutException e) {
-            logger.error("remove issuer from type failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("remove issuer from type failed due to transaction error. ", e);
+            EngineResultData<Boolean> result = engine.removeIssuer(issuerType, issuerAddress);
             return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
             logger.error("remove issuer from type failed.", e);
@@ -499,21 +330,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
         }
         try {
-            Future<Bool> future = specificIssuerController
-                .isSpecificTypeIssuer(DataToolUtils.stringToBytes32(issuerType),
-                    new Address(WeIdUtils.convertWeIdToAddress(targetIssuerWeId)));
-            Boolean result =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS).getValue();
-            if (!result) {
-                return new ResponseData<>(result,
-                    ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST);
-            }
-            return new ResponseData<>(result, ErrorCode.SUCCESS);
-        } catch (TimeoutException e) {
-            logger.error("check issuer type failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("check issuer type failed due to transaction error. ", e);
+        	String address = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
+        	EngineResultData<Boolean> result = engine.isSpecificTypeIssuer(issuerType, address);
             return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
             logger.error("check issuer type failed.", e);
@@ -543,23 +361,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(null, errorCode);
         }
         try {
-            List<Address> addresses = specificIssuerController
-                .getSpecificTypeIssuerList(DataToolUtils.stringToBytes32(issuerType),
-                    new Uint256(index), new Uint256(num))
-                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
-                .getValue();
-            List<String> addressList = new ArrayList<>();
-            for (Address addr : addresses) {
-                if (!WeIdUtils.isEmptyAddress(addr)) {
-                    addressList.add(addr.toString());
-                }
-            }
-            return new ResponseData<>(addressList, ErrorCode.SUCCESS);
-        } catch (TimeoutException e) {
-            logger.error("get all specific issuers failed due to system timeout. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("get all specific issuers failed due to transaction error. ", e);
+        	EngineResultData<List<String>> result = engine.getSpecificTypeIssuerList(issuerType, index, num);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
             logger.error("get all specific issuers failed.", e);
@@ -719,18 +521,4 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             && StringUtils.isAsciiPrintable(name);
     }
 
-    private String[] loadNameToStringAttributes(String name) {
-        String[] nameArray = new String[WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH];
-        nameArray[0] = name;
-        return nameArray;
-    }
-
-    private String extractNameFromBytes32Attributes(List<Bytes32> bytes32Array) {
-        StringBuffer name = new StringBuffer();
-        int maxLength = WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH / 32;
-        for (int i = 0; i < maxLength; i++) {
-            name.append(DataToolUtils.bytes32ToString(bytes32Array.get(i)));
-        }
-        return name.toString();
-    }
 }
