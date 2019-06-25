@@ -38,8 +38,8 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.EvidenceFactory;
-import com.webank.weid.contract.EvidenceFactory.CreateEvidenceLogEventResponse;
+import com.webank.weid.contract.v1.EvidenceFactory;
+import com.webank.weid.contract.v1.EvidenceFactory.CreateEvidenceLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;

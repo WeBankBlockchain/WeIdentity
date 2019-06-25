@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.bcos.channel.client.ChannelPushCallback;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.dto.ChannelRequest;
@@ -20,11 +21,12 @@ import org.bcos.web3j.protocol.core.Response;
 import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.protocol.response.AmopResponse;
-import com.webank.weid.rpc.callback.OnNotifyCallback;
+import com.webank.weid.rpc.callback.OnNotifyCallbackV1;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
@@ -38,7 +40,7 @@ public final class WeServerV1 extends WeServer<Web3j,Credentials,Service> {
     private static Credentials credentials;
 
     public WeServerV1(FiscoConfig fiscoConfig) {
-        super(fiscoConfig, new OnNotifyCallback());
+        super(fiscoConfig, new OnNotifyCallbackV1());
     }
 
     @Override
@@ -102,7 +104,7 @@ public final class WeServerV1 extends WeServer<Web3j,Credentials,Service> {
         channelConnections
             .setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
         channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
-        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(";")));
+        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(",")));
         ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
             new ConcurrentHashMap<>();
         allChannelConnections.put(fiscoConfig.getCurrentOrgId(), channelConnections);
