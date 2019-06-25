@@ -97,19 +97,4 @@ public abstract class BaseTest extends BaseService {
     public void testFinalize() {
         Assert.assertTrue(true);
     }
-
-    /**
-     * get current blockNumber.
-     *
-     * @return return blockNumber
-     * @throws IOException possible exceptions to sending transactions
-     */
-    public int getBlockNumber() throws IOException {
-        Response<String> response = super.getWeb3j().ethBlockNumber().send();
-        if (response instanceof EthBlockNumber) {
-            EthBlockNumber ethBlockNumber = (EthBlockNumber) response;
-            return ethBlockNumber.getBlockNumber().intValue();
-        }
-        return 0;
-    }
 }

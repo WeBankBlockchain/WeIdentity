@@ -1,19 +1,24 @@
 package com.webank.weid.service.fisco;
 
 import java.io.IOException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.v1.WeServerV1;
+import com.webank.weid.service.fisco.v2.WeServerV2;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.PropertyUtils;
 
 public abstract class WeServer<W,C,S> {
+    
     /*
      * Maximum Timeout period in milliseconds.
      */
@@ -66,7 +71,12 @@ public abstract class WeServer<W,C,S> {
     }
     
     public static <W,C,S> WeServer<W,C,S> init(FiscoConfig fiscoConfig) {
-        WeServer<?,?,?> weService = new WeServerV1(fiscoConfig);
+        WeServer<?,?,?> weService = null;
+        if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+            weService = new WeServerV1(fiscoConfig);
+        } else {
+            weService = new WeServerV2(fiscoConfig);
+        }
         weService.initWeb3j();
         return (WeServer<W,C,S>)weService;
     }
