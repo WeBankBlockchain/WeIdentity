@@ -177,6 +177,16 @@ public final class WeIdUtils {
     public static boolean isEmptyAddress(Address addr) {
         return addr.getValue().equals(BigInteger.ZERO);
     }
+    
+    /**
+     * check if the given Address is empty.
+     *
+     * @param addr given Address
+     * @return true if yes, false otherwise.
+     */
+    public static boolean isEmptyAddress(org.fisco.bcos.web3j.abi.datatypes.Address addr) {
+        return addr.getValue().equals(BigInteger.ZERO);
+    }
 
     /**
      * check the weId is match the private key.
