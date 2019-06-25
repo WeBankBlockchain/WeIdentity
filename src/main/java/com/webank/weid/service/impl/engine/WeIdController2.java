@@ -83,138 +83,6 @@ public class WeIdController2 implements WeIdController{
         );
     }
     
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.engine.WeIdController#createWeId()
-	 */
-	@Override
-	public EngineResultData<CreateWeIdDataResult> createWeId() {
-		CreateWeIdDataResult result = new CreateWeIdDataResult();
-        ECKeyPair keyPair = null;
-
-        try {
-            keyPair = Keys.createEcKeyPair();
-        } catch (Exception e) {
-            logger.error("Create weId failed.", e);
-            return new EngineResultData<>(null, ErrorCode.WEID_KEYPAIR_CREATE_FAILED);
-        }
-
-        String publicKey = String.valueOf(keyPair.getPublicKey());
-        String privateKey = String.valueOf(keyPair.getPrivateKey());
-        WeIdPublicKey userWeIdPublicKey = new WeIdPublicKey();
-        userWeIdPublicKey.setPublicKey(publicKey);
-        result.setUserWeIdPublicKey(userWeIdPublicKey);
-        WeIdPrivateKey userWeIdPrivateKey = new WeIdPrivateKey();
-        userWeIdPrivateKey.setPrivateKey(privateKey);
-        result.setUserWeIdPrivateKey(userWeIdPrivateKey);
-        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
-        result.setWeId(weId);
-        EngineResultData<Boolean> innerRespData = processCreateWeId(weId, publicKey, privateKey);
-
-        if (innerRespData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
-            logger.error(
-                "[createWeId] Create weId failed. error message is :{}",
-                innerRespData.getErrorMessage()
-            );
-            return new EngineResultData<>(null,
-                ErrorCode.getTypeByErrorCode(innerRespData.getErrorCode()),
-                innerRespData.getTransactionInfo());
-        }
-        return new EngineResultData<>(result,
-            ErrorCode.getTypeByErrorCode(innerRespData.getErrorCode()),
-            innerRespData.getTransactionInfo());
-	}
-
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.engine.WeIdController#createWeId(com.webank.weid.protocol.request.CreateWeIdArgs)
-	 */
-	@Override
-	public EngineResultData<String> createWeId(CreateWeIdArgs createWeIdArgs) {
-		 if (createWeIdArgs == null) {
-	            logger.error("[createWeId]: input parameter createWeIdArgs is null.");
-	            return new EngineResultData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-	        }
-	        if (!WeIdUtils.isPrivateKeyValid(createWeIdArgs.getWeIdPrivateKey())) {
-	            return new EngineResultData<>(StringUtils.EMPTY, ErrorCode.WEID_PRIVATEKEY_INVALID);
-	        }
-	        String privateKey = createWeIdArgs.getWeIdPrivateKey().getPrivateKey();
-	        String publicKey = createWeIdArgs.getPublicKey();
-	        if (StringUtils.isNotBlank(publicKey)) {
-	            if (!WeIdUtils.isKeypairMatch(privateKey, publicKey)) {
-	                return new EngineResultData<>(
-	                    StringUtils.EMPTY,
-	                    ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED
-	                );
-	            }
-	            String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
-	            EngineResultData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
-	            if (isWeIdExistResp.getResult() == null || isWeIdExistResp.getResult()) {
-	                logger
-	                    .error("[createWeId]: create weid failed, the weid :{} is already exist", weId);
-	                return new EngineResultData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
-	            }
-
-	            EngineResultData<Boolean> innerRespData = processCreateWeId(weId, publicKey, privateKey);
-	            if (innerRespData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
-	                logger.error(
-	                    "[createWeId]: create weid failed. error message is :{}, public key is {}",
-	                    innerRespData.getErrorMessage(),
-	                    publicKey
-	                );
-	                return new EngineResultData<>(StringUtils.EMPTY,
-	                    ErrorCode.getTypeByErrorCode(innerRespData.getErrorCode()),
-	                    innerRespData.getTransactionInfo());
-	            }
-	            return new EngineResultData<>(weId,
-	                ErrorCode.getTypeByErrorCode(innerRespData.getErrorCode()),
-	                innerRespData.getTransactionInfo());
-	        } else {
-	            return new EngineResultData<>(StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_INVALID);
-	        }
-	        
-	        
-	}
-
-	private EngineResultData<Boolean> processCreateWeId(String weId, String publicKey,
-	        String privateKey) {
-		try {
-//            WeIdContract weIdContract = (WeIdContract) reloadContract(
-//                weIdContractAddress,
-//                privateKey,
-//                WeIdContract.class);
-
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-            String auth = new StringBuffer()
-                .append(publicKey)
-                .append(WeIdConstant.SEPARATOR)
-                .append(weAddress)
-                .toString();
-            String created = DateUtils.getCurrentTimeStampString();
-            TransactionReceipt receipt = weIdContract.createWeId(
-                weAddress,
-                DataToolUtils.stringToByteArray(auth),
-                DataToolUtils.stringToByteArray(created),
-                BigInteger.valueOf(DateUtils.getCurrentTimeStamp())
-            ).send();
-
-            TransactionInfo info = new TransactionInfo(receipt);
-            List<WeIdAttributeChangedEventResponse> response =
-                weIdContract.getWeIdAttributeChangedEvents(receipt);
-            if (CollectionUtils.isEmpty(response)) {
-                logger.error(
-                    "The input private key does not match the current weid, operation of "
-                        + "modifying weid is not allowed. weid is {}",
-                    weId
-                );
-                return new EngineResultData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
-            }
-            return new EngineResultData<>(true, ErrorCode.SUCCESS, info);
-        } catch (PrivateKeyIllegalException e) {
-            return new EngineResultData<>(false, e.getErrorCode());
-        } catch (Exception e) {
-            logger.error("createWeId failed,e", e);
-            return new EngineResultData<>(false, ErrorCode.UNKNOW_ERROR);
-        }
-	    }
 
 	/* (non-Javadoc)
 	 * @see com.webank.weid.service.impl.engine.WeIdController#isWeIdExist(java.lang.String)
@@ -231,179 +99,6 @@ public class WeIdController2 implements WeIdController{
 	        }
 	}
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.WeIdController#setPublicKey(com.webank.weid.protocol.request.SetPublicKeyArgs)
-	 */
-	@Override
-	public EngineResultData<Boolean> setPublicKey(SetPublicKeyArgs setPublicKeyArgs) {
-		 String weId = setPublicKeyArgs.getWeId();
-	        String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-	        if (StringUtils.isEmpty(weAddress)) {
-	            logger.error("setPublicKey: weId : {} is invalid.", weId);
-	            return new EngineResultData<>(false, ErrorCode.WEID_INVALID);
-	        }
-	        String owner = setPublicKeyArgs.getOwner();
-	        if (StringUtils.isEmpty(owner)) {
-	            owner = weAddress;
-	        } else {
-	            if (WeIdUtils.isWeIdValid(owner)) {
-	                owner = WeIdUtils.convertWeIdToAddress(owner);
-	            } else {
-	                logger.error("setPublicKey: owner : {} is invalid.", owner);
-	                return new EngineResultData<>(false, ErrorCode.WEID_INVALID);
-	            }
-	        }
-	        String pubKey = setPublicKeyArgs.getPublicKey();
-	        String attributeKey =
-	            new StringBuffer()
-	                .append(WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)
-	                .append(WeIdConstant.SEPARATOR)
-	                .append(setPublicKeyArgs.getType())
-	                .append(WeIdConstant.SEPARATOR)
-	                .append("base64")
-	                .toString();
-	        String privateKey = setPublicKeyArgs.getUserWeIdPrivateKey().getPrivateKey();
-	        try {
-//	            WeIdContract weIdContract = (WeIdContract) reloadContract(
-//	                weIdContractAddress,
-//	                privateKey,
-//	                WeIdContract.class
-//	            );
-	            byte[] attrValue = new StringBuffer().append(pubKey).append("/").append(owner)
-	                .toString().getBytes();
-	            BigInteger updated = BigInteger.valueOf(System.currentTimeMillis());
-	            TransactionReceipt transactionReceipt =
-	                weIdContract.setAttribute(
-	                    weAddress,
-	                    DataToolUtils.stringToByte32Array(attributeKey),
-	                    attrValue,
-	                    updated
-	                ).send();
-
-	            TransactionInfo info = new TransactionInfo(transactionReceipt);
-	            List<WeIdAttributeChangedEventResponse> response =
-	                weIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
-	            if (CollectionUtils.isNotEmpty(response)) {
-	                return new EngineResultData<>(true, ErrorCode.SUCCESS, info);
-	            } else {
-	                return new EngineResultData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
-	                    info);
-	            }
-	        } catch (PrivateKeyIllegalException e) {
-	            return new EngineResultData<>(false, e.getErrorCode());
-	        } catch (Exception e) {
-	            return new EngineResultData<>(false, ErrorCode.UNKNOW_ERROR);
-	        }
-	}
-
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.WeIdController#setService(com.webank.weid.protocol.request.SetServiceArgs)
-	 */
-	@Override
-	public EngineResultData<Boolean> setService(SetServiceArgs setServiceArgs) {
-		String weId = setServiceArgs.getWeId();
-        String serviceType = setServiceArgs.getType();
-        String serviceEndpoint = setServiceArgs.getServiceEndpoint();
-        if (WeIdUtils.isWeIdValid(weId)) {
-            String privateKey = setServiceArgs.getUserWeIdPrivateKey().getPrivateKey();
-            try {
-//                WeIdContract weIdContract = (WeIdContract) reloadContract(
-//                    weIdContractAddress,
-//                    privateKey,
-//                    WeIdContract.class);
-                String attrKey = new StringBuffer()
-                    .append(WeIdConstant.WEID_DOC_SERVICE_PREFIX)
-                    .append("/")
-                    .append(serviceType)
-                    .toString();
-                TransactionReceipt receipt =
-                    weIdContract.setAttribute(
-                        WeIdUtils.convertWeIdToAddress(weId),
-                        DataToolUtils.stringToByte32Array(attrKey),
-                        serviceEndpoint.getBytes(),
-                        BigInteger.valueOf(System.currentTimeMillis())
-                    ).send();
-
-                TransactionInfo info = new TransactionInfo(receipt);
-                List<WeIdAttributeChangedEventResponse> response =
-                    weIdContract.getWeIdAttributeChangedEvents(receipt);
-                if (CollectionUtils.isNotEmpty(response)) {
-                    return new EngineResultData<>(true, ErrorCode.SUCCESS, info);
-                } else {
-                    return new EngineResultData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
-                        info);
-                }
-            } catch (PrivateKeyIllegalException e) {
-                return new EngineResultData<>(false, e.getErrorCode());
-            } catch (Exception e) {
-                logger.error("Set weId service failed. Error message :{}", e);
-                return new EngineResultData<>(false, ErrorCode.UNKNOW_ERROR);
-            }
-        } else {
-            return new EngineResultData<>(false, ErrorCode.WEID_INVALID);
-        }
-	}
-
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.WeIdController#setAuthentication(com.webank.weid.protocol.request.SetAuthenticationArgs)
-	 */
-	@Override
-	public EngineResultData<Boolean> setAuthentication(SetAuthenticationArgs setAuthenticationArgs) {
-		String weId = setAuthenticationArgs.getWeId();
-        if (WeIdUtils.isWeIdValid(weId)) {
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-
-            String owner = setAuthenticationArgs.getOwner();
-            if (StringUtils.isEmpty(owner)) {
-                owner = weAddress;
-            } else {
-                if (WeIdUtils.isWeIdValid(owner)) {
-                    owner = WeIdUtils.convertWeIdToAddress(owner);
-                } else {
-                    logger.error("[setAuthentication]: owner : {} is invalid.", owner);
-                    return new EngineResultData<>(false, ErrorCode.WEID_INVALID);
-                }
-            }
-            String privateKey = setAuthenticationArgs.getUserWeIdPrivateKey().getPrivateKey();
-            try {
-//                WeIdContract weIdContract = (WeIdContract) reloadContract(
-//                    weIdContractAddress,
-//                    privateKey,
-//                    WeIdContract.class);
-
-                byte[] attrValue = new StringBuffer()
-                    .append(setAuthenticationArgs.getPublicKey())
-                    .append("/")
-                    .append(owner)
-                    .toString().getBytes();
-                TransactionReceipt receipt = weIdContract.setAttribute(
-                    weAddress,
-                    DataToolUtils.stringToByte32Array(WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX),
-                    attrValue,
-                    BigInteger.valueOf(System.currentTimeMillis())
-                ).send();
-                TransactionInfo info = new TransactionInfo(receipt);
-                List<WeIdAttributeChangedEventResponse> response =
-                    weIdContract.getWeIdAttributeChangedEvents(receipt);
-                if (CollectionUtils.isNotEmpty(response)) {
-                    return new EngineResultData<>(true, ErrorCode.SUCCESS, info);
-                } else {
-                    logger.error("Set authenticate failed. Error message :{}",
-                        ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCodeDesc());
-                    return new EngineResultData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
-                }
-            } catch (PrivateKeyIllegalException e) {
-                logger.error("Set authenticate with private key exception. Error message :{}", e);
-                return new EngineResultData<>(false, e.getErrorCode());
-            } catch (Exception e) {
-                logger.error("Set authenticate failed. Error message :{}", e);
-                return new EngineResultData<>(false, ErrorCode.UNKNOW_ERROR);
-            }
-        } else {
-            logger.error("Set authenticate failed. weid : {} is invalid.", weId);
-            return new EngineResultData<>(false, ErrorCode.WEID_INVALID);
-        }
-	}
 
 	/* (non-Javadoc)
 	 * @see com.webank.weid.service.impl.engine.WeIdController#getWeIdDocument(java.lang.String)
@@ -669,4 +364,79 @@ public class WeIdController2 implements WeIdController{
 		            }
 		        }
 		    }
+
+			/* (non-Javadoc)
+			 * @see com.webank.weid.service.impl.engine.WeIdController#createWeId(java.lang.String, java.lang.String, java.lang.String)
+			 */
+			@Override
+			public EngineResultData<CreateWeIdDataResult> createWeId(String weId, String publicKey, String privateKey) {
+				 String weAddress = WeIdUtils.convertWeIdToAddress(weId);
+		            String auth = new StringBuffer()
+		                .append(publicKey)
+		                .append(WeIdConstant.SEPARATOR)
+		                .append(weAddress)
+		                .toString();
+		            String created = DateUtils.getCurrentTimeStampString();
+		            TransactionReceipt receipt;
+					try {
+						receipt = weIdContract.createWeId(
+						    weAddress,
+						    DataToolUtils.stringToByteArray(auth),
+						    DataToolUtils.stringToByteArray(created),
+						    BigInteger.valueOf(DateUtils.getCurrentTimeStamp())
+						).send();
+					
+
+		            TransactionInfo info = new TransactionInfo(receipt);
+		            List<WeIdAttributeChangedEventResponse> response =
+		                weIdContract.getWeIdAttributeChangedEvents(receipt);
+		            if (CollectionUtils.isEmpty(response)) {
+		                logger.error(
+		                    "The input private key does not match the current weid, operation of "
+		                        + "modifying weid is not allowed. weid is {}",
+		                    weId
+		                );
+		                return new EngineResultData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
+		            }
+		            return new EngineResultData(true, ErrorCode.SUCCESS, info);
+					} catch (Exception e) {
+						
+						return new EngineResultData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+					}
+			}
+
+			/* (non-Javadoc)
+			 * @see com.webank.weid.service.impl.engine.WeIdController#setAttribute(java.lang.String, java.lang.String, java.lang.String)
+			 */
+			@Override
+			public EngineResultData<Boolean> setAttribute(String weAddress, String attributeKey, String value) {
+//				WeIdContract weIdContract = (WeIdContract) reloadContract(
+//		                weIdContractAddress,
+//		                privateKey,
+//		                WeIdContract.class
+//		            );
+				try {
+		            byte[] attrValue = value.getBytes();
+		            BigInteger updated = BigInteger.valueOf(System.currentTimeMillis());
+		            TransactionReceipt transactionReceipt =
+		                weIdContract.setAttribute(
+		                    weAddress,
+		                    DataToolUtils.stringToByte32Array(attributeKey),
+		                    attrValue,
+		                    updated
+		                ).send();
+
+		            TransactionInfo info = new TransactionInfo(transactionReceipt);
+		            List<WeIdAttributeChangedEventResponse> response =
+		                weIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
+		            if (CollectionUtils.isNotEmpty(response)) {
+		                return new EngineResultData<>(true, ErrorCode.SUCCESS, info);
+		            } else {
+		                return new EngineResultData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
+		                    info);
+		            }
+				}catch (Exception e){
+					return new EngineResultData<>(true, ErrorCode.SUCCESS);
+				}
+			}
 }
