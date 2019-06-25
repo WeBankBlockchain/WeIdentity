@@ -20,10 +20,6 @@
 package com.webank.weid.service.impl.engine;
 
 import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.request.CreateWeIdArgs;
-import com.webank.weid.protocol.request.SetAuthenticationArgs;
-import com.webank.weid.protocol.request.SetPublicKeyArgs;
-import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.EngineResultData;
 import com.webank.weid.util.PropertyUtils;
@@ -53,33 +49,23 @@ public class WeIdServiceEngine {
 		}
 	}
 	
-	public EngineResultData<CreateWeIdDataResult> createWeId() {
-		
-		return controller.createWeId();
-	}
-	
 	public EngineResultData<Boolean> isWeIdExist(String weId) {
 		
 		return controller.isWeIdExist(weId);
 	}
 	
-	public EngineResultData<String> createWeId(CreateWeIdArgs createWeIdArgs){
-		return controller.createWeId(createWeIdArgs);
-	}
-	
-	public EngineResultData<Boolean> setPublicKey(SetPublicKeyArgs setPublicKeyArgs){
-		return controller.setPublicKey(setPublicKeyArgs);
-	}
-	
-	public EngineResultData<Boolean> setService(SetServiceArgs setServiceArgs){
-		return controller.setService(setServiceArgs);
-	}
-	
-	public EngineResultData<Boolean> setAuthentication(SetAuthenticationArgs setAuthenticationArgs){
-		return controller.setAuthentication(setAuthenticationArgs);
-	}
 	
 	public EngineResultData<WeIdDocument> getWeIdDocument(String weId){
 		return controller.getWeIdDocument(weId);
+	}
+	
+	public EngineResultData<CreateWeIdDataResult> createWeId(String weId, String publicKey,
+	        String privateKey){
+		return controller.createWeId(weId, publicKey, privateKey);
+	}
+	
+	public EngineResultData<Boolean> setAttribute(String weAddress, String attributeKey,
+	        String value){
+		return controller.setAttribute(weAddress, attributeKey, value);
 	}
 }

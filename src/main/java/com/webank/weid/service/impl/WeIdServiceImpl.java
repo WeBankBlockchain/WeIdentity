@@ -19,16 +19,9 @@
 
 package com.webank.weid.service.impl;
 
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.bcos.web3j.crypto.ECKeyPair;
+import org.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +30,11 @@ import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.WeIdContract;
-import com.webank.weid.contract.v1.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
@@ -47,12 +42,9 @@ import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.EngineResultData;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.WeIdServiceEngine;
-import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -102,10 +94,63 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     @Override
     public ResponseData<CreateWeIdDataResult> createWeId() {
 
-    	EngineResultData<CreateWeIdDataResult>  result = engine.createWeId();
-    	ResponseData<CreateWeIdDataResult>resp = new ResponseData<CreateWeIdDataResult>();
-    	return resp;
+    	CreateWeIdDataResult result = new CreateWeIdDataResult();
+        ECKeyPair keyPair = null;
+
+        try {
+            keyPair = Keys.createEcKeyPair();
+        } catch (Exception e) {
+            logger.error("Create weId failed.", e);
+            return new ResponseData<>(null, ErrorCode.WEID_KEYPAIR_CREATE_FAILED);
+        }
+
+        String publicKey = String.valueOf(keyPair.getPublicKey());
+        String privateKey = String.valueOf(keyPair.getPrivateKey());
+        WeIdPublicKey userWeIdPublicKey = new WeIdPublicKey();
+        userWeIdPublicKey.setPublicKey(publicKey);
+        result.setUserWeIdPublicKey(userWeIdPublicKey);
+        WeIdPrivateKey userWeIdPrivateKey = new WeIdPrivateKey();
+        userWeIdPrivateKey.setPrivateKey(privateKey);
+        result.setUserWeIdPrivateKey(userWeIdPrivateKey);
+        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
+        result.setWeId(weId);
+        
+        ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[createWeId] Create weId failed. error message is :{}",
+                innerResp.getErrorMessage()
+            );
+            return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                innerResp.getTransactionInfo());
+        }
+        return new ResponseData<>(result, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+            innerResp.getTransactionInfo());
+        
+//    	EngineResultData<CreateWeIdDataResult>  result = engine.createWeId();
+//    	ResponseData<CreateWeIdDataResult>resp = new ResponseData<CreateWeIdDataResult>();
+//    	return resp;
     }
+    
+    private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,
+	        String privateKey) {
+	        try {
+//	            WeIdContract weIdContract = (WeIdContract) reloadContract(
+//	                weIdContractAddress,
+//	                privateKey,
+//	                WeIdContract.class);
+
+	        	EngineResultData<CreateWeIdDataResult>  result = engine.createWeId(weId, publicKey, privateKey);
+	        	return new ResponseData<>(false, ErrorCode.SUCCESS);
+	        }  catch (PrivateKeyIllegalException e) {
+	            return new ResponseData<>(false, e.getErrorCode());
+	        } catch (LoadContractException e) {
+	            return new ResponseData<>(false, e.getErrorCode());
+	        } catch (Exception e) {
+	            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+	        }
+	    }
+    
     /**
      * Create a WeIdentity DID.
      *
@@ -139,8 +184,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
             EngineResultData<String>  result = engine.createWeId(createWeIdArgs);
-//            ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
-            ResponseData<Boolean> innerResp = new ResponseData<Boolean>();
+            ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
+//            ResponseData<Boolean> innerResp = new ResponseData<Boolean>();
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[createWeId]: create weid failed. error message is :{}, public key is {}",
@@ -230,11 +275,52 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (!WeIdUtils.isPrivateKeyValid(setPublicKeyArgs.getUserWeIdPrivateKey())) {
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
-        EngineResultData<Boolean> result = engine.setPublicKey(setPublicKeyArgs);
-        ResponseData<Boolean>response = new ResponseData<Boolean>();
-        return response;
         
-    }
+        String weId = setPublicKeyArgs.getWeId();
+        String weAddress = WeIdUtils.convertWeIdToAddress(weId);
+        if (StringUtils.isEmpty(weAddress)) {
+            logger.error("setPublicKey: weId : {} is invalid.", weId);
+            return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+        }
+        String owner = setPublicKeyArgs.getOwner();
+        if (StringUtils.isEmpty(owner)) {
+            owner = weAddress;
+        } else {
+            if (WeIdUtils.isWeIdValid(owner)) {
+                owner = WeIdUtils.convertWeIdToAddress(owner);
+            } else {
+                logger.error("setPublicKey: owner : {} is invalid.", owner);
+                return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+            }
+        }
+        String pubKey = setPublicKeyArgs.getPublicKey();
+        
+//        String privateKey = setPublicKeyArgs.getUserWeIdPrivateKey().getPrivateKey();
+        try {
+//            WeIdContract weIdContract = (WeIdContract) reloadContract(
+//                weIdContractAddress,
+//                privateKey,
+//                WeIdContract.class
+//            );
+            String attributeKey =
+                    new StringBuffer()
+                        .append(WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)
+                        .append(WeIdConstant.SEPARATOR)
+                        .append(setPublicKeyArgs.getType())
+                        .append(WeIdConstant.SEPARATOR)
+                        .append("base64")
+                        .toString();
+//            engine.setAuthentication(setAuthenticationArgs)
+            String attrValue = new StringBuffer().append(pubKey).append("/").append(owner).toString();
+            EngineResultData<Boolean>  result = engine.setAttribute(weAddress, attributeKey, attrValue);
+            return new ResponseData<>(false, ErrorCode.SUCCESS);
+        } catch (PrivateKeyIllegalException e) {
+            return new ResponseData<>(false, e.getErrorCode());
+        } catch (Exception e) {
+            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+        }
+}
+    
 
     private boolean verifySetPublicKeyArgs(SetPublicKeyArgs setPublicKeyArgs) {
 
@@ -252,17 +338,38 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
      */
     @Override
     public ResponseData<Boolean> setService(SetServiceArgs setServiceArgs) {
-
-        if (!verifySetServiceArgs(setServiceArgs)) {
+    	if (!verifySetServiceArgs(setServiceArgs)) {
             logger.error("[setService]: input parameter setServiceArgs is illegal.");
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }
         if (!WeIdUtils.isPrivateKeyValid(setServiceArgs.getUserWeIdPrivateKey())) {
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
-        EngineResultData<Boolean> result = engine.setService(setServiceArgs);
-        ResponseData<Boolean> response = new ResponseData<Boolean>();
-        return response;
+        String weId = setServiceArgs.getWeId();
+        String serviceType = setServiceArgs.getType();
+        String serviceEndpoint = setServiceArgs.getServiceEndpoint();
+        if (WeIdUtils.isWeIdValid(weId)) {
+//            String privateKey = setServiceArgs.getUserWeIdPrivateKey().getPrivateKey();
+            try {
+//                WeIdContract weIdContract = (WeIdContract) reloadContract(
+//                    weIdContractAddress,
+//                    privateKey,
+//                    WeIdContract.class);
+            	String attributeKey = WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
+                        + serviceType;
+            	EngineResultData<Boolean> result = engine.setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey, serviceEndpoint);
+            	return new ResponseData<>(false, ErrorCode.SUCCESS);
+
+            }catch (PrivateKeyIllegalException e) {
+                return new ResponseData<>(false, e.getErrorCode());
+            } catch (Exception e) {
+                logger.error("Set weId service failed. Error message :{}", e);
+                return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+            }
+        } else {
+            return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+        }
+      
     }
 
     private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
@@ -306,41 +413,19 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             }
             String privateKey = setAuthenticationArgs.getUserWeIdPrivateKey().getPrivateKey();
             try {
-                WeIdContract weIdContract = (WeIdContract) reloadContract(
-                    weIdContractAddress,
-                    privateKey,
-                    WeIdContract.class);
-                Future<TransactionReceipt> future =
-                    weIdContract.setAttribute(
-                        new Address(weAddress),
-                        DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX),
-                        DataToolUtils.stringToDynamicBytes(
-                            new StringBuffer()
-                                .append(setAuthenticationArgs.getPublicKey())
-                                .append(WeIdConstant.SEPARATOR)
-                                .append(owner)
-                                .toString()),
-                        DateUtils.getCurrentTimeStampInt256());
-                TransactionReceipt receipt =
-                    future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-                List<WeIdAttributeChangedEventResponse> response =
-                    WeIdContract.getWeIdAttributeChangedEvents(receipt);
-                TransactionInfo info = new TransactionInfo(receipt);
-                if (CollectionUtils.isNotEmpty(response)) {
-                    return new ResponseData<>(true, ErrorCode.SUCCESS, info);
-                } else {
-                    logger.error("Set authenticate failed. Error message :{}",
-                        ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCodeDesc());
-                    return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
-                        info);
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("Set authenticate failed. Error message :{}", e);
-                return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-            } catch (TimeoutException e) {
-                logger.error("Set authenticate timeout. Error message :{}", e);
-                return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-            } catch (PrivateKeyIllegalException e) {
+//                WeIdContract weIdContract = (WeIdContract) reloadContract(
+//                    weIdContractAddress,
+//                    privateKey,
+//                    WeIdContract.class);
+//            	String attributeKey = 
+            	String attrValue = new StringBuffer()
+                        .append(setAuthenticationArgs.getPublicKey())
+                        .append(WeIdConstant.SEPARATOR)
+                        .append(owner)
+                        .toString();
+            	engine.setAttribute(weAddress, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX, attrValue);
+            	return new ResponseData<>(false, ErrorCode.SUCCESS);
+            }  catch (PrivateKeyIllegalException e) {
                 logger.error("Set authenticate with private key exception. Error message :{}", e);
                 return new ResponseData<>(false, e.getErrorCode());
             } catch (Exception e) {
