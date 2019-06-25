@@ -23,4 +23,5 @@ WeIdentity文档
    docs/weidentity-spec.rst
    docs/faq.md
    docs/weidentity-rest.rst
+   docs/miscellaneous.md
    WeIdentity JAVA SDK 文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>
