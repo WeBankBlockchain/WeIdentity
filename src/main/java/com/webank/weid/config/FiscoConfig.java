@@ -41,6 +41,7 @@ public class FiscoConfig {
     private String v2CaCrtPath;
     private String v2NodeCrtPath;
     private String v2NodeKeyPath;
+    private String currentOrgId;
 
     /**
      * load configuration without Spring context required.
