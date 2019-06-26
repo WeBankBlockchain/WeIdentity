@@ -38,6 +38,7 @@ import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
+import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.util.WeIdUtils;
 
 /**
