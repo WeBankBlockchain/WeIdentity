@@ -67,6 +67,15 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
     private static AuthorityIssuerController authorityIssuerController;
     private static SpecificIssuerController specificIssuerController;
 
+    public AuthorityIssuerEngineV1() {
+    	
+    	if(authorityIssuerController == null) {
+    		authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(), AuthorityIssuerController.class);
+    	}
+    	if(specificIssuerController == null) {
+    		specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(), SpecificIssuerController.class);
+    	}
+    }
     /**
      * Use the given private key to send the transaction to call the contract.
      *

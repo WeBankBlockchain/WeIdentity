@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.fisco.bcos.web3j.crypto.Sign;
+import org.bcos.web3j.crypto.Sign;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple7;
 import org.slf4j.Logger;
@@ -59,7 +59,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     private static CptController cptController;
     
     public CptServiceEngineV2() {
-    	cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+    	if(cptController == null) {
+    		cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+    	}
     }
 
     /* (non-Javadoc)
@@ -89,23 +91,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS().getValue()
             ).send();
 
-            List<UpdateCptRetLogEventResponse> event = cptController.getUpdateCptRetLogEvents(
-                transactionReceipt
-            );
-            if (CollectionUtils.isEmpty(event)) {
-                logger.error("[updateCpt] event is empty, cptId:{}.", cptId);
-                return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
-            }
-
-            return this.getResultByResolveEvent(
-                transactionReceipt,
-                event.get(0).retCode,
-                event.get(0).cptId,
-                event.get(0).cptVersion
-            );
+            return processEventLog(transactionReceipt);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId);
             return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
         }
     }
@@ -189,23 +177,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS().getValue()
             ).send();
 
-            List<UpdateCptRetLogEventResponse> event = cptController.getUpdateCptRetLogEvents(
-                transactionReceipt
-            );
-            if (CollectionUtils.isEmpty(event)) {
-                logger.error("[updateCpt] event is empty, cptId:{}.", cptId);
-                return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
-            }
-
-            return this.getResultByResolveEvent(
-                transactionReceipt,
-                event.get(0).retCode,
-                event.get(0).cptId,
-                event.get(0).cptVersion
-            );
+            return processEventLog(transactionReceipt);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        	logger.error("[registerCpt] register cpt failed. exception message: ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
@@ -214,11 +188,13 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
      */
     @Override
-    public ResponseData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey) {
+    public ResponseData<CptBaseInfo> registerCpt(
+    	String address, 
+    	String cptJsonSchemaNew,
+        RsvSignature rsvSignature, 
+        String privateKey) {
 
         List<byte[]> byteArray = new ArrayList<>();
-
         TransactionReceipt transactionReceipt;
         try {
             transactionReceipt = cptController.registerCpt(
@@ -238,25 +214,32 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS().getValue()
             ).send();
 
-            List<UpdateCptRetLogEventResponse> event = cptController.getUpdateCptRetLogEvents(
-                transactionReceipt
-            );
-            if (CollectionUtils.isEmpty(event)) {
-                return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
-            }
-
-            return this.getResultByResolveEvent(
-                transactionReceipt,
-                event.get(0).retCode,
-                event.get(0).cptId,
-                event.get(0).cptVersion
-            );
+            return processEventLog(transactionReceipt);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("[registerCpt] register cpt failed. exception message: ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
+
+	/**
+	 * @param transactionReceipt
+	 * @return
+	 */
+	private ResponseData<CptBaseInfo> processEventLog(TransactionReceipt transactionReceipt) {
+		List<UpdateCptRetLogEventResponse> event = cptController.getUpdateCptRetLogEvents(
+		    transactionReceipt
+		);
+		if (CollectionUtils.isEmpty(event)) {
+		    return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
+		}
+
+		return this.getResultByResolveEvent(
+		    transactionReceipt,
+		    event.get(0).retCode,
+		    event.get(0).cptId,
+		    event.get(0).cptVersion
+		);
+	}
 
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.CptEngineController#queryCpt(int)
@@ -264,6 +247,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     @Override
     public ResponseData<Cpt> queryCpt(int cptId) {
 
+    	try {
         Tuple7<String, List<BigInteger>, List<byte[]>, List<byte[]>,
             BigInteger, byte[], byte[]> valueList =
             cptController
@@ -315,6 +299,10 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
         ResponseData<Cpt> responseData = new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS);
         return responseData;
+    	} catch(Exception e) {
+    		logger.error("[queryCpt] query Cpt failed. exception message: ", e);
+    		return new ResponseData<Cpt>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+    	}
     }
 
 }
