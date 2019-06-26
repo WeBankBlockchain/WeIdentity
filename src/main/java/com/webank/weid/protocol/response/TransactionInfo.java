@@ -67,21 +67,6 @@ public class TransactionInfo {
      *
      * @param receipt the transaction receipt
      */
-    public TransactionInfo(
-        org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt receipt
-    ) {
-        if (receipt != null) {
-            this.blockNumber = receipt.getBlockNumber();
-            this.transactionHash = receipt.getTransactionHash();
-            this.transactionIndex = receipt.getTransactionIndex();
-        }
-    }
-    
-    /**
-     * Constructor from a transactionReceipt. If the receipt is null, an
-     *
-     * @param receipt the transaction receipt
-     */
     public TransactionInfo(org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt receipt) {
         if (receipt != null) {
             this.blockNumber = receipt.getBlockNumber();
