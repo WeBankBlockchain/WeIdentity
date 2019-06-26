@@ -50,6 +50,7 @@ import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
+import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.TransactionUtils;
@@ -58,13 +59,15 @@ import com.webank.weid.util.WeIdUtils;
 /**
  * @author tonychen 2019年6月25日
  */
-public class CptServiceEngineV1 implements CptServiceEngine {
+public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV1.class);
 
-    private static String cptControllerAddress;
-
     private static CptController cptController;
+    
+    public CptServiceEngineV1() {
+    	cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+    }
 
     /**
      * Verify Register CPT related events.
@@ -175,9 +178,8 @@ public class CptServiceEngineV1 implements CptServiceEngine {
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             return resolveRegisterCptEvents(receipt);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+            logger.error("[updateCpt] transaction execute with exception. ", e);
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
 
     }
@@ -212,9 +214,8 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 
             return resolveRegisterCptEvents(receipt);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+        	logger.error("[updateCpt] transaction execute with exception. ", e);
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
 
@@ -224,16 +225,13 @@ public class CptServiceEngineV1 implements CptServiceEngine {
     @Override
     public ResponseData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
         RsvSignature rsvSignature, String privateKey) {
+    	
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
 
-//	        reloadContract(weIdPrivateKey.getPrivateKey());
-        // the case to update a CPT. Requires a valid CPT ID
-//	        	engine.
         TransactionReceipt receipt;
         try {
-
             // the case to register a CPT with a pre-set CPT ID
             receipt = cptController.registerCpt(
                 new Address(address),
@@ -247,9 +245,8 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 
             return resolveRegisterCptEvents(receipt);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+        	logger.error("[updateCpt] transaction execute with exception. ", e);
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
 
@@ -314,7 +311,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
             cpt.setCptSignature(cptSignature);
             return new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS);
         } catch (InterruptedException | ExecutionException e) {
-            logger.error("Set weId service failed. Error message :{}", e);
+            logger.error("query cpt failed. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
             return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
