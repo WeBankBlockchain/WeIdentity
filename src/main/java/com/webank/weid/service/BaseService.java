@@ -20,10 +20,6 @@
 package com.webank.weid.service;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.math.BigInteger;
-
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,8 +29,6 @@ import com.webank.weid.config.ContractConfig;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.protocol.amop.AmopRequestBody;
 import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
@@ -57,7 +51,7 @@ public abstract class BaseService {
 
     protected static FiscoConfig fiscoConfig;
     
-    private static WeServer<?,?,?> weServer;
+    protected static WeServer<?,?,?> weServer;
 
     static {
         fiscoConfig = new FiscoConfig();
@@ -78,7 +72,10 @@ public abstract class BaseService {
         }
     }
     
-    private static void init() {
+    /**
+     * initialization WeServer.
+     */
+    protected static void init() {
         if (weServer == null) {
             weServer = WeServer.init(fiscoConfig);
         }
@@ -101,7 +98,7 @@ public abstract class BaseService {
      *
      * @return the web3j
      */
-    private static Class<?> getWeb3jClass() {
+    protected static Class<?> getWeb3jClass() {
         if (weServer == null) {
             init();
         }
@@ -130,6 +127,11 @@ public abstract class BaseService {
         return DataToolUtils.getUuId32();
     }
     
+    /**
+     * Get the RegistCallBack.
+     * 
+     * @return the RegistCallBack
+     */
     protected RegistCallBack getPushCallback(){
         if (weServer == null) {
             init();
@@ -150,101 +152,6 @@ public abstract class BaseService {
         contractConfig.setEvidenceAddress(fiscoConfig.getEvidenceAddress());
         contractConfig.setSpecificIssuerAddress(fiscoConfig.getSpecificIssuerAddress());
         return contractConfig;
-    }
-
-    private static <T> T loadContract(
-        String contractAddress,
-        Object credentials,
-        Class<T> cls) throws NoSuchMethodException, IllegalAccessException,
-        InvocationTargetException {
-        Object contract;
-        Method method = cls.getMethod(
-            "load",
-            String.class,
-            getWeb3jClass(),
-            credentials.getClass(),
-            BigInteger.class,
-            BigInteger.class
-        );
-
-        contract = method.invoke(
-            null,
-            contractAddress,
-            getWeb3j(),
-            credentials,
-            WeIdConstant.GAS_PRICE,
-            WeIdConstant.GAS_LIMIT
-        );
-        return (T) contract;
-    }
-
-    /**
-     * Reload contract.
-     *
-     * @param contractAddress the contract address
-     * @param privateKey the privateKey of the sender
-     * @param cls the class
-     * @return the contract
-     */
-    protected static <T> T reloadContract(
-        String contractAddress,
-        String privateKey,
-        Class<T> cls) {
-        
-        if (weServer == null) {
-            init();
-        }
-
-        T contract = null;
-        try {
-            // load contract
-            contract = loadContract(contractAddress, weServer.createCredentials(privateKey), cls);
-            logger.info(cls.getSimpleName() + " init succ");
-        } catch (Exception e) {
-            logger.error("load contract :{} failed. Error message is :{}",
-                cls.getSimpleName(), e);
-            throw new LoadContractException();
-        }
-
-        if (contract == null) {
-            throw new LoadContractException();
-        }
-        return contract;
-    }
-
-    /**
-     * Gets the contract service.
-     *
-     * @param contractAddress the contract address
-     * @param cls the class
-     * @return the contract service
-     */
-    protected static <T> T getContractService(String contractAddress, Class<T> cls) {
-
-        T contract = null;
-        try {
-            // load contract
-            if (weServer == null) {
-                init();
-            }
-            contract = loadContract(contractAddress, weServer.getCredentials(), cls);
-            logger.info(cls.getSimpleName() + " init succ");
-
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-            logger.error("load contract :{} failed. Error message is :{}",
-                cls.getSimpleName(), e);
-            throw new LoadContractException();
-        } catch (Exception e) {
-            logger.error("load contract Exception:{} failed. Error message is :{}",
-                cls.getSimpleName(), e);
-            throw new LoadContractException();
-        }
-
-        if (contract == null) {
-            throw new LoadContractException();
-        }
-        return  contract;
     }
 
     /**
