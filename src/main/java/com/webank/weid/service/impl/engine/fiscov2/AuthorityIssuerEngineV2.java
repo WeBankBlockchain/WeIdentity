@@ -1,4 +1,4 @@
-package com.webank.weid.service.impl.engine;
+package com.webank.weid.service.impl.engine.fiscov2;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -22,6 +22,7 @@ import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.EngineResultData;
 import com.webank.weid.protocol.response.TransactionInfo;
+import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -29,9 +30,9 @@ import com.webank.weid.util.WeIdUtils;
  * @author tonychen 2019年6月25日
  *
  */
-public class AuthorityIssuerControllerV2 implements IssuerContractController {
+public class AuthorityIssuerEngineV2 implements AuthorityIssuerServiceEngine {
 
-	   private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerControllerV2.class);
+	   private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerEngineV2.class);
 
 	    private static AuthorityIssuerController authorityIssuerController;
 	    private static String authorityIssuerControllerAddress;

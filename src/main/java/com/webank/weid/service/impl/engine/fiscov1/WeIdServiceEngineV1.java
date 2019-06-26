@@ -1,4 +1,4 @@
-package com.webank.weid.service.impl.engine;
+package com.webank.weid.service.impl.engine.fiscov1;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -56,6 +56,7 @@ import com.webank.weid.protocol.response.EngineResultData;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
+import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -64,7 +65,7 @@ import com.webank.weid.util.WeIdUtils;
  * @author tonychen 2019年6月21日
  *
  */
-public class WeIdController1 implements WeIdController{
+public class WeIdServiceEngineV1 implements WeIdServiceEngine{
 	
 	
 	/**
@@ -82,7 +83,7 @@ public class WeIdController1 implements WeIdController{
 //    private static String weIdContractAddress;
     
 
-	private static final Logger logger = LoggerFactory.getLogger(WeIdController1.class);
+	private static final Logger logger = LoggerFactory.getLogger(WeIdServiceEngineV1.class);
 	
 //	public WeIdController1(String contractAddress) {
 ////		weIdContract = WeIdContract.load(contractAddress, web3j, credentials, gasPrice, gasLimit);
@@ -429,8 +430,8 @@ public class WeIdController1 implements WeIdController{
 		 * @see com.webank.weid.service.impl.engine.WeIdController#createWeId(java.lang.String, java.lang.String, java.lang.String)
 		 */
 		@Override
-		public EngineResultData<CreateWeIdDataResult> createWeId(String weId, String publicKey, String privateKey) {
 			
+		public EngineResultData<CreateWeIdDataResult> createWeId(String weId, String publicKey, String privateKey) {
 //			 WeIdContract weIdContract = (WeIdContract) reloadContract(
 //	                    weIdContractAddress,
 //	                    privateKey,
