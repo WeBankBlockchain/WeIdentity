@@ -4,15 +4,14 @@ dist: trusty
 # blocklist
 branches:
   except:
-  - /^release.*/
+    - /^release.*/
 
 # safelist
 branches:
   only:
-  - master
-  - develop
-  - feature/macau
-  - /^v\d+\.\d+\.\d+$/
+    - master
+    - develop
+    - /^v\d+\.\d+\.\d+$/
 
 language: java
 jdk:
@@ -29,22 +28,44 @@ cache:
 
 before_install:
   - gradle wrapper
+  - chmod +x install.sh
+  - ./install.sh
 
-script:
-  - chmod +x ci/script/build-ci.sh
-  - ci/script/build-ci.sh
-  - travis_wait 30 ./gradlew check
-  - ./gradlew jacocoTestReport
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
+jobs:
+  include:
+    - stage: "WeID-Java-SDK CI"
+      script:
+        - chmod +x ci/script/build-ci.sh
+        - ci/script/build-ci.sh
+        - travis_wait 30 ./gradlew check
+        - ./gradlew jacocoTestReport
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+    - stage: "dependency pipeline"
+      script:
+        - chmod +x ci/script/weid-http-service/build-ci.sh
+        - ci/script/weid-http-service/build-ci.sh
+      name: "HTTP Rest Service simple CI"
+      if: (branch = master)
+    - stage: "dependency pipeline"
+      script:
+        - chmod +x ci/script/weid-build-tools/build-ci.sh
+        - ci/script/weid-build-tools/build-ci.sh
+      name: "Build Tools simple CI"
+      if: (branch = master)
+    - stage: "dependency pipeline"
+      script:
+        - chmod +x ci/script/weid-sample/build-ci.sh
+        - ci/script/weid-sample/build-ci.sh
+      name: "Sample simple CI"
+      if: (branch = master)
 
 deploy:
-    provider: releases
-    api_key: $GIT_REPO_TOKEN
-    file_glob: true
-    file: dist/app/weidentity-java-sdk*.jar
-    skip_cleanup: true
-    on:
-      tags: true
-      all_branches: true
+  provider: releases
+  api_key: $GIT_REPO_TOKEN
+  file_glob: true
+  file: dist/app/weid-java-sdk*.jar
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
