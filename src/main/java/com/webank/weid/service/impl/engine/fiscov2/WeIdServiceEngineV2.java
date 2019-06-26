@@ -1,4 +1,4 @@
-package com.webank.weid.service.impl.engine;
+package com.webank.weid.service.impl.engine.fiscov2;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -46,6 +46,7 @@ import com.webank.weid.protocol.response.EngineResultData;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
+import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -54,9 +55,9 @@ import com.webank.weid.util.WeIdUtils;
  * @author tonychen 2019年6月21日
  *
  */
-public class WeIdController2 implements WeIdController{
+public class WeIdServiceEngineV2 implements WeIdServiceEngine{
 
-	private static final Logger logger = LoggerFactory.getLogger(WeIdController2.class);
+	private static final Logger logger = LoggerFactory.getLogger(WeIdServiceEngineV2.class);
 	
 	 /**
      * The topic map.
