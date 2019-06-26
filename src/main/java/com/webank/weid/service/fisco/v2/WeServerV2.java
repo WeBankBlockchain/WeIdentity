@@ -29,7 +29,7 @@ import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
 
-public class WeServerV2 extends WeServer<Web3j, Credentials, Service>{
+public final class WeServerV2 extends WeServer<Web3j, Credentials, Service>{
 
     private static final Logger logger = LoggerFactory.getLogger(WeServerV2.class);
     
@@ -61,7 +61,7 @@ public class WeServerV2 extends WeServer<Web3j, Credentials, Service>{
     }
     
     @Override
-    public Object createCredentials(String privateKey) {
+    public Credentials createCredentials(String privateKey) {
         Credentials credentials;
         try {
             ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
