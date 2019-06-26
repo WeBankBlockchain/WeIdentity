@@ -116,7 +116,7 @@ public final class WeServerV1 extends WeServer<Web3j,Credentials,Service> {
     }
 
     @Override
-    public Object createCredentials(String privateKey) {
+    public Credentials createCredentials(String privateKey) {
         Credentials credentials;
         try {
             ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
