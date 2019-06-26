@@ -72,8 +72,8 @@ public class AuthorityIssuerServiceProxy {
         return engine.getAuthorityIssuerAddressList(index, num);
     }
 
-    public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress) {
-        return engine.removeIssuer(issuerType, issuerAddress);
+    public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress, String privateKey) {
+        return engine.removeIssuer(issuerType, issuerAddress, privateKey);
     }
 
     public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address) {
@@ -86,11 +86,11 @@ public class AuthorityIssuerServiceProxy {
         return engine.getSpecificTypeIssuerList(issuerType, index, num);
     }
 
-    public ResponseData<Boolean> registerIssuerType(String issuerType) {
-        return engine.registerIssuerType(issuerType);
+    public ResponseData<Boolean> registerIssuerType(String issuerType, String privateKey) {
+        return engine.registerIssuerType(issuerType, privateKey);
     }
 
-    public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress) {
-        return engine.addIssuer(issuerType, issuerAddress);
+    public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress, String privateKey) {
+        return engine.addIssuer(issuerType, issuerAddress, privateKey);
     }
 }

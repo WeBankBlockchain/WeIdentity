@@ -24,17 +24,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.v1.AuthorityIssuerController;
-import com.webank.weid.contract.v1.SpecificIssuerController;
-import com.webank.weid.contract.v1.SpecificIssuerController.SpecificIssuerRetLogEventResponse;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
@@ -93,8 +87,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerResponseData);
         }
 
-        String weId = args.getWeId();
-        Address addr = new Address(WeIdUtils.convertWeIdToAddress(weId));
         try {
             return proxy.removeAuthorityIssuer(args);
         } catch (Exception e) {
@@ -111,7 +103,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
      */
     @Override
     public ResponseData<Boolean> isAuthorityIssuer(String weId) {
-        ResponseData<Boolean> responseData = new ResponseData<Boolean>();
 
         if (!WeIdUtils.isWeIdValid(weId)) {
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
@@ -133,11 +124,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
      */
     @Override
     public ResponseData<AuthorityIssuer> queryAuthorityIssuerInfo(String weId) {
-        ResponseData<AuthorityIssuer> responseData = new ResponseData<>();
         if (!WeIdUtils.isWeIdValid(weId)) {
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
-        Address addr = new Address(WeIdUtils.convertWeIdToAddress(weId));
         try {
             return proxy.getAuthorityIssuerInfoNonAccValue(weId);
 
@@ -199,7 +188,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerCode);
         }
         try {
-            return proxy.registerIssuerType(issuerType);
+            return proxy.registerIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("register issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -227,7 +216,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return proxy.addIssuer(issuerType, issuerAddress);
+            return proxy.addIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("add issuer into type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -253,9 +242,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerCode);
         }
         try {
-//            reloadSpecificIssuerContract(callerAuth.getWeIdPrivateKey().getPrivateKey());
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return proxy.removeIssuer(issuerType, issuerAddress);
+            return proxy.removeIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("remove issuer from type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -353,39 +341,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return ErrorCode.WEID_INVALID;
         }
         return ErrorCode.SUCCESS;
-    }
-
-    private ErrorCode resolveSpecificIssuerEvents(
-        TransactionReceipt transactionReceipt,
-        boolean isRegister,
-        String address) {
-        List<SpecificIssuerRetLogEventResponse> eventList =
-            SpecificIssuerController.getSpecificIssuerRetLogEvents(transactionReceipt);
-
-        SpecificIssuerRetLogEventResponse event = eventList.get(0);
-        if (event != null) {
-            if (isRegister) {
-                // this might be the register type, or the register specific issuer case
-                if (event.operation.getValue().intValue()
-                    != WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
-                    || !StringUtils.equalsIgnoreCase(event.addr.toString(), address)) {
-                    return ErrorCode.TRANSACTION_EXECUTE_ERROR;
-                }
-            } else {
-                // this is the remove specific issuer case
-                if (event.operation.getValue().intValue()
-                    != WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
-                    || !StringUtils.equalsIgnoreCase(event.addr.toString(), address)) {
-                    return ErrorCode.TRANSACTION_EXECUTE_ERROR;
-                }
-            }
-            Integer eventRetCode = event.retCode.getValue().intValue();
-            return ErrorCode.getTypeByErrorCode(eventRetCode);
-        } else {
-            logger.error(
-                "specific issuer type resolution failed due to event decoding failure.");
-            return ErrorCode.UNKNOW_ERROR;
-        }
     }
 
     private ErrorCode isIssuerTypeValid(String issuerType) {
