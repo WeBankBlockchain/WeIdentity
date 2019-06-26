@@ -54,10 +54,18 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerEngineV2.class);
 
     private static AuthorityIssuerController authorityIssuerController;
-    private static String authorityIssuerControllerAddress;
     private static SpecificIssuerController specificIssuerController;
-    private static String specificIssuerControllerAddress;
 
+    public AuthorityIssuerEngineV2() {
+    	
+    	if(authorityIssuerController == null) {
+    		authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(), AuthorityIssuerController.class);
+    	}
+    	if(specificIssuerController == null) {
+    		specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(), SpecificIssuerController.class);
+    	}
+    }
+    
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#addAuthorityIssuer(com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs)
      */
@@ -71,7 +79,6 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         Long createDate = System.currentTimeMillis();
         longAttributes.add(BigInteger.valueOf(createDate));
         try {
-//	            reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
             AuthorityIssuerController authorityIssuerController = reloadContract(
                 fiscoConfig.getIssuerAddress(),
                 args.getWeIdPrivateKey().getPrivateKey(),
