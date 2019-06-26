@@ -57,49 +57,16 @@ import com.webank.weid.util.WeIdUtils;
 
 /**
  * @author tonychen 2019年6月25日
- *
  */
 public class CptServiceEngineV1 implements CptServiceEngine {
-	
-	 private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV1.class);
 
-	 private static String cptControllerAddress;
-	 
-	 private static CptController cptController;
+    private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV1.class);
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.CptEngineController#updateCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
-	 */
-	@Override
-	public ResponseData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
-			RsvSignature rsvSignature) {
-		
-		StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
-	            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
-	        );
+    private static String cptControllerAddress;
 
-		TransactionReceipt receipt;
-		try {
-			receipt = cptController.updateCpt(
-			            DataToolUtils.intToUint256(cptId),
-			            new Address(address),
-			            TransactionUtils.getParamUpdated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
-			            bytes32Array,
-			            TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
-			            rsvSignature.getV(),
-			            rsvSignature.getR(),
-			            rsvSignature.getS()
-			        ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-			return resolveRegisterCptEvents(receipt);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
-		}
-		
-	}
+    private static CptController cptController;
 
-	/**
+    /**
      * Verify Register CPT related events.
      *
      * @param transactionReceipt the TransactionReceipt
@@ -182,87 +149,118 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 
         return new ResponseData<>(result, ErrorCode.SUCCESS, info);
     }
-	
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
-	 */
-	@Override
-	public ResponseData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
-			RsvSignature rsvSignature) {
-		StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
-	            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
-	        );
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.CptEngineController#updateCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
+     */
+    @Override
+    public ResponseData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
+        RsvSignature rsvSignature, String privateKey) {
+
+        StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
+            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
+        );
+
+        TransactionReceipt receipt;
+        try {
+            receipt = cptController.updateCpt(
+                DataToolUtils.intToUint256(cptId),
+                new Address(address),
+                TransactionUtils.getParamUpdated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
+                bytes32Array,
+                TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
+                rsvSignature.getV(),
+                rsvSignature.getR(),
+                rsvSignature.getS()
+            ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            return resolveRegisterCptEvents(receipt);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+        }
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
+     */
+    @Override
+    public ResponseData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
+        RsvSignature rsvSignature, String privateKey) {
+        StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
+            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
+        );
 
 //	        reloadContract(weIdPrivateKey.getPrivateKey());
-	            // the case to update a CPT. Requires a valid CPT ID
+        // the case to update a CPT. Requires a valid CPT ID
 //	        	engine.
-		TransactionReceipt receipt;
-		try {
-			
-	                // the case to register a CPT with a pre-set CPT ID
-			receipt = cptController.registerCpt(
-	                    DataToolUtils.intToUint256(cptId),
-	                    new Address(address),
-	                    TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
-	                    bytes32Array,
-	                    TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
-	                    rsvSignature.getV(),
-	                    rsvSignature.getR(),
-	                    rsvSignature.getS()
-	                ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-	            
-			return resolveRegisterCptEvents(receipt);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
-		}
-	}
+        TransactionReceipt receipt;
+        try {
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
-	 */
-	@Override
-	public ResponseData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
-			RsvSignature rsvSignature) {
-		StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
-	            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
-	        );
+            // the case to register a CPT with a pre-set CPT ID
+            receipt = cptController.registerCpt(
+                DataToolUtils.intToUint256(cptId),
+                new Address(address),
+                TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
+                bytes32Array,
+                TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
+                rsvSignature.getV(),
+                rsvSignature.getR(),
+                rsvSignature.getS()
+            ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+
+            return resolveRegisterCptEvents(receipt);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
+     */
+    @Override
+    public ResponseData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
+        RsvSignature rsvSignature, String privateKey) {
+        StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
+            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
+        );
 
 //	        reloadContract(weIdPrivateKey.getPrivateKey());
-	            // the case to update a CPT. Requires a valid CPT ID
+        // the case to update a CPT. Requires a valid CPT ID
 //	        	engine.
-		TransactionReceipt receipt;
-		try {
-			
-	                // the case to register a CPT with a pre-set CPT ID
-			receipt = cptController.registerCpt(
-	                    new Address(address),
-	                    TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
-	                    bytes32Array,
-	                    TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
-	                    rsvSignature.getV(),
-	                    rsvSignature.getR(),
-	                    rsvSignature.getS()
-	                ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-	            
-			return resolveRegisterCptEvents(receipt);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
-		}
-	}
+        TransactionReceipt receipt;
+        try {
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.CptEngineController#queryCpt(int)
-	 */
-	@Override
-	public ResponseData<Cpt> queryCpt(int cptId) {
-		try {
-			
-		
-		List<Type> typeList = cptController
+            // the case to register a CPT with a pre-set CPT ID
+            receipt = cptController.registerCpt(
+                new Address(address),
+                TransactionUtils.getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
+                bytes32Array,
+                TransactionUtils.getParamJsonSchema(cptJsonSchemaNew),
+                rsvSignature.getV(),
+                rsvSignature.getR(),
+                rsvSignature.getS()
+            ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+
+            return resolveRegisterCptEvents(receipt);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.CptEngineController#queryCpt(int)
+     */
+    @Override
+    public ResponseData<Cpt> queryCpt(int cptId) {
+        try {
+
+            List<Type> typeList = cptController
                 .queryCpt(DataToolUtils.intToUint256(cptId))
                 .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
@@ -314,14 +312,14 @@ public class CptServiceEngineV1 implements CptServiceEngine {
                     StandardCharsets.UTF_8
                 );
             cpt.setCptSignature(cptSignature);
-            return new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS); 
-		  } catch (InterruptedException | ExecutionException e) {
-	            logger.error("Set weId service failed. Error message :{}", e);
-	            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-	        } catch (TimeoutException e) {
-	            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-	        }
-	}
+            return new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("Set weId service failed. Error message :{}", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (TimeoutException e) {
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        }
+    }
 
 
 }

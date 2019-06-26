@@ -32,67 +32,65 @@ import com.webank.weid.util.PropertyUtils;
 
 /**
  * @author tonychen 2019年6月25日
- *
  */
 public class AuthorityIssuerServiceProxy {
-	
-private static AuthorityIssuerServiceEngine engine;
-	
-	private static String weIdContractAddr;
-	/**
-	 * fisco bcos version, default 1.3.x
-	 */
-	private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
 
-	public AuthorityIssuerServiceProxy() {
-		
-		if(fiscoVersion.equals("1.3")) {
-			engine = new AuthorityIssuerEngineV1();
-		}
-		else {
-			engine = new AuthorityIssuerEngineV2();
-		}
-	}
-	
-public ResponseData<Boolean> addAuthorityIssuer(RegisterAuthorityIssuerArgs args){
-	return engine.addAuthorityIssuer(args);
-}
-	
-	public ResponseData<Boolean> removeAuthorityIssuer(RemoveAuthorityIssuerArgs args){
-		return engine.removeAuthorityIssuer(args);
-	}
-	
-	public ResponseData<Boolean> isAuthorityIssuer(String address){
-		return engine.isAuthorityIssuer(address);
-	}
-	
-	public ResponseData<AuthorityIssuer> getAuthorityIssuerInfoNonAccValue(String weId){
-		return engine.getAuthorityIssuerInfoNonAccValue(weId);
-	}
-	
-	public List<String> getAuthorityIssuerAddressList(Integer index, Integer num){
-		return engine.getAuthorityIssuerAddressList(index, num);
-	}
-	
-	public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress){
-		return engine.removeIssuer(issuerType, issuerAddress);
-	}
-	
-	public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address){
-		return engine.isSpecificTypeIssuer(issuerType, address);
-	}
-	
-	public ResponseData<List<String>> getSpecificTypeIssuerList(String issuerType,
-	        Integer index,
-	        Integer num){
-		return engine.getSpecificTypeIssuerList(issuerType, index, num);
-	}
-	
-	public ResponseData<Boolean>  registerIssuerType(String issuerType){
-		return engine.registerIssuerType(issuerType);
-	}
-	
-	public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress){
-		return engine.addIssuer(issuerType, issuerAddress);
-	}
+    private static AuthorityIssuerServiceEngine engine;
+
+    private static String weIdContractAddr;
+    /**
+     * fisco bcos version, default 1.3.x
+     */
+    private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
+
+    public AuthorityIssuerServiceProxy() {
+
+        if (fiscoVersion.equals("1.3")) {
+            engine = new AuthorityIssuerEngineV1();
+        } else {
+            engine = new AuthorityIssuerEngineV2();
+        }
+    }
+
+    public ResponseData<Boolean> addAuthorityIssuer(RegisterAuthorityIssuerArgs args) {
+        return engine.addAuthorityIssuer(args);
+    }
+
+    public ResponseData<Boolean> removeAuthorityIssuer(RemoveAuthorityIssuerArgs args) {
+        return engine.removeAuthorityIssuer(args);
+    }
+
+    public ResponseData<Boolean> isAuthorityIssuer(String address) {
+        return engine.isAuthorityIssuer(address);
+    }
+
+    public ResponseData<AuthorityIssuer> getAuthorityIssuerInfoNonAccValue(String weId) {
+        return engine.getAuthorityIssuerInfoNonAccValue(weId);
+    }
+
+    public List<String> getAuthorityIssuerAddressList(Integer index, Integer num) {
+        return engine.getAuthorityIssuerAddressList(index, num);
+    }
+
+    public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress) {
+        return engine.removeIssuer(issuerType, issuerAddress);
+    }
+
+    public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address) {
+        return engine.isSpecificTypeIssuer(issuerType, address);
+    }
+
+    public ResponseData<List<String>> getSpecificTypeIssuerList(String issuerType,
+        Integer index,
+        Integer num) {
+        return engine.getSpecificTypeIssuerList(issuerType, index, num);
+    }
+
+    public ResponseData<Boolean> registerIssuerType(String issuerType) {
+        return engine.registerIssuerType(issuerType);
+    }
+
+    public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress) {
+        return engine.addIssuer(issuerType, issuerAddress);
+    }
 }

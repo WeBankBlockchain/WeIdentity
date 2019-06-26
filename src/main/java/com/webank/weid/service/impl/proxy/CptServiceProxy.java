@@ -30,55 +30,56 @@ import com.webank.weid.util.PropertyUtils;
 
 /**
  * @author tonychen 2019年6月25日
- *
  */
 public class CptServiceProxy {
 
-private static CptServiceEngine engine;
-	
-	private static String cptContractAddr;
-	/**
-	 * fisco bcos version, default 1.3.x
-	 */
-	private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
+    private static CptServiceEngine engine;
 
-	public CptServiceProxy() {
-		
-		if(fiscoVersion.equals("1.3")) {
-			engine = new CptServiceEngineV1();
-		}
-		else {
-			engine = new CptServiceEngineV2();
-		}
-	}
-	
-	public ResponseData<CptBaseInfo>  updateCpt(
-            int cptId,
-            String address,
-            String cptJsonSchemaNew,
-            RsvSignature rsvSignature
-        ){
-		return engine.updateCpt(cptId, address, cptJsonSchemaNew, rsvSignature);
-	}
-	
-	public ResponseData<CptBaseInfo>  registerCpt(
-            int cptId,
-            String address,
-            String cptJsonSchemaNew,
-            RsvSignature rsvSignature
-        ){
-		return engine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature);
-	}
-	
-	public ResponseData<CptBaseInfo>  registerCpt(
-            String address,
-            String cptJsonSchemaNew,
-            RsvSignature rsvSignature
-        ){
-		return engine.registerCpt(address, cptJsonSchemaNew, rsvSignature);
-	}
-	
-	public ResponseData<Cpt> queryCpt(int cptId){
-		return engine.queryCpt(cptId);
-	}
+    private static String cptContractAddr;
+    /**
+     * fisco bcos version, default 1.3.x
+     */
+    private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
+
+    public CptServiceProxy() {
+
+        if (fiscoVersion.equals("1.3")) {
+            engine = new CptServiceEngineV1();
+        } else {
+            engine = new CptServiceEngineV2();
+        }
+    }
+
+    public ResponseData<CptBaseInfo> updateCpt(
+        int cptId,
+        String address,
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature,
+        String privateKey
+    ) {
+        return engine.updateCpt(cptId, address, cptJsonSchemaNew, rsvSignature, privateKey);
+    }
+
+    public ResponseData<CptBaseInfo> registerCpt(
+        int cptId,
+        String address,
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature,
+        String privateKey
+    ) {
+        return engine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature, privateKey);
+    }
+
+    public ResponseData<CptBaseInfo> registerCpt(
+        String address,
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature,
+        String privateKey
+    ) {
+        return engine.registerCpt(address, cptJsonSchemaNew, rsvSignature, privateKey);
+    }
+
+    public ResponseData<Cpt> queryCpt(int cptId) {
+        return engine.queryCpt(cptId);
+    }
 }
