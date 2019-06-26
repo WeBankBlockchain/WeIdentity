@@ -20,6 +20,7 @@ import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
