@@ -1,20 +1,37 @@
+def gradleVer = "4"
+if (gradle.gradleVersion.startsWith("6")
+        || gradle.gradleVersion.startsWith("5")
+        || gradle.gradleVersion.startsWith("4.10")
+        || gradle.gradleVersion.startsWith("4.9")
+        || gradle.gradleVersion.startsWith("4.8")
+        || gradle.gradleVersion.startsWith("4.7")) {
+    println "Gradle with version >= 4.7 detected"
+    gradleVer = "5"
+} else {
+    println "Gradle with version < 4.7 detected"
+}
+
+// Due to a bug of spotbugs, the following lines have to be defined on top as well
 buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
     dependencies {
         classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.5"
     }
-}
-
-plugins {
-    id "com.github.spotbugs" version "1.6.5"
 }
 
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'checkstyle'
-apply plugin: "com.github.spotbugs"
-apply plugin: 'jacoco'
+if (!gradle.startParameter.isOffline()) {
+    apply plugin: 'checkstyle'
+    apply plugin: 'jacoco'
+    apply plugin: "com.github.spotbugs"
+}
 
 version = "1.2.1"
 
@@ -25,77 +42,101 @@ targetCompatibility = 1.8
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 // In this section you declare where to find the dependencies of your project
 repositories {
-    mavenLocal()
-    mavenCentral()
-    maven {
-        url "http://maven.aliyun.com/nexus/content/groups/public/"
+    if (!gradle.startParameter.isOffline()) {
+        mavenLocal()
+        mavenCentral()
+        maven {
+            url "http://maven.aliyun.com/nexus/content/groups/public/"
+        }
+    } else {
+        maven {
+            url 'dependencies'
+        }
     }
 }
 
 List lombok = [
-    "org.projectlombok:lombok:1.16.14"
+        "org.projectlombok:lombok:1.16.14"
 ]
 
 List logger = [
-    "org.slf4j:jul-to-slf4j:1.7.10",
-    "org.apache.logging.log4j:log4j-api:2.1",
-    "org.apache.logging.log4j:log4j-core:2.1",
-    "org.apache.logging.log4j:log4j-slf4j-impl:2.1",
-    "org.apache.logging.log4j:log4j-web:2.1"
+        "org.slf4j:jul-to-slf4j:1.7.10",
+        "org.apache.logging.log4j:log4j-api:2.1",
+        "org.apache.logging.log4j:log4j-core:2.1",
+        "org.apache.logging.log4j:log4j-slf4j-impl:2.1",
+        "org.apache.logging.log4j:log4j-web:2.1"
 ]
 
 // junit test
 List junit = [
-    "junit:junit:4.12"
+        "junit:junit:4.12"
 ]
 
 List apache_commons = [
-    "org.apache.commons:commons-collections4:4.1",
-    "org.apache.commons:commons-lang3:3.5",
-    "commons-cli:commons-cli:1.3.1"
+        "org.apache.commons:commons-collections4:4.1",
+        "org.apache.commons:commons-lang3:3.5",
+        "commons-cli:commons-cli:1.3.1"
 ]
 
 List jmockit = [
-    "org.jmockit:jmockit:1.9"
+        "org.jmockit:jmockit:1.9"
 ]
 
 List json = [
-    "com.fasterxml.jackson.core:jackson-databind:2.8.8.1",
-    "com.github.fge:json-schema-validator:2.2.6",
-    "com.github.reinert:jjschema:1.16"
+        "com.fasterxml.jackson.core:jackson-databind:2.8.8.1",
+        "com.github.fge:json-schema-validator:2.2.6",
+        "com.github.reinert:jjschema:1.16"
 ]
 
 List weidentity_contract = [
-    "com.webank:weidentity-contract-java:1.2.2"
+        "com.webank:weidentity-contract-java:1.2.2"
 ]
 
 List mysql_driver = [
-    "mysql:mysql-connector-java:5.1.44",
-    "org.apache.commons:commons-dbcp2:2.5.0"
+        "mysql:mysql-connector-java:5.1.44",
+        "org.apache.commons:commons-dbcp2:2.5.0"
 ]
 
 List web3sdk = [
-    "org.fisco-bcos:web3sdk:1.2.5"
+        "org.fisco-bcos:web3sdk:1.2.5"
 ]
 
 List zxing = [
-    "com.google.zxing:core:3.3.0"
+        "com.google.zxing:core:3.3.0"
 ]
+
+configurations {
+    localDeps
+}
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile logger, lombok, apache_commons, json, web3sdk, weidentity_contract, mysql_driver, zxing
-    testCompile logger, lombok, apache_commons, json, web3sdk, junit, jmockit
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        html.enabled false
+    localDeps 'org.projectlombok:lombok:1.16.14'
+    if (gradleVer.startsWith("4")) {
+        if (!gradle.startParameter.isOffline()) {
+            compile logger, lombok, apache_commons, json, web3sdk, weidentity_contract, mysql_driver, zxing
+            testCompile logger, lombok, apache_commons, json, web3sdk, junit, jmockit
+        } else {
+            compile fileTree(dir: 'dist/lib', include: '*.jar')
+        }
+    }
+    if (gradleVer.startsWith("5")) {
+        if (!gradle.startParameter.isOffline()) {
+            compileOnly 'org.projectlombok:lombok:1.16.14'
+            annotationProcessor 'org.projectlombok:lombok:1.16.14'
+            testAnnotationProcessor 'org.projectlombok:lombok:1.16.14'
+            testCompileOnly 'org.projectlombok:lombok:1.16.14'
+            compile logger, apache_commons, json, web3sdk, weidentity_contract, mysql_driver, zxing
+            testCompile logger, apache_commons, json, web3sdk, junit, jmockit
+        } else {
+            compileOnly files('dist/lib/lombok-1.16.14.jar')
+            annotationProcessor files('dist/lib/lombok-1.16.14.jar')
+            testAnnotationProcessor files('dist/lib/lombok-1.16.14.jar')
+            testCompileOnly files('dist/lib/lombok-1.16.14.jar')
+            compile fileTree(dir: 'dist/lib', include: '*.jar')
+        }
     }
 }
-
-check.dependsOn jacocoTestReport
 
 sourceSets {
     main {
@@ -132,9 +173,14 @@ jar {
             from file('src/main/resources/')
             into 'dist/conf'
         }
-        copy {
-            from configurations.runtime
-            into 'dist/lib'
+        if (!gradle.startParameter.isOffline()) {
+            copy {
+                from configurations.runtime
+                from configurations.testCompile.allArtifacts.files
+                from configurations.testCompile
+                from configurations.localDeps
+                into 'dist/lib'
+            }
         }
         copy {
             from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
@@ -143,37 +189,48 @@ jar {
     }
 }
 
-checkstyle {
-    ignoreFailures false
-    showViolations true
-    toolVersion '8.12'
-    configProperties.projectDir = project.projectDir
-    checkstyleMain.configFile = new File(project.projectDir, '/config/checkstyle/webank_google_checks.xml')
-    checkstyleTest.configFile = new File(project.projectDir, '/config/checkstyle/webank_google_checks.xml')
-}
-
-tasks.withType(Checkstyle) {
-    include '**/*.java'
-    exclude '**/contract/*.java'
-    reports {
-        xml.enabled false
-        html.enabled true
+if (!gradle.startParameter.isOffline()) {
+    jacocoTestReport {
+        reports {
+            xml.enabled true
+            html.enabled false
+        }
     }
-}
 
-spotbugs {
-    ignoreFailures = true
-    showProgress = true
-    toolVersion = "3.1.8"
-    effort = "max"
-    reportLevel = "low"
-    excludeFilter = file("${project.rootDir}/config/spotbugs/spotbugs_filter.xml")
-}
+    check.dependsOn jacocoTestReport
 
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
-    reports {
-        xml.enabled false
-        html.enabled true
-        html.stylesheet resources.text.fromFile('config/spotbugs.xsl')
+    checkstyle {
+        ignoreFailures false
+        showViolations true
+        toolVersion '8.12'
+        configProperties.projectDir = project.projectDir
+        checkstyleMain.configFile = new File(project.projectDir, '/config/checkstyle/webank_google_checks.xml')
+        checkstyleTest.configFile = new File(project.projectDir, '/config/checkstyle/webank_google_checks.xml')
+    }
+
+    tasks.withType(Checkstyle) {
+        include '**/*.java'
+        exclude '**/contract/*.java'
+        reports {
+            xml.enabled false
+            html.enabled true
+        }
+    }
+
+    spotbugs {
+        ignoreFailures = true
+        showProgress = true
+        toolVersion = "3.1.8"
+        effort = "max"
+        reportLevel = "low"
+        excludeFilter = file("${project.rootDir}/config/spotbugs/spotbugs_filter.xml")
+    }
+
+    tasks.withType(com.github.spotbugs.SpotBugsTask) {
+        reports {
+            xml.enabled false
+            html.enabled true
+            html.stylesheet resources.text.fromFile('config/spotbugs.xsl')
+        }
     }
 }
