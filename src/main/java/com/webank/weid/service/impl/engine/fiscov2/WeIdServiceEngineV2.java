@@ -1,3 +1,22 @@
+/*
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *
+ *       This file is part of weidentity-java-sdk.
+ *
+ *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.webank.weid.service.impl.engine.fiscov2;
 
 import java.io.IOException;
@@ -42,7 +61,7 @@ import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.EngineResultData;
+import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
@@ -89,14 +108,14 @@ public class WeIdServiceEngineV2 implements WeIdServiceEngine{
 	 * @see com.webank.weid.service.impl.engine.WeIdController#isWeIdExist(java.lang.String)
 	 */
 	@Override
-	public EngineResultData<Boolean> isWeIdExist(String weId) {
+	public ResponseData<Boolean> isWeIdExist(String weId) {
 		 try {
 	            boolean isExist = weIdContract
 	                .isIdentityExist(WeIdUtils.convertWeIdToAddress(weId)).send().booleanValue();
-	            return new EngineResultData<>(isExist, ErrorCode.SUCCESS);
+	            return new ResponseData<>(isExist, ErrorCode.SUCCESS);
 	        } catch (Exception e) {
 	            logger.error("[isWeIdExist] execute failed. Error message :{}", e);
-	            return new EngineResultData<>(false, ErrorCode.UNKNOW_ERROR);
+	            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
 	        }
 	}
 
@@ -105,7 +124,7 @@ public class WeIdServiceEngineV2 implements WeIdServiceEngine{
 	 * @see com.webank.weid.service.impl.engine.WeIdController#getWeIdDocument(java.lang.String)
 	 */
 	@Override
-	public EngineResultData<WeIdDocument> getWeIdDocument(String weId) {
+	public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
 		 WeIdDocument result = new WeIdDocument();
 	        result.setId(weId);
 	        int latestBlockNumber = 0;
@@ -114,27 +133,27 @@ public class WeIdServiceEngineV2 implements WeIdServiceEngine{
 	            latestBlockNumber = weIdContract
 	                .getLatestRelatedBlock(identityAddr).send().intValue();
 	            if (0 == latestBlockNumber) {
-	                return new EngineResultData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
+	                return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
 	            }
 
 	            resolveTransaction(weId, latestBlockNumber, result);
 //	            responseData.setResult(result);
-	            return new EngineResultData<WeIdDocument>(result, ErrorCode.SUCCESS);
+	            return new ResponseData<WeIdDocument>(result, ErrorCode.SUCCESS);
 	        } catch (InterruptedException | ExecutionException e) {
 	            logger.error("Set weId service failed. Error message :{}", e);
-	            return new EngineResultData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+	            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
 	        } catch (TimeoutException e) {
-	            return new EngineResultData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
+	            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
 	        } catch (ResolveAttributeException e) {
 	            logger.error("[getWeIdDocument]: resolveTransaction failed. "
 	                    + "weId: {}, errorCode:{}",
 	                weId,
 	                e.getErrorCode(),
 	                e);
-	            return new EngineResultData<WeIdDocument>(result, ErrorCode.getTypeByErrorCode(e.getErrorCode()));
+	            return new ResponseData<WeIdDocument>(result, ErrorCode.getTypeByErrorCode(e.getErrorCode()));
 	        } catch (Exception e) {
 	            logger.error("[getWeIdDocument]: exception.", e);
-	            return new EngineResultData<>(null, ErrorCode.UNKNOW_ERROR);
+	            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
 	        }
 	}
 
@@ -370,7 +389,7 @@ public class WeIdServiceEngineV2 implements WeIdServiceEngine{
 			 * @see com.webank.weid.service.impl.engine.WeIdController#createWeId(java.lang.String, java.lang.String, java.lang.String)
 			 */
 			@Override
-			public EngineResultData<CreateWeIdDataResult> createWeId(String weId, String publicKey, String privateKey) {
+			public ResponseData<Boolean> createWeId(String weId, String publicKey, String privateKey) {
 				 String weAddress = WeIdUtils.convertWeIdToAddress(weId);
 		            String auth = new StringBuffer()
 		                .append(publicKey)
@@ -397,12 +416,12 @@ public class WeIdServiceEngineV2 implements WeIdServiceEngine{
 		                        + "modifying weid is not allowed. weid is {}",
 		                    weId
 		                );
-		                return new EngineResultData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
+		                return new ResponseData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
 		            }
-		            return new EngineResultData(true, ErrorCode.SUCCESS, info);
+		            return new ResponseData(true, ErrorCode.SUCCESS, info);
 					} catch (Exception e) {
 						
-						return new EngineResultData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+						return new ResponseData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
 					}
 			}
 
@@ -410,7 +429,7 @@ public class WeIdServiceEngineV2 implements WeIdServiceEngine{
 			 * @see com.webank.weid.service.impl.engine.WeIdController#setAttribute(java.lang.String, java.lang.String, java.lang.String)
 			 */
 			@Override
-			public EngineResultData<Boolean> setAttribute(String weAddress, String attributeKey, String value) {
+			public ResponseData<Boolean> setAttribute(String weAddress, String attributeKey, String value) {
 //				WeIdContract weIdContract = (WeIdContract) reloadContract(
 //		                weIdContractAddress,
 //		                privateKey,
@@ -431,13 +450,13 @@ public class WeIdServiceEngineV2 implements WeIdServiceEngine{
 		            List<WeIdAttributeChangedEventResponse> response =
 		                weIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
 		            if (CollectionUtils.isNotEmpty(response)) {
-		                return new EngineResultData<>(true, ErrorCode.SUCCESS, info);
+		                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
 		            } else {
-		                return new EngineResultData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
+		                return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
 		                    info);
 		            }
 				}catch (Exception e){
-					return new EngineResultData<>(true, ErrorCode.SUCCESS);
+					return new ResponseData<>(true, ErrorCode.SUCCESS);
 				}
 			}
 }
