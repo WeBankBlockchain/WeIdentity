@@ -66,7 +66,10 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
     private static CptController cptController;
     
     public CptServiceEngineV1() {
-    	cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+    	if(cptController == null) {
+    		
+    		cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+    	}
     }
 
     /**

@@ -83,6 +83,12 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      */
     private static WeIdContract weIdContract;
 
+    public WeIdServiceEngineV2() {
+    	
+    	if(weIdContract==null) {
+    		weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
+    	}
+    }
     static {
         // initialize the event topic
         topicMap = new HashMap<String, String>();
@@ -381,6 +387,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      */
     @Override
     public ResponseData<Boolean> createWeId(String weId, String publicKey, String privateKey) {
+    	
         String weAddress = WeIdUtils.convertWeIdToAddress(weId);
         String auth = new StringBuffer()
             .append(publicKey)
