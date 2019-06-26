@@ -80,11 +80,7 @@ public abstract class BaseService {
     
     private static void init() {
         if (weServer == null) {
-            synchronized (BaseService.class) {
-                if (weServer == null) {
-                    weServer = WeServer.init(fiscoConfig);
-                }
-            }
+            weServer = WeServer.init(fiscoConfig);
         }
     }
 
