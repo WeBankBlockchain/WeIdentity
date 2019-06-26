@@ -20,7 +20,6 @@
 package com.webank.weid.service.impl.proxy;
 
 import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.service.impl.engine.fiscov1.WeIdServiceEngineV1;
@@ -29,45 +28,43 @@ import com.webank.weid.util.PropertyUtils;
 
 /**
  * @author tonychen 2019年6月21日
- *
  */
 
 public class WeIdServiceProxy {
-	
-	private static WeIdServiceEngine engine;
-	
-	private static String weIdContractAddr;
-	/**
-	 * fisco bcos version, default 1.3.x
-	 */
-	private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
 
-	public WeIdServiceProxy() {
-		
-		if(fiscoVersion.equals("1.3")) {
-			engine = new WeIdServiceEngineV1();
-		}
-		else {
-			engine = new WeIdServiceEngineV2();
-		}
-	}
-	
-	public ResponseData<Boolean> isWeIdExist(String weId) {
-		
-		return engine.isWeIdExist(weId);
-	}
-	
-	public ResponseData<WeIdDocument> getWeIdDocument(String weId){
-		return engine.getWeIdDocument(weId);
-	}
-	
-	public ResponseData<Boolean> createWeId(String weId, String publicKey,
-	        String privateKey){
-		return engine.createWeId(weId, publicKey, privateKey);
-	}
-	
-	public ResponseData<Boolean> setAttribute(String weAddress, String attributeKey,
-	        String value){
-		return engine.setAttribute(weAddress, attributeKey, value);
-	}
+    private static WeIdServiceEngine engine;
+
+    private static String weIdContractAddr;
+    /**
+     * fisco bcos version, default 1.3.x
+     */
+    private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
+
+    public WeIdServiceProxy() {
+
+        if (fiscoVersion.equals("1.3")) {
+            engine = new WeIdServiceEngineV1();
+        } else {
+            engine = new WeIdServiceEngineV2();
+        }
+    }
+
+    public ResponseData<Boolean> isWeIdExist(String weId) {
+
+        return engine.isWeIdExist(weId);
+    }
+
+    public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
+        return engine.getWeIdDocument(weId);
+    }
+
+    public ResponseData<Boolean> createWeId(String weId, String publicKey,
+        String privateKey) {
+        return engine.createWeId(weId, publicKey, privateKey);
+    }
+
+    public ResponseData<Boolean> setAttribute(String weAddress, String attributeKey,
+        String value, String privateKey) {
+        return engine.setAttribute(weAddress, attributeKey, value, privateKey);
+    }
 }

@@ -42,105 +42,114 @@ import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
+import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
  * @author tonychen 2019年6月25日
- *
  */
-public class AuthorityIssuerEngineV2 implements AuthorityIssuerServiceEngine {
+public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssuerServiceEngine {
 
-	   private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerEngineV2.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerEngineV2.class);
 
-	    private static AuthorityIssuerController authorityIssuerController;
-	    private static String authorityIssuerControllerAddress;
-	    private static SpecificIssuerController specificIssuerController;
-	    private static String specificIssuerControllerAddress;
-	    
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#addAuthorityIssuer(com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs)
-	 */
-	@Override
-	public ResponseData<Boolean> addAuthorityIssuer(RegisterAuthorityIssuerArgs args) {
-		 AuthorityIssuer authorityIssuer = args.getAuthorityIssuer();
-	        String weAddress = WeIdUtils.convertWeIdToAddress(authorityIssuer.getWeId());
-	        List<byte[]> stringAttributes = new ArrayList<byte[]>();
-	        stringAttributes.add(authorityIssuer.getName().getBytes());
-	        List<BigInteger> longAttributes = new ArrayList<>();
-	        Long createDate = System.currentTimeMillis();
-	        longAttributes.add(BigInteger.valueOf(createDate));
-	        try {
+    private static AuthorityIssuerController authorityIssuerController;
+    private static String authorityIssuerControllerAddress;
+    private static SpecificIssuerController specificIssuerController;
+    private static String specificIssuerControllerAddress;
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#addAuthorityIssuer(com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs)
+     */
+    @Override
+    public ResponseData<Boolean> addAuthorityIssuer(RegisterAuthorityIssuerArgs args) {
+        AuthorityIssuer authorityIssuer = args.getAuthorityIssuer();
+        String weAddress = WeIdUtils.convertWeIdToAddress(authorityIssuer.getWeId());
+        List<byte[]> stringAttributes = new ArrayList<byte[]>();
+        stringAttributes.add(authorityIssuer.getName().getBytes());
+        List<BigInteger> longAttributes = new ArrayList<>();
+        Long createDate = System.currentTimeMillis();
+        longAttributes.add(BigInteger.valueOf(createDate));
+        try {
 //	            reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
-	            TransactionReceipt receipt = authorityIssuerController.addAuthorityIssuer(
-	                weAddress,
-	                DataToolUtils.bytesArrayListToBytes32ArrayList(
-	                    stringAttributes,
-	                    WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH
-	                ),
-	                DataToolUtils.listToListBigInteger(
-	                    longAttributes,
-	                    WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH
-	                ),
-	                authorityIssuer.getAccValue().getBytes()
-	            ).send();
-	            ErrorCode errorCode = resolveRegisterAuthorityIssuerEvents(receipt);
-	            TransactionInfo info = new TransactionInfo(receipt);
-	            if (errorCode.equals(ErrorCode.SUCCESS)) {
-	                return new ResponseData<>(Boolean.TRUE, ErrorCode.SUCCESS, info);
-	            } else {
-	                return new ResponseData<>(Boolean.FALSE, errorCode, info);
-	            }
-	        } catch (Exception e) {
-	            logger.error("register authority issuer failed.", e);
-	            return new ResponseData<>(Boolean.FALSE, ErrorCode.UNKNOW_ERROR);
-	        }
-	}
-	
-	  private ErrorCode resolveRegisterAuthorityIssuerEvents(
-		        TransactionReceipt transactionReceipt) {
-		        List<AuthorityIssuerRetLogEventResponse> eventList =
-		            authorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
+            AuthorityIssuerController authorityIssuerController = reloadContract(
+                fiscoConfig.getIssuerAddress(),
+                args.getWeIdPrivateKey().getPrivateKey(),
+                AuthorityIssuerController.class);
 
-		        AuthorityIssuerRetLogEventResponse event = eventList.get(0);
-		        if (event != null) {
-		            ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(
-		                event,
-		                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
-		            );
-		            return errorCode;
-		        } else {
-		            logger.error(
-		                "register authority issuer failed due to transcation event decoding failure.");
-		            return ErrorCode.AUTHORITY_ISSUER_ERROR;
-		        }
-		    }
-	  
-	    private ErrorCode verifyAuthorityIssuerRelatedEvent(
-	            AuthorityIssuerRetLogEventResponse event,
-	            Integer opcode) {
+            TransactionReceipt receipt = authorityIssuerController.addAuthorityIssuer(
+                weAddress,
+                DataToolUtils.bytesArrayListToBytes32ArrayList(
+                    stringAttributes,
+                    WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH
+                ),
+                DataToolUtils.listToListBigInteger(
+                    longAttributes,
+                    WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH
+                ),
+                authorityIssuer.getAccValue().getBytes()
+            ).send();
+            ErrorCode errorCode = resolveRegisterAuthorityIssuerEvents(receipt);
+            TransactionInfo info = new TransactionInfo(receipt);
+            if (errorCode.equals(ErrorCode.SUCCESS)) {
+                return new ResponseData<>(Boolean.TRUE, ErrorCode.SUCCESS, info);
+            } else {
+                return new ResponseData<>(Boolean.FALSE, errorCode, info);
+            }
+        } catch (Exception e) {
+            logger.error("register authority issuer failed.", e);
+            return new ResponseData<>(Boolean.FALSE, ErrorCode.UNKNOW_ERROR);
+        }
+    }
 
-	            if (event.addr == null || event.operation == null || event.retCode == null) {
-	                return ErrorCode.ILLEGAL_INPUT;
-	            }
-	            Integer eventOpcode = event.operation.intValue();
-	            if (eventOpcode.equals(opcode)) {
-	                Integer eventRetCode = event.retCode.intValue();
-	                return ErrorCode.getTypeByErrorCode(eventRetCode);
-	            } else {
-	                return ErrorCode.AUTHORITY_ISSUER_OPCODE_MISMATCH;
-	            }
+    private ErrorCode resolveRegisterAuthorityIssuerEvents(
+        TransactionReceipt transactionReceipt) {
+        List<AuthorityIssuerRetLogEventResponse> eventList =
+            authorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
 
-	        }
+        AuthorityIssuerRetLogEventResponse event = eventList.get(0);
+        if (event != null) {
+            ErrorCode errorCode = verifyAuthorityIssuerRelatedEvent(
+                event,
+                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
+            );
+            return errorCode;
+        } else {
+            logger.error(
+                "register authority issuer failed due to transcation event decoding failure.");
+            return ErrorCode.AUTHORITY_ISSUER_ERROR;
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#removeAuthorityIssuer(com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs)
-	 */
-	@Override
-	public ResponseData<Boolean> removeAuthorityIssuer(RemoveAuthorityIssuerArgs args) {
-		String weId = args.getWeId();
+    private ErrorCode verifyAuthorityIssuerRelatedEvent(
+        AuthorityIssuerRetLogEventResponse event,
+        Integer opcode) {
+
+        if (event.addr == null || event.operation == null || event.retCode == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        Integer eventOpcode = event.operation.intValue();
+        if (eventOpcode.equals(opcode)) {
+            Integer eventRetCode = event.retCode.intValue();
+            return ErrorCode.getTypeByErrorCode(eventRetCode);
+        } else {
+            return ErrorCode.AUTHORITY_ISSUER_OPCODE_MISMATCH;
+        }
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#removeAuthorityIssuer(com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs)
+     */
+    @Override
+    public ResponseData<Boolean> removeAuthorityIssuer(RemoveAuthorityIssuerArgs args) {
+        String weId = args.getWeId();
         try {
 //            reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
+            AuthorityIssuerController authorityIssuerController = reloadContract(
+                fiscoConfig.getIssuerAddress(),
+                args.getWeIdPrivateKey().getPrivateKey(),
+                AuthorityIssuerController.class);
             TransactionReceipt receipt = authorityIssuerController
                 .removeAuthorityIssuer(WeIdUtils.convertWeIdToAddress(weId)).send();
             List<AuthorityIssuerRetLogEventResponse> eventList =
@@ -167,39 +176,39 @@ public class AuthorityIssuerEngineV2 implements AuthorityIssuerServiceEngine {
             logger.error("remove authority issuer failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
-	}
+    }
 
-    
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#isAuthorityIssuer(java.lang.String)
-	 */
-	@Override
-	public ResponseData<Boolean> isAuthorityIssuer(String address) {
-		ResponseData<Boolean> resultData = new ResponseData<Boolean>();
-		 try {
-	            Boolean result = authorityIssuerController.isAuthorityIssuer(
-	            		address).send();
-	            resultData.setResult(result);
-	            if (result) {
-	            	resultData.setErrorCode(ErrorCode.SUCCESS);
-	            } else {
-	            	resultData.setErrorCode(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS);
-	            }
-	            return resultData;
-	        } catch (Exception e) {
-	            logger.error("check authority issuer id failed.", e);
-	            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
-	        }
-		 
-	}
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getAuthorityIssuerInfoNonAccValue(java.lang.String)
-	 */
-	@Override
-	public ResponseData<AuthorityIssuer> getAuthorityIssuerInfoNonAccValue(String weId) {
-		ResponseData<AuthorityIssuer> resultData = new ResponseData<AuthorityIssuer>();
-		try {
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#isAuthorityIssuer(java.lang.String)
+     */
+    @Override
+    public ResponseData<Boolean> isAuthorityIssuer(String address) {
+        ResponseData<Boolean> resultData = new ResponseData<Boolean>();
+        try {
+            Boolean result = authorityIssuerController.isAuthorityIssuer(
+                address).send();
+            resultData.setResult(result);
+            if (result) {
+                resultData.setErrorCode(ErrorCode.SUCCESS);
+            } else {
+                resultData.setErrorCode(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS);
+            }
+            return resultData;
+        } catch (Exception e) {
+            logger.error("check authority issuer id failed.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getAuthorityIssuerInfoNonAccValue(java.lang.String)
+     */
+    @Override
+    public ResponseData<AuthorityIssuer> getAuthorityIssuerInfoNonAccValue(String weId) {
+        ResponseData<AuthorityIssuer> resultData = new ResponseData<AuthorityIssuer>();
+        try {
             Tuple2<List<byte[]>, List<BigInteger>> rawResult =
                 authorityIssuerController.getAuthorityIssuerInfoNonAccValue(
                     WeIdUtils.convertWeIdToAddress(weId)).send();
@@ -233,84 +242,91 @@ public class AuthorityIssuerEngineV2 implements AuthorityIssuerServiceEngine {
             logger.error("query authority issuer failed.", e);
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getAuthorityIssuerAddressList(java.lang.Integer, java.lang.Integer)
-	 */
-	@Override
-	public List<String> getAuthorityIssuerAddressList(Integer index, Integer num) {
-		List<String> addressList = new ArrayList<>();
-		try {
-		addressList =
-	                authorityIssuerController.getAuthorityIssuerAddressList(
-	                		new BigInteger(index.toString()),
-	                		new BigInteger(num.toString())
-	                ).send();
-		}catch(Exception e) {
-			 logger.error("query authority issuer failed.", e);
-		}
-	                return addressList;
-	}
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getAuthorityIssuerAddressList(java.lang.Integer, java.lang.Integer)
+     */
+    @Override
+    public List<String> getAuthorityIssuerAddressList(Integer index, Integer num) {
+        List<String> addressList = new ArrayList<>();
+        try {
+            addressList =
+                authorityIssuerController.getAuthorityIssuerAddressList(
+                    new BigInteger(index.toString()),
+                    new BigInteger(num.toString())
+                ).send();
+        } catch (Exception e) {
+            logger.error("query authority issuer failed.", e);
+        }
+        return addressList;
+    }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#removeIssuer(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress) {
-		 try {
-	            TransactionReceipt receipt = specificIssuerController.removeIssuer(
-	                DataToolUtils.stringToByte32Array(issuerType),
-	                issuerAddress).send();
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#removeIssuer(java.lang.String, java.lang.String)
+     */
+    @Override
+    public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress,
+        String privateKey) {
+        try {
 
-	            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, false, issuerAddress);
-	            TransactionInfo info = new TransactionInfo(receipt);
-	            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
-	                errorCode, info);
-	        } catch (Exception e) {
-	            logger.error("remove issuer from type failed.", e);
-	            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
-	        }
-	}
-	 private ErrorCode resolveSpecificIssuerEvents(
-		        TransactionReceipt transactionReceipt,
-		        boolean isRegister,
-		        String address) {
-		        List<SpecificIssuerRetLogEventResponse> eventList =
-		            specificIssuerController.getSpecificIssuerRetLogEvents(transactionReceipt);
+            SpecificIssuerController specificIssuerController = reloadContract(
+                fiscoConfig.getSpecificIssuerAddress(),
+                privateKey,
+                SpecificIssuerController.class);
+            TransactionReceipt receipt = specificIssuerController.removeIssuer(
+                DataToolUtils.stringToByte32Array(issuerType),
+                issuerAddress).send();
 
-		        SpecificIssuerRetLogEventResponse event = eventList.get(0);
-		        if (event != null) {
-		            if (isRegister) {
-		                // this might be the register type, or the register specific issuer case
-		                if (event.operation.intValue()
-		                    != WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
-		                    || !StringUtils.equalsIgnoreCase(event.addr.toString(), address)) {
-		                    return ErrorCode.TRANSACTION_EXECUTE_ERROR;
-		                }
-		            } else {
-		                // this is the remove specific issuer case
-		                if (event.operation.intValue()
-		                    != WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
-		                    || !StringUtils.equalsIgnoreCase(event.addr.toString(), address)) {
-		                    return ErrorCode.TRANSACTION_EXECUTE_ERROR;
-		                }
-		            }
-		            Integer eventRetCode = event.retCode.intValue();
-		            return ErrorCode.getTypeByErrorCode(eventRetCode);
-		        } else {
-		            logger.error(
-		                "specific issuer type resolution failed due to event decoding failure.");
-		            return ErrorCode.UNKNOW_ERROR;
-		        }
-		    }
+            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, false, issuerAddress);
+            TransactionInfo info = new TransactionInfo(receipt);
+            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
+                errorCode, info);
+        } catch (Exception e) {
+            logger.error("remove issuer from type failed.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+    }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#isSpecificTypeIssuer(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address) {
-		try {
+    private ErrorCode resolveSpecificIssuerEvents(
+        TransactionReceipt transactionReceipt,
+        boolean isRegister,
+        String address) {
+        List<SpecificIssuerRetLogEventResponse> eventList =
+            specificIssuerController.getSpecificIssuerRetLogEvents(transactionReceipt);
+
+        SpecificIssuerRetLogEventResponse event = eventList.get(0);
+        if (event != null) {
+            if (isRegister) {
+                // this might be the register type, or the register specific issuer case
+                if (event.operation.intValue()
+                    != WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
+                    || !StringUtils.equalsIgnoreCase(event.addr.toString(), address)) {
+                    return ErrorCode.TRANSACTION_EXECUTE_ERROR;
+                }
+            } else {
+                // this is the remove specific issuer case
+                if (event.operation.intValue()
+                    != WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
+                    || !StringUtils.equalsIgnoreCase(event.addr.toString(), address)) {
+                    return ErrorCode.TRANSACTION_EXECUTE_ERROR;
+                }
+            }
+            Integer eventRetCode = event.retCode.intValue();
+            return ErrorCode.getTypeByErrorCode(eventRetCode);
+        } else {
+            logger.error(
+                "specific issuer type resolution failed due to event decoding failure.");
+            return ErrorCode.UNKNOW_ERROR;
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#isSpecificTypeIssuer(java.lang.String, java.lang.String)
+     */
+    @Override
+    public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address) {
+        try {
             Boolean result = specificIssuerController.isSpecificTypeIssuer(
                 DataToolUtils.stringToByte32Array(issuerType),
                 address
@@ -325,35 +341,40 @@ public class AuthorityIssuerEngineV2 implements AuthorityIssuerServiceEngine {
             logger.error("check issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getSpecificTypeIssuerList(java.lang.String, java.lang.Integer, java.lang.Integer)
-	 */
-	@Override
-	public ResponseData<List<String>> getSpecificTypeIssuerList(String issuerType, Integer index, Integer num) {
-		List<String> addresses = new ArrayList<>();
-		ResponseData<List<String>> result = new ResponseData<List<String>>();
-		try {
-			
-			addresses = specificIssuerController.getSpecificTypeIssuerList(
-					DataToolUtils.stringToByte32Array(issuerType),
-					new BigInteger(index.toString()),
-					new BigInteger(num.toString())
-					).send();
-			return result;
-		}catch(Exception e) {
-			logger.error("check issuer type failed.", e);
-			return new ResponseData<List<String>>(null, ErrorCode.UNKNOW_ERROR);
-		}
-	}
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getSpecificTypeIssuerList(java.lang.String, java.lang.Integer, java.lang.Integer)
+     */
+    @Override
+    public ResponseData<List<String>> getSpecificTypeIssuerList(String issuerType, Integer index,
+        Integer num) {
+        List<String> addresses = new ArrayList<>();
+        ResponseData<List<String>> result = new ResponseData<List<String>>();
+        try {
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.IssuerContractController#registerIssuerType(java.lang.String)
-	 */
-	@Override
-	public ResponseData<Boolean> registerIssuerType(String issuerType) {
-		try {
+            addresses = specificIssuerController.getSpecificTypeIssuerList(
+                DataToolUtils.stringToByte32Array(issuerType),
+                new BigInteger(index.toString()),
+                new BigInteger(num.toString())
+            ).send();
+            return result;
+        } catch (Exception e) {
+            logger.error("check issuer type failed.", e);
+            return new ResponseData<List<String>>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.IssuerContractController#registerIssuerType(java.lang.String)
+     */
+    @Override
+    public ResponseData<Boolean> registerIssuerType(String issuerType, String privateKey) {
+        try {
+            SpecificIssuerController specificIssuerController = reloadContract(
+                fiscoConfig.getSpecificIssuerAddress(),
+                privateKey,
+                SpecificIssuerController.class);
             TransactionReceipt receipt = specificIssuerController
                 .registerIssuerType(DataToolUtils.stringToByte32Array(issuerType)).send();
 
@@ -367,15 +388,20 @@ public class AuthorityIssuerEngineV2 implements AuthorityIssuerServiceEngine {
             logger.error("register issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
-	}
+    }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.service.impl.engine.IssuerContractController#addIssuer(java.lang.String, java.lang.String)
-	 */
-	@Override
-	public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress) {
-		try {
-		TransactionReceipt receipt = specificIssuerController.addIssuer(
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.IssuerContractController#addIssuer(java.lang.String, java.lang.String)
+     */
+    @Override
+    public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress,
+        String privateKey) {
+        try {
+            SpecificIssuerController specificIssuerController = reloadContract(
+                fiscoConfig.getSpecificIssuerAddress(),
+                privateKey,
+                SpecificIssuerController.class);
+            TransactionReceipt receipt = specificIssuerController.addIssuer(
                 DataToolUtils.stringToByte32Array(issuerType),
                 issuerAddress
             ).send();
@@ -387,6 +413,6 @@ public class AuthorityIssuerEngineV2 implements AuthorityIssuerServiceEngine {
             logger.error("add issuer into type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
-	}
+    }
 
 }

@@ -26,16 +26,32 @@ import com.webank.weid.protocol.response.RsvSignature;
 
 /**
  * @author tonychen 2019年6月25日
- *
  */
 public interface CptServiceEngine {
 
 
-	ResponseData<CptBaseInfo>  updateCpt(int cptId, String address, String cptJsonSchemaNew, RsvSignature rsvSignature);
-	
-	ResponseData<CptBaseInfo>  registerCpt(int cptId, String address, String cptJsonSchemaNew, RsvSignature rsvSignature);
-	
-	ResponseData<CptBaseInfo>  registerCpt(String address, String cptJsonSchemaNew, RsvSignature rsvSignature);
-	
-	ResponseData<Cpt> queryCpt(int cptId);
+    ResponseData<CptBaseInfo> updateCpt(
+        int cptId,
+        String address,
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature,
+        String privateKey
+    );
+
+    ResponseData<CptBaseInfo> registerCpt(
+        int cptId,
+        String address,
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature,
+        String privateKey
+    );
+
+    ResponseData<CptBaseInfo> registerCpt(
+        String address,
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature,
+        String privateKey
+    );
+
+    ResponseData<Cpt> queryCpt(int cptId);
 }
