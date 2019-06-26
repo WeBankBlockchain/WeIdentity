@@ -21,7 +21,7 @@ package com.webank.weid.service.impl.proxy;
 
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.EngineResultData;
+import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.service.impl.engine.fiscov1.WeIdServiceEngineV1;
 import com.webank.weid.service.impl.engine.fiscov2.WeIdServiceEngineV2;
@@ -52,22 +52,21 @@ public class WeIdServiceProxy {
 		}
 	}
 	
-	public EngineResultData<Boolean> isWeIdExist(String weId) {
+	public ResponseData<Boolean> isWeIdExist(String weId) {
 		
 		return engine.isWeIdExist(weId);
 	}
 	
-	
-	public EngineResultData<WeIdDocument> getWeIdDocument(String weId){
+	public ResponseData<WeIdDocument> getWeIdDocument(String weId){
 		return engine.getWeIdDocument(weId);
 	}
 	
-	public EngineResultData<CreateWeIdDataResult> createWeId(String weId, String publicKey,
+	public ResponseData<Boolean> createWeId(String weId, String publicKey,
 	        String privateKey){
 		return engine.createWeId(weId, publicKey, privateKey);
 	}
 	
-	public EngineResultData<Boolean> setAttribute(String weAddress, String attributeKey,
+	public ResponseData<Boolean> setAttribute(String weAddress, String attributeKey,
 	        String value){
 		return engine.setAttribute(weAddress, attributeKey, value);
 	}
