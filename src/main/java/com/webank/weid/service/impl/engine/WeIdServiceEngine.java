@@ -24,16 +24,18 @@ import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * @author tonychen 2019年6月21日
- * @param <T>
- *
  */
-public interface WeIdServiceEngine{
-	
-	ResponseData<Boolean> createWeId(String weId, String publicKey, String privateKey);
-	
-	ResponseData<Boolean> setAttribute(String weAddress, String attributeKey, String value);
-	
-	ResponseData<Boolean> isWeIdExist(String weId);
-	
-	ResponseData<WeIdDocument> getWeIdDocument(String weId);
+public interface WeIdServiceEngine {
+
+    ResponseData<Boolean> createWeId(String weId, String publicKey, String privateKey);
+
+    ResponseData<Boolean> setAttribute(
+        String weAddress,
+        String attributeKey,
+        String value,
+        String privateKey);
+
+    ResponseData<Boolean> isWeIdExist(String weId);
+
+    ResponseData<WeIdDocument> getWeIdDocument(String weId);
 }
