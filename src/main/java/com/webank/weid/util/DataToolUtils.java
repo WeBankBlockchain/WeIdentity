@@ -592,6 +592,7 @@ public final class DataToolUtils {
         System.arraycopy(signatureData.getS(), 0, serializedSignatureData, 33, 32);
         return serializedSignatureData;
     }
+    
 
     /**
      * The De-Serialization class of Signatures. This is simply a de-concatenation of bytes of the
@@ -626,21 +627,6 @@ public final class DataToolUtils {
         return new Sign.SignatureData(valueByte, r, s);
     }
     
-    /**
-     * The De-Serialization class of Signatures accepting raw values of v, r, and s. Note: due to
-     * the non 1:1 mapping between default encoded Java String and Byte Array, all the parameters
-     * derived from Byte Array should either be STILL IN Byte Array or Base-64.
-     *
-     * @param v the v
-     * @param r the r
-     * @param s the s
-     * @return the sign. signature data
-     */
-    public static Sign.SignatureData rawSignatureDeserializationV2(int v, byte[] r, byte[] s) {
-    	byte valueByte = (byte) v;
-        return new Sign.SignatureData(valueByte, r, s);
-    }
-
     /**
      * Verify a signature based on the provided raw data, and the WeID Document from chain. This
      * will traverse each public key in the WeID Document and fetch all keys which belongs to the

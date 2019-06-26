@@ -94,6 +94,13 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
      * WeIdentity DID contract object, for calling weIdentity DID contract.
      */
     private static WeIdContract weIdContract;
+    
+    public WeIdServiceEngineV1() {
+    	
+    	if(weIdContract==null) {
+    		weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
+    	}
+    }
 
     static {
         // initialize the event topic
