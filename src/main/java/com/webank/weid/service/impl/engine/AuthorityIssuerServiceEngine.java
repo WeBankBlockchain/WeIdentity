@@ -28,27 +28,29 @@ import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * @author tonychen 2019年6月25日
- *
  */
 public interface AuthorityIssuerServiceEngine {
 
-	public ResponseData<Boolean> addAuthorityIssuer(RegisterAuthorityIssuerArgs args);
-	
-	public ResponseData<Boolean> removeAuthorityIssuer(RemoveAuthorityIssuerArgs args);
-	
-	public ResponseData<Boolean> isAuthorityIssuer(String address);
-	
-	public ResponseData<AuthorityIssuer> getAuthorityIssuerInfoNonAccValue(String weId);
-	
-	public List<String> getAuthorityIssuerAddressList(Integer index, Integer num);
-	
-	public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress);
-	
-	public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address);
-	
-	public ResponseData<List<String>> getSpecificTypeIssuerList(String issuerType,Integer index,Integer num);
-	
-	public ResponseData<Boolean>  registerIssuerType(String issuerType);
-	
-	public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress);
+    public ResponseData<Boolean> addAuthorityIssuer(RegisterAuthorityIssuerArgs args);
+
+    public ResponseData<Boolean> removeAuthorityIssuer(RemoveAuthorityIssuerArgs args);
+
+    public ResponseData<Boolean> isAuthorityIssuer(String address);
+
+    public ResponseData<AuthorityIssuer> getAuthorityIssuerInfoNonAccValue(String weId);
+
+    public List<String> getAuthorityIssuerAddressList(Integer index, Integer num);
+
+    public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress,
+        String privateKey);
+
+    public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address);
+
+    public ResponseData<List<String>> getSpecificTypeIssuerList(String issuerType, Integer index,
+        Integer num);
+
+    public ResponseData<Boolean> registerIssuerType(String issuerType, String privateKey);
+
+    public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress,
+        String privateKey);
 }
