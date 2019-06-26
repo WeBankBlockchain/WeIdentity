@@ -386,9 +386,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      * @see com.webank.weid.service.impl.engine.WeIdController#createWeId(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Boolean> createWeId(String weId, String publicKey, String privateKey) {
+    public ResponseData<Boolean> createWeId(String weAddress, String publicKey, String privateKey) {
     	
-        String weAddress = WeIdUtils.convertWeIdToAddress(weId);
         String auth = new StringBuffer()
             .append(publicKey)
             .append(WeIdConstant.SEPARATOR)
@@ -410,8 +409,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             if (CollectionUtils.isEmpty(response)) {
                 logger.error(
                     "The input private key does not match the current weid, operation of "
-                        + "modifying weid is not allowed. weid is {}",
-                    weId
+                        + "modifying weid is not allowed. we address is {}",
+                        weAddress
                 );
                 return new ResponseData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
             }

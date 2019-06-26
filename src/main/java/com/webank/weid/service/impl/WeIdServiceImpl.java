@@ -100,19 +100,22 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
         return new ResponseData<>(result, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
             innerResp.getTransactionInfo());
-
     }
 
     private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,
         String privateKey) {
     	
+    	String address = WeIdUtils.convertWeIdToAddress(weId);
         try {
-            return weIdServiceEngine.createWeId(weId, publicKey, privateKey);
+            return weIdServiceEngine.createWeId(address, publicKey, privateKey);
         } catch (PrivateKeyIllegalException e) {
+        	logger.error("[createWeId] create weid failed because privateKey is illegal. ", e);
             return new ResponseData<>(false, e.getErrorCode());
         } catch (LoadContractException e) {
+        	logger.error("[createWeId] create weid failed because Load Contract with exception. ", e);
             return new ResponseData<>(false, e.getErrorCode());
         } catch (Exception e) {
+        	logger.error("[createWeId] create weid failed with exception. ", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
@@ -150,7 +153,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
             ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
-//            ResponseData<Boolean> innerResp = new ResponseData<Boolean>();
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[createWeId]: create weid failed. error message is :{}, public key is {}",
@@ -272,8 +274,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 .toString();
             return weIdServiceEngine.setAttribute(weAddress, attributeKey, attrValue, privateKey);
         } catch (PrivateKeyIllegalException e) {
+        	logger.error("[setPublicKey] set PublicKey failed because privateKey is illegal. ", e);
             return new ResponseData<>(false, e.getErrorCode());
         } catch (Exception e) {
+        	logger.error("[setPublicKey] set PublicKey failed with exception. ", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
@@ -314,12 +318,14 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     serviceEndpoint, privateKey);
 
             } catch (PrivateKeyIllegalException e) {
+            	logger.error("[setService] set PublicKey failed because privateKey is illegal. ", e);
                 return new ResponseData<>(false, e.getErrorCode());
             } catch (Exception e) {
-                logger.error("Set weId service failed. Error message :{}", e);
+                logger.error("[setService] set service failed. Error message :{}", e);
                 return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
             }
         } else {
+        	logger.error("[setService] set service failed, weid -->{} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
 
@@ -374,7 +380,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 return weIdServiceEngine
                     .setAttribute(weAddress, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX, attrValue,
                         privateKey);
-//            	return new ResponseData<>(false, ErrorCode.SUCCESS);
             } catch (PrivateKeyIllegalException e) {
                 logger.error("Set authenticate with private key exception. Error message :{}", e);
                 return new ResponseData<>(false, e.getErrorCode());
@@ -404,6 +409,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     @Override
     public ResponseData<Boolean> isWeIdExist(String weId) {
         if (!WeIdUtils.isWeIdValid(weId)) {
+        	logger.error("[isWeIdExist] check weid failed. weid : {} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
         return weIdServiceEngine.isWeIdExist(weId);
