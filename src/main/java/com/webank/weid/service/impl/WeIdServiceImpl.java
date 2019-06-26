@@ -41,7 +41,7 @@ import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.proxy.WeIdServiceProxy;
+import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -57,7 +57,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceImpl.class);
 
 
-    private static WeIdServiceProxy proxy = new WeIdServiceProxy();
+    private static WeIdServiceEngine weIdServiceEngine = EngineFactory.createWeIdServiceEngine();
 
 
     /**
@@ -107,7 +107,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         String privateKey) {
         try {
 
-            return proxy.createWeId(weId, publicKey, privateKey);
+            return weIdServiceEngine.createWeId(weId, publicKey, privateKey);
 //	        	return new ResponseData<>(false, ErrorCode.SUCCESS);
         } catch (PrivateKeyIllegalException e) {
             return new ResponseData<>(false, e.getErrorCode());
@@ -179,7 +179,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     @Override
     public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
 
-        return proxy.getWeIdDocument(weId);
+        return weIdServiceEngine.getWeIdDocument(weId);
     }
 
     /**
@@ -271,7 +271,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     .toString();
             String attrValue = new StringBuffer().append(pubKey).append("/").append(owner)
                 .toString();
-            return proxy.setAttribute(weAddress, attributeKey, attrValue, privateKey);
+            return weIdServiceEngine.setAttribute(weAddress, attributeKey, attrValue, privateKey);
         } catch (PrivateKeyIllegalException e) {
             return new ResponseData<>(false, e.getErrorCode());
         } catch (Exception e) {
@@ -311,7 +311,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             try {
                 String attributeKey = WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
                     + serviceType;
-                return proxy.setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey,
+                return weIdServiceEngine.setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey,
                     serviceEndpoint, privateKey);
 
             } catch (PrivateKeyIllegalException e) {
@@ -372,7 +372,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     .append(WeIdConstant.SEPARATOR)
                     .append(owner)
                     .toString();
-                return proxy
+                return weIdServiceEngine
                     .setAttribute(weAddress, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX, attrValue,
                         privateKey);
 //            	return new ResponseData<>(false, ErrorCode.SUCCESS);
@@ -407,7 +407,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (!WeIdUtils.isWeIdValid(weId)) {
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
-        return proxy.isWeIdExist(weId);
+        return weIdServiceEngine.isWeIdExist(weId);
     }
 
 }
