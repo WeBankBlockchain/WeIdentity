@@ -19,43 +19,29 @@
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.v1.Evidence;
-import com.webank.weid.contract.v1.EvidenceFactory;
-import com.webank.weid.contract.v1.EvidenceFactory.CreateEvidenceLogEventResponse;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -69,42 +55,11 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
 
-    // Evidence Factory contract instance
-    private static EvidenceFactory evidenceFactory;
-
-    // Evidence Factory contract address
-    private static String evidenceFactoryAddress;
-
     private WeIdService weIdService = new WeIdServiceImpl();
-
-    /**
-     * Instantiates a new evidence service impl.
-     */
-    public EvidenceServiceImpl() {
-        init();
-    }
-
-    private static void init() {
-        ContractConfig config = buildContractConfig();
-        evidenceFactoryAddress = config.getEvidenceAddress();
-        evidenceFactory = (EvidenceFactory) getContractService(
-            evidenceFactoryAddress,
-            EvidenceFactory.class);
-    }
-
-    /**
-     * Use the evidence creator's private key to send the transaction to call the contract.
-     *
-     * @param privateKey the private key
-     */
-    private static void reloadContract(String privateKey) {
-        evidenceFactory = (EvidenceFactory) reloadContract(
-            evidenceFactoryAddress,
-            privateKey,
-            EvidenceFactory.class
-        );
-    }
-
+    
+    private EvidenceServiceEngine evidenceServiceEngine = 
+        EngineFactory.createEvidenceServiceEngine();
+    
     /**
      * Create a new evidence to the blockchain and store its address into the credential.
      */
@@ -140,64 +95,18 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 ));
             List<String> extraValueList = new ArrayList<>();
             extraValueList.add(StringUtils.EMPTY);
-            Sign.SignatureData sigData = DataToolUtils
-                .signMessage(credentialHash, weIdPrivateKey.getPrivateKey());
-            Bytes32 r = DataToolUtils.bytesArrayToBytes32(sigData.getR());
-            Bytes32 s = DataToolUtils.bytesArrayToBytes32(sigData.getS());
-            Uint8 v = DataToolUtils.intToUnt8(Integer.valueOf(sigData.getV()));
-            List<Address> signer = new ArrayList<>();
-            signer.add(new Address(Keys.getAddress(DataToolUtils
-                .createKeyPairFromPrivate(new BigInteger(weIdPrivateKey.getPrivateKey())))));
-            reloadContract(weIdPrivateKey.getPrivateKey());
-            Future<TransactionReceipt> future = evidenceFactory.createEvidence(
-                new DynamicArray<Bytes32>(generateBytes32List(hashAttributes)),
-                new DynamicArray<Address>(signer),
-                r,
-                s,
-                v,
-                new DynamicArray<Bytes32>(generateBytes32List(extraValueList))
+            Sign.SignatureData sigData = 
+                DataToolUtils.signMessage(credentialHash, weIdPrivateKey.getPrivateKey());
+            return evidenceServiceEngine.createEvidence(
+                sigData,
+                hashAttributes,
+                extraValueList,
+                weIdPrivateKey.getPrivateKey()
             );
-
-            TransactionReceipt receipt = future.get(
-                WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
-                TimeUnit.SECONDS);
-            TransactionInfo info = new TransactionInfo(receipt);
-            List<CreateEvidenceLogEventResponse> eventResponseList =
-                EvidenceFactory.getCreateEvidenceLogEvents(receipt);
-            CreateEvidenceLogEventResponse event = eventResponseList.get(0);
-
-            if (event != null) {
-                innerResponse = verifyCreateEvidenceEvent(event);
-                if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
-                    return new ResponseData<>(StringUtils.EMPTY, innerResponse, info);
-                }
-                return new ResponseData<>(event.addr.toString(), ErrorCode.SUCCESS, info);
-            } else {
-                logger
-                    .error(
-                        "create evidence failed due to transcation event decoding failure. ");
-                return new ResponseData<>(StringUtils.EMPTY,
-                    ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
-            }
-        } catch (TimeoutException e) {
-            logger.error("create evidence failed due to system timeout. ", e);
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("create evidence failed due to transaction error. ", e);
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (Exception e) {
+        }  catch (Exception e) {
             logger.error("create evidence failed due to system error. ", e);
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
-    }
-
-    private List<Bytes32> generateBytes32List(List<String> bytes32List) {
-        int desiredLength = bytes32List.size();
-        List<Bytes32> finalList = new ArrayList<>();
-        for (int i = 0; i < desiredLength; i++) {
-            finalList.add(DataToolUtils.stringToBytes32(bytes32List.get(i)));
-        }
-        return finalList;
     }
 
     /**
@@ -208,69 +117,12 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
      */
     @Override
     public ResponseData<EvidenceInfo> getEvidence(String evidenceAddress) {
-        ResponseData<EvidenceInfo> responseData = new ResponseData<>();
         if (StringUtils.isEmpty(evidenceAddress) || !WeIdUtils.isValidAddress(evidenceAddress)) {
             logger.error("Evidence argument illegal input: address. ");
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-
-        Evidence evidence = (Evidence) getContractService(evidenceAddress, Evidence.class);
-
         try {
-            List<Type> rawResult =
-                evidence.getInfo()
-                    .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            if (rawResult == null) {
-                return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
-            }
-
-            List<Bytes32> credentialHashList = ((DynamicArray<Bytes32>) rawResult.get(0))
-                .getValue();
-            List<Address> issuerList = ((DynamicArray<Address>) rawResult.get(1)).getValue();
-
-            EvidenceInfo evidenceInfoData = new EvidenceInfo();
-            evidenceInfoData.setCredentialHash(
-                WeIdConstant.HEX_PREFIX + DataToolUtils
-                    .bytes32ToString(credentialHashList.get(0))
-                    + DataToolUtils.bytes32ToString(credentialHashList.get(1)));
-
-            List<String> signerStringList = new ArrayList<>();
-            for (Address addr : issuerList) {
-                signerStringList.add(addr.toString());
-            }
-            evidenceInfoData.setSigners(signerStringList);
-
-            List<String> signaturesList = new ArrayList<>();
-            List<Bytes32> rlist = ((DynamicArray<Bytes32>) rawResult.get(2)).getValue();
-            List<Bytes32> slist = ((DynamicArray<Bytes32>) rawResult.get(3)).getValue();
-            List<Uint8> vlist = ((DynamicArray<Uint8>) rawResult.get(4)).getValue();
-            byte v;
-            byte[] r;
-            byte[] s;
-            for (int index = 0; index < rlist.size(); index++) {
-                v = (byte) (vlist.get(index).getValue().intValue());
-                r = rlist.get(index).getValue();
-                s = slist.get(index).getValue();
-                SignatureData sigData = new SignatureData(v, r, s);
-                signaturesList.add(
-                    new String(
-                        DataToolUtils.base64Encode(
-                            DataToolUtils.simpleSignatureSerialization(sigData)
-                        ),
-                        StandardCharsets.UTF_8
-                    )
-                );
-            }
-            evidenceInfoData.setSignatures(signaturesList);
-
-            responseData.setResult(evidenceInfoData);
-            return responseData;
-        } catch (TimeoutException e) {
-            logger.error("get evidence failed due to system timeout. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("get evidence failed due to transaction error. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+             return evidenceServiceEngine.getInfo(evidenceAddress);
         } catch (Exception e) {
             logger.error("get evidence failed.", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
@@ -349,18 +201,6 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
         return new ResponseData<>(true, ErrorCode.SUCCESS);
-    }
-
-    private ErrorCode verifyCreateEvidenceEvent(CreateEvidenceLogEventResponse event) {
-        if (event.retCode == null || event.addr == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        Integer eventRetCode = event.retCode.getValue().intValue();
-        if (eventRetCode
-            .equals(ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode())) {
-            return ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT;
-        }
-        return ErrorCode.SUCCESS;
     }
 
     private ResponseData<Boolean> verifySignatureToSigner(

@@ -17,17 +17,16 @@
  *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.service.impl;
+package com.webank.weid.service.impl.engine;
 
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
-import com.webank.weid.service.impl.engine.CptServiceEngine;
-import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.service.impl.engine.fiscov1.AuthorityIssuerEngineV1;
 import com.webank.weid.service.impl.engine.fiscov1.CptServiceEngineV1;
+import com.webank.weid.service.impl.engine.fiscov1.EvidenceServiceEngineV1;
 import com.webank.weid.service.impl.engine.fiscov1.WeIdServiceEngineV1;
 import com.webank.weid.service.impl.engine.fiscov2.AuthorityIssuerEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.CptServiceEngineV2;
+import com.webank.weid.service.impl.engine.fiscov2.EvidenceServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.WeIdServiceEngineV2;
 import com.webank.weid.util.PropertyUtils;
 
@@ -38,24 +37,31 @@ public class EngineFactory {
      */
     private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
     
-    static WeIdServiceEngine createWeIdServiceEngine() {
+    public static WeIdServiceEngine createWeIdServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new WeIdServiceEngineV1();
         }
         return new WeIdServiceEngineV2();
     }
     
-    static CptServiceEngine createCptServiceEngine() {
+    public static CptServiceEngine createCptServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new CptServiceEngineV1();
         }
         return new CptServiceEngineV2();
     }
     
-    static AuthorityIssuerServiceEngine createAuthorityIssuerServiceEngine() {
+    public static AuthorityIssuerServiceEngine createAuthorityIssuerServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new AuthorityIssuerEngineV1();
         }
         return new AuthorityIssuerEngineV2();
+    }
+    
+    public static EvidenceServiceEngine createEvidenceServiceEngine() {
+        if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+            return new EvidenceServiceEngineV1();
+        }
+        return new EvidenceServiceEngineV2();
     }
 }
