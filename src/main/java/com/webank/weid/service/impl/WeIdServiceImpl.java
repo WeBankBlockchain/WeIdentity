@@ -40,11 +40,10 @@ import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.EngineResultData;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.engine.WeIdServiceEngine;
+import com.webank.weid.service.impl.proxy.WeIdServiceProxy;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -68,7 +67,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
      */
     private static String weIdContractAddress;
 
-    private static WeIdServiceEngine engine = new WeIdServiceEngine();
+    private static WeIdServiceProxy proxy = new WeIdServiceProxy();
     
     
     /**
@@ -140,8 +139,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 //	                privateKey,
 //	                WeIdContract.class);
 
-	        	EngineResultData<CreateWeIdDataResult>  result = engine.createWeId(weId, publicKey, privateKey);
-	        	return new ResponseData<>(false, ErrorCode.SUCCESS);
+	        	return proxy.createWeId(weId, publicKey, privateKey);
+//	        	return new ResponseData<>(false, ErrorCode.SUCCESS);
 	        }  catch (PrivateKeyIllegalException e) {
 	            return new ResponseData<>(false, e.getErrorCode());
 	        } catch (LoadContractException e) {
@@ -183,7 +182,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     .error("[createWeId]: create weid failed, the weid :{} is already exist", weId);
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
-            EngineResultData<String>  result = engine.createWeId(createWeIdArgs);
             ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
 //            ResponseData<Boolean> innerResp = new ResponseData<Boolean>();
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
@@ -213,9 +211,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     @Override
     public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
 
-    	EngineResultData<WeIdDocument> result = engine.getWeIdDocument(weId);
-    	ResponseData<WeIdDocument>response = new ResponseData<WeIdDocument>();
-    	return response;
+    	return proxy.getWeIdDocument(weId);
     }
 
     /**
@@ -312,8 +308,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                         .toString();
 //            engine.setAuthentication(setAuthenticationArgs)
             String attrValue = new StringBuffer().append(pubKey).append("/").append(owner).toString();
-            EngineResultData<Boolean>  result = engine.setAttribute(weAddress, attributeKey, attrValue);
-            return new ResponseData<>(false, ErrorCode.SUCCESS);
+            return proxy.setAttribute(weAddress, attributeKey, attrValue);
         } catch (PrivateKeyIllegalException e) {
             return new ResponseData<>(false, e.getErrorCode());
         } catch (Exception e) {
@@ -357,8 +352,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 //                    WeIdContract.class);
             	String attributeKey = WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
                         + serviceType;
-            	EngineResultData<Boolean> result = engine.setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey, serviceEndpoint);
-            	return new ResponseData<>(false, ErrorCode.SUCCESS);
+            	return proxy.setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey, serviceEndpoint);
 
             }catch (PrivateKeyIllegalException e) {
                 return new ResponseData<>(false, e.getErrorCode());
@@ -423,8 +417,8 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                         .append(WeIdConstant.SEPARATOR)
                         .append(owner)
                         .toString();
-            	engine.setAttribute(weAddress, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX, attrValue);
-            	return new ResponseData<>(false, ErrorCode.SUCCESS);
+            	return proxy.setAttribute(weAddress, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX, attrValue);
+//            	return new ResponseData<>(false, ErrorCode.SUCCESS);
             }  catch (PrivateKeyIllegalException e) {
                 logger.error("Set authenticate with private key exception. Error message :{}", e);
                 return new ResponseData<>(false, e.getErrorCode());
@@ -456,9 +450,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (!WeIdUtils.isWeIdValid(weId)) {
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
-        engine.isWeIdExist(weId);
-        ResponseData<Boolean> resp = new ResponseData<Boolean>();
-        return resp;
+        return proxy.isWeIdExist(weId);
     }
 
 }
