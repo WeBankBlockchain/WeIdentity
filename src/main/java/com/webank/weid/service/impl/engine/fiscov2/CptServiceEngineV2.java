@@ -55,9 +55,12 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV2.class);
 
-    private static String cptControllerAddress;
 
     private static CptController cptController;
+    
+    public CptServiceEngineV2() {
+    	cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+    }
 
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.CptEngineController#updateCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
@@ -313,6 +316,5 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         ResponseData<Cpt> responseData = new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS);
         return responseData;
     }
-
 
 }
