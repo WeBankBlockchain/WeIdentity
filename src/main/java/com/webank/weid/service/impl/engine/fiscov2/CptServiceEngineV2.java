@@ -42,10 +42,10 @@ import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
-import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -57,11 +57,11 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
 
     private static CptController cptController;
-    
+
     public CptServiceEngineV2() {
-    	if(cptController == null) {
-    		cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
-    	}
+        if (cptController == null) {
+            cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+        }
     }
 
     /* (non-Javadoc)
@@ -93,60 +93,11 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
             return processEventLog(transactionReceipt);
         } catch (Exception e) {
-        	logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId);
+            logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId);
             return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
         }
     }
 
-    private ResponseData<CptBaseInfo> getResultByResolveEvent(
-        TransactionReceipt receipt,
-        BigInteger retCode,
-        BigInteger cptId,
-        BigInteger cptVersion) {
-
-        TransactionInfo info = new TransactionInfo(receipt);
-
-        // register
-        if (retCode.intValue()
-            == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
-            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
-        }
-
-        if (retCode.intValue() == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
-            logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
-                cptId.intValue());
-            return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST, info);
-        }
-
-        if (retCode.intValue() == ErrorCode.CPT_NO_PERMISSION.getCode()) {
-            logger.error("[getResultByResolveEvent] no permission. cptId:{}",
-                cptId.intValue());
-            return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION, info);
-        }
-
-        // register and update
-        if (retCode.intValue()
-            == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
-            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
-        }
-
-        // update
-        if (retCode.intValue()
-            == ErrorCode.CPT_NOT_EXISTS.getCode()) {
-            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
-        }
-
-        CptBaseInfo result = new CptBaseInfo();
-        result.setCptId(cptId.intValue());
-        result.setCptVersion(cptVersion.intValue());
-
-        ResponseData<CptBaseInfo> responseData =
-            new ResponseData<>(result, ErrorCode.SUCCESS, info);
-        return responseData;
-    }
 
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
@@ -179,7 +130,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
             return processEventLog(transactionReceipt);
         } catch (Exception e) {
-        	logger.error("[registerCpt] register cpt failed. exception message: ", e);
+            logger.error("[registerCpt] register cpt failed. exception message: ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
@@ -189,9 +140,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      */
     @Override
     public ResponseData<CptBaseInfo> registerCpt(
-    	String address, 
-    	String cptJsonSchemaNew,
-        RsvSignature rsvSignature, 
+        String address,
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature,
         String privateKey) {
 
         List<byte[]> byteArray = new ArrayList<>();
@@ -221,25 +172,25 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         }
     }
 
-	/**
-	 * @param transactionReceipt
-	 * @return
-	 */
-	private ResponseData<CptBaseInfo> processEventLog(TransactionReceipt transactionReceipt) {
-		List<UpdateCptRetLogEventResponse> event = cptController.getUpdateCptRetLogEvents(
-		    transactionReceipt
-		);
-		if (CollectionUtils.isEmpty(event)) {
-		    return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
-		}
+    /**
+     * @param transactionReceipt
+     * @return
+     */
+    private ResponseData<CptBaseInfo> processEventLog(TransactionReceipt transactionReceipt) {
+        List<UpdateCptRetLogEventResponse> event = cptController.getUpdateCptRetLogEvents(
+            transactionReceipt
+        );
+        if (CollectionUtils.isEmpty(event)) {
+            return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
+        }
 
-		return this.getResultByResolveEvent(
-		    transactionReceipt,
-		    event.get(0).retCode,
-		    event.get(0).cptId,
-		    event.get(0).cptVersion
-		);
-	}
+        return TransactionUtils.getResultByResolveEvent(
+            event.get(0).retCode,
+            event.get(0).cptId,
+            event.get(0).cptVersion,
+            transactionReceipt
+        );
+    }
 
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.CptEngineController#queryCpt(int)
@@ -247,62 +198,62 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     @Override
     public ResponseData<Cpt> queryCpt(int cptId) {
 
-    	try {
-        Tuple7<String, List<BigInteger>, List<byte[]>, List<byte[]>,
-            BigInteger, byte[], byte[]> valueList =
-            cptController
-                .queryCpt(new BigInteger(String.valueOf(cptId))).sendAsync()
-                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+        try {
+            Tuple7<String, List<BigInteger>, List<byte[]>, List<byte[]>,
+                BigInteger, byte[], byte[]> valueList =
+                cptController
+                    .queryCpt(new BigInteger(String.valueOf(cptId))).sendAsync()
+                    .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
-        if (valueList == null) {
-            logger.error("Query cpt id : {} does not exist, result is null.", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
-        }
+            if (valueList == null) {
+                logger.error("Query cpt id : {} does not exist, result is null.", cptId);
+                return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
+            }
 
-        if (WeIdConstant.EMPTY_ADDRESS.equals(valueList.getValue1())) {
-            logger.error("Query cpt id : {} does not exist.", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
-        }
-        Cpt cpt = new Cpt();
-        cpt.setCptId(cptId);
-        cpt.setCptPublisher(
-            WeIdUtils.convertAddressToWeId(valueList.getValue1())
-        );
-
-        List<BigInteger> longArray = valueList.getValue2();
-
-        cpt.setCptVersion(longArray.get(0).intValue());
-        cpt.setCreated(longArray.get(1).longValue());
-        cpt.setUpdated(longArray.get(2).longValue());
-
-        List<byte[]> jsonSchemaArray = valueList.getValue4();
-
-        String jsonSchema = DataToolUtils.byte32ListToString(
-            jsonSchemaArray, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH);
-
-        Map<String, Object> jsonSchemaMap = DataToolUtils
-            .deserialize(jsonSchema.trim(), HashMap.class);
-        cpt.setCptJsonSchema(jsonSchemaMap);
-
-        int v = valueList.getValue5().intValue();
-        byte[] r = valueList.getValue6();
-        byte[] s = valueList.getValue7();
-        Sign.SignatureData signatureData = DataToolUtils
-            .rawSignatureDeserialization(v, r, s);
-        String cptSignature =
-            new String(
-                DataToolUtils.base64Encode(
-                    DataToolUtils.simpleSignatureSerialization(signatureData)),
-                StandardCharsets.UTF_8
+            if (WeIdConstant.EMPTY_ADDRESS.equals(valueList.getValue1())) {
+                logger.error("Query cpt id : {} does not exist.", cptId);
+                return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
+            }
+            Cpt cpt = new Cpt();
+            cpt.setCptId(cptId);
+            cpt.setCptPublisher(
+                WeIdUtils.convertAddressToWeId(valueList.getValue1())
             );
-        cpt.setCptSignature(cptSignature);
 
-        ResponseData<Cpt> responseData = new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS);
-        return responseData;
-    	} catch(Exception e) {
-    		logger.error("[queryCpt] query Cpt failed. exception message: ", e);
-    		return new ResponseData<Cpt>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-    	}
+            List<BigInteger> longArray = valueList.getValue2();
+
+            cpt.setCptVersion(longArray.get(0).intValue());
+            cpt.setCreated(longArray.get(1).longValue());
+            cpt.setUpdated(longArray.get(2).longValue());
+
+            List<byte[]> jsonSchemaArray = valueList.getValue4();
+
+            String jsonSchema = DataToolUtils.byte32ListToString(
+                jsonSchemaArray, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH);
+
+            Map<String, Object> jsonSchemaMap = DataToolUtils
+                .deserialize(jsonSchema.trim(), HashMap.class);
+            cpt.setCptJsonSchema(jsonSchemaMap);
+
+            int v = valueList.getValue5().intValue();
+            byte[] r = valueList.getValue6();
+            byte[] s = valueList.getValue7();
+            Sign.SignatureData signatureData = DataToolUtils
+                .rawSignatureDeserialization(v, r, s);
+            String cptSignature =
+                new String(
+                    DataToolUtils.base64Encode(
+                        DataToolUtils.simpleSignatureSerialization(signatureData)),
+                    StandardCharsets.UTF_8
+                );
+            cpt.setCptSignature(cptSignature);
+
+            ResponseData<Cpt> responseData = new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS);
+            return responseData;
+        } catch (Exception e) {
+            logger.error("[queryCpt] query Cpt failed. exception message: ", e);
+            return new ResponseData<Cpt>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
     }
 
 }
