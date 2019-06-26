@@ -23,10 +23,12 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.service.impl.engine.fiscov1.AuthorityIssuerEngineV1;
 import com.webank.weid.service.impl.engine.fiscov1.CptServiceEngineV1;
 import com.webank.weid.service.impl.engine.fiscov1.EvidenceServiceEngineV1;
+import com.webank.weid.service.impl.engine.fiscov1.RawTransactionServiceEngineV1;
 import com.webank.weid.service.impl.engine.fiscov1.WeIdServiceEngineV1;
 import com.webank.weid.service.impl.engine.fiscov2.AuthorityIssuerEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.CptServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.EvidenceServiceEngineV2;
+import com.webank.weid.service.impl.engine.fiscov2.RawTransactionServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.WeIdServiceEngineV2;
 import com.webank.weid.util.PropertyUtils;
 
@@ -63,5 +65,12 @@ public class EngineFactory {
             return new EvidenceServiceEngineV1();
         }
         return new EvidenceServiceEngineV2();
+    }
+    
+    public static RawTransactionServiceEngine createRawTransactionServiceEngine() {
+        if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+            return new RawTransactionServiceEngineV1();
+        }
+        return new RawTransactionServiceEngineV2();
     }
 }
