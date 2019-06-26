@@ -427,13 +427,12 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
      */
     @Override
 
-    public ResponseData<Boolean> createWeId(String weId, String publicKey, String privateKey) {
+    public ResponseData<Boolean> createWeId(String weAddress, String publicKey, String privateKey) {
         WeIdContract weIdContract = (WeIdContract) reloadContract(
             fiscoConfig.getWeIdAddress(),
             privateKey,
             WeIdContract.class);
         try {
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
             DynamicBytes auth = DataToolUtils.stringToDynamicBytes(
                 new StringBuffer()
                     .append(publicKey)
@@ -457,8 +456,8 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             if (CollectionUtils.isEmpty(response)) {
                 logger.error(
                     "The input private key does not match the current weid, operation of "
-                        + "modifying weid is not allowed. weid is {}",
-                    weId
+                        + "modifying weid is not allowed. we address is {}",
+                        weAddress
                 );
                 return new ResponseData<Boolean>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
                     info);
