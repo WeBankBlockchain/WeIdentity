@@ -59,7 +59,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     private static WeIdServiceEngine weIdServiceEngine = EngineFactory.createWeIdServiceEngine();
 
-
     /**
      * Create a WeIdentity DID with null input param.
      *
@@ -105,10 +104,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
 
     private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,
         String privateKey) {
+    	
         try {
-
             return weIdServiceEngine.createWeId(weId, publicKey, privateKey);
-//	        	return new ResponseData<>(false, ErrorCode.SUCCESS);
         } catch (PrivateKeyIllegalException e) {
             return new ResponseData<>(false, e.getErrorCode());
         } catch (LoadContractException e) {
