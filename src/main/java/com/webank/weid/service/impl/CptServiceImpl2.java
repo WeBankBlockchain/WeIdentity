@@ -176,6 +176,7 @@ public class CptServiceImpl2 extends BaseService implements CptService {
                 cptId
             );
             return TransactionUtils.resolveRegisterCptEvents(transactionReceipt);
+//            engine.re
         } catch (InterruptedException | ExecutionException e) {
             logger.error(
                 "[registerCpt] register cpt failed due to transaction execution error. ",
@@ -332,11 +333,6 @@ public class CptServiceImpl2 extends BaseService implements CptService {
 
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
-            // cptMapArgs.setCptJsonSchema(
-            //     (Map<String, Object>) JsonUtil.jsonStrToObj(
-            //         new HashMap<String, Object>(),
-            //         args.getCptJsonSchema())
-            // );
             cptMapArgs.setCptJsonSchema(
                 DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
             return this.updateCpt(cptMapArgs, cptId);
