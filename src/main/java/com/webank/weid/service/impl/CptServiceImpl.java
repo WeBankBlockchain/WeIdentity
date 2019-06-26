@@ -43,6 +43,7 @@ import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
+import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
