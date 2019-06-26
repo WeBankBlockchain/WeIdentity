@@ -42,7 +42,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.proxy.CptServiceProxy;
+import com.webank.weid.service.impl.engine.CptServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -55,7 +55,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
 
-    private CptServiceProxy proxy;
+    private CptServiceEngine cptServiceEngine = EngineFactory.createCptServiceEngine();
 
     /**
      * Register a new CPT with a pre-set CPT ID, to the blockchain.
@@ -138,7 +138,7 @@ public class CptServiceImpl extends BaseService implements CptService {
                 cptJsonSchemaNew,
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return proxy.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
+            return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
                 weIdPrivateKey.getPrivateKey());
         } catch (InterruptedException | ExecutionException e) {
             logger.error(
@@ -186,7 +186,7 @@ public class CptServiceImpl extends BaseService implements CptService {
                 cptJsonSchemaNew,
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return proxy.registerCpt(address, cptJsonSchemaNew, rsvSignature,
+            return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
                 weIdPrivateKey.getPrivateKey());
         } catch (InterruptedException | ExecutionException e) {
             logger.error(
@@ -216,7 +216,7 @@ public class CptServiceImpl extends BaseService implements CptService {
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
 
-            return proxy.queryCpt(cptId);
+            return cptServiceEngine.queryCpt(cptId);
         } catch (Exception e) {
             logger.error("[updateCpt] query cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -283,7 +283,7 @@ public class CptServiceImpl extends BaseService implements CptService {
                 cptJsonSchemaNew,
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return proxy.updateCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
+            return cptServiceEngine.updateCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
                 weIdPrivateKey.getPrivateKey());
         } catch (InterruptedException | ExecutionException e) {
             logger.error(

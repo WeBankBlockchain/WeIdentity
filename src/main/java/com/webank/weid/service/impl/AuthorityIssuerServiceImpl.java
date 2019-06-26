@@ -37,7 +37,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.proxy.AuthorityIssuerServiceProxy;
+import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -49,9 +49,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
 
     private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerServiceImpl.class);
 
-    private AuthorityIssuerServiceProxy proxy = new AuthorityIssuerServiceProxy();
+    private AuthorityIssuerServiceEngine engine = EngineFactory.createAuthorityIssuerServiceEngine();
+    
     private WeIdService weIdService = new WeIdServiceImpl();
-
 
     /**
      * Register a new Authority Issuer on Chain.
@@ -67,7 +67,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerResponseData);
         }
         try {
-            return proxy.addAuthorityIssuer(args);
+            return engine.addAuthorityIssuer(args);
         } catch (Exception e) {
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
@@ -88,7 +88,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
 
         try {
-            return proxy.removeAuthorityIssuer(args);
+            return engine.removeAuthorityIssuer(args);
         } catch (Exception e) {
             logger.error("remove authority issuer failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -109,7 +109,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         String addr = WeIdUtils.convertWeIdToAddress(weId);
         try {
-            return proxy.isAuthorityIssuer(addr);
+            return engine.isAuthorityIssuer(addr);
         } catch (Exception e) {
             logger.error("check authority issuer id failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -128,7 +128,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
         try {
-            return proxy.getAuthorityIssuerInfoNonAccValue(weId);
+            return engine.getAuthorityIssuerInfoNonAccValue(weId);
 
         } catch (Exception e) {
             logger.error("query authority issuer failed.", e);
@@ -151,11 +151,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(null, errorCode);
         }
         try {
-            List<String> addrList = proxy.getAuthorityIssuerAddressList(index, num);
-//            List<Address> addressList = authorityIssuerController
-//                .getAuthorityIssuerAddressList(new Uint256(index), new Uint256(num))
-//                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
-//                .getValue();
+            List<String> addrList = engine.getAuthorityIssuerAddressList(index, num);
             List<AuthorityIssuer> authorityIssuerList = new ArrayList<>();
             for (String address : addrList) {
                 String weId = WeIdUtils.convertAddressToWeId(address);
@@ -188,7 +184,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerCode);
         }
         try {
-            return proxy.registerIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
+            return engine.registerIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("register issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -216,7 +212,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return proxy.addIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
+            return engine.addIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("add issuer into type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -243,7 +239,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return proxy.removeIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
+            return engine.removeIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("remove issuer from type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -270,7 +266,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             String address = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return proxy.isSpecificTypeIssuer(issuerType, address);
+            return engine.isSpecificTypeIssuer(issuerType, address);
         } catch (Exception e) {
             logger.error("check issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -299,7 +295,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(null, errorCode);
         }
         try {
-            return proxy.getSpecificTypeIssuerList(issuerType, index, num);
+            return engine.getSpecificTypeIssuerList(issuerType, index, num);
         } catch (Exception e) {
             logger.error("get all specific issuers failed.", e);
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
