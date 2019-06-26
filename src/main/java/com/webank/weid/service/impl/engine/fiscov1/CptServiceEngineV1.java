@@ -1,3 +1,22 @@
+/*
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *
+ *       This file is part of weidentity-java-sdk.
+ *
+ *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.webank.weid.service.impl.engine.fiscov1;
 
 import java.nio.charset.StandardCharsets;
@@ -28,7 +47,7 @@ import com.webank.weid.contract.v1.CptController;
 import com.webank.weid.contract.v1.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.response.EngineResultData;
+import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
@@ -52,7 +71,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 	 * @see com.webank.weid.service.impl.engine.CptEngineController#updateCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
 	 */
 	@Override
-	public EngineResultData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
+	public ResponseData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
 			RsvSignature rsvSignature) {
 		
 		StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
@@ -75,7 +94,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new EngineResultData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+			return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
 		}
 		
 	}
@@ -86,7 +105,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
      * @param transactionReceipt the TransactionReceipt
      * @return the ErrorCode
      */
-    public static EngineResultData<CptBaseInfo> resolveRegisterCptEvents(
+    public static ResponseData<CptBaseInfo> resolveRegisterCptEvents(
         TransactionReceipt transactionReceipt) {
         List<RegisterCptRetLogEventResponse> event = CptController.getRegisterCptRetLogEvents(
             transactionReceipt
@@ -94,7 +113,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 
         if (CollectionUtils.isEmpty(event)) {
             logger.error("[registerCpt] event is empty");
-            return new EngineResultData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
+            return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
         }
 
         return getResultByResolveEvent(
@@ -114,7 +133,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
      * @param receipt the transactionReceipt
      * @return the result
      */
-    public static EngineResultData<CptBaseInfo> getResultByResolveEvent(
+    public static ResponseData<CptBaseInfo> getResultByResolveEvent(
         Uint256 retCode,
         Uint256 cptId,
         Int256 cptVersion,
@@ -126,19 +145,19 @@ public class CptServiceEngineV1 implements CptServiceEngine {
             == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
             logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}",
                 DataToolUtils.uint256ToInt(cptId));
-            return new EngineResultData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
+            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
         }
 
         if (DataToolUtils.uint256ToInt(retCode) == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
             logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
                 DataToolUtils.uint256ToInt(cptId));
-            return new EngineResultData<>(null, ErrorCode.CPT_ALREADY_EXIST, info);
+            return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST, info);
         }
 
         if (DataToolUtils.uint256ToInt(retCode) == ErrorCode.CPT_NO_PERMISSION.getCode()) {
             logger.error("[getResultByResolveEvent] no permission. cptId:{}",
                 DataToolUtils.uint256ToInt(cptId));
-            return new EngineResultData<>(null, ErrorCode.CPT_NO_PERMISSION, info);
+            return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION, info);
         }
 
         // register and update
@@ -146,7 +165,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
             == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
             logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}",
                 DataToolUtils.uint256ToInt(cptId));
-            return new EngineResultData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
+            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
         }
 
         // update
@@ -154,21 +173,21 @@ public class CptServiceEngineV1 implements CptServiceEngine {
             == ErrorCode.CPT_NOT_EXISTS.getCode()) {
             logger.error("[getResultByResolveEvent] cpt id : {} does not exist.",
                 DataToolUtils.uint256ToInt(cptId));
-            return new EngineResultData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
+            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
         }
 
         CptBaseInfo result = new CptBaseInfo();
         result.setCptId(DataToolUtils.uint256ToInt(cptId));
         result.setCptVersion(DataToolUtils.int256ToInt(cptVersion));
 
-        return new EngineResultData<>(result, ErrorCode.SUCCESS, info);
+        return new ResponseData<>(result, ErrorCode.SUCCESS, info);
     }
 	
 	/* (non-Javadoc)
 	 * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
 	 */
 	@Override
-	public EngineResultData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
+	public ResponseData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
 			RsvSignature rsvSignature) {
 		StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
 	            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
@@ -196,7 +215,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new EngineResultData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+			return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
 		}
 	}
 
@@ -204,7 +223,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 	 * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
 	 */
 	@Override
-	public EngineResultData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
+	public ResponseData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
 			RsvSignature rsvSignature) {
 		StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
 	            new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
@@ -231,7 +250,7 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return new EngineResultData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
+			return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
 		}
 	}
 
@@ -239,19 +258,22 @@ public class CptServiceEngineV1 implements CptServiceEngine {
 	 * @see com.webank.weid.service.impl.engine.CptEngineController#queryCpt(int)
 	 */
 	@Override
-	public EngineResultData<Cpt> queryCpt(int cptId) {
+	public ResponseData<Cpt> queryCpt(int cptId) {
+		try {
+			
+		
 		List<Type> typeList = cptController
                 .queryCpt(DataToolUtils.intToUint256(cptId))
                 .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
             if (typeList == null || typeList.isEmpty()) {
                 logger.error("Query cpt id : {} does not exist, result is null.", cptId);
-                return new EngineResultData<>(null, ErrorCode.CPT_NOT_EXISTS);
+                return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
             }
 
             if (WeIdConstant.EMPTY_ADDRESS.equals(((Address) typeList.get(0)).toString())) {
                 logger.error("Query cpt id : {} does not exist.", cptId);
-                return new EngineResultData<>(null, ErrorCode.CPT_NOT_EXISTS);
+                return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS);
             }
             Cpt cpt = new Cpt();
             cpt.setCptId(cptId);
@@ -292,7 +314,13 @@ public class CptServiceEngineV1 implements CptServiceEngine {
                     StandardCharsets.UTF_8
                 );
             cpt.setCptSignature(cptSignature);
-            return new EngineResultData<Cpt>(cpt, ErrorCode.SUCCESS); 
+            return new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS); 
+		  } catch (InterruptedException | ExecutionException e) {
+	            logger.error("Set weId service failed. Error message :{}", e);
+	            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+	        } catch (TimeoutException e) {
+	            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
+	        }
 	}
 
 
