@@ -1,16 +1,26 @@
+### v1.3.0 (2019-06-30)
+- Features:
+1. Official support for FISCO-BCOS 1.3 and 2.0 blockchain nodes.
+2. Support Gradle 5.x
+3. Support offline compilation for weid-java-sdk and build-tools.
+4. Credential issuance date can be customized.
+
+- Bugfixes:
+1. Fixed a bug where dates are not identical after fromJson() and toJson().
+
 ### v1.2.1 (2019-06-19)
 
 - Features:
-1. Remove spring dependencies for weidentity-java-sdk.
+1. Remove spring dependencies in weid-java-sdk.
 2. Optimize weidentity.properties and fisco.properties files.
-3. Modify random salt generator.
-4. Support connection pool for presistence.
+3. Incorporate new random salt generator.
+4. Support connection pool for persistence layer.
 5. Modify docs.
 
 - Bugfixes:
 1. Fixed issue of printing exception log.
 
-### v1.2.0 (2019-06-6)
+### v1.2.0 (2019-06-06)
 
 - Features:
 1. Add AMOP function to support communication between organizations by blockchain nodes.
