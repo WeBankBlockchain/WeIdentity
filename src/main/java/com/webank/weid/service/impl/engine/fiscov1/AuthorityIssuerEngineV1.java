@@ -1,4 +1,4 @@
-package com.webank.weid.service.impl.engine;
+package com.webank.weid.service.impl.engine.fiscov1;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -33,8 +33,8 @@ import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.EngineResultData;
-import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
+import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -42,13 +42,13 @@ import com.webank.weid.util.WeIdUtils;
  * @author tonychen 2019年6月25日
  *
  */
-public class AuthorityIssuerControllerV1 implements IssuerContractController {
+public class AuthorityIssuerEngineV1 implements AuthorityIssuerServiceEngine {
 
 	private static AuthorityIssuerController authorityIssuerController;
     private static String authorityIssuerControllerAddress;
     private static SpecificIssuerController specificIssuerController;
     private static String specificIssuerControllerAddress;
-    private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerControllerV1.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerEngineV1.class);
     
 	/* (non-Javadoc)
 	 * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#addAuthorityIssuer(com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs)
