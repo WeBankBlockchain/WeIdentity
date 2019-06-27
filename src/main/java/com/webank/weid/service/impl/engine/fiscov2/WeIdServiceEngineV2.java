@@ -458,7 +458,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
                     info);
             }
         } catch (Exception e) {
-            return new ResponseData<>(true, ErrorCode.SUCCESS);
+            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
 }

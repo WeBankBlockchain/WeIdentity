@@ -62,12 +62,12 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     ) {
         try {
             List<byte[]> hashAttributesByte = new ArrayList<>();
-            for (String extraValue : extraValueList) {
-                hashAttributesByte.add(DataToolUtils.stringToByte32Array(extraValue));
+            for (String hashValue: hashAttributes) {
+                hashAttributesByte.add(DataToolUtils.stringToByte32Array(hashValue));
             }
             List<byte[]> extraValueListByte = new ArrayList<>();
-            for (String hashValue : hashAttributes) {
-                extraValueListByte.add(DataToolUtils.stringToByte32Array(hashValue));
+            for (String extraValue : extraValueList) {
+                extraValueListByte.add(DataToolUtils.stringToByte32Array(extraValue));
             }
             List<String> signer = new ArrayList<>();
             ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
