@@ -51,6 +51,7 @@ import com.webank.weid.util.WeIdUtils;
 
 /**
  * CptServiceEngine calls cpt contract which runs on FISCO BCOS 2.0.
+ *
  * @author tonychen 2019年6月25日
  */
 public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
@@ -60,10 +61,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     private static CptController cptController;
 
-    /**
-     * constructor.
-     */
-    public CptServiceEngineV2() {
+    static {
         if (cptController == null) {
             cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
         }
@@ -192,6 +190,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     /**
      * process UpdateEventLog.
+     *
      * @param cptController cpt contract object
      * @param transactionReceipt transactionReceipt
      * @return result
@@ -213,9 +212,10 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             transactionReceipt
         );
     }
-    
+
     /**
      * process RegisterEventLog.
+     *
      * @param cptController cpt contract object
      * @param transactionReceipt transactionReceipt
      * @return result
