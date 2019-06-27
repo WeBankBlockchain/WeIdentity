@@ -71,6 +71,8 @@ import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
+ * WeIdServiceEngine calls the weid contract which runs on FISCO BCOS 1.3.x version.
+ *
  * @author tonychen 2019年6月21日
  */
 public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine {
@@ -83,7 +85,6 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
     /**
      * WeIdentity DID contract address.
      */
-//    private static String weIdContractAddress;
 
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceEngineV1.class);
     /**
@@ -119,6 +120,9 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
         );
     }
 
+    /**
+     * constructor.
+     */
     public WeIdServiceEngineV1() {
 
         if (weIdContract == null) {
@@ -411,7 +415,6 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
                 weId,
                 e.getErrorCode(),
                 e);
-//		            responseData.setErrorCode(ErrorCode.getTypeByErrorCode(e.getErrorCode()));
             return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(e.getErrorCode()));
         } catch (Exception e) {
             logger.error("[getWeIdDocument]: exception.", e);
@@ -421,11 +424,15 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.WeIdController#createWeId(java.lang.String, java.lang.String, java.lang.String)
+     * @see com.webank.weid.service.impl.engine.WeIdController
+     * #createWeId(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
 
-    public ResponseData<Boolean> createWeId(String weAddress, String publicKey, String privateKey) {
+    public ResponseData<Boolean> createWeId(
+        String weAddress,
+        String publicKey,
+        String privateKey) {
         WeIdContract weIdContract = (WeIdContract) reloadContract(
             fiscoConfig.getWeIdAddress(),
             privateKey,
@@ -457,7 +464,8 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
                         + "modifying weid is not allowed. we address is {}",
                     weAddress
                 );
-                return new ResponseData<Boolean>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
+                return new ResponseData<Boolean>(false,
+                    ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
                     info);
             }
             return new ResponseData<Boolean>(true, ErrorCode.SUCCESS, info);
@@ -471,11 +479,15 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.WeIdController#setAttribute(java.lang.String, java.lang.String, java.lang.String)
+     * @see com.webank.weid.service.impl.engine.WeIdController
+     * #setAttribute(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Boolean> setAttribute(String weAddress, String attributeKey,
-        String value, String privateKey) {
+    public ResponseData<Boolean> setAttribute(
+        String weAddress,
+        String attributeKey,
+        String value,
+        String privateKey) {
         try {
             WeIdContract weIdContract = (WeIdContract) reloadContract(
                 fiscoConfig.getWeIdAddress(),
@@ -497,7 +509,8 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             if (CollectionUtils.isNotEmpty(response)) {
                 return new ResponseData<Boolean>(true, ErrorCode.SUCCESS, info);
             } else {
-                return new ResponseData<Boolean>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
+                return new ResponseData<Boolean>(false,
+                    ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
                     info);
             }
         } catch (InterruptedException | ExecutionException e) {

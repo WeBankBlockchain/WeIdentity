@@ -50,10 +50,10 @@ import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
 
-public final class WeServerV1 extends WeServer<Web3j,Credentials,Service> {
-    
+public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
+
     private static final Logger logger = LoggerFactory.getLogger(WeServerV1.class);
-    
+
     private static Web3j web3j;
     private static Service service;
     private static Credentials credentials;
@@ -80,13 +80,13 @@ public final class WeServerV1 extends WeServer<Web3j,Credentials,Service> {
     @Override
     protected void initWeb3j() {
         logger.info("[WeServiceImplV1] begin to init web3j instance..");
-        service = buildFiscoBcosService(fiscoConfig);        
-        service.setPushCallback((ChannelPushCallback)pushCallBack);
+        service = buildFiscoBcosService(fiscoConfig);
+        service.setPushCallback((ChannelPushCallback) pushCallBack);
         // Set topics for AMOP
         List<String> topics = new ArrayList<String>();
         topics.add(fiscoConfig.getCurrentOrgId());
         service.setTopics(topics);
-        
+
         try {
             service.run();
         } catch (Exception e) {
@@ -101,7 +101,7 @@ public final class WeServerV1 extends WeServer<Web3j,Credentials,Service> {
             logger.error("[WeServiceImplV1] web3j init failed. ");
             throw new InitWeb3jException();
         }
-        
+
         credentials = GenCredential.create();
         if (credentials == null) {
             logger.error("[WeServiceImplV1] credentials init failed. ");
@@ -109,7 +109,7 @@ public final class WeServerV1 extends WeServer<Web3j,Credentials,Service> {
         }
         logger.info("[WeServiceImplV1] init web3j instance success..");
     }
-    
+
     private Service buildFiscoBcosService(FiscoConfig fiscoConfig) {
 
         Service service = new Service();
@@ -148,15 +148,15 @@ public final class WeServerV1 extends WeServer<Web3j,Credentials,Service> {
 
     @Override
     public AmopResponse sendChannelMessage(AmopCommonArgs amopCommonArgs, int timeOut) {
-        
+
         ChannelRequest request = new ChannelRequest();
         request.setTimeout(super.getTimeOut(timeOut));
         request.setToTopic(amopCommonArgs.getToOrgId());
         request.setMessageID(DataToolUtils.getUuId32());
         request.setContent(amopCommonArgs.getMessage());
-        
+
         ChannelResponse response = this.getService().sendChannelMessage2(request);
-        
+
         AmopResponse amopResponse = new AmopResponse();
         amopResponse.setMessageId(response.getMessageID());
         amopResponse.setErrorCode(response.getErrorCode());

@@ -39,6 +39,10 @@ public class EngineFactory {
      */
     private static String fiscoVersion = PropertyUtils.getProperty("bcos.version", "1.3");
 
+    /**
+     * create WeIdServiceEngine.
+     * @return WeIdServiceEngine object
+     */
     public static WeIdServiceEngine createWeIdServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new WeIdServiceEngineV1();
@@ -46,6 +50,10 @@ public class EngineFactory {
         return new WeIdServiceEngineV2();
     }
 
+    /**
+     * create CptServiceEngine.
+     * @return CptServiceEngine object
+     */
     public static CptServiceEngine createCptServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new CptServiceEngineV1();
@@ -53,6 +61,10 @@ public class EngineFactory {
         return new CptServiceEngineV2();
     }
 
+    /**
+     * create CptServiceEngine.
+     * @return CptServiceEngine object
+     */
     public static AuthorityIssuerServiceEngine createAuthorityIssuerServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new AuthorityIssuerEngineV1();
@@ -60,6 +72,10 @@ public class EngineFactory {
         return new AuthorityIssuerEngineV2();
     }
 
+    /**
+     * create EvidenceServiceEngine.
+     * @return EvidenceServiceEngine object
+     */
     public static EvidenceServiceEngine createEvidenceServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new EvidenceServiceEngineV1();
@@ -67,6 +83,10 @@ public class EngineFactory {
         return new EvidenceServiceEngineV2();
     }
 
+    /**
+     * create RawTransactionServiceEngine.
+     * @return RawTransactionServiceEngine object
+     */
     public static RawTransactionServiceEngine createRawTransactionServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new RawTransactionServiceEngineV1();

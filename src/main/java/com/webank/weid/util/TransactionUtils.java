@@ -33,6 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Splitter;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.handler.ChannelConnections;
@@ -55,9 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Splitter;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
@@ -129,14 +129,14 @@ public class TransactionUtils {
      */
     public static BigInteger getBlockLimit() {
         try {
-            return ((Web3j)BaseService.getWeb3j()).ethBlockNumber().send().getBlockNumber()
+            return ((Web3j) BaseService.getWeb3j()).ethBlockNumber().send().getBlockNumber()
                 .add(new BigInteger(String.valueOf(WeIdConstant.ADDITIVE_BLOCK_HEIGHT)));
         } catch (Exception e) {
             //Send a large enough block limit number
             return new BigInteger(WeIdConstant.BIG_BLOCK_LIMIT);
         }
     }
-    
+
     /**
      * Check validity and build input params for createWeId (with attributes - public key) function.
      * Used by Restful API service.
@@ -147,7 +147,7 @@ public class TransactionUtils {
      */
     public static ResponseData<List<Type>> buildCreateWeIdInputParameters(String inputParam)
         throws Exception {
-        
+
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode inputParamNode = objectMapper.readTree(inputParam);
         JsonNode publicKeyNode = inputParamNode.get(ParamKeyConstant.PUBLIC_KEY);
@@ -331,7 +331,7 @@ public class TransactionUtils {
         longArray[1] = created;
         return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
-    
+
     /**
      * Get the current timestamp as the param "updated".  Used by Restful API service.
      *
@@ -344,7 +344,7 @@ public class TransactionUtils {
         longArray[2] = created;
         return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
-    
+
     /**
      * Get the cpt json schema as the param "cptJsonSchema". Used by Restful API service.
      *
@@ -509,7 +509,7 @@ public class TransactionUtils {
             info);
         return responseData;
     }
-    
+
     /**
      * Get the transaction instance from blockchain. Requires an on-chain Read operation.
      *

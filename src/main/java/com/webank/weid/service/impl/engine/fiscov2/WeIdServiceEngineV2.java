@@ -62,6 +62,7 @@ import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
+ * WeIdServiceEngine call weid contract which runs on FISCO BCOS 2.0.
  * @author tonychen 2019年6月21日
  */
 public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine {
@@ -93,6 +94,9 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         );
     }
 
+    /**
+     * constructor.
+     */
     public WeIdServiceEngineV2() {
 
         if (weIdContract == null) {
@@ -383,7 +387,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.WeIdController#createWeId(java.lang.String, java.lang.String, java.lang.String)
+     * @see com.webank.weid.service.impl.engine.WeIdController
+     * #createWeId(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public ResponseData<Boolean> createWeId(String weAddress, String publicKey, String privateKey) {
@@ -424,7 +429,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.WeIdController#setAttribute(java.lang.String, java.lang.String, java.lang.String)
+     * @see com.webank.weid.service.impl.engine.WeIdController
+     * #setAttribute(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public ResponseData<Boolean> setAttribute(String weAddress, String attributeKey, String value,
