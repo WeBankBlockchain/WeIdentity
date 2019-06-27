@@ -62,7 +62,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     ) {
         try {
             List<byte[]> hashAttributesByte = new ArrayList<>();
-            for (String hashValue: hashAttributes) {
+            for (String hashValue : hashAttributes) {
                 hashAttributesByte.add(DataToolUtils.stringToByte32Array(hashValue));
             }
             List<byte[]> extraValueListByte = new ArrayList<>();

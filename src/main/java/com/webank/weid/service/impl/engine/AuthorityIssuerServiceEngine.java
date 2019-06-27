@@ -93,6 +93,7 @@ public interface AuthorityIssuerServiceEngine {
      * call specific issuer contract to check the address is a specific issuer .
      *
      * @param issuerType issuerType value
+     * @param address issuer's address
      * @return result
      */
     public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address);

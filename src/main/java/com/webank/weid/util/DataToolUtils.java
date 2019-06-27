@@ -1032,6 +1032,7 @@ public final class DataToolUtils {
      *
      * @param data stringData
      * @param size size of byte32List
+     * @return data
      */
     public static List<byte[]> stringToByte32ArrayList(String data, int size) {
         List<byte[]> byteList = new ArrayList<>();
@@ -1446,7 +1447,7 @@ public final class DataToolUtils {
     
     /**
      * Get the current timestamp as the param "created". May be called elsewhere.
-     *
+     * @param length length
      * @return the StaticArray
      */
     public static List<BigInteger> getParamCreatedList(int length) {
