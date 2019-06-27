@@ -180,6 +180,10 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     @Override
     public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
 
+    	if (!WeIdUtils.isWeIdValid(weId)) {
+            logger.error("Input weId : {} is invalid.", weId);
+            return new ResponseData<>(null, ErrorCode.WEID_INVALID);
+        }
         return weIdServiceEngine.getWeIdDocument(weId);
     }
 
