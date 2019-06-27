@@ -37,7 +37,7 @@ public class EngineFactory {
     /**
      * fisco bcos version, default 1.3.x
      */
-    private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
+    private static String fiscoVersion = PropertyUtils.getProperty("bcos.version", "1.3");
 
     public static WeIdServiceEngine createWeIdServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
