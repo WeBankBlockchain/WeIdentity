@@ -28,6 +28,7 @@ import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.WalletUtils;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,6 +189,16 @@ public final class WeIdUtils {
         return addr.getValue().equals(BigInteger.ZERO);
     }
 
+    /**
+     * check if the given Address is empty.
+     *
+     * @param addr given Address
+     * @return true if yes, false otherwise.
+     */
+    public static boolean isEmptyStringAddress(String addr) {
+        return Numeric.toBigInt(addr).equals(BigInteger.ZERO);
+    }
+    
     /**
      * check the weId is match the private key.
      *
