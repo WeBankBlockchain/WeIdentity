@@ -81,6 +81,9 @@ public abstract class WeServer<W, C, S> {
      * 初始化WeServer服务,进行多线程安全保护,确保整个应用只初始化一次 并且根据配置FISCO的版本来自动初始化对应版本的服务.
      *
      * @param fiscoConfig FISCO配置对象
+     * @param <W> Web3j对象
+     * @param <C> Credential对象
+     * @param <S> Service 对象
      * @return 返回WeServer对象
      */
     public static synchronized <W, C, S> WeServer<W, C, S> init(FiscoConfig fiscoConfig) {
@@ -160,6 +163,8 @@ public abstract class WeServer<W, C, S> {
 
     /**
      * 获取Web3j对象所属的类型,此处是为了给动态加载合约使用.
+     * 
+     * @return Web3j的Class
      */
     public abstract Class<?> getWeb3jClass();
 
@@ -180,6 +185,7 @@ public abstract class WeServer<W, C, S> {
     /**
      * 根据传入的私钥(10进制数字私钥)，进行动态创建Credentials对象.
      *
+     * @param privateKey 数字私钥
      * @return 返回Credentials对象
      */
     public abstract C createCredentials(String privateKey);
