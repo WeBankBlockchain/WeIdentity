@@ -97,9 +97,8 @@ public class DeployContractV1 extends DeployContract {
     }
 
     /**
-     * Gets the web3j.
+     * Inits the web3j.
      *
-     * @return the web3j instance
      */
     protected static void initWeb3j() {
         if (web3j == null) {
