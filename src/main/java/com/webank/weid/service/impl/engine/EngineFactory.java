@@ -33,40 +33,40 @@ import com.webank.weid.service.impl.engine.fiscov2.WeIdServiceEngineV2;
 import com.webank.weid.util.PropertyUtils;
 
 public class EngineFactory {
-    
+
     /**
      * fisco bcos version, default 1.3.x
      */
     private static String fiscoVersion = PropertyUtils.getProperty("fisco.version", "1.3");
-    
+
     public static WeIdServiceEngine createWeIdServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new WeIdServiceEngineV1();
         }
         return new WeIdServiceEngineV2();
     }
-    
+
     public static CptServiceEngine createCptServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new CptServiceEngineV1();
         }
         return new CptServiceEngineV2();
     }
-    
+
     public static AuthorityIssuerServiceEngine createAuthorityIssuerServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new AuthorityIssuerEngineV1();
         }
         return new AuthorityIssuerEngineV2();
     }
-    
+
     public static EvidenceServiceEngine createEvidenceServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new EvidenceServiceEngineV1();
         }
         return new EvidenceServiceEngineV2();
     }
-    
+
     public static RawTransactionServiceEngine createRawTransactionServiceEngine() {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new RawTransactionServiceEngineV1();

@@ -57,15 +57,17 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     private static SpecificIssuerController specificIssuerController;
 
     public AuthorityIssuerEngineV2() {
-    	
-    	if(authorityIssuerController == null) {
-    		authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(), AuthorityIssuerController.class);
-    	}
-    	if(specificIssuerController == null) {
-    		specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(), SpecificIssuerController.class);
-    	}
+
+        if (authorityIssuerController == null) {
+            authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
+                AuthorityIssuerController.class);
+        }
+        if (specificIssuerController == null) {
+            specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(),
+                SpecificIssuerController.class);
+        }
     }
-    
+
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#addAuthorityIssuer(com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs)
      */
