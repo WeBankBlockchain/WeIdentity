@@ -45,6 +45,7 @@ targetCompatibility = 1.8
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 // In this section you declare where to find the dependencies of your project
 repositories {
+<<<<<<< HEAD
     if (!gradle.startParameter.isOffline()) {
         mavenLocal()
         mavenCentral()
@@ -55,6 +56,16 @@ repositories {
         maven {
             url 'dependencies'
         }
+=======
+    mavenLocal()
+    mavenCentral()
+    maven {
+        url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven { url "https://dl.bintray.com/ethereum/maven/" }
+    maven {
+        url "http://maven.aliyun.com/nexus/content/groups/public/"
+>>>>>>> * modify build.gradle
     }
 }
 
