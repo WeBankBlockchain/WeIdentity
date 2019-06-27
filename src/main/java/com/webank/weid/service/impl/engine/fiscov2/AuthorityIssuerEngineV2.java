@@ -47,6 +47,7 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
+ * AuthorityIssuerEngine calls authority issuer contract which runs on FISCO BCOS 2.0.
  * @author tonychen 2019年6月25日
  */
 public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssuerServiceEngine {
@@ -56,6 +57,9 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     private static AuthorityIssuerController authorityIssuerController;
     private static SpecificIssuerController specificIssuerController;
 
+    /**
+     * constructor.
+     */
     public AuthorityIssuerEngineV2() {
 
         if (authorityIssuerController == null) {
@@ -69,7 +73,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#addAuthorityIssuer(com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
+     * #addAuthorityIssuer(com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs)
      */
     @Override
     public ResponseData<Boolean> addAuthorityIssuer(RegisterAuthorityIssuerArgs args) {
@@ -148,13 +153,13 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#removeAuthorityIssuer(com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
+     * #removeAuthorityIssuer(com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs)
      */
     @Override
     public ResponseData<Boolean> removeAuthorityIssuer(RemoveAuthorityIssuerArgs args) {
         String weId = args.getWeId();
         try {
-//            reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
             AuthorityIssuerController authorityIssuerController = reloadContract(
                 fiscoConfig.getIssuerAddress(),
                 args.getWeIdPrivateKey().getPrivateKey(),
@@ -189,7 +194,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#isAuthorityIssuer(java.lang.String)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
+     * #isAuthorityIssuer(java.lang.String)
      */
     @Override
     public ResponseData<Boolean> isAuthorityIssuer(String address) {
@@ -212,7 +218,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getAuthorityIssuerInfoNonAccValue(java.lang.String)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
+     * #getAuthorityIssuerInfoNonAccValue(java.lang.String)
      */
     @Override
     public ResponseData<AuthorityIssuer> getAuthorityIssuerInfoNonAccValue(String weId) {
@@ -254,7 +261,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getAuthorityIssuerAddressList(java.lang.Integer, java.lang.Integer)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
+     * #getAuthorityIssuerAddressList(java.lang.Integer, java.lang.Integer)
      */
     @Override
     public List<String> getAuthorityIssuerAddressList(Integer index, Integer num) {
@@ -272,7 +280,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#removeIssuer(java.lang.String, java.lang.String)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
+     * #removeIssuer(java.lang.String, java.lang.String)
      */
     @Override
     public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress,
@@ -331,7 +340,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#isSpecificTypeIssuer(java.lang.String, java.lang.String)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
+     * #isSpecificTypeIssuer(java.lang.String, java.lang.String)
      */
     @Override
     public ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String address) {
@@ -353,7 +363,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController#getSpecificTypeIssuerList(java.lang.String, java.lang.Integer, java.lang.Integer)
+     * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
+     * #getSpecificTypeIssuerList(java.lang.String, java.lang.Integer, java.lang.Integer)
      */
     @Override
     public ResponseData<List<String>> getSpecificTypeIssuerList(String issuerType, Integer index,
@@ -375,7 +386,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.IssuerContractController#registerIssuerType(java.lang.String)
+     * @see com.webank.weid.service.impl.engine.IssuerContractController
+     * #registerIssuerType(java.lang.String)
      */
     @Override
     public ResponseData<Boolean> registerIssuerType(String issuerType, String privateKey) {
@@ -400,7 +412,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.IssuerContractController#addIssuer(java.lang.String, java.lang.String)
+     * @see com.webank.weid.service.impl.engine.IssuerContractController
+     * #addIssuer(java.lang.String, java.lang.String)
      */
     @Override
     public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress,

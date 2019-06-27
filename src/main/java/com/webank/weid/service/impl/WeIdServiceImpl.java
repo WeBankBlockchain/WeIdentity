@@ -19,13 +19,13 @@
 
 package com.webank.weid.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.LoadContractException;
@@ -95,29 +95,12 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 "[createWeId] Create weId failed. error message is :{}",
                 innerResp.getErrorMessage()
             );
-            return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+            return new ResponseData<>(null,
+                ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
                 innerResp.getTransactionInfo());
         }
         return new ResponseData<>(result, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
             innerResp.getTransactionInfo());
-    }
-
-    private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,
-        String privateKey) {
-    	
-    	String address = WeIdUtils.convertWeIdToAddress(weId);
-        try {
-            return weIdServiceEngine.createWeId(address, publicKey, privateKey);
-        } catch (PrivateKeyIllegalException e) {
-        	logger.error("[createWeId] create weid failed because privateKey is illegal. ", e);
-            return new ResponseData<>(false, e.getErrorCode());
-        } catch (LoadContractException e) {
-        	logger.error("[createWeId] create weid failed because Load Contract with exception. ", e);
-            return new ResponseData<>(false, e.getErrorCode());
-        } catch (Exception e) {
-        	logger.error("[createWeId] create weid failed with exception. ", e);
-            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
-        }
     }
 
     /**
@@ -163,13 +146,13 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
                     innerResp.getTransactionInfo());
             }
-            return new ResponseData<>(weId, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+            return new ResponseData<>(weId,
+                ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
                 innerResp.getTransactionInfo());
         } else {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_INVALID);
         }
     }
-
 
     /**
      * Get a WeIdentity DID Document.
@@ -180,7 +163,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     @Override
     public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
 
-    	if (!WeIdUtils.isWeIdValid(weId)) {
+        if (!WeIdUtils.isWeIdValid(weId)) {
             logger.error("Input weId : {} is invalid.", weId);
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
@@ -278,21 +261,13 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 .toString();
             return weIdServiceEngine.setAttribute(weAddress, attributeKey, attrValue, privateKey);
         } catch (PrivateKeyIllegalException e) {
-        	logger.error("[setPublicKey] set PublicKey failed because privateKey is illegal. ", e);
+            logger.error("[setPublicKey] set PublicKey failed because privateKey is illegal. ",
+                e);
             return new ResponseData<>(false, e.getErrorCode());
         } catch (Exception e) {
-        	logger.error("[setPublicKey] set PublicKey failed with exception. ", e);
+            logger.error("[setPublicKey] set PublicKey failed with exception. ", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
-    }
-
-
-    private boolean verifySetPublicKeyArgs(SetPublicKeyArgs setPublicKeyArgs) {
-
-        return !(setPublicKeyArgs == null
-            || setPublicKeyArgs.getType() == null
-            || setPublicKeyArgs.getUserWeIdPrivateKey() == null
-            || setPublicKeyArgs.getPublicKey() == null);
     }
 
     /**
@@ -318,29 +293,39 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             try {
                 String attributeKey = WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
                     + serviceType;
-                return weIdServiceEngine.setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey,
-                    serviceEndpoint, privateKey);
+                return weIdServiceEngine
+                    .setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey,
+                        serviceEndpoint, privateKey);
 
             } catch (PrivateKeyIllegalException e) {
-            	logger.error("[setService] set PublicKey failed because privateKey is illegal. ", e);
+                logger
+                    .error("[setService] set PublicKey failed because privateKey is illegal. ",
+                        e);
                 return new ResponseData<>(false, e.getErrorCode());
             } catch (Exception e) {
                 logger.error("[setService] set service failed. Error message :{}", e);
                 return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
             }
         } else {
-        	logger.error("[setService] set service failed, weid -->{} is invalid.", weId);
+            logger.error("[setService] set service failed, weid -->{} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
 
     }
 
-    private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
-
-        return !(setServiceArgs == null
-            || setServiceArgs.getType() == null
-            || setServiceArgs.getUserWeIdPrivateKey() == null
-            || setServiceArgs.getServiceEndpoint() == null);
+    /**
+     * Check if WeIdentity DID exists on Chain.
+     *
+     * @param weId the WeIdentity DID
+     * @return true if exists, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> isWeIdExist(String weId) {
+        if (!WeIdUtils.isWeIdValid(weId)) {
+            logger.error("[isWeIdExist] check weid failed. weid : {} is invalid.", weId);
+            return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+        }
+        return weIdServiceEngine.isWeIdExist(weId);
     }
 
     /**
@@ -382,7 +367,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     .append(owner)
                     .toString();
                 return weIdServiceEngine
-                    .setAttribute(weAddress, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX, attrValue,
+                    .setAttribute(weAddress,
+                        WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX,
+                        attrValue,
                         privateKey);
             } catch (PrivateKeyIllegalException e) {
                 logger.error("Set authenticate with private key exception. Error message :{}", e);
@@ -397,26 +384,48 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
     }
 
+    private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
+
+        return !(setServiceArgs == null
+            || setServiceArgs.getType() == null
+            || setServiceArgs.getUserWeIdPrivateKey() == null
+            || setServiceArgs.getServiceEndpoint() == null);
+    }
+
+    private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,
+        String privateKey) {
+
+        String address = WeIdUtils.convertWeIdToAddress(weId);
+        try {
+            return weIdServiceEngine.createWeId(address, publicKey, privateKey);
+        } catch (PrivateKeyIllegalException e) {
+            logger.error("[createWeId] create weid failed because privateKey is illegal. ",
+                e);
+            return new ResponseData<>(false, e.getErrorCode());
+        } catch (LoadContractException e) {
+            logger.error("[createWeId] create weid failed because Load Contract with "
+                    + "exception. ",
+                e);
+            return new ResponseData<>(false, e.getErrorCode());
+        } catch (Exception e) {
+            logger.error("[createWeId] create weid failed with exception. ", e);
+            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    private boolean verifySetPublicKeyArgs(SetPublicKeyArgs setPublicKeyArgs) {
+
+        return !(setPublicKeyArgs == null
+            || setPublicKeyArgs.getType() == null
+            || setPublicKeyArgs.getUserWeIdPrivateKey() == null
+            || setPublicKeyArgs.getPublicKey() == null);
+    }
+
     private boolean verifySetAuthenticationArgs(SetAuthenticationArgs setAuthenticationArgs) {
 
         return !(setAuthenticationArgs == null
             || setAuthenticationArgs.getUserWeIdPrivateKey() == null
             || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey()));
-    }
-
-    /**
-     * Check if WeIdentity DID exists on Chain.
-     *
-     * @param weId the WeIdentity DID
-     * @return true if exists, false otherwise
-     */
-    @Override
-    public ResponseData<Boolean> isWeIdExist(String weId) {
-        if (!WeIdUtils.isWeIdValid(weId)) {
-        	logger.error("[isWeIdExist] check weid failed. weid : {} is invalid.", weId);
-            return new ResponseData<>(false, ErrorCode.WEID_INVALID);
-        }
-        return weIdServiceEngine.isWeIdExist(weId);
     }
 
 }

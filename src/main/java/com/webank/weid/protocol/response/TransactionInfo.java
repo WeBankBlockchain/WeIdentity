@@ -50,7 +50,7 @@ public class TransactionInfo {
     private BigInteger transactionIndex;
 
     /**
-     * Constructor from a transactionReceipt. If the receipt is null, an
+     * Constructor from a transactionReceipt.
      *
      * @param receipt the transaction receipt
      */
@@ -61,23 +61,33 @@ public class TransactionInfo {
             this.transactionIndex = receipt.getTransactionIndex();
         }
     }
-    
+
     /**
-     * Constructor from a transactionReceipt. If the receipt is null, an
+     * Constructor from a transactionReceipt.
      *
      * @param receipt the transaction receipt
      */
-    public TransactionInfo(org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt receipt) {
+    public TransactionInfo(
+        org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt receipt) {
         if (receipt != null) {
             this.blockNumber = receipt.getBlockNumber();
             this.transactionHash = receipt.getTransactionHash();
             this.transactionIndex = receipt.getTransactionIndex();
         }
     }
-    
-    public TransactionInfo(BigInteger blockNumber, String transactionHash, BigInteger transactionIndex) {
-            this.blockNumber = blockNumber;
-            this.transactionHash = transactionHash;
-            this.transactionIndex = transactionIndex;
+
+    /**
+     * Constructor.
+     *
+     * @param blockNumber blockNumber
+     * @param transactionHash transactionHash
+     * @param transactionIndex transactionIndex
+     */
+    public TransactionInfo(BigInteger blockNumber,
+        String transactionHash,
+        BigInteger transactionIndex) {
+        this.blockNumber = blockNumber;
+        this.transactionHash = transactionHash;
+        this.transactionIndex = transactionIndex;
     }
 }

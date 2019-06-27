@@ -101,6 +101,9 @@ public class DeployContractV2 extends DeployContract {
         }
     }
 
+    /**
+     * depoly contract on FISCO BCOS 2.0.
+     */
     public static void deployContract() {
         initWeb3j();
         initCredentials();
