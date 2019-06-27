@@ -83,7 +83,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         try {
             CptController cptController =
                 reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
-            transactionReceipt = cptController.registerCpt(
+            transactionReceipt = cptController.updateCpt(
+                BigInteger.valueOf(Long.valueOf(cptId)),
                 address,
                 DataToolUtils.listToListBigInteger(
                     DataToolUtils.getParamCreatedList(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
@@ -103,7 +104,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             return processUpdateEventLog(cptController, transactionReceipt);
         } catch (Exception e) {
             logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId);
-            return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
 

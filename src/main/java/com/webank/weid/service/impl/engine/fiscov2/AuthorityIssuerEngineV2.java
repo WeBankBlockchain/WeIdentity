@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple2;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -112,7 +113,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
             }
         } catch (Exception e) {
             logger.error("register authority issuer failed.", e);
-            return new ResponseData<>(Boolean.FALSE, ErrorCode.UNKNOW_ERROR);
+            return new ResponseData<>(Boolean.FALSE, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
     }
 
@@ -378,7 +379,13 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 new BigInteger(index.toString()),
                 new BigInteger(num.toString())
             ).send();
-            return result;
+            List<String> addressList = new ArrayList<>();
+            for (String addr : addresses) {
+                if (!WeIdUtils.isEmptyStringAddress(addr)) {
+                    addressList.add(addr);
+                }
+            }
+            return new ResponseData<>(addressList, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("check issuer type failed.", e);
             return new ResponseData<List<String>>(null, ErrorCode.UNKNOW_ERROR);
