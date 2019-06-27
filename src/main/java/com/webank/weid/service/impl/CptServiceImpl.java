@@ -141,15 +141,6 @@ public class CptServiceImpl extends BaseService implements CptService {
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
                 weIdPrivateKey.getPrivateKey());
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error(
-                "[registerCpt] register cpt failed due to transaction execution error. ",
-                e
-            );
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            logger.error("[registerCpt] register cpt failed due to transaction timeout. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -189,15 +180,6 @@ public class CptServiceImpl extends BaseService implements CptService {
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
                 weIdPrivateKey.getPrivateKey());
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error(
-                "[registerCpt] register cpt failed due to transaction execution error. ",
-                e
-            );
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            logger.error("[registerCpt] register cpt failed due to transaction timeout. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -286,15 +268,6 @@ public class CptServiceImpl extends BaseService implements CptService {
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.updateCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
                 weIdPrivateKey.getPrivateKey());
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error(
-                "[updateCpt2] update cpt failed due to transaction execution error. ",
-                e
-            );
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            logger.error("[updateCpt] update cpt failed due to transaction timeout. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         } catch (Exception e) {
             logger.error("[updateCpt] update cpt failed due to unkown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
