@@ -48,10 +48,12 @@ import com.webank.weid.util.WeIdUtils;
  */
 public class AuthorityIssuerServiceImpl extends BaseService implements AuthorityIssuerService {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuthorityIssuerServiceImpl.class);
+    private static final Logger logger = LoggerFactory
+        .getLogger(AuthorityIssuerServiceImpl.class);
 
-    private AuthorityIssuerServiceEngine engine = EngineFactory.createAuthorityIssuerServiceEngine();
-    
+    private AuthorityIssuerServiceEngine engine = EngineFactory
+        .createAuthorityIssuerServiceEngine();
+
     private WeIdService weIdService = new WeIdServiceImpl();
 
     /**
@@ -185,7 +187,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
             return new ResponseData<>(false, innerCode);
         }
         try {
-            return engine.registerIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
+            return engine
+                .registerIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("register issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -213,7 +216,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return engine.addIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
+            return engine.addIssuer(issuerType, issuerAddress,
+                callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("add issuer into type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -240,7 +244,10 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return engine.removeIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
+            return engine.removeIssuer(
+                issuerType,
+                issuerAddress,
+                callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("remove issuer from type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);

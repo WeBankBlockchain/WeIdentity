@@ -46,6 +46,9 @@ import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 
+/**
+ * EvidenceServiceEngine calls evidence contract which runs on FISCO BCOS 2.0.
+ */
 public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV2.class);

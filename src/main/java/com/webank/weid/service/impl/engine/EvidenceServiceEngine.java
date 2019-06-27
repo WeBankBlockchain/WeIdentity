@@ -38,6 +38,12 @@ public interface EvidenceServiceEngine {
 
     ResponseData<EvidenceInfo> getInfo(String evidenceAddress);
 
+    /**
+     * verify create evidence event.
+     * @param eventRetCode eventRetCode
+     * @param address evidence contract address
+     * @return
+     */
     default ErrorCode verifyCreateEvidenceEvent(Integer eventRetCode, String address) {
         if (eventRetCode == null || address == null) {
             return ErrorCode.ILLEGAL_INPUT;
