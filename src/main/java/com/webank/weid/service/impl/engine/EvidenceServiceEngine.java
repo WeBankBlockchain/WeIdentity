@@ -20,22 +20,24 @@
 package com.webank.weid.service.impl.engine;
 
 import java.util.List;
+
 import org.bcos.web3j.crypto.Sign;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.response.ResponseData;
 
 public interface EvidenceServiceEngine {
-    
+
     ResponseData<String> createEvidence(
         Sign.SignatureData sigData,
         List<String> hashAttributes,
         List<String> extraValueList,
         String privateKey
     );
-    
+
     ResponseData<EvidenceInfo> getInfo(String evidenceAddress);
-    
+
     default ErrorCode verifyCreateEvidenceEvent(Integer eventRetCode, String address) {
         if (eventRetCode == null || address == null) {
             return ErrorCode.ILLEGAL_INPUT;
