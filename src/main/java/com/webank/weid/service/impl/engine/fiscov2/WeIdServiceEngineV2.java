@@ -63,6 +63,7 @@ import com.webank.weid.util.WeIdUtils;
 
 /**
  * WeIdServiceEngine call weid contract which runs on FISCO BCOS 2.0.
+ *
  * @author tonychen 2019年6月21日
  */
 public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine {
@@ -92,17 +93,10 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
+
+        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
     }
 
-    /**
-     * constructor.
-     */
-    public WeIdServiceEngineV2() {
-
-        if (weIdContract == null) {
-            weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
-        }
-    }
 
     private static ResolveEventLogResult resolveAttributeEvent(
         String weId,
@@ -401,7 +395,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         String created = DateUtils.getCurrentTimeStampString();
         TransactionReceipt receipt;
         try {
-            WeIdContract weIdContract = 
+            WeIdContract weIdContract =
                 reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
             receipt = weIdContract.createWeId(
                 weAddress,
@@ -436,7 +430,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
     public ResponseData<Boolean> setAttribute(String weAddress, String attributeKey, String value,
         String privateKey) {
         try {
-            WeIdContract weIdContract = 
+            WeIdContract weIdContract =
                 reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
             byte[] attrValue = value.getBytes();
             BigInteger updated = BigInteger.valueOf(System.currentTimeMillis());

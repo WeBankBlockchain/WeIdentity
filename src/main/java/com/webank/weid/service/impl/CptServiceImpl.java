@@ -21,8 +21,6 @@ package com.webank.weid.service.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign.SignatureData;

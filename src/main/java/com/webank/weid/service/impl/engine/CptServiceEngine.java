@@ -74,6 +74,7 @@ public interface CptServiceEngine {
      * @param cptJsonSchemaNew cpt content
      * @param rsvSignature signature
      * @param privateKey private key
+     * @return result
      */
     ResponseData<CptBaseInfo> registerCpt(
         String address,

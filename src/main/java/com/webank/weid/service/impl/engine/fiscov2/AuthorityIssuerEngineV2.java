@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple2;
-import org.fisco.bcos.web3j.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +48,7 @@ import com.webank.weid.util.WeIdUtils;
 
 /**
  * AuthorityIssuerEngine calls authority issuer contract which runs on FISCO BCOS 2.0.
+ *
  * @author tonychen 2019年6月25日
  */
 public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssuerServiceEngine {
@@ -58,19 +58,12 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     private static AuthorityIssuerController authorityIssuerController;
     private static SpecificIssuerController specificIssuerController;
 
-    /**
-     * constructor.
-     */
-    public AuthorityIssuerEngineV2() {
+    static {
 
-        if (authorityIssuerController == null) {
-            authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
-                AuthorityIssuerController.class);
-        }
-        if (specificIssuerController == null) {
-            specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(),
-                SpecificIssuerController.class);
-        }
+        authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
+            AuthorityIssuerController.class);
+        specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(),
+            SpecificIssuerController.class);
     }
 
     /* (non-Javadoc)
@@ -371,7 +364,6 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     public ResponseData<List<String>> getSpecificTypeIssuerList(String issuerType, Integer index,
         Integer num) {
         List<String> addresses = new ArrayList<>();
-        ResponseData<List<String>> result = new ResponseData<List<String>>();
         try {
 
             addresses = specificIssuerController.getSpecificTypeIssuerList(
