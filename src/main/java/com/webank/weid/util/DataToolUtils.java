@@ -1092,6 +1092,7 @@ public final class DataToolUtils {
         }
         return byteList;
     }
+
     /**
      * convert bytesArrayList to Bytes32ArrayList.
      * @param list byte size
@@ -1099,8 +1100,8 @@ public final class DataToolUtils {
      * @return result
      */
     public static List<byte[]> bytesArrayListToBytes32ArrayList(List<byte[]> list, int size) {
-        List<byte[]> bytesList = new ArrayList<>();
 
+        List<byte[]> bytesList = new ArrayList<>();
         if (list.isEmpty()) {
             for (int i = 0; i < size; i++) {
                 bytesList.add(new byte[32]);
