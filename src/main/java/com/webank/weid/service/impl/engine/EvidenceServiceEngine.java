@@ -42,7 +42,7 @@ public interface EvidenceServiceEngine {
      * verify create evidence event.
      * @param eventRetCode eventRetCode
      * @param address evidence contract address
-     * @return
+     * @return ErrorCode
      */
     default ErrorCode verifyCreateEvidenceEvent(Integer eventRetCode, String address) {
         if (eventRetCode == null || address == null) {
