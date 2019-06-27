@@ -23,23 +23,26 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * this service engine calls the contract methods and process blockchain response data
- * on FISCO BCOS 1.3.x or on FISCO BCOS 2.0 
+ * this service engine calls the contract methods and process blockchain response data on FISCO BCOS
+ * 1.3.x or on FISCO BCOS 2.0.
+ *
  * @author tonychen 2019年6月21日
  */
 public interface WeIdServiceEngine {
 
-	/**
-	 * 
-	 * @param weAddress identity on blockchain
-	 * @param publicKey public key of the identity
-	 * @param privateKey privateKey identity's private key
-	 * @return result
-	 */
+    /**
+     * call weid contract to create a new weid.
+     *
+     * @param weAddress identity on blockchain
+     * @param publicKey public key of the identity
+     * @param privateKey privateKey identity's private key
+     * @return result
+     */
     ResponseData<Boolean> createWeId(String weAddress, String publicKey, String privateKey);
 
     /**
-     * write attribute to blockchain
+     * write attribute to blockchain.
+     *
      * @param weAddress identity on blockchain
      * @param attributeKey the key of the attribute
      * @param value the value of the attribute
@@ -50,17 +53,20 @@ public interface WeIdServiceEngine {
         String weAddress,
         String attributeKey,
         String value,
-        String privateKey);
+        String privateKey
+    );
 
     /**
-     * check if the weid exists on blockchain
+     * check if the weid exists on blockchain.
+     *
      * @param weId the weid of the entity
      * @return result
      */
     ResponseData<Boolean> isWeIdExist(String weId);
 
     /**
-     * get weid document from blockchain
+     * get weid document from blockchain.
+     *
      * @param weId the entity's weid
      * @return weid document
      */
