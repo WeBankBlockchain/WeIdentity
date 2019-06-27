@@ -150,7 +150,10 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, 10000);
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_NO_PERMISSION.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(
+            ErrorCode.CPT_NO_PERMISSION.getCode(), 
+            response.getErrorCode().intValue()
+        );
         Assert.assertNull(response.getResult());
     }
 
@@ -437,7 +440,10 @@ public class TestUpdateCpt extends TestBaseServcie {
             cptBaseInfo.getCptId());
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_NO_PERMISSION.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(
+            ErrorCode.CPT_NO_PERMISSION.getCode(),
+            response.getErrorCode().intValue()
+        );
         Assert.assertNull(response.getResult());
     }
 
