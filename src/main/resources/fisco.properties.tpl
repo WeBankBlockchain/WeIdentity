@@ -1,7 +1,7 @@
 # Fisco-bcos blockchain node related properties
 
 # Version
-bcos.version=2
+bcos.version=1
 
 # contract address
 weId.contractaddress=${WEID_ADDRESS}
