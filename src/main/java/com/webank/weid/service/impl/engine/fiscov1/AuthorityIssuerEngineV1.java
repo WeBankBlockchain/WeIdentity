@@ -61,6 +61,7 @@ import com.webank.weid.util.WeIdUtils;
 /**
  * AuthorityIssuerEngineV1 calls the authority issuer contract which runs on FISCO BCOS 1.3.x
  * version.
+ *
  * @author tonychen 2019年6月25日
  */
 public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssuerServiceEngine {
@@ -72,16 +73,13 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
     /**
      * constructor.
      */
-    public AuthorityIssuerEngineV1() {
-
-        if (authorityIssuerController == null) {
-            authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
-                AuthorityIssuerController.class);
-        }
-        if (specificIssuerController == null) {
-            specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(),
-                SpecificIssuerController.class);
-        }
+    static {
+        authorityIssuerController = getContractService(
+            fiscoConfig.getIssuerAddress(),
+            AuthorityIssuerController.class);
+        specificIssuerController = getContractService(
+            fiscoConfig.getSpecificIssuerAddress(),
+            SpecificIssuerController.class);
     }
 
     /**

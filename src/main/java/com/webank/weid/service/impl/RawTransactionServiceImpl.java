@@ -39,7 +39,7 @@ public class RawTransactionServiceImpl extends BaseService implements RawTransac
 
     private static final Logger logger = LoggerFactory.getLogger(RawTransactionServiceImpl.class);
 
-    RawTransactionServiceEngine engine = EngineFactory.createRawTransactionServiceEngine();
+    private RawTransactionServiceEngine engine = EngineFactory.createRawTransactionServiceEngine();
 
     /**
      * Create a WeIdentity DID from the provided public key, with preset transaction hex value.

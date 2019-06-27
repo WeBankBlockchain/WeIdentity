@@ -51,6 +51,7 @@ import com.webank.weid.util.TransactionUtils;
 
 /**
  * RawTransactionService runs on FISCO BCOS 2.0.
+ *
  * @author tonychen 2019年6月26日
  */
 public class RawTransactionServiceEngineV2 extends BaseEngine implements
@@ -77,19 +78,16 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     /**
      * constructor.
      */
-    public RawTransactionServiceEngineV2() {
-        if (weIdContract == null) {
-            weIdContract = getContractService(fiscoConfig.getWeIdAddress(),
-                WeIdContract.class);
-        }
-        if (authorityIssuerController == null) {
-            authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
-                AuthorityIssuerController.class);
-        }
-        if (cptController == null) {
-            cptController = (CptController) getContractService(fiscoConfig.getCptAddress(),
-                CptController.class);
-        }
+    static {
+        weIdContract = getContractService(
+            fiscoConfig.getWeIdAddress(),
+            WeIdContract.class);
+        authorityIssuerController = getContractService(
+            fiscoConfig.getIssuerAddress(),
+            AuthorityIssuerController.class);
+        cptController = (CptController) getContractService(
+            fiscoConfig.getCptAddress(),
+            CptController.class);
     }
 
     /**
@@ -182,6 +180,7 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
      * Verify Register CPT related events.
      *
      * @param transactionReceipt the TransactionReceipt
+     * @param cptController cptController contract address
      * @return the ErrorCode
      */
     public static ResponseData<CptBaseInfo> resolveRegisterCptEvents(

@@ -118,17 +118,11 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             EventEncoder.encode(event),
             WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
+
+        //load contract
+        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
     }
 
-    /**
-     * constructor.
-     */
-    public WeIdServiceEngineV1() {
-
-        if (weIdContract == null) {
-            weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
-        }
-    }
 
     private static ResolveEventLogResult resolveAttributeEvent(
         String weId,
