@@ -58,6 +58,7 @@ import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
+ * CptServiceEngine calls the authority issuer contract which runs on FISCO BCOS 1.3.x.
  * @author tonychen 2019年6月25日
  */
 public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
@@ -66,6 +67,9 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
     private static CptController cptController;
 
+    /**
+     * constructor.
+     */
     public CptServiceEngineV1() {
         if (cptController == null) {
 
@@ -97,7 +101,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             transactionReceipt
         );
     }
-    
+
     /**
      * Verify Update CPT related events.
      *
@@ -122,7 +126,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             transactionReceipt
         );
     }
-    
+
     /**
      * Resolve CPT Event.
      *
@@ -183,7 +187,9 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.CptEngineController#updateCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
+     * @see com.webank.weid.service.impl.engine.CptEngineController
+     * #updateCpt(int, java.lang.String, java.lang.String,
+     * com.webank.weid.protocol.response.RsvSignature)
      */
     @Override
     public ResponseData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
@@ -219,7 +225,9 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(int, java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
+     * @see com.webank.weid.service.impl.engine.CptEngineController
+     * #registerCpt(int, java.lang.String, java.lang.String,
+     * com.webank.weid.protocol.response.RsvSignature)
      */
     @Override
     public ResponseData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
@@ -228,13 +236,10 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
 
-        // the case to update a CPT. Requires a valid CPT ID
-//	        	engine.
         TransactionReceipt receipt;
         try {
             CptController cptController =
                 reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
-            // the case to register a CPT with a pre-set CPT ID
             receipt = cptController.registerCpt(
                 DataToolUtils.intToUint256(cptId),
                 new Address(address),
@@ -257,7 +262,9 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.CptEngineController#registerCpt(java.lang.String, java.lang.String, com.webank.weid.protocol.response.RsvSignature)
+     * @see com.webank.weid.service.impl.engine.CptEngineController
+     * #registerCpt(java.lang.String, java.lang.String,
+     * com.webank.weid.protocol.response.RsvSignature)
      */
     @Override
     public ResponseData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
@@ -359,6 +366,4 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
-
-
 }

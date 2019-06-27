@@ -50,6 +50,7 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.TransactionUtils;
 
 /**
+ * RawTransactionService runs on FISCO BCOS 2.0.
  * @author tonychen 2019年6月26日
  */
 public class RawTransactionServiceEngineV2 extends BaseEngine implements
@@ -73,24 +74,27 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
      */
     private static CptController cptController;
 
-    static {
-        weIdContract = (WeIdContract) getContractService(fiscoConfig.getWeIdAddress(),
-            WeIdContract.class);
-        authorityIssuerController =
-            (AuthorityIssuerController)
-                getContractService(fiscoConfig.getIssuerAddress(), AuthorityIssuerController.class);
-        cptController = (CptController) getContractService(fiscoConfig.getCptAddress(),
-            CptController.class);
-    }
-
+    /**
+     * constructor.
+     */
     public RawTransactionServiceEngineV2() {
-
+        if (weIdContract == null) {
+            weIdContract = getContractService(fiscoConfig.getWeIdAddress(),
+                WeIdContract.class);
+        }
+        if (authorityIssuerController == null) {
+            authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
+                AuthorityIssuerController.class);
+        }
+        if (cptController == null) {
+            cptController = (CptController) getContractService(fiscoConfig.getCptAddress(),
+                CptController.class);
+        }
     }
 
     /**
      * Send a transaction to blockchain through web3j instance using the transactionHex value.
      *
-     * @param web3j the web3j instance to blockchain
      * @param transactionHex the transactionHex value
      * @return the transactionReceipt
      * @throws Exception the exception
@@ -201,7 +205,8 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.RawTransactionServiceEngine#createWeId(java.lang.String)
+     * @see com.webank.weid.service.impl.engine.RawTransactionServiceEngine
+     * #createWeId(java.lang.String)
      */
     @Override
     public ResponseData<String> createWeId(String transactionHex) {
@@ -220,7 +225,8 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.RawTransactionServiceEngine#registerAuthorityIssuer(java.lang.String)
+     * @see com.webank.weid.service.impl.engine.RawTransactionServiceEngine
+     * #registerAuthorityIssuer(java.lang.String)
      */
     @Override
     public ResponseData<String> registerAuthorityIssuer(String transactionHex) {
@@ -242,7 +248,8 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.RawTransactionServiceEngine#registerCpt(java.lang.String)
+     * @see com.webank.weid.service.impl.engine.RawTransactionServiceEngine
+     * #registerCpt(java.lang.String)
      */
     @Override
     public ResponseData<String> registerCpt(String transactionHex) {
