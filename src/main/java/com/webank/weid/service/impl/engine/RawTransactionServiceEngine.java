@@ -32,6 +32,7 @@ public interface RawTransactionServiceEngine {
      * create a weid.
      *
      * @param transactionHex transactionHex
+     * @return result
      */
     ResponseData<String> createWeId(String transactionHex);
 
@@ -39,6 +40,7 @@ public interface RawTransactionServiceEngine {
      * register authority issuer.
      *
      * @param transactionHex transactionHex
+     * @return result
      */
     ResponseData<String> registerAuthorityIssuer(String transactionHex);
 
@@ -46,6 +48,7 @@ public interface RawTransactionServiceEngine {
      * register cpt.
      *
      * @param transactionHex transactionHex
+     * @return result
      */
     ResponseData<String> registerCpt(String transactionHex);
 

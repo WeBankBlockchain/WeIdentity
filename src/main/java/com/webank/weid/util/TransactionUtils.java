@@ -458,6 +458,7 @@ public class TransactionUtils {
      * @param retCode the retCode
      * @param cptId the CptId
      * @param cptVersion the CptVersion
+     * @param receipt receipt
      * @return the result
      */
     public static ResponseData<CptBaseInfo> getResultByResolveEvent(
