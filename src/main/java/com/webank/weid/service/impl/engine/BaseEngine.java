@@ -66,6 +66,7 @@ public abstract class BaseEngine extends BaseService {
      * @param contractAddress the contract address
      * @param privateKey the privateKey of the sender
      * @param cls the class
+     * @param <T> t
      * @return the contract
      */
     protected static <T> T reloadContract(
@@ -99,6 +100,7 @@ public abstract class BaseEngine extends BaseService {
      *
      * @param contractAddress the contract address
      * @param cls the class
+     * @param <T> t
      * @return the contract service
      */
     protected static <T> T getContractService(String contractAddress, Class<T> cls) {
