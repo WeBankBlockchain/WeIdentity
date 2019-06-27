@@ -129,7 +129,7 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
 
-        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeIdNew);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
 
         ResponseData<CptBaseInfo> responseUp = cptService.updateCpt(
             cptMapArgs,
