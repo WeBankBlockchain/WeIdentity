@@ -25,11 +25,22 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 
 /**
+ * 针对不同版本的FISCO BCOS，做不同的CPT合约接口调用和数据处理 目前分为支持FISCO BCOS 1.3.x和FISCO BCOS 2.0版本
+ *
  * @author tonychen 2019年6月25日
  */
 public interface CptServiceEngine {
 
-
+    /**
+     * call cpt contract to update cpt based on cptid.
+     *
+     * @param cptId cptid
+     * @param address publisher's address
+     * @param cptJsonSchemaNew cpt content
+     * @param rsvSignature signature
+     * @param privateKey private key
+     * @return result
+     */
     ResponseData<CptBaseInfo> updateCpt(
         int cptId,
         String address,
@@ -38,6 +49,16 @@ public interface CptServiceEngine {
         String privateKey
     );
 
+    /**
+     * call cpt contract to register cpt with the specific cptid.
+     *
+     * @param cptId cptid
+     * @param address publisher's address
+     * @param cptJsonSchemaNew cpt content
+     * @param rsvSignature signature
+     * @param privateKey private key
+     * @return result
+     */
     ResponseData<CptBaseInfo> registerCpt(
         int cptId,
         String address,
@@ -46,6 +67,14 @@ public interface CptServiceEngine {
         String privateKey
     );
 
+    /**
+     * call cpt contract to register cpt.
+     *
+     * @param address publisher's address
+     * @param cptJsonSchemaNew cpt content
+     * @param rsvSignature signature
+     * @param privateKey private key
+     */
     ResponseData<CptBaseInfo> registerCpt(
         String address,
         String cptJsonSchemaNew,
@@ -53,5 +82,11 @@ public interface CptServiceEngine {
         String privateKey
     );
 
+    /**
+     * call cpt contract method to query cpt info from blockchain.
+     *
+     * @param cptId the id of the cpt
+     * @return cpt info
+     */
     ResponseData<Cpt> queryCpt(int cptId);
 }
