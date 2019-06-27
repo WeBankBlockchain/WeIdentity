@@ -94,13 +94,6 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
      * WeIdentity DID contract object, for calling weIdentity DID contract.
      */
     private static WeIdContract weIdContract;
-    
-    public WeIdServiceEngineV1() {
-    	
-    	if(weIdContract==null) {
-    		weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
-    	}
-    }
 
     static {
         // initialize the event topic
@@ -124,6 +117,13 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             EventEncoder.encode(event),
             WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
+    }
+
+    public WeIdServiceEngineV1() {
+
+        if (weIdContract == null) {
+            weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
+        }
     }
 
     private static ResolveEventLogResult resolveAttributeEvent(
@@ -399,9 +399,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             }
 
             resolveTransaction(weId, latestBlockNumber, result);
-//		            responseData.setResult(result);
-//		            return responseData;
-            return new ResponseData<>(null, ErrorCode.SUCCESS);
+            return new ResponseData<>(result, ErrorCode.SUCCESS);
         } catch (InterruptedException | ExecutionException e) {
             logger.error("Set weId service failed. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
@@ -457,7 +455,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
                 logger.error(
                     "The input private key does not match the current weid, operation of "
                         + "modifying weid is not allowed. we address is {}",
-                        weAddress
+                    weAddress
                 );
                 return new ResponseData<Boolean>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
                     info);

@@ -55,9 +55,9 @@ import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 
 public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServiceEngine {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV1.class);
-    
+
     @Override
     public ResponseData<String> createEvidence(
         Sign.SignatureData sigData,
@@ -65,7 +65,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
         List<String> extraValueList,
         String privateKey
     ) {
-        
+
         try {
             Bytes32 r = DataToolUtils.bytesArrayToBytes32(sigData.getR());
             Bytes32 s = DataToolUtils.bytesArrayToBytes32(sigData.getS());
@@ -73,8 +73,8 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
             List<Address> signer = new ArrayList<>();
             ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
             signer.add(new Address(Keys.getAddress(keyPair)));
-            
-            EvidenceFactory evidenceFactory = 
+
+            EvidenceFactory evidenceFactory =
                 reloadContract(
                     fiscoConfig.getEvidenceAddress(),
                     privateKey,
@@ -88,7 +88,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
                 v,
                 new DynamicArray<Bytes32>(generateBytes32List(extraValueList))
             );
-    
+
             TransactionReceipt receipt = future.get(
                 WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
                 TimeUnit.SECONDS);
@@ -96,7 +96,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
             List<CreateEvidenceLogEventResponse> eventResponseList =
                 EvidenceFactory.getCreateEvidenceLogEvents(receipt);
             CreateEvidenceLogEventResponse event = eventResponseList.get(0);
-    
+
             if (event != null) {
                 ErrorCode innerResponse =
                     verifyCreateEvidenceEvent(
@@ -113,7 +113,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
                 );
                 return new ResponseData<>(StringUtils.EMPTY,
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
-            } 
+            }
         } catch (TimeoutException e) {
             logger.error("create evidence failed due to system timeout. ", e);
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_TIMEOUT);
@@ -122,7 +122,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
-    
+
     private List<Bytes32> generateBytes32List(List<String> bytes32List) {
         int desiredLength = bytes32List.size();
         List<Bytes32> finalList = new ArrayList<>();
@@ -131,7 +131,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
         }
         return finalList;
     }
-    
+
     @Override
     public ResponseData<EvidenceInfo> getInfo(String evidenceAddress) {
         try {
@@ -139,7 +139,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
             List<Type> rawResult =
                 evidence.getInfo()
                     .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            
+
             if (rawResult == null) {
                 return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
             }
