@@ -50,6 +50,7 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.TransactionUtils;
 
 /**
+ * awTransactionService runs on FISCO BCOS 1.3.x.
  * @author tonychen 2019年6月26日
  */
 public class RawTransactionServiceEngineV1 extends BaseEngine implements
@@ -86,7 +87,6 @@ public class RawTransactionServiceEngineV1 extends BaseEngine implements
     /**
      * Send a transaction to blockchain through web3j instance using the transactionHex value.
      *
-     * @param web3j the web3j instance to blockchain
      * @param transactionHex the transactionHex value
      * @return the transactionReceipt
      * @throws Exception the exception
@@ -133,6 +133,7 @@ public class RawTransactionServiceEngineV1 extends BaseEngine implements
      */
     private static Optional<TransactionReceipt> getTransactionReceiptRequest(Web3j web3j,
         String transactionHash) throws Exception {
+
         EthGetTransactionReceipt transactionReceipt =
             web3j.ethGetTransactionReceipt(transactionHash).send();
         if (transactionReceipt.hasError()) {
@@ -151,6 +152,7 @@ public class RawTransactionServiceEngineV1 extends BaseEngine implements
      */
     public static ResponseData<CptBaseInfo> resolveRegisterCptEvents(
         TransactionReceipt transactionReceipt) {
+
         List<RegisterCptRetLogEventResponse> event = CptController.getRegisterCptRetLogEvents(
             transactionReceipt
         );
@@ -176,6 +178,7 @@ public class RawTransactionServiceEngineV1 extends BaseEngine implements
      */
     @Override
     public ResponseData<String> createWeId(String transactionHex) {
+
         try {
             TransactionReceipt transactionReceipt = sendTransaction(transactionHex);
             List<WeIdAttributeChangedEventResponse> response =
@@ -199,6 +202,7 @@ public class RawTransactionServiceEngineV1 extends BaseEngine implements
      */
     @Override
     public ResponseData<String> registerAuthorityIssuer(String transactionHex) {
+
         try {
             TransactionReceipt transactionReceipt = sendTransaction(transactionHex);
 
@@ -222,6 +226,7 @@ public class RawTransactionServiceEngineV1 extends BaseEngine implements
      * @return The registered CPT info
      */
     public ResponseData<String> registerCpt(String transactionHex) {
+
         try {
             TransactionReceipt transactionReceipt = sendTransaction(transactionHex);
             CptBaseInfo cptBaseInfo = resolveRegisterCptEvents(transactionReceipt)

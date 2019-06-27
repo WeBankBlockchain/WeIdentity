@@ -56,10 +56,10 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
 
     private WeIdService weIdService = new WeIdServiceImpl();
-    
-    private EvidenceServiceEngine evidenceServiceEngine = 
+
+    private EvidenceServiceEngine evidenceServiceEngine =
         EngineFactory.createEvidenceServiceEngine();
-    
+
     /**
      * Create a new evidence to the blockchain and store its address into the credential.
      */
@@ -95,7 +95,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 ));
             List<String> extraValueList = new ArrayList<>();
             extraValueList.add(StringUtils.EMPTY);
-            Sign.SignatureData sigData = 
+            Sign.SignatureData sigData =
                 DataToolUtils.signMessage(credentialHash, weIdPrivateKey.getPrivateKey());
             return evidenceServiceEngine.createEvidence(
                 sigData,
@@ -103,7 +103,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 extraValueList,
                 weIdPrivateKey.getPrivateKey()
             );
-        }  catch (Exception e) {
+        } catch (Exception e) {
             logger.error("create evidence failed due to system error. ", e);
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
@@ -122,7 +122,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
         try {
-             return evidenceServiceEngine.getInfo(evidenceAddress);
+            return evidenceServiceEngine.getInfo(evidenceAddress);
         } catch (Exception e) {
             logger.error("get evidence failed.", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
@@ -205,7 +205,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
 
     private ResponseData<Boolean> verifySignatureToSigner(
         String rawData,
-        String signerWeId, 
+        String signerWeId,
         SignatureData signatureData
     ) {
 

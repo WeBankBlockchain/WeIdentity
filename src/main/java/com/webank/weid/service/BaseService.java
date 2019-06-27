@@ -46,12 +46,12 @@ import com.webank.weid.util.DataToolUtils;
  * @author tonychen
  */
 public abstract class BaseService {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
 
     protected static FiscoConfig fiscoConfig;
-    
-    protected static WeServer<?,?,?> weServer;
+
+    protected static WeServer<?, ?, ?> weServer;
 
     static {
         fiscoConfig = new FiscoConfig();
@@ -71,7 +71,7 @@ public abstract class BaseService {
             init();
         }
     }
-    
+
     /**
      * initialization WeServer.
      */
@@ -92,7 +92,7 @@ public abstract class BaseService {
         }
         return weServer.getWeb3j();
     }
-    
+
     /**
      * Gets the web3j class.
      *
@@ -104,7 +104,7 @@ public abstract class BaseService {
         }
         return weServer.getWeb3jClass();
     }
-    
+
     /**
      * get current blockNumber.
      *
@@ -126,19 +126,7 @@ public abstract class BaseService {
     protected static String getSeq() {
         return DataToolUtils.getUuId32();
     }
-    
-    /**
-     * Get the RegistCallBack.
-     * 
-     * @return the RegistCallBack
-     */
-    protected RegistCallBack getPushCallback(){
-        if (weServer == null) {
-            init();
-        }
-        return weServer.getPushCallback();
-    }
-    
+
     /**
      * On-demand build the contract config info.
      *
@@ -152,6 +140,18 @@ public abstract class BaseService {
         contractConfig.setEvidenceAddress(fiscoConfig.getEvidenceAddress());
         contractConfig.setSpecificIssuerAddress(fiscoConfig.getSpecificIssuerAddress());
         return contractConfig;
+    }
+
+    /**
+     * Get the RegistCallBack.
+     *
+     * @return the RegistCallBack
+     */
+    protected RegistCallBack getPushCallback() {
+        if (weServer == null) {
+            init();
+        }
+        return weServer.getPushCallback();
     }
 
     /**
@@ -194,13 +194,13 @@ public abstract class BaseService {
         amopRequestBody.setMsgType(msgType);
         amopRequestBody.setMsgBody(msgBody);
         String requestBodyStr = DataToolUtils.serialize(amopRequestBody);
-        
-        AmopCommonArgs amopCommonArgs =new AmopCommonArgs();
+
+        AmopCommonArgs amopCommonArgs = new AmopCommonArgs();
         amopCommonArgs.setToOrgId(toOrgId);
         amopCommonArgs.setMessage(requestBodyStr);
         amopCommonArgs.setMessageId(getSeq());
         logger.info("direct route request, seq : {}, body ：{}", amopCommonArgs.getMessageId(),
-                requestBodyStr);
+            requestBodyStr);
         AmopResponse response = weServer.sendChannelMessage(amopCommonArgs, timeOut);
         logger.info("direct route response, seq : {}, errorCode : {}, body : {}",
             response.getMessageId(),
