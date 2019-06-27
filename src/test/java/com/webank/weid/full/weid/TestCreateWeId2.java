@@ -44,6 +44,7 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.engine.BaseEngine;
 
 /**
  * a parametric createWeId method for testing WeIdService.
@@ -288,9 +289,9 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
 
-        MockUp<BaseService> mockTest = new MockUp<BaseService>() {
+        MockUp<BaseEngine> mockTest = new MockUp<BaseEngine>() {
             @Mock
-            public Contract reloadContract(String contractAddress, String privateKey, Class<?> cls)
+            public <T> T reloadContract(String contractAddress, String privateKey, Class<T> cls)
                 throws PrivateKeyIllegalException {
 
                 throw new PrivateKeyIllegalException();
