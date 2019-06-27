@@ -45,6 +45,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.CptController;
 import com.webank.weid.contract.v1.CptController.RegisterCptRetLogEventResponse;
+import com.webank.weid.contract.v1.CptController.UpdateCptRetLogEventResponse;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
@@ -96,7 +97,32 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             transactionReceipt
         );
     }
+    
+    /**
+     * Verify Update CPT related events.
+     *
+     * @param transactionReceipt the TransactionReceipt
+     * @return the ErrorCode
+     */
+    public static ResponseData<CptBaseInfo> resolveUpdateCptEvents(
+        TransactionReceipt transactionReceipt) {
+        List<UpdateCptRetLogEventResponse> event = CptController.getUpdateCptRetLogEvents(
+            transactionReceipt
+        );
 
+        if (CollectionUtils.isEmpty(event)) {
+            logger.error("[updateCpt] event is empty");
+            return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
+        }
+
+        return getResultByResolveEvent(
+            event.get(0).retCode,
+            event.get(0).cptId,
+            event.get(0).cptVersion,
+            transactionReceipt
+        );
+    }
+    
     /**
      * Resolve CPT Event.
      *
@@ -169,6 +195,8 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
         TransactionReceipt receipt;
         try {
+            CptController cptController =
+                reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             receipt = cptController.updateCpt(
                 DataToolUtils.intToUint256(cptId),
                 new Address(address),
@@ -179,8 +207,11 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getR(),
                 rsvSignature.getS()
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            return resolveRegisterCptEvents(receipt);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            return resolveUpdateCptEvents(receipt);
+        } catch (TimeoutException e) {
+            logger.error("[updateCpt] transaction execute with timeout exception. ", e);
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
             logger.error("[updateCpt] transaction execute with exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
@@ -197,12 +228,12 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
 
-//	        reloadContract(weIdPrivateKey.getPrivateKey());
         // the case to update a CPT. Requires a valid CPT ID
 //	        	engine.
         TransactionReceipt receipt;
         try {
-
+            CptController cptController =
+                reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             // the case to register a CPT with a pre-set CPT ID
             receipt = cptController.registerCpt(
                 DataToolUtils.intToUint256(cptId),
@@ -216,7 +247,10 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
             return resolveRegisterCptEvents(receipt);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (TimeoutException e) {
+            logger.error("[updateCpt] transaction execute with timeout exception. ", e);
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
             logger.error("[updateCpt] transaction execute with exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
@@ -235,6 +269,8 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
         TransactionReceipt receipt;
         try {
+            CptController cptController =
+                reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             // the case to register a CPT with a pre-set CPT ID
             receipt = cptController.registerCpt(
                 new Address(address),
@@ -247,7 +283,10 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
             return resolveRegisterCptEvents(receipt);
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+        } catch (TimeoutException e) {
+            logger.error("[updateCpt] transaction execute with timeout exception. ", e);
+            return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
             logger.error("[updateCpt] transaction execute with exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
