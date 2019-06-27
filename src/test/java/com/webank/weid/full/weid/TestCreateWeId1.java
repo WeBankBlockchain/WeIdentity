@@ -26,10 +26,8 @@ import java.util.concurrent.Future;
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
@@ -46,8 +44,6 @@ import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.RawTransactionService;
 import com.webank.weid.service.impl.RawTransactionServiceImpl;
-import com.webank.weid.util.TransactionUtils;
-import com.webank.weid.util.WeIdUtils;
 
 /**
  * non parametric createWeId method for testing WeIdService.
@@ -69,11 +65,6 @@ public class TestCreateWeId1 extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
-        Transaction transaction = TransactionUtils
-            .getTransaction(response.getTransactionInfo());
-        Assert.assertNotNull(transaction);
-        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getFrom())));
-        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getTo())));
     }
 
     /**

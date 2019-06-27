@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.CptController;
+import com.webank.weid.contract.v2.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.contract.v2.CptController.UpdateCptRetLogEventResponse;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -74,6 +75,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         List<byte[]> byteArray = new ArrayList<>();
         TransactionReceipt transactionReceipt;
         try {
+            CptController cptController =
+                reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             transactionReceipt = cptController.registerCpt(
                 address,
                 DataToolUtils.listToListBigInteger(
@@ -91,7 +94,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS().getValue()
             ).send();
 
-            return processEventLog(transactionReceipt);
+            return processUpdateEventLog(cptController, transactionReceipt);
         } catch (Exception e) {
             logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId);
             return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
@@ -110,6 +113,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
         TransactionReceipt transactionReceipt;
         try {
+            CptController cptController =
+                reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             transactionReceipt = cptController.registerCpt(
                 BigInteger.valueOf(cptId),
                 address,
@@ -128,7 +133,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS().getValue()
             ).send();
 
-            return processEventLog(transactionReceipt);
+            return processRegisterEventLog(cptController, transactionReceipt);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed. exception message: ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
@@ -148,6 +153,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         List<byte[]> byteArray = new ArrayList<>();
         TransactionReceipt transactionReceipt;
         try {
+            CptController cptController =
+                reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             transactionReceipt = cptController.registerCpt(
                 address,
                 DataToolUtils.listToListBigInteger(
@@ -165,7 +172,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS().getValue()
             ).send();
 
-            return processEventLog(transactionReceipt);
+            return processRegisterEventLog(cptController, transactionReceipt);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed. exception message: ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
@@ -176,8 +183,28 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      * @param transactionReceipt
      * @return
      */
-    private ResponseData<CptBaseInfo> processEventLog(TransactionReceipt transactionReceipt) {
+    private ResponseData<CptBaseInfo> processUpdateEventLog(CptController cptController, TransactionReceipt transactionReceipt) {
         List<UpdateCptRetLogEventResponse> event = cptController.getUpdateCptRetLogEvents(
+            transactionReceipt
+        );
+        if (CollectionUtils.isEmpty(event)) {
+            return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
+        }
+
+        return TransactionUtils.getResultByResolveEvent(
+            event.get(0).retCode,
+            event.get(0).cptId,
+            event.get(0).cptVersion,
+            transactionReceipt
+        );
+    }
+    
+    /**
+     * @param transactionReceipt
+     * @return
+     */
+    private ResponseData<CptBaseInfo> processRegisterEventLog(CptController cptController, TransactionReceipt transactionReceipt) {
+        List<RegisterCptRetLogEventResponse> event = cptController.getRegisterCptRetLogEvents(
             transactionReceipt
         );
         if (CollectionUtils.isEmpty(event)) {
