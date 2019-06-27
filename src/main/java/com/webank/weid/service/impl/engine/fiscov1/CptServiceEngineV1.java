@@ -64,12 +64,12 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
     private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV1.class);
 
     private static CptController cptController;
-    
+
     public CptServiceEngineV1() {
-    	if(cptController == null) {
-    		
-    		cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
-    	}
+        if (cptController == null) {
+
+            cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+        }
     }
 
     /**
@@ -217,7 +217,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
             return resolveRegisterCptEvents(receipt);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-        	logger.error("[updateCpt] transaction execute with exception. ", e);
+            logger.error("[updateCpt] transaction execute with exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
@@ -228,7 +228,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
     @Override
     public ResponseData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
         RsvSignature rsvSignature, String privateKey) {
-    	
+
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
@@ -248,7 +248,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
             return resolveRegisterCptEvents(receipt);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-        	logger.error("[updateCpt] transaction execute with exception. ", e);
+            logger.error("[updateCpt] transaction execute with exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }

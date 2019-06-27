@@ -83,12 +83,6 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      */
     private static WeIdContract weIdContract;
 
-    public WeIdServiceEngineV2() {
-    	
-    	if(weIdContract==null) {
-    		weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
-    	}
-    }
     static {
         // initialize the event topic
         topicMap = new HashMap<String, String>();
@@ -97,6 +91,13 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
+    }
+
+    public WeIdServiceEngineV2() {
+
+        if (weIdContract == null) {
+            weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
+        }
     }
 
     private static ResolveEventLogResult resolveAttributeEvent(
@@ -361,7 +362,6 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             }
 
             resolveTransaction(weId, latestBlockNumber, result);
-//	            responseData.setResult(result);
             return new ResponseData<WeIdDocument>(result, ErrorCode.SUCCESS);
         } catch (InterruptedException | ExecutionException e) {
             logger.error("Set weId service failed. Error message :{}", e);
@@ -387,7 +387,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      */
     @Override
     public ResponseData<Boolean> createWeId(String weAddress, String publicKey, String privateKey) {
-    	
+
         String auth = new StringBuffer()
             .append(publicKey)
             .append(WeIdConstant.SEPARATOR)
@@ -410,7 +410,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
                 logger.error(
                     "The input private key does not match the current weid, operation of "
                         + "modifying weid is not allowed. we address is {}",
-                        weAddress
+                    weAddress
                 );
                 return new ResponseData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
             }

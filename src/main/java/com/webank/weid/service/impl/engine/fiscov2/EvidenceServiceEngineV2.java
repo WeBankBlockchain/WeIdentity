@@ -47,9 +47,9 @@ import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 
 public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServiceEngine {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV2.class);
-    
+
     @Override
     public ResponseData<String> createEvidence(
         Sign.SignatureData sigData,
@@ -69,14 +69,14 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             List<String> signer = new ArrayList<>();
             ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
             signer.add(Keys.getAddress(keyPair));
-            
-            EvidenceFactory evidenceFactory = 
+
+            EvidenceFactory evidenceFactory =
                 reloadContract(
                     fiscoConfig.getEvidenceAddress(),
                     privateKey,
                     EvidenceFactory.class
                 );
-            TransactionReceipt receipt = 
+            TransactionReceipt receipt =
                 evidenceFactory.createEvidence(
                     hashAttributesByte,
                     signer,
@@ -85,14 +85,15 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                     BigInteger.valueOf(sigData.getV()),
                     extraValueListByte
                 ).send();
-    
+
             TransactionInfo info = new TransactionInfo(receipt);
             List<CreateEvidenceLogEventResponse> eventResponseList =
                 evidenceFactory.getCreateEvidenceLogEvents(receipt);
             CreateEvidenceLogEventResponse event = eventResponseList.get(0);
-    
+
             if (event != null) {
-                ErrorCode innerResponse = verifyCreateEvidenceEvent(event.retCode.intValue(), event.addr);
+                ErrorCode innerResponse = verifyCreateEvidenceEvent(event.retCode.intValue(),
+                    event.addr);
                 if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
                     return new ResponseData<>(StringUtils.EMPTY, innerResponse, info);
                 }
@@ -109,7 +110,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
     }
-    
+
     @Override
     public ResponseData<EvidenceInfo> getInfo(String evidenceAddress) {
         try {

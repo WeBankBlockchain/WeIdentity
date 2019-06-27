@@ -68,22 +68,25 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
     private static SpecificIssuerController specificIssuerController;
 
     public AuthorityIssuerEngineV1() {
-    	
-    	if(authorityIssuerController == null) {
-    		authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(), AuthorityIssuerController.class);
-    	}
-    	if(specificIssuerController == null) {
-    		specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(), SpecificIssuerController.class);
-    	}
+
+        if (authorityIssuerController == null) {
+            authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
+                AuthorityIssuerController.class);
+        }
+        if (specificIssuerController == null) {
+            specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(),
+                SpecificIssuerController.class);
+        }
     }
+
     /**
      * Use the given private key to send the transaction to call the contract.
      *
      * @param privateKey the private key
      */
     private static AuthorityIssuerController reloadAuthorityIssuerContract(String privateKey) {
-    	AuthorityIssuerController authorityIssuerController = (AuthorityIssuerController) reloadContract(
-        		fiscoConfig.getIssuerAddress(),
+        AuthorityIssuerController authorityIssuerController = (AuthorityIssuerController) reloadContract(
+            fiscoConfig.getIssuerAddress(),
             privateKey,
             AuthorityIssuerController.class
         );
@@ -91,14 +94,14 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
     }
 
     private static SpecificIssuerController reloadSpecificIssuerContract(String privateKey) {
-    	SpecificIssuerController specificIssuerController = (SpecificIssuerController) reloadContract(
-        	fiscoConfig.getSpecificIssuerAddress(),
+        SpecificIssuerController specificIssuerController = (SpecificIssuerController) reloadContract(
+            fiscoConfig.getSpecificIssuerAddress(),
             privateKey,
             SpecificIssuerController.class
         );
         return specificIssuerController;
     }
-    
+
     /**
      * Verify Authority Issuer related events.
      *
@@ -143,7 +146,8 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
                 .getAccValue()
                 .getBytes(StandardCharsets.UTF_8)
             );
-            AuthorityIssuerController authorityIssuerController = reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
+            AuthorityIssuerController authorityIssuerController = reloadAuthorityIssuerContract(
+                args.getWeIdPrivateKey().getPrivateKey());
             Future<TransactionReceipt> future = authorityIssuerController.addAuthorityIssuer(
                 addr,
                 DataToolUtils.stringArrayToBytes32StaticArray(stringAttributes),
@@ -185,7 +189,8 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
         String weId = args.getWeId();
         Address addr = new Address(WeIdUtils.convertWeIdToAddress(weId));
         try {
-            AuthorityIssuerController authorityIssuerController = reloadAuthorityIssuerContract(args.getWeIdPrivateKey().getPrivateKey());
+            AuthorityIssuerController authorityIssuerController = reloadAuthorityIssuerContract(
+                args.getWeIdPrivateKey().getPrivateKey());
             Future<TransactionReceipt> future = authorityIssuerController
                 .removeAuthorityIssuer(addr);
             TransactionReceipt receipt =
@@ -333,7 +338,8 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
     public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress,
         String privateKey) {
         try {
-            SpecificIssuerController specificIssuerController = reloadSpecificIssuerContract(privateKey);
+            SpecificIssuerController specificIssuerController = reloadSpecificIssuerContract(
+                privateKey);
             Future<TransactionReceipt> future = specificIssuerController
                 .removeIssuer(DataToolUtils.stringToBytes32(issuerType),
                     new Address(issuerAddress));
@@ -444,7 +450,8 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
     @Override
     public ResponseData<Boolean> registerIssuerType(String issuerType, String privateKey) {
         try {
-        	SpecificIssuerController specificIssuerController = reloadSpecificIssuerContract(privateKey);
+            SpecificIssuerController specificIssuerController = reloadSpecificIssuerContract(
+                privateKey);
             Future<TransactionReceipt> future = specificIssuerController
                 .registerIssuerType(DataToolUtils.stringToBytes32(issuerType));
             TransactionReceipt receipt =
@@ -471,7 +478,8 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
     public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress,
         String privateKey) {
         try {
-        	SpecificIssuerController specificIssuerController = reloadSpecificIssuerContract(privateKey);
+            SpecificIssuerController specificIssuerController = reloadSpecificIssuerContract(
+                privateKey);
             Future<TransactionReceipt> future = specificIssuerController
                 .addIssuer(DataToolUtils.stringToBytes32(issuerType), new Address(issuerAddress));
             TransactionReceipt receipt =
