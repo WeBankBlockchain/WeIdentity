@@ -59,6 +59,7 @@ import com.webank.weid.util.WeIdUtils;
 
 /**
  * CptServiceEngine calls the authority issuer contract which runs on FISCO BCOS 1.3.x.
+ *
  * @author tonychen 2019年6月25日
  */
 public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
@@ -67,14 +68,9 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
     private static CptController cptController;
 
-    /**
-     * constructor.
-     */
-    public CptServiceEngineV1() {
-        if (cptController == null) {
+    static {
 
-            cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
-        }
+        cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
     }
 
     /**
