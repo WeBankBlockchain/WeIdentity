@@ -113,7 +113,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
 
     private String getEntryptKey(EncodeData encodeData) {
         //说明是当前机构，这个时候不适用于AMOP获取key，而是从本地数据库中获取key
-        if (currentOrgId.equals(encodeData.getOrgId())) {
+        if (fiscoConfig.getCurrentOrgId().equals(encodeData.getOrgId())) {
             //保存秘钥
             ResponseData<String> response = 
                 this.dataDriver.get(TRANSENCRYPTIONDOMAIN, encodeData.getId());
@@ -139,7 +139,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         args.setKeyId(encodeData.getId());
         args.setMessageId(DataToolUtils.getUuId32());
         args.setToOrgId(encodeData.getOrgId());
-        args.setFromOrgId(currentOrgId);
+        args.setFromOrgId(fiscoConfig.getCurrentOrgId());
         ResponseData<GetEncryptKeyResponse> resResponse = 
             amopService.getEncryptKey(encodeData.getOrgId(), args);
         if (resResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
