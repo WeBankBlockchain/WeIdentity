@@ -141,13 +141,13 @@ public class TestVerifyEvidence extends TestBaseServcie {
     @Test
     public void testVerifyEvidenceCase7() {
         Credential credential = copyCredential(evidenceCredential);
-        credential.setExpirationDate(System.currentTimeMillis());
+        credential.setExpirationDate(System.currentTimeMillis() - 5);
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase7 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
         Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH.getCode());
+            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode());
     }
 
     /**

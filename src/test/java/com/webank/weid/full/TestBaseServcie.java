@@ -21,6 +21,7 @@ package com.webank.weid.full;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -47,6 +48,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
+import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
@@ -98,6 +100,12 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
      * parameters needed to create credentials.
      */
     protected static volatile CreateCredentialArgs createCredentialArgs = null;
+    
+    /**
+     * parameters needed to create credentialPojos.
+     */
+    protected static volatile CreateCredentialPojoArgs<Map<String, Object>> 
+        createCredentialPojoArgs = null;
 
     /**
      * parameters needed to register CPT.
@@ -143,6 +151,13 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
             cptBaseInfo = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
             createCredentialArgs.setCptId(cptBaseInfo.getCptId());
         }
+        if (createCredentialPojoArgs == null) {
+            registerCptArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
+            createCredentialPojoArgs =
+                TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
+            cptBaseInfo = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
+            createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
+        }    
     }
 
     /**

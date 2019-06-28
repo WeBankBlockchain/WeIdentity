@@ -19,6 +19,7 @@
 
 package com.webank.weid.suite.transportation.json.impl;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +82,7 @@ public class JsonTransportationImpl
             logger.info("encode by {}.", property.getEncodeType().name());
             // 如果是原文方式，则直接放对象,data为对象类型
             if (property.getEncodeType() == EncodeType.ORIGINAL) {
-                jsonBaseData.setData(object);
+                jsonBaseData.setData(object.toJson());
             } else {
                 // 非原文格式，根据data进行编解码，data为字符串类型
                 // 创建编解码实体对象，对此实体中的data编码操作
@@ -125,7 +126,13 @@ public class JsonTransportationImpl
             }
             //将JSON字符串解析成JsonBaseData对象
             //JsonBaseData jsonBaseData = JsonUtil.jsonStrToObj(JsonBaseData.class, transString);
-            JsonBaseData jsonBaseData = DataToolUtils.deserialize(transString, JsonBaseData.class);
+            String transStringNew = transString;
+            if (DataToolUtils.isValidFromToJson(transString)) {
+                transStringNew = DataToolUtils.removeTagFromToJson(transString);
+            }
+            JsonBaseData jsonBaseData = DataToolUtils.deserialize(
+                transStringNew, 
+                JsonBaseData.class);
             //检查JsonBaseData合法性
             ErrorCode errorCode = checkJsonBaseData(jsonBaseData);
             if (errorCode != ErrorCode.SUCCESS) {
@@ -161,8 +168,15 @@ public class JsonTransportationImpl
                     .decode(encodeData);
             //T object =
             //      (T) DataToolUtils.jsonStrToObj(clazz, presentationEStr);
-            T object =
-                (T) DataToolUtils.deserialize(presentationEStr, clazz);
+            String presentationEJson = DataToolUtils.convertUtcToTimestamp(presentationEStr);
+            T object = null;
+            Method method = getFromJsonMethod(clazz);
+            if (method == null) {
+                //调用工具的反序列化 
+                object = (T) DataToolUtils.deserialize(presentationEJson, clazz);
+            } else  {
+                object = (T) method.invoke(null, presentationEJson);
+            }
             logger.info("JsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(object, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
