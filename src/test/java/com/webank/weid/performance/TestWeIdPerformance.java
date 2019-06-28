@@ -47,7 +47,7 @@ public class TestWeIdPerformance extends BaseTest {
     @Test
     public void testGetWeIdDom() throws IOException {
 
-        logger.info("blockNumber:{}", this.getBlockNumber());
+        logger.info("blockNumber:{}", getBlockNumber());
 
         CreateWeIdDataResult weIdResult = this.createWeId();
         logger.info("WeIdentity DID:{}", weIdResult.getWeId());
@@ -60,7 +60,7 @@ public class TestWeIdPerformance extends BaseTest {
                 "https://weidentity.webank.com/endpoint/8377464" + i
             );
         }
-        logger.info("blockNumber:{}", this.getBlockNumber());
+        logger.info("blockNumber:{}", getBlockNumber());
 
         long startTime = System.currentTimeMillis();
 
