@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid;
@@ -30,12 +30,14 @@ import org.junit.Before;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.rpc.AuthorityIssuerService;
 import com.webank.weid.rpc.CptService;
+import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AuthorityIssuerServiceImpl;
 import com.webank.weid.service.impl.CptServiceImpl;
+import com.webank.weid.service.impl.CredentialPojoServiceImpl;
 import com.webank.weid.service.impl.CredentialServiceImpl;
 import com.webank.weid.service.impl.EvidenceServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
@@ -51,6 +53,7 @@ public abstract class BaseTest extends BaseService {
     protected CptService cptService;
     protected WeIdService weIdService;
     protected CredentialService credentialService;
+    protected CredentialPojoService credentialPojoService;
     protected EvidenceService evidenceService;
 
     /**
@@ -69,8 +72,9 @@ public abstract class BaseTest extends BaseService {
         weIdService = new WeIdServiceImpl();
         credentialService = new CredentialServiceImpl();
         evidenceService = new EvidenceServiceImpl();
-
-        privateKey = TestBaseUtil.readPrivateKeyFromFile("privateKey.txt");
+        credentialPojoService = new CredentialPojoServiceImpl();
+        
+        privateKey = TestBaseUtil.readPrivateKeyFromFile("ecdsa_key");
 
         testInit();
     }
@@ -86,7 +90,8 @@ public abstract class BaseTest extends BaseService {
         weIdService = null;
         credentialService = null;
         evidenceService = null;
-
+        credentialPojoService = null;
+        
         testFinalize();
     }
 
@@ -96,20 +101,5 @@ public abstract class BaseTest extends BaseService {
 
     public void testFinalize() {
         Assert.assertTrue(true);
-    }
-
-    /**
-     * get current blockNumber.
-     *
-     * @return return blockNumber
-     * @throws IOException possible exceptions to sending transactions
-     */
-    public int getBlockNumber() throws IOException {
-        Response<String> response = super.getWeb3j().ethBlockNumber().send();
-        if (response instanceof EthBlockNumber) {
-            EthBlockNumber ethBlockNumber = (EthBlockNumber) response;
-            return ethBlockNumber.getBlockNumber().intValue();
-        }
-        return 0;
     }
 }

@@ -80,3 +80,7 @@ Control）。此外，在一个不需要token的区块链世界里，tx.origin�
 详见\ `如何运行单元测试 <./how-to-run-unit-test.html>`__\ 。
 
 --------------
+
+- **如何在无Internet外网连接状态下部署WeIdentity？**
+
+详见\ `网络访问受限时的部署方法 <./how-to-run-without-internet.html>`__\ 。
