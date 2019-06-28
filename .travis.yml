@@ -28,8 +28,6 @@ cache:
 
 before_install:
   - gradle wrapper
-  - chmod +x install.sh
-  - ./install.sh
 
 jobs:
   include:
