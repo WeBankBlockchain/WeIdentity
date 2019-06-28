@@ -4,9 +4,9 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/WeBankFinTech/weid-java-sdk/badge)](https://www.codefactor.io/repository/github/WeBankFinTech/weid-java-sdk)
 [![License](https://img.shields.io/badge/license-GNU%20LGPL%20v3.0-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Build Status](https://travis-ci.org/WeBankFinTech/weid-java-sdk.svg?branch=master)](https://travis-ci.org/WeBankFinTech/weid-java-sdk)
-[![codecov](https://codecov.io/gh/WeBankFinTech/weidentity-java-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/WeBankFinTech/weid-java-sdk)
-[![Maven Central](https://img.shields.io/maven-central/v/com.webank/weidentity-java-sdk.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%22weidentity-java-sdk%22)
-[![Latest release](https://img.shields.io/github/release/WeBankFinTech/weid-java-sdk.svg)](https://github.com/WeBankFinTech/weidentity-java-sdk/releases/latest)
+[![codecov](https://codecov.io/gh/WeBankFinTech/weid-java-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/WeBankFinTech/weid-java-sdk)
+[![Maven Central](https://img.shields.io/maven-central/v/com.webank/weid-java-sdk.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%weid-java-sdk%22)
+[![Latest release](https://img.shields.io/github/release/WeBankFinTech/weid-java-sdk.svg)](https://github.com/WeBankFinTech/weid-java-sdk/releases/latest)
 
 ---
 
@@ -22,7 +22,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 
 ## 关于
 
-* WeIdentity Project对应的合约代码。需配合FISCO-BCOS和weidentity-java-sdk使用，更多详细信息详见: [WeIdentity Project](https://github.com/WeBankFinTech/WeIdentity)
+* WeIdentity Project对应的合约代码。需配合FISCO-BCOS和weid-java-sdk使用，更多详细信息详见: [WeIdentity Project](https://github.com/WeBankFinTech/WeIdentity)
 
 ## 联系我们
 
