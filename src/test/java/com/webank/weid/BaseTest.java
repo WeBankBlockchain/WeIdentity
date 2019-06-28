@@ -74,7 +74,7 @@ public abstract class BaseTest extends BaseService {
         evidenceService = new EvidenceServiceImpl();
         credentialPojoService = new CredentialPojoServiceImpl();
         
-        privateKey = TestBaseUtil.readPrivateKeyFromFile("privateKey.txt");
+        privateKey = TestBaseUtil.readPrivateKeyFromFile("ecdsa_key");
 
         testInit();
     }
