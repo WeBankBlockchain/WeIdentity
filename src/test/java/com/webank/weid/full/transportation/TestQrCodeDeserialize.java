@@ -57,6 +57,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
     @Override
     public synchronized void testInit() {
         mockMysqlDriver();
+        super.testInit();
         if (presentation == null) {
             presentation = this.getPresentationE();
             original_transString = 
@@ -82,7 +83,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
                 .deserialize(response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
-        Assert.assertEquals(presentation, wrapperRes.getResult());
+        Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
     }
     
     /**
@@ -100,7 +101,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
                 .deserialize(response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
-        Assert.assertEquals(presentation, wrapperRes.getResult());
+        Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
     }
 
     
