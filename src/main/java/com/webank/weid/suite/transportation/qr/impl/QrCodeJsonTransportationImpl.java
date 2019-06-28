@@ -155,16 +155,17 @@ public class QrCodeJsonTransportationImpl
             //将解压出来的数据进行反序列化成原数据对象
             //T presentation = JsonUtil.jsonStrToObj(clazz, data);
             String presentationEStr = DataToolUtils.convertUtcToTimestamp(data);
+            String presentationEStrNew = presentationEStr;
             if (DataToolUtils.isValidFromToJson(presentationEStr)) {
-                presentationEStr = DataToolUtils.removeTagFromToJson(presentationEStr);
+                presentationEStrNew = DataToolUtils.removeTagFromToJson(presentationEStr);
             }
             T object = null;
             Method method = getFromJsonMethod(clazz);
             if (method == null) {
                 //调用工具的反序列化 
-                object = (T) DataToolUtils.deserialize(presentationEStr, clazz);
+                object = (T) DataToolUtils.deserialize(presentationEStrNew, clazz);
             } else  {
-                object = (T) method.invoke(null, presentationEStr);
+                object = (T) method.invoke(null, presentationEStrNew);
             }
             logger.info("QrCodeJsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(object, ErrorCode.SUCCESS);
