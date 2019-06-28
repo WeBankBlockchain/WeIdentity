@@ -19,7 +19,7 @@ WeIdentity-Java-SDK及其部署工具默认需要连接到Internet，以访问Ma
 --------------
 
 如果您没有自建仓库的打算，或者您的部署环境无法连接到除了区块链节点以外的Internet环境，那么下面将介绍从Java-SDK 1.3.0
-开始，新引入的离线编译功能。此功能可以支持您在无Internet环境下WeIdentity-Java-SDK及部署工具build-tools的编译与部署。
+开始，新引入的离线编译功能。此功能可以支持您在无Internet环境下weid-java-sdk及部署工具build-tools的编译与部署。
 
 前提条件
 ~~~~~~~~
