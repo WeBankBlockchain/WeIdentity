@@ -13,7 +13,7 @@ JAVA SDK 安装部署文档`_\ 安装部署WeIdentity。
 流程
 ~~~~
 
-下载源代码后，以 ``weidentity-java-sdk`` 根目录为起点：
+下载源代码后，以 ``weid-java-sdk`` 根目录为起点：
 
 1, 进入dist/conf目录。
 
