@@ -10,9 +10,9 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 """"""""""
 
 
-* `WeIdentity JAVA SDK <https://github.com/WeBankFinTech/weidentity-java-sdk.git>`_\ :raw-html-m2r:`<br>`
+* `WeIdentity JAVA SDK <https://github.com/WeBankFinTech/weid-java-sdk.git>`_\ :raw-html-m2r:`<br>`
   建议下载最新版本的release
-* `WeIdentity 智能合约 <https://github.com/WeBankFinTech/weidentity-contract.git>`_\ :raw-html-m2r:`<br>`
+* `WeIdentity 智能合约 <https://github.com/WeBankFinTech/weid-contract.git>`_\ :raw-html-m2r:`<br>`
   建议下载最新版本的release
 
 2.拷贝「WeIdentity智能合约」源码到特定目录
@@ -22,7 +22,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 
 .. code-block:: shell
 
-      cd weidentity-java-sdk/build-tools/contracts/
+      cd weid-java-sdk/build-tools/contracts/
 
 将您刚下载的「WeIdentity智能合约」源码文件放至该目录即可。
 
