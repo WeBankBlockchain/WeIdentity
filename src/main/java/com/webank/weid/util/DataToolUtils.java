@@ -1488,15 +1488,15 @@ public final class DataToolUtils {
     }
     
     /**
-     * convert timestamp to UTC of presentationJson string.
-     * @param presentation presentationJson
-     * @return presentationJson after convert
+     * convert timestamp to UTC of json string.
+     * @param jsonString json string
+     * @return timestampToUtcString
      */
-    public static String convertTimestampToUtc(String presentation) { 
-        String presentationJson;
+    public static String convertTimestampToUtc(String jsonString) { 
+        String timestampToUtcString;
         try {
-            presentationJson = replaceJsonObj(
-                JSONObject.parseObject(presentation),
+            timestampToUtcString = dealObjectOfConvertUtcAndLong(
+                JSONObject.parseObject(jsonString),
                 CONVERT_UTC_LONG_KEYLIST, 
                 TO_JSON
             ).toString();
@@ -1504,7 +1504,7 @@ public final class DataToolUtils {
             logger.error("replaceJsonObj exception.", e);
             throw new DataTypeCastException(e);
         }
-        return presentationJson;
+        return timestampToUtcString;
     }
     
     /**
@@ -1515,7 +1515,7 @@ public final class DataToolUtils {
     public static String convertUtcToTimestamp(String jsonString) { 
         String utcToTimestampString;
         try {
-            utcToTimestampString = replaceJsonObj(
+            utcToTimestampString = dealObjectOfConvertUtcAndLong(
                 JSONObject.parseObject(jsonString), 
                 CONVERT_UTC_LONG_KEYLIST, 
                 FROM_JSON
@@ -1527,8 +1527,10 @@ public final class DataToolUtils {
         return utcToTimestampString;
     }
     
-    private static JSONObject replaceJsonObj(JSONObject jsonObj, List<String> list, String type) 
-        throws ParseException { 
+    private static JSONObject dealObjectOfConvertUtcAndLong(
+        JSONObject jsonObj, 
+        List<String> list, 
+        String type) throws ParseException { 
         JSONObject resJson = new JSONObject(); 
         Set<String> keySet = jsonObj.keySet(); 
         for (String key : keySet) { 
@@ -1538,11 +1540,11 @@ public final class DataToolUtils {
                 if (key.equals(KEY_CLAIM)) {
                     resJson.put(key, obj); 
                 } else {
-                    resJson.put(key, replaceJsonObj((JSONObject)obj, list, type));
+                    resJson.put(key, dealObjectOfConvertUtcAndLong((JSONObject)obj, list, type));
                 }
             } else if (obj instanceof JSONArray) {
                 //JSONArray 
-                resJson.put(key, replaceJsonArr((JSONArray)obj, list, type)); 
+                resJson.put(key, dealArrayOfConvertUtcAndLong((JSONArray)obj, list, type)); 
             } else {
                 if (list.contains(key)) {
                     if (TO_JSON.equals(type)) {
@@ -1571,13 +1573,15 @@ public final class DataToolUtils {
         return resJson; 
     } 
 
-    private static JSONArray replaceJsonArr(JSONArray jsonArr, List<String> list, String type) 
-        throws ParseException { 
+    private static JSONArray dealArrayOfConvertUtcAndLong(
+        JSONArray jsonArr, 
+        List<String> list, 
+        String type) throws ParseException { 
         JSONArray resJson = new JSONArray(); 
         for (int i = 0; i < jsonArr.size(); i++) { 
             Object jsonObj = jsonArr.get(i); 
             if (jsonObj instanceof JSONObject) {
-                resJson.add(replaceJsonObj((JSONObject)jsonObj, list, type)); 
+                resJson.add(dealObjectOfConvertUtcAndLong((JSONObject)jsonObj, list, type)); 
             } else {
                 resJson.add(jsonObj); 
             }
