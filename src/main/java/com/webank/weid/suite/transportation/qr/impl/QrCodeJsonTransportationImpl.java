@@ -19,6 +19,7 @@
 
 package com.webank.weid.suite.transportation.qr.impl;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -153,9 +154,20 @@ public class QrCodeJsonTransportationImpl
                     .decode(encodeData);
             //将解压出来的数据进行反序列化成原数据对象
             //T presentation = JsonUtil.jsonStrToObj(clazz, data);
-            T presentation = DataToolUtils.deserialize(data, clazz);
+            String presentationEStr = DataToolUtils.convertUtcToTimestamp(data);
+            if (DataToolUtils.isValidFromToJson(presentationEStr)) {
+                presentationEStr = DataToolUtils.removeTagFromToJson(presentationEStr);
+            }
+            T object = null;
+            Method method = getFromJsonMethod(clazz);
+            if (method == null) {
+                //调用工具的反序列化 
+                object = (T) DataToolUtils.deserialize(presentationEStr, clazz);
+            } else  {
+                object = (T) method.invoke(null, presentationEStr);
+            }
             logger.info("QrCodeJsonTransportationImpl deserialization finished.");
-            return new ResponseData<T>(presentation, ErrorCode.SUCCESS);
+            return new ResponseData<T>(object, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("QrCodeJsonTransportationImpl deserialization due to base error.", e);
             return new ResponseData<T>(null, e.getErrorCode());
