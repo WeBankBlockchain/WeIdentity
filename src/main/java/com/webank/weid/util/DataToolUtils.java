@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.util;
@@ -43,19 +43,24 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
 import javax.imageio.ImageIO;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -140,7 +145,24 @@ public final class DataToolUtils {
     // LOGO高度
     private static final int LOGO_HEIGHT = 60;
 
+    private static final int radix = 10;
+    
+    private static final String TO_JSON = "toJson";
+    
+    private static final String FROM_JSON = "fromJson";
 
+    private static final String KEY_CREATED = "created";
+    
+    private static final String KEY_ISSUANCEDATE = "issuanceDate";
+    
+    private static final String KEY_EXPIRATIONDATE = "expirationDate";
+    
+    private static final String KEY_CLAIM = "claim";
+    
+    private static final String KEY_FROM_TOJSON = "$from";
+    
+    private static final List<String> CONVERT_UTC_LONG_KEYLIST = new ArrayList<>();
+        
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     //private static final ObjectWriter OBJECT_WRITER;
@@ -161,6 +183,10 @@ public final class DataToolUtils {
         OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         OBJECT_WRITER_UN_PRETTY_PRINTER = OBJECT_MAPPER.writer();
+        
+        CONVERT_UTC_LONG_KEYLIST.add(KEY_CREATED);
+        CONVERT_UTC_LONG_KEYLIST.add(KEY_ISSUANCEDATE);
+        CONVERT_UTC_LONG_KEYLIST.add(KEY_EXPIRATIONDATE);
 
         //OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
         //OBJECT_READER = OBJECT_MAPPER.reader();
@@ -233,18 +259,24 @@ public final class DataToolUtils {
      * @return class instance
      */
     public static <T> T deserialize(String json, Class<T> clazz) {
+        if (isValidFromToJson(json)) {
+            logger.error("this jsonString is converted by toJson(), "
+                + "please use fromJson() to deserialize it");
+            throw new DataTypeCastException("deserialize json to Object error");
+        }
         Object object = null;
         try {
-            object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));
+            object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));  
         } catch (JsonParseException e) {
             logger.error("JsonParseException when serialize object to json", e);
             throw new DataTypeCastException(e);
         } catch (JsonMappingException e) {
             logger.error("JsonMappingException when serialize object to json", e);
-            new DataTypeCastException(e);
+            throw new DataTypeCastException(e);
         } catch (IOException e) {
             logger.error("IOException when serialize object to json", e);
-        }
+            throw new DataTypeCastException(e);
+        }        
         return (T) object;
     }
 
@@ -591,6 +623,7 @@ public final class DataToolUtils {
         System.arraycopy(signatureData.getS(), 0, serializedSignatureData, 33, 32);
         return serializedSignatureData;
     }
+    
 
     /**
      * The De-Serialization class of Signatures. This is simply a de-concatenation of bytes of the
@@ -624,7 +657,7 @@ public final class DataToolUtils {
         byte valueByte = (byte) v;
         return new Sign.SignatureData(valueByte, r, s);
     }
-
+    
     /**
      * Verify a signature based on the provided raw data, and the WeID Document from chain. This
      * will traverse each public key in the WeID Document and fetch all keys which belongs to the
@@ -995,6 +1028,138 @@ public final class DataToolUtils {
     }
 
     /**
+     * string to byte.
+     *
+     * @param value stringData
+     * @return byte[]
+     */
+    public static byte[] stringToByteArray(String value) {
+        if (StringUtils.isBlank(value)) {
+            return new byte[1];
+        }
+        return value.getBytes(StandardCharsets.UTF_8);
+    }
+
+    /**
+     * string to byte32.
+     *
+     * @param value stringData
+     * @return byte[]
+     */
+    public static byte[] stringToByte32Array(String value) {
+        if (StringUtils.isBlank(value)) {
+            return new byte[32];
+        }
+
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
+        byte[] newBytes = new byte[32];
+
+        System.arraycopy(bytes, 0, newBytes, 0, bytes.length);
+        return newBytes;
+    }
+
+    /**
+     * string to byte32List.
+     *
+     * @param data stringData
+     * @param size size of byte32List
+     * @return data
+     */
+    public static List<byte[]> stringToByte32ArrayList(String data, int size) {
+        List<byte[]> byteList = new ArrayList<>();
+
+        if (StringUtils.isBlank(data)) {
+            for (int i = 0; i < size; i++) {
+                byteList.add(new byte[32]);
+            }
+            return byteList;
+        }
+
+        byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
+
+        if (dataBytes.length <= WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH) {
+            byte[] newBytes = new byte[32];
+            System.arraycopy(dataBytes, 0, newBytes, 0, dataBytes.length);
+            byteList.add(newBytes);
+        } else {
+            byteList = splitBytes(dataBytes, size);
+        }
+
+        if (byteList.size() < size) {
+            List<byte[]> addList = new ArrayList<>();
+            for (int i = 0; i < size - byteList.size(); i++) {
+                addList.add(new byte[32]);
+            }
+            byteList.addAll(addList);
+        }
+        return byteList;
+    }
+
+    private static synchronized List<byte[]> splitBytes(byte[] bytes, int size) {
+        List<byte[]> byteList = new ArrayList<>();
+        double splitLength =
+            Double.parseDouble(WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH + "");
+        int arrayLength = (int) Math.ceil(bytes.length / splitLength);
+        byte[] result = new byte[arrayLength];
+
+        int from = 0;
+        int to = 0;
+
+        for (int i = 0; i < arrayLength; i++) {
+            from = (int) (i * splitLength);
+            to = (int) (from + splitLength);
+
+            if (to > bytes.length) {
+                to = bytes.length;
+            }
+
+            result = Arrays.copyOfRange(bytes, from, to);
+            if (result.length < size) {
+                byte[] newBytes = new byte[32];
+                System.arraycopy(result, 0, newBytes, 0, result.length);
+                byteList.add(newBytes);
+            } else {
+                byteList.add(result);
+            }
+        }
+        return byteList;
+    }
+
+    /**
+     * convert bytesArrayList to Bytes32ArrayList.
+     * @param list byte size
+     * @param size size
+     * @return result
+     */
+    public static List<byte[]> bytesArrayListToBytes32ArrayList(List<byte[]> list, int size) {
+
+        List<byte[]> bytesList = new ArrayList<>();
+        if (list.isEmpty()) {
+            for (int i = 0; i < size; i++) {
+                bytesList.add(new byte[32]);
+            }
+            return bytesList;
+        }
+
+        for (byte[] bytes : list) {
+            if (bytes.length <= WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH) {
+                byte[] newBytes = new byte[32];
+                System.arraycopy(bytes, 0, newBytes, 0, bytes.length);
+                bytesList.add(newBytes);
+            }
+        }
+
+        if (bytesList.size() < size) {
+            List<byte[]> addList = new ArrayList<>();
+            for (int i = 0; i < size - bytesList.size(); i++) {
+                addList.add(new byte[32]);
+            }
+            bytesList.addAll(addList);
+        }
+        return bytesList;
+    }
+
+    /**
      * Bytes 32 to string without trim.
      *
      * @param bytes32 the bytes 32
@@ -1192,6 +1357,28 @@ public final class DataToolUtils {
     }
 
     /**
+     * convert list to BigInteger list.
+     * @param list BigInteger list
+     * @param size size
+     * @return result
+     */
+    public static List<BigInteger> listToListBigInteger(List<BigInteger> list, int size) {
+        List<BigInteger> bigIntegerList = new ArrayList<>();
+        for (BigInteger bs : list) {
+            bigIntegerList.add(bs);
+        }
+
+        List<BigInteger> addList = new ArrayList<>();
+        if (bigIntegerList.size() < size) {
+            for (int i = 0; i < size - bigIntegerList.size(); i++) {
+                addList.add(BigInteger.ZERO);
+            }
+            bigIntegerList.addAll(addList);
+        }
+        return bigIntegerList;
+    }
+    
+    /**
      * Generate Default CPT Json Schema based on a given CPT ID.
      *
      * @param cptId the CPT ID
@@ -1249,4 +1436,232 @@ public final class DataToolUtils {
         cptSchemaMap.put("patternProperties", patternMap);
         return DataToolUtils.objToJsonStrWithNoPretty(cptSchemaMap);
     }
+    
+    /**
+     * convert byte32List to String.
+     * @param bytesList list
+     * @param size size
+     * @return reuslt
+     */
+    public static synchronized String byte32ListToString(List<byte[]> bytesList, int size) {
+        if (bytesList.isEmpty()) {
+            return "";
+        }
+
+        int zeroCount = 0;
+        for (int i = 0; i < bytesList.size(); i++) {
+            for (int j = 0; j < bytesList.get(i).length; j++) {
+                if (bytesList.get(i)[j] == 0) {
+                    zeroCount++;
+                }
+            }
+        }
+
+        if (WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH * size - zeroCount == 0) {
+            return "";
+        }
+
+        byte[] newByte = new byte[WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH * size - zeroCount];
+        int index = 0;
+        for (int i = 0; i < bytesList.size(); i++) {
+            for (int j = 0; j < bytesList.get(i).length; j++) {
+                if (bytesList.get(i)[j] != 0) {
+                    newByte[index] = bytesList.get(i)[j];
+                    index++;
+                }
+            }
+        }
+
+        return (new String(newByte)).toString();
+    }
+    
+    /**
+     * Get the current timestamp as the param "created". May be called elsewhere.
+     * @param length length
+     * @return the StaticArray
+     */
+    public static List<BigInteger> getParamCreatedList(int length) {
+        long created = System.currentTimeMillis();
+        List<BigInteger> createdList = new ArrayList<>();
+        createdList.add(BigInteger.valueOf(created));
+        return createdList;
+    }
+    
+    /**
+     * convert timestamp to UTC of json string.
+     * @param jsonString json string
+     * @return timestampToUtcString
+     */
+    public static String convertTimestampToUtc(String jsonString) { 
+        String timestampToUtcString;
+        try {
+            timestampToUtcString = dealObjectOfConvertUtcAndLong(
+                JSONObject.parseObject(jsonString),
+                CONVERT_UTC_LONG_KEYLIST, 
+                TO_JSON
+            ).toString();
+        } catch (ParseException | JSONException e) {
+            logger.error("replaceJsonObj exception.", e);
+            throw new DataTypeCastException(e);
+        }
+        return timestampToUtcString;
+    }
+    
+    /**
+     * convert UTC Date to timestamp of Json string.
+     * @param jsonString presentationJson
+     * @return presentationJson after convert
+     */
+    public static String convertUtcToTimestamp(String jsonString) { 
+        String utcToTimestampString;
+        try {
+            utcToTimestampString = dealObjectOfConvertUtcAndLong(
+                JSONObject.parseObject(jsonString), 
+                CONVERT_UTC_LONG_KEYLIST, 
+                FROM_JSON
+            ).toString();
+        } catch (ParseException | JSONException e) {
+            logger.error("replaceJsonObj exception.", e);
+            throw new DataTypeCastException(e);
+        }
+        return utcToTimestampString;
+    }
+    
+    private static JSONObject dealObjectOfConvertUtcAndLong(
+        JSONObject jsonObj, 
+        List<String> list, 
+        String type) throws ParseException { 
+        JSONObject resJson = new JSONObject(); 
+        Set<String> keySet = jsonObj.keySet(); 
+        for (String key : keySet) { 
+            Object obj = jsonObj.get(key);
+            if (obj instanceof JSONObject) {
+                //JSONObject
+                if (key.equals(KEY_CLAIM)) {
+                    resJson.put(key, obj); 
+                } else {
+                    resJson.put(key, dealObjectOfConvertUtcAndLong((JSONObject)obj, list, type));
+                }
+            } else if (obj instanceof JSONArray) {
+                //JSONArray 
+                resJson.put(key, dealArrayOfConvertUtcAndLong((JSONArray)obj, list, type)); 
+            } else {
+                if (list.contains(key)) {
+                    if (TO_JSON.equals(type)) {
+                        if (isValidLongString(obj.toString())) {
+                            resJson.put(
+                                key, 
+                                DateUtils.convertNoMillisecondTimestampToUtc(
+                                    Long.parseLong(obj.toString())));
+                        } else {
+                            resJson.put(key, obj);
+                        }
+                    } else {
+                        if (DateUtils.isValidDateString(obj.toString())) {
+                            resJson.put(
+                                key, 
+                                DateUtils.convertUtcDateToNoMillisecondTime(obj.toString()));
+                        } else {
+                            resJson.put(key, obj);
+                        }
+                    } 
+                } else {
+                    resJson.put(key, obj);
+                }
+            }
+        }
+        return resJson; 
+    } 
+
+    private static JSONArray dealArrayOfConvertUtcAndLong(
+        JSONArray jsonArr, 
+        List<String> list, 
+        String type) throws ParseException { 
+        JSONArray resJson = new JSONArray(); 
+        for (int i = 0; i < jsonArr.size(); i++) { 
+            Object jsonObj = jsonArr.get(i); 
+            if (jsonObj instanceof JSONObject) {
+                resJson.add(dealObjectOfConvertUtcAndLong((JSONObject)jsonObj, list, type)); 
+            } else {
+                resJson.add(jsonObj); 
+            }
+        } 
+        return resJson; 
+    }
+
+    /**
+     * valid string is a long type.
+     * @param str string
+     * @return result
+     */
+    public static boolean isValidLongString(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+
+        long result = 0;
+        int i = 0; 
+        int len = str.length();
+        long limit = -Long.MAX_VALUE;
+        long multmin;
+        int digit;
+
+        char firstChar = str.charAt(0);
+        if (firstChar <= '0') { 
+            return false;
+        }
+        multmin = limit / radix;
+        while (i < len) {
+            digit = Character.digit(str.charAt(i++), radix);
+            if (digit < 0) {
+                return false;
+            }
+            if (result < multmin) {
+                return false;
+            }
+            result *= radix;
+            if (result < limit + digit) {
+                return false;
+            }
+            result -= digit;
+        }    
+        return true;
+    }
+    
+    /**
+     * valid the json string is converted by toJson().
+     * @param json jsonString
+     * @return result
+     */
+    public static boolean isValidFromToJson(String json) {
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        return jsonObject.containsKey(KEY_FROM_TOJSON);
+    }
+    
+    /**
+     * add tag which the json string is converted by toJson().
+     * @param json jsonString
+     * @return result
+     */
+    public static String addTagFromToJson(String json) {
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        if (!jsonObject.containsKey(KEY_FROM_TOJSON)) {
+            jsonObject.fluentPut(KEY_FROM_TOJSON, TO_JSON);
+        }
+        return jsonObject.toString();
+    }
+    
+    /**
+     * remove tag which the json string is converted by toJson().
+     * @param json jsonString
+     * @return result
+     */
+    public static String removeTagFromToJson(String json) {
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        if (jsonObject.containsKey(KEY_FROM_TOJSON)) {
+            jsonObject.fluentRemove(KEY_FROM_TOJSON);
+        }
+        return jsonObject.toString();
+    }
 }
+

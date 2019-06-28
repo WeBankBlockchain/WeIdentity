@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.full.evidence;
@@ -29,7 +29,6 @@ import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicArray;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,14 +37,12 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.EvidenceFactory;
-import com.webank.weid.contract.EvidenceFactory.CreateEvidenceLogEventResponse;
+import com.webank.weid.contract.v1.EvidenceFactory;
+import com.webank.weid.contract.v1.EvidenceFactory.CreateEvidenceLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.util.TransactionUtils;
-import com.webank.weid.util.WeIdUtils;
 
 /**
  * Test CreateEvidence.
@@ -79,12 +76,6 @@ public class TestCreateEvidence extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(!response.getResult().isEmpty());
-
-        Transaction transaction = TransactionUtils
-            .getTransaction(response.getTransactionInfo());
-        Assert.assertNotNull(transaction);
-        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getFrom())));
-        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getTo())));
     }
 
     /**

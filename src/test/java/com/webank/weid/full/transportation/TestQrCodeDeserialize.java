@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.full.transportation;
@@ -57,6 +57,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
     @Override
     public synchronized void testInit() {
         mockMysqlDriver();
+        super.testInit();
         if (presentation == null) {
             presentation = this.getPresentationE();
             original_transString = 
@@ -82,7 +83,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
                 .deserialize(response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
-        Assert.assertEquals(presentation, wrapperRes.getResult());
+        Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
     }
     
     /**
@@ -100,7 +101,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
                 .deserialize(response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
-        Assert.assertEquals(presentation, wrapperRes.getResult());
+        Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
     }
 
     

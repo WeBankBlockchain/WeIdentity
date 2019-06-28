@@ -1,70 +1,35 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.service.impl;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.EventEncoder;
-import org.bcos.web3j.abi.TypeReference;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.Bool;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.Event;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
-import org.bcos.web3j.protocol.core.methods.response.EthBlock;
-import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
-import org.bcos.web3j.protocol.core.methods.response.Log;
-import org.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.config.ContractConfig;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.WeIdContract;
-import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
-import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
-import com.webank.weid.exception.ResolveAttributeException;
-import com.webank.weid.protocol.base.AuthenticationProperty;
-import com.webank.weid.protocol.base.PublicKeyProperty;
-import com.webank.weid.protocol.base.ServiceProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
@@ -73,13 +38,11 @@ import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.DateUtils;
+import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -93,290 +56,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
      * log4j object, for recording log.
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceImpl.class);
-    /**
-     * Block number for stopping parsing.
-     */
-    private static final int STOP_RESOLVE_BLOCK_NUMBER = 0;
-    /**
-     * The topic map.
-     */
-    private static final HashMap<String, String> topicMap;
-    /**
-     * WeIdentity DID contract object, for calling weIdentity DID contract.
-     */
-    private static WeIdContract weIdContract;
-    /**
-     * WeIdentity DID contract address.
-     */
-    private static String weIdContractAddress;
-
-    static {
-        // initialize the event topic
-        topicMap = new HashMap<String, String>();
-        final Event event =
-            new Event(
-                WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE,
-                Arrays.<TypeReference<?>>asList(new TypeReference<Address>() {
-                }),
-                Arrays.<TypeReference<?>>asList(
-                    new TypeReference<Bytes32>() {
-                    },
-                    new TypeReference<DynamicBytes>() {
-                    },
-                    new TypeReference<Uint256>() {
-                    },
-                    new TypeReference<Int256>() {
-                    })
-            );
-        topicMap.put(
-            EventEncoder.encode(event),
-            WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE
-        );
-    }
-
-    /**
-     * Instantiates a new WeIdentity DID service.
-     */
-    public WeIdServiceImpl() {
-        init();
-    }
-
-    private static void init() {
-
-        // initialize the WeIdentity DID contract
-        ContractConfig config = buildContractConfig();
-        weIdContractAddress = config.getWeIdAddress();
-        weIdContract = (WeIdContract) getContractService(weIdContractAddress, WeIdContract.class);
-    }
 
 
-    private static ResolveEventLogResult resolveAttributeEvent(
-        String weId,
-        TransactionReceipt receipt,
-        WeIdDocument result) {
-
-        List<WeIdAttributeChangedEventResponse> eventlog =
-            WeIdContract.getWeIdAttributeChangedEvents(receipt);
-        ResolveEventLogResult response = new ResolveEventLogResult();
-
-        if (CollectionUtils.isEmpty(eventlog)) {
-            response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENTLOG_NULL);
-            return response;
-        }
-
-        int previousBlock = 0;
-        for (WeIdAttributeChangedEventResponse res : eventlog) {
-            if (res.identity == null || res.updated == null || res.previousBlock == null) {
-                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_RES_NULL);
-                return response;
-            }
-
-            String identity = res.identity.toString();
-            if (result.getUpdated() == null) {
-                long timeStamp = res.updated.getValue().longValue();
-                result.setUpdated(timeStamp);
-            }
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-            if (!StringUtils.equals(weAddress, identity)) {
-                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_WEID_NOT_MATCH);
-                return response;
-            }
-
-            String key = DataToolUtils.bytes32ToString(res.key);
-            String value = DataToolUtils.dynamicBytesToString(res.value);
-            previousBlock = res.previousBlock.getValue().intValue();
-            buildupWeIdAttribute(key, value, weId, result);
-        }
-
-        response.setPreviousBlock(previousBlock);
-        response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_SUCCESS);
-        return response;
-    }
-
-    private static void buildupWeIdAttribute(
-        String key, String value, String weId, WeIdDocument result) {
-        if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)) {
-            buildWeIdPublicKeys(value, weId, result);
-        } else if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX)) {
-            buildWeIdPublicKeys(value, weId, result);
-            buildWeIdAuthentication(value, weId, result);
-        } else if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_SERVICE_PREFIX)) {
-            buildWeIdService(key, value, weId, result);
-        } else {
-            buildWeIdAttributeDefault(key, value, weId, result);
-        }
-    }
-
-    private static void buildWeIdPublicKeys(String value, String weId, WeIdDocument result) {
-
-        logger.info("method buildWeIdPublicKeys() parameter::value:{}, weId:{}, "
-            + "result:{}", value, weId, result);
-        List<PublicKeyProperty> pubkeyList = result.getPublicKey();
-        for (PublicKeyProperty pr : pubkeyList) {
-            if (StringUtils.contains(value, pr.getPublicKey())) {
-                return;
-            }
-        }
-        PublicKeyProperty pubKey = new PublicKeyProperty();
-        pubKey.setId(
-            new StringBuffer()
-                .append(weId)
-                .append("#keys-")
-                .append(result.getPublicKey().size())
-                .toString()
-        );
-        String[] publicKeyData = StringUtils.splitByWholeSeparator(value, "/");
-        if (publicKeyData != null && publicKeyData.length == 2) {
-            pubKey.setPublicKey(publicKeyData[0]);
-            String weAddress = publicKeyData[1];
-            String owner = WeIdUtils.convertAddressToWeId(weAddress);
-            pubKey.setOwner(owner);
-        }
-        result.getPublicKey().add(pubKey);
-    }
-
-    private static void buildWeIdAuthentication(String value, String weId, WeIdDocument result) {
-
-        logger.info("method buildWeIdAuthentication() parameter::value:{}, weId:{}, "
-            + "result:{}", value, weId, result);
-        AuthenticationProperty auth = new AuthenticationProperty();
-        List<PublicKeyProperty> keys = result.getPublicKey();
-        List<AuthenticationProperty> authList = result.getAuthentication();
-
-        for (PublicKeyProperty r : keys) {
-            if (StringUtils.contains(value, r.getPublicKey())) {
-                for (AuthenticationProperty ar : authList) {
-                    if (StringUtils.equals(ar.getPublicKey(), r.getId())) {
-                        return;
-                    }
-                }
-                auth.setPublicKey(r.getId());
-                result.getAuthentication().add(auth);
-            }
-        }
-    }
-
-    private static void buildWeIdService(String key, String value, String weId,
-        WeIdDocument result) {
-
-        logger.info("method buildWeIdService() parameter::key{}, value:{}, weId:{}, "
-            + "result:{}", key, value, weId, result);
-        String service = StringUtils.splitByWholeSeparator(key, "/")[2];
-        List<ServiceProperty> serviceList = result.getService();
-        for (ServiceProperty sr : serviceList) {
-            if (StringUtils.equals(service, sr.getType())) {
-                return;
-            }
-        }
-        ServiceProperty serviceResult = new ServiceProperty();
-        serviceResult.setType(service);
-        serviceResult.setServiceEndpoint(value);
-        result.getService().add(serviceResult);
-    }
-
-    private static void buildWeIdAttributeDefault(
-        String key, String value, String weId, WeIdDocument result) {
-
-        logger.info("method buildWeIdAttributeDefault() parameter::key{}, value:{}, weId:{}, "
-            + "result:{}", key, value, weId, result);
-        switch (key) {
-            case WeIdConstant.WEID_DOC_CREATED:
-                result.setCreated(Long.valueOf(value));
-                break;
-            default:
-                break;
-        }
-    }
-
-    private static ResolveEventLogResult resolveEventLog(
-        String weId, Log log, TransactionReceipt receipt, WeIdDocument result) {
-        String topic = log.getTopics().get(0);
-        String event = topicMap.get(topic);
-
-        if (StringUtils.isNotBlank(event)) {
-            switch (event) {
-                case WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE:
-                    return resolveAttributeEvent(weId, receipt, result);
-                default:
-            }
-        }
-        ResolveEventLogResult response = new ResolveEventLogResult();
-        response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENT_NULL);
-        return response;
-    }
-
-    private static void resolveTransaction(
-        String weId,
-        int blockNumber,
-        WeIdDocument result) {
-
-        int previousBlock = blockNumber;
-        while (previousBlock != STOP_RESOLVE_BLOCK_NUMBER) {
-            int currentBlockNumber = previousBlock;
-            EthBlock latestBlock = null;
-            try {
-                latestBlock =
-                    getWeb3j()
-                        .ethGetBlockByNumber(
-                            new DefaultBlockParameterNumber(currentBlockNumber),
-                            true
-                        )
-                        .send();
-            } catch (IOException e) {
-                logger.error(
-                    "[resolveTransaction]:get block by number :{} failed. Exception message:{}",
-                    currentBlockNumber,
-                    e
-                );
-            }
-            if (latestBlock == null) {
-                logger.info(
-                    "[resolveTransaction]:get block by number :{} . latestBlock is null",
-                    currentBlockNumber
-                );
-                return;
-            }
-            List<Transaction> transList =
-                latestBlock
-                    .getBlock()
-                    .getTransactions()
-                    .stream()
-                    .map(transactionResult -> (Transaction) transactionResult.get())
-                    .collect(Collectors.toList());
-
-            previousBlock = 0;
-            try {
-                for (Transaction transaction : transList) {
-                    String transHash = transaction.getHash();
-
-                    EthGetTransactionReceipt rec1 = getWeb3j().ethGetTransactionReceipt(transHash)
-                        .send();
-                    TransactionReceipt receipt = rec1.getTransactionReceipt().get();
-                    List<Log> logs = rec1.getResult().getLogs();
-                    for (Log log : logs) {
-                        ResolveEventLogResult returnValue =
-                            resolveEventLog(weId, log, receipt, result);
-                        if (returnValue.getResultStatus().equals(
-                            ResolveEventLogStatus.STATUS_SUCCESS)) {
-                            if (returnValue.getPreviousBlock() == currentBlockNumber) {
-                                continue;
-                            }
-                            previousBlock = returnValue.getPreviousBlock();
-                        }
-                    }
-                }
-            } catch (IOException | DataTypeCastException e) {
-                logger.error(
-                    "[resolveTransaction]: get TransactionReceipt by weId :{} failed.",
-                    weId,
-                    e
-                );
-                throw new ResolveAttributeException(
-                    ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-                    ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc());
-            }
-        }
-    }
+    private static WeIdServiceEngine weIdServiceEngine = EngineFactory.createWeIdServiceEngine();
 
     /**
      * Create a WeIdentity DID with null input param.
@@ -406,13 +88,15 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         result.setUserWeIdPrivateKey(userWeIdPrivateKey);
         String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
         result.setWeId(weId);
+
         ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
         if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[createWeId] Create weId failed. error message is :{}",
                 innerResp.getErrorMessage()
             );
-            return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+            return new ResponseData<>(null,
+                ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
                 innerResp.getTransactionInfo());
         }
         return new ResponseData<>(result, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
@@ -452,7 +136,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
             ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
-
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[createWeId]: create weid failed. error message is :{}, public key is {}",
@@ -463,61 +146,11 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
                     ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
                     innerResp.getTransactionInfo());
             }
-            return new ResponseData<>(weId, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+            return new ResponseData<>(weId,
+                ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
                 innerResp.getTransactionInfo());
         } else {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_INVALID);
-        }
-    }
-
-    private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,
-        String privateKey) {
-        try {
-            WeIdContract weIdContract = (WeIdContract) reloadContract(
-                weIdContractAddress,
-                privateKey,
-                WeIdContract.class);
-
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-            DynamicBytes auth = DataToolUtils.stringToDynamicBytes(
-                new StringBuffer()
-                    .append(publicKey)
-                    .append(WeIdConstant.SEPARATOR)
-                    .append(weAddress)
-                    .toString());
-            DynamicBytes created = DataToolUtils
-                .stringToDynamicBytes(DateUtils.getCurrentTimeStampString());
-            Future<TransactionReceipt> future = weIdContract.createWeId(
-                new Address(weAddress),
-                auth,
-                created,
-                DateUtils.getCurrentTimeStampInt256()
-            );
-            TransactionReceipt receipt =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            TransactionInfo info = new TransactionInfo(receipt);
-            List<WeIdAttributeChangedEventResponse> response =
-                WeIdContract.getWeIdAttributeChangedEvents(receipt);
-            if (CollectionUtils.isEmpty(response)) {
-                logger.error(
-                    "The input private key does not match the current weid, operation of "
-                        + "modifying weid is not allowed. weid is {}",
-                    weId
-                );
-                return new ResponseData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
-            }
-            return new ResponseData<>(true, ErrorCode.SUCCESS, info);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("Set authenticate failed. Error message :{}", e);
-            return new ResponseData(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (PrivateKeyIllegalException e) {
-            return new ResponseData<>(false, e.getErrorCode());
-        } catch (LoadContractException e) {
-            return new ResponseData<>(false, e.getErrorCode());
-        } catch (Exception e) {
-            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
 
@@ -530,48 +163,11 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     @Override
     public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
 
-        WeIdDocument result = new WeIdDocument();
-        result.setId(weId);
-
         if (!WeIdUtils.isWeIdValid(weId)) {
             logger.error("Input weId : {} is invalid.", weId);
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
-
-        ResponseData<WeIdDocument> responseData = new ResponseData<>();
-        int latestBlockNumber = 0;
-        try {
-            String identityAddr = WeIdUtils.convertWeIdToAddress(weId);
-            latestBlockNumber =
-                weIdContract
-                    .getLatestRelatedBlock(new Address(identityAddr))
-                    .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS)
-                    .getValue()
-                    .intValue();
-            if (0 == latestBlockNumber) {
-                return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
-            }
-
-            resolveTransaction(weId, latestBlockNumber, result);
-            responseData.setResult(result);
-            return responseData;
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("Set weId service failed. Error message :{}", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (ResolveAttributeException e) {
-            logger.error("[getWeIdDocument]: resolveTransaction failed. "
-                    + "weId: {}, errorCode:{}",
-                weId,
-                e.getErrorCode(),
-                e);
-            responseData.setErrorCode(ErrorCode.getTypeByErrorCode(e.getErrorCode()));
-            return responseData;
-        } catch (Exception e) {
-            logger.error("[getWeIdDocument]: exception.", e);
-            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
-        }
+        return weIdServiceEngine.getWeIdDocument(weId);
     }
 
     /**
@@ -631,6 +227,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (!WeIdUtils.isPrivateKeyValid(setPublicKeyArgs.getUserWeIdPrivateKey())) {
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
+
         String weId = setPublicKeyArgs.getWeId();
         String weAddress = WeIdUtils.convertWeIdToAddress(weId);
         if (StringUtils.isEmpty(weAddress)) {
@@ -649,58 +246,28 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             }
         }
         String pubKey = setPublicKeyArgs.getPublicKey();
-        String attributeKey =
-            new StringBuffer()
-                .append(WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)
-                .append(WeIdConstant.SEPARATOR)
-                .append(setPublicKeyArgs.getType())
-                .append(WeIdConstant.SEPARATOR)
-                .append("base64")
-                .toString();
+
         String privateKey = setPublicKeyArgs.getUserWeIdPrivateKey().getPrivateKey();
         try {
-            WeIdContract weIdContract = (WeIdContract) reloadContract(
-                weIdContractAddress,
-                privateKey,
-                WeIdContract.class
-            );
-            Future<TransactionReceipt> future =
-                weIdContract.setAttribute(
-                    new Address(weAddress),
-                    DataToolUtils.stringToBytes32(attributeKey),
-                    DataToolUtils.stringToDynamicBytes(
-                        new StringBuffer().append(pubKey).append("/").append(owner).toString()),
-                    DateUtils.getCurrentTimeStampInt256()
-                );
-            TransactionReceipt receipt =
-                future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            TransactionInfo info = new TransactionInfo(receipt);
-            List<WeIdAttributeChangedEventResponse> response =
-                WeIdContract.getWeIdAttributeChangedEvents(receipt);
-            if (CollectionUtils.isNotEmpty(response)) {
-                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
-            } else {
-                return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
-                    info);
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("Set public key failed. Error message :{}", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
+            String attributeKey =
+                new StringBuffer()
+                    .append(WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)
+                    .append(WeIdConstant.SEPARATOR)
+                    .append(setPublicKeyArgs.getType())
+                    .append(WeIdConstant.SEPARATOR)
+                    .append("base64")
+                    .toString();
+            String attrValue = new StringBuffer().append(pubKey).append("/").append(owner)
+                .toString();
+            return weIdServiceEngine.setAttribute(weAddress, attributeKey, attrValue, privateKey);
         } catch (PrivateKeyIllegalException e) {
+            logger.error("[setPublicKey] set PublicKey failed because privateKey is illegal. ",
+                e);
             return new ResponseData<>(false, e.getErrorCode());
         } catch (Exception e) {
+            logger.error("[setPublicKey] set PublicKey failed with exception. ", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
-    }
-
-    private boolean verifySetPublicKeyArgs(SetPublicKeyArgs setPublicKeyArgs) {
-
-        return !(setPublicKeyArgs == null
-            || setPublicKeyArgs.getType() == null
-            || setPublicKeyArgs.getUserWeIdPrivateKey() == null
-            || setPublicKeyArgs.getPublicKey() == null);
     }
 
     /**
@@ -711,7 +278,6 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
      */
     @Override
     public ResponseData<Boolean> setService(SetServiceArgs setServiceArgs) {
-
         if (!verifySetServiceArgs(setServiceArgs)) {
             logger.error("[setService]: input parameter setServiceArgs is illegal.");
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
@@ -725,52 +291,41 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (WeIdUtils.isWeIdValid(weId)) {
             String privateKey = setServiceArgs.getUserWeIdPrivateKey().getPrivateKey();
             try {
-                WeIdContract weIdContract = (WeIdContract) reloadContract(
-                    weIdContractAddress,
-                    privateKey,
-                    WeIdContract.class);
-                Future<TransactionReceipt> future =
-                    weIdContract.setAttribute(
-                        new Address(WeIdUtils.convertWeIdToAddress(weId)),
-                        DataToolUtils.stringToBytes32(
-                            WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
-                                + serviceType),
-                        DataToolUtils.stringToDynamicBytes(serviceEndpoint),
-                        DateUtils.getCurrentTimeStampInt256());
+                String attributeKey = WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
+                    + serviceType;
+                return weIdServiceEngine
+                    .setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey,
+                        serviceEndpoint, privateKey);
 
-                TransactionReceipt receipt =
-                    future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-                TransactionInfo info = new TransactionInfo(receipt);
-
-                List<WeIdAttributeChangedEventResponse> response =
-                    WeIdContract.getWeIdAttributeChangedEvents(receipt);
-                if (CollectionUtils.isNotEmpty(response)) {
-                    return new ResponseData<>(true, ErrorCode.SUCCESS, info);
-                } else {
-                    return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
-                        info);
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-            } catch (TimeoutException e) {
-                return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
             } catch (PrivateKeyIllegalException e) {
+                logger
+                    .error("[setService] set PublicKey failed because privateKey is illegal. ",
+                        e);
                 return new ResponseData<>(false, e.getErrorCode());
             } catch (Exception e) {
-                logger.error("Set weId service failed. Error message :{}", e);
+                logger.error("[setService] set service failed. Error message :{}", e);
                 return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
             }
         } else {
+            logger.error("[setService] set service failed, weid -->{} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
+
     }
 
-    private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
-
-        return !(setServiceArgs == null
-            || setServiceArgs.getType() == null
-            || setServiceArgs.getUserWeIdPrivateKey() == null
-            || setServiceArgs.getServiceEndpoint() == null);
+    /**
+     * Check if WeIdentity DID exists on Chain.
+     *
+     * @param weId the WeIdentity DID
+     * @return true if exists, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> isWeIdExist(String weId) {
+        if (!WeIdUtils.isWeIdValid(weId)) {
+            logger.error("[isWeIdExist] check weid failed. weid : {} is invalid.", weId);
+            return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+        }
+        return weIdServiceEngine.isWeIdExist(weId);
     }
 
     /**
@@ -806,40 +361,16 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             }
             String privateKey = setAuthenticationArgs.getUserWeIdPrivateKey().getPrivateKey();
             try {
-                WeIdContract weIdContract = (WeIdContract) reloadContract(
-                    weIdContractAddress,
-                    privateKey,
-                    WeIdContract.class);
-                Future<TransactionReceipt> future =
-                    weIdContract.setAttribute(
-                        new Address(weAddress),
-                        DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX),
-                        DataToolUtils.stringToDynamicBytes(
-                            new StringBuffer()
-                                .append(setAuthenticationArgs.getPublicKey())
-                                .append(WeIdConstant.SEPARATOR)
-                                .append(owner)
-                                .toString()),
-                        DateUtils.getCurrentTimeStampInt256());
-                TransactionReceipt receipt =
-                    future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-                List<WeIdAttributeChangedEventResponse> response =
-                    WeIdContract.getWeIdAttributeChangedEvents(receipt);
-                TransactionInfo info = new TransactionInfo(receipt);
-                if (CollectionUtils.isNotEmpty(response)) {
-                    return new ResponseData<>(true, ErrorCode.SUCCESS, info);
-                } else {
-                    logger.error("Set authenticate failed. Error message :{}",
-                        ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCodeDesc());
-                    return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
-                        info);
-                }
-            } catch (InterruptedException | ExecutionException e) {
-                logger.error("Set authenticate failed. Error message :{}", e);
-                return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-            } catch (TimeoutException e) {
-                logger.error("Set authenticate timeout. Error message :{}", e);
-                return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
+                String attrValue = new StringBuffer()
+                    .append(setAuthenticationArgs.getPublicKey())
+                    .append(WeIdConstant.SEPARATOR)
+                    .append(owner)
+                    .toString();
+                return weIdServiceEngine
+                    .setAttribute(weAddress,
+                        WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX,
+                        attrValue,
+                        privateKey);
             } catch (PrivateKeyIllegalException e) {
                 logger.error("Set authenticate with private key exception. Error message :{}", e);
                 return new ResponseData<>(false, e.getErrorCode());
@@ -853,40 +384,48 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
     }
 
+    private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
+
+        return !(setServiceArgs == null
+            || setServiceArgs.getType() == null
+            || setServiceArgs.getUserWeIdPrivateKey() == null
+            || setServiceArgs.getServiceEndpoint() == null);
+    }
+
+    private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,
+        String privateKey) {
+
+        String address = WeIdUtils.convertWeIdToAddress(weId);
+        try {
+            return weIdServiceEngine.createWeId(address, publicKey, privateKey);
+        } catch (PrivateKeyIllegalException e) {
+            logger.error("[createWeId] create weid failed because privateKey is illegal. ",
+                e);
+            return new ResponseData<>(false, e.getErrorCode());
+        } catch (LoadContractException e) {
+            logger.error("[createWeId] create weid failed because Load Contract with "
+                    + "exception. ",
+                e);
+            return new ResponseData<>(false, e.getErrorCode());
+        } catch (Exception e) {
+            logger.error("[createWeId] create weid failed with exception. ", e);
+            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    private boolean verifySetPublicKeyArgs(SetPublicKeyArgs setPublicKeyArgs) {
+
+        return !(setPublicKeyArgs == null
+            || setPublicKeyArgs.getType() == null
+            || setPublicKeyArgs.getUserWeIdPrivateKey() == null
+            || setPublicKeyArgs.getPublicKey() == null);
+    }
+
     private boolean verifySetAuthenticationArgs(SetAuthenticationArgs setAuthenticationArgs) {
 
         return !(setAuthenticationArgs == null
             || setAuthenticationArgs.getUserWeIdPrivateKey() == null
             || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey()));
-    }
-
-    /**
-     * Check if WeIdentity DID exists on Chain.
-     *
-     * @param weId the WeIdentity DID
-     * @return true if exists, false otherwise
-     */
-    @Override
-    public ResponseData<Boolean> isWeIdExist(String weId) {
-        if (!WeIdUtils.isWeIdValid(weId)) {
-            return new ResponseData<>(false, ErrorCode.WEID_INVALID);
-        }
-        try {
-            Bool isExist = weIdContract
-                .isIdentityExist(new Address(WeIdUtils.convertWeIdToAddress(weId)))
-                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            Boolean result = isExist.getValue();
-            return new ResponseData<>(result, ErrorCode.SUCCESS);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("[isWeIdExist] execute failed. Error message :{}", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            logger.error("[isWeIdExist] execute with timeout. Error message :{}", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (Exception e) {
-            logger.error("[isWeIdExist] execute failed. Error message :{}", e);
-            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
-        }
     }
 
 }

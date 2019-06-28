@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.protocol.base;
@@ -26,10 +26,18 @@ import java.util.Map;
 
 import lombok.Data;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.inf.IProof;
 import com.webank.weid.protocol.inf.JsonSerializer;
+import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
+
 
 /**
  * The base data structure to handle Credential info.
@@ -38,6 +46,8 @@ import com.webank.weid.util.DataToolUtils;
  */
 @Data
 public class CredentialPojo implements IProof, JsonSerializer {
+
+    private static final Logger logger = LoggerFactory.getLogger(CredentialPojo.class);
 
     /**
      * the serialVersionUID.
@@ -149,11 +159,47 @@ public class CredentialPojo implements IProof, JsonSerializer {
     }
     
     /**
+     * convert CredentialPojo to JSON String.
+     * @return CredentialPojo
+     */
+    @Override
+    public String toJson() {     
+        String json = DataToolUtils.convertTimestampToUtc(DataToolUtils.serialize(this));
+        return DataToolUtils.addTagFromToJson(json);
+    }
+    
+    /**
      * create CredentialPojo with JSON String.
      * @param credentialJson the CredentialPojo JSON String
      * @return CredentialPojo
      */
     public static CredentialPojo fromJson(String credentialJson) {
-        return DataToolUtils.deserialize(credentialJson, CredentialPojo.class);
+        if (StringUtils.isBlank(credentialJson)) {
+            logger.error("create credential with JSON String failed, "
+                + "the credential JSON String is null");
+            throw new DataTypeCastException("the credential JSON String is null");
+        }
+        String credentialString = credentialJson;
+        if (DataToolUtils.isValidFromToJson(credentialJson)) {
+            credentialString = DataToolUtils.removeTagFromToJson(credentialJson);
+        }
+        CredentialPojo credentialPojo = DataToolUtils.deserialize(
+            DataToolUtils.convertUtcToTimestamp(credentialString), 
+            CredentialPojo.class
+        );
+        ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialPojo);
+        if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
+            logger.error("create CredentialPojo with JSON String failed, {}", 
+                checkResp.getCodeDesc());
+            throw new DataTypeCastException(checkResp.getCodeDesc());
+        }
+        if (!CredentialPojoUtils.validClaimAndSaltForMap(
+            credentialPojo.getClaim(), 
+            credentialPojo.getSalt())) {
+            logger.error("create PresentationE with JSON String failed, claim and salt of "
+                + "credentialPojo not match.");
+            throw new DataTypeCastException("claim and salt of credentialPojo not match.");
+        }
+        return credentialPojo;
     }
 }

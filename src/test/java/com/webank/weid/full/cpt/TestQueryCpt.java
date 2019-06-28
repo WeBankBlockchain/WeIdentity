@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.full.cpt;
@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.CptController;
+import com.webank.weid.contract.v1.CptController;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
@@ -129,7 +129,7 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
 
-        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeIdNew);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
 
         ResponseData<CptBaseInfo> responseUp = cptService.updateCpt(
             cptMapArgs,
