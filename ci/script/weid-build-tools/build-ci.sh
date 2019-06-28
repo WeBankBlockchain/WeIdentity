@@ -19,7 +19,10 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
 
     # copy SDK jar to repo dependencies path and rename
     # requires repo to allow local dep first
-    # cp dist/app/$FILENAME weid-build-tools/dependencies/weid-java-sdk-pipeline.jar
+    mkdir -p weid-build-tools/dependencies
+    cp dist/app/$FILENAME weid-build-tools/dependencies/weid-java-sdk-pipeline.jar
+    mkdir -p weid-build-tools/dist/lib
+    cp dist/lib/* weid-build-tools/dist/lib/
 
     # install fisco-solc
     wget https://github.com/FISCO-BCOS/fisco-solc/raw/master/fisco-solc-ubuntu
@@ -36,7 +39,10 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     sed -i -e '$a\blockchain_address=$NODE_IP' run.config
     chmod +x compile.sh
     ./compile.sh
+    chmod +x deploy.sh
     ./deploy.sh
+    chmod +x build-tools-ci.sh
+    ./build-tools-ci.sh
 else
     echo "This is not a master branch PR (commit omitted). CI skipped."
 fi
