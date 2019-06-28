@@ -147,3 +147,9 @@ Credential的重新生成则为重新发行一个Credential ID不相同的全新
 [Quantum_computing_attacks](https://en.wikipedia.org/wiki/Elliptic-curve_cryptography#Quantum_computing_attacks)
 
 ---
+
+- **在 FISCO-BCOS 上部署 WeIdentity，部署区块链节点的机器需要准备多大的硬盘？**
+
+详见 [WeIdentity 存储容量预估](./capacity-estimation.md)
+
+---
