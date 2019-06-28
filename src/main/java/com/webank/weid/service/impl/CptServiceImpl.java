@@ -291,7 +291,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
     private ErrorCode validateCptArgs(
         WeIdAuthentication weIdAuthentication,
-        Map<String, Object> cptJsonSchemaMap) throws Exception  {
+        Map<String, Object> cptJsonSchemaMap) throws Exception {
 
         if (weIdAuthentication == null) {
             logger.error("Input cpt weIdAuthentication is invalid.");
@@ -302,7 +302,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         if (!WeIdUtils.isWeIdValid(weId)) {
             logger.error("Input cpt publisher : {} is invalid.", weId);
             return ErrorCode.WEID_INVALID;
-        }       
+        }
 
         ErrorCode errorCode = validateCptJsonSchemaMap(cptJsonSchemaMap);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
@@ -359,6 +359,4 @@ public class CptServiceImpl extends BaseService implements CptService {
         cptJsonSchemaNew.putAll(cptJsonSchema);
         return DataToolUtils.serialize(cptJsonSchemaNew);
     }
-
-
 }
