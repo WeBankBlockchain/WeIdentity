@@ -1,12 +1,16 @@
-### v1.3.0 (2019-06-30)
+### v1.3.0 (2019-06-28)
 - Features:
-1. Official support for FISCO-BCOS 1.3 and 2.0 blockchain nodes.
-2. Support Gradle 5.x
-3. Support offline compilation for weid-java-sdk and build-tools.
+1. Official support for FISCO-BCOS 1.3 and 2.0 blockchain nodes and smart contracts by extracting a proxy layer.
+2. Combine weidentity.properties and fisco.properties.
+3. Support Gradle 5.x, offline compilation for weid-java-sdk and build-tools (docs attached).
 4. Credential issuance date can be customized.
+5. Credential adds a new interface to extract disclosed claim data directly.
 
 - Bugfixes:
-1. Fixed a bug where dates are not identical after fromJson() and toJson().
+1. Fixed a bug where dates are not consistent after transfer by fromJson() and toJson().
+2. Project renamed from weidentity-java-sdk to weid-java-sdk.
+3. Credential Claim structure now requires "weid" as an obligatory attribute.
+4. Added multiple unit test.
 
 ### v1.2.1 (2019-06-19)
 
