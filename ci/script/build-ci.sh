@@ -25,8 +25,8 @@ function modify_config()
     NODEVAR='${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
     cp ${weid_config} ${java_source_code_dir}/src/test/resources/
-    if [ -e ${java_source_code_dir}/privateKey.txt ];then
-        cp ${java_source_code_dir}/privateKey.txt ${java_source_code_dir}/src/test/resources/
+    if [ -e ${java_source_code_dir}/ecdsa_key ];then
+        cp ${java_source_code_dir}/ecdsa_key ${java_source_code_dir}/src/test/resources/
     fi
     #cat $app_xml_config
     echo "modify sdk config finished..."
