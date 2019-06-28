@@ -43,6 +43,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -51,12 +52,15 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
 import javax.imageio.ImageIO;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -141,7 +145,24 @@ public final class DataToolUtils {
     // LOGO高度
     private static final int LOGO_HEIGHT = 60;
 
+    private static final int radix = 10;
+    
+    private static final String TO_JSON = "toJson";
+    
+    private static final String FROM_JSON = "fromJson";
 
+    private static final String KEY_CREATED = "created";
+    
+    private static final String KEY_ISSUANCEDATE = "issuanceDate";
+    
+    private static final String KEY_EXPIRATIONDATE = "expirationDate";
+    
+    private static final String KEY_CLAIM = "claim";
+    
+    private static final String KEY_FROM_TOJSON = "$from";
+    
+    private static final List<String> CONVERT_UTC_LONG_KEYLIST = new ArrayList<>();
+        
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     //private static final ObjectWriter OBJECT_WRITER;
@@ -162,6 +183,10 @@ public final class DataToolUtils {
         OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         OBJECT_WRITER_UN_PRETTY_PRINTER = OBJECT_MAPPER.writer();
+        
+        CONVERT_UTC_LONG_KEYLIST.add(KEY_CREATED);
+        CONVERT_UTC_LONG_KEYLIST.add(KEY_ISSUANCEDATE);
+        CONVERT_UTC_LONG_KEYLIST.add(KEY_EXPIRATIONDATE);
 
         //OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
         //OBJECT_READER = OBJECT_MAPPER.reader();
@@ -234,18 +259,24 @@ public final class DataToolUtils {
      * @return class instance
      */
     public static <T> T deserialize(String json, Class<T> clazz) {
+        if (isValidFromToJson(json)) {
+            logger.error("this jsonString is converted by toJson(), "
+                + "please use fromJson() to deserialize it");
+            throw new DataTypeCastException("deserialize json to Object error");
+        }
         Object object = null;
         try {
-            object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));
+            object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));  
         } catch (JsonParseException e) {
             logger.error("JsonParseException when serialize object to json", e);
             throw new DataTypeCastException(e);
         } catch (JsonMappingException e) {
             logger.error("JsonMappingException when serialize object to json", e);
-            new DataTypeCastException(e);
+            throw new DataTypeCastException(e);
         } catch (IOException e) {
             logger.error("IOException when serialize object to json", e);
-        }
+            throw new DataTypeCastException(e);
+        }        
         return (T) object;
     }
 
@@ -1406,7 +1437,6 @@ public final class DataToolUtils {
         return DataToolUtils.objToJsonStrWithNoPretty(cptSchemaMap);
     }
     
-    
     /**
      * convert byte32List to String.
      * @param bytesList list
@@ -1455,6 +1485,179 @@ public final class DataToolUtils {
         List<BigInteger> createdList = new ArrayList<>();
         createdList.add(BigInteger.valueOf(created));
         return createdList;
+    }
+    
+    /**
+     * convert timestamp to UTC of presentationJson string.
+     * @param presentation presentationJson
+     * @return presentationJson after convert
+     */
+    public static String convertTimestampToUtc(String presentation) { 
+        String presentationJson;
+        try {
+            presentationJson = replaceJsonObj(
+                JSONObject.parseObject(presentation),
+                CONVERT_UTC_LONG_KEYLIST, 
+                TO_JSON
+            ).toString();
+        } catch (ParseException | JSONException e) {
+            logger.error("replaceJsonObj exception.", e);
+            throw new DataTypeCastException(e);
+        }
+        return presentationJson;
+    }
+    
+    /**
+     * convert UTC Date to timestamp of Json string.
+     * @param jsonString presentationJson
+     * @return presentationJson after convert
+     */
+    public static String convertUtcToTimestamp(String jsonString) { 
+        String utcToTimestampString;
+        try {
+            utcToTimestampString = replaceJsonObj(
+                JSONObject.parseObject(jsonString), 
+                CONVERT_UTC_LONG_KEYLIST, 
+                FROM_JSON
+            ).toString();
+        } catch (ParseException | JSONException e) {
+            logger.error("replaceJsonObj exception.", e);
+            throw new DataTypeCastException(e);
+        }
+        return utcToTimestampString;
+    }
+    
+    private static JSONObject replaceJsonObj(JSONObject jsonObj, List<String> list, String type) 
+        throws ParseException { 
+        JSONObject resJson = new JSONObject(); 
+        Set<String> keySet = jsonObj.keySet(); 
+        for (String key : keySet) { 
+            Object obj = jsonObj.get(key);
+            if (obj instanceof JSONObject) {
+                //JSONObject
+                if (key.equals(KEY_CLAIM)) {
+                    resJson.put(key, obj); 
+                } else {
+                    resJson.put(key, replaceJsonObj((JSONObject)obj, list, type));
+                }
+            } else if (obj instanceof JSONArray) {
+                //JSONArray 
+                resJson.put(key, replaceJsonArr((JSONArray)obj, list, type)); 
+            } else {
+                if (list.contains(key)) {
+                    if (TO_JSON.equals(type)) {
+                        if (isValidLongString(obj.toString())) {
+                            resJson.put(
+                                key, 
+                                DateUtils.convertNoMillisecondTimestampToUtc(
+                                    Long.parseLong(obj.toString())));
+                        } else {
+                            resJson.put(key, obj);
+                        }
+                    } else {
+                        if (DateUtils.isValidDateString(obj.toString())) {
+                            resJson.put(
+                                key, 
+                                DateUtils.convertUtcDateToNoMillisecondTime(obj.toString()));
+                        } else {
+                            resJson.put(key, obj);
+                        }
+                    } 
+                } else {
+                    resJson.put(key, obj);
+                }
+            }
+        }
+        return resJson; 
+    } 
+
+    private static JSONArray replaceJsonArr(JSONArray jsonArr, List<String> list, String type) 
+        throws ParseException { 
+        JSONArray resJson = new JSONArray(); 
+        for (int i = 0; i < jsonArr.size(); i++) { 
+            Object jsonObj = jsonArr.get(i); 
+            if (jsonObj instanceof JSONObject) {
+                resJson.add(replaceJsonObj((JSONObject)jsonObj, list, type)); 
+            } else {
+                resJson.add(jsonObj); 
+            }
+        } 
+        return resJson; 
+    }
+
+    /**
+     * valid string is a long type.
+     * @param str string
+     * @return result
+     */
+    public static boolean isValidLongString(String str) {
+        if (StringUtils.isBlank(str)) {
+            return false;
+        }
+
+        long result = 0;
+        int i = 0; 
+        int len = str.length();
+        long limit = -Long.MAX_VALUE;
+        long multmin;
+        int digit;
+
+        char firstChar = str.charAt(0);
+        if (firstChar <= '0') { 
+            return false;
+        }
+        multmin = limit / radix;
+        while (i < len) {
+            digit = Character.digit(str.charAt(i++), radix);
+            if (digit < 0) {
+                return false;
+            }
+            if (result < multmin) {
+                return false;
+            }
+            result *= radix;
+            if (result < limit + digit) {
+                return false;
+            }
+            result -= digit;
+        }    
+        return true;
+    }
+    
+    /**
+     * valid the json string is converted by toJson().
+     * @param json jsonString
+     * @return result
+     */
+    public static boolean isValidFromToJson(String json) {
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        return jsonObject.containsKey(KEY_FROM_TOJSON);
+    }
+    
+    /**
+     * add tag which the json string is converted by toJson().
+     * @param json jsonString
+     * @return result
+     */
+    public static String addTagFromToJson(String json) {
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        if (!jsonObject.containsKey(KEY_FROM_TOJSON)) {
+            jsonObject.fluentPut(KEY_FROM_TOJSON, TO_JSON);
+        }
+        return jsonObject.toString();
+    }
+    
+    /**
+     * remove tag which the json string is converted by toJson().
+     * @param json jsonString
+     * @return result
+     */
+    public static String removeTagFromToJson(String json) {
+        JSONObject jsonObject = JSONObject.parseObject(json);
+        if (jsonObject.containsKey(KEY_FROM_TOJSON)) {
+            jsonObject.fluentRemove(KEY_FROM_TOJSON);
+        }
+        return jsonObject.toString();
     }
 }
 
