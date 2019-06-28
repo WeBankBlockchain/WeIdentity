@@ -126,12 +126,8 @@ public class JsonTransportationImpl
             }
             //将JSON字符串解析成JsonBaseData对象
             //JsonBaseData jsonBaseData = JsonUtil.jsonStrToObj(JsonBaseData.class, transString);
-            String transStringNew = transString;
-            if (DataToolUtils.isValidFromToJson(transString)) {
-                transStringNew = DataToolUtils.removeTagFromToJson(transString);
-            }
             JsonBaseData jsonBaseData = DataToolUtils.deserialize(
-                transStringNew, 
+                transString, 
                 JsonBaseData.class);
             //检查JsonBaseData合法性
             ErrorCode errorCode = checkJsonBaseData(jsonBaseData);
@@ -169,13 +165,17 @@ public class JsonTransportationImpl
             //T object =
             //      (T) DataToolUtils.jsonStrToObj(clazz, presentationEStr);
             String presentationEJson = DataToolUtils.convertUtcToTimestamp(presentationEStr);
+            String presentationEJsonNew = presentationEJson;
+            if (DataToolUtils.isValidFromToJson(presentationEJson)) {
+                presentationEJsonNew = DataToolUtils.removeTagFromToJson(presentationEJson);
+            }
             T object = null;
             Method method = getFromJsonMethod(clazz);
             if (method == null) {
                 //调用工具的反序列化 
-                object = (T) DataToolUtils.deserialize(presentationEJson, clazz);
+                object = (T) DataToolUtils.deserialize(presentationEJsonNew, clazz);
             } else  {
-                object = (T) method.invoke(null, presentationEJson);
+                object = (T) method.invoke(null, presentationEJsonNew);
             }
             logger.info("JsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(object, ErrorCode.SUCCESS);
