@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.protocol.base;
@@ -26,11 +26,18 @@ import java.util.Map;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.inf.IProof;
 import com.webank.weid.protocol.inf.RawSerializer;
+import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
+
 
 /**
  * Created by Junqi Zhang on 2019/4/4.
@@ -38,6 +45,8 @@ import com.webank.weid.util.DataToolUtils;
 @Data
 @EqualsAndHashCode
 public class PresentationE implements RawSerializer, IProof {
+
+    private static final Logger logger = LoggerFactory.getLogger(PresentationE.class);
 
     /**
      * the serialVersionUID.
@@ -92,12 +101,56 @@ public class PresentationE implements RawSerializer, IProof {
     }
     
     /**
-     * create PresentationE with JSON String.
-     * @param presentationJson the presentation JSON String
+     * convert PresentationE to JSON String.
      * @return PresentationE
      */
+    @Override
+    public String toJson() {
+        String json = DataToolUtils.convertTimestampToUtc(DataToolUtils.serialize(this));
+        return DataToolUtils.addTagFromToJson(json);
+    }
+    
+    /**
+     * create PresentationE with JSON String.
+     * @param presentationJson the presentation JSON String
+     * @return PresentationE PresentationE
+     */
     public static PresentationE fromJson(String presentationJson) {
-        return DataToolUtils.deserialize(presentationJson, PresentationE.class);
+        if (StringUtils.isBlank(presentationJson)) {
+            logger.error("create PresentationE with JSON String failed, "
+                + "the presentation JSON String is null");
+            throw new DataTypeCastException("the presentation JSON String is null");
+        }
+        String presentationString = presentationJson;
+        if (DataToolUtils.isValidFromToJson(presentationJson)) {
+            presentationString = DataToolUtils.removeTagFromToJson(presentationJson);
+        }
+        PresentationE presentationE = DataToolUtils.deserialize(
+            DataToolUtils.convertUtcToTimestamp(presentationString), 
+            PresentationE.class);
+        if (presentationE == null 
+            || presentationE.getVerifiableCredential() == null 
+            || presentationE.getVerifiableCredential().isEmpty()) {
+            logger.error("create PresentationE with JSON String failed, "
+                + "due to convert UTC to Timestamp error");
+            throw new DataTypeCastException("convert UTC to Timestamp error");
+        }
+        for (CredentialPojo credentialPojo : presentationE.getVerifiableCredential()) {
+            ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialPojo);
+            if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
+                logger.error("create PresentationE with JSON String failed, {}", 
+                    checkResp.getCodeDesc());
+                throw new DataTypeCastException(checkResp.getCodeDesc());
+            }
+            if (!CredentialPojoUtils.validClaimAndSaltForMap(
+                credentialPojo.getClaim(),  
+                credentialPojo.getSalt())) {
+                logger.error("create PresentationE with JSON String failed, claim and salt of "
+                    + "credentialPojo not match.");
+                throw new DataTypeCastException("claim and salt of credentialPojo not match.");
+            }
+        } 
+        return presentationE;
     }
     
     /**
@@ -124,7 +177,7 @@ public class PresentationE implements RawSerializer, IProof {
             return false;
         }
         // 更新proof里面的签名
-        this.proof.remove(ParamKeyConstant.PROOF_SIGNATURE);
+        //this.proof.remove(ParamKeyConstant.PROOF_SIGNATURE);
         String signature = 
             DataToolUtils.sign(
                 this.toRawData(),
@@ -132,5 +185,12 @@ public class PresentationE implements RawSerializer, IProof {
             );
         this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
         return true;
+    }
+    
+    @Override
+    public String toRawData() {
+        PresentationE presentation = DataToolUtils.clone(this);
+        presentation.proof = null;
+        return DataToolUtils.serialize(presentation);
     }
 }

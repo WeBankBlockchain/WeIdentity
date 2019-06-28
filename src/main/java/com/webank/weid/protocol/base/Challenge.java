@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.protocol.base;
@@ -24,7 +24,11 @@ import java.security.SecureRandom;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.inf.RawSerializer;
 import com.webank.weid.util.DataToolUtils;
 
@@ -34,6 +38,8 @@ import com.webank.weid.util.DataToolUtils;
 @Getter
 @Setter
 public class Challenge extends Version implements RawSerializer {
+
+    private static final Logger logger = LoggerFactory.getLogger(Challenge.class);
 
     /**
      * the serialVersionUID.
@@ -77,13 +83,27 @@ public class Challenge extends Version implements RawSerializer {
         return challenge;
     }
     
+    @Override
+    public String toJson() {
+        return DataToolUtils.addTagFromToJson(DataToolUtils.serialize(this));
+    }
+    
     /**
      * create Challenge with JSON String.
      * @param challengeJson the challenge JSON String
      * @return Challenge
      */
     public static Challenge fromJson(String challengeJson) {
-        return DataToolUtils.deserialize(challengeJson, Challenge.class);
+        if (StringUtils.isBlank(challengeJson)) {
+            logger.error("create Challenge with JSON String failed, "
+                + "the Challenge JSON String is null");
+            throw new DataTypeCastException("the Challenge JSON String is null.");
+        }
+        String challengeString = challengeJson;
+        if (DataToolUtils.isValidFromToJson(challengeJson)) {
+            challengeString = DataToolUtils.removeTagFromToJson(challengeJson);
+        }
+        return DataToolUtils.deserialize(challengeString, Challenge.class);
     }
     
     @Override
