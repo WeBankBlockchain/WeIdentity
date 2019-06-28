@@ -2,6 +2,10 @@
     "title": "cpt templet",
     "description": "five information requirements for users",
     "properties" : {
+        "weid": {
+            "type": "string",
+            "description": "the weid of certificate owner"
+        },
         "name": {
             "type": "string",
             "description": "the name of certificate owner"

@@ -73,6 +73,10 @@ public class TestData {
     public static final String SCHEMA =
         "{"
             + "  \"properties\" : {"
+            + "      \"weid\": {"
+            + "          \"type\": \"string\", "
+            + "          \"description\": \"the weid of certificate owner\""
+            + "      }, "
             + "      \"name\": {"
             + "          \"type\": \"string\", "
             + "          \"description\": \"the name of certificate owner\""
@@ -87,6 +91,6 @@ public class TestData {
             + "          \"description\": \"the age of certificate owner\""
             + "      }"
             + "  },"
-            + "  \"required\": [\"name\", \"age\"]"
+            + "  \"required\": [\"weid\",\"name\", \"age\"]"
             + "}";
 }
