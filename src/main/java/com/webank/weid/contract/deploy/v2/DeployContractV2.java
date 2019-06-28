@@ -86,7 +86,7 @@ public class DeployContractV2 extends DeployContract {
             return false;
         }
         String privateKey = credentials.getEcKeyPair().getPrivateKey().toString();
-        writeAddressToFile(privateKey, "privateKey.txt");
+        writeAddressToFile(privateKey, "ecdsa_key");
         return true;
     }
 
