@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.CptController;
+import com.webank.weid.contract.v1.CptController;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
@@ -129,7 +129,7 @@ public class TestQueryCpt extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
 
-        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeIdNew);
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
 
         ResponseData<CptBaseInfo> responseUp = cptService.updateCpt(
             cptMapArgs,
