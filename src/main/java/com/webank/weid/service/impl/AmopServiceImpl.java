@@ -34,8 +34,8 @@ import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.callback.AmopCallback;
-import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 
 
@@ -53,15 +53,15 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String targetUserWeId
     ) {
         try {
-            if (StringUtils.isBlank(currentOrgId)) {
+            if (StringUtils.isBlank(fiscoConfig.getCurrentOrgId())) {
                 logger.error("the orgId is null, policyId = {}", policyId);
                 return new ResponseData<PolicyAndChallenge>(null, ErrorCode.ILLEGAL_INPUT);
             }
             GetPolicyAndChallengeArgs args = new GetPolicyAndChallengeArgs();
-            args.setFromOrgId(currentOrgId);
+            args.setFromOrgId(fiscoConfig.getCurrentOrgId());
             args.setToOrgId(targetOrgId);
             args.setPolicyId(String.valueOf(policyId));
-            args.setMessageId(getService().newSeq());
+            args.setMessageId(super.getSeq());
             args.setTargetUserWeId(targetUserWeId);
             ResponseData<GetPolicyAndChallengeResponse> retResponse =
                 this.getPolicyAndChallenge(targetOrgId, args);
@@ -90,13 +90,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String toOrgId,
         GetPolicyAndChallengeArgs args) {
         return this.getImpl(
-            currentOrgId,
+            fiscoConfig.getCurrentOrgId(),
             toOrgId,
             args,
             GetPolicyAndChallengeArgs.class,
             GetPolicyAndChallengeResponse.class,
             AmopMsgType.GET_POLICY_AND_CHALLENGE,
-            AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -105,13 +105,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      */
     public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
         return this.getImpl(
-            currentOrgId,
+            fiscoConfig.getCurrentOrgId(),
             toOrgId,
             args,
             AmopCommonArgs.class,
             AmopResponse.class,
             AmopMsgType.TYPE_TRANSPORTATION,
-            AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -121,13 +121,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId,
         GetEncryptKeyArgs args) {
         return this.getImpl(
-            currentOrgId,
+            fiscoConfig.getCurrentOrgId(),
             toOrgId,
             args,
             GetEncryptKeyArgs.class,
             GetEncryptKeyResponse.class,
             AmopMsgType.GET_ENCRYPT_KEY,
-            AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -135,8 +135,6 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      * 注册回调函数接口.
      */
     public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
-
-        OnNotifyCallback callback = (OnNotifyCallback) getService().getPushCallback();
-        callback.registAmopCallback(directRouteMsgType, directRouteCallback);
+        super.getPushCallback().registAmopCallback(directRouteMsgType, directRouteCallback);
     }
 }

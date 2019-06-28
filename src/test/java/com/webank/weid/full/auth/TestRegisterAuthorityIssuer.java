@@ -31,7 +31,6 @@ import org.bcos.web3j.abi.datatypes.DynamicBytes;
 import org.bcos.web3j.abi.datatypes.StaticArray;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,8 +39,8 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.AuthorityIssuerController;
-import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
+import com.webank.weid.contract.v1.AuthorityIssuerController;
+import com.webank.weid.contract.v1.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
@@ -49,8 +48,6 @@ import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.RawTransactionService;
 import com.webank.weid.service.impl.RawTransactionServiceImpl;
-import com.webank.weid.util.TransactionUtils;
-import com.webank.weid.util.WeIdUtils;
 
 /**
  * registerAuthorityIssuer method for testing AuthorityIssuerService.
@@ -181,11 +178,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
-        Transaction transaction = TransactionUtils
-            .getTransaction(response.getTransactionInfo());
-        Assert.assertNotNull(transaction);
-        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getFrom())));
-        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getTo())));
     }
 
     /**

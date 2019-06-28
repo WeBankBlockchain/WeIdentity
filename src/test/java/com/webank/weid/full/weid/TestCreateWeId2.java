@@ -26,7 +26,6 @@ import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.bcos.web3j.tx.Contract;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -35,15 +34,15 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.WeIdContract;
-import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.contract.v1.WeIdContract;
+import com.webank.weid.contract.v1.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.engine.BaseEngine;
 
 /**
  * a parametric createWeId method for testing WeIdService.
@@ -288,9 +287,9 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
 
-        MockUp<BaseService> mockTest = new MockUp<BaseService>() {
+        MockUp<BaseEngine> mockTest = new MockUp<BaseEngine>() {
             @Mock
-            public Contract reloadContract(String contractAddress, String privateKey, Class<?> cls)
+            public <T> T reloadContract(String contractAddress, String privateKey, Class<T> cls)
                 throws PrivateKeyIllegalException {
 
                 throw new PrivateKeyIllegalException();

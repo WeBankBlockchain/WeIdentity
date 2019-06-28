@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.channel.client.Service;
 import org.bcos.channel.handler.ChannelConnections;
@@ -64,9 +63,6 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
-import com.webank.weid.contract.CptController;
-import com.webank.weid.contract.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
@@ -127,6 +123,21 @@ public class TransactionUtils {
     }
 
     /**
+     * Get a default blocklimit for a transaction. Used by Restful API service.
+     *
+     * @return blocklimit in BigInt.
+     */
+    public static BigInteger getBlockLimit() {
+        try {
+            return ((Web3j) BaseService.getWeb3j()).ethBlockNumber().send().getBlockNumber()
+                .add(new BigInteger(String.valueOf(WeIdConstant.ADDITIVE_BLOCK_HEIGHT)));
+        } catch (Exception e) {
+            //Send a large enough block limit number
+            return new BigInteger(WeIdConstant.BIG_BLOCK_LIMIT);
+        }
+    }
+
+    /**
      * Check validity and build input params for createWeId (with attributes - public key) function.
      * Used by Restful API service.
      *
@@ -136,7 +147,7 @@ public class TransactionUtils {
      */
     public static ResponseData<List<Type>> buildCreateWeIdInputParameters(String inputParam)
         throws Exception {
-        
+
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode inputParamNode = objectMapper.readTree(inputParam);
         JsonNode publicKeyNode = inputParamNode.get(ParamKeyConstant.PUBLIC_KEY);
@@ -320,7 +331,7 @@ public class TransactionUtils {
         longArray[1] = created;
         return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
-    
+
     /**
      * Get the current timestamp as the param "updated".  Used by Restful API service.
      *
@@ -333,7 +344,7 @@ public class TransactionUtils {
         longArray[2] = created;
         return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
-    
+
     /**
      * Get the cpt json schema as the param "cptJsonSchema". Used by Restful API service.
      *
@@ -380,71 +391,6 @@ public class TransactionUtils {
     public static BigInteger getNonce() {
         Random r = new SecureRandom();
         return new BigInteger(250, r);
-    }
-
-    /**
-     * Get a default blocklimit for a transaction. Used by Restful API service.
-     *
-     * @return blocklimit in BigInt.
-     */
-    public static BigInteger getBlockLimit() {
-        try {
-            return BaseService.getWeb3j().ethBlockNumber().send().getBlockNumber()
-                .add(new BigInteger(String.valueOf(WeIdConstant.ADDITIVE_BLOCK_HEIGHT)));
-        } catch (Exception e) {
-            //Send a large enough block limit number
-            return new BigInteger(WeIdConstant.BIG_BLOCK_LIMIT);
-        }
-    }
-
-    /**
-     * Verify Authority Issuer related events.
-     *
-     * @param event the Event
-     * @param opcode the Opcode
-     * @return the ErrorCode
-     */
-    public static ErrorCode verifyAuthorityIssuerRelatedEvent(
-        AuthorityIssuerRetLogEventResponse event,
-        Integer opcode) {
-        if (event == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (event.addr == null || event.operation == null || event.retCode == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        Integer eventOpcode = event.operation.getValue().intValue();
-        if (eventOpcode.equals(opcode)) {
-            Integer eventRetCode = event.retCode.getValue().intValue();
-            return ErrorCode.getTypeByErrorCode(eventRetCode);
-        } else {
-            return ErrorCode.AUTHORITY_ISSUER_OPCODE_MISMATCH;
-        }
-    }
-
-    /**
-     * Verify Register CPT related events.
-     *
-     * @param transactionReceipt the TransactionReceipt
-     * @return the ErrorCode
-     */
-    public static ResponseData<CptBaseInfo> resolveRegisterCptEvents(
-        TransactionReceipt transactionReceipt) {
-        List<RegisterCptRetLogEventResponse> event = CptController.getRegisterCptRetLogEvents(
-            transactionReceipt
-        );
-
-        if (CollectionUtils.isEmpty(event)) {
-            logger.error("[registerCpt] event is empty");
-            return new ResponseData<>(null, ErrorCode.CPT_EVENT_LOG_NULL);
-        }
-
-        return getResultByResolveEvent(
-            event.get(0).retCode,
-            event.get(0).cptId,
-            event.get(0).cptVersion,
-            transactionReceipt
-        );
     }
 
     /**
@@ -507,6 +453,65 @@ public class TransactionUtils {
     }
 
     /**
+     * Resolve CPT Event.
+     *
+     * @param retCode the retCode
+     * @param cptId the CptId
+     * @param cptVersion the CptVersion
+     * @param receipt receipt
+     * @return the result
+     */
+    public static ResponseData<CptBaseInfo> getResultByResolveEvent(
+        BigInteger retCode,
+        BigInteger cptId,
+        BigInteger cptVersion,
+        org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt receipt) {
+
+        TransactionInfo info = new TransactionInfo(receipt);
+        // register
+        if (retCode.intValue()
+            == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
+            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}",
+                retCode.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
+        }
+
+        if (retCode.intValue() == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST, info);
+        }
+
+        if (retCode.intValue() == ErrorCode.CPT_NO_PERMISSION.getCode()) {
+            logger.error("[getResultByResolveEvent] no permission. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION, info);
+        }
+
+        // register and update
+        if (retCode.intValue() == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
+        }
+
+        // update
+        if (retCode.intValue() == ErrorCode.CPT_NOT_EXISTS.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
+        }
+
+        CptBaseInfo result = new CptBaseInfo();
+        result.setCptId(cptId.intValue());
+        result.setCptVersion(cptVersion.intValue());
+
+        ResponseData<CptBaseInfo> responseData = new ResponseData<>(result, ErrorCode.SUCCESS,
+            info);
+        return responseData;
+    }
+
+    /**
      * Get the transaction instance from blockchain. Requires an on-chain Read operation.
      *
      * @param info the transaction info
@@ -516,7 +521,7 @@ public class TransactionUtils {
         if (info == null) {
             return null;
         }
-        Web3j web3j = BaseService.getWeb3j();
+        Web3j web3j = (Web3j) BaseService.getWeb3j();
         EthBlock ethBlock = null;
         BigInteger blockNumber = info.getBlockNumber();
         try {
