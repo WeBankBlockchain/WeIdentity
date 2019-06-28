@@ -1,26 +1,27 @@
 /*
  *       Copyright© (2018) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.full;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -39,7 +40,7 @@ import com.webank.weid.BaseTest;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.WeIdContract;
+import com.webank.weid.contract.v1.WeIdContract;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
@@ -47,6 +48,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
+import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
@@ -98,6 +100,12 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
      * parameters needed to create credentials.
      */
     protected static volatile CreateCredentialArgs createCredentialArgs = null;
+    
+    /**
+     * parameters needed to create credentialPojos.
+     */
+    protected static volatile CreateCredentialPojoArgs<Map<String, Object>> 
+        createCredentialPojoArgs = null;
 
     /**
      * parameters needed to register CPT.
@@ -143,6 +151,13 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
             cptBaseInfo = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
             createCredentialArgs.setCptId(cptBaseInfo.getCptId());
         }
+        if (createCredentialPojoArgs == null) {
+            registerCptArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
+            createCredentialPojoArgs =
+                TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
+            cptBaseInfo = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
+            createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
+        }    
     }
 
     /**

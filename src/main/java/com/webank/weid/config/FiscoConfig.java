@@ -1,3 +1,22 @@
+/*
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *
+ *       This file is part of weid-java-sdk.
+ *
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weid-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.webank.weid.config;
 
 import lombok.Data;
@@ -41,6 +60,7 @@ public class FiscoConfig {
     private String v2CaCrtPath;
     private String v2NodeCrtPath;
     private String v2NodeKeyPath;
+    private String currentOrgId;
 
     /**
      * load configuration without Spring context required.
@@ -49,7 +69,7 @@ public class FiscoConfig {
      */
     public boolean load() {
         try {
-            // node info is obtained from weidentity.properties
+            // node info is obtained from weidentity.properties.tpl
             nodes = PropertyUtils.getProperty("nodes");
 
             version = PropertyUtils.getProperty("bcos.version");
@@ -64,13 +84,19 @@ public class FiscoConfig {
             web3sdkMaxPoolSize = PropertyUtils.getProperty("web3sdk.max-pool-size");
             web3sdkQueueSize = PropertyUtils.getProperty("web3sdk.queue-capacity");
             web3sdkKeepAliveSeconds = PropertyUtils.getProperty("web3sdk.keep-alive-seconds");
+            groupId = PropertyUtils.getProperty("group.id");
+            encryptType = PropertyUtils.getProperty("encrypt.type");
             v1CaCrtPath = PropertyUtils.getProperty("v1.ca-crt-path");
             v1ClientCrtPassword = PropertyUtils.getProperty("v1.client-crt-password");
             v1ClientKeyStorePath = PropertyUtils.getProperty("v1.client-key-store-path");
             v1KeyStorePassword = PropertyUtils.getProperty("v1.key-store-password");
+            v2CaCrtPath = PropertyUtils.getProperty("v2.ca-crt-path");
+            v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
+            v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
+            currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
             return true;
         } catch (Exception e) {
-            logger.error("Error occurred during loading Fisco-Bcos properties: ", e);
+            logger.error("Error occurred during loading Fisco-Bcos properties: " + e.getMessage());
             return false;
         }
     }

@@ -1,24 +1,25 @@
 /*
  *       Copyright© (2018) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.suite.transportation.qr.impl;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,7 +95,7 @@ public class QrCodeJsonTransportationImpl
             // 构建协议header
             qrCodeData.buildQrCodeData(
                 property,
-                currentOrgId
+                fiscoConfig.getCurrentOrgId()
             );
             // 创建编解码实体对象，对此实体中的data编码操作
             EncodeData encodeData = 
@@ -153,9 +154,21 @@ public class QrCodeJsonTransportationImpl
                     .decode(encodeData);
             //将解压出来的数据进行反序列化成原数据对象
             //T presentation = JsonUtil.jsonStrToObj(clazz, data);
-            T presentation = DataToolUtils.deserialize(data, clazz);
+            String presentationEStr = DataToolUtils.convertUtcToTimestamp(data);
+            String presentationEStrNew = presentationEStr;
+            if (DataToolUtils.isValidFromToJson(presentationEStr)) {
+                presentationEStrNew = DataToolUtils.removeTagFromToJson(presentationEStr);
+            }
+            T object = null;
+            Method method = getFromJsonMethod(clazz);
+            if (method == null) {
+                //调用工具的反序列化 
+                object = (T) DataToolUtils.deserialize(presentationEStrNew, clazz);
+            } else  {
+                object = (T) method.invoke(null, presentationEStrNew);
+            }
             logger.info("QrCodeJsonTransportationImpl deserialization finished.");
-            return new ResponseData<T>(presentation, ErrorCode.SUCCESS);
+            return new ResponseData<T>(object, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("QrCodeJsonTransportationImpl deserialization due to base error.", e);
             return new ResponseData<T>(null, e.getErrorCode());
