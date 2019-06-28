@@ -1,0 +1,20 @@
+{
+	"extra": {
+		"extra1": "",
+		"extra2": ""
+	},
+	"id": 123456,
+	"version": 1,
+	"orgId": "organizationA",
+	"weId": "did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0",
+	"policy": {
+		"1000": {
+			"fieldsToBeDisclosed": {
+				"weid": 1,
+				"name": 1,
+				"gender": 0,
+				"age": 1
+			}
+		}
+	}
+}

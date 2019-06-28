@@ -1,44 +1,34 @@
 /*
  *       Copyright© (2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.service.impl;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.AuthorityIssuerController;
-import com.webank.weid.contract.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
-import com.webank.weid.contract.WeIdContract;
-import com.webank.weid.contract.WeIdContract.WeIdAttributeChangedEventResponse;
-import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.RawTransactionService;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.TransactionUtils;
+import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.service.impl.engine.RawTransactionServiceEngine;
 
 /**
  * Service interface for operations on direct transactions on blockchain.
@@ -49,6 +39,8 @@ public class RawTransactionServiceImpl extends BaseService implements RawTransac
 
     private static final Logger logger = LoggerFactory.getLogger(RawTransactionServiceImpl.class);
 
+    private RawTransactionServiceEngine engine = EngineFactory.createRawTransactionServiceEngine();
+
     /**
      * Create a WeIdentity DID from the provided public key, with preset transaction hex value.
      *
@@ -57,22 +49,12 @@ public class RawTransactionServiceImpl extends BaseService implements RawTransac
      */
     @Override
     public ResponseData<String> createWeId(String transactionHex) {
-        try {
-            if (StringUtils.isEmpty(transactionHex)) {
-                logger.error("WeID transaction error");
-                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-            }
-            TransactionReceipt transactionReceipt = TransactionUtils
-                .sendTransaction(getWeb3j(), transactionHex);
-            List<WeIdAttributeChangedEventResponse> response =
-                WeIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
-            if (!CollectionUtils.isEmpty(response)) {
-                return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS);
-            }
-        } catch (Exception e) {
-            logger.error("[createWeId] create failed due to unknown transaction error. ", e);
+
+        if (StringUtils.isEmpty(transactionHex)) {
+            logger.error("WeID transaction error");
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        return engine.createWeId(transactionHex);
     }
 
     /**
@@ -85,25 +67,11 @@ public class RawTransactionServiceImpl extends BaseService implements RawTransac
      */
     @Override
     public ResponseData<String> registerAuthorityIssuer(String transactionHex) {
-        try {
-            if (StringUtils.isEmpty(transactionHex)) {
-                logger.error("AuthorityIssuer transaction error");
-                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-            }
-            TransactionReceipt transactionReceipt = TransactionUtils
-                .sendTransaction(getWeb3j(), transactionHex);
-
-            List<AuthorityIssuerRetLogEventResponse> eventList =
-                AuthorityIssuerController.getAuthorityIssuerRetLogEvents(transactionReceipt);
-            AuthorityIssuerRetLogEventResponse event = eventList.get(0);
-            ErrorCode errorCode = TransactionUtils.verifyAuthorityIssuerRelatedEvent(event,
-                WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE);
-            Boolean result = errorCode.getCode() == ErrorCode.SUCCESS.getCode();
-            return new ResponseData<>(result.toString(), errorCode);
-        } catch (Exception e) {
-            logger.error("[registerAuthorityIssuer] register failed due to transaction error.", e);
+        if (StringUtils.isEmpty(transactionHex)) {
+            logger.error("AuthorityIssuer transaction error");
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        return engine.registerAuthorityIssuer(transactionHex);
     }
 
 
@@ -114,22 +82,10 @@ public class RawTransactionServiceImpl extends BaseService implements RawTransac
      * @return The registered CPT info
      */
     public ResponseData<String> registerCpt(String transactionHex) {
-        try {
-            if (StringUtils.isEmpty(transactionHex)) {
-                logger.error("CptService transaction error");
-                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-            }
-            TransactionReceipt transactionReceipt = TransactionUtils
-                .sendTransaction(getWeb3j(), transactionHex);
-            CptBaseInfo cptBaseInfo = TransactionUtils.resolveRegisterCptEvents(transactionReceipt)
-                .getResult();
-            if (cptBaseInfo != null) {
-                return new ResponseData<>(DataToolUtils.objToJsonStrWithNoPretty(cptBaseInfo),
-                    ErrorCode.SUCCESS);
-            }
-        } catch (Exception e) {
-            logger.error("[registerCpt] register failed due to unknown transaction error. ", e);
+        if (StringUtils.isEmpty(transactionHex)) {
+            logger.error("CptService transaction error");
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        return engine.registerCpt(transactionHex);
     }
 }
