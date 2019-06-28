@@ -96,7 +96,7 @@ public class TestTransactionUtils {
         receipt.setTransactionIndex("0");
         TransactionInfo info = new TransactionInfo(receipt);
         Assert.assertNotNull(info);
-        Assert.assertNull(new TransactionInfo(null).getBlockNumber());
+        Assert.assertNull(new TransactionInfo((TransactionReceipt)null).getBlockNumber());
         Assert.assertNull(TransactionUtils.getTransaction(null));
     }
 

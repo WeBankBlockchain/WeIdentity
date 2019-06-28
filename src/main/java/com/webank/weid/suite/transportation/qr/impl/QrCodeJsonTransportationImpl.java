@@ -94,7 +94,7 @@ public class QrCodeJsonTransportationImpl
             // 构建协议header
             qrCodeData.buildQrCodeData(
                 property,
-                currentOrgId
+                fiscoConfig.getCurrentOrgId()
             );
             // 创建编解码实体对象，对此实体中的data编码操作
             EncodeData encodeData = 
