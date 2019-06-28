@@ -1,24 +1,25 @@
 /*
  *       Copyright© (2018) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.suite.transportation.json.impl;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +82,7 @@ public class JsonTransportationImpl
             logger.info("encode by {}.", property.getEncodeType().name());
             // 如果是原文方式，则直接放对象,data为对象类型
             if (property.getEncodeType() == EncodeType.ORIGINAL) {
-                jsonBaseData.setData(object);
+                jsonBaseData.setData(object.toJson());
             } else {
                 // 非原文格式，根据data进行编解码，data为字符串类型
                 // 创建编解码实体对象，对此实体中的data编码操作
@@ -125,7 +126,9 @@ public class JsonTransportationImpl
             }
             //将JSON字符串解析成JsonBaseData对象
             //JsonBaseData jsonBaseData = JsonUtil.jsonStrToObj(JsonBaseData.class, transString);
-            JsonBaseData jsonBaseData = DataToolUtils.deserialize(transString, JsonBaseData.class);
+            JsonBaseData jsonBaseData = DataToolUtils.deserialize(
+                transString, 
+                JsonBaseData.class);
             //检查JsonBaseData合法性
             ErrorCode errorCode = checkJsonBaseData(jsonBaseData);
             if (errorCode != ErrorCode.SUCCESS) {
@@ -161,8 +164,19 @@ public class JsonTransportationImpl
                     .decode(encodeData);
             //T object =
             //      (T) DataToolUtils.jsonStrToObj(clazz, presentationEStr);
-            T object =
-                (T) DataToolUtils.deserialize(presentationEStr, clazz);
+            String presentationEJson = DataToolUtils.convertUtcToTimestamp(presentationEStr);
+            String presentationEJsonNew = presentationEJson;
+            if (DataToolUtils.isValidFromToJson(presentationEJson)) {
+                presentationEJsonNew = DataToolUtils.removeTagFromToJson(presentationEJson);
+            }
+            T object = null;
+            Method method = getFromJsonMethod(clazz);
+            if (method == null) {
+                //调用工具的反序列化 
+                object = (T) DataToolUtils.deserialize(presentationEJsonNew, clazz);
+            } else  {
+                object = (T) method.invoke(null, presentationEJsonNew);
+            }
             logger.info("JsonTransportationImpl deserialization finished.");
             return new ResponseData<T>(object, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
@@ -184,7 +198,7 @@ public class JsonTransportationImpl
         JsonBaseData jsonBaseData = new JsonBaseData();
         jsonBaseData.setEncodeType(property.getEncodeType().getCode());
         jsonBaseData.setId(DataToolUtils.getUuId32());
-        jsonBaseData.setOrgId(currentOrgId);
+        jsonBaseData.setOrgId(fiscoConfig.getCurrentOrgId());
         jsonBaseData.setVersion(version.getCode());
         return jsonBaseData;
     }

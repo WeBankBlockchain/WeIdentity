@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.service.impl;
@@ -34,8 +34,8 @@ import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.callback.AmopCallback;
-import com.webank.weid.rpc.callback.OnNotifyCallback;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 
 
@@ -53,15 +53,15 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String targetUserWeId
     ) {
         try {
-            if (StringUtils.isBlank(currentOrgId)) {
+            if (StringUtils.isBlank(fiscoConfig.getCurrentOrgId())) {
                 logger.error("the orgId is null, policyId = {}", policyId);
                 return new ResponseData<PolicyAndChallenge>(null, ErrorCode.ILLEGAL_INPUT);
             }
             GetPolicyAndChallengeArgs args = new GetPolicyAndChallengeArgs();
-            args.setFromOrgId(currentOrgId);
+            args.setFromOrgId(fiscoConfig.getCurrentOrgId());
             args.setToOrgId(targetOrgId);
             args.setPolicyId(String.valueOf(policyId));
-            args.setMessageId(getService().newSeq());
+            args.setMessageId(super.getSeq());
             args.setTargetUserWeId(targetUserWeId);
             ResponseData<GetPolicyAndChallengeResponse> retResponse =
                 this.getPolicyAndChallenge(targetOrgId, args);
@@ -90,13 +90,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String toOrgId,
         GetPolicyAndChallengeArgs args) {
         return this.getImpl(
-            currentOrgId,
+            fiscoConfig.getCurrentOrgId(),
             toOrgId,
             args,
             GetPolicyAndChallengeArgs.class,
             GetPolicyAndChallengeResponse.class,
             AmopMsgType.GET_POLICY_AND_CHALLENGE,
-            AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -105,13 +105,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      */
     public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
         return this.getImpl(
-            currentOrgId,
+            fiscoConfig.getCurrentOrgId(),
             toOrgId,
             args,
             AmopCommonArgs.class,
             AmopResponse.class,
             AmopMsgType.TYPE_TRANSPORTATION,
-            AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -121,13 +121,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId,
         GetEncryptKeyArgs args) {
         return this.getImpl(
-            currentOrgId,
+            fiscoConfig.getCurrentOrgId(),
             toOrgId,
             args,
             GetEncryptKeyArgs.class,
             GetEncryptKeyResponse.class,
             AmopMsgType.GET_ENCRYPT_KEY,
-            AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -135,8 +135,6 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      * 注册回调函数接口.
      */
     public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
-
-        OnNotifyCallback callback = (OnNotifyCallback) getService().getPushCallback();
-        callback.registAmopCallback(directRouteMsgType, directRouteCallback);
+        super.getPushCallback().registAmopCallback(directRouteMsgType, directRouteCallback);
     }
 }

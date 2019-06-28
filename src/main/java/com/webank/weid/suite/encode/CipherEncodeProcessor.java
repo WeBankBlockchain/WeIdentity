@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.suite.encode;
@@ -113,7 +113,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
 
     private String getEntryptKey(EncodeData encodeData) {
         //说明是当前机构，这个时候不适用于AMOP获取key，而是从本地数据库中获取key
-        if (currentOrgId.equals(encodeData.getOrgId())) {
+        if (fiscoConfig.getCurrentOrgId().equals(encodeData.getOrgId())) {
             //保存秘钥
             ResponseData<String> response = 
                 this.dataDriver.get(TRANSENCRYPTIONDOMAIN, encodeData.getId());
@@ -139,7 +139,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         args.setKeyId(encodeData.getId());
         args.setMessageId(DataToolUtils.getUuId32());
         args.setToOrgId(encodeData.getOrgId());
-        args.setFromOrgId(currentOrgId);
+        args.setFromOrgId(fiscoConfig.getCurrentOrgId());
         ResponseData<GetEncryptKeyResponse> resResponse = 
             amopService.getEncryptKey(encodeData.getOrgId(), args);
         if (resResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {

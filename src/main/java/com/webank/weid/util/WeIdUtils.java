@@ -1,25 +1,27 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +30,7 @@ import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.WalletUtils;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +54,9 @@ public final class WeIdUtils {
      * read the chainId from properties.
      */
     private static final String CHAIN_ID = PropertyUtils.getProperty("chain.id");
+    
+    private static final String WEID = "weid";
+    private static final String PROPERTIES = "properties";
 
     /**
      * Convert a WeIdentity DID to a fisco account address.
@@ -177,7 +183,27 @@ public final class WeIdUtils {
     public static boolean isEmptyAddress(Address addr) {
         return addr.getValue().equals(BigInteger.ZERO);
     }
+    
+    /**
+     * check if the given Address is empty.
+     *
+     * @param addr given Address
+     * @return true if yes, false otherwise.
+     */
+    public static boolean isEmptyAddress(org.fisco.bcos.web3j.abi.datatypes.Address addr) {
+        return addr.getValue().equals(BigInteger.ZERO);
+    }
 
+    /**
+     * check if the given Address is empty.
+     *
+     * @param addr given Address
+     * @return true if yes, false otherwise.
+     */
+    public static boolean isEmptyStringAddress(String addr) {
+        return Numeric.toBigInt(addr).equals(BigInteger.ZERO);
+    }
+    
     /**
      * check the weId is match the private key.
      *
@@ -202,5 +228,24 @@ public final class WeIdUtils {
         }
 
         return isMatch;
+    }
+    
+    /**
+     * check if the given map contain correct WeId.
+     * @param map map
+     * @return boolean
+     */
+    public static boolean validateContainWeIdKey(Map<String, Object> map) {
+        if (map == null || map.isEmpty()) {
+            return false;
+        }
+        if (map.containsKey(WEID)) {   
+            return map.containsKey(WEID);
+        } else if (map.containsKey(PROPERTIES)) {
+            HashMap<String, Object> propertiesMap = (HashMap<String, Object>) map.get(PROPERTIES);
+            return propertiesMap.containsKey(WEID);        
+        } else {
+            return false;
+        }
     }
 }
