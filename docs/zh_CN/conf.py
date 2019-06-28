@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'weidentity-java-sdk'
+project = 'weid-java-sdk'
 copyright = '(2018)Webank Co. Ltd.'
 author = 'weidentity team'
 
@@ -127,7 +127,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'weidentity-java-sdk.tex', 'weidentity-java-sdk Documentation',
+    (master_doc, 'weidentity-java-sdk.tex', 'weid-java-sdk Documentation',
      'weidentity team', 'manual'),
 ]
 
@@ -137,7 +137,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'weidentity-java-sdk', 'weidentity-java-sdk Documentation',
+    (master_doc, 'weid-java-sdk', 'weid-java-sdk Documentation',
      [author], 1)
 ]
 
@@ -148,8 +148,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'weidentity-java-sdk', 'weidentity-java-sdk Documentation',
-     author, 'weidentity-java-sdk', 'One line description of project.',
+    (master_doc, 'weid-java-sdk', 'weid-java-sdk Documentation',
+     author, 'weid-java-sdk', 'One line description of project.',
      'Miscellaneous'),
 ]
 
