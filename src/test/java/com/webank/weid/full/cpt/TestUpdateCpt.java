@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.full.cpt;
@@ -32,7 +32,6 @@ import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
@@ -43,7 +42,7 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.contract.CptController;
+import com.webank.weid.contract.v1.CptController;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Cpt;
@@ -52,7 +51,6 @@ import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -92,11 +90,6 @@ public class TestUpdateCpt extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
-        Transaction transaction = TransactionUtils
-            .getTransaction(response.getTransactionInfo());
-        Assert.assertNotNull(transaction);
-        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getFrom())));
-        Assert.assertFalse(WeIdUtils.isEmptyAddress(new Address(transaction.getTo())));
     }
 
     /**
@@ -157,7 +150,10 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, 10000);
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_NOT_EXISTS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(
+            ErrorCode.CPT_NO_PERMISSION.getCode(), 
+            response.getErrorCode().intValue()
+        );
         Assert.assertNull(response.getResult());
     }
 
@@ -444,8 +440,11 @@ public class TestUpdateCpt extends TestBaseServcie {
             cptBaseInfo.getCptId());
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
+        Assert.assertEquals(
+            ErrorCode.CPT_NO_PERMISSION.getCode(),
+            response.getErrorCode().intValue()
+        );
+        Assert.assertNull(response.getResult());
     }
 
     /**

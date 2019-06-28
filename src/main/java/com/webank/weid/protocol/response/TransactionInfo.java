@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.protocol.response;
@@ -50,7 +50,7 @@ public class TransactionInfo {
     private BigInteger transactionIndex;
 
     /**
-     * Constructor from a transactionReceipt. If the receipt is null, an
+     * Constructor from a transactionReceipt.
      *
      * @param receipt the transaction receipt
      */
@@ -60,5 +60,34 @@ public class TransactionInfo {
             this.transactionHash = receipt.getTransactionHash();
             this.transactionIndex = receipt.getTransactionIndex();
         }
+    }
+
+    /**
+     * Constructor from a transactionReceipt.
+     *
+     * @param receipt the transaction receipt
+     */
+    public TransactionInfo(
+        org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt receipt) {
+        if (receipt != null) {
+            this.blockNumber = receipt.getBlockNumber();
+            this.transactionHash = receipt.getTransactionHash();
+            this.transactionIndex = receipt.getTransactionIndex();
+        }
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param blockNumber blockNumber
+     * @param transactionHash transactionHash
+     * @param transactionIndex transactionIndex
+     */
+    public TransactionInfo(BigInteger blockNumber,
+        String transactionHash,
+        BigInteger transactionIndex) {
+        this.blockNumber = blockNumber;
+        this.transactionHash = transactionHash;
+        this.transactionIndex = transactionIndex;
     }
 }

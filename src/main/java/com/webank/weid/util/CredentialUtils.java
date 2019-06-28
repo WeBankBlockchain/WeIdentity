@@ -1,20 +1,20 @@
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
- *       This file is part of weidentity-java-sdk.
+ *       This file is part of weid-java-sdk.
  *
- *       weidentity-java-sdk is free software: you can redistribute it and/or modify
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
  *       it under the terms of the GNU Lesser General Public License as published by
  *       the Free Software Foundation, either version 3 of the License, or
  *       (at your option) any later version.
  *
- *       weidentity-java-sdk is distributed in the hope that it will be useful,
+ *       weid-java-sdk is distributed in the hope that it will be useful,
  *       but WITHOUT ANY WARRANTY; without even the implied warranty of
  *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *       GNU Lesser General Public License for more details.
  *
  *       You should have received a copy of the GNU Lesser General Public License
- *       along with weidentity-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.webank.weid.util;
@@ -109,15 +109,19 @@ public final class CredentialUtils {
         //Map<String, String> proof = (HashMap<String, String>) JsonUtil
         //    .jsonStrToObj(new HashMap<String, String>(), JsonUtil.objToJsonStr(originalProof));
         //ct.setProof(proof);
-        Map<String, String> proof = DataToolUtils
-            .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
-        ct.setProof(proof);
+        if (originalProof != null) {
+            Map<String, String> proof = DataToolUtils
+                .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
+            ct.setProof(proof);
+        } 
         Map<String, Object> originalClaim = credential.getClaim();
         //Map<String, Object> claim = (HashMap<String, Object>) JsonUtil
         //    .jsonStrToObj(new HashMap<String, Object>(), JsonUtil.objToJsonStr(originalClaim));
-        Map<String, Object> claim = DataToolUtils
-            .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
-        ct.setClaim(claim);
+        if (originalClaim != null) {
+            Map<String, Object> claim = DataToolUtils
+                .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
+            ct.setClaim(claim);
+        }
 
         ct.setIssuanceDate(credential.getIssuanceDate());
         ct.setCptId(credential.getCptId());
