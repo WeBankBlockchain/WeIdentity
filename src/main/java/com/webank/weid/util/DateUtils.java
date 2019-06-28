@@ -22,10 +22,17 @@ package com.webank.weid.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.TimeZone;
 
 import org.bcos.web3j.abi.datatypes.generated.Int256;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Date formatter utilities.
@@ -33,6 +40,13 @@ import org.bcos.web3j.abi.datatypes.generated.Int256;
  * @author lingfenghe
  */
 public class DateUtils {
+    private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
+
+    private static String TIME_ZONE = "Asia/Shanghai";
+
+    private static String STRING_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+    private static String UTC_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
     /**
      * Get the ISO8601 timestamp.
@@ -65,6 +79,16 @@ public class DateUtils {
         df.setTimeZone(tz);
         return df;
     }
+    
+    /**
+     * Gets the default date format.
+     *
+     * @return the default date format
+     */
+    private static DateTimeFormatter getDefaultDateTimeFormatter() {
+        DateTimeFormatter ftf = DateTimeFormatter.ofPattern(UTC_DATE_FORMAT);
+        return ftf.withZone(ZoneId.of(TIME_ZONE));
+    }
 
     /**
      * Convert a String to Date based on a specific DateFormat.
@@ -96,7 +120,7 @@ public class DateUtils {
      * @throws ParseException the parse exception
      */
     public static long converDateToTimeStamp(String time) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(STRING_DATE_FORMAT);
         Date date = simpleDateFormat.parse(time);
         long ts = date.getTime();
         return ts;
@@ -109,11 +133,22 @@ public class DateUtils {
      * @return the long timestamp
      * @throws ParseException the parse exception
      */
-    public static long convertUtcDateToTimeStamp(String time) throws ParseException {
+    public static Long convertUtcDateToTimeStamp(String time) throws ParseException {
         DateFormat simpleDateFormat = getDefaultDateFormat();
         Date date = simpleDateFormat.parse(time);
-        long ts = date.getTime();
-        return ts;
+        return date.getTime();      
+    }
+    
+    /**
+     * Conver utc date to without millisecond timestamp.
+     *
+     * @param time the time in UTC
+     * @return the long timestamp   
+     */
+    public static Long convertUtcDateToNoMillisecondTime(String time) {
+        DateTimeFormatter dtf = getDefaultDateTimeFormatter();
+        LocalDateTime date = LocalDateTime.parse(time, dtf);
+        return date.toInstant(ZoneOffset.of("+8")).getEpochSecond();
     }
 
     /**
@@ -136,15 +171,34 @@ public class DateUtils {
     /**
      * Check the timestamp date to UTC date string.
      *
-     * @param timestamp the date string
+     * @param date the timestamp string
      * @return UTC formatted date string
      */
-    public static String convertTimestampToUtc(Long timestamp) {
+    public static String convertTimestampToUtc(Long date) {
         DateFormat df = getDefaultDateFormat();
         df.setLenient(false);
-        return df.format(new Date(timestamp));
+        return df.format(new Date(date));      
     }
-
+    
+    /**
+     * Convert the timestamp without millisecond date to UTC date string.
+     *
+     * @param date the timestamp without millisecond string
+     * @return UTC formatted date string
+     */
+    public static String convertNoMillisecondTimestampToUtc(Long date) {
+        if (String.valueOf(date) != null
+            && String.valueOf(date).length() == getNoMillisecondTimeStampString().length()) {
+            DateTimeFormatter dtf = getDefaultDateTimeFormatter();
+            return dtf.format(LocalDateTime.ofInstant(
+                Instant.ofEpochSecond(date), 
+                ZoneId.of(TIME_ZONE)));
+        } else {
+            logger.error("the timestamp is illegal.");
+            return null;
+        }        
+    }
+    
     /**
      * Get current timestamp in Int256 type.
      *
@@ -164,11 +218,68 @@ public class DateUtils {
     }
 
     /**
-     * Get current timestamp in String type.
+     * Get current timestamp in long type.
      *
      * @return the current time stamp long
      */
     public static Long getCurrentTimeStamp() {
         return System.currentTimeMillis();
+    }
+
+    /**
+     * Get current timestamp without millisecond in long type.
+     *
+     * @return the current time stamp without millisecond long
+     */
+    public static Long getNoMillisecondTimeStamp() {
+        return Instant.now().getEpochSecond();
+    }
+    
+    /**
+     * Get current timestamp without millisecond in String type.
+     *
+     * @return the current time stamp without millisecond String
+     */
+    public static String getNoMillisecondTimeStampString() {
+        return String.valueOf(Instant.now().getEpochSecond());
+    }
+    
+    /**
+     * compare with the long date with CurrentTime.
+     * @param date long date
+     * @return boolean
+     */
+    public static boolean isBeforeCurrentTime(Long date) {
+        if (String.valueOf(date) != null
+            && String.valueOf(date).length() == getCurrentTimeStampString().length()) {
+            return date < getCurrentTimeStamp();
+        } else if (String.valueOf(date) != null
+            && String.valueOf(date).length() == getNoMillisecondTimeStampString().length()) {
+            return date < getNoMillisecondTimeStamp();
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * convert timeStamp which contain millisecond to without millisecond timeStamp.
+     * @param date timeStamp
+     * @return the timeStamp without millisecond
+     */
+    public static Long convertToNoMillisecondTimeStamp(Long date) { 
+        if (String.valueOf(date) == null) {
+            logger.error("the timestamp is null.");
+            return null;
+        } 
+        if (String.valueOf(date) != null 
+            && String.valueOf(date).length() != getCurrentTimeStampString().length()) {
+            return date;
+        }
+        DateTimeFormatter ftf = DateTimeFormatter.ofPattern(STRING_DATE_FORMAT); 
+        String time = ftf.format(
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(date), 
+            ZoneId.of(TIME_ZONE))); 
+        LocalDateTime parse = LocalDateTime.parse(time, ftf);
+        return LocalDateTime.from(parse).atZone(ZoneId.of(TIME_ZONE)).toInstant().getEpochSecond();
     }
 }

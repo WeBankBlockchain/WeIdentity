@@ -24,7 +24,11 @@ import java.security.SecureRandom;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.inf.RawSerializer;
 import com.webank.weid.util.DataToolUtils;
 
@@ -34,6 +38,8 @@ import com.webank.weid.util.DataToolUtils;
 @Getter
 @Setter
 public class Challenge extends Version implements RawSerializer {
+
+    private static final Logger logger = LoggerFactory.getLogger(Challenge.class);
 
     /**
      * the serialVersionUID.
@@ -77,13 +83,27 @@ public class Challenge extends Version implements RawSerializer {
         return challenge;
     }
     
+    @Override
+    public String toJson() {
+        return DataToolUtils.addTagFromToJson(DataToolUtils.serialize(this));
+    }
+    
     /**
      * create Challenge with JSON String.
      * @param challengeJson the challenge JSON String
      * @return Challenge
      */
     public static Challenge fromJson(String challengeJson) {
-        return DataToolUtils.deserialize(challengeJson, Challenge.class);
+        if (StringUtils.isBlank(challengeJson)) {
+            logger.error("create Challenge with JSON String failed, "
+                + "the Challenge JSON String is null");
+            throw new DataTypeCastException("the Challenge JSON String is null.");
+        }
+        String challengeString = challengeJson;
+        if (DataToolUtils.isValidFromToJson(challengeJson)) {
+            challengeString = DataToolUtils.removeTagFromToJson(challengeJson);
+        }
+        return DataToolUtils.deserialize(challengeString, Challenge.class);
     }
     
     @Override

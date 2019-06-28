@@ -72,8 +72,9 @@ public class CptServiceImpl extends BaseService implements CptService {
         try {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
-            cptMapArgs.setCptJsonSchema(
-                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
+            Map<String, Object> cptJsonSchemaMap = 
+                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
+            cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs, cptId);
         } catch (Exception e) {
             logger.error("[registerCpt1] register cpt failed due to unknown error. ", e);
@@ -98,8 +99,9 @@ public class CptServiceImpl extends BaseService implements CptService {
 
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
-            cptMapArgs.setCptJsonSchema(
-                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
+            Map<String, Object> cptJsonSchemaMap = 
+                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
+            cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs);
         } catch (Exception e) {
             logger.error("[registerCpt1] register cpt failed due to unknown error. ", e);
@@ -289,7 +291,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
     private ErrorCode validateCptArgs(
         WeIdAuthentication weIdAuthentication,
-        Map<String, Object> cptJsonSchemaMap) throws Exception {
+        Map<String, Object> cptJsonSchemaMap) throws Exception  {
 
         if (weIdAuthentication == null) {
             logger.error("Input cpt weIdAuthentication is invalid.");
@@ -300,18 +302,17 @@ public class CptServiceImpl extends BaseService implements CptService {
         if (!WeIdUtils.isWeIdValid(weId)) {
             logger.error("Input cpt publisher : {} is invalid.", weId);
             return ErrorCode.WEID_INVALID;
-        }
+        }       
 
-        if (cptJsonSchemaMap == null || cptJsonSchemaMap.isEmpty()) {
-            logger.error("Input cpt json schema is invalid.");
-            return ErrorCode.CPT_JSON_SCHEMA_INVALID;
+        ErrorCode errorCode = validateCptJsonSchemaMap(cptJsonSchemaMap);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return errorCode;
         }
         String cptJsonSchema = DataToolUtils.serialize(cptJsonSchemaMap);
         if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
             logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaMap);
             return ErrorCode.CPT_JSON_SCHEMA_INVALID;
         }
-
         WeIdPrivateKey weIdPrivateKey = weIdAuthentication.getWeIdPrivateKey();
         if (weIdPrivateKey == null
             || StringUtils.isEmpty(weIdPrivateKey.getPrivateKey())) {
@@ -324,6 +325,22 @@ public class CptServiceImpl extends BaseService implements CptService {
 
         if (!WeIdUtils.validatePrivateKeyWeIdMatches(weIdPrivateKey, weId)) {
             return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
+        }
+        return ErrorCode.SUCCESS;
+    }
+    
+    private ErrorCode validateCptJsonSchemaMap(
+        Map<String, Object> cptJsonSchemaMap) throws Exception {
+        if (cptJsonSchemaMap == null || cptJsonSchemaMap.isEmpty()) {
+            logger.error("Input cpt json schema is invalid.");
+            return ErrorCode.CPT_JSON_SCHEMA_INVALID;
+        }
+        //String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
+        String cptJsonSchema = DataToolUtils.serialize(cptJsonSchemaMap);
+        if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema) 
+            || !WeIdUtils.validateContainWeIdKey(cptJsonSchemaMap)) {
+            logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaMap);
+            return ErrorCode.CPT_JSON_SCHEMA_INVALID;
         }
         return ErrorCode.SUCCESS;
     }
