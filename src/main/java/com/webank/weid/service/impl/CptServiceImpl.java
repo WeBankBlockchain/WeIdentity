@@ -42,6 +42,7 @@ import com.webank.weid.rpc.CptService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
 import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -338,7 +339,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         //String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
         String cptJsonSchema = DataToolUtils.serialize(cptJsonSchemaMap);
         if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema) 
-            || !WeIdUtils.validateContainWeIdKey(cptJsonSchemaMap)) {
+            || !CredentialPojoUtils.validateContainIdKeyForCpt(cptJsonSchemaMap)) {
             logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaMap);
             return ErrorCode.CPT_JSON_SCHEMA_INVALID;
         }
