@@ -17,9 +17,10 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.persistence.driver;
+package com.webank.weid.suite.persistence.sql.driver;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,9 +29,10 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.DbBase;
+import com.webank.weid.suite.persistence.sql.SqlExecutor;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -38,51 +40,41 @@ import com.webank.weid.util.DataToolUtils;
  *
  * @author tonychen 2019年3月18日
  */
-public class MysqlDriver extends DbBase implements Persistence {
+public class MysqlDriver implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(MysqlDriver.class);
+    
+    private static final String CHECK_TABLE_SQL =
+        "SELECT table_name data FROM information_schema.TABLES WHERE table_name ='$1'";
+    
+    private static final String CREATE_TABLE_SQL =
+        "CREATE TABLE `$1` ("
+        + "`id` varchar(128) NOT NULL COMMENT 'primary key',"
+        + "`data` blob DEFAULT NULL COMMENT 'the save data', "
+        + "`created` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'created', "
+        + "`updated` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'updated', "
+        + "`protocol` varchar(32) DEFAULT NULL COMMENT 'protocol', "
+        + "PRIMARY KEY (`id`) "
+        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='the data table'";
 
-    /**
-     * sql for query.
-     */
-    private static final String SQL_QUERY = "select id,data,created from sdk_all_data where id =?";
-
-    /**
-     * sql for save.
-     */
-    private static final String SQL_SAVE = "insert into sdk_all_data(id, data) values(?,?)";
-
-    /**
-     * sql for update.
-     */
-    private static final String SQL_UPDATE = "update sdk_all_data set data = ?, updated=now() "
-        + "where id = ?";
-
-    /**
-     * sql for delete.
-     */
-    private static final String SQL_DELETE = "delete from sdk_all_data where id = ?";
-
-    /**
-     * 根据驱动类型构造对象.
-     */
-    public MysqlDriver() {
-        super(DataDriverConstant.JDBC_MYSQL_DRIVER_CLASS_NAME);
-    }
-
+    private static final Integer FAILED_STATUS = DataDriverConstant.SQL_EXECUTE_FAILED_STATUS;
+    
+    private static final ErrorCode KEY_INVALID = ErrorCode.PRESISTENCE_DATA_KEY_INVALID;
+    
     @Override
     public ResponseData<String> get(String domain, String id) {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[mysql->get] the id of the data is empty.");
-            return 
-                new ResponseData<String>(
-                    StringUtils.EMPTY,
-                    ErrorCode.PRESISTENCE_DATA_KEY_INVALID
-                );
+            return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
         String dataKey = DataToolUtils.getHash(id);
-        return super.executeQuery(SQL_QUERY, dataKey);
+        try {
+            return new SqlExecutor(domain).executeQuery(SqlExecutor.SQL_QUERY, dataKey);
+        } catch (WeIdBaseException e) {
+            logger.error("[mysql->get] get the data error.", e);
+            return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.UNKNOW_ERROR);
+        }
     }
 
     /* (non-Javadoc)
@@ -93,14 +85,22 @@ public class MysqlDriver extends DbBase implements Persistence {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[mysql->save] the id of the data is empty.");
-            return 
-                new ResponseData<Integer>(
-                    DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                    ErrorCode.PRESISTENCE_DATA_KEY_INVALID
-                );
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.getHash(id);
-        return super.execute(SQL_SAVE, dataKey, data);
+        try {
+            return new SqlExecutor(domain)
+                .executeSave(
+                    SqlExecutor.SQL_SAVE,
+                    CHECK_TABLE_SQL,
+                    CREATE_TABLE_SQL,
+                    dataKey,
+                    data
+                );
+        } catch (WeIdBaseException e) {
+            logger.error("[mysql->save] save the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, ErrorCode.UNKNOW_ERROR);
+        }
     }
 
     /* (non-Javadoc)
@@ -108,6 +108,7 @@ public class MysqlDriver extends DbBase implements Persistence {
      */
     @Override
     public ResponseData<Integer> batchSave(String domain, List<String> ids, List<String> dataList) {
+        
         List<List<String>> dataLists = new ArrayList<List<String>>();
         List<String> idHashList = new ArrayList<>();
         for (String id : ids) {
@@ -115,7 +116,18 @@ public class MysqlDriver extends DbBase implements Persistence {
         }
         dataLists.add(idHashList);
         dataLists.add(dataList);
-        return super.batchSave(SQL_SAVE, dataLists);
+        try {
+            return new SqlExecutor(domain)
+                .batchSave(
+                    SqlExecutor.SQL_SAVE,
+                    CHECK_TABLE_SQL,
+                    CREATE_TABLE_SQL, 
+                    dataLists
+                );
+        } catch (WeIdBaseException e) {
+            logger.error("[mysql->batchSave] batchSave the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, ErrorCode.UNKNOW_ERROR);
+        }
     }
 
     /* (non-Javadoc)
@@ -126,14 +138,15 @@ public class MysqlDriver extends DbBase implements Persistence {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[mysql->delete] the id of the data is empty.");
-            return 
-                new ResponseData<Integer>(
-                    DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                    ErrorCode.PRESISTENCE_DATA_KEY_INVALID
-                );
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.getHash(id);
-        return super.execute(SQL_DELETE, dataKey);
+        try {
+            return new SqlExecutor(domain).execute(SqlExecutor.SQL_DELETE, dataKey);
+        } catch (WeIdBaseException e) {
+            logger.error("[mysql->delete] delete the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, ErrorCode.UNKNOW_ERROR);
+        }
     }
 
     /* (non-Javadoc)
@@ -144,13 +157,15 @@ public class MysqlDriver extends DbBase implements Persistence {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[mysql->update] the id of the data is empty.");
-            return 
-                new ResponseData<Integer>(
-                    DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                    ErrorCode.PRESISTENCE_DATA_KEY_INVALID
-                );
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.getHash(id);
-        return super.execute(SQL_UPDATE, data, dataKey);
+        Date date = new Date();
+        try {
+            return new SqlExecutor(domain).execute(SqlExecutor.SQL_UPDATE, date, data, dataKey);
+        } catch (WeIdBaseException e) {
+            logger.error("[mysql->update] update the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, ErrorCode.UNKNOW_ERROR);
+        }
     }
 }
