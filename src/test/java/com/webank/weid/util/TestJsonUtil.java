@@ -94,7 +94,7 @@ public class TestJsonUtil {
         cptSchema = DataToolUtils.generateDefaultCptJsonSchema(101);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
         Cpt101 cpt101 = new Cpt101();
-        cpt101.setDelegator("aaa");
+        cpt101.setId("did:weid:101:0x11111");
         cpt101.setReceiver("bbb");
         List<String> stringList = new ArrayList<>();
         stringList.add("ccc");
@@ -107,6 +107,7 @@ public class TestJsonUtil {
         Cpt103 cpt103 = new Cpt103();
         cpt103.setChallenge(Challenge.create("did:weid:0x11111", "abcd"));
         cpt103.setProof("aaa");
+        cpt103.setId("did:weid:101:0x12221");
         Assert.assertTrue(DataToolUtils
             .isValidateJsonVersusSchema(DataToolUtils.objToJsonStrWithNoPretty(cpt103), cptSchema));
 
