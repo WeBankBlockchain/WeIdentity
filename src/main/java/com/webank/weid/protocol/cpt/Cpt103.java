@@ -34,6 +34,8 @@ import com.webank.weid.protocol.base.Challenge;
 @Attributes(title = "Authentication Answer", description = "Answer to meet the challenge")
 public class Cpt103 {
 
+    @Attributes(required = true, description = "The entity's weidentity did")
+    private String id;
     @Attributes(required = true, description = "The challenge")
     private Challenge challenge;
     @Attributes(required = true, description = "The proof")
