@@ -361,7 +361,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             }
             
             HashMap<String, Object> claimMap = DataToolUtils.deserialize(claimStr, HashMap.class);
-            if (!WeIdUtils.validateContainWeIdKey(claimMap)) {
+            if (!CredentialPojoUtils.validateIdValueForClaim(claimMap)) {
                 logger.error("Generate Credential failed, "
                     + "claim of pojoArgs not include effective WeId.");
                 return new ResponseData<>(null, ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL);
