@@ -234,10 +234,10 @@ public class TestBaseUtil {
         cptJsonSchema.put("name", propertitesMap1);
         cptJsonSchema.put("gender", propertitesMap2);
         cptJsonSchema.put("age", propertitesMap3);
-        cptJsonSchema.put("weid", propertitesMap4);
+        cptJsonSchema.put("id", propertitesMap4);
         cptJsonSchemaNew.put(JsonSchemaConstant.PROPERTIES_KEY, cptJsonSchema);
 
-        String[] genderRequired = {"weid", "name", "gender"};
+        String[] genderRequired = {"id", "name", "gender"};
         cptJsonSchemaNew.put(JsonSchemaConstant.REQUIRED_KEY, genderRequired);
 
         return cptJsonSchemaNew;
@@ -253,7 +253,7 @@ public class TestBaseUtil {
         cptJsonSchemaData.put("name", "zhang san");
         cptJsonSchemaData.put("gender", "F");
         cptJsonSchemaData.put("age", 18);
-        cptJsonSchemaData.put("weid", "did:weid:101:0xe4bee5a07f282ffd3109699e21663cde0210fb64");
+        cptJsonSchemaData.put("id", "did:weid:101:0xe4bee5a07f282ffd3109699e21663cde0210fb64");
         return cptJsonSchemaData;
     }
 
