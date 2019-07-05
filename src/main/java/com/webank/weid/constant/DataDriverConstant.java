@@ -157,6 +157,17 @@ public final class DataDriverConstant {
     public static final String POOL_MIN_EITM = "minEvictableIdleTimeMillis";
     
     /**
+     *  the default value for pool.
+     */
+    public static final String POOL_MAX_ACTIVE_DEFAULT_VALUE = "50";
+    public static final String POOL_MIN_IDLE_DEFAULT_VALUE = "5";
+    public static final String POOL_MAX_IDLE_DEFAULT_VALUE = "5";
+    public static final String POOL_MAX_WAIT_DEFAULT_VALUE = "10000";
+    public static final String POOL_TIME_BETWEEN_ERM_DEFAULT_VALUE = "600000";
+    public static final String POOL_NUM_TEST_PER_ER_DEFAULT_VALUE = "5";
+    public static final String POOL_MIN_EITM_DEFAULT_VALUE = "1800000";
+
+    /**
      * 系统domain之私钥存储domainKey.
      */
     public static final String DEFAULT_DOMAIN = "default.domain";
