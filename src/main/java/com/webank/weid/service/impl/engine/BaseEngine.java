@@ -115,7 +115,6 @@ public abstract class BaseEngine extends BaseService {
             logger.info(cls.getSimpleName() + " init succ");
 
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
             logger.error("load contract :{} failed. Error message is :{}",
                 cls.getSimpleName(), e);
             throw new LoadContractException();
