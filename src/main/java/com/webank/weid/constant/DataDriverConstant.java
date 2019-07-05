@@ -27,9 +27,9 @@ package com.webank.weid.constant;
 public final class DataDriverConstant {
 
     /**
-     * jdbc properties file name.
+     * jdbc url properties.
      */
-    public static final String JDBC_PROPERTIES = "jdbc.properties";
+    public static final String JDBC_DATASOURCE_NAME = "datasource.name";
 
     /**
      * jdbc url properties.
@@ -156,6 +156,8 @@ public final class DataDriverConstant {
     public static final String POOL_VALIDATION_QUERY = "validationQuery";
     public static final String POOL_MIN_EITM = "minEvictableIdleTimeMillis";
     
-    
-    
+    /**
+     * 系统domain之私钥存储domainKey.
+     */
+    public static final String DEFAULT_DOMAIN = "default.domain";
 }
