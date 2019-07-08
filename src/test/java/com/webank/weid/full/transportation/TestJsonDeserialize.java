@@ -126,7 +126,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
             .deserialize(transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_BASE_ERROR.getCode(),
+            ErrorCode.DATA_TYPE_CASE_ERROR.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());

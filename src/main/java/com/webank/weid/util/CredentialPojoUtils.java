@@ -51,6 +51,9 @@ public final class CredentialPojoUtils {
      */
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoUtils.class);
     
+    private static final String CLAIM_ID = "id";
+    private static final String PROPERTIES = "properties";
+    
     private static Integer NOT_DISCLOSED = 
         CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus();
     
@@ -480,6 +483,9 @@ public final class CredentialPojoUtils {
         }
         args.setExpirationDate(
             DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate()));
+        if (!validateContainIdKeyForClaim(args.getClaim())) {
+            return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+        }
         return ErrorCode.SUCCESS;
     }
 
@@ -560,5 +566,50 @@ public final class CredentialPojoUtils {
             }
         }
         return false;
+    }
+    
+    /**
+     * check if the given map contain correct id.
+     * @param cptJsonSchema cptJsonSchema
+     * @return boolean
+     */
+    public static boolean validateContainIdKeyForCpt(Map<String, Object> cptJsonSchema) {
+        if (cptJsonSchema == null || cptJsonSchema.isEmpty()) {
+            return false;
+        }
+        if (cptJsonSchema.containsKey(CLAIM_ID)) {   
+            return true;
+        } else if (cptJsonSchema.containsKey(PROPERTIES)) {
+            HashMap<String, Object> propertiesMap = 
+                (HashMap<String, Object>) cptJsonSchema.get(PROPERTIES);
+            return propertiesMap.containsKey(CLAIM_ID);        
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * check if the given map contain correct id.
+     * @param claimMap claimMap
+     * @return boolean
+     */
+    public static boolean validateContainIdKeyForClaim(Map<String, Object> claimMap) {
+        if (claimMap == null || claimMap.isEmpty()) {
+            return false;
+        }
+        return claimMap.containsKey(CLAIM_ID);
+    }
+    
+    /**
+     * check if the given map contain correct id and the value is an WeId.
+     * @param claimMap claimMap
+     * @return boolean
+     */
+    public static boolean validateIdValueForClaim(Map<String, Object> claimMap) {
+        if (!validateContainIdKeyForClaim(claimMap)) {
+            return false;
+        }
+        String weId = (String)(claimMap.get(CLAIM_ID));
+        return WeIdUtils.isWeIdValid(weId);
     }
 }
