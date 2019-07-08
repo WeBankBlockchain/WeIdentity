@@ -73,43 +73,46 @@ public class ConnectionPool {
         String passWord = PropertyUtils.getProperty(passWordKey);
         // 最大活跃链接
         String maxActiveKey = dsNamePrefix + DataDriverConstant.JDBC_MAX_ACTIVE;
-        String defaultMaxActive = DataDriverConstant.POOL_MAX_ACTIVE_DEFAULT_VALUE;
-        String maxActive = PropertyUtils.getProperty(maxActiveKey, defaultMaxActive);
+        String maxActive = PropertyUtils.getProperty(
+            maxActiveKey,
+            DataDriverConstant.POOL_MAX_ACTIVE_DEFAULT_VALUE
+        );
         // 最小空闲链接
         String minIdleKey = dsNamePrefix + DataDriverConstant.JDBC_MIN_IDLE;
-        String defaultMinIdle = DataDriverConstant.POOL_MIN_IDLE_DEFAULT_VALUE;
-        String minIdle = PropertyUtils.getProperty(minIdleKey, defaultMinIdle);
+        String minIdle = PropertyUtils.getProperty(
+            minIdleKey,
+            DataDriverConstant.POOL_MIN_IDLE_DEFAULT_VALUE
+        );
         // 最大空闲链接
         String maxIdleKey = dsNamePrefix + DataDriverConstant.JDBC_MAX_IDLE;
-        String defaultMaxIdle = DataDriverConstant.POOL_MAX_IDLE_DEFAULT_VALUE;
-        String maxIdle = PropertyUtils.getProperty(maxIdleKey, defaultMaxIdle);
+        String maxIdle = PropertyUtils.getProperty(
+            maxIdleKey,
+            DataDriverConstant.POOL_MAX_IDLE_DEFAULT_VALUE
+        );
         // 获取链接的最大等待时间
         String maxWaitKey = dsNamePrefix + DataDriverConstant.JDBC_MAX_WAIT;
-        String defaultMaxWait = DataDriverConstant.POOL_MAX_WAIT_DEFAULT_VALUE;
-        String maxWait = PropertyUtils.getProperty(maxWaitKey, defaultMaxWait);
+        String maxWait = PropertyUtils.getProperty(
+            maxWaitKey,
+            DataDriverConstant.POOL_MAX_WAIT_DEFAULT_VALUE
+        );
         // 轮询检查连接间隔时间
         String timeBetweenKey = dsNamePrefix + DataDriverConstant.JDBC_TIME_BETWEEN_ERM;
-        String defaultTimeBetween = DataDriverConstant.POOL_TIME_BETWEEN_ERM_DEFAULT_VALUE;
-        String timeBetween = PropertyUtils.getProperty(timeBetweenKey, defaultTimeBetween);
+        String timeBetween = PropertyUtils.getProperty(
+            timeBetweenKey,
+            DataDriverConstant.POOL_TIME_BETWEEN_ERM_DEFAULT_VALUE
+        );
         // 单次检查连接数据
         String numTestsPerErKey = dsNamePrefix + DataDriverConstant.JDBC_NUM_TEST_PER_ER;
-        String defaultNumTestsPerEr = DataDriverConstant.POOL_NUM_TEST_PER_ER_DEFAULT_VALUE;
-        String numTestsPerEr = PropertyUtils.getProperty(numTestsPerErKey, defaultNumTestsPerEr);
+        String numTestsPerEr = PropertyUtils.getProperty(
+            numTestsPerErKey,
+            DataDriverConstant.POOL_NUM_TEST_PER_ER_DEFAULT_VALUE
+        );
         // 最小空闲时间的连接将被检查
         String minEitmKey = dsNamePrefix + DataDriverConstant.JDBC_MIN_EITM;
-        String defaultMinEitm = DataDriverConstant.POOL_MIN_EITM_DEFAULT_VALUE;
-        String minEitm = PropertyUtils.getProperty(minEitmKey, defaultMinEitm);
-
-        // 是否自动回收超时连接
-        String rmAbandoned = DataDriverConstant.JDBC_REMOVE_ABANDONED;
-        // 是否自动回收超时连接的超时时间
-        String rmAbandonedTimeout = DataDriverConstant.JDBC_REMOVE_ABANDONED_TIMEOUT;
-        // 是否测试借出连接
-        String testOnBorrow = DataDriverConstant.JDBC_TEST_ON_BORROW;
-        // 是否开启定时检查
-        String testOnWhile = DataDriverConstant.JDBC_TEST_ON_WHILE;
-        // 检查连接sql
-        String validationQuery = DataDriverConstant.JDBC_VALIDATION_QUERY;
+        String minEitm = PropertyUtils.getProperty(
+            minEitmKey,
+            DataDriverConstant.POOL_MIN_EITM_DEFAULT_VALUE
+        );
 
         Properties p = new Properties();
         p.setProperty(DataDriverConstant.POOL_URL, dbUrl);
@@ -119,13 +122,33 @@ public class ConnectionPool {
         p.setProperty(DataDriverConstant.POOL_MIN_IDLE, minIdle);
         p.setProperty(DataDriverConstant.POOL_MAX_IDLE, maxIdle);
         p.setProperty(DataDriverConstant.POOL_MAX_WAIT, maxWait);
-        p.setProperty(DataDriverConstant.POOL_MAX_REMOVE_ABANDONED, rmAbandoned);
-        p.setProperty(DataDriverConstant.POOL_MAX_REMOVE_ABANDONED_TIMEOUT, rmAbandonedTimeout);
-        p.setProperty(DataDriverConstant.POOL_TEST_ON_BORROW, testOnBorrow);  
-        p.setProperty(DataDriverConstant.POOL_TEST_ON_WHILE, testOnWhile);
+        // 是否自动回收超时连接
+        p.setProperty(
+            DataDriverConstant.POOL_MAX_REMOVE_ABANDONED,
+            DataDriverConstant.JDBC_REMOVE_ABANDONED
+        );
+        // 是否自动回收超时连接的超时时间
+        p.setProperty(
+            DataDriverConstant.POOL_MAX_REMOVE_ABANDONED_TIMEOUT,
+            DataDriverConstant.JDBC_REMOVE_ABANDONED_TIMEOUT
+        );
+        // 是否测试借出连接
+        p.setProperty(
+            DataDriverConstant.POOL_TEST_ON_BORROW,
+            DataDriverConstant.JDBC_TEST_ON_BORROW
+        );
+        // 是否开启定时检查
+        p.setProperty(
+            DataDriverConstant.POOL_TEST_ON_WHILE,
+            DataDriverConstant.JDBC_TEST_ON_WHILE
+        );
         p.setProperty(DataDriverConstant.POOL_TIME_BETWEEN_ERM, timeBetween);
         p.setProperty(DataDriverConstant.POOL_NUM_TEST_PER_ER, numTestsPerEr);
-        p.setProperty(DataDriverConstant.POOL_VALIDATION_QUERY, validationQuery);
+        // 检查连接sql
+        p.setProperty(
+            DataDriverConstant.POOL_VALIDATION_QUERY,
+            DataDriverConstant.JDBC_VALIDATION_QUERY
+        );
         p.setProperty(DataDriverConstant.POOL_MIN_EITM, minEitm);
         return p;
     }
