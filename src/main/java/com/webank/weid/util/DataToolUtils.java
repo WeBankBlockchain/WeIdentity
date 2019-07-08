@@ -259,22 +259,22 @@ public final class DataToolUtils {
      * @return class instance
      */
     public static <T> T deserialize(String json, Class<T> clazz) {
-        if (isValidFromToJson(json)) {
-            logger.error("this jsonString is converted by toJson(), "
-                + "please use fromJson() to deserialize it");
-            throw new DataTypeCastException("deserialize json to Object error");
-        }
         Object object = null;
         try {
+            if (isValidFromToJson(json)) {
+                logger.error("this jsonString is converted by toJson(), "
+                    + "please use fromJson() to deserialize it");
+                throw new DataTypeCastException("deserialize json to Object error");
+            }
             object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));  
         } catch (JsonParseException e) {
-            logger.error("JsonParseException when serialize object to json", e);
+            logger.error("JsonParseException when deserialize json to object", e);
             throw new DataTypeCastException(e);
         } catch (JsonMappingException e) {
-            logger.error("JsonMappingException when serialize object to json", e);
+            logger.error("JsonMappingException when deserialize json to object", e);
             throw new DataTypeCastException(e);
         } catch (IOException e) {
-            logger.error("IOException when serialize object to json", e);
+            logger.error("IOException when deserialize json to object", e);
             throw new DataTypeCastException(e);
         }        
         return (T) object;
@@ -1634,7 +1634,17 @@ public final class DataToolUtils {
      * @return result
      */
     public static boolean isValidFromToJson(String json) {
-        JSONObject jsonObject = JSONObject.parseObject(json);
+        if (StringUtils.isBlank(json)) {
+            logger.error("input json param is null.");
+            return false;
+        }
+        JSONObject jsonObject = null;
+        try { 
+            jsonObject = JSONObject.parseObject(json);
+        } catch (JSONException e) {
+            logger.error("convert jsonString to JSONObject failed." + e);
+            return false;
+        }
         return jsonObject.containsKey(KEY_FROM_TOJSON);
     }
     
