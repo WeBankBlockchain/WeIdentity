@@ -26,13 +26,15 @@ import lombok.Data;
 
 /**
  * CPT for authorization.
+ *
  * @author chaoxinhu 2019.5
  */
 @Data
 @Attributes(title = "Authorization token", description = "Basic Authorization Token Template")
 public class Cpt101 {
+
     @Attributes(required = true, description = "The one granting authorization")
-    private String delegator;
+    private String id;
     @Attributes(required = true, description = "The one receiving authorization")
     private String receiver;
     @Attributes(required = true, description = "Subjects to be authorized", minItems = 1)
