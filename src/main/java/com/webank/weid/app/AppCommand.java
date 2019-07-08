@@ -43,23 +43,24 @@ public class AppCommand {
      * commands.
      *
      * @param args input
-     * @return status
      */
-    public static int main(String[] args) {
+    public static void main(String[] args) {
 
         if (args.length < 2) {
             System.err.println("Parameter illegal, please check your input.");
-            return 1;
+            return;
         }
         String command = args[0];
         switch (command) {
             case "--checkhealth":
-                return checkAmopHealth(args[1]);
+                checkAmopHealth(args[1]);
+                return;
             case "--checkweid":
-                return checkWeid(args[1]);
+                checkWeid(args[1]);
+                return;
             default:
                 logger.error("[AppCommand]: the command -> {} is not supported .", command);
-                return 1;
+                return;
         }
     }
 
@@ -67,30 +68,29 @@ public class AppCommand {
      * check if the weid exists on blockchain.
      *
      * @param weid the weid to check
-     * @return status
      */
-    private static int checkWeid(String weid) {
+    private static void checkWeid(String weid) {
 
         WeIdService weidService = new WeIdServiceImpl();
         ResponseData<Boolean> resp = weidService.isWeIdExist(weid);
 
         if (resp.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
             logger.info("[checkWeid] weid --> {} exists on blockchain.", weid);
-            return 0;
+            System.out.println("[checkWeid] weid --> " + weid + "exists on blockchain.");
+            return;
         }
         logger.error("[checkWeid] weid --> {} does not exist on blockchain. response is {}",
             weid,
             resp);
-        return resp.getErrorCode();
+        System.out.println("[checkWeid] weid --> " + weid + " does not exist on blockchain.");
     }
 
     /**
      * check if the amop is health.
      *
      * @param toOrgId the orgid to test amop connection
-     * @return status
      */
-    private static int checkAmopHealth(String toOrgId) {
+    private static void checkAmopHealth(String toOrgId) {
 
         AmopServiceImpl amopService = new AmopServiceImpl();
 
@@ -102,11 +102,13 @@ public class AppCommand {
 
         if (resp.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
             logger.info("[checkAmopHealth] toOrgId --> {} check success.", toOrgId);
-            return 0;
+            System.out.println("[checkAmopHealth] toOrgId -->" + toOrgId + " check success.");
+            return;
         }
         logger.error("[checkAmopHealth] toOrgId --> {} check failed, response is {}",
             toOrgId,
             resp);
-        return resp.getErrorCode();
+        System.out.println(
+            "[checkAmopHealth] toOrgId -->" + toOrgId + " check failed. please check log.");
     }
 }
