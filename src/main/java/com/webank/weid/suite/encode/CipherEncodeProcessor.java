@@ -22,6 +22,7 @@ package com.webank.weid.suite.encode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.EncodeSuiteException;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
@@ -35,8 +36,9 @@ import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.crypto.KeyGenerator;
 import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.EncodeData;
-import com.webank.weid.suite.persistence.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.PropertyUtils;
 
 /**
  * 密文编解码处理器.
@@ -52,7 +54,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
     
     protected AmopService amopService = new AmopServiceImpl();
     
-    private static final String TRANSENCRYPTIONDOMAIN = "transEncryption";
+    private static final String TRANSENCRYPTIONDOMAIN = 
+        PropertyUtils.getProperty(DataDriverConstant.DEFAULT_DOMAIN);
     
     /**
      * 密文编码处理：先进行压缩，然后进行AES加密.
