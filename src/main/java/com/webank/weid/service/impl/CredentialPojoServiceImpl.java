@@ -22,6 +22,7 @@ import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
+import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
@@ -30,6 +31,7 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
@@ -49,8 +51,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
 
     private static WeIdService weIdService = new WeIdServiceImpl();
-    
-    private static String NOT_DISCLOSED = 
+    private static CptService cptService = new CptServiceImpl();
+    private static String NOT_DISCLOSED =
         CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().toString();
     
     private static String DISCLOSED = 
@@ -286,6 +288,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
             return checkResp;
         }
+        ErrorCode errorCode = verifyCptFormat(
+            credential.getCptId(),
+            credential.getClaim()
+        );
+        if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
+            return errorCode;
+        }
         String rawData = CredentialPojoUtils
             .getCredentialThumbprintWithoutSig(credential, salt, null);
         String issuerWeid = credential.getIssuer();
@@ -319,6 +328,35 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
             }
             return ErrorCode.SUCCESS;
+        }
+    }
+
+    private static ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim) {
+
+        try {
+            //String claimStr = JsonUtil.objToJsonStr(claim);
+            String claimStr = DataToolUtils.serialize(claim);
+            Cpt cpt = cptService.queryCpt(cptId).getResult();
+            if (cpt == null) {
+                logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
+                return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
+            }
+            //String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
+            String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
+
+            if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
+                logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
+                return ErrorCode.CPT_JSON_SCHEMA_INVALID;
+            }
+            if (!DataToolUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
+                logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
+                return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+            }
+            return ErrorCode.SUCCESS;
+        } catch (Exception e) {
+            logger.error(
+                "Generic error occurred during verify cpt format when verifyCredential: " + e);
+            return ErrorCode.CREDENTIAL_ERROR;
         }
     }
 
