@@ -502,6 +502,7 @@ public final class CredentialPojoUtils {
         CreateCredentialPojoArgs generateCredentialArgs = new CreateCredentialPojoArgs();
         generateCredentialArgs.setCptId(arg.getCptId());
         generateCredentialArgs.setIssuer(arg.getIssuer());
+        generateCredentialArgs.setIssuanceDate(arg.getIssuanceDate());
         generateCredentialArgs.setExpirationDate(arg.getExpirationDate());
         generateCredentialArgs.setClaim(arg.getClaim());
         return generateCredentialArgs;
