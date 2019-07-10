@@ -135,7 +135,7 @@ public class TestCreateCredential extends TestBaseServcie {
             credentialService.createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
     }
 
