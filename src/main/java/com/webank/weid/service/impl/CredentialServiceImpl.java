@@ -81,14 +81,6 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 logger.error("Generate Credential input format error!");
                 return new ResponseData<>(null, innerResponse);
             }
-            // On-chain check is leveraged into credential creation period
-            ErrorCode errorCode = verifyCptFormat(
-                args.getCptId(),
-                args.getClaim()
-            );
-            if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
-                return new ResponseData<>(null, errorCode);
-            }
 
             Credential result = new Credential();
             String context = CredentialUtils.getDefaultCredentialContext();
@@ -215,6 +207,15 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             if (!responseData.getResult()) {
                 return responseData;
             }
+
+            ErrorCode errorCode = verifyCptFormat(
+                credential.getCptId(),
+                credential.getClaim()
+            );
+            if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
+                return new ResponseData<>(null, errorCode);
+            }
+
             responseData = verifyNotExpired(credential);
             if (!responseData.getResult()) {
                 return responseData;
