@@ -106,17 +106,12 @@ public final class CredentialUtils {
         ct.setContext(credential.getContext());
 
         Map<String, String> originalProof = credential.getProof();
-        //Map<String, String> proof = (HashMap<String, String>) JsonUtil
-        //    .jsonStrToObj(new HashMap<String, String>(), JsonUtil.objToJsonStr(originalProof));
-        //ct.setProof(proof);
         if (originalProof != null) {
             Map<String, String> proof = DataToolUtils
                 .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
             ct.setProof(proof);
         }
         Map<String, Object> originalClaim = credential.getClaim();
-        //Map<String, Object> claim = (HashMap<String, Object>) JsonUtil
-        //    .jsonStrToObj(new HashMap<String, Object>(), JsonUtil.objToJsonStr(originalClaim));
         if (originalClaim != null) {
             Map<String, Object> claim = DataToolUtils
                 .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
@@ -336,9 +331,6 @@ public final class CredentialUtils {
         }
         if (args.getClaim() == null || args.getClaim().isEmpty()) {
             return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
-        }
-        if (!CredentialPojoUtils.validateContainIdKeyForClaim(args.getClaim())) {
-            return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
         }
         return ErrorCode.SUCCESS;
     }
