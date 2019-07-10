@@ -41,6 +41,8 @@ public class OnNotifyCallbackV1 extends ChannelPushCallback implements RegistCal
     
     private Map<Integer, AmopCallback> amopCallBackMap = new HashMap<Integer, AmopCallback>();
 
+    private AmopCallback defaultAmopCallback = new AmopCallback();
+    
     public void registAmopCallback(Integer msgType, AmopCallback routeCallBack) {
         amopCallBackMap.put(msgType, routeCallBack);
     }
@@ -61,6 +63,9 @@ public class OnNotifyCallbackV1 extends ChannelPushCallback implements RegistCal
             DataToolUtils.deserialize(push.getContent(), AmopRequestBody.class);
         AmopMsgType msgType = amopRequestBody.getMsgType();
         AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
+        if (amopCallBack == null) {
+            amopCallBack = defaultAmopCallback;
+        }
         String messageBody = amopRequestBody.getMsgBody();
         String result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
         

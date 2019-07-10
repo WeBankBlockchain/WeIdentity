@@ -338,8 +338,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         }
         //String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
         String cptJsonSchema = DataToolUtils.serialize(cptJsonSchemaMap);
-        if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema) 
-            || !CredentialPojoUtils.validateContainIdKeyForCpt(cptJsonSchemaMap)) {
+        if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
             logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaMap);
             return ErrorCode.CPT_JSON_SCHEMA_INVALID;
         }
