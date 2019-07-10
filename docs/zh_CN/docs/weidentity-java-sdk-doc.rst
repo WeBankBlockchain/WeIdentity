@@ -113,6 +113,13 @@ AMOP通讯相关接口。
 本接口提供AMOP的请求和注册。
 
 
+* Persistence
+
+数据持久化接口，默认为MySql存储操作处理。
+
+本接口提供K-V方式的数据存储服务。
+
+
 接口列表
 --------
 
@@ -896,6 +903,811 @@ com.webank.weid.protocol.base.AuthorityIssuer
 
 ----
 
+
+5. getAllAuthorityIssuerList
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AuthorityIssuerService.getAllAuthorityIssuerList
+   接口定义: ResponseData<List<AuthorityIssuer>> getAllAuthorityIssuerList(Integer index, Integer num)
+   接口描述: 查询指定范围内的issuer列表。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - index
+     - Integer
+     - Y
+     - 检索的开始位置
+     - 
+   * - num
+     - Integer
+     - Y
+     - 检索的数据条数
+     - 
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<List\<AuthorityIssuer>>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - List<AuthorityIssuer>
+     - 
+     - 授权机构信息，见下
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易快高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+     
+
+com.webank.weid.protocol.base.AuthorityIssuer
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 授权机构WeIdentity DID
+     - 
+   * - name
+     - String
+     - Y
+     - 授权机构名称
+     - 
+   * - created
+     - Long
+     - Y
+     - 创建日期
+     - 
+   * - accValue
+     - String
+     - Y
+     - 授权方累积判定值
+     - 
+
+
+**注意**\ ：因为Solidity 0.4.4的限制，无法正确的返回accValue，因此这里取得的accValue一定为空字符串。未来会进行修改。
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - WEID_INVALID
+     - 100101
+     - 无效的WeIdentity DID
+   * - AUTHORITY_ISSUER_ERROR
+     - 100200
+     - 授权标准异常
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS
+     - 500202
+     - 实体不存在
+
+
+**调用示例**
+
+.. code-block:: java
+
+   AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
+   ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.getAllAuthorityIssuerList(0, 2);
+
+	
+.. code-block:: text
+
+   返回数据如：
+
+
+----
+
+
+6. registerIssuerType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AuthorityIssuerService.registerIssuerType
+   接口定义: ResponseData<Boolean> registerIssuerType(WeIdAuthentication callerAuth, String issuerType)
+   接口描述: 注册issuer type。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - callerAuth
+     - WeIdAuthentication
+     - Y
+     - weId身份信息
+     - 
+   * - issuerType
+     - String
+     - Y
+     - 机构类型
+     - 
+
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - WeIdentity DID
+     - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     - 
+     - 交易私钥，见下
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Boolean
+     - 是否注册成功
+     - 
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易快高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+
+
+**调用示例**
+
+.. code-block:: java
+
+
+	
+.. code-block:: text
+
+   返回数据如：
+
+
+----
+
+
+7. addIssuerIntoIssuerType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AuthorityIssuerService.addIssuerIntoIssuerType
+   接口定义: ResponseData<Boolean> addIssuerIntoIssuerType(WeIdAuthentication callerAuth, String issuerType, String targetIssuerWeId)
+   接口描述: 向issuerType中添加成员。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - callerAuth
+     - WeIdAuthentication
+     - Y
+     - weId身份信息
+     - 
+   * - issuerType
+     - String
+     - Y
+     - 机构类型
+     - 
+   * - targetIssuerWeId
+     - String
+     - Y
+     - issuer的WeIdentity DID
+     - 
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - WeIdentity DID
+     - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     - 
+     - 交易私钥，见下
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Boolean
+     - 是否添加成员成功
+     - 
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易快高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+
+
+**调用示例**
+
+.. code-block:: java
+
+
+	
+.. code-block:: text
+
+   返回数据如：
+
+
+----
+
+
+8. removeIssuerFromIssuerType
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AuthorityIssuerService.removeIssuerFromIssuerType
+   接口定义: ResponseData<Boolean> removeIssuerFromIssuerType(WeIdAuthentication callerAuth, String issuerType, String targetIssuerWeId)
+   接口描述: 移除指定issuerType里面的IssuerWeId成员。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - callerAuth
+     - WeIdAuthentication
+     - Y
+     - weId身份信息
+     - 
+   * - issuerType
+     - String
+     - Y
+     - 机构类型
+     - 
+   * - targetIssuerWeId
+     - String
+     - Y
+     - issuer的WeIdentity DID
+     - 
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - WeIdentity DID
+     - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     - 
+     - 交易私钥，见下
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Boolean
+     - 是否移除成功
+     - 
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易快高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+
+
+**调用示例**
+
+.. code-block:: java
+
+
+	
+.. code-block:: text
+
+   返回数据如：
+
+
+----
+
+
+9. isSpecificTypeIssuer
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AuthorityIssuerService.isSpecificTypeIssuer
+   接口定义: ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String targetIssuerWeId)
+   接口描述: 判断issuer是否为指定机构里面的成员。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - issuerType
+     - String
+     - Y
+     - 机构类型
+     - 
+   * - targetIssuerWeId
+     - String
+     - Y
+     - issuer的WeIdentity DID
+     - 
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Boolean
+     - 是否为指定类型中的成员
+     - 
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易快高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+
+
+**调用示例**
+
+.. code-block:: java
+
+
+	
+.. code-block:: text
+
+   返回数据如：
+
+
+----
+
+
+10. getAllSpecificTypeIssuerList
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AuthorityIssuerService.getAllSpecificTypeIssuerList
+   接口定义: ResponseData<List<String>> getAllSpecificTypeIssuerList(String issuerType, Integer index, Integer num)
+   接口描述: 获取指定索引范围内的issuer列表。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - issuerType
+     - String
+     - Y
+     - 机构类型
+     - 
+   * - index
+     - Integer
+     - Y
+     - 检索的开始下标位置
+     - 
+   * - num
+     - Integer
+     - Y
+     - 检索数据个数
+     - 
+     
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<List\<String>>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - List<String>
+     - issuer列表
+     - 
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易快高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+
+
+**调用示例**
+
+.. code-block:: java
+
+
+	
+.. code-block:: text
+
+   返回数据如：
+
+
+----
+
+
 CptService
 ^^^^^^^^^^
 
@@ -1181,7 +1993,296 @@ com.webank.weid.protocol.base.CptBaseInfo
 
 ----
 
+
 2. registerCpt
+~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.CptService.registerCpt
+   接口定义: ResponseData<CptBaseInfo> registerCpt(CptMapArgs args, Integer cptId)
+   接口描述: 传入WeIdentity DID，JsonSchema(Map类型), cptId 和其对应的私钥，链上注册指定cptId的CPT，返回CPT编号和版本。
+
+**接口入参**\ :    
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - args
+     - CptMapArgs
+     - Y
+     - Map类型参数注册CPT
+     - 
+   * - cptId
+     - Integer
+     - Y
+     - 指定的cptId
+     - 
+
+
+com.webank.weid.protocol.request.CptMapArgs
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - 认证信息，包含WeIdentity DID和私钥
+     - 用于WeIdentity DID的身份认证
+   * - cptJsonSchema
+     - Map<String, Object>
+     - Y
+     - Map类型的JsonSchema信息
+     - 基本使用见调用示例
+
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - CPT发布者的WeIdentity DID
+     - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     - 
+     - 交易私钥，见下
+
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - Y
+     - 私钥值
+     - 使用十进制数字表示
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<CptBaseInfo>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 此接口返回的code
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - CptBaseInfo
+     - 
+     - CPT基础数据，见下
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易快高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+     
+
+com.webank.weid.protocol.base.CptBaseInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - cptId
+     - Integer
+     - cpId编号
+     - 
+   * - cptVersion
+     - Integer
+     - 版本号
+     - 
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - WEID_INVALID
+     - 100101
+     - WeIdentity DID无效
+   * - WEID_PRIVATEKEY_INVALID
+     - 100103
+     - 私钥无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - CPT_JSON_SCHEMA_INVALID
+     - 100301
+     - schema无效
+   * - CPT_JSON_SCHEMA_NULL
+     - 100302
+     - schema为null
+   * - CPT_EVENT_LOG_NULL
+     - 100304
+     - 交易日志异常
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX
+     - 500302
+     - 为权威机构生成的cptId超过上限
+   * - CPT_PUBLISHER_NOT_EXIST
+     - 500303
+     - CPT发布者的WeIdentity DID不存在
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CptService cptService = new CptServiceImpl();
+
+   HashMap<String, Object> cptJsonSchema = new HashMap<String, Object>(3);
+   cptJsonSchema.put(JsonSchemaConstant.TITLE_KEY, "cpt template");
+   cptJsonSchema.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is a cpt template");
+
+   HashMap<String, Object> propertitesMap1 = new HashMap<String, Object>(2);
+   propertitesMap1.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_STRING);
+   propertitesMap1.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is name");
+
+   String[] genderEnum = { "F", "M" };
+   HashMap<String, Object> propertitesMap2 = new HashMap<String, Object>(2);
+   propertitesMap2.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_STRING);
+   propertitesMap2.put(JsonSchemaConstant.DATA_TYPE_ENUM, genderEnum);
+
+   HashMap<String, Object> propertitesMap3 = new HashMap<String, Object>(2);
+   propertitesMap3.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_NUMBER);
+   propertitesMap3.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is age");
+
+   HashMap<String, Object> propertitesMap4 = new HashMap<String, Object>(2);
+   propertitesMap4.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_STRING);
+   propertitesMap4.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is id");
+
+   HashMap<String, Object> cptJsonSchemaKeys = new HashMap<String, Object>(3);
+   cptJsonSchemaKeys.put("name", propertitesMap1);
+   cptJsonSchemaKeys.put("gender", propertitesMap2);
+   cptJsonSchemaKeys.put("age", propertitesMap3);
+   cptJsonSchemaKeys.put("id", propertitesMap4);
+   cptJsonSchema.put(JsonSchemaConstant.PROPERTIES_KEY, cptJsonSchemaKeys);
+
+   String[] genderRequired = { "id", "name", "gender" };
+   cptJsonSchema.put(JsonSchemaConstant.REQUIRED_KEY, genderRequired);
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+
+   CptMapArgs cptMapArgs = new CptMapArgs();
+   cptMapArgs.setCptJsonSchema(cptJsonSchema);
+   cptMapArgs.setWeIdAuthentication(weIdAuthentication);
+
+   ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs, 101);
+
+
+.. code-block:: text
+
+   返回数据如下：
+   result:(com.webank.weid.protocol.base.CptBaseInfo)
+      cptId: 101
+      cptVersion: 1
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+	  blockNumber: 29950
+	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+	  transactionIndex: 0
+
+
+----
+
+
+3. registerCpt
 ~~~~~~~~~~~~~~
 
 **基本信息**
@@ -1415,7 +2516,265 @@ com.webank.weid.protocol.base.CptBaseInfo
 
 ----
 
-3. queryCpt
+
+4. registerCpt
+~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.CptService.registerCpt
+   接口定义: ResponseData<CptBaseInfo> registerCpt(CptStringArgs args, Integer cptId)
+   接口描述: 传入WeIdentity DID，JsonSchema(String类型) , cptId和其对应的私钥，链上注册指定cptId的CPT，返回CPT编号和版本。
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - args
+     - CptStringArgs
+     - Y
+     - String类型参数注册CPT
+     - 
+   * - cptId
+     - Integer
+     - Y
+     - 指定的cptId
+     - 
+
+
+com.webank.weid.protocol.request.CptStringArgs
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - 认证信息，包含WeIdentity DID和私钥
+     - 用于WeIdentity DID的身份认证
+   * - cptJsonSchema
+     - String
+     - Y
+     - 字符串类型的JsonSchema信息
+     - 基本使用见调用示例
+
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - CPT发布者的WeIdentity DID
+     - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     - 
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     - 
+     - 交易私钥，见下
+
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - Y
+     - 私钥值
+     - 使用十进制数字表示
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<CptBaseInfo>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 此接口返回的code
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - CptBaseInfo
+     - 
+     - CPT基础数据，见下
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易快高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+     
+
+com.webank.weid.protocol.base.CptBaseInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - cptId
+     - Integer
+     - cpId编号
+     - 
+   * - cptVersion
+     - Integer
+     - 版本号
+     - 
+
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - WEID_INVALID
+     - 100101
+     - WeIdentity DID无效
+   * - WEID_PRIVATEKEY_INVALID
+     - 100103
+     - 私钥无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - CPT_JSON_SCHEMA_INVALID
+     - 100301
+     - schema无效
+   * - CPT_JSON_SCHEMA_NULL
+     - 100302
+     - schema为null
+   * - CPT_EVENT_LOG_NULL
+     - 100304
+     - 交易日志异常
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX
+     - 500302
+     - 为权威机构生成的cptId超过上限
+   * - CPT_PUBLISHER_NOT_EXIST
+     - 500303
+     - CPT发布者的WeIdentity DID不存在
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CptService cptService = new CptServiceImpl();
+
+   String jsonSchema = "{\"properties\" : {\"id\": {\"type\": \"string\",\"description\": \"the id of certificate owner\"}, \"name\": {\"type\": \"string\",\"description\": \"the name of certificate owner\"},\"gender\": {\"enum\": [\"F\", \"M\"],\"type\": \"string\",\"description\": \"the gender of certificate owner\"}, \"age\": {\"type\": \"number\", \"description\": \"the age of certificate owner\"}},\"required\": [\"id\", \"name\", \"age\"]}";
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+
+   CptStringArgs cptStringArgs = new CptStringArgs();
+   cptStringArgs.setCptJsonSchema(jsonSchema);
+   cptStringArgs.setWeIdAuthentication(weIdAuthentication);
+
+   ResponseData<CptBaseInfo> response = cptService.registerCpt(cptStringArgs, 103);
+
+
+.. code-block:: text
+
+   返回数据如下：
+   result:(com.webank.weid.protocol.base.CptBaseInfo)
+      cptId: 103
+      cptVersion: 1
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 29910
+      transactionHash: 0xf3b039557b2d1e575e9949b3a33d34e35c8749b55940347d18a0f7e929eda799
+      transactionIndex: 0
+
+
+----
+
+
+5. queryCpt
 ~~~~~~~~~~~
 
 **基本信息**
@@ -1650,7 +3009,7 @@ com.webank.weid.protocol.base.Cpt.MetaData
 
 ----
 
-4. updateCpt
+6. updateCpt
 ~~~~~~~~~~~~
 
 **基本信息**
@@ -1959,7 +3318,7 @@ com.webank.weid.protocol.base.CptBaseInfo
 
 ----
 
-5. updateCpt
+7. updateCpt
 ~~~~~~~~~~~~
 
 **基本信息**
@@ -5495,7 +6854,7 @@ CredentialPojoService
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口名称:com.webank.weid.rpc.CredentialPojoService.createCredential
    接口定义:<T> ResponseData<CredentialPojo> createCredential(CreateCredentialPojoArgs<T> args)
    接口描述: 根据传入的claim对象生成Credential。
 
@@ -5736,7 +7095,7 @@ com.webank.weid.protocol.base.CredentialPojo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口名称:com.webank.weid.rpc.CredentialPojoService.createSelectiveCredential
    接口定义: ResponseData<CredentialPojo> createSelectiveCredential(CredentialPojo credentialPojo, ClaimPolicy claimPolicy)
    接口描述: 通过原始凭证和披漏策略，创建选择性披露的Credential。
 
@@ -5968,7 +7327,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口名称:com.webank.weid.rpc.CredentialPojoService.verify
    接口定义: ResponseData<Boolean> verify(String issuerWeId, CredentialPojo credential)
    接口描述: 验证credential。
 
@@ -6172,7 +7531,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口名称:com.webank.weid.rpc.CredentialPojoService.verify
    接口定义: ResponseData<Boolean> verify(WeIdPublicKey issuerPublicKey, CredentialPojo credential)
    接口描述: 使用指定公钥验证credentialWrapper。
 
@@ -6382,7 +7741,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口名称:com.webank.weid.rpc.CredentialPojoService.verify
    接口定义: ResponseData<Boolean> verify(String presenterWeId, PresentationPolicyE presentationPolicyE, Challenge challenge, PresentationE presentationE)
    接口描述: 验证Presentation。
 
@@ -6669,7 +8028,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService
+   接口名称:com.webank.weid.rpc.CredentialPojoService.createPresentation
    接口定义: ResponseData<PresentationE> createPresentation(List<CredentialPojo> credentialList, PresentationPolicyE presentationPolicyE, Challenge challenge, WeIdAuthentication weIdAuthentication)
    接口描述: 创建Presentation。
 
@@ -7052,7 +8411,7 @@ AmopService
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.AmopService
+   接口名称:com.webank.weid.rpc.AmopService.registerCallback
    接口定义:void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback)
    接口描述: 注册AMOP回调处理。
 
@@ -7102,7 +8461,7 @@ com.webank.weid.rpc.callback.AmopCallback
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.AmopService
+   接口名称: com.webank.weid.rpc.AmopService.request
    接口定义: ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args)
    接口描述: AMOP请求Server。
 
@@ -7201,7 +8560,10 @@ com.webank.weid.protocol.response.AmopResponse
      - String
      - 业务结果描述
      - 
-
+   * - messageId
+     - String
+     - 消息编号
+     - 
 
 **此方法返回code**
 
@@ -7234,7 +8596,7 @@ com.webank.weid.protocol.response.AmopResponse
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.AmopService
+   接口名称: com.webank.weid.rpc.AmopService.getPolicyAndChallenge
    接口定义: ResponseData<PolicyAndChallenge> getPolicyAndChallenge(String orgId, Integer policyId, String targetUserWeId)
    接口描述: 通过AMOP获取PolicyAndChallenge。
 
@@ -7364,8 +8726,7 @@ com.webank.weid.protocol.base.PresentationPolicyE
    * - extra
      - Map<String, String>
      - 扩展字段
-     - 
-     
+     -  
 
 
 com.webank.weid.protocol.base.Challenge
@@ -7423,6 +8784,152 @@ com.webank.weid.protocol.base.Challenge
 ----
 
 
+4. getEncryptKey
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.AmopService.getEncryptKey
+   接口定义: ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId, GetEncryptKeyArgs args)
+   接口描述: 通过AMOP获取密钥数据。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - toOrgId
+     - String
+     - Y
+     - 目标机构编码
+     - 
+   * - args
+     - GetEncryptKeyArgs
+     - Y
+     - 密钥请求数据
+     - 
+ 
+ 
+com.webank.weid.protocol.amop.GetEncryptKeyArgs
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - keyId
+     - String
+     - Y
+     - 用于获取数据的Id
+     - 
+   * - version
+     - Version
+     - Y
+     - sdk版本信息
+     - 
+   * - messageId
+     - String
+     - Y
+     - 消息Id
+     - 
+   * - fromOrgId
+     - String
+     - Y
+     - 数据来源机构
+     - 
+   * - toOrgId
+     - String
+     - Y
+     - 数据目标机构
+     - 
+
+     
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<GetEncryptKeyResponse>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - GetEncryptKeyResponse
+     - 
+     - 业务数据
+
+com.webank.weid.protocol.response.GetEncryptKeyResponse
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - encryptKey
+     - String
+     - 密钥数据
+     - 
+   * - errorCode
+     - Integer
+     - 错误码
+     - 
+   * - errorMessage
+     - String
+     - 错误描述
+     - 
+
+    
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - POLICY_SERVICE_NOT_EXISTS
+     - 100701
+     - policyService不存在
+   * - POLICY_SERVICE_CALL_FAIL
+     - 100701
+     - policyService调用未知异常
+----
+
 
 JsonTransportation
 ^^^^^^^^^^^^^^^^^
@@ -7434,7 +8941,7 @@ JsonTransportation
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation
+   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation.specify
    接口定义: JsonTransportation specify(List<String> verifierWeIdList)
    接口描述: 指定transportation的认证者,用于权限控制。
 
@@ -7479,7 +8986,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation
+   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation.serialize
    接口定义: <T extends JsonSerializer> ResponseData<String> serialize(T object,ProtocolProperty property)
    接口描述: 用于序列化对象,要求对象实现JsonSerializer接口。
 
@@ -7600,7 +9107,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation
+   接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation.deserialize
    接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(String transString,Class<T> clazz)
    接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
 
@@ -7723,3 +9230,830 @@ java.util.List<java.lang.String>
            .specify(verifierWeIdList)
            .deserialize(transString,PresentationE.class);
 ----
+
+
+QrCodeTransportation
+^^^^^^^^^^^^^^^^^
+
+1. specify
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.QrCodeTransportation.specify
+   接口定义: JsonTransportation specify(List<String> verifierWeIdList)
+   接口描述: 指定transportation的认证者,用于权限控制。
+
+**接口入参**\ : 
+
+java.util.List<java.lang.String>
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - verifierWeIdList
+     - List<String> 
+     - N
+     - verifierWeId列表
+     - 
+     
+     
+**接口返回**\ :   com.webank.weid.suite.api.transportation.inf.JsonTransportation;
+
+**调用示例**
+
+.. code-block:: java
+
+   QrCodeTransportation qrCodeTransportation =TransportationFactory.newQrCodeTransportation();
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   JsonTransportation jsonTransportation = qrCodeTransportation.specify(verifierWeIdList);
+   
+----
+
+2. serialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.QrCodeTransportation.serialize
+   接口定义: <T extends JsonSerializer> ResponseData<String> serialize(T object,ProtocolProperty property)
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     - 
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     - 
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - String
+     - 序列化后的字符串数据
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
+     - 100805
+     - 协议数据无效
+   * - TRANSPORTATION_PROTOCOL_FIELD_INVALID
+     - 100806
+     - 协议字段无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   
+   PresentationE presentation;
+   
+   //原文方式调用
+   ResponseData<String> result1 = 
+       TransportationFactory
+           .newQrCodeTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL));
+   
+   //密文方式调用
+   ResponseData<String> result2 = 
+      TransportationFactory
+           .newQrCodeTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
+           
+----
+
+3. deserialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.QrCodeTransportation.deserialize
+   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(String transString,Class<T> clazz)
+   接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - transString
+     - String
+     - Y
+     - 待序列化对象
+     - 
+   * - clazz
+     - Class<T>
+     - Y
+     - 目标类型
+     - 
+
+**接口返回**\ :  <T extends JsonSerializer> com.webank.weid.protocol.response.ResponseData\<T>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - <T extends JsonSerializer>
+     - 反序列化后的对象
+     - 业务数据
+     
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - ENCRYPT_KEY_NOT_EXISTS
+     - 100700
+     - 无法获取秘钥
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_VERSION_ERROR
+     - 100802
+     - 协议版本错误
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常 
+   * - TRANSPORTATION_PROTOCOL_STRING_INVALID
+     - 100804
+     - 协议字符串无效
+   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
+     - 100805
+     - 协议数据无效
+   * - TRANSPORTATION_PROTOCOL_FIELD_INVALID
+     - 100806
+     - 协议字段无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   
+   String transString="";
+   
+   //原文方式调用反序列化
+   ResponseData<PresentationE> result1 = 
+       TransportationFactory
+           .newQrCodeTransportation()
+           .specify(verifierWeIdList)
+           .deserialize(transString,PresentationE.class);
+   
+   //密文方式调用反序列化
+   ResponseData<PresentationE> result2 = 
+      TransportationFactory
+           .newQrCodeTransportation()
+           .specify(verifierWeIdList)
+           .deserialize(transString,PresentationE.class);
+----
+
+
+Persistence
+^^^^^^^^^^^^^^^^^
+
+1. save
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.Persistence.save
+   接口定义: ResponseData<Integer> save(String domain, String id, String data)
+   接口描述: 根据domain定向存储数据。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+     - domain用于分布式存储数据
+     - 
+   * - id
+     - String
+     - Y
+     - 数据存储编号
+     - 
+   * - data
+     - String
+     - Y
+     - 存储的数据体
+     -           
+     
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Integer
+     - 存储结果
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常，需核对日志
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+     
+
+**调用示例**
+
+.. code-block:: java
+
+   Persistence persistence = new MysqlDriver();
+   ResponseData<Integer> res = persistence.save("datasource1:sdk_all_data", "123456", "data123456");
+   
+   
+.. code-block:: text
+
+返回结果如：
+   result: 1
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+   
+   
+----  
+
+
+2. batchSave
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.Persistence.batchSave
+   接口定义: ResponseData<Integer> batchSave(String domain, List<String> ids, List<String> dataList)
+   接口描述: 根据domain定向批量存储数据。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+     - domain用于分布式存储数据
+     - 
+   * - ids
+     - List<String>
+     - Y
+     - 数据存储编号集合
+     - 
+   * - data
+     - List<String>
+     - Y
+     - 存储的数据体集合
+     -           
+     
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Integer
+     - 存储结果
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常，需核对日志
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+     
+
+**调用示例**
+
+.. code-block:: java
+
+   Persistence persistence = new MysqlDriver();
+   
+   List<String> ids = new ArrayList<String>();
+   ids.add("123457");
+   ids.add("123458");
+   
+   List<String> datas = new ArrayList<String>();
+   datas.add("123457");
+   datas.add("123458");
+   
+   ResponseData<Integer> res = persistence.batchSave("datasource1:sdk_all_data", ids, datas);
+   
+   
+.. code-block:: text
+
+返回结果如：
+   result: 2
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+   
+   
+----
+
+
+3. get
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.Persistence.get
+   接口定义: ResponseData<String> get(String domain, String id)
+   接口描述: 根据domain定向查询数据。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+     - domain用于分布式存储数据
+     - 
+   * - id
+     - String
+     - Y
+     - 数据存储编号
+     -     
+     
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - String
+     - 查询结果
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常，需核对日志
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+     
+
+**调用示例**
+
+.. code-block:: java
+
+   Persistence persistence = new MysqlDriver();
+   ResponseData<String> res = persistence.get("datasource1:sdk_all_data", "123456");
+   
+   
+.. code-block:: text
+
+返回结果如：
+   result: data123456
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+   
+   
+----
+
+4. delete
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.Persistence.delete
+   接口定义: ResponseData<Integer> delete(String domain, String id)
+   接口描述: 根据domain定向删除数据。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+     - domain用于分布式存储数据
+     - 
+   * - id
+     - String
+     - Y
+     - 数据存储编号
+     -     
+     
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Integer
+     - 删除结果
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常，需核对日志
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+     
+
+**调用示例**
+
+.. code-block:: java
+
+   Persistence persistence = new MysqlDriver();
+   ResponseData<Integer> res = persistence.delete("datasource1:sdk_all_data", "123456");
+   
+   
+.. code-block:: text
+
+返回结果如：
+   result: 1
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+   
+   
+----
+
+
+5. update
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.Persistence.update
+   接口定义: ResponseData<Integer> update(String domain, String id, String data)
+   接口描述: 根据domain定向更新数据。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+     - domain用于分布式存储数据
+     - 
+   * - id
+     - String
+     - Y
+     - 更新数据编号
+     -     
+   * - data
+     - String
+     - Y
+     - 数据体
+     -       
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Integer
+     - 删除结果
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常，需核对日志
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+     
+
+**调用示例**
+
+.. code-block:: java
+
+   Persistence persistence = new MysqlDriver();
+   ResponseData<Integer> res = persistence.update("datasource1:sdk_all_data", "123456", "data456789");
+   
+   
+.. code-block:: text
+
+返回结果如：
+   result: 1
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+   
+   
+----
+
