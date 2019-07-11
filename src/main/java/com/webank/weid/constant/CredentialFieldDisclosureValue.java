@@ -27,6 +27,11 @@ package com.webank.weid.constant;
 public enum CredentialFieldDisclosureValue {
 
     /**
+     * the field is existed.
+     */
+    EXISTED(2),
+
+    /**
      * the field is disclosed.
      */
     DISCLOSED(1),
