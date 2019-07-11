@@ -221,7 +221,7 @@ public enum ErrorCode {
     /**
      * The credential presenterWeId notmatch.
      */
-    CREDENTIAL_PRESENTERWEID_NOTMATCH(100426, "credential presenterWeId notmatch"),
+    CREDENTIAL_PRESENTERWEID_NOTMATCH(100426, "credential presenter WeId not match"),
 
     /**
      * The credential evidence id mismatch.
@@ -314,7 +314,22 @@ public enum ErrorCode {
         100606,
         "the signature of presentation does not match the presenter."
     ),
+    
+    /**
+     * the presenter weid of presentation does not match the credential.
+     */
+    PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH(
+        100607,
+        "the presenter weid of presentation does not match the credential."
+    ),
 
+    /**
+     * the weid of the claim of the presentation does not exist.
+     */
+    PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST(
+        100608,
+        "the weid of the claim of the presentation does not exist."
+    ),
     /**
      * the encrypt key is not exists.
      */
