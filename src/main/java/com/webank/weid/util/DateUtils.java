@@ -249,13 +249,13 @@ public class DateUtils {
      * @param date long date
      * @return boolean
      */
-    public static boolean isBeforeCurrentTime(Long date) {
+    public static boolean isAfterCurrentTime(Long date) {
         if (String.valueOf(date) != null
             && String.valueOf(date).length() == getCurrentTimeStampString().length()) {
-            return date < getCurrentTimeStamp();
+            return date > getCurrentTimeStamp();
         } else if (String.valueOf(date) != null
             && String.valueOf(date).length() == getNoMillisecondTimeStampString().length()) {
-            return date < getNoMillisecondTimeStamp();
+            return date > getNoMillisecondTimeStamp();
         } else {
             return false;
         }
