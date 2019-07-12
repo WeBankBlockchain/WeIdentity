@@ -447,7 +447,7 @@ public final class CredentialPojoUtils {
             || expirationDate.longValue() < 0
             || expirationDate.longValue() == 0
             || (issuanceDate != null && expirationDate < issuanceDate)
-            || (issuanceDate == null && DateUtils.isBeforeCurrentTime(expirationDate))) {
+            || (issuanceDate == null && !DateUtils.isAfterCurrentTime(expirationDate))) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
         }
         if (issuanceDate != null) {
