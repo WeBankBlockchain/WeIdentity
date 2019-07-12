@@ -279,9 +279,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL
      - 100202
      - 私钥格式非法
-   * - AUTHORITY_ISSUER_ADDRESS_MISMATCH
-     - 100204
-     - 地址不匹配
    * - AUTHORITY_ISSUER_OPCODE_MISMATCH
      - 100205
      - 操作码不匹配
@@ -300,12 +297,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
-   * - AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST
-     - 500201
-     - 授权人已经存在
-   * - AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION
-     - 500203
-     - 授权人没有权限
 
 
 **调用示例**
@@ -499,9 +490,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL
      - 100202
      - 私钥格式非法
-   * - AUTHORITY_ISSUER_ADDRESS_MISMATCH
-     - 100204
-     - 地址不匹配
    * - AUTHORITY_ISSUER_OPCODE_MISMATCH
      - 100205
      - 操作码不匹配
@@ -514,12 +502,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
-   * - AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS
-     - 500202
-     - 授权人信息不存在
-   * - AUTHORITY_ISSUER_CONTRACT_ERROR_NO_PERMISSION
-     - 500203
-     - 授权人没有权限
 
 
 **调用示例**
@@ -1031,21 +1013,12 @@ com.webank.weid.protocol.base.AuthorityIssuer
    * - SUCCESS
      - 0
      - 成功
-   * - WEID_INVALID
-     - 100101
-     - 无效的WeIdentity DID
    * - AUTHORITY_ISSUER_ERROR
      - 100200
      - 授权标准异常
-   * - TRANSACTION_TIMEOUT
-     - 160001
-     - 超时
-   * - TRANSACTION_EXECUTE_ERROR
-     - 160002
-     - 交易错误
-   * - AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS
-     - 500202
-     - 实体不存在
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
 
 
 **调用示例**
@@ -1185,6 +1158,24 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - AUTHORITY_ISSUER_ERROR
+     - 100200
+     -  授权标准异常
+   * - SPECIFIC_ISSUER_TYPE_ILLEGAL
+     - 100208
+     - 机构类型非法
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
 
 
 **调用示例**
@@ -1325,7 +1316,34 @@ com.webank.weid.protocol.response.TransactionInfo
      - desc
    * - SUCCESS
      - 0
-     - 成功
+     - 成功 
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在      
+   * - AUTHORITY_ISSUER_ERROR
+     - 100200   
+     -  授权标准异常 
+   * - WEID_INVALID
+     - 100201
+     -  无效的WeIdentity DID
+   * - AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL
+     - 100202
+     -  私钥格式非法
+   * - SPECIFIC_ISSUER_TYPE_ILLEGAL
+     - 100208
+     - 机构类型非法
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
 
 
 **调用示例**
@@ -1467,6 +1485,33 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在      
+   * - AUTHORITY_ISSUER_ERROR
+     - 100200   
+     -  授权标准异常 
+   * - WEID_INVALID
+     - 100201
+     -  无效的WeIdentity DID
+   * - AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL
+     - 100202
+     -  私钥格式非法
+   * - SPECIFIC_ISSUER_TYPE_ILLEGAL
+     - 100208
+     - 机构类型非法
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
 
 
 **调用示例**
@@ -1577,6 +1622,27 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在      
+   * - AUTHORITY_ISSUER_ERROR
+     - 100200   
+     -  授权标准异常 
+   * - SPECIFIC_ISSUER_TYPE_ILLEGAL
+     - 100208
+     - 机构类型非法
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST
+     - 500502
+     - 授权人不存在
 
 
 **调用示例**
@@ -1691,7 +1757,25 @@ com.webank.weid.protocol.response.TransactionInfo
      - desc
    * - SUCCESS
      - 0
-     - 成功
+     - 成功   
+   * - AUTHORITY_ISSUER_ERROR
+     - 100200   
+     -  授权标准异常 
+   * - SPECIFIC_ISSUER_TYPE_ILLEGAL
+     - 100208
+     - 机构类型非法
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
 
 
 **调用示例**
@@ -1883,9 +1967,6 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - schema无效
-   * - CPT_JSON_SCHEMA_NULL
-     - 100302
-     - schema为null
    * - CPT_EVENT_LOG_NULL
      - 100304
      - 交易日志异常
@@ -1901,12 +1982,21 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
+   * - CPT_NOT_EXISTS
+     - 500301
+     - CPT不存在
    * - CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX
      - 500302
      - 为权威机构生成的cptId超过上限
    * - CPT_PUBLISHER_NOT_EXIST
      - 500303
      - CPT发布者的WeIdentity DID不存在
+   * - CPT_ALREADY_EXIST
+     - 500304
+     - CPT已经存在
+   * - CPT_NO_PERMISSION
+     - 500305
+     - CPT无权限
 
 
 **调用示例**
@@ -2188,9 +2278,6 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - schema无效
-   * - CPT_JSON_SCHEMA_NULL
-     - 100302
-     - schema为null
    * - CPT_EVENT_LOG_NULL
      - 100304
      - 交易日志异常
@@ -2206,12 +2293,21 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
+   * - CPT_NOT_EXISTS
+     - 500301
+     - CPT不存在
    * - CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX
      - 500302
      - 为权威机构生成的cptId超过上限
    * - CPT_PUBLISHER_NOT_EXIST
      - 500303
      - CPT发布者的WeIdentity DID不存在
+   * - CPT_ALREADY_EXIST
+     - 500304
+     - CPT已经存在
+   * - CPT_NO_PERMISSION
+     - 500305
+     - CPT无权限
 
 
 **调用示例**
@@ -2452,9 +2548,6 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - schema无效
-   * - CPT_JSON_SCHEMA_NULL
-     - 100302
-     - schema为null
    * - CPT_EVENT_LOG_NULL
      - 100304
      - 交易日志异常
@@ -2470,12 +2563,21 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
+   * - CPT_NOT_EXISTS
+     - 500301
+     - CPT不存在
    * - CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX
      - 500302
      - 为权威机构生成的cptId超过上限
    * - CPT_PUBLISHER_NOT_EXIST
      - 500303
      - CPT发布者的WeIdentity DID不存在
+   * - CPT_ALREADY_EXIST
+     - 500304
+     - CPT已经存在
+   * - CPT_NO_PERMISSION
+     - 500305
+     - CPT无权限
 
 
 **调用示例**
@@ -2709,9 +2811,6 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - schema无效
-   * - CPT_JSON_SCHEMA_NULL
-     - 100302
-     - schema为null
    * - CPT_EVENT_LOG_NULL
      - 100304
      - 交易日志异常
@@ -2727,12 +2826,21 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
+   * - CPT_NOT_EXISTS
+     - 500301
+     - CPT不存在
    * - CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX
      - 500302
      - 为权威机构生成的cptId超过上限
    * - CPT_PUBLISHER_NOT_EXIST
      - 500303
      - CPT发布者的WeIdentity DID不存在
+   * - CPT_ALREADY_EXIST
+     - 500304
+     - CPT已经存在
+   * - CPT_NO_PERMISSION
+     - 500305
+     - CPT无权限
 
 
 **调用示例**
@@ -2932,6 +3040,9 @@ com.webank.weid.protocol.base.Cpt.MetaData
    * - SUCCESS
      - 0
      - 成功
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
    * - TRANSACTION_EXECUTE_ERROR
      - 160002
      - 交易错误
@@ -3203,9 +3314,6 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - schema无效
-   * - CPT_JSON_SCHEMA_NULL
-     - 100302
-     - schema为null
    * - CPT_ID_NULL
      - 100303
      - CPT编号为null
@@ -3227,9 +3335,18 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_NOT_EXISTS
      - 500301
      - CPT不存在
+   * - CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX
+     - 500302
+     - 为权威机构生成的cptId超过上限
    * - CPT_PUBLISHER_NOT_EXIST
      - 500303
      - CPT发布者的WeIdentity DID不存在
+   * - CPT_ALREADY_EXIST
+     - 500304
+     - CPT已经存在
+   * - CPT_NO_PERMISSION
+     - 500305
+     - CPT无权限
 
 
 **调用示例**
@@ -3510,9 +3627,6 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - schema无效
-   * - CPT_JSON_SCHEMA_NULL
-     - 100302
-     - schema为null
    * - CPT_ID_NULL
      - 100303
      - CPT编号为null
@@ -3534,9 +3648,18 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_NOT_EXISTS
      - 500301
      - CPT不存在
+   * - CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX
+     - 500302
+     - 为权威机构生成的cptId超过上限
    * - CPT_PUBLISHER_NOT_EXIST
      - 500303
      - CPT发布者的WeIdentity DID不存在
+   * - CPT_ALREADY_EXIST
+     - 500304
+     - CPT已经存在
+   * - CPT_NO_PERMISSION
+     - 500305
+     - CPT无权限
 
 
 **调用示例**
@@ -3788,6 +3911,9 @@ com.webank.weid.protocol.base.Credential
    * - CREDENTIAL_ERROR
      - 100400
      - Credential标准错误
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
    * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
      - 100409
      - 到期日期无效
@@ -4010,9 +4136,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_ERROR
      - 100400
      - Credential标准错误
-   * - CREDENTIAL_NOT_EXISTS
-     - 100401
-     - Credential入参为空
    * - CREDENTIAL_EXPIRED
      - 100402
      - 过期
@@ -4034,9 +4157,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_CLAIM_NOT_EXISTS
      - 100410
      - Claim数据不能为空
-   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
-     - 100411
-     - Claim数据无效
    * - CREDENTIAL_ID_NOT_EXISTS
      - 100412
      - ID为空
@@ -4056,7 +4176,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 100419
      - 验证签名异常
    * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
-     - 100420
+     - 100429
      - 验证签名类型异常
    * - ILLEGAL_INPUT
      - 160004
@@ -4337,9 +4457,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_ERROR
      - 100400
      - Credential标准错误
-   * - CREDENTIAL_NOT_EXISTS
-     - 100401
-     - Credential入参为空
    * - CREDENTIAL_EXPIRED
      - 100402
      - 过期
@@ -4361,9 +4478,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_CLAIM_NOT_EXISTS
      - 100410
      - Claim数据不能为空
-   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
-     - 100411
-     - Claim数据无效
    * - CREDENTIAL_ID_NOT_EXISTS
      - 100412
      - ID为空
@@ -4383,7 +4497,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 100419
      - 验证签名异常
    * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
-     - 100420
+     - 100429
      - 验证签名类型异常
    * - ILLEGAL_INPUT
      - 160004
@@ -4586,6 +4700,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -4778,7 +4895,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 0
      - 成功
    * - WEID_KEYPAIR_CREATE_FAILED
-     - 10107
+     - 100107
      - 创建密钥对失败
    * - TRANSACTION_TIMEOUT
      - 160001
@@ -4944,9 +5061,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
-   * - WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED
-     - 10108
-     - 公私钥不成对
+   * - WEID_PUBLICKEY_INVALID
+     - 100102
+     - 公钥无效
    * - WEID_PRIVATEKEY_INVALID
      - 100103
      - 私钥格式非法
@@ -4956,21 +5073,21 @@ com.webank.weid.protocol.response.TransactionInfo
    * - WEID_PRIVATEKEY_DOES_NOT_MATCH
      - 100106
      - 私钥不与WeIdentity DID所对应
+   * - WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED
+     - 100108
+     - 公私钥不成对
    * - TRANSACTION_TIMEOUT
      - 160001
      - 超时
    * - TRANSACTION_EXECUTE_ERROR
      - 160002
      - 交易错误
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数为空
    * - UNKNOW_ERROR
      - 160003
      - 其他异常
-   * - WEID_PUBLICKEY_INVALID
-     - 100102
-     - 公钥无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
 
 
 **调用示例**
@@ -5098,9 +5215,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - TRANSACTION_EXECUTE_ERROR
      - 160002
      - 交易错误
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数为空
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
 
 
 **调用示例**
@@ -5365,9 +5482,9 @@ com.webank.weid.protocol.base.ServiceProperty
    * - TRANSACTION_EXECUTE_ERROR
      - 160002
      - 交易错误
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数为空
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
 
 
 **调用示例**
@@ -5545,6 +5662,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - TRANSACTION_EXECUTE_ERROR
      - 160002
      - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -5739,6 +5859,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - TRANSACTION_EXECUTE_ERROR
      - 160002
      - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -5931,6 +6054,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - TRANSACTION_EXECUTE_ERROR
      - 160002
      - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -6277,27 +6403,12 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
-   * - CPT_JSON_SCHEMA_INVALID
-     - 100301
-     - Json Schema非法
-   * - CREDENTIAL_ERROR
-     - 100400
-     - Credential标准错误
    * - CREDENTIAL_EXPIRED
      - 100402
      - 过期
-   * - CREDENTIAL_ISSUER_MISMATCH
-     - 100403
-     - issuer与签名不匹配
    * - CREDENTIAL_SIGNATURE_BROKEN
      - 100405
      - 签名破坏
-   * - CREDENTIAL_REVOKED
-     - 100406
-     - 已被撤销
-   * - CREDENTIAL_ISSUER_NOT_EXISTS
-     - 100407
-     - WeIdentity DID不能为空
    * - CREDENTIAL_CREATE_DATE_ILLEGAL
      - 100408
      - 创建日期格式非法
@@ -6307,21 +6418,24 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_CLAIM_NOT_EXISTS
      - 100410
      - Claim数据不能为空
-   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
-     - 100411
-     - Claim数据无效
    * - CREDENTIAL_ID_NOT_EXISTS
      - 100412
      - ID为空
    * - CREDENTIAL_CONTEXT_NOT_EXISTS
      - 100413
-     - context为空
+     - context为空   
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
    * - CREDENTIAL_CPT_NOT_EXISTS
      - 100416
      - cpt不存在
-   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
-     - 100417
-     - WeIdentity Document为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
    * - CREDENTIAL_EVIDENCE_BASE_ERROR
      - 100500
      - Evidence标准错误
@@ -6334,6 +6448,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
+   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT
+     - 500401
+     - Evidence参数非法
 
 
 **调用示例**
@@ -6502,9 +6619,6 @@ com.webank.weid.protocol.base.EvidenceInfo
    * - SUCCESS
      - 0
      - 成功
-   * - CREDENTIAL_EVIDENCE_NOT_EXISTS_ON_CHAIN
-     - 100401
-     - Credential入参为空
    * - CREDENTIAL_EVIDENCE_BASE_ERROR
      - 100500
      - Evidence标准错误
@@ -6690,12 +6804,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
-   * - CPT_JSON_SCHEMA_INVALID
-     - 100301
-     - Json Schema非法
-   * - CREDENTIAL_ERROR
-     - 100400
-     - Credential标准错误
    * - CREDENTIAL_EXPIRED
      - 100402
      - 过期
@@ -6705,12 +6813,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_SIGNATURE_BROKEN
      - 100405
      - 签名破坏
-   * - CREDENTIAL_REVOKED
-     - 100406
-     - 已被撤销
-   * - CREDENTIAL_ISSUER_NOT_EXISTS
-     - 100407
-     - WeIdentity DID不能为空
    * - CREDENTIAL_CREATE_DATE_ILLEGAL
      - 100408
      - 创建日期格式非法
@@ -6720,9 +6822,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_CLAIM_NOT_EXISTS
      - 100410
      - Claim数据不能为空
-   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
-     - 100411
-     - Claim数据无效
    * - CREDENTIAL_ID_NOT_EXISTS
      - 100412
      - ID为空
@@ -6735,15 +6834,21 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
      - 100417
      - WeIdentity Document为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
+     - 100419
+     -  验证签名异常
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
    * - CREDENTIAL_EVIDENCE_BASE_ERROR
      - 100500
      - Evidence标准错误
    * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
      - 100501
      - Evidence Hash不匹配
-   * - CREDENTIAL_EVIDENCE_ID_MISMATCH
-     - 100502
-     - Evidence ID不匹配
    * - TRANSACTION_TIMEOUT
      - 160001
      - 超时
@@ -6753,12 +6858,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
-   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ALREADY_EXISTS
-     - 500401
-     - Evidence ID已存在
-   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_NO_PERMISSION
-     - 500402
-     - Evidence操作无权限
 
 
 **调用示例**
@@ -7023,9 +7122,21 @@ com.webank.weid.protocol.base.CredentialPojo
    * - CREDENTIAL_ERROR
      - 100400
      - credential处理未知异常
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
    * - CREDENTIAL_CLAIM_DATA_ILLEGAL
      - 100411
      - Claim非法
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
 
 **调用示例**
 
@@ -7236,15 +7347,45 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
-   * - CREDENTIAL_IS_NILL
-     - 100428
-     - credential为null
+   * - CREDENTIAL_ERROR
+     - 100400
+     - Credential标准错误
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名破坏
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
    * - CREDENTIAL_CLAIM_POLICY_NOT_EXIST
      - 100420
      - 披露策略为null   
    * - CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM
      - 100427
      - 披露策略与Claim不匹配
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
      
      
 **调用示例**
@@ -7471,8 +7612,29 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_ISSUER_MISMATCH
      - 100403
      - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
    * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
      - 100417
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
      - 获取weIdDocument异常
    * - CREDENTIAL_SIGNATURE_BROKEN
      - 100405
@@ -7480,6 +7642,12 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
      - 100419
      - 签名验证异常
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
      
      
 **调用示例**
@@ -7675,18 +7843,45 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_ISSUER_MISMATCH
      - 100403
      - issuerWeId跟Credential中的issuer不匹配
-   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
-     - 100417
-     - 获取weIdDocument异常
    * - CREDENTIAL_SIGNATURE_BROKEN
      - 100405
      - 签名验证不通过
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
+     - 100417
+     - 获取weIdDocument异常
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
    * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
      - 100419
      - 签名验证异常
    * - CREDENTIAL_PUBLIC_KEY_NOT_EXISTS
      - 100421
      - 公钥不存在
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
 
 
 **调用示例**
@@ -7926,42 +8121,66 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数非法
-   * - CREDENTIAL_SIGNATURE_NOT_EXISTS
-     - 100422
-     - 签名不存在
-   * - CREDENTIAL_PRESENTERWEID_NOTMATCH
-     - 100426
-     - presenterWeId跟challenge不匹配
-   * - PRESENTATION_CHALLENGE_NONCE_MISMATCH
-     - 100605
-     - challenge随机数不匹配  
-   * - PRESENTATION_SIGNATURE_MISMATCH
-     - 100606
-     - presentation验签失败
    * - CREDENTIAL_ISSUER_MISMATCH
      - 100403
      - issuerWeId跟Credential中的issuer不匹配
-   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
-     - 100417
-     - 获取weIdDocument异常
    * - CREDENTIAL_SIGNATURE_BROKEN
      - 100405
      - 签名验证不通过
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
+     - 100417
+     - 获取weIdDocument异常
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
    * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
      - 100419
      - 签名验证异常
-   * - CREDENTIAL_CPTID_NOTMATCH
-     - 100425
-     - CPT不匹配
+   * - CREDENTIAL_SIGNATURE_NOT_EXISTS
+     - 100422
    * - CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL
      - 100423
      - policy披露信息非法
    * - CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE
      - 100424
      - Credential披露信息跟盐信息不一致
+   * - CREDENTIAL_CPTID_NOTMATCH
+     - 100425
+     - CPT不匹配
+     - 签名不存在
+   * - CREDENTIAL_PRESENTERWEID_NOTMATCH
+     - 100426
+     - presenterWeId跟challenge不匹配
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - PRESENTATION_CHALLENGE_NONCE_MISMATCH
+     - 100605
+     - challenge随机数不匹配  
+   * - PRESENTATION_SIGNATURE_MISMATCH
+     - 100606
+     - presentation验签失败
 
 
 **调用示例**
@@ -8278,39 +8497,69 @@ com.webank.weid.protocol.base.PresentationE
    * - SUCCESS
      - 0
      - 成功
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数非法
-   * - PRESENTATION_CHALLENGE_INVALID
-     - 100600
-     - challenge无效
    * - WEID_PRIVATEKEY_DOES_NOT_MATCH
      - 100106
      - 用户weId不匹配其私钥
-   * - PRESENTATION_CHALLENGE_WEID_MISMATCH
-     - 100601
-     - challenge中的weId不匹配用户的weId
-   * - PRESENTATION_WEID_PUBLICKEY_ID_INVALID
-     - 100604
-     - 公钥编号无效
-   * - PRESENTATION_POLICY_INVALID
-     - 100602
-     - policy无效
-   * - PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY
-     - 100603
-     - credentialList不匹配Policy
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常
-   * - CREDENTIAL_IS_NILL
-     - 100428
-     - credential为null
+   * - CREDENTIAL_ERROR
+     - 100400
+     - Credential标准错误
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名破坏
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
    * - CREDENTIAL_CLAIM_POLICY_NOT_EXIST
      - 100420
      - 披露策略为null
    * - CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM
      - 100427
      - 披露策略与Claim不匹配 
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
+   * - PRESENTATION_CHALLENGE_INVALID
+     - 100600
+     - challenge无效
+   * - PRESENTATION_CHALLENGE_WEID_MISMATCH
+     - 100601
+     - challenge中的weId不匹配用户的weId
+   * - PRESENTATION_POLICY_INVALID
+     - 100602
+     - policy无效
+   * - PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY
+     - 100603
+     - credentialList不匹配Policy
+   * - PRESENTATION_WEID_PUBLICKEY_ID_INVALID
+     - 100604
+     - 公钥编号无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
 
 
 **调用示例**
@@ -8576,15 +8825,15 @@ com.webank.weid.protocol.response.AmopResponse
    * - SUCCESS
      - 0
      - 成功
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
    * - DIRECT_ROUTE_REQUEST_TIMEOUT
      - 160009
      - AMOP超时
    * - DIRECT_ROUTE_MSG_BASE_ERROR
      - 160010
      - AMOP异常
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常
      
      
 ----
@@ -8763,24 +9012,24 @@ com.webank.weid.protocol.base.Challenge
    * - SUCCESS
      - 0
      - 成功
-   * - DIRECT_ROUTE_REQUEST_TIMEOUT
-     - 160009
-     - AMOP超时
-   * - DIRECT_ROUTE_MSG_BASE_ERROR
-     - 160010
-     - AMOP异常
+   * - POLICY_SERVICE_NOT_EXISTS
+     - 100701
+     - policyService不存在
+   * - POLICY_SERVICE_CALL_FAIL
+     - 100702
+     - policyService调用未知异常
    * - UNKNOW_ERROR
      - 160003
      - 未知异常
    * - ILLEGAL_INPUT
      - 160004
      - 参数非法
-   * - POLICY_SERVICE_NOT_EXISTS
-     - 100701
-     - policyService不存在
-   * - POLICY_SERVICE_CALL_FAIL
-     - 100701
-     - policyService调用未知异常
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
 ----
 
 
@@ -8908,26 +9157,29 @@ com.webank.weid.protocol.response.GetEncryptKeyResponse
      - code
      - desc
    * - SUCCESS
-     - 0
+     - 0   
      - 成功
+   * - ENCRYPT_KEY_NOT_EXISTS
+     - 100700
+     - 无法获取秘钥
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
    * - DIRECT_ROUTE_REQUEST_TIMEOUT
      - 160009
      - AMOP超时
    * - DIRECT_ROUTE_MSG_BASE_ERROR
      - 160010
      - AMOP异常
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数非法
-   * - POLICY_SERVICE_NOT_EXISTS
-     - 100701
-     - policyService不存在
-   * - POLICY_SERVICE_CALL_FAIL
-     - 100701
-     - policyService调用未知异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
 ----
 
 
@@ -9057,21 +9309,27 @@ java.util.List<java.lang.String>
    * - TRANSPORTATION_PROTOCOL_DATA_INVALID
      - 100805
      - 协议数据无效
-   * - TRANSPORTATION_PROTOCOL_FIELD_INVALID
-     - 100806
-     - 协议字段无效
    * - TRANSPORTATION_ENCODE_BASE_ERROR
      - 100807
      - Encode基本未知异常
-   * - SQL_EXECUTE_FAILED
-     - 160011
-     - SQL执行异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常
    * - BASE_ERROR
      - 160007
      - weId基础未知异常
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
 
 
 **调用示例**
@@ -9167,43 +9425,46 @@ java.util.List<java.lang.String>
      - 成功
    * - ENCRYPT_KEY_NOT_EXISTS
      - 100700
-     - 无法获取秘钥
+     -  无法获取秘钥
    * - TRANSPORTATION_BASE_ERROR
      - 100800
      - transportation基本未知异常
-   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
-     - 100801
-     - 协议配置异常
    * - TRANSPORTATION_PROTOCOL_VERSION_ERROR
      - 100802
      - 协议版本错误
    * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
      - 100803
      - 协议配置Encode异常 
-   * - TRANSPORTATION_PROTOCOL_STRING_INVALID
-     - 100804
-     - 协议字符串无效
    * - TRANSPORTATION_PROTOCOL_DATA_INVALID
      - 100805
      - 协议数据无效
-   * - TRANSPORTATION_PROTOCOL_FIELD_INVALID
-     - 100806
-     - 协议字段无效
    * - TRANSPORTATION_ENCODE_BASE_ERROR
      - 100807
      - Encode基本未知异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常
    * - BASE_ERROR
      - 160007
      - weId基础未知异常
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
    * - SQL_EXECUTE_FAILED
      - 160011
      - SQL执行异常
-   * - PRESISTENCE_DATA_KEY_INVALID
-     - 100901
-     - dataKey无效
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
 
 
 **调用示例**
@@ -9346,9 +9607,6 @@ java.util.List<java.lang.String>
    * - SUCCESS
      - 0
      - 成功
-   * - TRANSPORTATION_BASE_ERROR
-     - 100800
-     - transportation基本未知异常
    * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
      - 100801
      - 协议配置异常
@@ -9358,21 +9616,24 @@ java.util.List<java.lang.String>
    * - TRANSPORTATION_PROTOCOL_DATA_INVALID
      - 100805
      - 协议数据无效
-   * - TRANSPORTATION_PROTOCOL_FIELD_INVALID
-     - 100806
-     - 协议字段无效
    * - TRANSPORTATION_ENCODE_BASE_ERROR
      - 100807
      - Encode基本未知异常
-   * - SQL_EXECUTE_FAILED
-     - 160011
-     - SQL执行异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常
    * - BASE_ERROR
      - 160007
      - weId基础未知异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
 
 
 **调用示例**
@@ -9469,42 +9730,39 @@ java.util.List<java.lang.String>
    * - ENCRYPT_KEY_NOT_EXISTS
      - 100700
      - 无法获取秘钥
-   * - TRANSPORTATION_BASE_ERROR
-     - 100800
-     - transportation基本未知异常
-   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
-     - 100801
-     - 协议配置异常
    * - TRANSPORTATION_PROTOCOL_VERSION_ERROR
      - 100802
      - 协议版本错误
-   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
-     - 100803
-     - 协议配置Encode异常 
    * - TRANSPORTATION_PROTOCOL_STRING_INVALID
      - 100804
      - 协议字符串无效
-   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
-     - 100805
-     - 协议数据无效
-   * - TRANSPORTATION_PROTOCOL_FIELD_INVALID
-     - 100806
-     - 协议字段无效
    * - TRANSPORTATION_ENCODE_BASE_ERROR
      - 100807
      - Encode基本未知异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常
    * - BASE_ERROR
      - 160007
      - weId基础未知异常
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
    * - SQL_EXECUTE_FAILED
      - 160011
      - SQL执行异常
-   * - PRESISTENCE_DATA_KEY_INVALID
-     - 100901
-     - dataKey无效
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
 
 
 **调用示例**
@@ -9712,9 +9970,6 @@ Persistence
    * - SUCCESS
      - 0
      - 成功
-   * - PRESISTENCE_DATA_KEY_INVALID
-     - 100901
-     - id无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常，需核对日志
