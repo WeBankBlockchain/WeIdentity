@@ -89,12 +89,12 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserializeCase2() {
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
+            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
         ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
-            .deserialize(response.getResult(), PresentationE.class);
+            .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
         Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
@@ -138,7 +138,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserializeCase5() {       
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
+            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
@@ -152,7 +152,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
 
         ResponseData<PresentationE> wrapperRes = 
             TransportationFactory.newJsonTransportation()
-                .deserialize(response.getResult(), PresentationE.class);
+                .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         mockTest.tearDown();
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(

@@ -92,13 +92,13 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserializeCase2() {
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
+            TransportationFactory.newQrCodeTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
         ResponseData<PresentationE> wrapperRes = 
             TransportationFactory.newQrCodeTransportation()
-                .deserialize(response.getResult(), PresentationE.class);
+                .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
         Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
@@ -232,7 +232,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
     public void testDeserializeCase10() {
         
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
+            TransportationFactory.newQrCodeTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
@@ -246,7 +246,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
 
         ResponseData<PresentationE> wrapperRes = 
             TransportationFactory.newQrCodeTransportation()
-                .deserialize(response.getResult(), PresentationE.class);
+                .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         mockTest.tearDown();
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
