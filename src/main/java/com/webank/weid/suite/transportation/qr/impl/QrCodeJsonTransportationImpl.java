@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.QrCodeTransportation;
@@ -71,19 +72,19 @@ public class QrCodeJsonTransportationImpl
         ProtocolProperty property) {
         
         logger.info(
-            "begin to execute QrCodeJsonTransportationImpl serialization, property:{}",
+            "[serialize] begin to execute QrCodeTransportation serialization, property:{}",
             property
         );
         // 验证协议配置
         ErrorCode errorCode = checkEncodeProperty(property);
         if (errorCode != ErrorCode.SUCCESS) {
-            logger.error("checkEncodeProperty fail, errorCode:{}.", errorCode);
+            logger.error("[serialize] checkEncodeProperty fail, errorCode:{}.", errorCode);
             return new ResponseData<String>(StringUtils.EMPTY, errorCode);
         }
         // 验证presentation数据
         errorCode = checkProtocolData(object);
         if (errorCode != ErrorCode.SUCCESS) {
-            logger.error("checkProtocolData fail, errorCode:{}.", errorCode);
+            logger.error("[serialize] checkProtocolData fail, errorCode:{}.", errorCode);
             return new ResponseData<String>(StringUtils.EMPTY, errorCode);
         }
         try {
@@ -103,9 +104,10 @@ public class QrCodeJsonTransportationImpl
                     qrCodeData.getId(),
                     qrCodeData.getOrgId(),
                     object.toJson(),
-                    super.getVerifiers()
+                    super.getVerifiers(),
+                    property.getKeyExpireTime()
                 );
-            logger.info("encode by {}.", property.getEncodeType().name());
+            logger.info("[serialize] encode by {}.", property.getEncodeType().name());
             // 进行编码处理
             String data = 
                 EncodeProcessorFactory
@@ -114,13 +116,13 @@ public class QrCodeJsonTransportationImpl
             qrCodeData.setData(data);
             // 将协议实体转换成协议字符串数据
             String transString = qrCodeData.buildBuffer().getTransString();
-            logger.info("QrCodeJsonTransportationImpl serialization finished.");
+            logger.info("[serialize] QrCodeTransportation serialization finished.");
             return new ResponseData<String>(transString, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
-            logger.error("QrCodeJsonTransportationImpl serialization due to base error.", e);
+            logger.error("[serialize] QrCodeTransportation serialization due to base error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
         } catch (Exception e) {
-            logger.error("QrCodeJsonTransportationImpl serialization due to unknown error.", e);
+            logger.error("[serialize] QrCodeTransportation serialization due to unknown error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.UNKNOW_ERROR);
         }
     }  
@@ -130,7 +132,7 @@ public class QrCodeJsonTransportationImpl
         String transString,
         Class<T> clazz) {
         
-        logger.info("begin to execute QrCodeJsonTransportationImpl deserialization.");
+        logger.info("[deserialize] begin to execute QrCodeTransportation deserialize.");
         try {
             //解析协议版本
             QrCodeVersion version = QrCodeBaseData.getQrCodeVersion(transString);
@@ -144,9 +146,9 @@ public class QrCodeJsonTransportationImpl
                     qrCodeData.getId(),
                     qrCodeData.getOrgId(),
                     qrCodeData.getData(),
-                    super.getVerifiers()
+                    super.getWeIdAuthentication()
                 );
-            logger.info("encode by {}.", qrCodeData.getEncodeType().name());
+            logger.info("[deserialize] encode by {}.", qrCodeData.getEncodeType().name());
             //进行解码处理
             String data = 
                 EncodeProcessorFactory
@@ -167,14 +169,30 @@ public class QrCodeJsonTransportationImpl
             } else  {
                 object = (T) method.invoke(null, presentationEStrNew);
             }
-            logger.info("QrCodeJsonTransportationImpl deserialization finished.");
+            logger.info("[deserialize] QrCodeTransportation deserialize finished.");
             return new ResponseData<T>(object, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
-            logger.error("QrCodeJsonTransportationImpl deserialization due to base error.", e);
+            logger.error("[deserialize] QrCodeTransportation deserialize due to base error.", e);
             return new ResponseData<T>(null, e.getErrorCode());
         } catch (Exception e) {
-            logger.error("QrCodeJsonTransportationImpl deserialization due to unknown error.", e);
+            logger.error("[deserialize] QrCodeTransportation deserialize due to unknown error.", e);
             return new ResponseData<T>(null, ErrorCode.UNKNOW_ERROR);
         }
+    }
+    
+    @Override
+    public <T extends JsonSerializer> ResponseData<T> deserialize(
+        WeIdAuthentication weIdAuthentication,
+        String transString, 
+        Class<T> clazz
+    ) {
+        //检查WeIdAuthentication合法性
+        ErrorCode errorCode = checkWeIdAuthentication(weIdAuthentication);
+        if (errorCode != ErrorCode.SUCCESS) {
+            logger.error("[deserialize] checkWeIdAuthentication fail, errorCode:{}.", errorCode);
+            return new ResponseData<T>(null, errorCode);
+        }
+        super.setWeIdAuthentication(weIdAuthentication);
+        return deserialize(transString, clazz);
     }
 }
