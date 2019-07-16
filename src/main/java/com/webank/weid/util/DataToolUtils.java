@@ -242,10 +242,13 @@ public final class DataToolUtils {
             OBJECT_MAPPER.writeValue(write, object);
         } catch (JsonGenerationException e) {
             logger.error("JsonGenerationException when serialize object to json", e);
+            throw new DataTypeCastException("serialize object to json error");
         } catch (JsonMappingException e) {
             logger.error("JsonMappingException when serialize object to json", e);
+            throw new DataTypeCastException("serialize object to json error");
         } catch (IOException e) {
             logger.error("IOException when serialize object to json", e);
+            throw new DataTypeCastException("serialize object to json error");
         }
         return write.toString();
     }
