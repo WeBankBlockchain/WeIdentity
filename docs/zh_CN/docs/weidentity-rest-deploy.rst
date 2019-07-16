@@ -27,8 +27,8 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
    * - JDK
      - 1.8+
      - 推荐使用1.8u141及以上
-   * - FISCO-BCOS
-     - 1.3.6+
+   * - FISCO-BCOS节点
+     - 1.2.5（目前暂不支持2.x）
      - 确保它可以和部署Server机器互相telnet连通其channelPort端口
    * - gradle
      - 4.6+
@@ -59,39 +59,27 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * 首先，确认WeIdentity合约已部署完毕。
-* 修改 ``dist/conf/ApplicationContext.xml`` ，更新合约地址及区块链节点信息。
+* 修改合约属性。如果您使用部署工具build-tools部署的WeIdentity合约，那么只需将部署工具生成的 ``fisco.properties`` 及 ``weidentity.properties`` 拷贝到 ``dist/conf`` 目录下即可。如果您使用源码部署或是连接到已有的WeIdentity合约，请手动修改 ``dist/conf/fisco.properties.tpl`` 及 ``dist/conf/weidentity.properties.tpl`` ，更新合约地址及区块链节点信息；修改完成后，将两个文件的子扩展名 ``.tpl`` 去掉。
 
-合约地址修改示例：更新下列属性中weId、cpt、issuer、evidence合约地址的值
-
-.. code-block:: xml
-
-    <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer"
-      id="appConfig">
-    ...
-      <property name="properties">
-        <props>
-          <prop key="weId.contractaddress">0xedfe29997c7783d618510f2da6510010ad5253f4</prop>
-          <prop key="cpt.contractaddress">0x8984cab94b7c3add9c56e6c21d4329e0020d73ad</prop>
-          <prop key="issuer.contractaddress">0xb5346fd29ac75e7bb682c548f2951b6f8bf7d754</prop>
-          <prop key="evidence.contractaddress">0xddddd42da68a40784f5f63ada7ead9b36a38d2e3</prop>
-        </props>
-      </property>
-
-区块链节点信息修改示例：更新value列表的值，注意每一条value记录都应包含区块链用户、节点IP、节点channel端口地址信息
+合约地址修改示例：更新 ``dist/conf/fisco.properties.tpl`` 下列属性中weId、cpt、issuer、evidence合约地址的值。
 
 .. code-block:: xml
 
-    <bean class="org.bcos.channel.handler.ChannelConnections">
-    ...
-      <property name="connectionsStr">
-        <list>
-          <value>WeIdentity@10.107.105.203:8812</value>
-          <value>WeIdentity@10.107.105.229:8900</value>
-        </list>
-      </property>
-    </bean>
+weId.contractaddress=0xedfe29997c7783d618510f2da6510010ad5253f4
+cpt.contractaddress=0x8984cab94b7c3add9c56e6c21d4329e0020d73ad
+issuer.contractaddress=0xb5346fd29ac75e7bb682c548f2951b6f8bf7d754
+evidence.contractaddress=0xddddd42da68a40784f5f63ada7ead9b36a38d2e3
+specificissuer.contractaddress=0x215d5c4b8867ce9f52d1a599c9dfef190201c263
 
-* 修改 ``dist/conf/application.properties`` ，确认Server监听端口地址（此即为RestServer的HTTP端口地址）及HTTP重定向地址已设置且未被其他程序占用，否则请修改之。示例：
+区块链节点信息修改示例：更新 ``dist/conf/weidentity.properties.tpl`` 中 ``nodes`` 项的值，注意每一条信息都应包含区块链用户、节点IP、节点channel端口地址；多于一个区块链节点，请用 “,” 半角逗号分隔。
+
+.. code-block:: xml
+
+nodes=WeIdentity@10.107.105.203:8812,WeIdentity@10.107.105.107:8900
+
+* 拷贝您WeIdentity合约部署者的私钥到 ``dist/conf`` 目录下，并重命名为``ecdsa_key``。如果您使用部署工具build-tools部署的WeIdentity合约，这个文件在 ``output/admin/`` 目录。如果您使用源码部署，这个文件在源代码根目录下。
+
+* 修改 ``dist/conf/application.properties`` ，确认Server监听端口地址（此即为RestServer的HTTP端口地址）及HTTP重定向地址已设置且未被其他程序占用；同时确认用来调用默认合约部署者私钥的暗语。
 
 .. code-block:: bash
 
@@ -99,6 +87,8 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
     server.port=20191
     # HTTP重定向地址
     server.http.port=20190
+    # 合约部署者私钥暗语
+    default.passphrase=default_ecdsa_key
 
 2. Server使用说明
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -117,7 +107,7 @@ Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity
     # 观察应用状态
     $ ./server_status.sh
     # 停止应用
-    $ ./stop.sh 停止应用
+    $ ./stop.sh
 
 执行 ``./start.sh`` 之后会输出以下提示，表示RestServer已经顺利启动：
 

@@ -262,7 +262,7 @@ WeIdentity RestService API 说明文档
      - 
      - Y
    * - transactionArg.invokerWeId
-     - 用于索引私钥的WeIdentity DID，服务器端会凭此找到所托管的私钥
+     - 用于索引私钥的WeIdentity DID，服务器端会凭此找到所托管的私钥。注意：如果在这里填入了预先定义在application.properties里的暗语，则可确保有足够的权限。
      - Y
    * - v
      - 版本号
