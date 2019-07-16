@@ -327,7 +327,7 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
                 .getValue();
             if (CollectionUtils.isNotEmpty(addressList)) {
                 for (Address addr : addressList) {
-                    addrList.add(addr.getTypeAsString());
+                    addrList.add(addr.toString());
                 }
             }
         } catch (TimeoutException e) {
