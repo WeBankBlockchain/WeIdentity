@@ -13,15 +13,15 @@ WeIdentity 在区块链上存储的信息主要包括：
 WeIdentity 容量预估：
 
 ```JAVA
-链上所占总空间 = WeIdentity DID 数量 * 52 Bytes * 10 +
-  Evidence 数量 * 220 Bytes * 10 +
-  CPT 数量 * 4560 Bytes * 10 +
-  Authority Issuer 数量 * 724 Bytes * 10 +
-  Specific Issuer 数量 * 372 Bytes * 10
+链上所占总空间 = (WeIdentity DID数量 * 52 Bytes * 10)
+  + (Evidence数量 * 220 Bytes * 10)
+  + (CPT数量 * 4560 Bytes * 10)
+  + (Authority Issuer数量 * 724 Bytes * 10)
+  + (Specific Issuer数量 * 372 Bytes * 10)
 ```
 
 ```JAVA
-Event 所占总空间 = WeIdentity DID 数量 * 1464 Bytes * 3
+Event 所占总空间 = (WeIdentity DID数量 * 1464 Bytes * 3)
 ```
 
 例如，假设一条联盟链，总共创建`1000万个`WeID，并且将Credential的存证上链，每天 `20000 条`存证上链（这种情况下，容量评估可以只考虑上面列出的前三项）。则`两年`时间，部署 WeIdentity 的区块链节点，大概会占用的空间（仅做参考）：
@@ -60,7 +60,7 @@ event WeIdAttributeChanged(
 
 ## 2. WeIdentity DID 的总表所占容量预估
 
-WeIdentity DID 的总表，存储在链上，存储了所有公开的 WeIdentity DID 的 ID到 Document 的映射关系。
+WeIdentity DID 的总表，存储在链上，存储了所有公开的 WeIdentity DID 的 ID 到 Document 的映射关系。
 
 ```javascript
 WeIdentity DID 的总表在链上所占空间 = WeIdentity DID 数量 * 52 Bytes * 10
