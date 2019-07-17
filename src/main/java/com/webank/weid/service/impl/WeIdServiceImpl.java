@@ -387,9 +387,9 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
 
         return !(setServiceArgs == null
-            || setServiceArgs.getType() == null
+            || StringUtils.isBlank(setServiceArgs.getType())
             || setServiceArgs.getUserWeIdPrivateKey() == null
-            || setServiceArgs.getServiceEndpoint() == null);
+            || StringUtils.isBlank(setServiceArgs.getServiceEndpoint()));
     }
 
     private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,
@@ -418,7 +418,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         return !(setPublicKeyArgs == null
             || setPublicKeyArgs.getType() == null
             || setPublicKeyArgs.getUserWeIdPrivateKey() == null
-            || setPublicKeyArgs.getPublicKey() == null);
+            || StringUtils.isBlank(setPublicKeyArgs.getPublicKey()));
     }
 
     private boolean verifySetAuthenticationArgs(SetAuthenticationArgs setAuthenticationArgs) {
