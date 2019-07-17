@@ -178,7 +178,8 @@ com.webank.weid.protocol.base.ServiceProperty
    接口描述: 将WeIdDocument转换成json格式的字符串。
    注意：此方法转换出错会抛DATA_TYPE_CASE_ERROR异常 。
 
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -209,7 +210,8 @@ com.webank.weid.protocol.base.ServiceProperty
    接口描述: 将json格式的WeIdDocument转换成WeIdDocument对象。
    注意：调用fromJson(String weIdDocumentJson)的入参，必须是通过调用toJson()得到的json格式的WeIdDocument字符串，否则会抛异常 。
 
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -275,7 +277,8 @@ com.webank.weid.protocol.base.Challenge
    接口描述: 将Challenge转换成json格式的字符串。
    注意：此方法转换出错会抛DATA_TYPE_CASE_ERROR异常 。
 
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -305,7 +308,8 @@ com.webank.weid.protocol.base.Challenge
    接口描述: 将json格式的Challenge转换成Challenge对象。
    注意：调用fromJson(String challengeJson)的入参，必须是通过调用toJson()得到的json格式的Challenge字符串，否则会抛DATA_TYPE_CASE_ERROR异常 。
 
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -390,7 +394,8 @@ com.webank.weid.protocol.base.CredentialPojo
    接口描述: 将CredentialPojo转换成json格式的字符串。
    注意：此方法转换出错会抛DATA_TYPE_CASE_ERROR异常 。
  
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -445,7 +450,8 @@ com.webank.weid.protocol.base.CredentialPojo
    接口描述: 将json格式的CredentialPojo转换成CredentialPojo对象。
    注意：调用fromJson(String credentialPojoJson)的入参，必须是通过调用toJson()得到的json格式的CredentialPojo字符串，否则会抛异常 。
  
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -550,7 +556,8 @@ com.webank.weid.protocol.base.PresentationPolicyE
    接口描述: 将PresentationPolicyE转换成json格式的字符串。
    注意：此方法转换出错会抛DATA_TYPE_CASE_ERROR异常 。
  
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -581,7 +588,8 @@ com.webank.weid.protocol.base.PresentationPolicyE
    接口描述: 将json格式的PresentationPolicyE转换成PresentationPolicyE对象。
    注意：调用fromJson(String presentationPolicyEJson)的入参，必须是通过调用toJson()得到的json格式的PresentationPolicyE字符串，否则会抛异常 。
  
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -652,7 +660,8 @@ com.webank.weid.protocol.base.PresentationE
    接口描述: 将PresentationE转换成json格式的字符串。
    注意：此方法转换出错会抛DATA_TYPE_CASE_ERROR异常 。
  
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
@@ -719,7 +728,8 @@ com.webank.weid.protocol.base.PresentationE
    接口描述: 将json格式的PresentationE转换成PresentationE对象。
    注意：调用fromJson(String presentationEJson)的入参，必须是通过调用toJson()得到的json格式的PresentationE字符串，否则会抛异常 。
  
-**此方法返回code**  
+**此方法返回code**
+
 .. list-table::
    :header-rows: 1
 
