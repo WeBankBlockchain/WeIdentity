@@ -90,7 +90,7 @@ List json = [
 ]
 
 List weidentity_contract = [
-        "com.webank:weid-contract-java:1.2.3"
+        "com.webank:weid-contract-java:1.2.4"
 ]
 
 List mysql_driver = [
