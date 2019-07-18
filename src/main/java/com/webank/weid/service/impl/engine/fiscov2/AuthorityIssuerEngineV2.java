@@ -44,6 +44,7 @@ import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -77,7 +78,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         List<byte[]> stringAttributes = new ArrayList<byte[]>();
         stringAttributes.add(authorityIssuer.getName().getBytes());
         List<BigInteger> longAttributes = new ArrayList<>();
-        Long createDate = System.currentTimeMillis();
+        Long createDate = DateUtils.getNoMillisecondTimeStamp();
         longAttributes.add(BigInteger.valueOf(createDate));
         try {
             AuthorityIssuerController authorityIssuerController = reloadContract(
