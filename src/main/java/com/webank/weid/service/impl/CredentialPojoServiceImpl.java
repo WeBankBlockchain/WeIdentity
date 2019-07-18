@@ -410,10 +410,24 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             if (issuanceDate == null) {
                 result.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
             } else {
-                result.setIssuanceDate(issuanceDate);
+                Long newIssuanceDate = 
+                    DateUtils.convertToNoMillisecondTimeStamp(args.getIssuanceDate());
+                if (newIssuanceDate == null) {
+                    logger.error("Create Credential Args illegal.");
+                    return new ResponseData<>(null, ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL);
+                } else {
+                    result.setIssuanceDate(newIssuanceDate);
+                }
             }
             result.setIssuer(args.getIssuer());
-            result.setExpirationDate(args.getExpirationDate());
+            Long newExpirationDate = 
+                DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate());
+            if (newExpirationDate == null) {
+                logger.error("Create Credential Args illegal.");
+                return new ResponseData<>(null, ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL);
+            } else {
+                result.setExpirationDate(newExpirationDate);
+            } 
             result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
             Object claimObject = args.getClaim();
             String claimStr = null;

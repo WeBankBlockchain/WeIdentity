@@ -449,11 +449,7 @@ public final class CredentialPojoUtils {
             || (issuanceDate != null && expirationDate < issuanceDate)
             || (issuanceDate == null && !DateUtils.isAfterCurrentTime(expirationDate))) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
-        }
-        if (issuanceDate != null) {
-            args.setIssuanceDate(DateUtils.convertToNoMillisecondTimeStamp(issuanceDate));
-        }
-        args.setExpirationDate(DateUtils.convertToNoMillisecondTimeStamp(expirationDate));
+        }       
         return ErrorCode.SUCCESS;
     }
 
@@ -476,12 +472,6 @@ public final class CredentialPojoUtils {
         if (ErrorCode.SUCCESS.getCode() != contentResponseData.getCode()) {
             return contentResponseData;
         }
-        if (args.getIssuanceDate() != null) {
-            args.setIssuanceDate(
-                DateUtils.convertToNoMillisecondTimeStamp(args.getIssuanceDate()));
-        }
-        args.setExpirationDate(
-            DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate()));
         return ErrorCode.SUCCESS;
     }
 
