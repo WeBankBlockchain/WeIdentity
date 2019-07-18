@@ -273,7 +273,11 @@ public class DateUtils {
         } 
         if (String.valueOf(date) != null 
             && String.valueOf(date).length() != getCurrentTimeStampString().length()) {
-            return date;
+            if (String.valueOf(date).length() == getNoMillisecondTimeStampString().length()) {
+                return date;
+            }
+            logger.error("the timestamp is illegal.");
+            return null;
         }
         DateTimeFormatter ftf = DateTimeFormatter.ofPattern(STRING_DATE_FORMAT); 
         String time = ftf.format(
