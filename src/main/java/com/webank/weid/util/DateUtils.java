@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author lingfenghe
  */
 public class DateUtils {
+
     private static final Logger logger = LoggerFactory.getLogger(DateUtils.class);
 
     private static String TIME_ZONE = "Asia/Shanghai";
@@ -79,7 +80,7 @@ public class DateUtils {
         df.setTimeZone(tz);
         return df;
     }
-    
+
     /**
      * Gets the default date format.
      *
@@ -136,14 +137,14 @@ public class DateUtils {
     public static Long convertUtcDateToTimeStamp(String time) throws ParseException {
         DateFormat simpleDateFormat = getDefaultDateFormat();
         Date date = simpleDateFormat.parse(time);
-        return date.getTime();      
+        return date.getTime();
     }
-    
+
     /**
      * Conver utc date to without millisecond timestamp.
      *
      * @param time the time in UTC
-     * @return the long timestamp   
+     * @return the long timestamp
      */
     public static Long convertUtcDateToNoMillisecondTime(String time) {
         DateTimeFormatter dtf = getDefaultDateTimeFormatter();
@@ -177,9 +178,9 @@ public class DateUtils {
     public static String convertTimestampToUtc(Long date) {
         DateFormat df = getDefaultDateFormat();
         df.setLenient(false);
-        return df.format(new Date(date));      
+        return df.format(new Date(date));
     }
-    
+
     /**
      * Convert the timestamp without millisecond date to UTC date string.
      *
@@ -191,14 +192,14 @@ public class DateUtils {
             && String.valueOf(date).length() == getNoMillisecondTimeStampString().length()) {
             DateTimeFormatter dtf = getDefaultDateTimeFormatter();
             return dtf.format(LocalDateTime.ofInstant(
-                Instant.ofEpochSecond(date), 
+                Instant.ofEpochSecond(date),
                 ZoneId.of(TIME_ZONE)));
         } else {
             logger.error("the timestamp is illegal.");
             return null;
-        }        
+        }
     }
-    
+
     /**
      * Get current timestamp in Int256 type.
      *
@@ -206,6 +207,15 @@ public class DateUtils {
      */
     public static Int256 getCurrentTimeStampInt256() {
         return new Int256(System.currentTimeMillis());
+    }
+
+    /**
+     * Get current no-ms timestamp in Int256 type.
+     *
+     * @return the current time stamp int 256
+     */
+    public static Int256 getNoMillisecondTimeStampInt256() {
+        return new Int256(DateUtils.getNoMillisecondTimeStamp());
     }
 
     /**
@@ -234,7 +244,7 @@ public class DateUtils {
     public static Long getNoMillisecondTimeStamp() {
         return Instant.now().getEpochSecond();
     }
-    
+
     /**
      * Get current timestamp without millisecond in String type.
      *
@@ -243,9 +253,10 @@ public class DateUtils {
     public static String getNoMillisecondTimeStampString() {
         return String.valueOf(Instant.now().getEpochSecond());
     }
-    
+
     /**
      * compare with the long date with CurrentTime.
+     *
      * @param date long date
      * @return boolean
      */
@@ -260,18 +271,19 @@ public class DateUtils {
             return false;
         }
     }
-    
+
     /**
      * convert timeStamp which contain millisecond to without millisecond timeStamp.
+     *
      * @param date timeStamp
      * @return the timeStamp without millisecond
      */
-    public static Long convertToNoMillisecondTimeStamp(Long date) { 
+    public static Long convertToNoMillisecondTimeStamp(Long date) {
         if (String.valueOf(date) == null) {
             logger.error("the timestamp is null.");
             return null;
-        } 
-        if (String.valueOf(date) != null 
+        }
+        if (String.valueOf(date) != null
             && String.valueOf(date).length() != getCurrentTimeStampString().length()) {
             if (String.valueOf(date).length() == getNoMillisecondTimeStampString().length()) {
                 return date;
@@ -279,10 +291,10 @@ public class DateUtils {
             logger.error("the timestamp is illegal.");
             return null;
         }
-        DateTimeFormatter ftf = DateTimeFormatter.ofPattern(STRING_DATE_FORMAT); 
+        DateTimeFormatter ftf = DateTimeFormatter.ofPattern(STRING_DATE_FORMAT);
         String time = ftf.format(
-            LocalDateTime.ofInstant(Instant.ofEpochMilli(date), 
-            ZoneId.of(TIME_ZONE))); 
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(date),
+                ZoneId.of(TIME_ZONE)));
         LocalDateTime parse = LocalDateTime.parse(time, ftf);
         return LocalDateTime.from(parse).atZone(ZoneId.of(TIME_ZONE)).toInstant().getEpochSecond();
     }

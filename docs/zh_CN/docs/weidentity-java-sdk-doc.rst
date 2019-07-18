@@ -907,7 +907,7 @@ com.webank.weid.protocol.base.AuthorityIssuer
      - String
      - Y
      - 授权机构名称
-     - 
+     - 机构名称必须小于32个字节，非空，且仅包含ASCII码可打印字符（ASCII值位于32~126）
    * - created
      - Long
      - N
@@ -975,7 +975,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -1186,7 +1186,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -1351,7 +1351,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -1496,7 +1496,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -1684,7 +1684,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -1760,7 +1760,38 @@ com.webank.weid.protocol.base.AuthorityIssuer
 .. code-block:: text
 
    返回数据如：
+   result: (java.util.ArrayList)
+      [0]: com.webank.weid.protocol.base.AuthorityIssuer
+         weId: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+         name: webank1
+         created: 1560412556901
+         accValue:
+      [1]: com.webank.weid.protocol.base.AuthorityIssuer
+         weId: did:weid:101:0x48f56f6b8cd77409447014ceb060243b914cb2a9
+         name: webank2
+         created: 1560632118000
+         accValue:
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
 
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: getAllAuthorityIssuerList()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>区块链节点: 调用查询详细信息合约
+   区块链节点->>区块链节点: 执行合约查询指定数目的授权机构，打包返回结果
+   区块链节点-->>AuthorityIssuerService: 返回查询结果
+   AuthorityIssuerService-->>调用者: 返回查询结果
 
 ----
 
@@ -1774,7 +1805,8 @@ com.webank.weid.protocol.base.AuthorityIssuer
 
    接口名称: com.webank.weid.rpc.AuthorityIssuerService.registerIssuerType
    接口定义: ResponseData<Boolean> registerIssuerType(WeIdAuthentication callerAuth, String issuerType)
-   接口描述: 注册issuer type。
+   接口描述: 指定并注册不同issuer的类型，如学校、政府机构等。
+   权限说明：本方法对传入的WeIdAuthentication没有特定权限要求。
 
 **接口入参**\ : 
 
@@ -1863,7 +1895,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -1888,7 +1920,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 成功
    * - AUTHORITY_ISSUER_ERROR
      - 100200
-     -  授权标准异常
+     - 授权标准异常
    * - SPECIFIC_ISSUER_TYPE_ILLEGAL
      - 100208
      - 机构类型非法
@@ -1910,11 +1942,45 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: java
 
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
-	
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+	 AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
+   ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.registerIssuerType(weIdAuthentication, "College");
+
 .. code-block:: text
 
    返回数据如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo: (com.webank.weid.protocol.response.TransactionInfo)
+	  blockNumber: 29950
+	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+	  transactionIndex: 0
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: registerIssuerType()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>区块链节点: 调用注册授权机构类型合约
+   区块链节点->>区块链节点: 执行合约注册授权机构类型
+   区块链节点-->>AuthorityIssuerService: 返回执行结果
+   AuthorityIssuerService-->>调用者: 返回执行结果
 
 
 ----
@@ -1929,7 +1995,8 @@ com.webank.weid.protocol.response.TransactionInfo
 
    接口名称: com.webank.weid.rpc.AuthorityIssuerService.addIssuerIntoIssuerType
    接口定义: ResponseData<Boolean> addIssuerIntoIssuerType(WeIdAuthentication callerAuth, String issuerType, String targetIssuerWeId)
-   接口描述: 向issuerType中添加成员。
+   接口描述: 向指定的issuerType中添加成员。
+   权限说明：方法的调用者至少需要是Authority Issuer才能成功。
 
 **接口入参**\ : 
 
@@ -2022,7 +2089,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -2078,12 +2145,45 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: java
 
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
-	
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+	 AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
+   ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.addIssuerIntoIssuerType(weIdAuthentication, "College", "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
 .. code-block:: text
 
    返回数据如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo: (com.webank.weid.protocol.response.TransactionInfo)
+	  blockNumber: 29950
+	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+	  transactionIndex: 0
 
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: addIssuerIntoIssuerType()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>区块链节点: 调用添加授权机构合约
+   区块链节点->>区块链节点: 执行合约添加授权机构
+   区块链节点-->>AuthorityIssuerService: 返回执行结果
+   AuthorityIssuerService-->>调用者: 返回执行结果
 
 ----
 
@@ -2097,7 +2197,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
    接口名称: com.webank.weid.rpc.AuthorityIssuerService.removeIssuerFromIssuerType
    接口定义: ResponseData<Boolean> removeIssuerFromIssuerType(WeIdAuthentication callerAuth, String issuerType, String targetIssuerWeId)
-   接口描述: 移除指定issuerType里面的IssuerWeId成员。
+   接口描述: 移除指定issuerType里面的WeId成员。
 
 **接口入参**\ : 
 
@@ -2190,7 +2290,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -2246,12 +2346,45 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: java
 
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
-	
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+	 AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
+   ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.removeIssuerFromIssuerType(weIdAuthentication, "College", "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
 .. code-block:: text
 
    返回数据如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo: (com.webank.weid.protocol.response.TransactionInfo)
+	  blockNumber: 29950
+	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+	  transactionIndex: 0
 
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: removeIssuerIntoIssuerType()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>区块链节点: 调用移除授权机构合约
+   区块链节点->>区块链节点: 执行合约移除授权机构
+   区块链节点-->>AuthorityIssuerService: 返回执行结果
+   AuthorityIssuerService-->>调用者: 返回执行结果
 
 ----
 
@@ -2327,7 +2460,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -2377,11 +2510,39 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: java
 
+   AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
+   String weId = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7";
+   ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer(weId);
 
-	
+
 .. code-block:: text
 
-   返回数据如：
+   返回结果如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant AuthorityIssuerService
+   participant 区块链节点
+   调用者->>AuthorityIssuerService: 调用IsAuthorityIssuer()
+   AuthorityIssuerService->>AuthorityIssuerService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   AuthorityIssuerService-->>调用者: 报错，提示参数不合法并退出
+   end
+   AuthorityIssuerService->>区块链节点: 调用查询是否为授权机构合约
+   区块链节点->>区块链节点: 执行合约通过WeIdentity DID查询
+   区块链节点-->>AuthorityIssuerService: 返回查询结果
+   AuthorityIssuerService-->>调用者: 返回是/否
+
+
 
 
 ----
@@ -2463,7 +2624,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -2638,7 +2799,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -2949,7 +3110,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -3221,7 +3382,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -3484,7 +3645,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -3676,7 +3837,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -3985,7 +4146,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -4299,7 +4460,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -4536,7 +4697,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -4838,7 +4999,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -5159,7 +5320,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -5378,7 +5539,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -5546,7 +5707,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -5766,7 +5927,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -6075,7 +6236,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -6352,7 +6513,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -6549,7 +6710,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -6744,7 +6905,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -6910,7 +7071,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -7108,7 +7269,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -7301,7 +7462,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -7509,7 +7670,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -7777,7 +7938,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -8052,7 +8213,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -8314,7 +8475,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -8545,7 +8706,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -8826,7 +8987,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
@@ -9175,7 +9336,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 备注
    * - blockNumber
      - BigInteger
-     - 交易快高
+     - 交易块高
      - 
    * - transactionHash
      - String
