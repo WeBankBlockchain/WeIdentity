@@ -293,22 +293,22 @@ public class TestCreateCredential extends TestBaseServcie {
     /**
      * case： claim is xxxxxxx.
      */
-    @Test
-    public void testCreateCredentialCase13() {
+    //@Test
+    //public void testCreateCredentialCase13() {
 
-        CreateCredentialArgs createCredentialArgs =
-            TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
-        HashMap<String, Object> claim = new HashMap<>();
-        claim.put("xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx");
-        createCredentialArgs.setClaim(claim);
+    //    CreateCredentialArgs createCredentialArgs =
+    //        TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
+    //    HashMap<String, Object> claim = new HashMap<>();
+    //    claim.put("xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx");
+    //    createCredentialArgs.setClaim(claim);
 
-        ResponseData<CredentialWrapper> response =
-            credentialService.createCredential(createCredentialArgs);
-        LogUtil.info(logger, "createCredential", response);
+    //    ResponseData<CredentialWrapper> response =
+    //        credentialService.createCredential(createCredentialArgs);
+    //    LogUtil.info(logger, "createCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCode(),
-            response.getErrorCode().intValue());
-    }
+    //    Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCode(),
+    //        response.getErrorCode().intValue());
+    //}
 
     /**
      * case： weIdPrivateKey is null.
