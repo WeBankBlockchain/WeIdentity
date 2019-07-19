@@ -12,42 +12,35 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 
 * `WeIdentity JAVA SDK <https://github.com/WeBankFinTech/weid-java-sdk.git>`_\ :raw-html-m2r:`<br>`
   建议下载最新版本的release
-* `WeIdentity 智能合约 <https://github.com/WeBankFinTech/weid-contract.git>`_\ :raw-html-m2r:`<br>`
-  建议下载最新版本的release
-
-2.拷贝「WeIdentity智能合约」源码到特定目录
-""""""""""""""""""""""""""""""""""""""""""""""""
-
-进入build_tools目录：
-
+  
 .. code-block:: shell
 
-      cd weid-java-sdk/build-tools/contracts/
-
-将您刚下载的「WeIdentity智能合约」源码文件放至该目录即可。
-
-..
-
-    如果不需要特定版本的「WeIdentity智能合约」，可以跳过第2步，而默认使用该目录下的智能合约（当前版本WeIdentity JAVA SDK在发布时最新版本的智能合约）。
-
-
-3.配置客户端证书
+      git clone https://github.com/WeBankFinTech/weid-java-sdk.git
+      cd weid-java-sdk
+      
+2.配置客户端证书
 """"""""""""""""
 
-
-*
-  将安装的FISCO-BCOS节点build/web3sdk里的客户端证书ca.crt和client.keystore复制出来。
-
-*
-  进入WeIdentity JAVA SDK的resources目录:
+* 将安装好的FISCO-BCOS节点证书复制到 ``src/main/resources``。
+  
+  如果您使用的FISCO-BCOS版本为1.x，证书在节点目录里面的路径：``build/web3sdk/conf``
+  
+  证书：``ca.crt``，``client.keystore``
+ 
+ 
+  如果您使用的FISCO-BCOS版本为2.x，证书在节点目录里面的路径：``nodes/xxx/sdk``
+  
+  证书：``ca.crt``，``node.crt``，``node.key``
+  
+* 进入WeIdentity JAVA SDK的resources目录:
 
   .. code-block:: shell
 
-     cd ../../src/main/resources
+     cd src/main/resources
 
-  然后将FISCO-BCOS节点的证书ca.crt和keystore文件拷贝至该目录，替换已有的证书文件:
+  然后将FISCO-BCOS节点的证书文件拷贝至该目录，替换已有的证书文件:
 
-4.配置SDK连接的区块链节点
+3.配置SDK连接的区块链节点
 """""""""""""""""""""""""
 
 .. code-block:: shell
@@ -56,7 +49,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
    chmod +x *.sh
    vim run.config
 
-bin目录下是运行部署打包的脚本和配置文件，您需要将FISCO-BCOS的节点地址配置到run.config文件中。如果SDK只需要连接一个区块链节点，以IP：PORT的形式赋值给配置项blockchain.node.address，例子：
+* bin目录下是运行部署打包的脚本和配置文件，您需要将FISCO-BCOS的节点地址配置到run.config文件中。如果SDK只需要连接一个区块链节点，以IP：PORT的形式赋值给配置项blockchain.node.address，例子：
 
 .. code-block:: shell
 
@@ -68,7 +61,21 @@ bin目录下是运行部署打包的脚本和配置文件，您需要将FISCO-BC
 
    blockchain.node.address=10.10.10.10:9000,10.11.11.11:9000
 
-5.安装部署
+* 根据您的节点版本配置bcos.version
+
+如果您使用的FISCO-BCOS版本为 1.x
+
+.. code-block:: shell
+
+   bcos.version=1.x
+
+如果您使用的FISCO-BCOS版本为 2.x
+
+.. code-block:: shell
+
+   bcos.version=2.x  
+
+4.安装部署
 """"""""""
 
 运行下面的命令，自动完成代码编译，智能合约编译，智能合约部署和所有配置文件的配置：
@@ -77,10 +84,15 @@ bin目录下是运行部署打包的脚本和配置文件，您需要将FISCO-BC
 
    ./run.sh
 
-如果部署过程中没有报错，那么源码目录下的dist里即为已经编译好并部署好智能合约的可运行的SDK包和配置文件。
+出现下列输出，则表示安装部署成功，源码目录下的dist中已生成可运行的SDK包和配置文件。
 
-6. 完成
-"""""""
+.. code-block:: shell
+
+	contract deployment done.
+	begin to modify sdk config...
+	modify sdk config finished...
+	begin to clean config...
+	clean finished...
 
 到这里，您已经完成了SDK的安装和部署的全部步骤，您可以开始使用WeIdentity来构建您的分布式身份管理的应用了。
 
@@ -89,17 +101,17 @@ Have fun!!!
 备注
 ----
 
-查看智能合约部署结果
+查看WeIdentity JAVA SDK部署结果
 """"""""""""""""""""
 
-进入dist目录
+* 进入dist目录
 
 .. code-block:: shell
 
    cd ../../dist/
    ls
 
-正常情况下，dist目录包含以下目录： ``app  conf  lib``
+dist目录包含以下目录： ``app  conf  lib``
 
 .. list-table::
    :header-rows: 1
@@ -113,10 +125,11 @@ Have fun!!!
    * - lib
      - 依赖的jar包。
 
+* 进入源码根目录
 
-客户端证书ca.crt,以及client.keystore的作用：
-""""""""""""""""""""""""""""""""""""""""""""
+.. code-block:: shell
 
+   cd ../
+   ls
 
-* 证书ca.crt：用来验证sdk连接节点的节点证书的合法性。
-* client.keystore有三种用途：(1) 用作和节点连接是sdk的身份证书，由节点的ca.crt和agency.crt来验证合法性。(2)用作和其他sdk（前置）连接的身份证书，由其他sdk的ca.crt来验证合法性。(3)用作sdk发交易的私钥证书。
+根目录下生成的文件 ``ecdsa_key`` 为SDK部署合约动态生成的秘钥文件，您的项目集成SDK的时候可能需要使用此文件，请妥善保管。
