@@ -110,7 +110,10 @@ dependencies {
     localDeps 'org.projectlombok:lombok:1.16.14'
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
-            compile logger, lombok, apache_commons, json, weidentity_contract, mysql_driver, zxing
+            compile logger, lombok, apache_commons, json, mysql_driver, zxing
+            compile("com.webank:weid-contract-java:1.2.4") {
+               exclude group:"org.slf4j", module: "slf4j-log4j12"
+            }
             testCompile logger, lombok, apache_commons, json, junit, jmockit
         } else {
             compile fileTree(dir: 'dist/lib', include: '*.jar')
@@ -122,7 +125,10 @@ dependencies {
             annotationProcessor 'org.projectlombok:lombok:1.16.14'
             testAnnotationProcessor 'org.projectlombok:lombok:1.16.14'
             testCompileOnly 'org.projectlombok:lombok:1.16.14'
-            compile logger, apache_commons, json, weidentity_contract, mysql_driver, zxing
+            compile logger, apache_commons, json, mysql_driver, zxing
+            compile("com.webank:weid-contract-java:1.2.4") {
+               exclude group:"org.slf4j", module: "slf4j-log4j12"
+            }
             testCompile logger, apache_commons, json, junit, jmockit
         } else {
             compileOnly files('dist/lib/lombok-1.16.14.jar')
