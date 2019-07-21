@@ -15,10 +15,32 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
   
 .. code-block:: shell
 
-      git clone https://github.com/WeBankFinTech/weid-java-sdk.git
-      cd build-tools/bin/
+  git clone https://github.com/WeBankFinTech/weid-java-sdk.git
 
- 主要的配置文件 ``run.config`` ，配置一些运行时需要的一些参数.
+
+
+- 配置节点证书和秘钥文件
+
+::
+
+    cd weid-java-sdk/src/main/resources/
+
+
+若您使用FISCO BCOS 2.0, 请参考\ `web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/sdk/sdk.html#sdk>`__
+将证书文件 ``ca.crt``  ``node.crt`` 和 ``node.key`` 复制出来，拷贝至当前目录下。
+
+若您使用FISCO BCOS 1.3, 请参考\ `web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/web3sdk.html>`__
+将证书文件 ``ca.crt`` 和 ``client.keystore`` 复制出来，拷贝至当前目录下 。
+
+
+- 配置基本信息
+
+::
+
+    cd ../../../build-tools/bin/
+
+主要的配置文件 ``run.config`` ，配置一些运行时需要的一些参数.
+
 
 
 -  配置说明：
@@ -34,8 +56,8 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
     #节点的连接串，节点IP为10.10.10.10，和channel_listen_port为20200。
     blockchain_address=10.10.10.10:20200
 
-    # 示FISCO BCOS的版本为2.0, 1则表示FISCO BCOS 1.3
-    blockchain_fiscobcos_version=2
+    # 2表示FISCO BCOS的版本为2.0, 1则表示FISCO BCOS 1.3
+    bcos.version=2
 
     #机构名称
     org_id=organizationA
@@ -44,20 +66,6 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
     chain_id=1 
  
 
-- 配置节点证书和秘钥文件
-
-::
-
-    cd ../../src/main/resources/
-
-
-若您使用FISCO BCOS 2.0, 请参考\ `web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/sdk/sdk.html#sdk>`__
-将证书文件 ``ca.crt``  ``node.crt`` 和 ``node.key`` 复制出来，拷贝至当前目录下。
-
-若您使用FISCO BCOS 1.3, 请参考\ `web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/web3sdk.html>`__
-将证书文件 ``ca.crt`` 和 ``client.keystore`` 复制出来，拷贝至当前目录下 。
-
-
 
 2.安装部署
 """"""""""
@@ -65,7 +73,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 运行下面的命令，自动完成代码编译，智能合约编译，智能合约部署和所有配置文件的配置：
 
 .. code-block:: shell
-
+  chmod +x *.sh
    ./run.sh
 
 出现下列输出，则表示安装部署成功，源码目录下的dist中已生成可运行的SDK包和配置文件。
