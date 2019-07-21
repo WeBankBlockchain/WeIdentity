@@ -19,7 +19,8 @@ function modify_config()
     export ISSUER_ADDRESS=${issuer_address}
     export EVIDENCE_ADDRESS=${evidence_address}
     export SPECIFICISSUER_ADDRESS=${specificissuer_address}
-    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
+    export FISCO_BCOS_VERSION="1"
+    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}:${FISCO_BCOS_VERSION}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${java_source_code_dir}/src/test/resources/
     NODEVAR='${BLOCKCHIAN_NODE_INFO}'
@@ -36,7 +37,7 @@ function modify_config()
 function gradle_build_sdk()
 {
     #run gradle build
- 	cp ${java_source_code_dir}/ci/ca.crt ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/ci/ca.crt ${java_source_code_dir}/src/main/resources
     cp ${java_source_code_dir}/ci/client.keystore ${java_source_code_dir}/src/main/resources
     content="WeIdentity@$NODE_IP"
     export BLOCKCHIAN_NODE_INFO=${content}
