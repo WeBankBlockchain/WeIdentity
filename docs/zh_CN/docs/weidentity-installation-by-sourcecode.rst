@@ -16,66 +16,50 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 .. code-block:: shell
 
       git clone https://github.com/WeBankFinTech/weid-java-sdk.git
-      cd weid-java-sdk
-      
-2.配置客户端证书
-""""""""""""""""
+      cd build-tools/bin/
 
-* 将安装好的FISCO-BCOS节点证书复制到 ``src/main/resources``。
-  
-  如果您使用的FISCO-BCOS版本为1.x，证书在节点目录里面的路径：``build/web3sdk/conf``
-  
-  证书：``ca.crt``，``client.keystore``
+ 主要的配置文件 ``run.config`` ，配置一些运行时需要的一些参数.
+
+
+-  配置说明：
+
+ | ``blockchain_address`` ： 区块链节点 IP 和channel_listen_port， channel_listen_port的配置可以参考\ `FISCO BCOS 配置文件 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/manual/configuration.html#rpc>`__ 进行配置，FISCO BCOS 1.3可以参考\ `FISCO BCOS 1.3 配置文件 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/web3sdk/config_web3sdk.html#java>`__ 进行配置。
+ | ``blockchain_fiscobcos_version`` ：对接的FISCO BCOS版本。
+ | ``org_id`` ：机构名称，该名称也被用作后续机构间的通信标识。
+ | ``chain_id`` ：用于标识您接入的区块链网络。
+
+配置样例：
+::
+
+    #节点的连接串，节点IP为10.10.10.10，和channel_listen_port为20200。
+    blockchain_address=10.10.10.10:20200
+
+    # 示FISCO BCOS的版本为2.0, 1则表示FISCO BCOS 1.3
+    blockchain_fiscobcos_version=2
+
+    #机构名称
+    org_id=organizationA
+
+    #链标识
+    chain_id=1 
  
- 
-  如果您使用的FISCO-BCOS版本为2.x，证书在节点目录里面的路径：``nodes/xxx/sdk``
-  
-  证书：``ca.crt``，``node.crt``，``node.key``
-  
-* 进入WeIdentity JAVA SDK的resources目录:
 
-  .. code-block:: shell
+- 配置节点证书和秘钥文件
 
-     cd src/main/resources
+::
 
-  然后将FISCO-BCOS节点的证书文件拷贝至该目录，替换已有的证书文件:
+    cd ../../src/main/resources/
 
-3.配置SDK连接的区块链节点
-"""""""""""""""""""""""""
 
-.. code-block:: shell
+若您使用FISCO BCOS 2.0, 请参考\ `web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/sdk/sdk.html#sdk>`__
+将证书文件 ``ca.crt``  ``node.crt`` 和 ``node.key`` 复制出来，拷贝至当前目录下。
 
-   cd ../../../build-tools/bin/
-   chmod +x *.sh
-   vim run.config
+若您使用FISCO BCOS 1.3, 请参考\ `web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/web3sdk.html>`__
+将证书文件 ``ca.crt`` 和 ``client.keystore`` 复制出来，拷贝至当前目录下 。
 
-* bin目录下是运行部署打包的脚本和配置文件，您需要将FISCO-BCOS的节点地址配置到run.config文件中。如果SDK只需要连接一个区块链节点，以IP：PORT的形式赋值给配置项blockchain.node.address，例子：
 
-.. code-block:: shell
 
-   blockchain.node.address=10.10.10.10:9000
-
-如果有SDK需要连接多个区块链节点，用逗号","分割：
-
-.. code-block:: shell
-
-   blockchain.node.address=10.10.10.10:9000,10.11.11.11:9000
-
-* 根据您的节点版本配置bcos.version
-
-如果您使用的FISCO-BCOS版本为 1.x
-
-.. code-block:: shell
-
-   bcos.version=1.x
-
-如果您使用的FISCO-BCOS版本为 2.x
-
-.. code-block:: shell
-
-   bcos.version=2.x  
-
-4.安装部署
+2.安装部署
 """"""""""
 
 运行下面的命令，自动完成代码编译，智能合约编译，智能合约部署和所有配置文件的配置：
