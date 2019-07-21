@@ -36,7 +36,8 @@ function modify_config()
 function gradle_build_sdk()
 {
     #run gradle build
-
+ 	cp ${java_source_code_dir}/ci/ca.crt ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/ci/client.keystore ${java_source_code_dir}/src/main/resources
     content="WeIdentity@$NODE_IP"
     export BLOCKCHIAN_NODE_INFO=${content}
     export WEID_ADDRESS="0x0"
@@ -44,7 +45,8 @@ function gradle_build_sdk()
     export ISSUER_ADDRESS="0x0"
     export EVIDENCE_ADDRESS="0x0"
     export SPECIFICISSUER_ADDRESS="0x0"
-    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}'
+    export FISCO_BCOS_VERSION="1"
+    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}:${FISCO_BCOS_VERSION}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     NODEVAR='${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
@@ -59,8 +61,7 @@ function gradle_build_sdk()
 
 function deploy_contract()
 {
-    cp ${java_source_code_dir}/ci/ca.crt ${java_source_code_dir}/src/main/resources
-    cp ${java_source_code_dir}/ci/client.keystore ${java_source_code_dir}/src/main/resources
+
     CLASSPATH=${java_source_code_dir}/dist/conf
     echo "begin to deploy contract..."
     for jar_file in ${java_source_code_dir}/dist/lib/*.jar
