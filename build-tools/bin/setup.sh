@@ -1,7 +1,5 @@
 #!/bin/bash
 
-SOLC=$(which fisco-solc)
-WEB3J="../bin/web3sdk.sh"
 java_source_code_dir=$2
 config_file=${java_source_code_dir}/dist/bin/run.config
 app_xml_config_dir=${java_source_code_dir}/dist/conf/
@@ -9,7 +7,6 @@ app_xml_config_tpl=${java_source_code_dir}/src/main/resources/fisco.properties.t
 app_xml_config=${java_source_code_dir}/src/main/resources/fisco.properties
 weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties.tpl
 weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
-bcos_version = 2.x
 
 CLASSPATH=${java_source_code_dir}/dist/conf
 
@@ -36,30 +33,13 @@ function check_jdk()
     fi
     else
         JAVACMD="java"
-        which java >/dev/null 2>&1 || die "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+        which java >/dev/null 2>&1 || echo "ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
 
     Please set the JAVA_HOME variable in your environment to match the
     location of your Java installation."
     fi
 }
 
-
-function compile_contract() 
-{ 
-    cd ../contracts/
-    
-    package="com.webank.weid.contract"
-    output_dir="${java_source_code_dir}/dist/output"
-    echo "output_dir is $output_dir"
-    local files=$(ls ./*.sol)
-    for itemfile in ${files}
-    do
-        local item=$(basename ${itemfile} ".sol")
-        ${SOLC} --abi --bin -o ${output_dir} ${itemfile}
-        echo "${output_dir}/${item}.bin, ${output_dir}, ${package} "
-        ${WEB3J} solidity generate  "${output_dir}/${item}.bin" "${output_dir}/${item}.abi" -o ${output_dir} -p ${package} 
-    done
-}
 
 
 function replace_java_contract()
@@ -109,6 +89,23 @@ function clean_config()
     if [ -f ${app_xml_config} ];then
 	rm -f ${app_xml_config}
     fi
+    
+    cd ${java_source_code_dir}
+    if [ -f weIdContract.address ];then
+        rm -f weIdContract.address
+    fi
+    if [ -f cptController.address ];then
+        rm -f cptController.address
+    fi
+    if [ -f authorityIssuer.address ];then
+        rm -f authorityIssuer.address
+    fi
+    if [ -f evidenceController.address ];then
+        rm -f evidenceController.address
+    fi
+    if [ -f specificIssuer.address ];then
+        rm -f specificIssuer.address
+    fi
     echo "clean finished..."
 }
 
@@ -117,7 +114,7 @@ function gradle_build_sdk()
     #run gradle build
     echo "Begin to compile java code......"
 	
-	node_addr=$(grep "blockchain.node.address" $config_file |awk -F"=" '{print $2}')
+	node_addr=$(grep "blockchain_address" $config_file |awk -F"=" '{print $2}')
 	bcos_version=$(grep "bcos.version" $config_file |awk -F"=" '{print $2}')
     OLD_IFS="$IFS"
     IFS=","
@@ -150,7 +147,7 @@ function gradle_build_sdk()
     if [ -d dist/ ];then
 	rm -rf dist/
     fi
-    gradle clean build -x test
+    gradle clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
     echo "compile java code done."
 }
 
