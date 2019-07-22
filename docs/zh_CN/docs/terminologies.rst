@@ -101,3 +101,9 @@
    * - Specific Issuer
      - 特定类型的发行者
      - 指定了特定类型的发行者，如学校、政府机构等，与Authority Issuer相互不矛盾
+   * - Verifiable Presentation
+     - 
+     - 遵循W3C Verifiable Presentation规范的凭证打包集。一个Presentation可以包括一个或多个Credential。
+   * - Policy
+     - 
+     - 机构指定的Verifiable Presentation验证策略，例如：至少包括哪些Credential；每个Credential的Claim中属性项对应要求等
