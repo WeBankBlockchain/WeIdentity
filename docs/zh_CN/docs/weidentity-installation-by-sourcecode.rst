@@ -71,9 +71,10 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 
 运行下面的命令，自动完成代码编译，智能合约编译，智能合约部署和所有配置文件的配置：
 
-.. code-block:: shell
-  chmod +x *.sh
-   ./run.sh
+::
+
+    chmod +x *.sh
+    ./run.sh
 
 出现下列输出，则表示安装部署成功，源码目录下的dist中已生成可运行的SDK包和配置文件。
 
