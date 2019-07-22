@@ -360,7 +360,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
         try {
             //String claimStr = JsonUtil.objToJsonStr(claim);
-            String claimStr = DataToolUtils.serialize(claim);
             Cpt cpt = cptService.queryCpt(cptId).getResult();
             if (cpt == null) {
                 logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
@@ -410,7 +409,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             if (issuanceDate == null) {
                 result.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
             } else {
-                Long newIssuanceDate = 
+                Long newIssuanceDate =
                     DateUtils.convertToNoMillisecondTimeStamp(args.getIssuanceDate());
                 if (newIssuanceDate == null) {
                     logger.error("Create Credential Args illegal.");
@@ -420,14 +419,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 }
             }
             result.setIssuer(args.getIssuer());
-            Long newExpirationDate = 
+            Long newExpirationDate =
                 DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate());
             if (newExpirationDate == null) {
                 logger.error("Create Credential Args illegal.");
                 return new ResponseData<>(null, ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL);
             } else {
                 result.setExpirationDate(newExpirationDate);
-            } 
+            }
             result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
             Object claimObject = args.getClaim();
             String claimStr = null;
