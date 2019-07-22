@@ -3,7 +3,7 @@
 ## 1.网络安全：
 * 与合作方传输数据需要使用加密协议，并验证身份有效性，如通讯使用 HTTPS
 * 接口数据除了 HTTPS，接口内容尽量再次加密
-* 防中间人劫持，APP写死服务器的证书（可定期下发更换），APP 连接到服务器前，会检查是否证书对的上
+* 防中间人劫持，APP 写死服务器的证书（可定期下发更换），APP 连接到服务器前，会检查是否证书对的上
 * 网络区域隔离： 如生产与开发、测试、办公隔离
 * 外网出口部署流量清洗、DDOS 防护等安全措施（可以使用云服务商或者运营服务厂商提供的服务）
 
@@ -38,10 +38,11 @@
 * Android 接入腾讯乐固加固和腾讯金刚扫描（发现四大组件权限设置问题，如调用方权限；防止仿编译等。）
 参考：[腾讯乐固](http://wiki.open.qq.com/wiki/%E5%BA%94%E7%94%A8%E5%8A%A0%E5%9B%BA)
 * Android 监测到 root 设备提示用户不安全问用户是否继续执行
-* Android APP 防止二次打包（对比签名）。
-* iOS反调试代码，监测是否越狱
+* Android APP 防止二次打包（对比签名）
+* iOS 反调试代码，监测是否越狱
 
 ## 5.其它
 * 安全编码规范：OWASP 安全编码规范:
+
  [(English Version) OWASP_SCP_Quick_Reference_Guide](https://www.owasp.org/index.php/File:OWASP_SCP_Quick_Reference_Guide_v2.pdf) ;
 [(中文) OWASP_SCP_Quick_Reference_Guide](https://www.owasp.org/index.php/File:OWASP_SCP_Quick_Reference_Guide_\(Chinese\).pdf)
