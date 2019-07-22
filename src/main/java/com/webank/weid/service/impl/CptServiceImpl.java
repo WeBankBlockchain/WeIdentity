@@ -42,7 +42,6 @@ import com.webank.weid.rpc.CptService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
 import com.webank.weid.service.impl.engine.EngineFactory;
-import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -73,7 +72,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         try {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
-            Map<String, Object> cptJsonSchemaMap = 
+            Map<String, Object> cptJsonSchemaMap =
                 DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
             cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs, cptId);
@@ -100,7 +99,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
-            Map<String, Object> cptJsonSchemaMap = 
+            Map<String, Object> cptJsonSchemaMap =
                 DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
             cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs);
@@ -329,7 +328,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     private ErrorCode validateCptJsonSchemaMap(
         Map<String, Object> cptJsonSchemaMap) throws Exception {
         if (cptJsonSchemaMap == null || cptJsonSchemaMap.isEmpty()) {

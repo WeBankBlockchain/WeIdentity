@@ -84,3 +84,9 @@ Control）。此外，在一个不需要token的区块链世界里，tx.origin�
 - **如何在无Internet外网连接状态下部署WeIdentity？**
 
 详见\ `网络访问受限时的部署方法 <./how-to-run-without-internet.html>`__\ 。
+
+--------------
+
+- **我原来的配置文件是applicationContext.xml，现在怎么兼容properties？**
+
+详见\ `从ApplicationContext.xml兼容properties的配置方式 <./from-application-context-to-properties.html>`__\ 。
