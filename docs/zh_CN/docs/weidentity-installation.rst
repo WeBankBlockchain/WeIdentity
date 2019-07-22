@@ -23,7 +23,7 @@ WeIdentity JAVA SDK安装部署文档
    * - 操作系统
      - CentOS （7.2 64位）或Ubuntu（16.04 64位）。
    * - FISCO-BCOS区块链环境
-     - 您需要有一套可以运行的FISCO-BCOS区块链环境，如果没有，可以参考\ `「FISCO-BCOS节点安装方法」 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/tools/index.html>`_\ 来搭建一套区块链环境。
+     - 您需要有一套可以运行的FISCO-BCOS区块链环境，如果没有，可以参考\ `「FISCO-BCOS节点安装方法」 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/installation.html>`_\ 来搭建一套区块链环境。
    * - JDK
      - 要求\ `JDK1.8+ <https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html>`_\ ，推荐使用jdk8u141。
    * - gradle
