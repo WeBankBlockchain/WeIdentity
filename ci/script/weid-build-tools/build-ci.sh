@@ -2,9 +2,15 @@
 
 if [ "$TRAVIS_BRANCH" = "master" ];then
     echo "This is a master branch PR, starting build-tools CI pipeline.."
+    chmod +x ci/script/build-ci.sh
+    ci/script/build-ci.sh
+
     # clone repo
     rm -rf weid-build-tools/
     git clone https://github.com/WeBankFinTech/weid-build-tools.git
+    cd weid-build-tools
+    git checkout master
+    cd ..
 
     # construct SDK jar version and file name
     cat build.gradle | grep "version =" > temp.ver
@@ -30,19 +36,21 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     sudo chmod +x /usr/bin/fisco-solc
 
     # copy blockchain cfg files
-    cp src/main/resources/ca.crt weid-build-tools/resources/
-    cp src/main/resources/client.keystore weid-build-tools/resources/
+    cp ci/ca.crt weid-build-tools/resources/
+    cp ci/client.keystore weid-build-tools/resources/
 
     # run repo ci scripts
     cd weid-build-tools/
     sed -i -e '$a\org_id=test' run.config
     sed -i -e '$a\blockchain_address=$NODE_IP' run.config
+    sed -i -e '$a\blockchain_fiscobcos_version=1' run.config
     chmod +x compile.sh
     ./compile.sh
     chmod +x deploy.sh
     ./deploy.sh
-    chmod +x build-tools-ci.sh
-    ./build-tools-ci.sh
+    cp ./script/build_tools_ci.sh .
+    chmod +x build_tools_ci.sh
+    ./build_tools_ci.sh
 else
     echo "This is not a master branch PR (commit omitted). CI skipped."
 fi
