@@ -43,7 +43,7 @@
      - 对实体的一个声明或者主张，用于装载凭证（Credential）业务数据的字段，例如电子驾照的各项信息就是存在一个Claim结构中
    * - WeIdentity Credential
      - 可验证数字凭证
-     - 简称‘凭证’，遵循W3C Verifiable Credential规范的电子凭证，可用来抽象现实世界凭证类的对象，一个Credential可以包含一个或者多个Claim。例如电子驾照，电子学历等
+     - 简称“凭证”，遵循W3C Verifiable Credential规范的电子凭证，可用来抽象现实世界凭证类的对象，一个Credential可以包含一个或者多个Claim。例如电子驾照，电子学历等
    * - Verifiable Credential
      - 同上
      - 同上
@@ -56,7 +56,7 @@
    * - CPT
      - 凭证的声明类型
      - Claim Protocol Type,不同的Issuer按业务场景需要，各自定义不同类型数据结构的Claim，各种各样的Claim用不同的CPT来定义
-   * - net-id
+   * - chain-id
      - 网络id
      - 用于路由到不同的网络
    * - Service Endpoint
@@ -95,3 +95,9 @@
    * - Publisher
      - CPT发布者
      - 发布一个新的CPT的角色，被称为Publisher
+   * - Committee Member
+     - 委员会机构成员
+     - 管理Authority Issuer的委员会机构的成员
+   * - Specific Issuer
+     - 特定类型的发行者
+     - 指定了特定类型的发行者，如学校、政府机构等，与Authority Issuer相互不矛盾
