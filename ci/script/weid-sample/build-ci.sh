@@ -33,12 +33,15 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     # copy config files
     cp ecdsa_key weid-sample/keys/priv/
     cp src/main/resources/* weid-sample/src/main/resources/
+    cp ci/ca.crt weid-sample/resources/
+    cp ci/client.keystore weid-sample/resources/
 
     # run repo ci scripts
     cd weid-sample/
     chmod +x *.sh
     ./build.sh
-    ./sample-ci.sh
+    #./sample-ci.sh
+    gradle build
 else
     echo "This is not a master branch PR (commit omitted). CI skipped."
 fi
