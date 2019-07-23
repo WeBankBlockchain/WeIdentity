@@ -1,3 +1,22 @@
+/*
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *
+ *       This file is part of weid-java-sdk.
+ *
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weid-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
@@ -22,6 +41,7 @@ import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
+import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
@@ -30,6 +50,7 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
@@ -41,7 +62,7 @@ import com.webank.weid.util.WeIdUtils;
 
 /**
  * Service implementations for operations on Credential.
- * 
+ *
  * @author tonychen 2019年4月17日
  */
 public class CredentialPojoServiceImpl extends BaseService implements CredentialPojoService {
@@ -49,24 +70,30 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
 
     private static WeIdService weIdService = new WeIdServiceImpl();
-    
-    private static String NOT_DISCLOSED = 
+
+    private static CptService cptService = new CptServiceImpl();
+
+    private static String NOT_DISCLOSED =
         CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().toString();
-    
-    private static String DISCLOSED = 
+
+    private static String DISCLOSED =
         CredentialFieldDisclosureValue.DISCLOSED.getStatus().toString();
-    
+
+    private static String EXISTED =
+        CredentialFieldDisclosureValue.EXISTED.getStatus().toString();
+
     /**
      * 验证生成器.
+     *
      * @param map 传入的Map
      */
     public static void generateSalt(Map<String, Object> map) {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             Object value = entry.getValue();
             if (value instanceof Map) {
-                generateSalt((HashMap)value);
+                generateSalt((HashMap) value);
             } else if (value instanceof List) {
-                boolean isMapOrList = generateSaltFromList((ArrayList<Object>)value);
+                boolean isMapOrList = generateSaltFromList((ArrayList<Object>) value);
                 if (!isMapOrList) {
                     addSalt(entry);
                 }
@@ -75,19 +102,19 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             }
         }
     }
-    
+
     private static void addSalt(Map.Entry<String, Object> entry) {
         String salt = DataToolUtils.getRandomSalt();
         entry.setValue(salt);
     }
-    
+
     private static boolean generateSaltFromList(List<Object> objList) {
-        List<Object> list = (List<Object>)objList;
+        List<Object> list = (List<Object>) objList;
         for (Object obj : list) {
             if (obj instanceof Map) {
-                generateSalt((HashMap)obj);
+                generateSalt((HashMap) obj);
             } else if (obj instanceof List) {
-                boolean result = generateSaltFromList((ArrayList<Object>)obj);
+                boolean result = generateSaltFromList((ArrayList<Object>) obj);
                 if (!result) {
                     return result;
                 }
@@ -97,7 +124,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return true;
     }
-    
+
     /**
      * 校验claim、salt和disclosureMap的格式是否一致.
      */
@@ -129,25 +156,25 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             }
             if (v instanceof Map) {
                 //递归检查
-                if (!validCredentialMapArgs((HashMap)claimV, (HashMap)saltV, (HashMap)v)) {
+                if (!validCredentialMapArgs((HashMap) claimV, (HashMap) saltV, (HashMap) v)) {
                     return false;
                 }
             } else if (v instanceof List) {
                 if (!validCredentialListArgs(
-                        (ArrayList<Object>)claimV,
-                        (ArrayList<Object>)saltV,
-                        (ArrayList<Object>)v
-                    )) {
+                    (ArrayList<Object>) claimV,
+                    (ArrayList<Object>) saltV,
+                    (ArrayList<Object>) v
+                )) {
                     return false;
                 }
             }
         }
         return true;
     }
-    
+
     private static boolean validCredentialListArgs(
         List<Object> claimList,
-        List<Object> saltList, 
+        List<Object> saltList,
         List<Object> disclosureList) {
         //检查是否为空
         if (claimList == null || saltList == null || disclosureList == null) {
@@ -161,21 +188,21 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             Object claimObj = claimList.get(i);
             Object saltObj = saltList.get(i);
             if (disclosureObj instanceof Map) {
-                boolean result = 
+                boolean result =
                     validCredentialListArgs(
                         claimList,
                         saltList,
-                        (HashMap)disclosureObj
+                        (HashMap) disclosureObj
                     );
                 if (!result) {
                     return result;
                 }
             } else if (disclosureObj instanceof List) {
-                boolean result = 
+                boolean result =
                     validCredentialListArgs(
-                        (ArrayList<Object>)claimObj,
-                        (ArrayList<Object>)saltObj,
-                        (ArrayList<Object>)disclosureObj
+                        (ArrayList<Object>) claimObj,
+                        (ArrayList<Object>) saltObj,
+                        (ArrayList<Object>) disclosureObj
                     );
                 if (!result) {
                     return result;
@@ -187,22 +214,22 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     private static boolean validCredentialListArgs(
         List<Object> claimList,
-        List<Object> saltList, 
+        List<Object> saltList,
         Map<String, Object> disclosure
     ) {
-        
+
         if (claimList == null || saltList == null || saltList.size() != claimList.size()) {
             return false;
         }
-        
+
         for (int i = 0; i < claimList.size(); i++) {
             Object claim = claimList.get(i);
             Object salt = saltList.get(i);
-            boolean result = validCredentialMapArgs((HashMap)claim, (HashMap)salt, disclosure);
+            boolean result = validCredentialMapArgs((HashMap) claim, (HashMap) salt, disclosure);
             if (!result) {
                 return result;
             }
-        } 
+        }
         return true;
     }
 
@@ -218,11 +245,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             Object claimV = claim.get(disclosureKey);
             if (value instanceof Map) {
                 addSelectSalt((HashMap) value, (HashMap) saltV, (HashMap) claimV);
-            } else if (value instanceof List) { 
+            } else if (value instanceof List) {
                 addSaltForList(
-                    (ArrayList<Object>)value,
-                    (ArrayList<Object>)saltV,
-                    (ArrayList<Object>)claimV
+                    (ArrayList<Object>) value,
+                    (ArrayList<Object>) saltV,
+                    (ArrayList<Object>) claimV
                 );
             } else {
                 addHashToClaim(saltMap, claim, disclosureKey, value, saltV, claimV);
@@ -240,7 +267,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     ) {
         if (((Integer) value).equals(Integer.parseInt(NOT_DISCLOSED))) {
             saltMap.put(disclosureKey, NOT_DISCLOSED);
-            String hash = 
+            String hash =
                 CredentialPojoUtils.getFieldSaltHash(
                     String.valueOf(claimV),
                     String.valueOf(saltV)
@@ -250,7 +277,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     private static void addSaltForList(List<Object> disclosures, List<Object> salt,
-            List<Object> claim) {
+        List<Object> claim) {
         for (int i = 0; claim != null && i < disclosures.size(); i++) {
             Object disclosureObj = disclosures.get(i);
             Object claimObj = claim.get(i);
@@ -266,7 +293,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             }
         }
     }
-    
+
     private static void addSaltForList(
         Map<String, Object> disclosures,
         List<Object> salt,
@@ -275,16 +302,23 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         for (int i = 0; claim != null && i < claim.size(); i++) {
             Object claimObj = claim.get(i);
             Object saltObj = salt.get(i);
-            addSelectSalt(disclosures, (HashMap)saltObj, (HashMap)claimObj);
+            addSelectSalt(disclosures, (HashMap) saltObj, (HashMap) claimObj);
         }
     }
-    
+
     private static ErrorCode verifyContent(CredentialPojo credential,
         String publicKey) {
         Map<String, Object> salt = credential.getSalt();
         ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credential);
         if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
             return checkResp;
+        }
+        ErrorCode errorCode = verifyCptFormat(
+            credential.getCptId(),
+            credential.getClaim()
+        );
+        if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
+            return errorCode;
         }
         String rawData = CredentialPojoUtils
             .getCredentialThumbprintWithoutSig(credential, salt, null);
@@ -322,6 +356,34 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
     }
 
+    private static ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim) {
+
+        try {
+            //String claimStr = JsonUtil.objToJsonStr(claim);
+            Cpt cpt = cptService.queryCpt(cptId).getResult();
+            if (cpt == null) {
+                logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
+                return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
+            }
+            //String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
+            String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
+
+            if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
+                logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
+                return ErrorCode.CPT_JSON_SCHEMA_INVALID;
+            }
+            //if (!DataToolUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
+            //   logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
+            //      return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+            // }
+            return ErrorCode.SUCCESS;
+        } catch (Exception e) {
+            logger.error(
+                "Generic error occurred during verify cpt format when verifyCredential: " + e);
+            return ErrorCode.CREDENTIAL_ERROR;
+        }
+    }
+
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#createCredential(
      *          com.webank.weid.protocol.request.CreateCredentialPojoArgs
@@ -330,11 +392,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     @Override
     public ResponseData<CredentialPojo> createCredential(CreateCredentialPojoArgs args) {
 
-        try { 
-            ErrorCode innerResponseData = 
+        try {
+            ErrorCode innerResponseData =
                 CredentialPojoUtils.isCreateCredentialPojoArgsValid(args);
             if (ErrorCode.SUCCESS.getCode() != innerResponseData.getCode()) {
-                logger.error("Create Credential Args illegal: {}", 
+                logger.error("Create Credential Args illegal: {}",
                     innerResponseData.getCodeDesc());
                 return new ResponseData<>(null, innerResponseData);
             }
@@ -347,25 +409,34 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             if (issuanceDate == null) {
                 result.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
             } else {
-                result.setIssuanceDate(issuanceDate);
+                Long newIssuanceDate =
+                    DateUtils.convertToNoMillisecondTimeStamp(args.getIssuanceDate());
+                if (newIssuanceDate == null) {
+                    logger.error("Create Credential Args illegal.");
+                    return new ResponseData<>(null, ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL);
+                } else {
+                    result.setIssuanceDate(newIssuanceDate);
+                }
             }
             result.setIssuer(args.getIssuer());
-            result.setExpirationDate(args.getExpirationDate());
+            Long newExpirationDate =
+                DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate());
+            if (newExpirationDate == null) {
+                logger.error("Create Credential Args illegal.");
+                return new ResponseData<>(null, ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL);
+            } else {
+                result.setExpirationDate(newExpirationDate);
+            }
             result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
             Object claimObject = args.getClaim();
             String claimStr = null;
             if (!(claimObject instanceof String)) {
-                claimStr = DataToolUtils.serialize(claimObject); 
+                claimStr = DataToolUtils.serialize(claimObject);
             } else {
-                claimStr = (String)claimObject;
+                claimStr = (String) claimObject;
             }
-            
+
             HashMap<String, Object> claimMap = DataToolUtils.deserialize(claimStr, HashMap.class);
-            if (!WeIdUtils.validateContainWeIdKey(claimMap)) {
-                logger.error("Generate Credential failed, "
-                    + "claim of pojoArgs not include effective WeId.");
-                return new ResponseData<>(null, ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL);
-            }
             result.setClaim(claimMap);
 
             Map<String, Object> saltMap = DataToolUtils.clone(claimMap);
@@ -377,11 +448,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             String signature = DataToolUtils.sign(rawData, privateKey);
 
             result.putProofValue(ParamKeyConstant.PROOF_CREATED, result.getIssuanceDate());
-            
+
             String weIdPublicKeyId = args.getWeIdAuthentication().getWeIdPublicKeyId();
             result.putProofValue(ParamKeyConstant.PROOF_CREATOR, weIdPublicKeyId);
-            
-            String  proofType = CredentialProofType.ECDSA.getTypeName();
+
+            String proofType = CredentialProofType.ECDSA.getTypeName();
             result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
             result.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
             result.setSalt(saltMap);
@@ -400,7 +471,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#createSelectiveCredential(
-     *          com.webank.weid.protocol.base.CredentialPojo, 
+     *          com.webank.weid.protocol.base.CredentialPojo,
      *          com.webank.weid.protocol.base.ClaimPolicy
      *      )
      */
@@ -408,7 +479,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     public ResponseData<CredentialPojo> createSelectiveCredential(
         CredentialPojo credential,
         ClaimPolicy claimPolicy) {
-        try { 
+        try {
             ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credential);
             if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
                 return new ResponseData<CredentialPojo>(null, checkResp);
@@ -421,10 +492,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             String disclosure = claimPolicy.getFieldsToBeDisclosed();
             Map<String, Object> saltMap = credential.getSalt();
             Map<String, Object> claim = credential.getClaim();
-            
-            Map<String, Object> disclosureMap = 
-                DataToolUtils.deserialize(disclosure, HashMap.class);
-    
+
+            Map<String, Object> disclosureMap = DataToolUtils
+                .deserialize(disclosure, HashMap.class);
+
             if (!validCredentialMapArgs(claim, saltMap, disclosureMap)) {
                 logger.error(
                     "[createSelectiveCredential] create failed. message is {}",
@@ -435,7 +506,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             }
             addSelectSalt(disclosureMap, saltMap, claim);
             credential.setSalt(saltMap);
-    
+
             ResponseData<CredentialPojo> response = new ResponseData<CredentialPojo>();
             response.setResult(credential);
             response.setErrorCode(ErrorCode.SUCCESS);
@@ -448,7 +519,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#verify(
-     *          java.lang.String, 
+     *          java.lang.String,
      *          com.webank.weid.protocol.base.CredentialPojo
      *      )
      */
@@ -470,9 +541,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#verify(
-     *          java.lang.String, 
-     *          com.webank.weid.protocol.base.PresentationPolicyE, 
-     *           com.webank.weid.protocol.base.Challenge, 
+     *          java.lang.String,
+     *          com.webank.weid.protocol.base.PresentationPolicyE,
+     *           com.webank.weid.protocol.base.Challenge,
      *           com.webank.weid.protocol.base.PresentationE
      *       )
      */
@@ -480,16 +551,16 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     public ResponseData<Boolean> verify(
         String presenterWeId,
         PresentationPolicyE presentationPolicyE,
-        Challenge challenge, 
+        Challenge challenge,
         PresentationE presentationE) {
 
-        ErrorCode errorCode = 
+        ErrorCode errorCode =
             checkInputArgs(presenterWeId, presentationPolicyE, challenge, presentationE);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[verify] checkInputArgs fail.");
             return new ResponseData<Boolean>(false, errorCode);
         }
-        
+
         //verify cptId of presentationE
         List<CredentialPojo> credentialList = presentationE.getVerifiableCredential();
         Map<Integer, ClaimPolicy> policyMap = presentationPolicyE.getPolicy();
@@ -505,7 +576,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 Integer cptId = credential.getCptId();
                 ClaimPolicy claimPolicy = policyMap.get(cptId);
                 if (claimPolicy != null) {
-                    ErrorCode verifypolicyResult = this.verifyPolicy(credential, claimPolicy);
+                    ErrorCode verifypolicyResult = this
+                        .verifyPolicy(credential, claimPolicy, presenterWeId);
                     if (verifypolicyResult.getCode() != ErrorCode.SUCCESS.getCode()) {
                         logger.error("[verify] verify policy {} failed.", policyMap);
                         return new ResponseData<Boolean>(false, verifypolicyResult);
@@ -548,13 +620,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
-    
+
     private ErrorCode checkInputArgs(
         String presenterWeId,
         PresentationPolicyE presentationPolicyE,
         Challenge challenge,
         PresentationE presentationE) {
-        
+
         if (StringUtils.isBlank(presenterWeId)
             || challenge == null
             || StringUtils.isBlank(challenge.getNonce())
@@ -588,6 +660,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
         //verify Signature of PresentationE
         WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
+        if (weIdDocument == null) {
+            logger.error(
+                "[verify]presentation verify failed, because the presenter weid :{} "
+                    + "does not exist.",
+                presenterWeId);
+            return ErrorCode.WEID_DOES_NOT_EXIST;
+        }
         String signature = presentationE.getSignature();
         errorCode =
             DataToolUtils
@@ -601,7 +680,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     private ErrorCode verifyCptId(
         Map<Integer, ClaimPolicy> policyMap,
         List<CredentialPojo> credentialList) {
@@ -629,22 +708,23 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             Object disclosureV = disclosureMap.get(disclosureK);
             Object saltV = saltMap.get(disclosureK);
             if (disclosureV instanceof Map) {
-                ErrorCode code = verifyDisclosureAndSalt((HashMap)disclosureV, (HashMap)saltV);
+                ErrorCode code = verifyDisclosureAndSalt((HashMap) disclosureV, (HashMap) saltV);
                 if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
                     return code;
                 }
-            } else if (disclosureV instanceof List) { 
+            } else if (disclosureV instanceof List) {
                 ArrayList<Object> disclosurs = (ArrayList<Object>) disclosureV;
-                ErrorCode code = verifyDisclosureAndSaltList(disclosurs, (ArrayList<Object>)saltV);
+                ErrorCode code = verifyDisclosureAndSaltList(disclosurs, (ArrayList<Object>) saltV);
                 if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
                     return code;
                 }
             } else {
                 String disclosure = String.valueOf(disclosureV);
                 String salt = String.valueOf(saltV);
-                if (!disclosure.equals(NOT_DISCLOSED) && !disclosure.equals(DISCLOSED)) {
+                if (!disclosure.equals(NOT_DISCLOSED) && !disclosure.equals(DISCLOSED)
+                    && !disclosure.equals(EXISTED)) {
                     logger.error(
-                        "[verifyDisclosureAndSalt] policy disclosureValue {} illegal.", 
+                        "[verifyDisclosureAndSalt] policy disclosureValue {} illegal.",
                         disclosureMap
                     );
                     return ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL;
@@ -666,7 +746,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     private ErrorCode verifyDisclosureAndSaltList(
         List<Object> disclosureList,
         List<Object> saltList
@@ -675,19 +755,19 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             Object disclosure = disclosureList.get(i);
             Object saltV = saltList.get(i);
             if (disclosure instanceof Map) {
-                ErrorCode code = 
+                ErrorCode code =
                     verifyDisclosureAndSaltList(
                         (HashMap) disclosure,
-                        (ArrayList<Object>)saltList
+                        (ArrayList<Object>) saltList
                     );
                 if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
                     return code;
                 }
             } else if (disclosure instanceof List) {
-                ErrorCode code = 
+                ErrorCode code =
                     verifyDisclosureAndSaltList(
-                        (ArrayList<Object>)disclosure,
-                        (ArrayList<Object>)saltV
+                        (ArrayList<Object>) disclosure,
+                        (ArrayList<Object>) saltV
                     );
                 if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
                     return code;
@@ -696,27 +776,52 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     private ErrorCode verifyDisclosureAndSaltList(
         Map<String, Object> disclosure,
         List<Object> saltList
     ) {
         for (int i = 0; i < saltList.size(); i++) {
             Object saltV = saltList.get(i);
-            ErrorCode code = verifyDisclosureAndSalt((HashMap)disclosure, (HashMap) saltV);
+            ErrorCode code = verifyDisclosureAndSalt((HashMap) disclosure, (HashMap) saltV);
             if (code.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return code;
             }
         }
         return ErrorCode.SUCCESS;
     }
-    
-    private ErrorCode verifyPolicy(CredentialPojo credential, ClaimPolicy claimPolicy) {
-        Map<String, Object> saltMap = credential.getSalt();
+
+    private ErrorCode verifyPolicy(CredentialPojo credentialPojo, ClaimPolicy claimPolicy,
+        String presenterWeId) {
+        Map<String, Object> saltMap = credentialPojo.getSalt();
         String disclosure = claimPolicy.getFieldsToBeDisclosed();
         Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
+
+        Object idValue = disclosureMap.get("id");
+        if (idValue != null) {
+            Object weid = credentialPojo.getClaim().get("id");
+            if (StringUtils.equals(String.valueOf(idValue), DISCLOSED)) {
+                if (!StringUtils.equals(String.valueOf(weid), presenterWeId)) {
+                    logger.error(
+                        "[verifyPolicy] the presenter weid->{} of presentation does not "
+                            + "match the credential's ->{}. ",
+                        presenterWeId,
+                        weid);
+                    return ErrorCode.PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH;
+                }
+            } else if (StringUtils.equals(String.valueOf(idValue), EXISTED)
+                && !credentialPojo.getClaim().containsKey("id")) {
+                logger.error(
+                    "[verifyPolicy] the presenter weid->{} of presentation does not "
+                        + "match the credential's ->{}. ",
+                    presenterWeId,
+                    weid);
+                return ErrorCode.PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST;
+            }
+        }
         return this.verifyDisclosureAndSalt(disclosureMap, saltMap);
     }
+
 
     @Override
     public ResponseData<PresentationE> createPresentation(
@@ -728,7 +833,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         PresentationE presentation = new PresentationE();
         try {
             // 检查输入数据完整性
-            ErrorCode errorCode = 
+            ErrorCode errorCode =
                 validateCreateArgs(
                     credentialList,
                     presentationPolicyE,
@@ -806,7 +911,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
                 return checkResp;
             }
-        }      
+        }
         List<Integer> cptIdList = credentialList.stream().map(
             cpwl -> cpwl.getCptId()).collect(Collectors.toList());
         Set<Integer> claimPolicyCptSet = presentationPolicyE.getPolicy().keySet();
@@ -850,16 +955,16 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
         String proofType = CredentialProofType.ECDSA.getTypeName();
         presentation.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
-        
+
         Long proofCreated = DateUtils.getNoMillisecondTimeStamp();
         presentation.putProofValue(ParamKeyConstant.PROOF_CREATED, proofCreated);
-        
+
         String weIdPublicKeyId = weIdAuthentication.getWeIdPublicKeyId();
         presentation.putProofValue(ParamKeyConstant.PROOF_VERIFICATION_METHOD, weIdPublicKeyId);
         presentation.putProofValue(ParamKeyConstant.PROOF_NONCE, challenge.getNonce());
-        String signature = 
+        String signature =
             DataToolUtils.sign(
-                presentation.toRawData(), 
+                presentation.toRawData(),
                 weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
             );
         presentation.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
