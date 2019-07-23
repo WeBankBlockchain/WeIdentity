@@ -74,7 +74,7 @@ public class TestGetCredentialJson extends TestBaseServcie {
     private Credential buildCredential() {
         Credential credential = new Credential();
         HashMap<String, Object> claim = new HashMap<>();
-        claim.put("xxxxxxxxxxxxx", "xxxxxxxxxxxxx");
+        claim.put("id", "xxxxxxxxxxxxx");
         credential.setClaim(claim);
         credential.setContext(CredentialConstant.DEFAULT_CREDENTIAL_CONTEXT);
         credential.setCptId(Integer.valueOf(1002));
