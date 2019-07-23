@@ -26,10 +26,10 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
     cd weid-java-sdk/src/main/resources/
 
 
-若您使用FISCO BCOS 2.0, 请参考\ `web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/sdk/sdk.html#sdk>`__
-将证书文件 ``ca.crt``  ``node.crt`` 和 ``node.key`` 复制出来，拷贝至当前目录下。
+若您使用FISCO BCOS 2.0, 请参考\ `2.0 web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/sdk/sdk.html#sdk>`__，
+将证书文件 ``ca.crt``， ``node.crt`` 和 ``node.key`` 复制出来，拷贝至当前目录下。
 
-若您使用FISCO BCOS 1.3, 请参考\ `web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/web3sdk.html>`__
+若您使用FISCO BCOS 1.3, 请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/web3sdk.html>`__，
 将证书文件 ``ca.crt`` 和 ``client.keystore`` 复制出来，拷贝至当前目录下 。
 
 
@@ -44,7 +44,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 
 -  配置说明：
 
- | ``blockchain_address`` ： 区块链节点 IP 和channel_listen_port， channel_listen_port的配置可以参考\ `FISCO BCOS 配置文件 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/manual/configuration.html#rpc>`__ 进行配置，FISCO BCOS 1.3可以参考\ `FISCO BCOS 1.3 配置文件 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/web3sdk/config_web3sdk.html#java>`__ 进行配置。
+ | ``blockchain_address`` ： 区块链节点 IP 和channel端口， channel端口的配置可以参考\ `FISCO BCOS 2.0 配置项说明 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/manual/configuration.html#rpc>`__ 进行配置，FISCO BCOS 1.3可以参考\ `FISCO BCOS 1.3 配置项说明 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/web3sdk/config_web3sdk.html#java>`__ 进行配置。
  | ``blockchain_fiscobcos_version`` ：对接的FISCO BCOS版本。
  | ``org_id`` ：机构名称，该名称也被用作后续机构间的通信标识。
  | ``chain_id`` ：用于标识您接入的区块链网络。
@@ -52,7 +52,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 配置样例：
 ::
 
-    #节点的连接串，节点IP为10.10.10.10，和channel_listen_port为20200。
+    #节点的连接串，节点IP为10.10.10.10，和channel端口为20200。
     blockchain_address=10.10.10.10:20200
 
     # 2表示FISCO BCOS的版本为2.0, 1则表示FISCO BCOS 1.3
@@ -76,7 +76,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
     chmod +x *.sh
     ./run.sh
 
-出现下列输出，则表示安装部署成功，源码目录下的dist中已生成可运行的SDK包和配置文件。
+出现下列输出，则表示安装部署成功。
 
 .. code-block:: shell
 
@@ -86,7 +86,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 	begin to clean config...
 	clean finished...
 
-到这里，您已经完成了weid-java-sdk的安装和部署的全部步骤，您可以开始使用WeIdentity来构建您的分布式身份管理的应用了。
+到这里，您已经完成了weid-java-sdk的安装和部署的全部步骤，您可以开始使用WeIdentity来构建您的分布式身份管理的Java应用了。
 
 Have fun!!!
 
@@ -103,7 +103,7 @@ Have fun!!!
    cd ../../dist/
    ls
 
-dist目录包含以下目录： ``app  conf  lib``
+dist目录包含以下目录： ``app``， ``conf`` 和 ``lib``
 
 .. list-table::
    :header-rows: 1
@@ -111,9 +111,9 @@ dist目录包含以下目录： ``app  conf  lib``
    * - 目录名
      - 说明
    * - app
-     - 打包好的SDK jar包。
+     - 打包好的weid-java-sdk jar包。
    * - conf
-     - SDK运行时的一些配置，Java应用集成weid-java-sdk的时候，需要将次目录下的文件放到classpath下。
+     - weid-java-sdk运行时的一些配置，Java应用集成weid-java-sdk的时候，需要将此目录下的文件放到您自己的Java应用的classpath下。
    * - lib
      - 依赖的jar包。
 
@@ -124,4 +124,4 @@ dist目录包含以下目录： ``app  conf  lib``
    cd ../
    ls
 
-根目录下生成的文件 ``ecdsa_key`` 为SDK部署合约动态生成的秘钥文件，您的Java应用集成weid-java-sdk的时候可能需要使用此文件，请妥善保管。
+根目录下生成的文件 ``ecdsa_key`` 为weid-java-sdk部署合约动态生成的秘钥文件，您的Java应用集成weid-java-sdk的时候可能需要使用此文件，请妥善保管。
