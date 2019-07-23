@@ -38,6 +38,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 ::
 
     cd ../../../build-tools/bin/
+    vim run.config
 
 
 主要的配置文件 ``run.config`` ，配置一些运行时需要的一些参数.
