@@ -115,7 +115,7 @@ function gradle_build_sdk()
     echo "Begin to compile java code......"
 	
 	node_addr=$(grep "blockchain_address" $config_file |awk -F"=" '{print $2}')
-	bcos_version=$(grep "bcos.version" $config_file |awk -F"=" '{print $2}')
+	bcos_version=$(grep "blockchain_fiscobcos_version" $config_file |awk -F"=" '{print $2}')
     OLD_IFS="$IFS"
     IFS=","
     array=($node_addr)
@@ -123,7 +123,7 @@ function gradle_build_sdk()
 	content=
     for var in ${array[@]}
     do
-	    if [[ $bcos_version == 1.* ]];
+	    if [[ $bcos_version == 1 ]];
 	    then
 	    	content="${content}WeIdentity@$var,"
 	    else
