@@ -72,7 +72,7 @@ Authority智能合约的主要任务是联盟链的权限管理。在WeIdentity�
 
 - 不同的DID实体拥有不同的权限。
 
-例如，存在Authority Issuer这一角色用来描述现实世界中的「权威机构」，它们的权限高于一般的DID；更进一步地，在Authority Issuer之上存在着委员会（Committee），它们的权限更高，包括了对Authority Issuer的治理等内容。因此，WeIdentity需要设计合理的「角色—操作」二元权限控制。
+例如，存在Authority Issuer这一角色用来描述现实世界中的「权威凭证发行者」，它们能够发行低段位授权CPT，权限高于一般的DID；更进一步地，在Authority Issuer之上存在着委员会（Committee），它们的权限更高，包括了对Authority Issuer的治理等内容。因此，WeIdentity需要设计合理的「角色—操作」二元权限控制。
 
 - 权限管理的业务逻辑会随着业务迭代而不断更新。
 
@@ -90,8 +90,10 @@ Authority智能合约的主要任务是联盟链的权限管理。在WeIdentity�
 
 - 一般DID。一般的实体（人或物），由WeIdentity的分布式多中心的ID注册机制生成，没有特定权限。
 - Authority Issuer。授权机构，具有发行低段位授权CPT的权限。
-- Committee Member。授权机构委员会。具有管理Authority Issuer成员资格的权限。
+- Committee Member。机构委员会成员。具有管理Authority Issuer成员资格的权限。
 - Administrator。系统管理员。具有管理Committee Member及Authority Issuer成员资格的权限，未来还包括修改合约地址的权限。
+
+除此之外，WeIdentity还支持为每位Authority Issuer在链上声明所属类型，即Specific Issuer。您可以指定某位Authority Issuer的具体类型属性，如学校、政府机构、医院等。当前，此属性与其对应的权限没有直接关系，仅作记录之目的。
 
 每个角色具体的权限表如下：
 
