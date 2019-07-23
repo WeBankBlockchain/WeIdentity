@@ -1,7 +1,7 @@
 # Fisco-bcos blockchain node related properties
 
 # Version
-bcos.version=1
+bcos.version=${FISCO_BCOS_VERSION}
 
 # contract address
 weId.contractaddress=${WEID_ADDRESS}
@@ -27,6 +27,6 @@ v1.ca-crt-path=ca.crt
 v1.client-crt-password=123456
 v1.client-key-store-path=client.keystore
 v1.key-store-password=123456
-v2.ca-crt-path=./v2/ca.crt
-v2.node-crt-path=./v2/node.crt
-v2.node-key-path=./v2/node.key
+v2.ca-crt-path=ca.crt
+v2.node-crt-path=node.crt
+v2.node-key-path=node.key

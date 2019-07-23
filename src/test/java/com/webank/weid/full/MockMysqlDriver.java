@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.persistence.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 
 public interface MockMysqlDriver {
     /**
