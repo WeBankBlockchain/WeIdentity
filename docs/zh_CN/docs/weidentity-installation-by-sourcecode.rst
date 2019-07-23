@@ -56,7 +56,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
     blockchain_address=10.10.10.10:20200
 
     # 2表示FISCO BCOS的版本为2.0, 1则表示FISCO BCOS 1.3
-    bcos.version=2
+    blockchain_fiscobcos_version=2
 
     #机构名称
     org_id=organizationA
@@ -86,7 +86,7 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 	begin to clean config...
 	clean finished...
 
-到这里，您已经完成了SDK的安装和部署的全部步骤，您可以开始使用WeIdentity来构建您的分布式身份管理的应用了。
+到这里，您已经完成了weid-java-sdk的安装和部署的全部步骤，您可以开始使用WeIdentity来构建您的分布式身份管理的应用了。
 
 Have fun!!!
 
@@ -113,7 +113,7 @@ dist目录包含以下目录： ``app  conf  lib``
    * - app
      - 打包好的SDK jar包。
    * - conf
-     - SDK运行时的一些配置，应用集成SDK的时候，需要将次目录下的文件放到classpath下。
+     - SDK运行时的一些配置，Java应用集成weid-java-sdk的时候，需要将次目录下的文件放到classpath下。
    * - lib
      - 依赖的jar包。
 
@@ -124,4 +124,4 @@ dist目录包含以下目录： ``app  conf  lib``
    cd ../
    ls
 
-根目录下生成的文件 ``ecdsa_key`` 为SDK部署合约动态生成的秘钥文件，您的项目集成SDK的时候可能需要使用此文件，请妥善保管。
+根目录下生成的文件 ``ecdsa_key`` 为SDK部署合约动态生成的秘钥文件，您的Java应用集成weid-java-sdk的时候可能需要使用此文件，请妥善保管。
