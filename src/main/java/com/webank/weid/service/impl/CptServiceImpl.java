@@ -72,7 +72,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         try {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
-            Map<String, Object> cptJsonSchemaMap = 
+            Map<String, Object> cptJsonSchemaMap =
                 DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
             cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs, cptId);
@@ -99,7 +99,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
-            Map<String, Object> cptJsonSchemaMap = 
+            Map<String, Object> cptJsonSchemaMap =
                 DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
             cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs);
@@ -328,7 +328,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     private ErrorCode validateCptJsonSchemaMap(
         Map<String, Object> cptJsonSchemaMap) throws Exception {
         if (cptJsonSchemaMap == null || cptJsonSchemaMap.isEmpty()) {
@@ -337,8 +337,7 @@ public class CptServiceImpl extends BaseService implements CptService {
         }
         //String cptJsonSchema = JsonUtil.objToJsonStr(cptJsonSchemaMap);
         String cptJsonSchema = DataToolUtils.serialize(cptJsonSchemaMap);
-        if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema) 
-            || !WeIdUtils.validateContainWeIdKey(cptJsonSchemaMap)) {
+        if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
             logger.error("Input cpt json schema : {} is invalid.", cptJsonSchemaMap);
             return ErrorCode.CPT_JSON_SCHEMA_INVALID;
         }

@@ -36,7 +36,7 @@ if (!gradle.startParameter.isOffline()) {
 
 group 'com.webank'
 
-version = "1.3.0"
+version = "1.3.1"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -48,9 +48,6 @@ repositories {
     if (!gradle.startParameter.isOffline()) {
         mavenLocal()
         mavenCentral()
-        maven {
-            url "http://maven.aliyun.com/nexus/content/groups/public/"
-        }
         maven { url "https://dl.bintray.com/ethereum/maven/" }
     } else {
         maven {
@@ -93,7 +90,7 @@ List json = [
 ]
 
 List weidentity_contract = [
-        "com.webank:weid-contract-java:1.2.3"
+        "com.webank:weid-contract-java:1.2.4"
 ]
 
 List mysql_driver = [
@@ -113,7 +110,10 @@ dependencies {
     localDeps 'org.projectlombok:lombok:1.16.14'
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
-            compile logger, lombok, apache_commons, json, weidentity_contract, mysql_driver, zxing
+            compile logger, lombok, apache_commons, json, mysql_driver, zxing
+            compile("com.webank:weid-contract-java:1.2.4") {
+               exclude group:"org.slf4j", module: "slf4j-log4j12"
+            }
             testCompile logger, lombok, apache_commons, json, junit, jmockit
         } else {
             compile fileTree(dir: 'dist/lib', include: '*.jar')
@@ -125,7 +125,10 @@ dependencies {
             annotationProcessor 'org.projectlombok:lombok:1.16.14'
             testAnnotationProcessor 'org.projectlombok:lombok:1.16.14'
             testCompileOnly 'org.projectlombok:lombok:1.16.14'
-            compile logger, apache_commons, json, weidentity_contract, mysql_driver, zxing
+            compile logger, apache_commons, json, mysql_driver, zxing
+            compile("com.webank:weid-contract-java:1.2.4") {
+               exclude group:"org.slf4j", module: "slf4j-log4j12"
+            }
             testCompile logger, apache_commons, json, junit, jmockit
         } else {
             compileOnly files('dist/lib/lombok-1.16.14.jar')
