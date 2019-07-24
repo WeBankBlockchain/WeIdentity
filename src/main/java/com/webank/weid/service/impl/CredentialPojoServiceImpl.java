@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.Cpt;
@@ -331,7 +333,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 logger.error(
                     "Error occurred when fetching WeIdentity DID document for: {}, msg: {}",
                     issuerWeid, innerResponseData.getErrorMessage());
-                return ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL;
+                return ErrorCode.getTypeByErrorCode(innerResponseData.getErrorCode());
             } else {
                 WeIdDocument weIdDocument = innerResponseData.getResult();
                 return DataToolUtils
@@ -417,7 +419,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 } else {
                     result.setIssuanceDate(newIssuanceDate);
                 }
-            }
+            }  
+            if (!WeIdUtils.validatePrivateKeyWeIdMatches(
+                args.getWeIdAuthentication().getWeIdPrivateKey(), 
+                args.getIssuer())) {
+                logger.error("Create Credential, private key does not match the current weid.");
+                return new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+            } 
             result.setIssuer(args.getIssuer());
             Long newExpirationDate =
                 DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate());
@@ -511,6 +519,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             response.setResult(credential);
             response.setErrorCode(ErrorCode.SUCCESS);
             return response;
+        } catch (DataTypeCastException e) {
+            logger.error("Generate SelectiveCredential failed, "
+                + "credential disclosure data type illegal. ", e);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL);
         } catch (Exception e) {
             logger.error("Generate SelectiveCredential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
@@ -900,7 +912,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private ErrorCode validateClaimPolicy(
         List<CredentialPojo> credentialList,
         PresentationPolicyE presentationPolicyE) {
-        if (credentialList == null) {
+        if (CollectionUtils.isEmpty(credentialList)) {
             return ErrorCode.ILLEGAL_INPUT;
         }
         if (presentationPolicyE == null || presentationPolicyE.getPolicy() == null) {

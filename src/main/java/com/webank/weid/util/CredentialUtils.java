@@ -326,7 +326,7 @@ public final class CredentialUtils {
             || expirationDate.longValue() < 0
             || expirationDate.longValue() == 0
             || (issuanceDate != null && expirationDate < issuanceDate)
-            || (issuanceDate == null && expirationDate < System.currentTimeMillis())) {
+            || expirationDate < System.currentTimeMillis()) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
         }
         if (args.getClaim() == null || args.getClaim().isEmpty()) {
