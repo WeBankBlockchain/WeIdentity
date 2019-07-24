@@ -24,7 +24,7 @@ WeIdentity-Java-SDK及其部署工具默认需要连接到Internet，以访问Ma
 前提条件
 ~~~~~~~~
 
-您仍需要在部署的机器上预先安装好Gradle、JDK环境及fisco-solc编译器，详见\ `WeIdentity JAVA SDK安装部署文档 <./weidentity-installation.html>`__\ 中的“准备工作”一节。
+您仍需要在部署的机器上预先安装好Gradle、JDK环境，详见\ `WeIdentity JAVA SDK安装部署文档 <https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-installation.html>`__\ 中的“准备工作”一节。
 
 流程
 ~~~~
