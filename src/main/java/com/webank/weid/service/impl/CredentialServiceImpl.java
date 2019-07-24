@@ -90,7 +90,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setIssuer(args.getIssuer());
             Long issuanceDate = args.getIssuanceDate();
             if (issuanceDate == null) {
-                result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
+                result.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
             } else {
                 result.setIssuanceDate(issuanceDate);
             }
