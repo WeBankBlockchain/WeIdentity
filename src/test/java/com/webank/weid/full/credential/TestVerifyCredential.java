@@ -118,7 +118,7 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /**
-     * case: cptId is another.
+     * case: cptId is another with **same** schema.
      */
     @Test
     public void testVerifyCredentialCase7() {
@@ -238,7 +238,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setIssuanceDate(issuanceDate);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -285,7 +285,7 @@ public class TestVerifyCredential extends TestBaseServcie {
     public void testVerifyCredentialCase16() {
 
         Long expirationDate = credential.getExpirationDate();
-        credential.setExpirationDate(System.currentTimeMillis() - 10000);
+        credential.setExpirationDate(credential.getIssuanceDate() - 100000000);
         ResponseData<Boolean> response = super.verifyCredential(credential);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -489,7 +489,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setExpirationDate(expirationDate);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }

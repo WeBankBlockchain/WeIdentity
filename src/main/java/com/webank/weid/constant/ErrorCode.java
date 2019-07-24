@@ -73,11 +73,6 @@ public enum ErrorCode {
     CPT_JSON_SCHEMA_INVALID(100301, "cpt json schema is invalid"),
 
     /**
-     * The cpt json schema null.
-     */
-    CPT_JSON_SCHEMA_NULL(100302, "cpt json schema is null"),
-
-    /**
      * cptId is null.
      */
     CPT_ID_NULL(100303, "cptId is null"),
@@ -93,11 +88,6 @@ public enum ErrorCode {
     CREDENTIAL_ERROR(100400, "error occured during processing credential tasks"),
 
     /**
-     * The credential does not exist on chain (evidence not found).
-     */
-    CREDENTIAL_EVIDENCE_NOT_EXISTS_ON_CHAIN(100401, "credential evidence does not exist on chain"),
-
-    /**
      * The credential expired.
      */
     CREDENTIAL_EXPIRED(100402, "credential is expired"),
@@ -108,22 +98,9 @@ public enum ErrorCode {
     CREDENTIAL_ISSUER_MISMATCH(100403, "credential issuer does not match the signature"),
 
     /**
-     * The credential issuer not exists in list.
-     */
-    CREDENTIAL_ISSUER_NOT_EXISTS_IN_LIST(
-        100404,
-        "credential issuer does not exist in the authority issuer list"
-    ),
-
-    /**
      * The credential signature broken.
      */
     CREDENTIAL_SIGNATURE_BROKEN(100405, "credential signature cannot be extracted"),
-
-    /**
-     * The credential revoked.
-     */
-    CREDENTIAL_REVOKED(100406, "credential is revoked"),
 
     /**
      * The credential issuer not exists.
@@ -221,7 +198,7 @@ public enum ErrorCode {
     /**
      * The credential presenterWeId notmatch.
      */
-    CREDENTIAL_PRESENTERWEID_NOTMATCH(100426, "credential presenterWeId notmatch"),
+    CREDENTIAL_PRESENTERWEID_NOTMATCH(100426, "credential presenter WeId not match"),
 
     /**
      * The credential evidence id mismatch.
@@ -230,12 +207,6 @@ public enum ErrorCode {
         100427,
         "credential disclosure format does not match claim"
     ),
-
-    /**
-     * The credential evidence id mismatch.
-     */
-    CREDENTIAL_IS_NILL(100428, "credential is null"),
-
 
     /**
      * The credential signature broken.
@@ -262,11 +233,6 @@ public enum ErrorCode {
      * The credential evidence hash mismatch.
      */
     CREDENTIAL_EVIDENCE_HASH_MISMATCH(100501, "credential evidence hash mismatch"),
-
-    /**
-     * The credential evidence id mismatch.
-     */
-    CREDENTIAL_EVIDENCE_ID_MISMATCH(100502, "credential evidence id mismatch"),
 
     /**
      * The challenge is invalid.
@@ -314,7 +280,22 @@ public enum ErrorCode {
         100606,
         "the signature of presentation does not match the presenter."
     ),
+    
+    /**
+     * the presenter weid of presentation does not match the credential.
+     */
+    PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH(
+        100607,
+        "the presenter weid of presentation does not match the credential."
+    ),
 
+    /**
+     * the weid of the claim of the presentation does not exist.
+     */
+    PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST(
+        100608,
+        "the weid of the claim of the presentation does not exist."
+    ),
     /**
      * the encrypt key is not exists.
      */
@@ -379,20 +360,9 @@ public enum ErrorCode {
     AUTHORITY_ISSUER_ERROR(100200, "error occured during processing authority issuer tasks"),
 
     /**
-     * The authority issuer argument not exists.
-     */
-    AUTHORITY_ISSUER_ARGUMENT_NOT_EXISTS(100201, "the argument passed in is null"),
-
-    /**
      * The authority issuer private key param is illegal.
      */
     AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL(100202, "the private key is illegal"),
-
-    /**
-     * The authority issuer address mismatch.
-     */
-    AUTHORITY_ISSUER_ADDRESS_MISMATCH(100204,
-        "address in event log does not match the WeIdentity DID"),
 
     /**
      * The authority issuer opcode mismatch.
