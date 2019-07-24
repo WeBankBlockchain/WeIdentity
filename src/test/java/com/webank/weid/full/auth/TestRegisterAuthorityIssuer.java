@@ -43,11 +43,13 @@ import com.webank.weid.contract.v1.AuthorityIssuerController;
 import com.webank.weid.contract.v1.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.RawTransactionService;
 import com.webank.weid.service.impl.RawTransactionServiceImpl;
+import com.webank.weid.util.DateUtils;
 
 /**
  * registerAuthorityIssuer method for testing AuthorityIssuerService.
@@ -223,6 +225,37 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
+    }
+
+
+    /**
+     * case: registerAuthorityIssuer with Chinese Name (utf-8).
+     */
+    @Test
+    public void testRegisterAuthorityIssuerChineseName() {
+
+        CreateWeIdDataResult createWeId = super.createWeId();
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+        String chiName = "中文" + DateUtils.getCurrentTimeStampString();
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setName(chiName);
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+
+        ResponseData<AuthorityIssuer> queryResponse = authorityIssuerService
+            .queryAuthorityIssuerInfo(createWeId.getWeId());
+        Assert.assertTrue(queryResponse.getResult().getName().equalsIgnoreCase(chiName));
     }
 
     /**

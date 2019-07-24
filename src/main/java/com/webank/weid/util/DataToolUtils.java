@@ -1481,7 +1481,7 @@ public final class DataToolUtils {
      * @return the StaticArray
      */
     public static List<BigInteger> getParamCreatedList(int length) {
-        long created = System.currentTimeMillis();
+        long created = DateUtils.getNoMillisecondTimeStamp();
         List<BigInteger> createdList = new ArrayList<>();
         createdList.add(BigInteger.valueOf(created));
         return createdList;
