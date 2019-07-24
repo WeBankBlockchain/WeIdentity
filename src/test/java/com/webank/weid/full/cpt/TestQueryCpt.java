@@ -203,7 +203,7 @@ public class TestQueryCpt extends TestBaseServcie {
 
         MockUp<DataToolUtils> mockTest = new MockUp<DataToolUtils>() {
             @Mock
-            public String[] bytes32DynamicArrayToStringArrayWithoutTrim(
+            public String bytes32DynamicArrayToStringWithoutTrim(
                 DynamicArray<Bytes32> bytes32DynamicArray)
                 throws DataTypeCastException {
                 WeIdBaseException e = new WeIdBaseException(

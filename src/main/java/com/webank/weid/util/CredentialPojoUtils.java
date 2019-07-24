@@ -430,29 +430,35 @@ public final class CredentialPojoUtils {
         if (args.getClaim() == null) {
             return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
         }
-        ErrorCode errorCode = validDateExpired(args);
+        ErrorCode errorCode = validDateExpired(args.getIssuanceDate(), args.getExpirationDate());
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return errorCode;
         }
+        if (args.getWeIdAuthentication() == null
+            || args.getWeIdAuthentication().getWeIdPrivateKey() == null
+            || StringUtils.isBlank(args.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
+            || StringUtils.isBlank(args.getWeIdAuthentication().getWeIdPublicKeyId())) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }    
         return ErrorCode.SUCCESS;
     }
 
-    private static ErrorCode validDateExpired(CreateCredentialPojoArgs args) {
-        Long issuanceDate = args.getIssuanceDate();
+    private static ErrorCode validDateExpired(Long issuanceDate, Long expirationDate) {
         if (issuanceDate != null && issuanceDate <= 0) {
             return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
         }
-        Long expirationDate = args.getExpirationDate();
         if (expirationDate == null
             || expirationDate.longValue() < 0
             || expirationDate.longValue() == 0
-            || (issuanceDate != null && expirationDate < issuanceDate)
-            || (issuanceDate == null && !DateUtils.isAfterCurrentTime(expirationDate))) {
+            || !DateUtils.isAfterCurrentTime(expirationDate)) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
-        }       
+        } 
+        if (issuanceDate != null && expirationDate < issuanceDate) {
+            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+        }
         return ErrorCode.SUCCESS;
     }
-
+    
     /**
      * Check the given CredentialPojo validity based on its input params.
      *
@@ -463,35 +469,24 @@ public final class CredentialPojoUtils {
         if (args == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        CreateCredentialPojoArgs createCredentialArgs = extractCredentialMetadata(args);
-        ErrorCode metadataResponseData = isCreateCredentialPojoArgsValid(createCredentialArgs);
-        if (ErrorCode.SUCCESS.getCode() != metadataResponseData.getCode()) {
-            return metadataResponseData;
+        if (args.getCptId() == null || args.getCptId().intValue() < 0) {
+            return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
+        }
+        if (!WeIdUtils.isWeIdValid(args.getIssuer())) {
+            return ErrorCode.CREDENTIAL_ISSUER_INVALID;
+        }
+        if (args.getClaim() == null) {
+            return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
+        }
+        ErrorCode errorCode = validDateExpired(args.getIssuanceDate(), args.getExpirationDate());
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return errorCode;
         }
         ErrorCode contentResponseData = isCredentialContentValid(args);
         if (ErrorCode.SUCCESS.getCode() != contentResponseData.getCode()) {
             return contentResponseData;
         }
         return ErrorCode.SUCCESS;
-    }
-
-    /**
-     * Extract GenerateCredentialPojoArgs from CredentialPojo.
-     *
-     * @param arg the arg
-     * @return GenerateCredentialPojoArgs
-     */
-    public static CreateCredentialPojoArgs extractCredentialMetadata(CredentialPojo arg) {
-        if (arg == null) {
-            return null;
-        }
-        CreateCredentialPojoArgs generateCredentialArgs = new CreateCredentialPojoArgs();
-        generateCredentialArgs.setCptId(arg.getCptId());
-        generateCredentialArgs.setIssuer(arg.getIssuer());
-        generateCredentialArgs.setIssuanceDate(arg.getIssuanceDate());
-        generateCredentialArgs.setExpirationDate(arg.getExpirationDate());
-        generateCredentialArgs.setClaim(arg.getClaim());
-        return generateCredentialArgs;
     }
 
     /**
