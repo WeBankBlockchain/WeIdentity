@@ -95,7 +95,7 @@ public enum ErrorCode {
     /**
      * The credential issuer mismatch.
      */
-    CREDENTIAL_ISSUER_MISMATCH(100403, "credential issuer does not match the signature"),
+    CREDENTIAL_ISSUER_MISMATCH(100403, "issuer weId does not match the weId of credential"),
 
     /**
      * The credential signature broken.
@@ -208,6 +208,11 @@ public enum ErrorCode {
         "credential disclosure format does not match claim"
     ),
 
+    /**
+     * credential disclosure data illegal.
+     */
+    CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL(100428, "credential disclosure data illegal"),
+    
     /**
      * The credential signature broken.
      */
