@@ -106,17 +106,12 @@ public final class CredentialUtils {
         ct.setContext(credential.getContext());
 
         Map<String, String> originalProof = credential.getProof();
-        //Map<String, String> proof = (HashMap<String, String>) JsonUtil
-        //    .jsonStrToObj(new HashMap<String, String>(), JsonUtil.objToJsonStr(originalProof));
-        //ct.setProof(proof);
         if (originalProof != null) {
             Map<String, String> proof = DataToolUtils
                 .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
             ct.setProof(proof);
-        } 
+        }
         Map<String, Object> originalClaim = credential.getClaim();
-        //Map<String, Object> claim = (HashMap<String, Object>) JsonUtil
-        //    .jsonStrToObj(new HashMap<String, Object>(), JsonUtil.objToJsonStr(originalClaim));
         if (originalClaim != null) {
             Map<String, Object> claim = DataToolUtils
                 .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
@@ -237,6 +232,7 @@ public final class CredentialUtils {
         CreateCredentialArgs generateCredentialArgs = new CreateCredentialArgs();
         generateCredentialArgs.setCptId(arg.getCptId());
         generateCredentialArgs.setIssuer(arg.getIssuer());
+        generateCredentialArgs.setIssuanceDate(arg.getIssuanceDate());
         generateCredentialArgs.setExpirationDate(arg.getExpirationDate());
         generateCredentialArgs.setClaim(arg.getClaim());
         return generateCredentialArgs;

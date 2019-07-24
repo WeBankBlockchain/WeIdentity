@@ -19,6 +19,7 @@
 
 package com.webank.weid.app;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,30 +47,44 @@ public class AppCommand {
      */
     public static void main(String[] args) {
 
-        if (args.length < 2) {
-            System.err.println("Parameter illegal, please check your input.");
-            return;
+        Integer result = 0;
+        try {
+            if (args.length < 2) {
+                System.err.println("Parameter illegal, please check your input.");
+                System.exit(1);
+            }
+            String command = args[0];
+            if (!StringUtils.equals(command, "--checkhealth")
+                && !StringUtils.equals(command, "--checkweid")) {
+                logger.error("[AppCommand] input command :{} is illegal.", command);
+                System.err.println("Parameter illegal, please check your input command.");
+                System.exit(1);
+            }
+
+            switch (command) {
+                case "--checkhealth":
+                    result = checkAmopHealth(args[1]);
+                    return;
+                case "--checkweid":
+                    result = checkWeid(args[1]);
+                    return;
+                default:
+                    logger.error("[AppCommand]: the command -> {} is not supported .", command);
+            }
+        } catch (Exception e) {
+            logger.error("[AppCommand] execute command with exception.", e);
+            System.exit(1);
         }
-        String command = args[0];
-        switch (command) {
-            case "--checkhealth":
-                checkAmopHealth(args[1]);
-                return;
-            case "--checkweid":
-                checkWeid(args[1]);
-                return;
-            default:
-                logger.error("[AppCommand]: the command -> {} is not supported .", command);
-                return;
-        }
+        System.exit(result);
     }
 
     /**
      * check if the weid exists on blockchain.
      *
      * @param weid the weid to check
+     * @return ErrorCode
      */
-    private static void checkWeid(String weid) {
+    private static Integer checkWeid(String weid) {
 
         WeIdService weidService = new WeIdServiceImpl();
         ResponseData<Boolean> resp = weidService.isWeIdExist(weid);
@@ -77,23 +92,24 @@ public class AppCommand {
         if (resp.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
             logger.info("[checkWeid] weid --> {} exists on blockchain.", weid);
             System.out.println("[checkWeid] weid --> " + weid + "exists on blockchain.");
-            return;
+        } else {
+            logger.error("[checkWeid] weid --> {} does not exist on blockchain. response is {}",
+                weid,
+                resp);
+            System.out.println("[checkWeid] weid --> " + weid + " does not exist on blockchain.");
         }
-        logger.error("[checkWeid] weid --> {} does not exist on blockchain. response is {}",
-            weid,
-            resp);
-        System.out.println("[checkWeid] weid --> " + weid + " does not exist on blockchain.");
+        return resp.getErrorCode();
     }
 
     /**
      * check if the amop is health.
      *
      * @param toOrgId the orgid to test amop connection
+     * @return ErrorCode
      */
-    private static void checkAmopHealth(String toOrgId) {
+    private static Integer checkAmopHealth(String toOrgId) {
 
         AmopServiceImpl amopService = new AmopServiceImpl();
-
         CheckAmopMsgHealthArgs checkAmopMsgHealthArgs = new CheckAmopMsgHealthArgs();
         checkAmopMsgHealthArgs.setMessage("hello");
 
@@ -102,13 +118,15 @@ public class AppCommand {
 
         if (resp.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
             logger.info("[checkAmopHealth] toOrgId --> {} check success.", toOrgId);
-            System.out.println("[checkAmopHealth] toOrgId -->" + toOrgId + " check success.");
-            return;
+            System.out.println(
+                "[checkAmopHealth] send amop message to OrgId -->" + toOrgId + " with success.");
+        } else {
+            logger.error("[checkAmopHealth] toOrgId --> {} check failed, response is {}",
+                toOrgId,
+                resp);
+            System.out.println(
+                "[checkAmopHealth] toOrgId -->" + toOrgId + " check failed. please check log.");
         }
-        logger.error("[checkAmopHealth] toOrgId --> {} check failed, response is {}",
-            toOrgId,
-            resp);
-        System.out.println(
-            "[checkAmopHealth] toOrgId -->" + toOrgId + " check failed. please check log.");
+        return resp.getErrorCode();
     }
 }
