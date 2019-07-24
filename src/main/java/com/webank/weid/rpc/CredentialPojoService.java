@@ -75,7 +75,16 @@ public interface CredentialPojoService {
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
     ResponseData<Boolean> verify(WeIdPublicKey issuerPublicKey, CredentialPojo credential);
-
+    
+    /**
+     * verify the presentation with presenter's weid and policy.
+     * 
+     * @param presenterWeId the presenter's weid
+     * @param presentationPolicyE policy of the presentation
+     * @param challenge challenge
+     * @param presentationE the presentation
+     * @return the verification result. True if yes, false otherwise with exact verify error codes
+     */
     ResponseData<Boolean> verify(
         String presenterWeId,
         PresentationPolicyE presentationPolicyE,
@@ -83,6 +92,7 @@ public interface CredentialPojoService {
         PresentationE presentationE
     );
 
+    
     /**
      * packing according to original vouchers and disclosure strategies.
      * 
@@ -92,7 +102,7 @@ public interface CredentialPojoService {
      * @param weIdAuthentication owner information
      * @return PresentationE presentationE
      */
-    public ResponseData<PresentationE> createPresentation(
+    ResponseData<PresentationE> createPresentation(
         List<CredentialPojo> credentialList,
         PresentationPolicyE presentationPolicyE,
         Challenge challenge,

@@ -38,16 +38,18 @@ import com.webank.weid.util.DataToolUtils;
 public class OnNotifyCallbackV2 extends ChannelPushCallback implements RegistCallBack {
 
     private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallbackV2.class);
-    
+
     private Map<Integer, AmopCallback> amopCallBackMap = new HashMap<Integer, AmopCallback>();
+
+    private AmopCallback defaultAmopCallBack = new AmopCallback();
 
     public void registAmopCallback(Integer msgType, AmopCallback routeCallBack) {
         amopCallBackMap.put(msgType, routeCallBack);
     }
-    
+
     @Override
     public void onPush(ChannelPush push) {
-        
+
         logger.info("received ChannelPush v2 msg : " + push.getContent());
         if (0 == amopCallBackMap.size()) {
             ChannelResponse response = new ChannelResponse();
@@ -57,13 +59,16 @@ public class OnNotifyCallbackV2 extends ChannelPushCallback implements RegistCal
             return;
         }
 
-        AmopRequestBody amopRequestBody = 
+        AmopRequestBody amopRequestBody =
             DataToolUtils.deserialize(push.getContent(), AmopRequestBody.class);
         AmopMsgType msgType = amopRequestBody.getMsgType();
         AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
+        if (amopCallBack == null) {
+            amopCallBack = defaultAmopCallBack;
+        }
         String messageBody = amopRequestBody.getMsgBody();
         String result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
-        
+
         /*
          * 接收到以后需要给发送端回包
          */
