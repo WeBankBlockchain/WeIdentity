@@ -12,94 +12,99 @@ WeIdentity JAVA SDK安装部署文档（源码方式）
 
 * `WeIdentity JAVA SDK <https://github.com/WeBankFinTech/weid-java-sdk.git>`_\ :raw-html-m2r:`<br>`
   建议下载最新版本的release
-* `WeIdentity 智能合约 <https://github.com/WeBankFinTech/weid-contract.git>`_\ :raw-html-m2r:`<br>`
-  建议下载最新版本的release
-
-2.拷贝「WeIdentity智能合约」源码到特定目录
-""""""""""""""""""""""""""""""""""""""""""""""""
-
-进入build_tools目录：
-
+  
 .. code-block:: shell
 
-      cd weid-java-sdk/build-tools/contracts/
-
-将您刚下载的「WeIdentity智能合约」源码文件放至该目录即可。
-
-..
-
-    如果不需要特定版本的「WeIdentity智能合约」，可以跳过第2步，而默认使用该目录下的智能合约（当前版本WeIdentity JAVA SDK在发布时最新版本的智能合约）。
+  git clone https://github.com/WeBankFinTech/weid-java-sdk.git
 
 
-3.配置客户端证书
-""""""""""""""""
+
+- 配置节点证书和秘钥文件
+
+::
+
+    cd weid-java-sdk/src/main/resources/
 
 
-*
-  将安装的FISCO-BCOS节点build/web3sdk里的客户端证书ca.crt和client.keystore复制出来。
+若您使用FISCO BCOS 2.0, 请参考\ `2.0 web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/sdk/sdk.html#sdk>`__，
+将证书文件 ``ca.crt``， ``node.crt`` 和 ``node.key`` 复制出来，拷贝至当前目录下。
 
-*
-  进入WeIdentity JAVA SDK的resources目录:
+若您使用FISCO BCOS 1.3, 请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/tools/web3sdk.html>`__，
+将证书文件 ``ca.crt`` 和 ``client.keystore`` 复制出来，拷贝至当前目录下 。
 
-  .. code-block:: shell
 
-     cd ../../src/main/resources
+- 配置基本信息
 
-  然后将FISCO-BCOS节点的证书ca.crt和keystore文件拷贝至该目录，替换已有的证书文件:
+::
 
-4.配置SDK连接的区块链节点
-"""""""""""""""""""""""""
+    cd ../../../build-tools/bin/
+    vim run.config
 
-.. code-block:: shell
 
-   cd ../../../build-tools/bin/
-   chmod +x *.sh
-   vim run.config
+主要的配置文件 ``run.config`` ，配置一些运行时需要的一些参数.
 
-bin目录下是运行部署打包的脚本和配置文件，您需要将FISCO-BCOS的节点地址配置到run.config文件中。如果SDK只需要连接一个区块链节点，以IP：PORT的形式赋值给配置项blockchain.node.address，例子：
+-  配置说明：
 
-.. code-block:: shell
+ | ``blockchain_address`` ： 区块链节点 IP 和channel端口， channel端口的配置可以参考\ `FISCO BCOS 2.0 配置项说明 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/latest/docs/manual/configuration.html#rpc>`__ 进行配置，FISCO BCOS 1.3可以参考\ `FISCO BCOS 1.3 配置项说明 <https://fisco-bcos-documentation.readthedocs.io/zh_CN/release-1.3/docs/web3sdk/config_web3sdk.html#java>`__ 进行配置。
+ | ``blockchain_fiscobcos_version`` ：对接的FISCO BCOS版本。
+ | ``org_id`` ：机构名称，该名称也被用作后续机构间的通信标识。
+ | ``chain_id`` ：用于标识您接入的区块链网络。
 
-   blockchain.node.address=10.10.10.10:9000
+配置样例：
+::
 
-如果有SDK需要连接多个区块链节点，用逗号","分割：
+    #节点的连接串，节点IP为10.10.10.10，和channel端口为20200。
+    blockchain_address=10.10.10.10:20200
 
-.. code-block:: shell
+    # 2表示FISCO BCOS的版本为2.0, 1则表示FISCO BCOS 1.3
+    blockchain_fiscobcos_version=2
 
-   blockchain.node.address=10.10.10.10:9000,10.11.11.11:9000
+    #机构名称
+    org_id=organizationA
 
-5.安装部署
+    #链标识
+    chain_id=1 
+ 
+
+
+2.安装部署
 """"""""""
 
 运行下面的命令，自动完成代码编译，智能合约编译，智能合约部署和所有配置文件的配置：
 
+::
+
+    chmod +x *.sh
+    ./run.sh
+
+出现下列输出，则表示安装部署成功。
+
 .. code-block:: shell
 
-   ./run.sh
+	contract deployment done.
+	begin to modify sdk config...
+	modify sdk config finished...
+	begin to clean config...
+	clean finished...
 
-如果部署过程中没有报错，那么源码目录下的dist里即为已经编译好并部署好智能合约的可运行的SDK包和配置文件。
-
-6. 完成
-"""""""
-
-到这里，您已经完成了SDK的安装和部署的全部步骤，您可以开始使用WeIdentity来构建您的分布式身份管理的应用了。
+到这里，您已经完成了weid-java-sdk的安装和部署的全部步骤，您可以开始使用WeIdentity来构建您的分布式身份管理的Java应用了。
 
 Have fun!!!
 
 备注
 ----
 
-查看智能合约部署结果
+查看WeIdentity JAVA SDK部署结果
 """"""""""""""""""""
 
-进入dist目录
+* 进入dist目录
 
 .. code-block:: shell
 
    cd ../../dist/
    ls
 
-正常情况下，dist目录包含以下目录： ``app  conf  lib``
+dist目录包含以下目录： ``app``， ``conf`` 和 ``lib``
 
 .. list-table::
    :header-rows: 1
@@ -107,16 +112,17 @@ Have fun!!!
    * - 目录名
      - 说明
    * - app
-     - 打包好的SDK jar包。
+     - 打包好的weid-java-sdk jar包。
    * - conf
-     - SDK运行时的一些配置，应用集成SDK的时候，需要将次目录下的文件放到classpath下。
+     - weid-java-sdk运行时的一些配置，Java应用集成weid-java-sdk的时候，需要将此目录下的文件放到您自己的Java应用的classpath下。
    * - lib
      - 依赖的jar包。
 
+* 进入源码根目录
 
-客户端证书ca.crt,以及client.keystore的作用：
-""""""""""""""""""""""""""""""""""""""""""""
+.. code-block:: shell
 
+   cd ../
+   ls
 
-* 证书ca.crt：用来验证sdk连接节点的节点证书的合法性。
-* client.keystore有三种用途：(1) 用作和节点连接是sdk的身份证书，由节点的ca.crt和agency.crt来验证合法性。(2)用作和其他sdk（前置）连接的身份证书，由其他sdk的ca.crt来验证合法性。(3)用作sdk发交易的私钥证书。
+根目录下生成的文件 ``ecdsa_key`` 为weid-java-sdk部署合约动态生成的秘钥文件，您的Java应用集成weid-java-sdk的时候可能需要使用此文件，请妥善保管。

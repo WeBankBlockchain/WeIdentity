@@ -50,13 +50,10 @@ public final class CredentialPojoUtils {
      * log4j object, for recording log.
      */
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoUtils.class);
-    
-    private static final String CLAIM_ID = "id";
-    private static final String PROPERTIES = "properties";
-    
-    private static Integer NOT_DISCLOSED = 
+
+    private static Integer NOT_DISCLOSED =
         CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus();
-    
+
     /**
      * Concat all fields of Credential info, without Signature, in Json format. This should be
      * invoked when calculating Credential Signature. Return null if credential format is illegal.
@@ -160,11 +157,11 @@ public final class CredentialPojoUtils {
             } else if (saltObj instanceof List) {
                 ArrayList<Object> disclosureObjList = null;
                 if (disclosureObj != null) {
-                    disclosureObjList = (ArrayList<Object>)disclosureObj;
+                    disclosureObjList = (ArrayList<Object>) disclosureObj;
                 }
                 addSaltAndGetHashForList(
-                    (ArrayList<Object>)newClaimObj,
-                    (ArrayList<Object>)saltObj,
+                    (ArrayList<Object>) newClaimObj,
+                    (ArrayList<Object>) saltObj,
                     disclosureObjList
                 );
             } else {
@@ -187,14 +184,14 @@ public final class CredentialPojoUtils {
                     getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj))
                 );
             }
-        } else if (NOT_DISCLOSED.toString().equals(disclosureObj.toString())) {           
+        } else if (NOT_DISCLOSED.toString().equals(disclosureObj.toString())) {
             claim.put(
                 key,
                 getFieldSaltHash(String.valueOf(newClaimObj), String.valueOf(saltObj))
             );
         }
     }
-    
+
     private static void addSaltAndGetHashForList(
         List<Object> claim,
         List<Object> salt,
@@ -208,18 +205,18 @@ public final class CredentialPojoUtils {
                 if (disclosures != null) {
                     disclosureObj = disclosures.get(0);
                 }
-                addSaltAndGetHash((HashMap)obj, (HashMap)saltObj, (HashMap)disclosureObj);
+                addSaltAndGetHash((HashMap) obj, (HashMap) saltObj, (HashMap) disclosureObj);
             } else if (obj instanceof List) {
                 ArrayList<Object> disclosureObjList = null;
                 if (disclosures != null) {
                     Object disclosureObj = disclosures.get(i);
                     if (disclosureObj != null) {
-                        disclosureObjList = (ArrayList<Object>)disclosureObj;
+                        disclosureObjList = (ArrayList<Object>) disclosureObj;
                     }
                 }
                 addSaltAndGetHashForList(
-                    (ArrayList<Object>)obj,
-                    (ArrayList<Object>)saltObj,
+                    (ArrayList<Object>) obj,
+                    (ArrayList<Object>) saltObj,
                     disclosureObjList
                 );
             }
@@ -266,26 +263,27 @@ public final class CredentialPojoUtils {
     public static String getFieldSaltHash(String field, String salt) {
         return DataToolUtils.sha3(String.valueOf(field) + String.valueOf(salt));
     }
-    
+
     /**
      * remove credentialPojo not disclosure claimData with salt.
+     *
      * @param credentialPojo credentialPojo
      * @return claimData of remove not disclosure data
      */
     public static Map<String, Object> getDisclosuredClaimData(CredentialPojo credentialPojo) {
-        if (credentialPojo == null 
+        if (credentialPojo == null
             || !validClaimAndSaltForMap(credentialPojo.getClaim(), credentialPojo.getSalt())) {
             logger.error("getDisclosuredClaimData failed, credentialPojo is null or "
                 + "claim and salt of credentialPojo not match ");
             return null;
         }
-        Map<String, Object> claimMap = credentialPojo.getClaim(); 
-        Map<String, Object> newMap = DataToolUtils.clone((HashMap<String, Object>)claimMap);
+        Map<String, Object> claimMap = credentialPojo.getClaim();
+        Map<String, Object> newMap = DataToolUtils.clone((HashMap<String, Object>) claimMap);
         Map<String, Object> saltMap = credentialPojo.getSalt();
         getDisclosureClaimData(saltMap, newMap);
         return newMap;
     }
-    
+
     private static void getDisclosureClaimData(
         Map<String, Object> saltMap,
         Map<String, Object> claim
@@ -296,10 +294,10 @@ public final class CredentialPojoUtils {
             Object claimV = claim.get(saltKey);
             if (saltV instanceof Map) {
                 getDisclosureClaimData((HashMap) saltV, (HashMap) claimV);
-            } else if (saltV instanceof List) { 
+            } else if (saltV instanceof List) {
                 getDisclosureClaimDataForList(
-                    (ArrayList<Object>)saltV,
-                    (ArrayList<Object>)claimV
+                    (ArrayList<Object>) saltV,
+                    (ArrayList<Object>) claimV
                 );
             } else {
                 removeNotDisclosureData(claim, saltKey, saltV);
@@ -312,18 +310,18 @@ public final class CredentialPojoUtils {
         String saltKey,
         Object saltV
     ) {
-        if (!StringUtils.isBlank(saltV.toString()) 
+        if (!StringUtils.isBlank(saltV.toString())
             && (String.valueOf(saltV)).equals(NOT_DISCLOSED.toString())) {
             claim.remove(saltKey);
         }
     }
-    
+
     private static void getDisclosureClaimDataForList(List<Object> salt, List<Object> claim) {
         for (int i = 0; claim != null && i < salt.size(); i++) {
             Object saltObj = salt.get(i);
             Object claimObj = claim.get(i);
             if (saltObj instanceof Map) {
-                getDisclosureClaimData((HashMap)saltObj, (HashMap)claimObj);
+                getDisclosureClaimData((HashMap) saltObj, (HashMap) claimObj);
             } else if (saltObj instanceof List) {
                 getDisclosureClaimDataForList(
                     (ArrayList<Object>) saltObj,
@@ -332,15 +330,16 @@ public final class CredentialPojoUtils {
             }
         }
     }
-    
+
     /**
      * valid claim and salt.
+     *
      * @param claim claimMap
      * @param salt saltMap
      * @return boolean
      */
     public static boolean validClaimAndSaltForMap(
-        Map<String, Object> claim, 
+        Map<String, Object> claim,
         Map<String, Object> salt) {
         //检查是否为空
         if (claim == null || salt == null) {
@@ -362,12 +361,12 @@ public final class CredentialPojoUtils {
             }
             if (claimV instanceof Map) {
                 //递归检查
-                if (!validClaimAndSaltForMap((HashMap)claimV, (HashMap)saltV)) {
+                if (!validClaimAndSaltForMap((HashMap) claimV, (HashMap) saltV)) {
                     return false;
                 }
             } else if (claimV instanceof List) {
-                ArrayList<Object> claimValue = (ArrayList<Object>)claimV;
-                ArrayList<Object> saltValue = (ArrayList<Object>)saltV;
+                ArrayList<Object> claimValue = (ArrayList<Object>) claimV;
+                ArrayList<Object> saltValue = (ArrayList<Object>) saltV;
                 if (!validClaimAndSaltForList(claimValue, saltValue)) {
                     return false;
                 }
@@ -375,7 +374,7 @@ public final class CredentialPojoUtils {
         }
         return true;
     }
-    
+
     private static boolean validClaimAndSaltForList(
         List<Object> claimList,
         List<Object> saltList) {
@@ -393,15 +392,15 @@ public final class CredentialPojoUtils {
                 if (!(saltObj instanceof Map)) {
                     return false;
                 }
-                if (!validClaimAndSaltForMap((HashMap)claimObj, (HashMap)saltObj)) {
+                if (!validClaimAndSaltForMap((HashMap) claimObj, (HashMap) saltObj)) {
                     return false;
                 }
             } else if (claimObj instanceof List) {
                 if (!(saltObj instanceof List)) {
                     return false;
                 }
-                ArrayList<Object> claimObjV = (ArrayList<Object>)claimObj;
-                ArrayList<Object> saltObjV = (ArrayList<Object>)saltObj;
+                ArrayList<Object> claimObjV = (ArrayList<Object>) claimObj;
+                ArrayList<Object> saltObjV = (ArrayList<Object>) saltObj;
                 if (!validClaimAndSaltForList(claimObjV, saltObjV)) {
                     return false;
                 }
@@ -409,7 +408,7 @@ public final class CredentialPojoUtils {
         }
         return true;
     }
-    
+
     /**
      * Check the given CreateCredentialPojoArgs validity based on its input params.
      *
@@ -426,8 +425,8 @@ public final class CredentialPojoUtils {
         }
         if (!WeIdUtils.isWeIdValid(args.getIssuer())) {
             return ErrorCode.CREDENTIAL_ISSUER_INVALID;
-        }               
-        
+        }
+
         if (args.getClaim() == null) {
             return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
         }
@@ -437,7 +436,7 @@ public final class CredentialPojoUtils {
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     private static ErrorCode validDateExpired(CreateCredentialPojoArgs args) {
         Long issuanceDate = args.getIssuanceDate();
         if (issuanceDate != null && issuanceDate <= 0) {
@@ -448,16 +447,12 @@ public final class CredentialPojoUtils {
             || expirationDate.longValue() < 0
             || expirationDate.longValue() == 0
             || (issuanceDate != null && expirationDate < issuanceDate)
-            || (issuanceDate == null && DateUtils.isBeforeCurrentTime(expirationDate))) {
+            || (issuanceDate == null && !DateUtils.isAfterCurrentTime(expirationDate))) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
-        }
-        if (issuanceDate != null) {
-            args.setIssuanceDate(DateUtils.convertToNoMillisecondTimeStamp(issuanceDate));
-        }
-        args.setExpirationDate(DateUtils.convertToNoMillisecondTimeStamp(expirationDate));
-        return ErrorCode.SUCCESS;        
+        }       
+        return ErrorCode.SUCCESS;
     }
-     
+
     /**
      * Check the given CredentialPojo validity based on its input params.
      *
@@ -477,15 +472,6 @@ public final class CredentialPojoUtils {
         if (ErrorCode.SUCCESS.getCode() != contentResponseData.getCode()) {
             return contentResponseData;
         }
-        if (args.getIssuanceDate() != null) {
-            args.setIssuanceDate(
-                DateUtils.convertToNoMillisecondTimeStamp(args.getIssuanceDate()));
-        }
-        args.setExpirationDate(
-            DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate()));
-        if (!validateContainIdKeyForClaim(args.getClaim())) {
-            return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
-        }
         return ErrorCode.SUCCESS;
     }
 
@@ -502,14 +488,15 @@ public final class CredentialPojoUtils {
         CreateCredentialPojoArgs generateCredentialArgs = new CreateCredentialPojoArgs();
         generateCredentialArgs.setCptId(arg.getCptId());
         generateCredentialArgs.setIssuer(arg.getIssuer());
+        generateCredentialArgs.setIssuanceDate(arg.getIssuanceDate());
         generateCredentialArgs.setExpirationDate(arg.getExpirationDate());
         generateCredentialArgs.setClaim(arg.getClaim());
         return generateCredentialArgs;
     }
-    
+
     /**
-     * Check the given CredentialPojo content fields validity excluding metadata, 
-     * based on its input.
+     * Check the given CredentialPojo content fields validity excluding metadata, based on its
+     * input.
      *
      * @param args CredentialPojo
      * @return true if yes, false otherwise
@@ -555,7 +542,7 @@ public final class CredentialPojoUtils {
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     private static boolean isCredentialProofTypeValid(String type) {
         // Proof type must be one of the pre-defined types.
         if (!StringUtils.isEmpty(type)) {
@@ -567,49 +554,5 @@ public final class CredentialPojoUtils {
         }
         return false;
     }
-    
-    /**
-     * check if the given map contain correct id.
-     * @param cptJsonSchema cptJsonSchema
-     * @return boolean
-     */
-    public static boolean validateContainIdKeyForCpt(Map<String, Object> cptJsonSchema) {
-        if (cptJsonSchema == null || cptJsonSchema.isEmpty()) {
-            return false;
-        }
-        if (cptJsonSchema.containsKey(CLAIM_ID)) {   
-            return true;
-        } else if (cptJsonSchema.containsKey(PROPERTIES)) {
-            HashMap<String, Object> propertiesMap = 
-                (HashMap<String, Object>) cptJsonSchema.get(PROPERTIES);
-            return propertiesMap.containsKey(CLAIM_ID);        
-        } else {
-            return false;
-        }
-    }
-    
-    /**
-     * check if the given map contain correct id.
-     * @param claimMap claimMap
-     * @return boolean
-     */
-    public static boolean validateContainIdKeyForClaim(Map<String, Object> claimMap) {
-        if (claimMap == null || claimMap.isEmpty()) {
-            return false;
-        }
-        return claimMap.containsKey(CLAIM_ID);
-    }
-    
-    /**
-     * check if the given map contain correct id and the value is an WeId.
-     * @param claimMap claimMap
-     * @return boolean
-     */
-    public static boolean validateIdValueForClaim(Map<String, Object> claimMap) {
-        if (!validateContainIdKeyForClaim(claimMap)) {
-            return false;
-        }
-        String weId = (String)(claimMap.get(CLAIM_ID));
-        return WeIdUtils.isWeIdValid(weId);
-    }
+
 }
