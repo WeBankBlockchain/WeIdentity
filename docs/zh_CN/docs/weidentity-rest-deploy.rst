@@ -12,7 +12,7 @@ RestService会提供一个Server组件包以供部署。未来，此Server组件
 1.1 环境要求
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-installation.html>`_ 类似，但它不需要fisco-solc编译环境：
+Server的环境要求与WeIdentity-Java-SDK的 `环境要求 <https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-installation.html>`_ 类似，但它不需要fisco-solc编译环境：
 
 .. list-table::
    :header-rows: 1
