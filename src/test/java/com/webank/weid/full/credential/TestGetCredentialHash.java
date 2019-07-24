@@ -53,7 +53,7 @@ public class TestGetCredentialHash extends TestBaseServcie {
     private Credential buildCredential() {
         Credential credential = new Credential();
         HashMap<String, Object> claim = new HashMap<>();
-        claim.put("xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx");
+        claim.put("id", "xxxxxxxxxxxxxx");
         credential.setClaim(claim);
         credential.setContext("v1");
         credential.setCptId(Integer.valueOf(1001));
