@@ -1644,7 +1644,7 @@ com.webank.weid.protocol.base.AuthorityIssuer
      - Integer
      - Y
      - 检索的数据条数
-     - 
+     - 单次最多可以检索50条
 
 **接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<List\<AuthorityIssuer>>;
 
@@ -2422,7 +2422,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - Integer
      - Y
      - 检索数据个数
-     - 
+     - 单次最多可以检索50条
      
 
 **接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<List\<String>>;
