@@ -147,7 +147,7 @@ FISCO BCOS 1.3请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documen
 
 ::
 
-    compile("com.webank:weid-java-sdk:1.3.1-rc.3")
+    compile("com.webank:weid-java-sdk:1.3.1")
 
 
 2.2 配置您的Java应用
