@@ -10769,6 +10769,12 @@ Persistence
    * - PRESISTENCE_DATA_KEY_INVALID
      - 100901
      - id无效
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常，需核对日志
@@ -10871,6 +10877,18 @@ Persistence
    * - SUCCESS
      - 0
      - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
+   * - PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
+     - 100904
+     - 保存数据不匹配
    * - UNKNOW_ERROR
      - 160003
      - 未知异常，需核对日志
@@ -10980,6 +10998,12 @@ Persistence
    * - PRESISTENCE_DATA_KEY_INVALID
      - 100901
      - id无效
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常，需核对日志
@@ -11079,6 +11103,12 @@ Persistence
    * - PRESISTENCE_DATA_KEY_INVALID
      - 100901
      - id无效
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常，需核对日志
@@ -11183,6 +11213,12 @@ Persistence
    * - PRESISTENCE_DATA_KEY_INVALID
      - 100901
      - id无效
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
    * - UNKNOW_ERROR
      - 160003
      - 未知异常，需核对日志
