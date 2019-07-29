@@ -8008,9 +8008,18 @@ com.webank.weid.protocol.base.CredentialPojo
    * - SUCCESS
      - 0
      - 成功
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥和weid不匹配
    * - CREDENTIAL_ERROR
      - 100400
      - credential处理未知异常
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期无效
    * - CREDENTIAL_CLAIM_NOT_EXISTS
      - 100410
      - Claim数据不能为空
@@ -8269,6 +8278,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM
      - 100427
      - 披露策略与Claim不匹配
+   * - CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL
+     - 100428
+     - 披露数据格式错误
    * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
      - 100429
      - 验证签名类型异常

@@ -1308,6 +1308,21 @@ public final class DataToolUtils {
     }
 
     /**
+     * byte array List to bytes 32 static array.
+     *
+     * @param bytes the byte array List
+     * @return the static array
+     */
+    public static StaticArray<Bytes32> byteArrayListToBytes32StaticArray(List<byte[]> bytes) {
+        List<Bytes32> bytes32List = new ArrayList<Bytes32>();
+        for (int i = 0; i < bytes.size(); i++) {
+            bytes32List.add(DataToolUtils.bytesArrayToBytes32(bytes.get(i)));
+        }
+        StaticArray<Bytes32> bytes32StaticArray = new StaticArray<Bytes32>(bytes32List);
+        return bytes32StaticArray;
+    }
+    
+    /**
      * String array to bytes 32 static array.
      *
      * @param addressArray the string array
@@ -1340,6 +1355,23 @@ public final class DataToolUtils {
         return stringArray;
     }
 
+    /**
+     * Bytes 32 dynamic array to stringwithout trim.
+     *
+     * @param bytes32DynamicArray the bytes 32 dynamic array
+     * @return the string
+     */
+    public static String bytes32DynamicArrayToStringWithoutTrim(
+        DynamicArray<Bytes32> bytes32DynamicArray) {
+
+        List<Bytes32> bytes32List = bytes32DynamicArray.getValue();
+        List<byte[]> byteArraylist = new ArrayList<>();
+        for (int i = 0; i < bytes32List.size(); i++) {
+            byteArraylist.add(bytes32ToBytesArray(bytes32List.get(i)));
+        }
+        return byte32ListToString(byteArraylist, bytes32List.size());       
+    }
+    
     /**
      * Int 256 dynamic array to long array.
      *
