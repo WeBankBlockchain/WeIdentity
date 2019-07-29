@@ -489,7 +489,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setExpirationDate(expirationDate);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }

@@ -352,15 +352,9 @@ public class TransactionUtils {
      * @return the StaticArray
      */
     public static StaticArray<Bytes32> getParamJsonSchema(String cptJsonSchema) {
-
-        List<String> stringList = Splitter
-            .fixedLength(WeIdConstant.BYTES32_FIXED_LENGTH)
-            .splitToList(cptJsonSchema);
-        String[] jsonSchemaArray = new String[WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH];
-        for (int i = 0; i < stringList.size(); i++) {
-            jsonSchemaArray[i] = stringList.get(i);
-        }
-        return DataToolUtils.stringArrayToBytes32StaticArray(jsonSchemaArray);
+        List<byte[]> bytes = DataToolUtils
+            .stringToByte32ArrayList(cptJsonSchema, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH);
+        return DataToolUtils.byteArrayListToBytes32StaticArray(bytes);
     }
 
     /**
