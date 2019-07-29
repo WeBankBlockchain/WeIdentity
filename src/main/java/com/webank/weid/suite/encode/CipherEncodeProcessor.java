@@ -157,7 +157,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
     }
     
     /**
-     * 本机构取秘钥权限控制.
+     * 本机构取秘钥(需要判断权限控制).
      * 
      * @param encodeData 编解码实体
      * @param value 数据库中存储的秘钥结构数据
