@@ -43,31 +43,31 @@ import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
 
 /**
  * 二维码协议反序列化测试.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestQrCodeDeserialize extends TestBaseTransportation {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestQrCodeDeserialize.class);
-    
+
     private static PresentationE presentation;
-    
+
     private static String original_transString;
-    
+
     @Override
     public synchronized void testInit() {
         mockMysqlDriver();
         super.testInit();
         if (presentation == null) {
             presentation = this.getPresentationE();
-            original_transString = 
+            original_transString =
                 TransportationFactory.newQrCodeTransportation().serialize(
-                    presentation, 
+                    presentation,
                     new ProtocolProperty(EncodeType.ORIGINAL)
                 ).getResult();
-        } 
+        }
     }
-    
+
     /**
      * 使用原文方式构建协议数据并解析.
      */
@@ -85,7 +85,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
         Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
     }
-    
+
     /**
      * 使用密文方式构建协议数据并解析.
      */
@@ -96,7 +96,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
-        ResponseData<PresentationE> wrapperRes = 
+        ResponseData<PresentationE> wrapperRes =
             TransportationFactory.newQrCodeTransportation()
                 .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
@@ -104,8 +104,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
     }
 
-    
-    
+
     /**
      * 协议字符串输入为空.
      */
@@ -119,10 +118,10 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
-        ); 
+        );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * 协议字符串输入为空.
      */
@@ -139,7 +138,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * 协议字符串输入非法.
      */
@@ -156,7 +155,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * 协议字符串输入第一段非法.
      */
@@ -173,7 +172,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * 协议字符串输入第二段非法.
      */
@@ -190,7 +189,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * 协议字符串输入第五段非法.
      */
@@ -207,7 +206,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * 协议字符串输入的字段数跟协议不匹配.
      */
@@ -221,22 +220,22 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
-        ); 
+        );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * mock异常情况.
      */
     @Test
     public void testDeserializeCase10() {
-        
+
         ResponseData<String> response =
             TransportationFactory.newQrCodeTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
-        
+
         MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
             @Mock
             public CryptService getCryptService(CryptType cryptType) {
@@ -244,7 +243,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
             }
         };
 
-        ResponseData<PresentationE> wrapperRes = 
+        ResponseData<PresentationE> wrapperRes =
             TransportationFactory.newQrCodeTransportation()
                 .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         mockTest.tearDown();
@@ -255,7 +254,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * mock异常情况.
      */
@@ -267,7 +266,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
                 return new HashMap<String, QrCodeBaseData>().get("key");
             }
         };
-        
+
         ResponseData<PresentationE> wrapperRes =
             TransportationFactory.newQrCodeTransportation()
                 .deserialize(original_transString, PresentationE.class);
@@ -278,24 +277,24 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
-    } 
-    
+    }
+
     /**
      * mock异常情况.
      */
     @Test
     public void testSerializeCase11() {
-        
+
         MockUp<QrCodeBaseData> mockTest = new MockUp<QrCodeBaseData>() {
             @Mock
             public Method getGetterMethod(
-                Class<?> cls, 
+                Class<?> cls,
                 String fieldName
             ) throws NoSuchMethodException {
                 return cls.getMethod("get" + fieldName, new Class[0]);
             }
         };
-        
+
         ResponseData<PresentationE> wrapperRes =
             TransportationFactory.newQrCodeTransportation()
                 .deserialize(original_transString, PresentationE.class);
@@ -306,14 +305,14 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
-    } 
-    
+    }
+
     /**
      * 改变协议指定段数据.
+     *
      * @param transString 原协议数据
      * @param index 段位
      * @param newString 新数据
-     * @return
      */
     private String changeTransString(String transString, int index, String newString) {
         StringBuffer buffer = new StringBuffer();
