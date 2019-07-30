@@ -394,9 +394,9 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             .toString();
         String created = DateUtils.getNoMillisecondTimeStampString();
         TransactionReceipt receipt;
+        WeIdContract weIdContract =
+            reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
         try {
-            WeIdContract weIdContract =
-                reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
             receipt = weIdContract.createWeId(
                 weAddress,
                 DataToolUtils.stringToByteArray(auth),

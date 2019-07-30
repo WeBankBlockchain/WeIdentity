@@ -32,6 +32,7 @@ import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
 
 public abstract class TestBaseTransportation extends TestBaseServcie {
@@ -52,13 +53,15 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
             weIdAuthentication = new WeIdAuthentication();
             weIdAuthentication.setWeId(createWeIdResult.getWeId());
             weIdAuthentication.setWeIdPublicKeyId(createWeIdResult.getWeId() + "#key-0");
-            weIdAuthentication.setWeIdPrivateKey(createWeIdResult.getUserWeIdPrivateKey());
+            weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
+            weIdAuthentication.getWeIdPrivateKey().setPrivateKey(
+                createWeIdResult.getUserWeIdPrivateKey().getPrivateKey());
         }
     }
     
 
     protected PresentationE getPresentationE() {
-        ResponseData<CredentialPojo> credentialPojoResponse = 
+        ResponseData<CredentialPojo> credentialPojoResponse =
             credentialPojoService.createCredential(createCredentialPojoArgs);
         if (credentialPojoResponse.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             return null;
@@ -76,16 +79,16 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
         policyMap.remove(1000);
         policyMap.put(createCredentialPojoArgs.getCptId(), cliamPolicy);
 
-        this.presentationPolicyE = presentationPolicyE; 
+        this.presentationPolicyE = presentationPolicyE;
         Challenge challenge = Challenge.create(
-            createWeIdResultWithSetAttr.getWeId(), 
+            createWeIdResultWithSetAttr.getWeId(),
             String.valueOf(System.currentTimeMillis())
         );
         this.challenge = challenge;
         ResponseData<PresentationE> response = credentialPojoService.createPresentation(
-            credentialList, 
-            presentationPolicyE, 
-            challenge, 
+            credentialList,
+            presentationPolicyE,
+            challenge,
             TestBaseUtil.buildWeIdAuthentication(createWeIdResultWithSetAttr)
         );
 
