@@ -19,19 +19,7 @@
 
 package com.webank.weid.full.auth;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-
-import mockit.Mock;
-import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.StaticArray;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -39,8 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.AuthorityIssuerController;
-import com.webank.weid.contract.v1.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.AuthorityIssuer;
@@ -65,7 +51,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: WeIdentity DID is invalid.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase1() {
+    public void testRegisterAuthorityIssuer_invalidWeId() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -83,7 +69,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: WeIdentity DID is bad format.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase2() {
+    public void testRegisterAuthorityIssuer_weIdFormat() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -102,7 +88,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID address is not exists.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase3() {
+    public void testRegisterAuthorityIssuer_weIdNotExist() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -121,7 +107,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID is null or "" or " ".
      */
     @Test
-    public void testRegisterAuthorityIssuerCase4() {
+    public void testRegisterAuthorityIssuer_weIdNull() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -136,34 +122,31 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: the name is blank.
+     * case: the WeIdentity DID is null or "" or " ".
      */
     @Test
-    public void testRegisterAuthorityIssuerCase5() {
+    public void testRegisterAuthorityIssuer_weIdBlank() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
-        registerAuthorityIssuerArgs.getAuthorityIssuer().setName(null);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setWeId("");
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL.getCode(),
-            response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
     /**
-     * case: the created before now ,now or after now.
+     * case: the created  after now.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase6() {
-
-        CreateWeIdDataResult createWeId = super.createWeId();
+    public void testRegisterAuthorityIssuer_createFuture() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(super.createWeId(), privateKey);
         registerAuthorityIssuerArgs.getAuthorityIssuer()
             .setCreated(System.currentTimeMillis() + 4000);
 
@@ -183,34 +166,17 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: the accValue is null.
+     * case: the created before now .
      */
     @Test
-    public void testRegisterAuthorityIssuerCase7() {
-
-        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
-        registerAuthorityIssuerArgs.getAuthorityIssuer().setAccValue(null);
-
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        LogUtil.info(logger, "registerAuthorityIssuer", response);
-
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: registerAuthorityIssuer success.
-     */
-    @Test
-    public void testRegisterAuthorityIssuerCase8() {
+    public void testRegisterAuthorityIssuer_createPassed() {
 
         CreateWeIdDataResult createWeId = super.createWeId();
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer()
+            .setCreated(System.currentTimeMillis() - 4000);
 
         ResponseData<Boolean> response = new ResponseData<>(false,
             ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
@@ -227,6 +193,237 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         Assert.assertEquals(true, response.getResult());
     }
 
+    /**
+     * case: the created  is null.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_createNull() {
+
+        CreateWeIdDataResult createWeId = super.createWeId();
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer()
+            .setCreated(null);
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: the created  is 19600101.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_create19600101() {
+
+        CreateWeIdDataResult createWeId = super.createWeId();
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer()
+            .setCreated(-19600101L);
+        System.out.println(registerAuthorityIssuerArgs);
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: the accValue is null.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_accValueNull() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setAccValue(null);
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: the accValue is null.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_accValueBlank() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setAccValue("");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: the accValue is any spec.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_accValueSpecialChar() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setAccValue("adssdf");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: the accValue is any spec.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_accValueIsInteger() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(super.createWeId(), privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setAccValue("123456789");
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: the accValue is any spec.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_accValueIsFloat() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setAccValue("123456789.2");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: the accValue is any spec.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_accValueIsNegInteger() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setAccValue("-123456");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: no acc value.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_noAccValue() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+
+        AuthorityIssuer authorityIssuer = new AuthorityIssuer();
+        authorityIssuer.setWeId(registerAuthorityIssuerArgs.getAuthorityIssuer().getWeId());
+        authorityIssuer.setName("hk123");
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs1 =
+            new RegisterAuthorityIssuerArgs();
+        registerAuthorityIssuerArgs1
+            .setAuthorityIssuer(authorityIssuer);
+        registerAuthorityIssuerArgs1
+            .setWeIdPrivateKey(registerAuthorityIssuerArgs.getWeIdPrivateKey());
+        ResponseData<Boolean> response1 =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs1);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
+    }
+
+    /**
+     * case: registerAuthorityIssuer success.
+     */
+
+    @Test
+    public void testRegisterAuthorityIssuer_weIdUpper() {
+
+        CreateWeIdDataResult createWeId = super.createWeId();
+        createWeId.setWeId(createWeId.getWeId().toUpperCase());
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
 
     /**
      * case: registerAuthorityIssuer with Chinese Name (utf-8).
@@ -234,18 +431,18 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     @Test
     public void testRegisterAuthorityIssuerChineseName() {
 
-        CreateWeIdDataResult createWeId = super.createWeId();
-
+        final CreateWeIdDataResult weId = super.createWeId();
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
-        String chiName = "中文" + DateUtils.getCurrentTimeStampString();
-        registerAuthorityIssuerArgs.getAuthorityIssuer().setName(chiName);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(weId, privateKey);
 
         ResponseData<Boolean> response = new ResponseData<>(false,
             ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
 
+        String chiName = null;
         while (response.getErrorCode()
             == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            chiName = "中文" + DateUtils.getCurrentTimeStampString();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(chiName);
             response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         }
         LogUtil.info(logger, "registerAuthorityIssuer", response);
@@ -254,20 +451,50 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         Assert.assertEquals(true, response.getResult());
 
         ResponseData<AuthorityIssuer> queryResponse = authorityIssuerService
-            .queryAuthorityIssuerInfo(createWeId.getWeId());
+            .queryAuthorityIssuerInfo(weId.getWeId());
         Assert.assertTrue(queryResponse.getResult().getName().equalsIgnoreCase(chiName));
+    }
+
+    /**
+     * case: registerAuthorityIssuer success.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_weIdTooLong() {
+
+        CreateWeIdDataResult createWeId = super.createWeId();
+        char[] chars = new char[1000];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) (i % 127);
+        }
+        String weId = String.valueOf(chars);
+        createWeId.setWeId(weId);
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
     }
 
     /**
      * case: the WeIdentity DID is registed.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase9() {
-
-        CreateWeIdDataResult createWeId = super.createWeId();
+    public void testRegisterAuthorityIssuer_repeat() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(super.createWeId(), privateKey);
 
         ResponseData<Boolean> response = new ResponseData<>(false,
             ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
@@ -287,6 +514,43 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response1);
 
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
+    }
+
+    /**
+     * case: the WeIdentity DID has been registed,issuer name is different.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_weIdHasRegister() {
+
+        final CreateWeIdDataResult weId = super.createWeId();
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(weId, privateKey);
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            String name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+
+        registerAuthorityIssuerArgs.getAuthorityIssuer()
+            .setName("weId 已经被注册" + (int)(Math.random() * 10000));
+        ResponseData<Boolean> response1 =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response1);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST.getCode(),
+            response1.getErrorCode().intValue());
         Assert.assertEquals(false, response1.getResult());
     }
 
@@ -294,7 +558,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: registerAuthorityIssuerArgs is null.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase10() {
+    public void testRegisterAuthorityIssuer_argsNull() {
         RegisterAuthorityIssuerArgs args = new RegisterAuthorityIssuerArgs();
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(args);
@@ -308,7 +572,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: authorityIssuer is null.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase11() {
+    public void testRegisterAuthorityIssuer_authorityIssuerNull() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -326,7 +590,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: weIdPrivateKey is null.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase12() {
+    public void testRegisterAuthorityIssuer_priKeyNull() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -345,7 +609,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: privateKey is null.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase13() {
+    public void testRegisterAuthorityIssuer_setPriKeyNull() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -361,10 +625,29 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
+     * case: privateKey is blank.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_setPriKeyBlank() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey("");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
      * case: privateKey is invalid.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase14() {
+    public void testRegisterAuthorityIssuer_invalidPrikey() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -375,6 +658,25 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: privateKey is valid but is a random integer.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_prikeyIsInteger() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey("123456789");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.CONTRACT_ERROR_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -394,6 +696,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
+        Assert.assertEquals(ErrorCode.CONTRACT_ERROR_NO_PERMISSION.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
@@ -401,7 +705,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
      * case: privateKey belongs to the private key of other WeIdentity DID.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase16() {
+    public void testRegisterAuthorityIssuer_otherPrivateKey() {
 
         CreateWeIdDataResult createWeId = super.createWeId();
 
@@ -413,6 +717,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
+        Assert.assertEquals(ErrorCode.CONTRACT_ERROR_NO_PERMISSION.getCode(),
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
@@ -434,104 +740,149 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: mock an InterruptedException.
+     * case: authorityIssuer.name is already exist.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase18() {
+    public void testRegisterAuthorityIssuer_issuerNameOnly() {
+
+        CreateWeIdDataResult createWeId = super.createWeId();
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
 
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-
-        ResponseData<Boolean> response =
-            registerAuthorityIssuerForMock(registerAuthorityIssuerArgs, mockFuture);
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+        String name = null;
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs1
+            = TestBaseUtil.buildRegisterAuthorityIssuerArgs(super.createWeId(), privateKey);
+        registerAuthorityIssuerArgs1.getAuthorityIssuer().setName(
+            registerAuthorityIssuerArgs.getAuthorityIssuer().getName());
+        ResponseData<Boolean> response1
+            = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs1);
+
+        Assert.assertNotEquals(registerAuthorityIssuerArgs.getAuthorityIssuer().getWeId(),
+            registerAuthorityIssuerArgs1.getAuthorityIssuer().getWeId());
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
+
     }
 
     /**
-     * case: mock an TimeoutException.
+     * one WeId can not register one more AuthorityIssuer with diferent name.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase19() {
+    public void testRegisterAuthorityIssuer_registerIssers() {
+
+        CreateWeIdDataResult createWeId = super.createWeId();
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
 
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-
-        ResponseData<Boolean> response =
-            registerAuthorityIssuerForMock(registerAuthorityIssuerArgs, mockFuture);
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+        String name = null;
+        String weId = registerAuthorityIssuerArgs.getAuthorityIssuer().getWeId();
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            registerAuthorityIssuerArgs.getAuthorityIssuer().setName(name + Math.random());
+            name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
 
-    private ResponseData<Boolean> registerAuthorityIssuerForMock(
-        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs,
-        MockUp<Future<?>> mockFuture) {
+        AuthorityIssuer authorityIssuer = new AuthorityIssuer();
+        authorityIssuer.setWeId(registerAuthorityIssuerArgs.getAuthorityIssuer().getWeId());
+        authorityIssuer.setName(name + 1);
+        authorityIssuer.setAccValue("0");
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs1
+            = new RegisterAuthorityIssuerArgs();
+        registerAuthorityIssuerArgs1.setAuthorityIssuer(authorityIssuer);
+        registerAuthorityIssuerArgs1
+            .setWeIdPrivateKey(registerAuthorityIssuerArgs.getWeIdPrivateKey());
+        ResponseData<Boolean> response1 = authorityIssuerService
+            .registerAuthorityIssuer(registerAuthorityIssuerArgs1);
 
-        MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
-            @Mock
-            public Future<?> addAuthorityIssuer(
-                Address addr,
-                StaticArray<Bytes32> attribBytes32,
-                StaticArray<Int256> attribInt,
-                DynamicBytes accValue) {
+        Assert.assertEquals(registerAuthorityIssuerArgs.getAuthorityIssuer().getWeId(),
+            registerAuthorityIssuerArgs1.getAuthorityIssuer().getWeId());
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
 
-                return mockFuture.getMockInstance();
-            }
-        };
-
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        mockTest.tearDown();
-        mockFuture.tearDown();
-        return response;
     }
 
     /**
-     * case: mock returns null when invoking the getAuthorityIssuerRetLogEvents.
+     * one WeId can not register one more AuthorityIssuer with diferent name.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase20() {
+    public void testRegisterAuthorityIssuer_noIssuerName() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
 
-        MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
-            @Mock
-            public List<AuthorityIssuerRetLogEventResponse> getAuthorityIssuerRetLogEvents(
-                TransactionReceipt transactionReceipt) {
-                List<AuthorityIssuerRetLogEventResponse> list =
-                    new ArrayList<AuthorityIssuerRetLogEventResponse>();
-                list.add(null);
-                return list;
-            }
-        };
+        AuthorityIssuer authorityIssuer = new AuthorityIssuer();
+        authorityIssuer.setWeId(registerAuthorityIssuerArgs.getAuthorityIssuer().getWeId());
+        authorityIssuer.setAccValue("0");
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs1
+            = new RegisterAuthorityIssuerArgs();
+        registerAuthorityIssuerArgs1.setAuthorityIssuer(authorityIssuer);
+        registerAuthorityIssuerArgs1
+            .setWeIdPrivateKey(registerAuthorityIssuerArgs.getWeIdPrivateKey());
+        ResponseData<Boolean> response1 = authorityIssuerService
+            .registerAuthorityIssuer(registerAuthorityIssuerArgs1);
 
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
+
+    }
+
+    /**
+     * case: authorityIssuer.name is digtal.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_issuerNameIsDigtal() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            registerAuthorityIssuerArgs.getAuthorityIssuer()
+                .setName("12435367890" + Math.random() * 10);
+            response =
+                authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
-        mockTest.tearDown();
-
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
+        Assert.assertEquals(true, response.getResult());
     }
 
     /**
      * case: authorityIssuer.name is too long.
      */
     @Test
-    public void testRegisterAuthorityIssuerCase21() {
+    public void testRegisterAuthorityIssuer_issuerTooLong() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -545,6 +896,97 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: authorityIssuer.name contain zh.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_issuerNameContainZh() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(super.createWeId(), privateKey);
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            registerAuthorityIssuerArgs.getAuthorityIssuer()
+                .setName("公安行政系统" + (int)(Math.random() * 10000));
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: authorityIssuer.name is null.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_issuerNameNull() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer()
+            .setName(null);
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: authorityIssuer.name is blank.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_issuerNameBlank() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer()
+            .setName("");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: authorityIssuer.name contains Special character.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_issuerNameContainsSpecialChar() {
+
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(super.createWeId(), privateKey);
+
+        ResponseData<Boolean> response = new ResponseData<>(false,
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
+
+        while (response.getErrorCode()
+            == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
+            registerAuthorityIssuerArgs.getAuthorityIssuer()
+                .setName("！@#￥%……&*-+<>?x" + (int)(Math.random() * 1000));
+            System.out.println(registerAuthorityIssuerArgs.toString());
+            response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        }
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
     }
 
     /**

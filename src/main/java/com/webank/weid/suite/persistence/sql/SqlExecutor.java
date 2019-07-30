@@ -19,7 +19,6 @@
 
 package com.webank.weid.suite.persistence.sql;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -151,9 +150,7 @@ public class SqlExecutor {
             rs.close();
             ps.close();
             result.setErrorCode(ErrorCode.SUCCESS);
-            result.setResult(
-                new String(value.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8)
-            );
+            result.setResult(value);
         } catch (SQLException e) {
             logger.error("Query data from {{}} with exception", baseDomain, e);
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);

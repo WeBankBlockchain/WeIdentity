@@ -33,12 +33,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * test DataToolUtils.
- * 
- * @author v_wbjnzhang
  *
+ * @author v_wbjnzhang
  */
 public class TestDataTypetUtils {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestDataTypetUtils.class);
 
     @Test
@@ -106,7 +105,7 @@ public class TestDataTypetUtils {
 
     @Test
     public void testIntToUint256() {
-        
+
         int n = 0;
         Uint256 result = DataToolUtils.intToUint256(n);
         int m = DataToolUtils.uint256ToInt(result);
@@ -120,7 +119,7 @@ public class TestDataTypetUtils {
 
     @Test
     public void testIntToInt256() {
-        
+
         int n = 0;
         Int256 result = DataToolUtils.intToInt256(n);
         int m = DataToolUtils.int256ToInt(result);
@@ -139,7 +138,7 @@ public class TestDataTypetUtils {
 
     @Test
     public void testLongToInt256() {
-        
+
         long n = 0L;
         Int256 result = DataToolUtils.longToInt256(n);
         long m = DataToolUtils.int256ToLong(result);
@@ -158,7 +157,7 @@ public class TestDataTypetUtils {
 
     @Test
     public void testLongArrayToInt256StaticArray() {
-        
+
         long[] array = {8L, 5555L, 64L, 0L, -147L};
         StaticArray<Int256> result = DataToolUtils.longArrayToInt256StaticArray(array);
         DynamicArray<Int256> result1 = new DynamicArray<Int256>(result.getValue());
@@ -171,7 +170,7 @@ public class TestDataTypetUtils {
 
     @Test
     public void teststringArrayToBytes32StaticArray() {
-        
+
         String[] array = {"book", "student", "person", "apple"};
         StaticArray<Bytes32> result = DataToolUtils.stringArrayToBytes32StaticArray(array);
         DynamicArray<Bytes32> result1 = new DynamicArray<Bytes32>(result.getValue());
