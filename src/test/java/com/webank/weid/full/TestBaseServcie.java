@@ -41,9 +41,12 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.contract.v1.WeIdContract;
+import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialWrapper;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CptMapArgs;
@@ -100,12 +103,29 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
      * parameters needed to create credentials.
      */
     protected static volatile CreateCredentialArgs createCredentialArgs = null;
-    
+
     /**
      * parameters needed to create credentialPojos.
      */
-    protected static volatile CreateCredentialPojoArgs<Map<String, Object>> 
+    protected static volatile CreateCredentialPojoArgs<Map<String, Object>>
         createCredentialPojoArgs = null;
+
+    /**
+     * parameters needed to create credentialPojos.
+     */
+    protected static volatile CreateCredentialPojoArgs<Map<String, Object>>
+        createCredentialPojoArgsNew = null;
+
+    /**
+     * CredentialPojo information required for use cases.  selectiveCredential.
+     */
+    protected static volatile CredentialPojo credentialPojo = null;
+
+    /**
+     * selectiveCredentialPojo information required for use cases.
+     */
+    protected static volatile CredentialPojo selectiveCredentialPojo = null;
+
 
     /**
      * parameters needed to register CPT.
@@ -121,7 +141,7 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
      * initializing related services.
      */
     @Override
-    public synchronized void testInit() {
+    public synchronized void testInit()  {
 
         if (!isInitIssuer) {
             try {
@@ -152,12 +172,25 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
             createCredentialArgs.setCptId(cptBaseInfo.getCptId());
         }
         if (createCredentialPojoArgs == null) {
-            registerCptArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
             createCredentialPojoArgs =
                 TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
-            cptBaseInfo = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
+            CptBaseInfo cptBaseInfo = 
+                this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
             createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
-        }    
+        }
+        if (createCredentialPojoArgsNew == null) {
+            CptMapArgs registerCptArgs = TestBaseUtil.buildCptArgs(createWeIdNew);
+            createCredentialPojoArgsNew =
+                TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdNew);
+            CptBaseInfo cptBaseInfo = this.registerCpt(createWeIdNew, registerCptArgs);
+            createCredentialPojoArgsNew.setCptId(cptBaseInfo.getCptId());
+        }
+        if (credentialPojo == null) {
+            credentialPojo = this.createCredentialPojo(createCredentialPojoArgs);
+        }
+        if (selectiveCredentialPojo == null) {
+            selectiveCredentialPojo = this.createSelectiveCredentialPojo(credentialPojo);
+        }
     }
 
     /**
@@ -198,7 +231,6 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, this.privateKey);
-
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
@@ -225,15 +257,84 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
     }
 
     /**
+     * verifyCredentialPojo by issuer.
+     *
+     * @param credentialPojo credentialPojo
+     */
+    protected ResponseData<Boolean> verifyCredentialPojo(CredentialPojo credentialPojo) {
+
+        ResponseData<Boolean> response = credentialPojoService.verify(
+            credentialPojo.getIssuer(), credentialPojo);
+        return response;
+    }
+
+    /**
+     * verifyCredentialPojo by weidpublic.
+     *
+     * @param credentialPojo credentialPojo
+     */
+    protected ResponseData<Boolean> verifyCredentialPojo(
+        WeIdPublicKey weIdPublicKey,
+        CredentialPojo credentialPojo) {
+
+        ResponseData<Boolean> response = credentialPojoService
+            .verify(weIdPublicKey, credentialPojo);
+        return response;
+    }
+
+    /**
      * createCredential.
      *
      * @param createCredentialArgs createCredentialArgs
      */
     protected CredentialWrapper createCredential(CreateCredentialArgs createCredentialArgs) {
-
+        
         ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+
+        return response.getResult();
+    }
+
+    /**
+     * createCredentialPojo.
+     */
+    protected CredentialPojo createCredentialPojo(
+        CreateCredentialPojoArgs createCredentialPojoArgs) {
+
+        if (createCredentialPojoArgs == null) {
+            CptMapArgs registerCptArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
+            createCredentialPojoArgs =
+                TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
+            CptBaseInfo cptBaseInfo = 
+                this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
+            createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
+        }
+
+        ResponseData<CredentialPojo> response = credentialPojoService
+            .createCredential(createCredentialPojoArgs);
+        LogUtil.info(logger, "createCredentialPojo", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+
+        return response.getResult();
+    }
+
+    /**
+     * createSelectiveCredentialPojo.
+     */
+    protected CredentialPojo createSelectiveCredentialPojo(CredentialPojo credentialPojo) {
+
+        ClaimPolicy claimPolicy = new ClaimPolicy();
+        claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
+
+        ResponseData<CredentialPojo> response =
+            credentialPojoService.createSelectiveCredential(credentialPojo, claimPolicy);
+        LogUtil.info(logger, "TestCreateSelectiveCredential", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -310,6 +411,21 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * register and return issuerType.
+     */
+    public String registerIssuerType(String issuerType) {
+
+        WeIdAuthentication weIdAuthentication = TestBaseUtil
+            .buildWeIdAuthentication(createWeIdNew);
+
+        ResponseData<Boolean> response
+            = authorityIssuerService.registerIssuerType(weIdAuthentication, issuerType);
+        LogUtil.info(logger, "registerIssuerType", response);
+
+        return issuerType;
     }
 
     /**
@@ -461,13 +577,13 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
         return new MockUp<WeIdContract>() {
             @Mock
             public Future<?> createWeId(
-                Address identity, 
+                Address identity,
                 DynamicBytes auth,
-                DynamicBytes created, 
+                DynamicBytes created,
                 Int256 updated) {
                 return mockFuture.getMockInstance();
             }
-            
+
             @Mock
             public Future<?> setAttribute(
                 Address identity,
@@ -479,8 +595,8 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
         };
     }
 
-    protected Credential copyCredential(Credential credential) {
-        return CredentialUtils.copyCredential(credential);
+    protected CredentialPojo copyCredentialPojo(CredentialPojo credentialPojo) {
+        return CredentialUtils.copyCredential(credentialPojo);
     }
 
     protected CreateWeIdDataResult copyCreateWeId(CreateWeIdDataResult createWeId) {
