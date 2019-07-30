@@ -19,13 +19,6 @@
 
 package com.webank.weid.full.auth;
 
-import java.util.List;
-import java.util.concurrent.Future;
-
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.Type;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -33,10 +26,11 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.AuthorityIssuerController;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -44,7 +38,7 @@ import com.webank.weid.protocol.response.ResponseData;
 /**
  * queryAuthorityIssuerInfo method for testing AuthorityIssuerService.
  *
- * @author v_wbgyang
+ * @author v_wbgyang/rockyxia
  */
 public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
 
@@ -66,7 +60,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
      * case: query success.
      */
     @Test
-    public void testQueryAuthorityIssuerInfoCase1() {
+    public void testQueryAuthorityIssuerInfo_success() {
 
         ResponseData<AuthorityIssuer> response =
             authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId());
@@ -77,10 +71,10 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     }
 
     /**
-     * case: WeIdentity DID is blank.
+     * case: WeIdentity DID is null.
      */
     @Test
-    public void testQueryAuthorityIssuerInfoCase2() {
+    public void testQueryAuthorityIssuerInfo_weIdNull() {
 
         ResponseData<AuthorityIssuer> response =
             authorityIssuerService.queryAuthorityIssuerInfo(null);
@@ -91,10 +85,24 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     }
 
     /**
+     * case: WeIdentity DID is blank.
+     */
+    @Test
+    public void testQueryAuthorityIssuerInfo_weIdBlank() {
+
+        ResponseData<AuthorityIssuer> response =
+            authorityIssuerService.queryAuthorityIssuerInfo("");
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /**
      * case: WeIdentity DID is bad format.
      */
     @Test
-    public void testQueryAuthorityIssuerInfoCase3() {
+    public void testQueryAuthorityIssuerInfo_weIdFormat() {
 
         ResponseData<AuthorityIssuer> response =
             authorityIssuerService.queryAuthorityIssuerInfo("xx:xx:xxxxxxx");
@@ -105,10 +113,24 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     }
 
     /**
+     * case: WeIdentity DID is invalid.
+     */
+    @Test
+    public void testQueryAuthorityIssuerInfo_invalidWeId() {
+
+        ResponseData<AuthorityIssuer> response = authorityIssuerService
+            .queryAuthorityIssuerInfo("123!@#$%^&*()/.,,-=+gt中国yyyyyy$%^&*fsdfdfdfdd");
+        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /**
      * case: WeIdentity DID is not exists.
      */
     @Test
-    public void testQueryAuthorityIssuerInfoCase4() {
+    public void testQueryAuthorityIssuerInfo_weIdNotExist() {
 
         ResponseData<AuthorityIssuer> response = authorityIssuerService
             .queryAuthorityIssuerInfo("did:weid:0xc7e399b8d2da337f4e92eb33ca88b60b899b5022");
@@ -120,13 +142,14 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     }
 
     /**
-     * case: WeIdentity DID is registed by other.
+     * case: WeIdentity DID is not registed.
      */
     @Test
-    public void testQueryAuthorityIssuerInfoCase5() {
+    public void testQueryAuthorityIssuerInfo_weIdNotRegister() {
 
+        String weId = createWeId().getWeId();
         ResponseData<AuthorityIssuer> response = authorityIssuerService
-            .queryAuthorityIssuerInfo("did:weid:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d8773b");
+            .queryAuthorityIssuerInfo(weId);
         LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
@@ -135,10 +158,10 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     }
 
     /**
-     * case: WeIdentity DID is removed.
+     * case: WeIdentity DID is removed then query.
      */
     @Test
-    public void testQueryAuthorityIssuerInfoCase6() {
+    public void testQueryAuthorityIssuerInfo_weIdRemoved() {
 
         CreateWeIdDataResult createWeId = super.registerAuthorityIssuer();
         LogUtil.info(logger, "registerAuthorityIssuer", createWeId);
@@ -163,91 +186,37 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseServcie {
     }
 
     /**
-     * case: mock an InterruptedException.
+     * case: register issuer that create time is after now, then query the issuer.
      */
     @Test
-    public void testQueryAuthorityIssuerInfoCase7() {
+    public void testQueryAuthorityIssuerInfo_createFuture() {
 
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
+        String weId = createWeId().getWeId();
+        AuthorityIssuer authorityIssuer = new AuthorityIssuer();
+        authorityIssuer.setWeId(weId);
+        authorityIssuer.setName("zhbank" + Math.random());
+        authorityIssuer.setAccValue("0");
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = new RegisterAuthorityIssuerArgs();
+        registerAuthorityIssuerArgs.setAuthorityIssuer(authorityIssuer);
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey(privateKey);
+        registerAuthorityIssuerArgs.setWeIdPrivateKey(weIdPrivateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer()
+            .setCreated(System.currentTimeMillis() + 1000000);
 
-        ResponseData<AuthorityIssuer> response = queryAuthorityIssuerInfoForMock(mockFuture);
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        LogUtil.info(logger, "registerAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+
+        ResponseData<AuthorityIssuer> response1 =
+            authorityIssuerService.queryAuthorityIssuerInfo(weId);
         LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
 
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
-    }
-
-    /**
-     * case: mock an TimeoutException.
-     */
-    @Test
-    public void testQueryAuthorityIssuerInfoCase8() {
-
-        final MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-
-        ResponseData<AuthorityIssuer> response = queryAuthorityIssuerInfoForMock(mockFuture);
-        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
-    }
-
-    /**
-     * case: mock returns null when invoking the future.get().
-     */
-    @Test
-    public void testQueryAuthorityIssuerInfoCase9() {
-
-        final MockUp<Future<?>> mockFuture = mockReturnNullFuture();
-
-        ResponseData<AuthorityIssuer> response = queryAuthorityIssuerInfoForMock(mockFuture);
-        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
-
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
-    }
-
-    private ResponseData<AuthorityIssuer> queryAuthorityIssuerInfoForMock(
-        MockUp<Future<?>> mockFuture) {
-
-        MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
-            @Mock
-            public Future<?> getAuthorityIssuerInfoNonAccValue(Address addr) {
-                return mockFuture.getMockInstance();
-            }
-        };
-
-        ResponseData<AuthorityIssuer> response =
-            authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId());
-        mockTest.tearDown();
-        mockFuture.tearDown();
-        return response;
-    }
-
-    /**
-     * case: mock an NullPointerException.
-     */
-    @Test
-    public void testQueryAuthorityIssuerInfoCase10() {
-
-        MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
-            @Mock
-            public Future<List<Type<?>>> getAuthorityIssuerInfoNonAccValue(Address addr) {
-                return null;
-            }
-        };
-
-        ResponseData<AuthorityIssuer> response =
-            authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId());
-        LogUtil.info(logger, "queryAuthorityIssuerInfo", response);
-
-        mockTest.tearDown();
-
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertNotNull(response1.getResult());
     }
 }
