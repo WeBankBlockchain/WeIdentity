@@ -446,7 +446,7 @@ public final class CredentialPojoUtils {
 
     private static ErrorCode validDateExpired(Long issuanceDate, Long expirationDate) {
         if (issuanceDate != null && issuanceDate <= 0) {
-            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         if (expirationDate == null
             || expirationDate.longValue() < 0
@@ -455,7 +455,7 @@ public final class CredentialPojoUtils {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
         } 
         if (issuanceDate != null && expirationDate < issuanceDate) {
-            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         return ErrorCode.SUCCESS;
     }
@@ -478,6 +478,9 @@ public final class CredentialPojoUtils {
         }
         if (args.getClaim() == null) {
             return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
+        }
+        if (args.getIssuanceDate() == null) {
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         ErrorCode errorCode = validDateExpired(args.getIssuanceDate(), args.getExpirationDate());
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
@@ -529,11 +532,11 @@ public final class CredentialPojoUtils {
         }
         // Created is not obligatory
         if (proof.get(ParamKeyConstant.PROOF_CREATED) == null) {
-            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         } else { 
             Long created = Long.valueOf(String.valueOf(proof.get(ParamKeyConstant.PROOF_CREATED)));
             if (created.longValue() <= 0) {
-                return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+                return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
             }
         }
         // Creator is not obligatory either
