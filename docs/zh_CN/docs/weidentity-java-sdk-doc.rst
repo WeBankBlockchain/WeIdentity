@@ -7839,6 +7839,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
      - 100429
      - 验证签名类型异常
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
    * - CREDENTIAL_EVIDENCE_BASE_ERROR
      - 100500
      - Evidence标准错误
@@ -8685,6 +8688,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
      - 100429
      - 验证签名类型异常
+   * - CREDENTIAL_SALT_ILLEGAL
+     - 100430
+     - 盐值非法
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -8922,6 +8928,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
      - 100429
      - 验证签名类型异常
+   * - CREDENTIAL_SALT_ILLEGAL
+     - 100430
+     - 盐值非法
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
@@ -9218,6 +9227,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
      - 100429
      - 验证签名类型异常
+   * - CREDENTIAL_SALT_ILLEGAL
+     - 100430
+     - 盐值非法
    * - ILLEGAL_INPUT
      - 160004
      - 参数非法

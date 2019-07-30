@@ -21,8 +21,8 @@ package com.webank.weid.common;
 
 /**
  * public and private key object class.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class PasswordKey {
 
@@ -50,5 +50,5 @@ public class PasswordKey {
 
     public void setPublicKey(String publicKey) {
         this.publicKey = publicKey;
-    } 
+    }
 }
