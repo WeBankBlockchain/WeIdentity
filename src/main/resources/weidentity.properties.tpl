@@ -36,3 +36,7 @@ amop.request.timeout=5000
 
 # Blockchain node info.
 nodes=${BLOCKCHIAN_NODE_INFO}
+
+# Endpoint Service Integration-side parameters
+# Listener port required to be opened for RPC Server, default: 6010
+rpc.listener.port=6010
