@@ -673,8 +673,13 @@ public final class DataToolUtils {
         String rawData,
         String signature,
         WeIdDocument weIdDocument) {
-
-        Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
+        Sign.SignatureData signatureData = null;
+        try {
+            signatureData = convertBase64StringToSignatureData(signature);
+        } catch (Exception e) {
+            logger.error("verify Signature failed.", e);
+            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
+        }
         return verifySignatureFromWeId(rawData, signatureData, weIdDocument);
     }
 
@@ -1580,19 +1585,19 @@ public final class DataToolUtils {
             } else {
                 if (list.contains(key)) {
                     if (TO_JSON.equals(type)) {
-                        if (isValidLongString(obj.toString())) {
+                        if (isValidLongString(String.valueOf(obj))) {
                             resJson.put(
                                 key, 
                                 DateUtils.convertNoMillisecondTimestampToUtc(
-                                    Long.parseLong(obj.toString())));
+                                    Long.parseLong(String.valueOf(obj))));
                         } else {
                             resJson.put(key, obj);
                         }
                     } else {
-                        if (DateUtils.isValidDateString(obj.toString())) {
+                        if (DateUtils.isValidDateString(String.valueOf(obj))) {
                             resJson.put(
                                 key, 
-                                DateUtils.convertUtcDateToNoMillisecondTime(obj.toString()));
+                                DateUtils.convertUtcDateToNoMillisecondTime(String.valueOf(obj)));
                         } else {
                             resJson.put(key, obj);
                         }
