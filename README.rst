@@ -80,27 +80,28 @@ WeIdentity支持认证机构自行注册标准化凭证模板，共同丰富公�
    `WeIdentity规范文档 <https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-spec.html>`_
 
 
-开始使用
+当前状态
 --------
 
-WeIdentity目前支持基于FISCO-BCOS运行，并提供JAVA SDK供调用。具体的规范文档、安装部署和SDK使用指引请参考如下文档：
+WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestService方式供部署。具体的规范文档、安装部署和使用指引如下表所示：
 
 
 .. raw:: html
 
     <embed>
-      <table style="border-collapse:collapse">
+      <table border='1' style="border-collapse:collapse" class='tables'>
          <tr>
             <th width="20%">集成方法</th>
             <th width="30%">文档入口</th>
             <th width="50%">当前状态</th>
          </tr>
          <tr>
-            <td style="text-align:center"><a href="https://github.com/WeBankFinTech/weid-java-sdk">JAVA SDK</a></td>
+            <td style="text-align:center"><a href="https://github.com/WeBankFinTech/weid-java-sdk">Java SDK</a></td>
             <td>
                <ul>
                  <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-installation.html">安装部署文档</a></li>
                  <li><a href="https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-java-sdk-doc.html">SDK使用文档</a></li>
+                 <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-rest.html">RestService集成文档</a></li>
                </ul>
             </td>
             <td>
