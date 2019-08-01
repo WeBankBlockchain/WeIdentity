@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,6 +233,16 @@ public class SqlExecutor {
         Connection conn = null;
         PreparedStatement psts = null;
         try {
+            List<String> values = dataList.get(dataList.size() - 1);
+            for (List<String> list : dataList) {
+                if (CollectionUtils.isEmpty(list) || list.size() != values.size()) {
+                    return 
+                        new ResponseData<Integer>(
+                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
+                        );  
+                }
+            }
             conn = ConnectionPool.getConnection(baseDomain);
             if (conn == null) {
                 return 
@@ -243,7 +254,6 @@ public class SqlExecutor {
             conn.setAutoCommit(false);
             psts = conn.prepareStatement(buildExecuteSql(sql));
             int count = 0;
-            List<String> values = dataList.get(dataList.size() - 1);
             for (int i = 0; i < values.size(); i++) {
                 for (int j = 0; j < dataList.size(); j++) {
                     psts.setString(j + 1, dataList.get(j).get(i));
@@ -303,10 +313,10 @@ public class SqlExecutor {
             this.baseDomain = domains[0];
             this.tableDomain = domains[1];
             if (!ConnectionPool.checkDataSourceName(this.baseDomain)) {
-                throw new WeIdBaseException("invalid domain");
+                throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
             }
         } else {
-            throw new WeIdBaseException("invalid domain");
+            throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL);
         }
     }
     
@@ -327,13 +337,13 @@ public class SqlExecutor {
                 ResponseData<Integer> createRes = this.execute(createTableSql);
                 //创建失败
                 if (createRes.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                    throw new WeIdBaseException("create table error.");
+                    throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
                 }
                 //再查询一次，确认是否创建成功
                 result =  this.executeQuery(checkTableSql);
                 //如果不相等 则表示创建失败
                 if (!tableDomain.equals(result.getResult())) {
-                    throw new WeIdBaseException("create table error.");
+                    throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
                 }
                 //本地缓存记录此表
                 TABLE_CACHE.put(tableDomain, tableDomain);
