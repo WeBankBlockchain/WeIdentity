@@ -342,12 +342,12 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         if (callerAuth == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
+        if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {
+            return ErrorCode.WEID_INVALID;
+        }
         if (callerAuth.getWeIdPrivateKey() == null
             || StringUtils.isEmpty(callerAuth.getWeIdPrivateKey().getPrivateKey())) {
             return ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL;
-        }
-        if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {
-            return ErrorCode.WEID_INVALID;
         }
         return ErrorCode.SUCCESS;
     }
