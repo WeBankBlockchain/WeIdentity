@@ -308,20 +308,33 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
     }
 
+    private static ErrorCode verifyContent(CredentialPojo credential, String publicKey) {
+        return verifyContent(credential, publicKey, null);
+    }
+
     private static ErrorCode verifyContent(CredentialPojo credential,
-        String publicKey) {
-        Map<String, Object> salt = credential.getSalt();
+        String publicKey, ClaimPolicy claimPolicy) {
         ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credential);
         if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
             return checkResp;
         }
-        ErrorCode errorCode = verifyCptFormat(
-            credential.getCptId(),
-            credential.getClaim()
-        );
+        ErrorCode errorCode;
+        if (claimPolicy != null) {
+            String disclosure = claimPolicy.getFieldsToBeDisclosed();
+            Map<String, Object> disclosureMap = DataToolUtils
+                .deserialize(disclosure, HashMap.class);
+            errorCode = verifyCptFormat(
+                credential.getCptId(),
+                credential.getClaim(),
+                isSelectivelyDisclosed(disclosureMap)
+            );
+        } else {
+            errorCode = verifyCptFormat(credential.getCptId(), credential.getClaim(), false);
+        }
         if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
             return errorCode;
         }
+        Map<String, Object> salt = credential.getSalt();
         String rawData = CredentialPojoUtils
             .getCredentialThumbprintWithoutSig(credential, salt, null);
         String issuerWeid = credential.getIssuer();
@@ -358,10 +371,67 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
     }
 
-    private static ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim) {
+
+    /**
+     * Check if the given CredentialPojo is selectively disclosed, or not.
+     *
+     * @param disclosureMap the disclosureMap
+     * @return true if yes, false otherwise
+     */
+    private static boolean isSelectivelyDisclosed(Map<String, Object> disclosureMap) {
+        if (disclosureMap == null) {
+            return false;
+        }
+        for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
+            Object v = entry.getValue();
+            if (v instanceof Map) {
+                if (isSelectivelyDisclosed((HashMap) v)) {
+                    return true;
+                }
+            } else if (v instanceof List) {
+                if (isSelectivelyDisclosed((ArrayList<Object>) v)) {
+                    return true;
+                }
+            }
+            if (v.toString().contains("0")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the given CredentialPojo is selectively disclosed, or not.
+     *
+     * @param disclosureList the disclosureList
+     * @return true if yes, false otherwise
+     */
+    private static boolean isSelectivelyDisclosed(List<Object> disclosureList) {
+        if (disclosureList == null) {
+            return false;
+        }
+        for (Object disclosureObject : disclosureList) {
+            if (disclosureObject instanceof Map) {
+                if (isSelectivelyDisclosed((HashMap) disclosureObject)) {
+                    return true;
+                }
+            } else if (disclosureObject instanceof List) {
+                if (isSelectivelyDisclosed((ArrayList<Object>) disclosureObject)) {
+                    return true;
+                }
+            }
+            if (disclosureObject.toString().contains("0")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim,
+        boolean isSelectivelyDisclosed) {
 
         try {
-            //String claimStr = JsonUtil.objToJsonStr(claim);
+            String claimStr = DataToolUtils.serialize(claim);
             Cpt cpt = cptService.queryCpt(cptId).getResult();
             if (cpt == null) {
                 logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
@@ -374,10 +444,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
                 return ErrorCode.CPT_JSON_SCHEMA_INVALID;
             }
-            //if (!DataToolUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
-            //   logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
-            //      return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
-            // }
+            if (!isSelectivelyDisclosed) {
+                if (!DataToolUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
+                    logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
+                    return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+                }
+            }
             return ErrorCode.SUCCESS;
         } catch (Exception e) {
             logger.error(
