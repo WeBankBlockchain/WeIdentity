@@ -83,7 +83,7 @@ More
 *
    `FAQ <https://weidentity.readthedocs.io/en/latest/docs/faq.html>`_
 
-Getting Started
+Current Status
 ---------------
 
 WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers, please review the Installation & Deployment guide and SDK user guide listed below:
@@ -104,6 +104,7 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
                <ul>
                  <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-installation.html">Installation and Deployment Guide (Chinese Version)</a></li>
                  <li><a href="https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-java-sdk-doc.html">SDK User Guide (Chinese Version)</a></li>
+                 <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-rest.html">RestService Guide (Chinese Version)</a></li>
                </ul>
             </td>
             <td>

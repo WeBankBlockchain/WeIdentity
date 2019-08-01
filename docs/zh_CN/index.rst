@@ -18,12 +18,12 @@ WeIdentity文档
    :caption: Contents:
 
    README.rst
+   docs/one-stop-experience.rst
    docs/terminologies.rst
    docs/use-cases.rst
    docs/weidentity-spec.rst
    docs/faq.md
    docs/miscellaneous.md
    docs/weidentity-rest.rst
-   WeIdentity JAVA SDK 文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>
    docs/weidentity-installation.rst
- 
+   WeIdentity JAVA SDK 文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>
