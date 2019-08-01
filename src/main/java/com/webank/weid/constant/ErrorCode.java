@@ -399,13 +399,37 @@ public enum ErrorCode {
     ),
 
     /**
-     * The Authority Issuer Contract level error: subject already exists.
+     * the key of the data is empty.
      */
     PRESISTENCE_DATA_KEY_INVALID(
         100901,
         "the key of the data is empty."
     ),
+    
+    /**
+     * the domain is illegal.
+     */
+    PRESISTENCE_DOMAIN_ILLEGAL(
+        100902,
+        "the domain is illegal."
+    ),
 
+    /**
+     * the domain is illegal.
+     */
+    PRESISTENCE_DOMAIN_INVALID(
+        100903,
+        "the domain is invalid."
+    ),
+    
+    /**
+     * the data does not match for batch save.
+     */
+    PRESISTENCE_BATCH_SAVE_DATA_MISMATCH(
+        100904,
+        "the data does not match for batch save."
+    ),
+    
     /**
      * The Authority Issuer Contract level error: subject already exists.
      */

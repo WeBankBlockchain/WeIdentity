@@ -23,7 +23,7 @@ JAVA SDK 安装部署文档`_\ 中的源码方式安装部署WeIdentity。
 
 2, 将生成好的 ``weidentity.properties`` 和 ``fisco.properties`` 复制到 ``src/test/resources``
 目录，WeIdentity 安装部署完会自动生成并配置好
-`weidentity.properties`` 和 ``fisco.properties``\ ，所需的节点配置和合约地址配置已完成,可以直接使用。
+``weidentity.properties`` 和 ``fisco.properties``\ ，所需的节点配置和合约地址配置已完成,可以直接使用。
 
 .. code:: shell
 

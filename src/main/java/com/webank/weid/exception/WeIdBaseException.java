@@ -28,6 +28,8 @@ import com.webank.weid.constant.ErrorCode;
  */
 @SuppressWarnings("serial")
 public class WeIdBaseException extends RuntimeException {
+    
+    private ErrorCode errorCode = ErrorCode.BASE_ERROR;
 
     /**
      * constructor.
@@ -47,6 +49,15 @@ public class WeIdBaseException extends RuntimeException {
     public WeIdBaseException(String msg) {
         super(msg);
     }
+    
+    /**
+     * constructor.
+     *
+     * @param errorCode the errorCode
+     */
+    public WeIdBaseException(ErrorCode errorCode) {
+        this.errorCode = errorCode;
+    }
 
     /**
      * get associated error code.
@@ -54,7 +65,7 @@ public class WeIdBaseException extends RuntimeException {
      * @return ErrorCode
      */
     public ErrorCode getErrorCode() {
-        return ErrorCode.BASE_ERROR;
+        return errorCode;
     }
 
     @Override
