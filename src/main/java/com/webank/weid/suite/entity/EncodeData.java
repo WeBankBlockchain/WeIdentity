@@ -23,6 +23,8 @@ import java.util.List;
 
 import lombok.Getter;
 
+import com.webank.weid.protocol.base.WeIdAuthentication;
+
 /**
  * 编辑码的实体类，封装了需要编解码的数据.
  * @author v_wbgyang
@@ -30,7 +32,7 @@ import lombok.Getter;
  */
 @Getter
 public class EncodeData {
-    
+
     /**
      * 机构名称.
      */
@@ -50,18 +52,52 @@ public class EncodeData {
      * 协议数据指定用户.
      */
     private List<String> verifiers;
+    
+    /**
+     * 解码者身份信息.
+     */
+    private WeIdAuthentication weIdAuthentication;
+    
+    /**
+     * 密文方式的过期时间.
+     */
+    private int expireTime;
    
+    private EncodeData(String id, String orgId, String data) {
+        this.id = id;
+        this.orgId = orgId;
+        this.data = data;
+    }
+    
     /**
      * 构建编解码对象.
      * @param orgId 协议所属机构
      * @param id 数据编号
      * @param data 需要编解码数据
      * @param verifiers 协议数据指定用户
+     * @param expireTime 协议加密时秘钥的有效时间,单位(秒)
      */
-    public EncodeData(String id, String orgId, String data, List<String> verifiers) {
-        this.id = id;
-        this.orgId = orgId;
-        this.data = data;
+    public EncodeData(
+        String id,
+        String orgId,
+        String data,
+        List<String> verifiers,
+        int expireTime
+    ) {
+        this(id, orgId, data);
         this.verifiers = verifiers;
+        this.expireTime = expireTime;
+    }
+    
+    /**
+     * 构建编解码对象.
+     * @param orgId 协议所属机构
+     * @param id 数据编号
+     * @param data 需要编解码数据
+     * @param weIdAuthentication 解码身份信息
+     */
+    public EncodeData(String id, String orgId, String data, WeIdAuthentication weIdAuthentication) {
+        this(id, orgId, data);
+        this.weIdAuthentication = weIdAuthentication;
     }
 }

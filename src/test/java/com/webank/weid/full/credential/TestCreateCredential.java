@@ -19,8 +19,6 @@
 
 package com.webank.weid.full.credential;
 
-import java.util.HashMap;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -272,7 +270,7 @@ public class TestCreateCredential extends TestBaseServcie {
     }
 
     /**
-     * case： claim is null.
+     * case： claim is null. 
      */
     @Test
     public void testCreateCredentialCase12() {
