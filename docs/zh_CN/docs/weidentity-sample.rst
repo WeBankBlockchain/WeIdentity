@@ -16,7 +16,7 @@ WeIdentity 开发样例体验
 
 我们提供了两种方式体验 weid-sample：
 
--  `命令行方式使用 <./experience-by-command.html>`__
+-  `命令行方式使用 <./weidentity-sample-commandline.html>`__
    （推荐方式）
 
--  `spring-boot方式使用 <./experience-by-springboot.html>`__
+-  `spring-boot方式使用 <./weidentity-sample-springboot.html>`__
