@@ -54,10 +54,9 @@ Demo体验
 快速部署与上手
 ----------------
 
-您可以参照 \ `部署文档 <./weidentiy-installation.html>`_\，进行WeIdentity的快速部署与上手。
-
-WeIdentity参考实现
--------------------
+您可以参照 \ `部署文档 <./weidentity-installation.html>`_\，进行WeIdentity的快速部署与上手。
 
 深入了解：SDK文档
 ------------------
+
+您可以参照\ `RestService文档 <./weidentity-rest.rst>`_\或\ `Java SDK文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>`_\，深入了解WeIdentity的技术细节。
