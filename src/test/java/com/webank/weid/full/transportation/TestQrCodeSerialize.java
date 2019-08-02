@@ -79,7 +79,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase2() {
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation()
+            TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -167,7 +167,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation()
+            TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
@@ -192,7 +192,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation()
+            TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
@@ -217,7 +217,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         };
         
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation()
+            TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
