@@ -37,8 +37,8 @@ function modify_config()
 function gradle_build_sdk()
 {
     #run gradle build
-    cp ${java_source_code_dir}/ci/ca.crt ${java_source_code_dir}/src/main/resources
-    cp ${java_source_code_dir}/ci/client.keystore ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/.ci/client.keystore ${java_source_code_dir}/src/main/resources
     content="WeIdentity@$NODE_IP"
     export BLOCKCHIAN_NODE_INFO=${content}
     export WEID_ADDRESS="0x0"
