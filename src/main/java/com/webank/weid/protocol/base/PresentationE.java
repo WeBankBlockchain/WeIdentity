@@ -159,7 +159,7 @@ public class PresentationE implements RawSerializer, IProof {
      * @return true is success, others fail
      */
     public boolean push(CredentialPojo credentialPojo) {
-        if (verifiableCredential == null) {
+        if (verifiableCredential == null || credentialPojo == null) {
             return false;
         }
         verifiableCredential.add(credentialPojo);
