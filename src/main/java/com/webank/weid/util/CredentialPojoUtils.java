@@ -513,26 +513,45 @@ public final class CredentialPojoUtils {
         if (proof == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        String type = String.valueOf(proof.get(ParamKeyConstant.PROOF_TYPE));
-        if (!isCredentialProofTypeValid(type)) {
+        
+        String type = null;
+        if (proof.get(ParamKeyConstant.PROOF_TYPE) == null) {
             return ErrorCode.CREDENTIAL_SIGNATURE_TYPE_ILLEGAL;
+        } else {
+            type = String.valueOf(proof.get(ParamKeyConstant.PROOF_TYPE));
+            if (!isCredentialProofTypeValid(type)) {
+                return ErrorCode.CREDENTIAL_SIGNATURE_TYPE_ILLEGAL;
+            }
         }
         // Created is not obligatory
-        Long created = Long.valueOf(String.valueOf(proof.get(ParamKeyConstant.PROOF_CREATED)));
-        if (created.longValue() <= 0) {
+        if (proof.get(ParamKeyConstant.PROOF_CREATED) == null) {
             return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+        } else { 
+            Long created = Long.valueOf(String.valueOf(proof.get(ParamKeyConstant.PROOF_CREATED)));
+            if (created.longValue() <= 0) {
+                return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+            }
         }
         // Creator is not obligatory either
-        String creator = String.valueOf(proof.get(ParamKeyConstant.PROOF_CREATOR));
-        //if (!StringUtils.isEmpty(creator) && !WeIdUtils.isWeIdValid(creator)) {
-        if (StringUtils.isEmpty(creator)) {
+        if (proof.get(ParamKeyConstant.PROOF_CREATOR) == null) {
             return ErrorCode.CREDENTIAL_ISSUER_INVALID;
+        } else { 
+            String creator = String.valueOf(proof.get(ParamKeyConstant.PROOF_CREATOR));
+            //if (!StringUtils.isEmpty(creator) && !WeIdUtils.isWeIdValid(creator)) {
+            if (StringUtils.isEmpty(creator)) {
+                return ErrorCode.CREDENTIAL_ISSUER_INVALID;
+            }
         }
         // If the Proof type is ECDSA or other signature based scheme, check signature
         if (type.equalsIgnoreCase(CredentialProofType.ECDSA.getTypeName())) {
-            String signature = String.valueOf(proof.get(ParamKeyConstant.CREDENTIAL_SIGNATURE));
-            if (StringUtils.isEmpty(signature) || !DataToolUtils.isValidBase64String(signature)) {
+            if (proof.get(ParamKeyConstant.PROOF_SIGNATURE) == null) {
                 return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
+            } else {
+                String signature = String.valueOf(proof.get(ParamKeyConstant.PROOF_SIGNATURE));
+                if (StringUtils.isEmpty(signature) 
+                    || !DataToolUtils.isValidBase64String(signature)) {
+                    return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
+                }
             }
         }
         return ErrorCode.SUCCESS;
