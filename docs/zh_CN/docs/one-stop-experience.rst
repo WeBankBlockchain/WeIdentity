@@ -60,3 +60,8 @@ Demo体验
 ------------------
 
 您可以参照\ `RestService文档 <./weidentity-rest.html>`_\，或 \ `Java SDK文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>`_\，深入了解WeIdentity的设计与技术细节。
+
+参考实现
+---------------
+
+您可以参考  \ `开发样例使用 <./weidentity-sample.html>`_\，体验WeIdentity的业务流程，并参考进行您的Java应用开发。
