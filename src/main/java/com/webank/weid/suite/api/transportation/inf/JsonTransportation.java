@@ -21,6 +21,7 @@ package com.webank.weid.suite.api.transportation.inf;
 
 import java.util.List;
 
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
@@ -53,7 +54,22 @@ public interface JsonTransportation {
      * @param <T> the type of the element
      * @return 返回PresentationE对象数据
      */
+    @Deprecated
     <T extends JsonSerializer> ResponseData<T> deserialize(
+        String transString,
+        Class<T> clazz
+    );
+    
+    /**
+     * 协议反序列化接口，支持权限控制.
+     * @param weIdAuthentication 验证方当前authentication信息 
+     * @param transString JSON格式的协议数据字符串
+     * @param clazz 需要转换成的Class类型
+     * @param <T> the type of the element
+     * @return 返回PresentationE对象数据
+     */
+    <T extends JsonSerializer> ResponseData<T> deserialize(
+        WeIdAuthentication weIdAuthentication,
         String transString,
         Class<T> clazz
     );
