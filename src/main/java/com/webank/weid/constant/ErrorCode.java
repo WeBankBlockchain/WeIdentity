@@ -315,6 +315,23 @@ public enum ErrorCode {
      * the policy service call fail.
      */
     POLICY_SERVICE_CALL_FAIL(100702, "the policy service call fail, please check the error log."),
+    
+    /**
+     * the policy service call fail.
+     */
+    ENCRYPT_KEY_NO_PERMISSION(100703, "no permission to get the key."),
+    
+    /**
+     * the key is invalid.
+     */
+    ENCRYPT_KEY_INVALID(100704, "the key is invalid."),
+    
+    
+    /**
+     * the key is expire.
+     */
+    ENCRYPT_KEY_EXPIRE(100705, "the key is expire."),
+
 
     /**
      * suite基本异常.
@@ -557,7 +574,7 @@ public enum ErrorCode {
     DATA_TYPE_CASE_ERROR(160008, "data type cast exception error, please check the error log."),
 
     DIRECT_ROUTE_REQUEST_TIMEOUT(160009, "amop timeout"),
-    DIRECT_ROUTE_MSG_BASE_ERROR(160010, "amop timeout"),
+    DIRECT_ROUTE_MSG_BASE_ERROR(160010, "amop response messageBody error."),
 
     /**
      * sql execute failed.
