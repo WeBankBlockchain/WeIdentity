@@ -93,7 +93,7 @@ WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestSer
                </ul>
             </td>
             <td>
-               <a href="https://travis-ci.org/WeBankFinTech/weid-java-sdk"><img src="https://travis-ci.org/WeBankFinTech/weid-java-sdk.svg?branch=develop" /></a>
+               <a href="https://travis-ci.org/WeBankFinTech/weid-java-sdk"><img src="https://travis-ci.org/WeBankFinTech/weid-java-sdk.svg?branch=master" /></a>
                <a href="https://github.com/WeBankFinTech/weid-java-sdk/releases/latest"><img src="https://img.shields.io/github/release/WeBankFinTech/weid-java-sdk.svg" /></a>
                <a href="https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%22weid-java-sdk%22"><img src="https://img.shields.io/maven-central/v/com.webank/weid-java-sdk.svg?label=Maven%20Central" /></a>
                <a href="https://app.codacy.com/app/webankadmin/weid-java-sdk?utm_source=github.com&utm_medium=referral&utm_content=WeBankFinTech/weid-java-sdk&utm_campaign=Badge_Grade_Dashboard"><img src="https://api.codacy.com/project/badge/Grade/9fc044b36fff4985bd69f1232380d5ee" /></a>

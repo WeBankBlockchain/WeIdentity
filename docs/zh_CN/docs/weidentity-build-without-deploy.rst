@@ -163,7 +163,7 @@ FISCO BCOS 1.3请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documen
 
 现在您可以使用 WeIdentity 开发您的区块链身份应用。weid-java-sdk 相关接口请见：\ `WeIdentity JAVA SDK文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-java-sdk-doc.html>`__ 。
 
-我们提供了一个基于WeID的 \ `开发样例 <https://github.com/WeBankFinTech/weid-sample/tree/develop>`__\， 您可以参考。
+我们提供了一个基于WeID的 \ `开发样例 <https://github.com/WeBankFinTech/weid-sample>`__\， 您可以参考。
 
 
 3. WeIdentity JAVA SDK 便捷工具使用
