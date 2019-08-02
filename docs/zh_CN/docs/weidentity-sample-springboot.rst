@@ -244,4 +244,4 @@ spring-boot服务方式使用
 
 表明 Credential 验证成功。
 
-至此，您已经体验了 weid-sample 实现的各个角色的运行流程，实现的入口在 ``com.webank.weid.demo.server.SampleApp``，您可以参考进行您的 Java 应用开发。
+至此，您已经体验了 weid-sample 实现的各个角色的运行流程，实现的入口类在weid-sample工程的 ``com.webank.weid.demo.server.SampleApp``，您可以参考进行您的 Java 应用开发。
