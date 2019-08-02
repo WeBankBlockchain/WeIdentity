@@ -990,6 +990,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (presentationPolicyE == null || presentationPolicyE.getPolicy() == null) {
             return ErrorCode.PRESENTATION_POLICY_INVALID;
         }
+        if (!WeIdUtils.isWeIdValid(presentationPolicyE.getPolicyPublisherWeId())) {
+            return ErrorCode.PRESENTATION_POLICY_PUBLISHER_WEID_INVALID;
+        }
+        ResponseData<Boolean> weIdRes = weIdService
+            .isWeIdExist(presentationPolicyE.getPolicyPublisherWeId());
+        if (ErrorCode.SUCCESS.getCode() != weIdRes.getErrorCode() || !weIdRes.getResult()) {
+            return ErrorCode.PRESENTATION_POLICY_PUBLISHER_WEID_NOT_EXIST;
+        }
         for (CredentialPojo credentialPojo : credentialList) {
             ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialPojo);
             if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
