@@ -2,8 +2,8 @@
 
 if [ "$TRAVIS_BRANCH" = "master" ];then
     echo "This is a master branch PR, starting Sample CI pipeline.."
-    chmod +x ci/script/build-ci.sh
-    ci/script/build-ci.sh
+    chmod u+x .ci/script/build-ci.sh
+    .ci/script/build-ci.sh
 
     # clone repo
     rm -rf weid-sample/
@@ -34,12 +34,12 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     cp ecdsa_key weid-sample/keys/priv/
     cp src/main/resources/fisco.properties weid-sample/src/main/resources/
     cp src/main/resources/weidentity.properties weid-sample/src/main/resources/
-    cp ci/ca.crt weid-sample/src/main/resources/
-    cp ci/client.keystore weid-sample/src/main/resources/
+    cp .ci/ca.crt weid-sample/src/main/resources/
+    cp .ci/client.keystore weid-sample/src/main/resources/
 
     # run repo ci scripts
     cd weid-sample/
-    chmod +x *.sh
+    chmod u+x *.sh
     ./build.sh
     
     if ! ./sample-ci.sh
