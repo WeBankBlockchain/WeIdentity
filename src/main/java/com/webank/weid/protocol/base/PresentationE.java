@@ -37,6 +37,7 @@ import com.webank.weid.protocol.inf.IProof;
 import com.webank.weid.protocol.inf.RawSerializer;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.WeIdUtils;
 
 
 /**
@@ -160,9 +161,16 @@ public class PresentationE implements RawSerializer, IProof {
      */
     public boolean push(CredentialPojo credentialPojo) {
         if (verifiableCredential == null || credentialPojo == null) {
+            logger.error("[push] the credentialPojo is null.");
+            return false;
+        }
+        ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialPojo);
+        if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
+            logger.error("[push] the credentialPojo is invalid.");
             return false;
         }
         verifiableCredential.add(credentialPojo);
+        logger.info("[push] the credentialPojo is added.");
         return true;
     }
     
@@ -172,18 +180,30 @@ public class PresentationE implements RawSerializer, IProof {
      * @return true is success, others fail
      */
     public boolean commit(WeIdAuthentication weIdAuthentication) {
-        if (weIdAuthentication == null
-                || !weIdAuthentication.getWeIdPublicKeyId().equals(this.getVerificationMethod())) {
+        if (weIdAuthentication == null 
+                || weIdAuthentication.getWeIdPrivateKey() == null
+                || weIdAuthentication.getWeId() == null) {
+            logger.error("[commit] the weIdAuthentication is null.");
+            return false;
+        }
+        if (!WeIdUtils.validatePrivateKeyWeIdMatches(
+                weIdAuthentication.getWeIdPrivateKey(), 
+                weIdAuthentication.getWeId())) {
+            logger.error("[commit] the private key does not match the current weid.");
+            return false;
+        }
+        if (!weIdAuthentication.getWeIdPublicKeyId().equals(this.getVerificationMethod())) {
+            logger.error("[commit] the public key id does not match the presentation.");
             return false;
         }
         // 更新proof里面的签名
-        //this.proof.remove(ParamKeyConstant.PROOF_SIGNATURE);
         String signature = 
             DataToolUtils.sign(
                 this.toRawData(),
                 weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
             );
         this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
+        logger.error("[commit] success.");
         return true;
     }
     
