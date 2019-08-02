@@ -136,6 +136,11 @@ public enum ErrorCode {
      * The credential context not exists.
      */
     CREDENTIAL_CONTEXT_NOT_EXISTS(100413, "credential context does not exist"),
+    
+    /**
+     * The credential type is null.
+     */
+    CREDENTIAL_TYPE_IS_NULL(100414, "credential type is null"),
 
     /**
      * The credential private key not exists.
@@ -301,6 +306,23 @@ public enum ErrorCode {
         100608,
         "the weid of the claim of the presentation does not exist."
     ),
+    
+    /**
+     * the publisherWeId of policy is invalid.
+     */
+    PRESENTATION_POLICY_PUBLISHER_WEID_INVALID(
+        100609,
+        "the publisherWeId of policy is invalid."
+    ),
+    
+    /**
+     * the publisherWeId of policy does not exist.
+     */
+    PRESENTATION_POLICY_PUBLISHER_WEID_NOT_EXIST(
+        100610,
+        "the publisherWeId of policy does not exist."
+    ), 
+    
     /**
      * the encrypt key is not exists.
      */
