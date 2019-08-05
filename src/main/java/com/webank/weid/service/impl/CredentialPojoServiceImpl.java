@@ -41,6 +41,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.Cpt;
@@ -245,7 +246,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             Object value = entry.getValue();
             Object saltV = saltMap.get(disclosureKey);
             Object claimV = claim.get(disclosureKey);
-            if (value instanceof Map) {
+            if (value == null) {
+                throw new WeIdBaseException(ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);
+            } else if (value instanceof Map) {
                 addSelectSalt((HashMap) value, (HashMap) saltV, (HashMap) claimV);
             } else if (value instanceof List) {
                 addSaltForList(
@@ -595,6 +598,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             logger.error("Generate SelectiveCredential failed, "
                 + "credential disclosure data type illegal. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL);
+        } catch (WeIdBaseException e) {
+            logger.error("Generate SelectiveCredential failed, "
+                + "policy disclosurevalue illegal. ", e);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);
         } catch (Exception e) {
             logger.error("Generate SelectiveCredential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
