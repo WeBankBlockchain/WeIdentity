@@ -39,8 +39,19 @@ public interface IProof {
      */
     public default Object getValueFromProof(Map<String, Object> proof, String key) {
         if (proof != null) {
-            Object value = proof.get(key);
-            return value != null ? value : StringUtils.EMPTY;
+            return proof.get(key);
+        }
+        return null;
+    }
+    
+    /**
+     * 将Object转换成String.
+     * @param obj 从proof中取出的object
+     * @return 返回key的字符串数据
+     */
+    public default String toString(Object obj) {
+        if (obj != null) {
+            return String.valueOf(obj);
         }
         return StringUtils.EMPTY;
     }
