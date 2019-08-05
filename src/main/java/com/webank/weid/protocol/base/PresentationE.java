@@ -70,7 +70,7 @@ public class PresentationE implements RawSerializer, IProof {
      * @return publicKeyId
      */
     public String getVerificationMethod() {
-        return getValueFromProof(proof, ParamKeyConstant.PROOF_VERIFICATION_METHOD).toString();
+        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_VERIFICATION_METHOD));
     }
     
     /**
@@ -78,7 +78,7 @@ public class PresentationE implements RawSerializer, IProof {
      * @return 返回challenge随机值.
      */
     public String getNonce() {
-        return getValueFromProof(proof, ParamKeyConstant.PROOF_NONCE).toString();
+        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_NONCE));
     }
 
     /**
@@ -86,7 +86,7 @@ public class PresentationE implements RawSerializer, IProof {
      * @return 返回签名字符串Signature.
      */
     public String getSignature() {
-        return getValueFromProof(proof, ParamKeyConstant.PROOF_SIGNATURE).toString();
+        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_SIGNATURE));
     }
     
     /**
@@ -203,7 +203,7 @@ public class PresentationE implements RawSerializer, IProof {
                 weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
             );
         this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
-        logger.error("[commit] success.");
+        logger.info("[commit] commit credential with weIdAuthentication is success.");
         return true;
     }
     
