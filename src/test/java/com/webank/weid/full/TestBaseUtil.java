@@ -323,7 +323,6 @@ public class TestBaseUtil {
         SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
         setPublicKeyArgs.setWeId(createWeId.getWeId());
         setPublicKeyArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-        setPublicKeyArgs.setType(TestData.PUBLIC_KEY_TYPE);
         setPublicKeyArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
         setPublicKeyArgs.getUserWeIdPrivateKey()
             .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
