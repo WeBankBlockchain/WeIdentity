@@ -119,23 +119,6 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: type is null or other string.
-     *
-     */
-    @Test
-    public void testSetPublicKeyCase5() {
-
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-        setPublicKeyArgs.setType(null);
-
-        ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        LogUtil.info(logger, "setPublicKey", response);
-
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
      * case: publicKey is a new key.
      *
      */
