@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -496,7 +497,7 @@ public final class CredentialPojoUtils {
      * @param args CredentialPojo
      * @return true if yes, false otherwise
      */
-    public static ErrorCode isCredentialContentValid(CredentialPojo args) {
+    private static ErrorCode isCredentialContentValid(CredentialPojo args) {
         String credentialId = args.getId();
         if (StringUtils.isEmpty(credentialId) || !CredentialUtils.isValidUuid(credentialId)) {
             return ErrorCode.CREDENTIAL_ID_NOT_EXISTS;
@@ -504,6 +505,9 @@ public final class CredentialPojoUtils {
         String context = args.getContext();
         if (StringUtils.isEmpty(context)) {
             return ErrorCode.CREDENTIAL_CONTEXT_NOT_EXISTS;
+        }
+        if (CollectionUtils.isEmpty(args.getType())) {
+            return ErrorCode.CREDENTIAL_TYPE_IS_NULL;
         }
         Map<String, Object> proof = args.getProof();
         return isCredentialProofValid(proof);
