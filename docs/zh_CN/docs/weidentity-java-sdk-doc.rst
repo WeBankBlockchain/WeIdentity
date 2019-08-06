@@ -784,7 +784,122 @@ com.webank.weid.protocol.base.PresentationE
    String presentationEJson = presentationERes.getResult().toJson();
    
    PresentationE presentationE = PresentationE.fromJson(presentationEJson);
+
+
+3. push
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+ 
+   接口名称: com.webank.weid.protocol.base.PresentationE.push
+   接口定义: boolean push(CredentialPojo credentialPojo)
+   接口描述: 将非policy里面的Credential添加到Presentation中
+  注意：调用 push(CredentialPojo credentialPojo) 添加完所有Credential后需要调用 commit(WeIdAuthentication weIdAuthentication) 进行重新签名，否则验证Presentation时会失败
    
+**调用示例**
+
+.. code-block:: java
+   CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+   CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
+   createCredentialPojoArgs.setCptId(1101);
+   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
+    
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+    
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+   
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
+    
+   Map<String, Object> claim = new HashMap<String, Object>();
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 22);
+   createCredentialPojoArgs.setClaim(claim);
+    
+   //创建CredentialPojo
+   ResponseData<CredentialPojo> response = credentialPojoService.createCredential(createCredentialPojoArgs);
+    
+   List<CredentialPojo> credentialList = new ArrayList<CredentialPojo>();
+   credentialList.add(response.getResult());
+    
+   //创建Challenge
+   Challenge challenge = Challenge.create("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
+    
+   //创建PresentationPolicyE
+   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
+   PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromJson(policyJson);
+    
+   //创建Presentation
+   ResponseData<PresentationE>  presentationERes = credentialPojoService.createPresentation(credentialList, presentationPolicyE, challenge, weIdAuthentication);
+   
+   //将非policy要求的Credential添加到presentation中
+   ResponseData<CredentialPojo> responseNew = credentialPojoService.createCredential(createCredentialPojoArgs);
+   presentationERes.getResult().push(responseNew.getResult());
+
+4. commit
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+ 
+   接口名称: com.webank.weid.protocol.base.PresentationE.commit
+   接口定义: boolean commit(WeIdAuthentication weIdAuthentication)
+   接口描述: 添加完Credential对Presentation重新签名处理了
+   
+**调用示例**
+
+.. code-block:: java
+   CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+   CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
+   createCredentialPojoArgs.setCptId(1101);
+   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
+    
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+    
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+   
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
+    
+   Map<String, Object> claim = new HashMap<String, Object>();
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 22);
+   createCredentialPojoArgs.setClaim(claim);
+    
+   //创建CredentialPojo
+   ResponseData<CredentialPojo> response = credentialPojoService.createCredential(createCredentialPojoArgs);
+    
+   List<CredentialPojo> credentialList = new ArrayList<CredentialPojo>();
+   credentialList.add(response.getResult());
+    
+   //创建Challenge
+   Challenge challenge = Challenge.create("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
+    
+   //创建PresentationPolicyE
+   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
+   PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromJson(policyJson);
+    
+   //创建Presentation
+   ResponseData<PresentationE>  presentationERes = credentialPojoService.createPresentation(credentialList, presentationPolicyE, challenge, weIdAuthentication);
+   
+   //将非policy要求的Credential添加到presentation中
+   ResponseData<CredentialPojo> responseNew = credentialPojoService.createCredential(createCredentialPojoArgs);
+   presentationERes.getResult().push(responseNew.getResult());
+   presentationERes.getResult().commit(weIdAuthentication)
+
 
 接口简介
 --------
@@ -6438,11 +6553,6 @@ com.webank.weid.protocol.base.ServiceProperty
      - Y
      - WeIdentity DID格式字符串
      - 如：did:weid:1:0x....
-   * - type
-     - String
-     - Y
-     - hash套件
-     - 默认：Secp256k1
    * - owner
      - String
      - N
@@ -6567,7 +6677,6 @@ com.webank.weid.protocol.response.TransactionInfo
 
    SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
    setPublicKeyArgs.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
-   setPublicKeyArgs.setType("Secp256k1");
    setPublicKeyArgs.setPublicKey(
       "13161444623157635919577071263152435729269604287924587017945158373362984739390835280704888860812486081963832887336483721952914804189509503053687001123007342");
 
@@ -9455,6 +9564,12 @@ com.webank.weid.protocol.base.PresentationE
    * - PRESENTATION_WEID_PUBLICKEY_ID_INVALID
      - 100604
      - 公钥编号无效
+   * - PRESENTATION_POLICY_PUBLISHER_WEID_INVALID
+     - 100609
+     - policy中的publisherWeId无效
+   * - PRESENTATION_POLICY_PUBLISHER_WEID_NOT_EXIST
+     - 100610
+     - policy中的publisherWeId不存在
    * - UNKNOW_ERROR
      - 160003
      - 未知异常
