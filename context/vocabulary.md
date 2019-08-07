@@ -16,12 +16,12 @@ This specification makes use of the following namespaces:
 weidentity: https://fintech.webank.com/weidentity/vocab
 
 ## Classes
-### EcdsaSignature
+### Secp256k1
 
-An EcdsaSignature is used for digital signatures on datasets. By default, this signature mechanism uses a ```SHA-256 digest``` and ```ECDSA signature``` algorithm-scheme to perform the digital signature.
+An Secp256k1 is used for digital signatures on datasets. By default, this signature mechanism uses a ```SHA-256 digest``` and ```ECDSA signature``` with SECP256K1 as the specific algorithm-scheme to perform the digital signature, authentication, and verification.
 
 - Identifier
-EcdsaSignature
+Secp256k1
 - Status
 stable
 - Parent Class
@@ -36,9 +36,9 @@ The example below shows how a basic JSON-LD signature is expressed in a JSON-LD 
 
 ```java
 {
-  "@context": ["http://fintech.webank.com/weidentity/v1"]
+  "@context": ["https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1"]
   "signature": {
-    "type": "EcdsaSignature",
+    "type": "Secp256k1",
     "creator": "did:weid:0xca35b7d915458ef540ade6068dfe2f44e8fa733c",
     "created": "2018-11-05T13:12:54Z",
     "signature": "OGCzNGVkMzVmMmQ31DIyOWM32MzQzNmEx3goYzI4ZDY3NjI4NTIy5Tk="

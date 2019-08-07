@@ -3,8 +3,8 @@
     "id": "@id",
     "type": "@type",
 
-    "weidentity": "https://fintech.webank.com/weidentity/vocab",
+    "weidentity": "https://github.com/WeBankFinTech/WeIdentity/blob/master/context/vocabulary.md",
 
-    "EcdsaSignature": "weidentity:EcdsaSignature"
+    "Secp256k1": "weidentity:Secp256k1"
   }
 }
