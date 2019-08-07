@@ -87,7 +87,8 @@ public class TestQueryCpt extends TestBaseServcie {
         ResponseData<Cpt> response = cptService.queryCpt(null);
         LogUtil.info(logger, "queryCpt", response);
 
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(), 
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
@@ -100,7 +101,8 @@ public class TestQueryCpt extends TestBaseServcie {
         ResponseData<Cpt> response = cptService.queryCpt(-1);
         LogUtil.info(logger, "queryCpt", response);
 
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(), 
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
