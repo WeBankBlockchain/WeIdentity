@@ -2049,6 +2049,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - WEID_PRIVATEKEY_DOES_NOT_MATCH
      - 100106
      - 私钥不与WeIdentity DID所对应
+   * - WEID_SETSERVICE_TYPE_INVALID
+     - 100110
+     - type字段超过限制
    * - TRANSACTION_TIMEOUT
      - 160001
      - 超时
@@ -5793,9 +5796,9 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - schema无效
-   * - CPT_ID_NULL
+   * - CPT_ID_ILLEGAL
      - 100303
-     - CPT编号为null
+     - cptId无效
    * - CPT_EVENT_LOG_NULL
      - 100304
      - 交易日志异常
@@ -6106,9 +6109,9 @@ com.webank.weid.protocol.base.CptBaseInfo
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - schema无效
-   * - CPT_ID_NULL
+   * - CPT_ID_ILLEGAL
      - 100303
-     - CPT编号为null
+     - cptId无效
    * - CPT_EVENT_LOG_NULL
      - 100304
      - 交易日志异常
@@ -6387,6 +6390,9 @@ com.webank.weid.protocol.base.Credential
    * - CPT_JSON_SCHEMA_INVALID
      - 100301
      - JsonSchema无效
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_ERROR
      - 100400
      - Credential标准错误
@@ -6405,9 +6411,6 @@ com.webank.weid.protocol.base.Credential
    * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
      - 100415
      - 私钥为空
-   * - CREDENTIAL_CPT_NOT_EXISTS
-     - 100416
-     - cpt不存在
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
@@ -6612,6 +6615,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_ERROR
      - 100400
      - Credential标准错误
@@ -6933,6 +6939,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_ERROR
      - 100400
      - Credential标准错误
@@ -7152,6 +7161,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_EXPIRED
      - 100402
      - 过期
@@ -7173,9 +7185,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_CONTEXT_NOT_EXISTS
      - 100413
      - context为空
-   * - CREDENTIAL_CPT_NOT_EXISTS
-     - 100416
-     - CPT不存在
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
@@ -7390,6 +7399,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_EXPIRED
      - 100402
      - 过期
@@ -7414,9 +7426,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
      - 100415
      - 私钥为空
-   * - CREDENTIAL_CPT_NOT_EXISTS
-     - 100416
-     - cpt不存在
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
@@ -7791,6 +7800,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_EXPIRED
      - 100402
      - 过期
@@ -7815,9 +7827,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_CONTEXT_NOT_EXISTS
      - 100413
      - context为空
-   * - CREDENTIAL_CPT_NOT_EXISTS
-     - 100416
-     - cpt不存在
    * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
      - 100417
      - WeIdentity Document为空
@@ -8132,6 +8141,9 @@ com.webank.weid.protocol.base.CredentialPojo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - WEID_PRIVATEKEY_DOES_NOT_MATCH
      - 100106
      - 私钥和weid不匹配
@@ -8150,9 +8162,6 @@ com.webank.weid.protocol.base.CredentialPojo
    * - CREDENTIAL_CLAIM_DATA_ILLEGAL
      - 100411
      - Claim非法
-   * - CREDENTIAL_CPT_NOT_EXISTS
-     - 100416
-     - cpt不存在
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
@@ -8369,6 +8378,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_ERROR
      - 100400
      - Credential标准错误
@@ -8390,9 +8402,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_CONTEXT_NOT_EXISTS
      - 100413
      - context为空
-   * - CREDENTIAL_CPT_NOT_EXISTS
-     - 100416
-     - cpt不存在
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
@@ -8637,6 +8646,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_ISSUER_MISMATCH
      - 100403
      - issuerWeId跟Credential中的issuer不匹配
@@ -8868,6 +8880,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_ISSUER_MISMATCH
      - 100403
      - issuerWeId跟Credential中的issuer不匹配
@@ -9149,6 +9164,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_ISSUER_MISMATCH
      - 100403
      - issuerWeId跟Credential中的issuer不匹配
@@ -9528,6 +9546,9 @@ com.webank.weid.protocol.base.PresentationE
    * - WEID_PRIVATEKEY_DOES_NOT_MATCH
      - 100106
      - 用户weId不匹配其私钥
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
    * - CREDENTIAL_ERROR
      - 100400
      - Credential标准错误
@@ -9552,9 +9573,6 @@ com.webank.weid.protocol.base.PresentationE
    * - CREDENTIAL_CONTEXT_NOT_EXISTS
      - 100413
      - context为空
-   * - CREDENTIAL_CPT_NOT_EXISTS
-     - 100416
-     - cpt不存在
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
@@ -10884,7 +10902,7 @@ Persistence
      - 
    * - result
      - Integer
-     - 存储结果
+     - 存储数据行数
      - 业务数据
 
 
@@ -10995,7 +11013,7 @@ Persistence
      - 
    * - result
      - Integer
-     - 存储结果
+     - 存储数据行数
      - 业务数据
 
 
@@ -11218,7 +11236,7 @@ Persistence
      - 
    * - result
      - Integer
-     - 删除结果
+     - 删除数据行数
      - 业务数据
 
 
@@ -11328,7 +11346,7 @@ Persistence
      - 
    * - result
      - Integer
-     - 删除结果
+     - 更新数据行数
      - 业务数据
 
 

@@ -196,7 +196,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
         try {
             if (cptId == null || cptId < 0) {
-                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+                return new ResponseData<>(null, ErrorCode.CPT_ID_ILLEGAL);
             }
 
             return cptServiceEngine.queryCpt(cptId);
@@ -244,9 +244,9 @@ public class CptServiceImpl extends BaseService implements CptService {
                 logger.error("[updateCpt]input UpdateCptArgs is null");
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
-            if (cptId == null) {
-                logger.error("[updateCpt]input cptId is null");
-                return new ResponseData<>(null, ErrorCode.CPT_ID_NULL);
+            if (cptId == null || cptId.intValue() < 0) {
+                logger.error("[updateCpt]input cptId illegal");
+                return new ResponseData<>(null, ErrorCode.CPT_ID_ILLEGAL);
             }
             ErrorCode errorCode =
                 this.validateCptArgs(
