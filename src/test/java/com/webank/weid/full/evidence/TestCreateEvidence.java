@@ -217,7 +217,7 @@ public class TestCreateEvidence extends TestBaseServcie {
         LogUtil.info(logger, "createEvidence", response);
 
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
+            ErrorCode.CPT_ID_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
