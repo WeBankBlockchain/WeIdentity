@@ -119,7 +119,7 @@ com.webank.weid.protocol.base.PublicKeyProperty
    * - type
      - String
      - 类型
-     - 默认为：Secp256k1VerificationKey2018
+     - 默认为：Secp256k1
    * - owner
      - String
      - 拥有者WeIdentity DID
@@ -142,7 +142,7 @@ com.webank.weid.protocol.base.AuthenticationProperty
    * - type
      - String
      - 类型
-     - 默认为：Secp256k1SignatureAuthentication2018
+     - 默认为：Secp256k1
    * - publicKey
      - String
      - 
@@ -1442,12 +1442,12 @@ com.webank.weid.protocol.response.TransactionInfo
       "updated" : 1560419409898,
       "publicKey" : [ {
          "id" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0",
-         "type" : "Secp256k1VerificationKey2018",
+         "type" : "Secp256k1",
          "owner" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a",
          "publicKey" : "2905679808560626772263712571437125497429146398815877180317365034921958007199576809718056336050058032599743534507469742764670961100255274766148096681073592"
       } ],
       "authentication" : [ {
-         "type" : "Secp256k1SignatureAuthentication2018",
+         "type" : "Secp256k1",
          "publicKey" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0"
       } ],
       "service" : [ {
@@ -1615,7 +1615,7 @@ com.webank.weid.protocol.base.PublicKeyProperty
    * - type
      - String
      - 类型
-     - 默认为：Secp256k1VerificationKey2018
+     - 默认为：Secp256k1
    * - owner
      - String
      - 拥有者WeIdentity DID
@@ -1638,7 +1638,7 @@ com.webank.weid.protocol.base.AuthenticationProperty
    * - type
      - String
      - 类型
-     - 默认为：Secp256k1SignatureAuthentication2018
+     - 默认为：Secp256k1
    * - publicKey
      - String
      - 
@@ -1710,12 +1710,12 @@ com.webank.weid.protocol.base.ServiceProperty
       publicKey:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.PublicKeyProperty
             id: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
-            type: Secp256k1VerificationKey2018
+            type: Secp256k18
             owner: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
             publicKey: 2905679808560626772263712571437125497429146398815877180317365034921958007199576809718056336050058032599743534507469742764670961100255274766148096681073592
       authentication:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.AuthenticationProperty
-            type: Secp256k1SignatureAuthentication2018
+            type: Secp256k1
             publicKey: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
       service:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.ServiceProperty
@@ -6466,7 +6466,7 @@ com.webank.weid.protocol.base.Credential
             creator: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
             signature: HHQwJ9eEpyv/BgwtWDveFYAPsKOPtEEWt6ieb28PS76pDwlpFKtbh9Ygog8SUPIXUaWNYS2pLkk4E91hpP8IdbU=
             created: 1560416978296
-            type: EcdsaSignature
+            type: Secp256k1
       disclosure:(java.util.HashMap)
          name: 1
          gender: 1
@@ -8020,7 +8020,7 @@ com.webank.weid.protocol.base.WeIdAuthentication
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - 
+     -
      - 交易私钥，见下
      
 com.webank.weid.protocol.base.WeIdPrivateKey
@@ -8225,7 +8225,7 @@ com.webank.weid.protocol.base.CredentialPojo
             name: el1w8
             age: ajqkr
          created: 1560420878712
-         type: EcdsaSignature
+         type: Secp256k1
          signatureValue: G7UPiw08P5E9dEcSJEo9zpKu/nsUrpn00xDE+mwDXn9gJEohIlRUX5XTGQB4G1w3yThp6R/2RqjUYkuQTaUXbIU=
       type:(java.util.ArrayList)
          [0]:VerifiableCredential
@@ -8250,7 +8250,7 @@ com.webank.weid.protocol.base.CredentialPojo
    CredentialPojoService->>CredentialPojoService: 为claim中的每个字段生成盐值
    CredentialPojoService->>CredentialPojoService: 生成签发日期、生成数字签名
    CredentialPojoService-->>调用者: 返回凭证
-   
+
 ----
 
 2. createSelectiveCredential
@@ -8510,7 +8510,7 @@ com.webank.weid.protocol.response.TransactionInfo
             name: rr3g0
             age: 9ysgr
          created: 1560420975268
-         type: EcdsaSignature
+         type: Secp256k1
          signatureValue: GxVcZJFEnC7w+ZKOZAjmKy5JfFxoEFqffmCMvbUnVYmzEVKIUtDCiDmokZ2X3jIV/uFvUHQ4DWXksrD6Opr1vLo=
       type:(java.util.ArrayList)
          [0]:VerifiableCredential
@@ -8535,7 +8535,7 @@ com.webank.weid.protocol.response.TransactionInfo
    CredentialPojoService->>CredentialPojoService: 根据claimPolicy来隐藏不披露的字段
    CredentialPojoService->>CredentialPojoService: 生成签发日期、生成数字签名
    CredentialPojoService-->>调用者: 返回凭证
-   
+
 
 ----
 
@@ -8818,7 +8818,7 @@ com.webank.weid.protocol.response.TransactionInfo
    CredentialPojoService-->>调用者: 报错并退出
    end
    CredentialPojoService-->>调用者: 返回成功
-   
+
 ----
 
 4. verify
@@ -9066,7 +9066,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. mermaid::
 
-   
+
    sequenceDiagram
    participant 调用者
    participant CredentialPojoService
@@ -9094,7 +9094,7 @@ com.webank.weid.protocol.response.TransactionInfo
    end
    CredentialPojoService-->>调用者: 返回成功
 
-----    
+----
 
 5. verify
 ~~~~~~~~~~~~~~~~~~~
@@ -9415,7 +9415,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. mermaid::
 
-   
+
    sequenceDiagram
    participant 调用者
    participant CredentialPojoService
@@ -9849,13 +9849,13 @@ com.webank.weid.protocol.base.PresentationE
                   name: yjckg
                   age: 0
                created: 1560425696276
-               type: EcdsaSignature
+               type: Secp256k1
                signatureValue: HCgmoX0f7ZYkwpd+pJ2+RCRKNt5lf9nbl8g9YWTSuA32IIoRSjMr7GPZVbe5bcu+hD/pnkAJbbinJo4/YqOOync=
             type:(java.util.ArrayList)
                [0]:VerifiableCredential
       proof:(java.util.HashMap)
          created: 1560425696412
-         type: EcdsaSignature
+         type: Secp256k1
          verificationMethod: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
          nonce: DJulONVxD2TFidB8vaYH
          signatureValue: G8ivS1e625NT8qSzLEugbqkRW6HDJNA4Lfcl7uCXV+uEffPMVF6Bwnk0pyCOd+4bbw90pMaj+EVxeL79acYPzM4=
@@ -9868,7 +9868,7 @@ com.webank.weid.protocol.base.PresentationE
 
 .. mermaid::
 
-  
+
    sequenceDiagram
    participant 调用者
    participant CredentialPojoService
@@ -10478,7 +10478,7 @@ java.util.List<java.lang.String>
 
 .. mermaid::
 
-  
+
    sequenceDiagram
    participant 调用者
    participant JsonTransportation
@@ -10635,7 +10635,7 @@ end
 
 .. mermaid::
 
-  
+
   sequenceDiagram
   participant 调用者
   participant JsonTransportation
@@ -10661,7 +10661,7 @@ end
   DataToolUtils-->>JsonTransportation:返回包含presentation的Json数据
   JsonTransportation-->>调用者: 返回成功
 
-   
+
 
 ----
 
@@ -10803,7 +10803,7 @@ end
 
 .. mermaid::
 
-  
+
    sequenceDiagram
    participant 调用者
    participant JsonTransportation
@@ -10885,7 +10885,7 @@ java.util.List<java.lang.String>
 
 .. mermaid::
 
-  
+
    sequenceDiagram
    participant 调用者
    participant QrCodeTransportation
@@ -11034,7 +11034,7 @@ end
 
 .. mermaid::
 
-  
+
   sequenceDiagram
   participant 调用者
   participant QrCodeTransportation
@@ -11192,7 +11192,7 @@ end
 
 .. mermaid::
 
-  
+
    sequenceDiagram
    participant 调用者
    participant QrCodeTransportation
