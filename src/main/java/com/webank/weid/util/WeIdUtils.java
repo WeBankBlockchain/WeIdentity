@@ -63,7 +63,7 @@ public final class WeIdUtils {
         if (StringUtils.isEmpty(weId) || !StringUtils.contains(weId, WeIdConstant.WEID_PREFIX)) {
             return StringUtils.EMPTY;
         }
-        String[] weIdFields = StringUtils.splitByWholeSeparator(weId, ":");
+        String[] weIdFields = StringUtils.splitByWholeSeparator(weId, WeIdConstant.WEID_SEPARATOR);
         return weIdFields[weIdFields.length - 1];
     }
 
@@ -89,6 +89,7 @@ public final class WeIdUtils {
     public static boolean isWeIdValid(String weId) {
         return StringUtils.isNotEmpty(weId)
             && StringUtils.startsWith(weId, WeIdConstant.WEID_PREFIX)
+            && isMatchTheChainId(weId)
             && isValidAddress(convertWeIdToAddress(weId));
     }
 
@@ -167,6 +168,20 @@ public final class WeIdUtils {
         } catch (Exception e) {
             return false;
         }
+    }
+    
+    /**
+     * check if the chainId.
+     *
+     * @param weId given weId
+     * @return true if yes, false otherwise.
+     */
+    public static boolean isMatchTheChainId(String weId) {
+        String[] weIdFields = StringUtils.splitByWholeSeparator(weId, WeIdConstant.WEID_SEPARATOR);
+        if (weIdFields.length == 4) {
+            return weIdFields[2].equals(CHAIN_ID);
+        }
+        return true;  
     }
 
     /**
