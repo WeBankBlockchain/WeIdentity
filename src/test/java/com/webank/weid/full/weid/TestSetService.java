@@ -150,7 +150,8 @@ public class TestSetService extends TestBaseServcie {
         ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
         LogUtil.info(logger, "setService", response);
 
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.WEID_SETSERVICE_TYPE_INVALID.getCode(), 
+            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
