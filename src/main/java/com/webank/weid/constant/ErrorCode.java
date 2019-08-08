@@ -73,9 +73,9 @@ public enum ErrorCode {
     CPT_JSON_SCHEMA_INVALID(100301, "cpt json schema is invalid"),
 
     /**
-     * cptId is null.
+     * cptId illegal.
      */
-    CPT_ID_NULL(100303, "cptId is null"),
+    CPT_ID_ILLEGAL(100303, "cptId illegal"),
 
     /**
      * cpt event log is null.
@@ -559,6 +559,13 @@ public enum ErrorCode {
      * the authority of the weIdentity DID is invalid.
      */
     WEID_AUTHORITY_INVALID(100109, "the authority of the weIdentity DID is invalid."),
+    
+    /**
+     * the length of the setService type must be 18 bytes or less.
+     */
+    WEID_SETSERVICE_TYPE_INVALID(
+        100110, "the length of service type is overlimit."
+    ),
 
     /**
      * transaction timeout.

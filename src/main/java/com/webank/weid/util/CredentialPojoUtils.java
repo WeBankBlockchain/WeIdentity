@@ -422,7 +422,7 @@ public final class CredentialPojoUtils {
             return ErrorCode.ILLEGAL_INPUT;
         }
         if (args.getCptId() == null || args.getCptId().intValue() < 0) {
-            return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
+            return ErrorCode.CPT_ID_ILLEGAL;
         }
         if (!WeIdUtils.isWeIdValid(args.getIssuer())) {
             return ErrorCode.CREDENTIAL_ISSUER_INVALID;
@@ -471,7 +471,7 @@ public final class CredentialPojoUtils {
             return ErrorCode.ILLEGAL_INPUT;
         }
         if (args.getCptId() == null || args.getCptId().intValue() < 0) {
-            return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
+            return ErrorCode.CPT_ID_ILLEGAL;
         }
         if (!WeIdUtils.isWeIdValid(args.getIssuer())) {
             return ErrorCode.CREDENTIAL_ISSUER_INVALID;

@@ -132,7 +132,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
         logger.info("testVerifyEvidenceCase6 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
         Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode());
+            ErrorCode.CPT_ID_ILLEGAL.getCode());
     }
 
     /**
