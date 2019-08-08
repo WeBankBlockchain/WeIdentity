@@ -118,7 +118,8 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, null);
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_ID_NULL.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(), 
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
@@ -134,7 +135,8 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, -1);
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(), 
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
