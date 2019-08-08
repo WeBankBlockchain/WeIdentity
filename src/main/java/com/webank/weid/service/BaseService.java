@@ -202,9 +202,10 @@ public abstract class BaseService {
         logger.info("direct route request, seq : {}, body ：{}", amopCommonArgs.getMessageId(),
             requestBodyStr);
         AmopResponse response = weServer.sendChannelMessage(amopCommonArgs, timeOut);
-        logger.info("direct route response, seq : {}, errorCode : {}, body : {}",
+        logger.info("direct route response, seq : {}, errorCode : {}, errorMsg : {}, body : {}",
             response.getMessageId(),
             response.getErrorCode(),
+            response.getErrorMessage(),
             response.getResult()
         );
         ResponseData<T> responseStruct = new ResponseData<>();

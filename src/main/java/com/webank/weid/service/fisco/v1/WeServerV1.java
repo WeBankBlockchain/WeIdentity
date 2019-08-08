@@ -48,7 +48,6 @@ import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.rpc.callback.OnNotifyCallbackV1;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
-import com.webank.weid.util.DataToolUtils;
 
 public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
 
@@ -152,7 +151,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
         ChannelRequest request = new ChannelRequest();
         request.setTimeout(super.getTimeOut(timeOut));
         request.setToTopic(amopCommonArgs.getToOrgId());
-        request.setMessageID(DataToolUtils.getUuId32());
+        request.setMessageID(amopCommonArgs.getMessageId());
         request.setContent(amopCommonArgs.getMessage());
 
         ChannelResponse response = this.getService().sendChannelMessage2(request);
