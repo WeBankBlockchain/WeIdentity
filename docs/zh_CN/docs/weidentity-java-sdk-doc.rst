@@ -2049,9 +2049,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - WEID_PRIVATEKEY_DOES_NOT_MATCH
      - 100106
      - 私钥不与WeIdentity DID所对应
-   * - WEID_SETSERVICE_TYPE_INVALID
+   * - WEID_SERVICE_TYPE_OVERLIMIT
      - 100110
-     - type字段超过限制
+     - type字段超长
    * - TRANSACTION_TIMEOUT
      - 160001
      - 超时
