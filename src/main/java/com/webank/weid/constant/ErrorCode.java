@@ -561,9 +561,9 @@ public enum ErrorCode {
     WEID_AUTHORITY_INVALID(100109, "the authority of the weIdentity DID is invalid."),
     
     /**
-     * the length of the setService type must be 18 bytes or less.
+     * the length of the setService type is overlimit.
      */
-    WEID_SETSERVICE_TYPE_INVALID(
+    WEID_SERVICE_TYPE_OVERLIMIT(
         100110, "the length of service type is overlimit."
     ),
 
