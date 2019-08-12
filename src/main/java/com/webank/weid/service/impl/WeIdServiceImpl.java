@@ -290,7 +290,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
         if (!verifyServiceType(setServiceArgs.getType())) {
             logger.error("[setService]: the length of service type is overlimit");
-            return new ResponseData<>(false, ErrorCode.WEID_SETSERVICE_TYPE_INVALID);
+            return new ResponseData<>(false, ErrorCode.WEID_SERVICE_TYPE_OVERLIMIT);
         }
         String weId = setServiceArgs.getWeId();
         String serviceType = setServiceArgs.getType();
@@ -298,8 +298,11 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (WeIdUtils.isWeIdValid(weId)) {
             String privateKey = setServiceArgs.getUserWeIdPrivateKey().getPrivateKey();
             try {
-                String attributeKey = WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
-                    + serviceType;
+                String attributeKey = new StringBuffer()
+                    .append(WeIdConstant.WEID_DOC_SERVICE_PREFIX)
+                    .append(WeIdConstant.SEPARATOR)
+                    .append(serviceType)
+                    .toString();
                 return weIdServiceEngine
                     .setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey,
                         serviceEndpoint, privateKey);
@@ -400,7 +403,11 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
     }
     
     private boolean verifyServiceType(String type) {
-        String serviceType = WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR + type;
+        String serviceType = new StringBuffer()
+            .append(WeIdConstant.WEID_DOC_SERVICE_PREFIX)
+            .append(WeIdConstant.SEPARATOR)
+            .append(type)
+            .toString();
         int serviceTypeLength = serviceType.getBytes(StandardCharsets.UTF_8).length;
         return serviceTypeLength <= WeIdConstant.BYTES32_FIXED_LENGTH;
     }
