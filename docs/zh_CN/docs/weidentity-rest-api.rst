@@ -2,7 +2,10 @@
 .. _weidentity-rest-api:
 
 WeIdentity RestService API 说明文档
-----------------------------------------
+=====================================
+
+WeIdentity核心API
+-------------------
 
 1. 总体介绍
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -860,7 +863,128 @@ WeIdentity RestService API 说明文档
 .. code-block:: java
 
     {
+        "respBody": true,
+        "ErrorCode": 0,
+        "ErrorMessage": "success"
+    }
+
+
+WeIdentity Endpoint Service API
+------------------------------------
+
+1. 获取所有已注册的Endpoint信息
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+调用接口：
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 50
+
+   * - 标题
+     - 描述
+   * - 接口名
+     - weid/api/endpoint
+   * - Method
+     - GET
+   * - Content-Type
+     - application/json
+
+接口入参：无
+
+接口返回：
+
+.. code-block:: java
+
+    {
         "ErrorCode": 0,
         "ErrorMessage": "success",
-        "respBody": True,
+        "respBody": [
+            {
+                "requestName": "create-passphrase",
+                "inAddr": [
+                    "127.0.0.1:10090",
+                    "127.0.0.1:10091"
+                ],
+                "description": "Create a valid random passphrase"
+            },
+            {
+                "requestName": "verify-passphrase",
+                "inAddr": [
+                    "127.0.0.1:20090",
+                    "127.0.0.1:20091"
+                ],
+                "description": "Verify a passphrase"
+            }
+        ]
+    }
+
+
+2. 进行Endpoint调用
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+调用接口：
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 50
+
+   * - 标题
+     - 描述
+   * - 接口名
+     - weid/api/endpoint/{endpoint}
+   * - Method
+     - POST
+   * - Content-Type
+     - application/json
+
+
+接口入参：
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 60 20
+
+   * - Key
+     - Value
+     - Required
+   * - /{endpoint}
+     - 在API路径中标明的API名，String
+     - Y
+   * - body
+     - 以``“```”``分隔的多个传入服务端用于执行API的参数
+     - Y
+
+接口入参：
+
+.. code-block:: java
+
+    {
+        "body": "did:weid:0x12025448644151248e5c1115b23a3fe55f4158e4153```25"
+    }
+
+
+接口返回: application/json
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 50
+
+   * - Key
+     - Value
+   * - ErrorCode
+     - 错误码，0表示成功
+   * - ErrorMessage
+     - 错误信息
+   * - respBody
+     - SDK侧的返回值，String
+
+接口返回：
+
+.. code-block:: java
+
+    {
+        "ErrorCode": 0,
+        "ErrorMessage": "success",
+        "respBody": "did:weid:0x1Ae5b88d37327830307ab8da0ec5D8E8692A35D3",
     }

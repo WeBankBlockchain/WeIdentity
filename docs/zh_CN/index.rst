@@ -26,4 +26,5 @@ WeIdentity文档
    docs/miscellaneous.md
    docs/weidentity-rest.rst
    docs/weidentity-installation.rst
-   WeIdentity JAVA SDK 文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>
+   docs/weidentity-endpoint.rst
+   WeIdentity Java SDK 文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>
