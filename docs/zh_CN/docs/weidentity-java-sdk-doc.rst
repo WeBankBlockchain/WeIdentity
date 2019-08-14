@@ -46,16 +46,19 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 
 .. code-block:: text
 
+   ├─ app：测试小工具
    ├─ config：FISCO-BCOS的合约配置
    ├─ constant：系统常量相关
    └─ contract：通过FISCO-BCOS Web3sdk生成的合约Java接口文件
       └─ deploy: 合约部署相关
+   ├─ exception: 异常定义
    └─ protocol：接口参数相关定义
       ├─ base: 基础数据类型定义
       ├─ request: 接口入参定义
       └─ response: 接口出参定义
    ├─ rpc：接口定义
    ├─ service：接口相关实现
+   ├─ suite：一些配套的工具
    └─ util：工具类实现
 
 基本数据结构
@@ -904,7 +907,14 @@ com.webank.weid.protocol.base.PresentationE
 接口简介
 --------
 
-整体上，WeIdentity Java SDK包括五个主要的接口，它们分别是：AuthorityIssuerService、CptService、CredentialService、WeIdService、EvidenceService。
+整体上，WeIdentity Java SDK包括五个主要的接口，它们分别是：WeIdService、AuthorityIssuerService、CptService、CredentialService、EvidenceService。
+
+
+* WeIdService
+
+WeIdentity DID相关功能的核心接口。
+
+本接口提供WeIdentity DID的创建、获取信息、设置属性等相关操作。
 
 
 * AuthorityIssuerService
@@ -933,13 +943,6 @@ com.webank.weid.protocol.base.PresentationE
 凭证签发相关功能的核心接口(操作Pojo)。
 
 本接口提供凭证的签发和验证操作。
-
-
-* WeIdService
-
-WeIdentity DID相关功能的核心接口。
-
-本接口提供WeIdentity DID的创建、获取信息、设置属性等相关操作。
 
 
 * EvidenceService
@@ -8230,7 +8233,24 @@ com.webank.weid.protocol.base.CredentialPojo
    errorMessage: success
    transactionInfo:null
 	
-	
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用CreateCredential()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 为claim中的每个字段生成盐值
+   CredentialPojoService->>CredentialPojoService: 生成签发日期、生成数字签名
+   CredentialPojoService-->>调用者: 返回凭证
+   
 ----
 
 2. createSelectiveCredential
@@ -8499,6 +8519,24 @@ com.webank.weid.protocol.response.TransactionInfo
    transactionInfo:null
 
 
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用createSelectiveCredential()，传入原始凭证
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 根据claimPolicy来隐藏不披露的字段
+   CredentialPojoService->>CredentialPojoService: 生成签发日期、生成数字签名
+   CredentialPojoService-->>调用者: 返回凭证
+   
+
 ----
 
 3. verify
@@ -8736,6 +8774,51 @@ com.webank.weid.protocol.response.TransactionInfo
    transactionInfo:null
 
 
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   participant CptService
+   participant WeIdService
+   participant 区块链节点
+   调用者->>CredentialPojoService: 调用verify()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>WeIdService: 查询WeIdentity DID存在性
+   WeIdService->>区块链节点: 调用智能合约，查询WeIdentity DID属性
+   区块链节点-->>WeIdService: 返回查询结果
+   WeIdService-->>CredentialPojoService: 返回查询结果
+   opt 查询不存在
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CptService: 查询CPT存在性及Claim关联语义
+   CptService->>区块链节点: 调用智能合约，查询CPT
+   区块链节点-->>CptService: 返回查询结果
+   CptService-->>CredentialPojoService: 返回查询结果
+   opt 不符合CPT格式要求
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 验证过期、撤销与否
+   opt 任一验证失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   opt 未提供验签公钥
+   CredentialPojoService->>WeIdService: 查询Issuer对应公钥
+   WeIdService->>区块链节点: 调用智能合约，查询Issuer的WeIdentity DID Document
+   区块链节点-->>WeIdService: 返回查询结果
+   WeIdService-->>CredentialPojoService: 返回查询结果
+   end
+   CredentialPojoService->>CredentialPojoService: 通过公钥与签名对比，验证Issuer是否签发此凭证
+   opt 验证签名失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService-->>调用者: 返回成功
+   
 ----
 
 4. verify
@@ -8978,6 +9061,38 @@ com.webank.weid.protocol.response.TransactionInfo
    errorMessage: success
    transactionInfo:null
 
+
+**时序图**
+
+.. mermaid::
+
+   
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   participant CptService
+   participant 区块链节点
+   调用者->>CredentialPojoService: 调用verify()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CptService: 查询CPT存在性及Claim关联语义
+   CptService->>区块链节点: 调用智能合约，查询CPT
+   区块链节点-->>CptService: 返回查询结果
+   CptService-->>CredentialPojoService: 返回查询结果
+   opt 不符合CPT格式要求
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 验证过期、撤销与否
+   opt 任一验证失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 通过公钥与签名对比，验证Issuer是否签发此凭证
+   opt 验证签名失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService-->>调用者: 返回成功
 
 ----    
 
@@ -9295,6 +9410,44 @@ com.webank.weid.protocol.response.TransactionInfo
    errorMessage: success
    transactionInfo:null
 
+
+**时序图**
+
+.. mermaid::
+
+   
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   participant CptService
+   participant 区块链节点
+   调用者->>CredentialPojoService: 调用verify()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+loop 遍历credentialPojo列表
+  CredentialPojoService->>CredentialPojoService: 验证policy和claim里的key是否一致
+   opt 任一验证失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CptService: 查询CPT存在性及Claim关联语义
+   CptService->>区块链节点: 调用智能合约，查询CPT
+   区块链节点-->>CptService: 返回查询结果
+   CptService-->>CredentialPojoService: 返回查询结果
+   opt 不符合CPT格式要求
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 验证过期、撤销与否
+   opt 任一验证失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 通过公钥与签名对比，验证Issuer是否签发此凭证
+   opt 验证签名失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+end
+   CredentialPojoService-->>调用者: 返回成功
 
 ----
 
@@ -9710,6 +9863,33 @@ com.webank.weid.protocol.base.PresentationE
    errorMessage: success
    transactionInfo:null
 
+
+**时序图**
+
+.. mermaid::
+
+  
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用verify()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+loop 遍历credentialPojo列表
+  CredentialPojoService->>CredentialPojoService: 根据credentialPojo中的cptId获取对应的claimPolicy
+   opt claimPolicy
+   CredentialPojoService-->>调用者: continue
+   end
+   CredentialPojoService->>CredentialPojoService: 根据claimPolicy，调用createSelectiveCredential()方法，做选择性披露
+   opt 选择性披露失败
+   CredentialPojoService-->>调用者: 失败退出
+   end
+end
+  CredentialPojoService->>CredentialPojoService: 设置context等元数据属性
+  CredentialPojoService->>CredentialPojoService: 对presentation整体签名，放入proof结构，同时设置其他proof属性，用于验证
+  CredentialPojoService-->>调用者: 返回成功
 
 ----
 
@@ -10293,6 +10473,35 @@ java.util.List<java.lang.String>
    verifierWeIdList.add(weId);
    jsonTransportation = jsonTransportation.specify(verifierWeIdList);
    
+
+**时序图**
+
+.. mermaid::
+
+  
+   sequenceDiagram
+   participant 调用者
+   participant JsonTransportation
+   participant WeIdService
+   participant 区块链
+   调用者->>JsonTransportation: 调用specify()
+   JsonTransportation->>JsonTransportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   JsonTransportation-->>调用者: 报错，提示参数不合法并退出
+   end
+loop 遍历每个WeID
+   JsonTransportation->>WeIdService: 判断WeID的合法性，以及存在性，调用isWeIdExist()方法
+   WeIdService->>区块链: 查询该WeID是否存在
+   区块链-->>WeIdService: 返回查询结果
+   WeIdService-->>JsonTransportation: 返回查询结果
+   opt WeID不存在
+   JsonTransportation-->>调用者: 报错，提示WeID不存在
+   end
+   JsonTransportation->>JsonTransportation: 放入verifier list里
+end
+   JsonTransportation-->>调用者: 返回成功
+
+
 ----
 
 2. serialize
@@ -10419,7 +10628,41 @@ java.util.List<java.lang.String>
            .newJsonTransportation()
            .specify(verifierWeIdList)
            .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
-           
+
+
+
+**时序图**
+
+.. mermaid::
+
+  
+  sequenceDiagram
+  participant 调用者
+  participant JsonTransportation
+  调用者->>JsonTransportation: 调用serialize()
+  JsonTransportation->>JsonTransportation: 入参非空、格式及合法性检查
+  opt 入参校验失败
+  JsonTransportation-->>调用者: 报错，提示参数不合法并退出
+  end
+  JsonTransportation->>JsonTransportation: 拼装Json格式的协议头数据
+  JsonTransportation->>JsonTransportation: 判断是采用加密方式还是非加密方式
+  opt 非加密方式
+  JsonTransportation->>JsonTransportation: 将presentation原文放入协议里
+  end
+  opt 加密方式
+  JsonTransportation->>EncodeProcessor: 调用encode方法
+  EncodeProcessor->>EncodeProcessor: 采用AES算法，生成对称加密秘钥
+  EncodeProcessor->>persistence: 保存至存储库里
+  persistence-->>EncodeProcessor: 返回
+  EncodeProcessor-->>JsonTransportation: 返回加密之后的presentation数据
+  JsonTransportation->>JsonTransportation: 将presentation密文放入协议里
+  end
+  JsonTransportation->>DataToolUtils: 调用objToJsonStrWithNoPretty()将协议序列化成Json数据
+  DataToolUtils-->>JsonTransportation:返回包含presentation的Json数据
+  JsonTransportation-->>调用者: 返回成功
+
+   
+
 ----
 
 3. deserialize
@@ -10554,6 +10797,40 @@ java.util.List<java.lang.String>
            .newJsonTransportation()
            .specify(verifierWeIdList)
            .deserialize(transString,PresentationE.class);
+
+
+**时序图**
+
+.. mermaid::
+
+  
+   sequenceDiagram
+   participant 调用者
+   participant JsonTransportation
+   调用者->>JsonTransportation: 调用deserialize()
+   JsonTransportation->>JsonTransportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   JsonTransportation-->>调用者: 报错，提示参数不合法并退出
+   end
+   JsonTransportation->>DataToolUtils: 调用deserialize()方法，反序列化协议数据
+   DataToolUtils-->>JsonTransportation:返回Json格式的协议数据
+   JsonTransportation->>JsonTransportation: 解析协议，判断是采用加密方式还是非加密方式
+   opt 非加密方式
+   JsonTransportation->>DataToolUtils: 调用deserialize方法将协议里的presentation反序列化为对象
+   DataToolUtils-->>JsonTransportation: 返回PresentationE对象
+   end
+   opt 加密方式
+   JsonTransportation->>EncodeProcessor: 调用decode方法
+   EncodeProcessor->>User Agent: 发送AMOP请求，获取对称加密秘钥
+   User Agent-->>EncodeProcessor: 返回加密秘钥
+   EncodeProcessor->>EncodeProcessor: 解密协议数据
+   EncodeProcessor-->>JsonTransportation: 返回解密后的presentation数据
+   JsonTransportation->>DataToolUtils: 调用deserialize方法将协议里的presentation反序列化
+   DataToolUtils-->>JsonTransportation: 返回PresentationE对象presentation反序列化为对象
+   end
+
+ JsonTransportation-->>调用者: 返回成功
+
 ----
 
 
@@ -10603,6 +10880,34 @@ java.util.List<java.lang.String>
    verifierWeIdList.add(weId);
    JsonTransportation jsonTransportation = qrCodeTransportation.specify(verifierWeIdList);
    
+
+**时序图**
+
+.. mermaid::
+
+  
+   sequenceDiagram
+   participant 调用者
+   participant QrCodeTransportation
+   participant WeIdService
+   participant 区块链
+   调用者->>QrCodeTransportation: 调用specify()
+   QrCodeTransportation->>QrCodeTransportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   QrCodeTransportation-->>调用者: 报错，提示参数不合法并退出
+   end
+loop 遍历每个WeID
+   QrCodeTransportation->>WeIdService: 判断WeID的合法性，以及存在性，调用isWeIdExist()方法
+   WeIdService->>区块链: 查询该WeID是否存在
+   区块链-->>WeIdService: 返回查询结果
+   WeIdService-->>QrCodeTransportation: 返回查询结果
+   opt WeID不存在
+   QrCodeTransportation-->>调用者: 报错，提示WeID不存在
+   end
+   QrCodeTransportation->>QrCodeTransportation: 放入verifier list里
+end
+   QrCodeTransportation-->>调用者: 返回成功
+
 ----
 
 2. serialize
@@ -10723,7 +11028,36 @@ java.util.List<java.lang.String>
            .newQrCodeTransportation()
            .specify(verifierWeIdList)
            .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
-           
+
+
+**时序图**
+
+.. mermaid::
+
+  
+  sequenceDiagram
+  participant 调用者
+  participant QrCodeTransportation
+  调用者->>QrCodeTransportation: 调用serialize()
+  QrCodeTransportation->>QrCodeTransportation: 入参非空、格式及合法性检查
+  opt 入参校验失败
+  QrCodeTransportation-->>调用者: 报错，提示参数不合法并退出
+  end
+  QrCodeTransportation->>QrCodeTransportation: 拼装协议头数据
+  QrCodeTransportation->>QrCodeTransportation: 判断是采用加密方式还是非加密方式
+  opt 非加密方式
+  QrCodeTransportation->>QrCodeTransportation: 将presentation原文放入协议里
+  end
+  opt 加密方式
+  QrCodeTransportation->>EncodeProcessor: 调用encode方法
+  EncodeProcessor->>EncodeProcessor: 采用AES算法，生成对称加密秘钥
+  EncodeProcessor->>persistence: 保存至存储库里
+  persistence-->>EncodeProcessor: 返回
+  EncodeProcessor-->>QrCodeTransportation: 返回加密之后的presentation数据
+  QrCodeTransportation->>QrCodeTransportation: 将presentation密文放入协议里
+  end
+  QrCodeTransportation-->>调用者: 返回QRCode协议数据
+
 ----
 
 3. deserialize
@@ -10852,6 +11186,39 @@ java.util.List<java.lang.String>
            .newQrCodeTransportation()
            .specify(verifierWeIdList)
            .deserialize(transString,PresentationE.class);
+
+
+**时序图**
+
+.. mermaid::
+
+  
+   sequenceDiagram
+   participant 调用者
+   participant QrCodeTransportation
+   调用者->>QrCodeTransportation: 调用deserialize()
+   QrCodeTransportation->>QrCodeTransportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   QrCodeTransportation-->>调用者: 报错，提示参数不合法并退出
+   end
+   QrCodeTransportation->>QrCodeTransportation: 解析协议，判断是采用加密方式还是非加密方式
+   opt 非加密方式
+   QrCodeTransportation->>DataToolUtils: 调用deserialize方法将协议里的presentation反序列化为对象
+   DataToolUtils-->>QrCodeTransportation: 返回PresentationE对象
+   end
+   opt 加密方式
+   QrCodeTransportation->>EncodeProcessor: 调用decode方法
+   EncodeProcessor->>User Agent: 发送AMOP请求，获取对称加密秘钥
+   User Agent-->>EncodeProcessor: 返回加密秘钥
+   EncodeProcessor->>EncodeProcessor: 解密协议数据
+   EncodeProcessor-->>QrCodeTransportation: 返回解密后的presentation数据
+   QrCodeTransportation->>DataToolUtils: 调用deserialize方法将协议里的presentation反序列化
+   DataToolUtils-->>QrCodeTransportation: 返回PresentationE对象presentation反序列化为对象
+   end
+
+ QrCodeTransportation-->>调用者: 返回成功
+
+
 ----
 
 
@@ -10954,7 +11321,7 @@ Persistence
 .. code-block:: java
 
    Persistence persistence = new MysqlDriver();
-   ResponseData<Integer> res = persistence.save("datasource1:sdk_all_data", "123456", "data123456");
+   ResponseData<Integer> res = persistence.save("domain1", "123456", "data123456");
    
    
 .. code-block:: text
