@@ -9,7 +9,7 @@ WeIdentity Endpoint Service部署指引
 
 Endpoint Service在代理端依托于RestService，环境要求也与其一致，请见 \ `Endpoint Service 部署文档 <./weidentity-endpoint-deploy.html>`_\。
 
-随后，在``dist/conf``目录下，修改``application.properties``文件中的主机端口列表这一项。您需要在此处以逗号分隔所有需要连接的远程服务端，指明其主机IP及端口。这样，Endpoint Service就会在后台以您配置的时间间隔（此处的``fetch.period.seconds``）去远程拉取注册在服务端的Endpoint。
+随后，在 ``dist/conf`` 目录下，修改 ``application.properties`` 文件中的主机端口列表这一项。您需要在此处以逗号分隔所有需要连接的远程服务端，指明其主机IP及端口。这样，Endpoint Service就会在后台以您配置的时间间隔（此处的 ``fetch.period.seconds`` ）去远程拉取注册在服务端的Endpoint。
 
 .. code-block:: bash
 
@@ -26,7 +26,7 @@ Endpoint Service在代理端依托于RestService，环境要求也与其一致�
 
 Endpoint Service在服务端依托于WeIdentity-Java-SDK，环境要求也与其一致，请见 `Java-SDK 部署环境要求 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-installation.html>`_。
 
-在``src/main/resources``目录下，修改``weidentity.properties``文件中的``rpc.listener.port``这一项内容，以具体确定在哪个端口上进行监听。
+在 ``src/main/resources`` 目录下，修改 ``weidentity.properties`` 文件中的 ``rpc.listener.port`` 这一项内容，以具体确定在哪个端口上进行监听。
 
 .. code-block:: bash
 
@@ -74,7 +74,7 @@ Endpoint Service在服务端依托于WeIdentity-Java-SDK，环境要求也与其
 3. 在服务端注册或注销您的Endpoint
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-为了注册您的Endpoint以调用所需的Java方法，您需要在服务端集成时，为您需要注册的每个Endpoint，实现一个对应的``EndpointFunctor``接口。此接口包括两个方法：``execute()``和``getDescription()``，其中前者界定了具体当代理端的RPC请求发送过来时需要进行的操作，后者则需要提供一段对此接口功能的描述。在实现完成之后，还需要调用``EndpointHandler``类的``registerEndpoint()``方法进行注册。
+为了注册您的Endpoint以调用所需的Java方法，您需要在服务端集成时，为您需要注册的每个Endpoint，实现一个对应的 ``EndpointFunctor`` 接口。此接口包括两个方法： ``execute()`` 和 ``getDescription()`` ，其中前者界定了具体当代理端的RPC请求发送过来时需要进行的操作，后者则需要提供一段对此接口功能的描述。在实现完成之后，还需要调用 ``EndpointHandler`` 类的 ``registerEndpoint()`` 方法进行注册。
 
 您可以参考SampleEndpointFunctor.java的相关实现。
 
