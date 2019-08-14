@@ -903,16 +903,16 @@ WeIdentity Endpoint Service API
             {
                 "requestName": "create-passphrase",
                 "inAddr": [
-                    "127.0.0.1:10090",
-                    "127.0.0.1:10091"
+                    "127.0.0.1:6090",
+                    "127.0.0.1:6190"
                 ],
                 "description": "Create a valid random passphrase"
             },
             {
                 "requestName": "verify-passphrase",
                 "inAddr": [
-                    "127.0.0.1:20090",
-                    "127.0.0.1:20091"
+                    "127.0.0.1:6290",
+                    "127.0.0.1:6390"
                 ],
                 "description": "Verify a passphrase"
             }
@@ -952,7 +952,7 @@ WeIdentity Endpoint Service API
      - 在API路径中标明的API名，String
      - Y
    * - body
-     - 以``“```”``分隔的多个传入服务端用于执行API的参数
+     - 以```分隔的多个传入服务端用于执行API的参数
      - Y
 
 接口入参：

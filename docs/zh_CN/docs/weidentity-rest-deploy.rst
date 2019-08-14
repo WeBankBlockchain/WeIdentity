@@ -90,14 +90,14 @@ Server 的环境要求与 WeIdentity-Java-SDK 的 `环境要求 <https://weident
 
 * 拷贝您 WeIdentity 合约部署者的私钥到 ``dist/conf`` 目录下，并重命名为``ecdsa_key``。如果您使用部署工具部署了 WeIdentity 合约，这个文件在 ``output/admin/`` 目录。如果您使用源码部署，这个文件在源代码根目录下。
 
-* 修改 ``dist/conf/application.properties`` ，填入需要打开的监听端口地址（用于 RestServer 监听外来的 HTTP/HTTPS RESTful 请求，默认为 20190/20191，不可被其他程序占用）。同时，请确认用来调用默认合约部署者私钥的暗语；由于此暗语可直接调用 WeIdentity 合约部署者的私钥，权限较高（详见 \ `RestService API 说明文档 <./weidentity-rest-api.html>`_\ ），因此请您务必对其进行修改。
+* 修改 ``dist/conf/application.properties`` ，填入需要打开的监听端口地址（用于 RestServer 监听外来的 HTTP/HTTPS RESTful 请求，默认为 6090/6091，不可被其他程序占用）。同时，请确认用来调用默认合约部署者私钥的暗语；由于此暗语可直接调用 WeIdentity 合约部署者的私钥，权限较高（详见 \ `RestService API 说明文档 <./weidentity-rest-api.html>`_\ ），因此请您务必对其进行修改。
 
 .. code-block:: bash
 
     # Server监听端口地址
-    server.port=20191
+    server.port=6091
     # HTTP重定向地址
-    server.http.port=20190
+    server.http.port=6090
     # 合约部署者私钥暗语
     default.passphrase=ecdsa_key
 
