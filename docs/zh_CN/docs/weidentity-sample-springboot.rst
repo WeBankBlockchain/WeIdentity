@@ -18,15 +18,7 @@ spring-boot服务方式使用
 2. 配置与部署
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2.1 下载 weid-sample 源码：
-''''''''''''''''''''''''''''''''''''
-
-.. code:: shell
-
-    git clone https://github.com/WeBankFinTech/weid-sample.git
-    
-
-2.2 部署 weid-java-sdk 与配置基本信息
+2.1 部署 weid-java-sdk 与配置基本信息
 ''''''''''''''''''''''''''''''''''''''
 
 -  安装部署 weid-java-sdk
@@ -47,9 +39,9 @@ spring-boot服务方式使用
    若您是智能合约发布的机构，您可以参考以下进行配置：
 
 
-2.3 基本流程的演示
+2.2 基本流程的演示
 ''''''''''''''''''''''''
-2.3.1 编译和运行
+2.2.1 编译和运行
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 - 编译 weid-sample
@@ -81,7 +73,7 @@ spring-boot服务方式使用
     [main] INFO  TomcatEmbeddedServletContainer() - Tomcat started on port(s): 20190 (https) 20191 (http)
     [main] INFO  SampleApp() - Started SampleApp in 3.588 seconds (JVM running for 4.294)
 
-2.3.2 流程演示
+2.2.2 流程演示
 >>>>>>>>>>>>>>>>>>>>>>>>
 
 以下将为您演示

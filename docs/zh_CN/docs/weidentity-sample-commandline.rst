@@ -223,4 +223,4 @@ weid-sample 里的 AMOP 服务是模拟 Verifier 向 User Agent 发送获取秘�
     begin get the presentation json...
 
 
-至此，您已经体验了 weid-sample 实现的各个角色的运行流程，实现的入口类在weid-sample工程的 ``com.webank.weid.demo.server.SampleApp``，您可以参考进行您的 Java 应用开发。
+至此，您已经体验了 weid-sample 实现的各个角色的运行流程，实现的入口类在weid-sample工程的 ``com.webank.weid.demo.command.DemoCommand``，您可以参考进行您的 Java 应用开发。
