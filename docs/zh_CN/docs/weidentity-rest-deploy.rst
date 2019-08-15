@@ -86,7 +86,7 @@ Server 的环境要求与 WeIdentity-Java-SDK 的 `环境要求 <https://weident
 
 .. code-block:: xml
 
-    nodes=WeIdentity@10.107.105.203:8812,WeIdentity@10.107.105.107:8900
+    nodes=WeIdentity@127.0.0.1:8812,WeIdentity@127.0.0.1:8900
 
 * 拷贝您 WeIdentity 合约部署者的私钥到 ``dist/conf`` 目录下，并重命名为``ecdsa_key``。如果您使用部署工具部署了 WeIdentity 合约，这个文件在 ``output/admin/`` 目录。如果您使用源码部署，这个文件在源代码根目录下。
 
