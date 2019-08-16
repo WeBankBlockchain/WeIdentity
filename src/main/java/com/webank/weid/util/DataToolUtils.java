@@ -111,6 +111,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -144,6 +145,8 @@ public final class DataToolUtils {
 
     // LOGO高度
     private static final int LOGO_HEIGHT = 60;
+    
+    private static final int SERIALIZED_SIGNATUREDATA_LENGTH = 65;
 
     private static final int radix = 10;
     
@@ -634,6 +637,9 @@ public final class DataToolUtils {
      */
     public static Sign.SignatureData simpleSignatureDeserialization(
         byte[] serializedSignatureData) {
+        if (SERIALIZED_SIGNATUREDATA_LENGTH != serializedSignatureData.length) {
+            throw new WeIdBaseException("signature data illegal");
+        }
         byte v = serializedSignatureData[0];
         byte[] r = new byte[32];
         byte[] s = new byte[32];
