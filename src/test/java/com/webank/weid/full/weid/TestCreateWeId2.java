@@ -19,13 +19,9 @@
 
 package com.webank.weid.full.weid;
 
-import java.util.List;
-import java.util.concurrent.Future;
-
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,14 +30,14 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.WeIdContract;
-import com.webank.weid.contract.v1.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.PrivateKeyIllegalException;
-import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.RawTransactionService;
+import com.webank.weid.service.impl.RawTransactionServiceImpl;
 import com.webank.weid.service.impl.engine.BaseEngine;
 
 /**
@@ -54,24 +50,22 @@ public class TestCreateWeId2 extends TestBaseServcie {
     private static final Logger logger = LoggerFactory.getLogger(TestCreateWeId2.class);
 
     /**
-     * case: create success.
+     * case: create weid with param success.
      */
     @Test
-    public void testCreateWeIdCase1() {
-
+    public void testCreateWeId_paramSucess() {
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
         LogUtil.info(logger, "createWeId", response);
-
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
     }
 
     /**
-     * case: createWeIdArgs is null.
+     * case: when createWeIdArgs is null,then return ILLEGAL_INPUT.
      */
     @Test
-    public void testCreateWeIdCase2() {
+    public void testCreateWeId_weIdArgsIsNull() {
         CreateWeIdArgs createWeIdArgs = null;
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
         LogUtil.info(logger, "createWeId", response);
@@ -81,10 +75,104 @@ public class TestCreateWeId2 extends TestBaseServcie {
     }
 
     /**
+     * case: when public key is wrong,then return WEID_PRIVATEKEY_INVALID.
+     */
+    @Test
+    public void testCreateWeId_publicKeyIsW() {
+        CreateWeIdArgs createWeIdArgs = new CreateWeIdArgs();
+        createWeIdArgs.setPublicKey("019WEASDFE");
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
+     * case: when publickey is digtal,then return WEID_PRIVATEKEY_INVALID.
+     */
+    @Test
+    public void testCreateWeId_publicKeyIsDigtal() {
+        CreateWeIdArgs createWeIdArgs = new CreateWeIdArgs();
+        createWeIdArgs.setPublicKey("1234567493064");
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
+     * case: when public key is start with ox,then return WEID_PRIVATEKEY_INVALID.
+     */
+    @Test
+    public void testCreateWeId_publicKeyIsHex() {
+        CreateWeIdArgs createWeIdArgs = new CreateWeIdArgs();
+        createWeIdArgs.setPublicKey("0x11a3c3123");
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
+     * case: when public key contain special char,then return WEID_PRIVATEKEY_INVALID.
+     */
+    @Test
+    public void testCreateWeId_publicKeyContainSpecialChar() {
+        CreateWeIdArgs createWeIdArgs = new CreateWeIdArgs();
+        createWeIdArgs.setPublicKey("-~!@#$%^&.");
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
+     * case: when public key contain zh,then return WEID_PRIVATEKEY_INVALID.
+     */
+    @Test
+    public void testCreateWeId_publicKeyContainZh() {
+        CreateWeIdArgs createWeIdArgs = new CreateWeIdArgs();
+        createWeIdArgs.setPublicKey("我爱你中国");
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
+     * case: when public key is too long ,then return WEID_PRIVATEKEY_INVALID.
+     */
+    @Test
+    public void testCreateWeId_publicKeyIsTooLong() {
+        CreateWeIdArgs createWeIdArgs = new CreateWeIdArgs();
+        char[] chars = new char[100];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) i;
+        }
+        createWeIdArgs.setPublicKey(chars.toString());
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
      * case: publicKey is null.
      */
     @Test
-    public void testCreateWeIdCase3() {
+    public void testCreateWeId_publicKeyIsNull() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.setPublicKey(null);
@@ -101,7 +189,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
      * case: publicKey is Non integer string.
      */
     @Test
-    public void testCreateWeIdCase4() {
+    public void testCreateWeId_keyNotMatch() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.setPublicKey("abc");
@@ -115,10 +203,48 @@ public class TestCreateWeId2 extends TestBaseServcie {
     }
 
     /**
+     * case: when publicKey has been used,return WEID_ALREADY_EXIST.
+     */
+    @Test
+    public void testCreateWeId_pubKeyUsed() {
+        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
+        String publicKey = createWeIdArgs.getPublicKey();
+        System.out.println(publicKey);
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        createWeIdArgs.setPublicKey(publicKey);
+        ResponseData<String> response1 = weIdService.createWeId(createWeIdArgs);
+        Assert.assertEquals(ErrorCode.WEID_ALREADY_EXIST.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response1.getResult());
+    }
+
+    /**
+     * case: when private key has been used,return WEID_ALREADY_EXIST.
+     */
+    @Test
+    public void testCreateWeId_priKeyUsed() {
+        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+
+        CreateWeIdArgs createWeIdArgs1 = TestBaseUtil.buildCreateWeIdArgs();
+        createWeIdArgs1.setWeIdPrivateKey(createWeIdArgs.getWeIdPrivateKey());
+
+        ResponseData<String> response1 = weIdService.createWeId(createWeIdArgs1);
+        Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED.getCode(),
+            response1.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response1.getResult());
+    }
+
+    /**
      * case: weIdPrivateKey is null.
      */
     @Test
-    public void testCreateWeIdCase5() {
+    public void testCreateWeId_privateKeyIsNull() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.setWeIdPrivateKey(null);
@@ -132,10 +258,46 @@ public class TestCreateWeId2 extends TestBaseServcie {
     }
 
     /**
+     * case: weIdPrivateKey contains interer and string.
+     */
+    @Test
+    public void testCreateWeId_privateKeyContainIntAndChar() {
+
+        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey("019WEASDFE");
+        createWeIdArgs.setWeIdPrivateKey(weIdPrivateKey);
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
+     * case: weIdPrivateKey contains interer and string.
+     */
+    @Test
+    public void testCreateWeId_privateKeyIsInteger() {
+
+        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey("1234567493064");
+        createWeIdArgs.setWeIdPrivateKey(weIdPrivateKey);
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
      * case: privateKey is null.
      */
     @Test
-    public void testCreateWeIdCase6() {
+    public void testCreateWeId_setPrivateKeyNull() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.getWeIdPrivateKey().setPrivateKey(null);
@@ -152,7 +314,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
      * case: privateKey is invalid.
      */
     @Test
-    public void testCreateWeIdCase7() {
+    public void testCreateWeId_privateKeyIsInvaild() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.getWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxx");
@@ -163,6 +325,27 @@ public class TestCreateWeId2 extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+    }
+
+    /**
+     * case: privateKey has been used.
+     */
+    @Test
+    public void testCreateWeId_privateKeyIsExist() {
+
+        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
+        WeIdPrivateKey weIdPrivateKey = createWeIdArgs.getWeIdPrivateKey();
+        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+
+        createWeIdArgs.setWeIdPrivateKey(weIdPrivateKey);
+        ResponseData<String> response1 = weIdService.createWeId(createWeIdArgs);
+        LogUtil.info(logger, "createWeId", response1);
+        Assert.assertEquals(ErrorCode.WEID_ALREADY_EXIST.getCode(),
+            response1.getErrorCode().intValue());
     }
 
     /**
@@ -184,99 +367,32 @@ public class TestCreateWeId2 extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation returns null when invoking the getWeIdAttributeChangedEvents method.
+     * case: call transactionhex null - arbitrary.
      */
+
     @Test
-    public void testCreateWeIdCase9() {
-
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt) {
-                return null;
-            }
-        };
-
-        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
-        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        LogUtil.info(logger, "createWeId", response);
-
-        mockTest.tearDown();
-
-        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+    public void testCreateWeIdCase7() {
+        String hex = StringUtils.EMPTY;
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.createWeId(hex);
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             response.getErrorCode().intValue());
-        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
     }
 
     /**
-     * case: Simulation throws an InterruptedException when calling the
-     * getWeIdAttributeChangedEvents method.
+     * case: call transactionhex method - arbitrary.
      */
     @Test
-    public void testCreateWeIdCase10() {
-
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-
-        ResponseData<String> response = createWeIdForMock(mockFuture);
-        LogUtil.info(logger, "createWeId", response);
-
+    public void testCreateWeIdCase81() {
+        String hex = "11111";
+        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
+        ResponseData<String> response = rawTransactionService.createWeId(hex);
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
-        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
+        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
     }
 
-    private ResponseData<String> createWeIdForMock(MockUp<Future<?>> mockFuture) {
-
-        MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
-
-        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
-        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        mockTest.tearDown();
-        mockFuture.tearDown();
-        return response;
-    }
-
-    /**
-     * case: Simulation throws an TimeoutException when calling the getWeIdAttributeChangedEvents
-     * method.
-     */
-    @Test
-    public void testCreateWeIdCase11() {
-
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-
-        ResponseData<String> response = createWeIdForMock(mockFuture);
-        LogUtil.info(logger, "createWeId", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
-    }
-
-    /**
-     * case: Simulation throws an NullPointerException when calling the
-     * getWeIdAttributeChangedEvents method.
-     */
-    @Test
-    public void testCreateWeIdCase12() {
-
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt) {
-                throw new WeIdBaseException("mock exception");
-            }
-        };
-
-        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
-        ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
-        LogUtil.info(logger, "createWeId", response);
-
-        mockTest.tearDown();
-
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
-    }
 
     /**
      * case: Simulation throws an PrivateKeyIllegalException when calling the reloadContract
@@ -310,7 +426,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
      * case: create again.
      */
     @Test
-    public void testCreateWeIdCase14() {
+    public void testCreateWeId_repeatCreate() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
