@@ -108,9 +108,9 @@ public enum ErrorCode {
     CREDENTIAL_ISSUER_NOT_EXISTS(100407, "credential issuer does not exist"),
 
     /**
-     * The credential create date illegal.
+     * The credential issuance date illegal.
      */
-    CREDENTIAL_CREATE_DATE_ILLEGAL(100408, "create date illegal"),
+    CREDENTIAL_ISSUANCE_DATE_ILLEGAL(100408, "credential issuance date illegal"),
 
     /**
      * The credential expire date illegal.
@@ -222,7 +222,17 @@ public enum ErrorCode {
      * The credential signature broken.
      */
     CREDENTIAL_SIGNATURE_TYPE_ILLEGAL(100429, "credential signature type unknown"),
+    
+    /**
+     * credential salt illegal.
+     */
+    CREDENTIAL_SALT_ILLEGAL(100430, "credential salt illegal"),
 
+    /**
+     * credential evidence cannot be extracted.
+     */
+    CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN(100431, "credential evidence cannot be extracted"),
+    
     /**
      * The credential evidence contract failure: illegal input.
      */

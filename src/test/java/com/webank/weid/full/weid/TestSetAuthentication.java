@@ -19,12 +19,9 @@
 
 package com.webank.weid.full.weid;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Future;
 
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -33,30 +30,32 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.WeIdContract;
-import com.webank.weid.contract.v1.WeIdContract.WeIdAttributeChangedEventResponse;
-import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * setAuthentication method for testing WeIdService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestSetAuthentication extends TestBaseServcie {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestSetAuthentication.class);
+
+    @Override
+    public synchronized void testInit() {
+        super.testInit();
+    }
 
     /**
      * case: set success.
-     *
      */
     @Test
-    public void testSetAuthenticationCase1() {
+    public void testSetAuthentication_setAuthenticationSuccess() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -66,14 +65,58 @@ public class TestSetAuthentication extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
+
+    }
+
+    /**
+     * case: set two Authentication success.
+     */
+    @Test
+    public void testSetAuthentication_setTwoAuthenticationSuccess() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdNew);
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+
+        SetAuthenticationArgs setAuthenticationArgs1 =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdNew);
+        setAuthenticationArgs1.setOwner(createWeIdResult.getWeId());
+        ResponseData<Boolean> response1 = weIdService.setAuthentication(setAuthenticationArgs1);
+        LogUtil.info(logger, "setAuthentication", response1);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
+        Assert.assertEquals(true, response1.getResult());
+
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(createWeIdNew.getWeId());
+        LogUtil.info(logger, "setAuthentication", weIdDoc);
+        Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
     }
 
     /**
      * case: WeIdentity DID is blank.
-     *
      */
     @Test
-    public void testSetAuthenticationCase2() {
+    public void testSetAuthentication_weIdBlank() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setWeId("");
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: WeIdentity DID is blank.
+     */
+    @Test
+    public void testSetAuthentication_weIdNull() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -88,10 +131,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is bad format.
-     *
      */
     @Test
-    public void testSetAuthenticationCase3() {
+    public void testSetAuthentication_weIdFormat() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -106,10 +148,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is not exists.
-     *
      */
     @Test
-    public void testSetAuthenticationCase4() {
+    public void testSetAuthentication_weIdNotExist() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -124,11 +165,75 @@ public class TestSetAuthentication extends TestBaseServcie {
     }
 
     /**
-     * case: publicKey is a new key.
-     *
+     * case: WeIdentity DID contain zh.
      */
     @Test
-    public void testSetAuthenticationCase6() {
+    public void testSetAuthentication_weIdContainZh() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setWeId("did:weid:你好");
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: and * at the end of WeIdentity DID .
+     */
+    @Test
+    public void testSetAuthentication_weIdEndwithX() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        String weId = createWeIdResult.getWeId();
+        List<String> arrayList = Arrays.asList("*", "+", "=");
+        for (String c : arrayList) {
+            weId = weId + c;
+            System.out.println(c);
+            setAuthenticationArgs.setWeId(weId);
+
+            ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+            LogUtil.info(logger, "setAuthentication", response);
+
+            Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(),
+                response.getErrorCode().intValue());
+            Assert.assertEquals(false, response.getResult());
+        }
+    }
+
+    /**
+     * case: WeIdentity DID is too long.
+     */
+    @Test
+    public void testSetAuthentication_weIdEndTooLong() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        String weId = createWeIdResult.getWeId();
+        char[] chars = new char[100];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) i;
+        }
+        setAuthenticationArgs.setWeId(weId + String.valueOf(chars));
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: publicKey is a new key.
+     */
+    @Test
+    public void testSetAuthentication_newPubKey() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -145,10 +250,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: publicKey is null.
-     *
      */
     @Test
-    public void testSetAuthenticationCase7() {
+    public void testSetAuthentication_PubKeyNull() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -162,11 +266,45 @@ public class TestSetAuthentication extends TestBaseServcie {
     }
 
     /**
-     * case: publicKey is invalid ("xxxxxxxxxx" or "1111111111111").
-     * 
+     * case: publicKey is blank.
      */
     @Test
-    public void testSetAuthenticationCase8() {
+    public void testSetAuthentication_PubKeyBlank() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setPublicKey("");
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: publicKey is belong other weId.
+     */
+    @Test
+    public void testSetAuthentication_PubKeyOther() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        String newPubkey = createWeIdNew.getUserWeIdPublicKey().getPublicKey();
+        setAuthenticationArgs.setPublicKey(newPubkey);
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: publicKey is invalid ("xxxxxxxxxx" or "1111111111111").
+     */
+    @Test
+    public void testSetAuthentication_pubKeyxxx() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -180,11 +318,44 @@ public class TestSetAuthentication extends TestBaseServcie {
     }
 
     /**
-     * case: userWeIdPrivateKey is null.
-     *
+     * case: publicKey contain special character.
      */
     @Test
-    public void testSetAuthenticationCase9() {
+    public void testSetAuthentication_pubKeySpecialChar() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setPublicKey("~！@#￥%……&*？》《;az09");
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: userWeIdPrivateKey is null.
+     */
+    @Test
+    public void testSetAuthentication_priKeySucess() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setUserWeIdPrivateKey(createWeIdResult.getUserWeIdPrivateKey());
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: userWeIdPrivateKey is null.
+     */
+    @Test
+    public void testSetAuthentication_priKeyNull() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -199,10 +370,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: privateKey is null.
-     *
      */
     @Test
-    public void testSetAuthenticationCase10() {
+    public void testSetAuthentication_setPriKeyNull() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -218,10 +388,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: privateKey is invalid.
-     *
      */
     @Test
-    public void testSetAuthenticationCase11() {
+    public void testSetAuthentication_invalidPriKey() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -237,10 +406,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: privateKey and privateKey of WeIdentity DID does not match.
-     *
      */
     @Test
-    public void testSetAuthenticationCase12() {
+    public void testSetAuthentication_newPriKey() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -257,10 +425,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: privateKey belongs to the private key of other WeIdentity DID.
-     *
      */
     @Test
-    public void testSetAuthenticationCase13() {
+    public void testSetAuthentication_otherPriKey() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -276,10 +443,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: other WeIdentity DID.
-     *
      */
     @Test
-    public void testSetAuthenticationCase14() {
+    public void testSetAuthentication_otherWeid() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -295,10 +461,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: owner is the WeIdentity DID.
-     *
      */
     @Test
-    public void testSetAuthenticationCase15() {
+    public void testSetAuthentication_owerIsWeId() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -313,10 +478,9 @@ public class TestSetAuthentication extends TestBaseServcie {
 
     /**
      * case: owner is other WeIdentity DID.
-     *
      */
     @Test
-    public void testSetAuthenticationCase16() {
+    public void testSetAuthentication_ownerIsOtherWeId() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -330,11 +494,102 @@ public class TestSetAuthentication extends TestBaseServcie {
     }
 
     /**
-     * case: owner is invalid.
-     *
+     * case: owner is the WeIdentity DID.
      */
     @Test
-    public void testSetAuthenticationCase17() {
+    public void testSetAuthentication_NoOwer() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: owner is the WeIdentity DID.
+     */
+    @Test
+    public void testSetAuthentication_owerNotExist() {
+
+        final String weid = "did:weid:1:0x39e5e6f663ef77409144014ceb063713b656aaf7";
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setOwner(weid);
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: owner is the WeIdentity DID.
+     */
+    @Test
+    public void testSetAuthentication_twoAuthentication() {
+
+        final String weid1 = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b656aaf7";
+        final String weid2 = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b656aaf8";
+        CreateWeIdDataResult createWeIdResultWithSetAttr = super.createWeId();
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResultWithSetAttr);
+        setAuthenticationArgs.setOwner(weid1);
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+
+        SetAuthenticationArgs setAuthenticationArgs1 =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResultWithSetAttr);
+        setAuthenticationArgs1.setOwner(weid2);
+        setAuthenticationArgs1.setPublicKey("12345678");
+        ResponseData<Boolean> res = weIdService.setAuthentication(setAuthenticationArgs1);
+        LogUtil.info(logger, "setAuthentication", res);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
+
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(createWeIdResultWithSetAttr.getWeId());
+        LogUtil.info(logger, "setAuthentication", weIdDoc);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(2, weIdDoc.getResult().getPublicKey().size());
+        Assert.assertEquals(2, weIdDoc.getResult().getAuthentication().size());
+    }
+
+    /**
+     * case: owner weId is not belong chain id .
+     */
+    @Test
+    public void testSetAuthentication_otherChainId() {
+
+        final String owner = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b656aaf7";
+        final CreateWeIdDataResult weId = super.createWeId();
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(weId);
+        setAuthenticationArgs.setOwner(owner);
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(weId.getWeId());
+        LogUtil.info(logger, "setAuthentication", weIdDoc);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(owner, weIdDoc.getResult().getPublicKey().get(0).getOwner());
+    }
+
+    /**
+     * case: owner is invalid.
+     */
+    @Test
+    public void testSetAuthentication_invalidOwner() {
 
         SetAuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
@@ -348,92 +603,83 @@ public class TestSetAuthentication extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation throws an InterruptedException when calling the
-     *       setAttribute method.
-     *
+     * case: owner is null.
      */
     @Test
-    public void testSetAuthenticationCase18() {
+    public void testSetAuthentication_ownerNull() {
 
+        final CreateWeIdDataResult weId = super.createWeId();
         SetAuthenticationArgs setAuthenticationArgs =
-            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-
-        ResponseData<Boolean> response =
-            setAuthenticationForMock(setAuthenticationArgs, mockFuture);
-        LogUtil.info(logger, "setAuthentication", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    private ResponseData<Boolean> setAuthenticationForMock(
-        SetAuthenticationArgs setAuthenticationArgs,
-        MockUp<Future<?>> mockFuture) {
-        
-        MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
-
-        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
-        mockTest.tearDown();
-        mockFuture.tearDown();
-        return response;
-    }
-
-    /**
-     * case: Simulation throws an TimeoutException when calling the
-     *       setAttribute method.
-     *
-     */
-    @Test
-    public void testSetAuthenticationCase19() {
-
-        SetAuthenticationArgs setAuthenticationArgs =
-            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-
-        ResponseData<Boolean> response =
-            setAuthenticationForMock(setAuthenticationArgs, mockFuture);
-        LogUtil.info(logger, "setAuthentication", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: Simulation throws an NullPointerException when calling the
-     *       getWeIdAttributeChangedEvents method.
-     *
-     */
-    @Test
-    public void testSetAuthenticationCase20() {
-
-        SetAuthenticationArgs setAuthenticationArgs =
-            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt) {
-                throw new WeIdBaseException("mock exception");
-            }
-        };
+            TestBaseUtil.buildSetAuthenticationArgs(weId);
+        setAuthenticationArgs.setOwner(null);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
         LogUtil.info(logger, "setAuthentication", response);
 
-        mockTest.tearDown();
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
 
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+        ResponseData<WeIdDocument> weIdDoc
+            = weIdService.getWeIdDocument(weId.getWeId());
+        LogUtil.info(logger, "setAuthentication", weIdDoc);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
+    }
+
+    /**
+     * case: owner is blank.
+     */
+    @Test
+    public void testSetAuthentication_ownerBlank() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setOwner("");
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
+
+    /**
+     * case: owner contain special char.
+     */
+    @Test
+    public void testSetAuthentication_ownerContainSpecialChar() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setOwner("~!@#$%^&*()——+=？》《，<>aq10");
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: owner contain zh.
+     */
+    @Test
+    public void testSetAuthentication_ownerContainZh() {
+
+        SetAuthenticationArgs setAuthenticationArgs =
+            TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
+        setAuthenticationArgs.setOwner("你好");
+
+        ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);
+        LogUtil.info(logger, "setAuthentication", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
     /**
      * case: setAuthenticationArgs is null.
-     *
      */
     @Test
     public void testSetAuthenticationCase21() {

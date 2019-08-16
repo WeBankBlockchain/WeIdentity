@@ -19,28 +19,22 @@
 
 package com.webank.weid.full.evidence;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
+import java.util.HashMap;
 
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.webank.weid.full.TestBaseUtil.createEcKeyPair;
+import static com.webank.weid.util.CredentialUtils.copyCredential;
+
 import com.webank.weid.common.LogUtil;
+import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.EvidenceFactory;
-import com.webank.weid.contract.v1.EvidenceFactory.CreateEvidenceLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -64,10 +58,10 @@ public class TestCreateEvidence extends TestBaseServcie {
     }
 
     /**
-     * case1: create evidence success.
+     * case1: credential issuer and private key belong the same weId.
      */
     @Test
-    public void testCreateEvidenceCase01() {
+    public void testCreateEvidence_success() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         ResponseData<String> response = evidenceService
@@ -82,7 +76,7 @@ public class TestCreateEvidence extends TestBaseServcie {
      * case2: credential is null.
      */
     @Test
-    public void testCreateEvidenceCase02() {
+    public void testCreateEvidence_credentialNull() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         ResponseData<String> response = evidenceService
@@ -97,7 +91,7 @@ public class TestCreateEvidence extends TestBaseServcie {
      * case3: weIdPrivateKey is null.
      */
     @Test
-    public void testCreateEvidenceCase03() {
+    public void testCreateEvidence_priKeyNull() {
         ResponseData<String> response = evidenceService
             .createEvidence(credential, null);
         LogUtil.info(logger, "createEvidence", response);
@@ -112,7 +106,7 @@ public class TestCreateEvidence extends TestBaseServcie {
      * case5: privateKey is null.
      */
     @Test
-    public void testCreateEvidenceCase04() {
+    public void testCreateEvidence_privateKeyNull() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey().setPrivateKey(null);
@@ -147,10 +141,29 @@ public class TestCreateEvidence extends TestBaseServcie {
     }
 
     /**
+     * case6: privateKey is blank.
+     */
+    @Test
+    public void testCreateEvidence_priKeyBlank() {
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
+            super.copyCreateWeId(createWeIdResultWithSetAttr);
+        tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey().setPrivateKey("");
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
      * case8: createEvidence immutability - multiple invocations lead to different addresses.
      */
     @Test
-    public void testCreateEvidenceCase06() {
+    public void testCreateEvidence_theSameRequestHasDifferentAddress() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = super.copyCreateWeId(createWeIdNew);
         ResponseData<String> response = evidenceService
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
@@ -175,7 +188,7 @@ public class TestCreateEvidence extends TestBaseServcie {
      * case9: privateKey is belong to others weId.
      */
     @Test
-    public void testCreateEvidenceCase07() {
+    public void testCreateEvidence_privateKeyBelongOtherWeId() {
         ResponseData<String> response = evidenceService
             .createEvidence(credential, createWeIdNew.getUserWeIdPrivateKey());
         LogUtil.info(logger, "createEvidence", response);
@@ -187,12 +200,61 @@ public class TestCreateEvidence extends TestBaseServcie {
     }
 
     /**
-     * case10: credential id is null.
+     * case9: privateKey is not exist.
      */
     @Test
-    public void testCreateEvidenceCase08() {
+    public void testCreateEvidence_privateKeyNotExist() {
+        PasswordKey passwordKey = createEcKeyPair();
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey(passwordKey.getPrivateKey());
+        ResponseData<String> response = evidenceService
+            .createEvidence(credential, weIdPrivateKey);
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case9: privateKey is sdk private key.
+     */
+    @Test
+    public void testCreateEvidence_privateKeyBelongSdk() {
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey(privateKey);
+        ResponseData<String> response = evidenceService
+            .createEvidence(credential, weIdPrivateKey);
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case: credential id is null.
+     */
+    @Test
+    public void testCreateEvidence_idNull() {
         Credential tempCredential = copyCredential(credential);
         tempCredential.setId(null);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case: credential id is null.
+     */
+    @Test
+    public void testCreateEvidence_idBlank() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setId("");
 
         ResponseData<String> response = evidenceService
             .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
@@ -208,7 +270,7 @@ public class TestCreateEvidence extends TestBaseServcie {
      * case12: the cptId is null of credential.
      */
     @Test
-    public void testCreateEvidenceCase09() {
+    public void testCreateEvidence_cptIdNull() {
         Credential tempCredential = copyCredential(credential);
         tempCredential.setCptId(null);
 
@@ -223,83 +285,274 @@ public class TestCreateEvidence extends TestBaseServcie {
     }
 
     /**
-     * case13: mock TimeOutException.
+     * case12: the cptId is not exist.
      */
     @Test
-    public void testCreateEvidenceCase10() {
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-        ResponseData<String> response = this.createEvidence(mockFuture);
+    public void testCreateEvidence_cptIdNotExist() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setCptId(999999999);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
         LogUtil.info(logger, "createEvidence", response);
 
         Assert.assertEquals(
-            ErrorCode.TRANSACTION_TIMEOUT.getCode(),
+            ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the cptId is minus.
+     */
+    @Test
+    public void testCreateEvidence_cptIdIsMinus() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setCptId(-1);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CPT_ID_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
 
     /**
-     * case14: mock InterruptedException.
+     * case12: the issuer is null.
      */
     @Test
-    public void testCreateEvidenceCase11() {
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-        ResponseData<String> response = this.createEvidence(mockFuture);
+    public void testCreateEvidence_issuerIsNull() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setIssuer(null);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
         LogUtil.info(logger, "createEvidence", response);
 
         Assert.assertEquals(
-            ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+            ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
 
     /**
-     * case15: mock InterruptedException.
+     * case12: the issuer is blank.
      */
     @Test
-    public void testCreateEvidenceCase12() {
-        MockUp<EvidenceFactory> mockTest = new MockUp<EvidenceFactory>() {
-            @Mock
-            public List<CreateEvidenceLogEventResponse> getCreateEvidenceLogEvents(
-                TransactionReceipt transactionReceipt) {
-
-                List<CreateEvidenceLogEventResponse> eventResponseList =
-                    new ArrayList<CreateEvidenceLogEventResponse>();
-                eventResponseList.add(null);
-                return eventResponseList;
-            }
-        };
+    public void testCreateEvidence_issuerIsBlank() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setIssuer("");
 
         ResponseData<String> response = evidenceService
-            .createEvidence(credential, createWeIdNew.getUserWeIdPrivateKey());
-        mockTest.tearDown();
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
         LogUtil.info(logger, "createEvidence", response);
 
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR.getCode(),
+            ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
 
-    private ResponseData<String> createEvidence(MockUp<Future<?>> mockFuture) {
-        MockUp<EvidenceFactory> mockTest = new MockUp<EvidenceFactory>() {
-            @Mock
-            public Future<?> createEvidence(
-                DynamicArray<Bytes32> credentialHash,
-                DynamicArray<Address> signer,
-                Bytes32 r,
-                Bytes32 s,
-                Uint8 v,
-                DynamicArray<Bytes32> extra
-            ) {
+    /**
+     * case12: the issuer is invalid.
+     */
+    @Test
+    public void testCreateEvidence_invalidIssuer() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b656");
 
-                return mockFuture.getMockInstance();
-            }
-        };
         ResponseData<String> response = evidenceService
-            .createEvidence(credential, createWeIdNew.getUserWeIdPrivateKey());
-        mockFuture.tearDown();
-        mockTest.tearDown();
-        return response;
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the issuer is not exist.
+     */
+    @Test
+    public void testCreateEvidence_issuerNotExist() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the claim is null.
+     */
+    @Test
+    public void testCreateEvidence_claimNull() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setClaim(null);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the claim is blank.
+     */
+    @Test
+    public void testCreateEvidence_claimBlank() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setClaim(new HashMap<>());
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the issuanceDate is null.
+     */
+    @Test
+    public void testCreateEvidence_issuanceDateNull() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setIssuanceDate(null);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the issuanceDate is minus.
+     */
+    @Test
+    public void testCreateEvidence_issuanceDateIsMinus() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setIssuanceDate(-1L);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the expireDate is minus.
+     */
+    @Test
+    public void testCreateEvidence_expireDateIsMinus() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setExpirationDate(-1L);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the expireDate is null.
+     */
+    @Test
+    public void testCreateEvidence_expireDateNull() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setExpirationDate(null);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the expireDate is passed.
+     */
+    @Test
+    public void testCreateEvidence_expireDatePassed() {
+        Credential tempCredential = copyCredential(credential);
+        long expireDate = System.currentTimeMillis() - 10000;
+        tempCredential.setExpirationDate(expireDate);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the pfooof is null.
+     */
+    @Test
+    public void testCreateEvidence_proofNull() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setProof(null);
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.ILLEGAL_INPUT.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+    }
+
+    /**
+     * case12: the proof is blank.
+     */
+    @Test
+    public void testCreateEvidence_proofBlank() {
+        Credential tempCredential = copyCredential(credential);
+        tempCredential.setProof(new HashMap<>());
+
+        ResponseData<String> response = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_SIGNATURE_TYPE_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
     }
 
 }

@@ -328,6 +328,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         String issuerType,
         String targetIssuerWeId
     ) {
+        if (!WeIdUtils.isWeIdValid(targetIssuerWeId)) {
+            return ErrorCode.WEID_INVALID;
+        }
         if (!weIdService.isWeIdExist(targetIssuerWeId).getResult()) {
             return ErrorCode.WEID_DOES_NOT_EXIST;
         }
@@ -344,6 +347,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {
             return ErrorCode.WEID_INVALID;
+        }
+        if (!weIdService.isWeIdExist(callerAuth.getWeId()).getResult()) {
+            return ErrorCode.WEID_DOES_NOT_EXIST;
         }
         if (callerAuth.getWeIdPrivateKey() == null
             || StringUtils.isEmpty(callerAuth.getWeIdPrivateKey().getPrivateKey())) {
