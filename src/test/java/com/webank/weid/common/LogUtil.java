@@ -23,13 +23,14 @@ import org.slf4j.Logger;
 
 /**
  * logging tool class.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class LogUtil {
 
     /**
      * log record.
+     *
      * @param message log description
      * @param obj objects to be recorded
      */
@@ -41,9 +42,10 @@ public class LogUtil {
             BeanUtil.objToString(obj)
         );
     }
-    
+
     /**
      * get stack information for log records.
+     *
      * @return StackTraceElement for currentThread.
      */
     private static StackTraceElement stackTrace() {

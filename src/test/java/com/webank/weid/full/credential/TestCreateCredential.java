@@ -32,6 +32,7 @@ import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.CredentialWrapper;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -46,7 +47,6 @@ public class TestCreateCredential extends TestBaseServcie {
 
     @Override
     public synchronized void testInit() {
-
         super.testInit();
         if (cptBaseInfo == null) {
             cptBaseInfo = super.registerCpt(createWeIdResultWithSetAttr);
@@ -54,13 +54,14 @@ public class TestCreateCredential extends TestBaseServcie {
     }
 
     /**
-     * case：createCredential success.
+     * case：cptjsonshema and claim is same,createCredential success.
      */
     @Test
-    public void testCreateCredentialCase1() {
+    public void testCreateCredential_success() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
+        System.out.println(createCredentialArgs);
 
         ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);
@@ -71,10 +72,130 @@ public class TestCreateCredential extends TestBaseServcie {
     }
 
     /**
+     * case：when cptjsonschema is different ,createCredential success but verify fail.
+     */
+    @Test
+    public void testCreateCredential_sampleSuccess() {
+
+        HashMap<String, Object> claim = new HashMap<>();
+        claim.put("student", new CptBaseInfo());
+        claim.put("name", "李白");
+        claim.put("age", 1300);
+        claim.put("poiet", "桃花潭水深千尺，不及汪伦送我情");
+
+        CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+        createCredentialArgs.setClaim(claim);
+        createCredentialArgs.setCptId(cptBaseInfo.getCptId());
+        createCredentialArgs.setExpirationDate(System.currentTimeMillis() + 6000);
+        createCredentialArgs.setIssuer(createWeIdResultWithSetAttr.getWeId());
+        createCredentialArgs.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+
+        ResponseData<CredentialWrapper> response =
+            credentialService.createCredential(createCredentialArgs);
+        LogUtil.info(logger, "createCredential", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+
+        ResponseData<Boolean> verify = credentialService.verify(response.getResult());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCode(),
+            verify.getErrorCode().intValue());
+    }
+
+    /**
+     * case：when cptJsonSchema and claim is different ,createCredential success but verify fail.
+     */
+    @Test
+    public void testCreateCredential_claimIsSubsetOfCptJsonSchema() {
+
+        HashMap<String, Object> claim = new HashMap<>();
+        claim.put("id", createWeIdResultWithSetAttr.getWeId());
+        claim.put("name", "李白");
+        claim.put("age", 1300);
+
+        CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+        createCredentialArgs.setClaim(claim);
+        createCredentialArgs.setCptId(cptBaseInfo.getCptId());
+        createCredentialArgs.setExpirationDate(System.currentTimeMillis() + 6000);
+        createCredentialArgs.setIssuer(createWeIdResultWithSetAttr.getWeId());
+        createCredentialArgs.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+
+        ResponseData<CredentialWrapper> response =
+            credentialService.createCredential(createCredentialArgs);
+        LogUtil.info(logger, "createCredential", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+
+        ResponseData<Boolean> verify = credentialService.verify(response.getResult());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCode(),
+            verify.getErrorCode().intValue());
+    }
+
+    /**
+     * case：when cptJsonSchema and claim is different ,createCredential success but verify fail.
+     */
+    @Test
+    public void testCreateCredential_cptJsonIsSubsetOfClaim() {
+
+        HashMap<String, Object> claim = new HashMap<>();
+        claim.put("id", createWeIdResultWithSetAttr.getWeId());
+        claim.put("name", "李白");
+        claim.put("age", 1300);
+        claim.put("gender", "F");
+        claim.put("city", "changan");
+
+        CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+        createCredentialArgs.setClaim(claim);
+        createCredentialArgs.setCptId(cptBaseInfo.getCptId());
+        createCredentialArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60);
+        createCredentialArgs.setIssuer(createWeIdResultWithSetAttr.getWeId());
+        createCredentialArgs.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+
+        ResponseData<CredentialWrapper> response =
+            credentialService.createCredential(createCredentialArgs);
+        LogUtil.info(logger, "createCredential", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+
+        ResponseData<Boolean> verify = credentialService.verify(response.getResult());
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), verify.getErrorCode().intValue());
+    }
+
+    /**
+     * case：when claim and cptJsonSchema key is same but type of value is different,
+     * createCredential success but verify fail.
+     */
+    @Test
+    public void testCreateCredential_claimKeyMatchButTypeDifferent() {
+
+        HashMap<String, Object> claim = new HashMap<>();
+        claim.put("id", createWeIdResultWithSetAttr.getWeId());
+        claim.put("name", "李白");
+        claim.put("age", 1300);
+        claim.put("gender", "FM");
+
+        CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+        createCredentialArgs.setClaim(claim);
+        createCredentialArgs.setCptId(cptBaseInfo.getCptId());
+        createCredentialArgs.setExpirationDate(System.currentTimeMillis() + 6000);
+        createCredentialArgs.setIssuer(createWeIdResultWithSetAttr.getWeId());
+        createCredentialArgs.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+
+        ResponseData<CredentialWrapper> response =
+            credentialService.createCredential(createCredentialArgs);
+        LogUtil.info(logger, "createCredential", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+
+        ResponseData<Boolean> verify = credentialService.verify(response.getResult());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCode(),
+            verify.getErrorCode().intValue());
+    }
+
+    /**
      * case: createCredentialArgs is null.
      */
     @Test
-    public void testCreateCredentialCase2() {
+    public void testCreateCredential_credentialArgsNull() {
         CreateCredentialArgs createCredentialArgs = null;
         ResponseData<CredentialWrapper> response = credentialService
             .createCredential(createCredentialArgs);
@@ -88,7 +209,7 @@ public class TestCreateCredential extends TestBaseServcie {
      * case：cptId is null.
      */
     @Test
-    public void testCreateCredentialCase3() {
+    public void testCreateCredential_cptIdNull() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -98,7 +219,7 @@ public class TestCreateCredential extends TestBaseServcie {
             credentialService.createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
@@ -107,7 +228,7 @@ public class TestCreateCredential extends TestBaseServcie {
      * case： cptId is minus number.
      */
     @Test
-    public void testCreateCredentialCase4() {
+    public void testCreateCredential_cptIdMinus() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -117,7 +238,7 @@ public class TestCreateCredential extends TestBaseServcie {
             credentialService.createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
     }
 
@@ -125,7 +246,7 @@ public class TestCreateCredential extends TestBaseServcie {
      * case： cptId is not exists.
      */
     @Test
-    public void testCreateCredentialCase5() {
+    public void testCreateCredential_cptIdNotExist() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -135,15 +256,18 @@ public class TestCreateCredential extends TestBaseServcie {
             credentialService.createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
-            response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+
+        ResponseData<Boolean> verify = credentialService.verify(response.getResult());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode(),
+            verify.getErrorCode().intValue());
     }
 
     /**
      * case： cptId is belongs to others weIdentity dId.
      */
     @Test
-    public void testCreateCredentialCase6() {
+    public void testCreateCredential_otherCptIdSuccess() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -156,14 +280,17 @@ public class TestCreateCredential extends TestBaseServcie {
         LogUtil.info(logger, "createCredential", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
+
+        ResponseData<Boolean> verify = credentialService.verify(response.getResult());
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+            verify.getErrorCode().intValue());
     }
 
     /**
      * case： issuer is null.
      */
     @Test
-    public void testCreateCredentialCase7() {
+    public void testCreateCredential_issuerNull() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -182,11 +309,11 @@ public class TestCreateCredential extends TestBaseServcie {
      * case： issuer is invalid.
      */
     @Test
-    public void testCreateCredentialCase8() {
+    public void testCreateCredential_invalidIssuer() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
-        createCredentialArgs.setIssuer("di:weid:0x1111111111");
+        createCredentialArgs.setIssuer("di:weid:0x11!@#$%^&*()_+zhon 中国》《？12qwe");
 
         ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);
@@ -198,14 +325,14 @@ public class TestCreateCredential extends TestBaseServcie {
     }
 
     /**
-     * case： issuer is not exists.
+     * case： issuer and private key not match.
      */
     @Test
-    public void testCreateCredentialCase9() {
+    public void testCreateCredential_priKeyNotMatch() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
-        createCredentialArgs.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797431");
+        createCredentialArgs.setWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
 
         ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);
@@ -213,6 +340,33 @@ public class TestCreateCredential extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
+
+        ResponseData<Boolean> verify = credentialService.verify(response.getResult());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            verify.getErrorCode().intValue());
+    }
+
+    /**
+     * case： private key is sdk private key.
+     */
+    @Test
+    public void testCreateCredential_sdkPriKey() {
+
+        CreateCredentialArgs createCredentialArgs =
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey(privateKey);
+        createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+        ResponseData<CredentialWrapper> response =
+            credentialService.createCredential(createCredentialArgs);
+        LogUtil.info(logger, "createCredential", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+
+        ResponseData<Boolean> verify = credentialService.verify(response.getResult());
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            verify.getErrorCode().intValue());
     }
 
 
@@ -228,7 +382,7 @@ public class TestCreateCredential extends TestBaseServcie {
             credentialService.createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
@@ -237,7 +391,7 @@ public class TestCreateCredential extends TestBaseServcie {
      * case： expirationDate <= 0.
      */
     @Test
-    public void testCreateCredentialCase10() {
+    public void testCreateCredential_expirationDateIsZero() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -256,7 +410,7 @@ public class TestCreateCredential extends TestBaseServcie {
      * case： expirationDate <= now.
      */
     @Test
-    public void testCreateCredentialCase11() {
+    public void testCreateCredential_expirationDatePassed() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -272,10 +426,10 @@ public class TestCreateCredential extends TestBaseServcie {
     }
 
     /**
-     * case： claim is null.
+     * case： claim is null. 
      */
     @Test
-    public void testCreateCredentialCase12() {
+    public void testCreateCredential_claimNull() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -291,30 +445,10 @@ public class TestCreateCredential extends TestBaseServcie {
     }
 
     /**
-     * case： claim is xxxxxxx.
-     */
-    //@Test
-    //public void testCreateCredentialCase13() {
-
-    //    CreateCredentialArgs createCredentialArgs =
-    //        TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
-    //    HashMap<String, Object> claim = new HashMap<>();
-    //    claim.put("xxxxxxxxxxxxxx", "xxxxxxxxxxxxxx");
-    //    createCredentialArgs.setClaim(claim);
-
-    //    ResponseData<CredentialWrapper> response =
-    //        credentialService.createCredential(createCredentialArgs);
-    //    LogUtil.info(logger, "createCredential", response);
-
-    //    Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCode(),
-    //        response.getErrorCode().intValue());
-    //}
-
-    /**
      * case： weIdPrivateKey is null.
      */
     @Test
-    public void testCreateCredentialCase14() {
+    public void testCreateCredential_priKeyNull() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -333,7 +467,7 @@ public class TestCreateCredential extends TestBaseServcie {
      * case： privateKey is null.
      */
     @Test
-    public void testCreateCredentialCase15() {
+    public void testCreateCredential_priKeyNull2() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -352,7 +486,7 @@ public class TestCreateCredential extends TestBaseServcie {
      * case： privateKey is xxxxxxxxxxx.
      */
     @Test
-    public void testCreateCredentialCase16() {
+    public void testCreateCredential_invalidPriKey() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
@@ -371,7 +505,7 @@ public class TestCreateCredential extends TestBaseServcie {
      * case： privateKey is 11111111111111.
      */
     @Test
-    public void testCreateCredentialCase17() {
+    public void testCreateCredential_priKeyIsInt() {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);

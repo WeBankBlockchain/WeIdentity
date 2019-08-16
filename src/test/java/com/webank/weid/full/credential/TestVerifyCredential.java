@@ -31,6 +31,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.webank.weid.util.CredentialUtils.copyCredential;
+
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
@@ -72,7 +74,7 @@ public class TestVerifyCredential extends TestBaseServcie {
      * case: verifyCredential success.
      */
     @Test
-    public void testVerifyCredentialCase1() {
+    public void testVerifyCredential_success() {
 
         ResponseData<Boolean> response = super.verifyCredential(credential);
         LogUtil.info(logger, "verifyCredential", response);
@@ -86,7 +88,7 @@ public class TestVerifyCredential extends TestBaseServcie {
      * case: context is null.
      */
     @Test
-    public void testVerifyCredentialCase2() {
+    public void testVerifyCredential_contextNull() {
 
         String context = credential.getContext();
         credential.setContext(null);
@@ -103,7 +105,7 @@ public class TestVerifyCredential extends TestBaseServcie {
      * case: context is other string.
      */
     @Test
-    public void testVerifyCredentialCase3() {
+    public void testVerifyCredential_contentIsOtherString() {
 
         String context = credential.getContext();
         credential.setContext("xxx");
@@ -118,10 +120,28 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /**
+     * case: context contain special char.
+     */
+    @Test
+    public void testVerifyCredential_contentContainSpecialChar() {
+
+        String context = credential.getContext();
+        credential.setContext("xxx！@#￥%……&*（）KL14536987");
+
+        ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
+        credential.setContext(context);
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
      * case: cptId is another with **same** schema.
      */
     @Test
-    public void testVerifyCredentialCase7() {
+    public void testVerifyCredential_cptIdAndClaimDifferent() {
 
         Integer cptId = credential.getCptId();
         CptBaseInfo cpt = super.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
@@ -137,10 +157,28 @@ public class TestVerifyCredential extends TestBaseServcie {
     }
 
     /**
+     * case: cptId is another with **same** schema.
+     */
+    @Test
+    public void testVerifyCredential_cptIdNull() {
+
+        Integer cptId = credential.getCptId();
+        credential.setCptId(null);
+
+        ResponseData<Boolean> response = super.verifyCredential(credential);
+        LogUtil.info(logger, "verifyCredential", response);
+
+        credential.setCptId(cptId);
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
      * case: id is null.
      */
     @Test
-    public void testVerifyCredentialCase8() {
+    public void testVerifyCredential_idNull() {
 
         String id = credential.getId();
         credential.setId(null);
@@ -158,7 +196,7 @@ public class TestVerifyCredential extends TestBaseServcie {
      * case: id is another.
      */
     @Test
-    public void testVerifyCredentialCase9() {
+    public void testVerifyCredential_otherId() {
 
         String id = credential.getId();
         credential.setId("xxxxxxxxx");
@@ -193,7 +231,7 @@ public class TestVerifyCredential extends TestBaseServcie {
      * case: issuer is xxxxx.
      */
     @Test
-    public void testVerifyCredentialCase11() {
+    public void testVerifyCredential_invalidIssuer() {
 
         String issuer = credential.getIssuer();
         credential.setIssuer("xxxxxxxxxxx");
@@ -211,7 +249,7 @@ public class TestVerifyCredential extends TestBaseServcie {
      * case: issuer is another.
      */
     @Test
-    public void testVerifyCredentialCase12() {
+    public void testVerifyCredential_otherIssuer() {
 
         String issuer = credential.getIssuer();
         credential.setIssuer(createWeIdNew.getWeId());
@@ -238,7 +276,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setIssuanceDate(issuanceDate);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -324,7 +362,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setIssuanceDate(issuanceDate);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -333,7 +371,7 @@ public class TestVerifyCredential extends TestBaseServcie {
      * case: claim is null. test error,Please add check.
      */
     // @Test
-    public void testVerifyCredentialCase19() {
+    public void testVerifyCredential_claimNull() {
 
         Map<String, Object> claim = credential.getClaim();
         credential.setClaim(null);
@@ -419,7 +457,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         ResponseData<Boolean> response = super.verifyCredential(newCredential);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -489,7 +527,7 @@ public class TestVerifyCredential extends TestBaseServcie {
         credential.setExpirationDate(expirationDate);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }

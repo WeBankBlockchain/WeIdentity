@@ -21,8 +21,8 @@ package com.webank.weid.common;
 
 /**
  * the constant for BaseBean to get Object String.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class BeanConstant {
 

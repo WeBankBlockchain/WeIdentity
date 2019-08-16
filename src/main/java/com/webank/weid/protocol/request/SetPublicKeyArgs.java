@@ -55,4 +55,12 @@ public class SetPublicKeyArgs {
      * Required: The WeIdentity DID private key.
      */
     private WeIdPrivateKey userWeIdPrivateKey;
+    
+    /**
+     * nothing to do.
+     * @param type the public key type
+     */
+    public void setType(String type) {
+        this.type = "Secp256k1";
+    }
 }
