@@ -69,7 +69,6 @@ public class TestRegisterIssuerType extends TestBaseServcie {
 
         while (response.getErrorCode()
             == ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS.getCode()) {
-            String name = issuerType + Math.random();
             response = authorityIssuerService.registerIssuerType(weIdAuthentication, issuerType);
         }
         LogUtil.info(logger, "registerIssuerType", response);

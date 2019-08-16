@@ -151,7 +151,6 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
-        String content = copyCredentialPojo.getContext();
         copyCredentialPojo.setContext("~!@#$%^&*()_中国123we");
 
         ResponseData<CredentialPojo> response =
@@ -624,7 +623,6 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
     @Test
     public void testCreateSelectiveCredential_claimPolicyAllOpen() {
 
-        Map<String, Object> claimMap = credentialPojo.getClaim();
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":1,\"age\":1,\"id\":1}");
 

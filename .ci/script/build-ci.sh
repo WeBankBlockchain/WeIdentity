@@ -30,6 +30,8 @@ function modify_config()
         cp ${java_source_code_dir}/ecdsa_key ${java_source_code_dir}/src/test/resources/
     fi
     #cat $app_xml_config
+	cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/test/resources
+    cp ${java_source_code_dir}/.ci/client.keystore ${java_source_code_dir}/src/test/resources
     echo "modify sdk config finished..."
 }
 
