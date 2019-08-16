@@ -36,9 +36,6 @@ public class TestVerifyCredentialWithPresentation extends TestBaseServcie {
 
     private static PresentationE presentationE = null;
 
-    private static final String claimDisclosedPolicy
-        = "{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}";
-
     @Override
     public synchronized void testInit() {
         super.testInit();
