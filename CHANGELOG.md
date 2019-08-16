@@ -1,3 +1,17 @@
+### v1.3.2 (2019-08-16)
+- Features:
+1. weid-java-sdk supports ci pipeline.
+2. Add Command line tool to check AMOP health and WeID existence.
+3. Persistence layer supports domain configuration.
+4. Support expiration period for Presentation encryption key (24 hrs by default).
+5. Transportation now supports Specify(), to allow only eligible WeIDs to access.
+6. Add sequence diagrams to all new interfaces in WeID-Java-SDK API document.
+
+- Bugfixes:
+1. Credential Verification now requires CPT format checks.
+2. Enhances the parameter validity check in all modules.
+
+
 ### v1.3.0 (2019-06-28)
 - Features:
 1. Official support for FISCO-BCOS 1.3 and 2.0 blockchain nodes and smart contracts by extracting a proxy layer.
