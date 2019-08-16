@@ -169,8 +169,8 @@ public class TransactionUtils {
         List<Type> result = Arrays.<Type>asList(
             new Address(addr),
             DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
-            DataToolUtils.stringToDynamicBytes(DateUtils.getCurrentTimeStampString()),
-            DateUtils.getCurrentTimeStampInt256()
+            DataToolUtils.stringToDynamicBytes(DateUtils.getNoMillisecondTimeStampString()),
+            DateUtils.getNoMillisecondTimeStampInt256()
         );
         return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
@@ -327,7 +327,7 @@ public class TransactionUtils {
      */
     public static StaticArray<Int256> getParamCreated(int length) {
         long[] longArray = new long[length];
-        long created = System.currentTimeMillis();
+        long created = DateUtils.getNoMillisecondTimeStamp();
         longArray[1] = created;
         return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
@@ -340,7 +340,7 @@ public class TransactionUtils {
      */
     public static StaticArray<Int256> getParamUpdated(int length) {
         long[] longArray = new long[length];
-        long created = System.currentTimeMillis();
+        long created = DateUtils.getNoMillisecondTimeStamp();
         longArray[2] = created;
         return DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
@@ -352,15 +352,9 @@ public class TransactionUtils {
      * @return the StaticArray
      */
     public static StaticArray<Bytes32> getParamJsonSchema(String cptJsonSchema) {
-
-        List<String> stringList = Splitter
-            .fixedLength(WeIdConstant.BYTES32_FIXED_LENGTH)
-            .splitToList(cptJsonSchema);
-        String[] jsonSchemaArray = new String[WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH];
-        for (int i = 0; i < stringList.size(); i++) {
-            jsonSchemaArray[i] = stringList.get(i);
-        }
-        return DataToolUtils.stringArrayToBytes32StaticArray(jsonSchemaArray);
+        List<byte[]> bytes = DataToolUtils
+            .stringToByte32ArrayList(cptJsonSchema, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH);
+        return DataToolUtils.byteArrayListToBytes32StaticArray(bytes);
     }
 
     /**
