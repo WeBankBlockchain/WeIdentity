@@ -25,12 +25,7 @@ public interface MockMysqlDriver {
      */
     public static final Map<String, Object> mockDbMap = new HashMap<String, Object>();
     
-    public static final Set<String> mockTableSet = new HashSet<String>() {
-        private static final long serialVersionUID = 1L;
-            {
-                add("sdk_all_data");
-            }
-        };
+    public static final Set<String> mockTableSet = new HashSet<String>();
 
     public static final String ISMOCKKEY = "isMock";
 
@@ -41,6 +36,9 @@ public interface MockMysqlDriver {
         String vlaue = (String)mockDbMap.get(ISMOCKKEY);
         if (StringUtils.isNotBlank(vlaue)) {
             return;
+        }
+        if (!mockTableSet.contains("sdk_all_data")) {
+            mockTableSet.add("sdk_all_data");
         }
         new MockUp<SqlExecutor>() {
             

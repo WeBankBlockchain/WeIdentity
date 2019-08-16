@@ -303,7 +303,7 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
      * createCredentialPojo.
      */
     protected CredentialPojo createCredentialPojo(
-        CreateCredentialPojoArgs createCredentialPojoArgs) {
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs) {
 
         if (createCredentialPojoArgs == null) {
             CptMapArgs registerCptArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);

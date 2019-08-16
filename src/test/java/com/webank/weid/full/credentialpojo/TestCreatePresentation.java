@@ -58,8 +58,6 @@ public class TestCreatePresentation extends TestBaseServcie {
 
     private static Challenge challenge = null;
 
-    private static final String claimDisclosedPolicy =
-        "{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}";
 
     @Override
     public synchronized void testInit() {
