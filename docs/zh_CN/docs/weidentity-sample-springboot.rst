@@ -133,6 +133,7 @@ spring-boot服务方式使用
 - 注册 CPT
 
 .. code:: shell
+
     curl -l -H "Content-type: application/json" -X POST -d '{"publisher": "did:weid:101:0xd613fbc0249f2ce5088ed484fa6b7b51ecb95e24",
     "claim": {"properties": {"id":{"type":"string","description":"user weid"},"name":{"type":"string","description":"user name"},"gender":{"type":"string","description":"user gender"}}}}' 
     http://127.0.0.1:20191/registCpt
@@ -163,6 +164,7 @@ spring-boot服务方式使用
 创建 Credential 依赖于具体的 CPT，参数里的 cptId 传入刚刚注册的 CPT 的 ID：
 
 .. code:: shell
+
     curl -l -H "Content-type: application/json" -X POST -d 
     '{"cptId": "1189","issuer": "did:weid:101:0xd613fbc0249f2ce5088ed484fa6b7b51ecb95e24",
     "claimData": {"id":"did:weid:101:0xf36fb2308d36bb94c579f568bdf670743d949deb","name":"zhangsan","gender":"F"}}' 
@@ -213,6 +215,7 @@ spring-boot服务方式使用
 
 
 .. code:: shell
+
     curl -l -H "Content-type: application/json" -X POST -d 
     '{"context":"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1",
     "id":"e4f4accd-6026-4fd0-9392-1379ddd4f778","cptId":1189,"issuer":"did:weid:101:0xd613fbc0249f2ce5088ed484fa6b7b51ecb95e24",
