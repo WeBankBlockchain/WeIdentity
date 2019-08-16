@@ -793,7 +793,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
         ResponseData<Boolean> response = new ResponseData<>(false,
             ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
         String name = null;
-        String weId = registerAuthorityIssuerArgs.getAuthorityIssuer().getWeId();
         while (response.getErrorCode()
             == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
             name = registerAuthorityIssuerArgs.getAuthorityIssuer().getName();

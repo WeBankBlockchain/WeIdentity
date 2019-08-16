@@ -57,7 +57,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: test many times isAuthorityIssuer success.
      */
     @Test
-    public void testIsAuthorityIssuer_repeatSuccess() {
+    public void testIsAuthorityIssuerRepeatSuccess() {
 
         String weId = createWeId.getWeId();
         for (int i = 0; i < 3; i++) {
@@ -75,7 +75,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: is authority issuer success .
      */
     @Test
-    public void testIsAuthorityIssuer_success() {
+    public void testIsAuthorityIssuerSuccess() {
 
         ResponseData<Boolean> response =
             authorityIssuerService.isAuthorityIssuer(createWeId.getWeId());
@@ -89,7 +89,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: WeIdentity DID is bad format.
      */
     @Test
-    public void testIsAuthorityIssuer_weIdFormat() {
+    public void testIsAuthorityIssuerWeIdFormat() {
 
         ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer("as~12345678>?<");
         LogUtil.info(logger, "isAuthorityIssuer", response);
@@ -102,9 +102,9 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID is not exists.
      */
     @Test
-    public void testIsAuthorityIssuer_weIdSorted() {
+    public void testIsAuthorityIssuerWeIdSorted() {
 
-        String weId = new String("weid:did:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d87733");
+        String weId = "weid:did:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d87733";
         ResponseData<Boolean> response = authorityIssuerService
             .isAuthorityIssuer(weId);
         LogUtil.info(logger, "isAuthorityIssuer", response);
@@ -118,9 +118,9 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID is not start with 0x.
      */
     @Test
-    public void testIsAuthorityIssuer_weIdnotHex() {
+    public void testIsAuthorityIssuerWeIdnotHex() {
 
-        String weId = new String("weid:did:00f3d8234e93823fac7ebdf0cfaa03b6a43d87733");
+        String weId = "weid:did:00f3d8234e93823fac7ebdf0cfaa03b6a43d87733";
         ResponseData<Boolean> response = authorityIssuerService
             .isAuthorityIssuer(weId);
         LogUtil.info(logger, "isAuthorityIssuer", response);
@@ -134,9 +134,9 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID is not start with space and end with space.
      */
     @Test
-    public void testIsAuthorityIssuer_weIdContainSpace() {
+    public void testIsAuthorityIssuerWeIdContainSpace() {
 
-        String weId = new String(" weid:did:0xf3d8234e93823fac7ebdf0cfaa03b6a43d87733 ");
+        String weId = "weid:did:0xf3d8234e93823fac7ebdf0cfaa03b6a43d87733";
         ResponseData<Boolean> response = authorityIssuerService
             .isAuthorityIssuer(weId);
         LogUtil.info(logger, "isAuthorityIssuer", response);
@@ -150,7 +150,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: WeIdentity DID is null.
      */
     @Test
-    public void testIsAuthorityIssuer_weIdNull() {
+    public void testIsAuthorityIssuerWeIdNull() {
 
         ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer(null);
         LogUtil.info(logger, "isAuthorityIssuer", response);
@@ -163,7 +163,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: WeIdentity DID is blank.
      */
     @Test
-    public void testIsAuthorityIssuer_weIdBlank() {
+    public void testIsAuthorityIssuerWeIdBlank() {
 
         ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer("");
         LogUtil.info(logger, "isAuthorityIssuer", response);
@@ -176,7 +176,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID is registed by other.
      */
     @Test
-    public void testIsAuthorityIssuer_weIdNotRegister() {
+    public void testIsAuthorityIssuerWeIdNotRegister() {
 
         String weId = createWeId().getWeId();
         ResponseData<Boolean> response = authorityIssuerService
@@ -192,7 +192,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID is not exists.
      */
     @Test
-    public void testIsAuthorityIssuer_weIdNotExist() {
+    public void testIsAuthorityIssuerWeIdNotExist() {
 
         ResponseData<Boolean> response = authorityIssuerService
             .isAuthorityIssuer("did:weid:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d87733");
@@ -207,7 +207,7 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID is removed.
      */
     @Test
-    public void testIsAuthorityIssuer_removedWeId() {
+    public void testIsAuthorityIssuerRemovedWeId() {
 
         CreateWeIdDataResult createWeId = super.registerAuthorityIssuer();
         LogUtil.info(logger, "registerAuthorityIssuer", createWeId);
