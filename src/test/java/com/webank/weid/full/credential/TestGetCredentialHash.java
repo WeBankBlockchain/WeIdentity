@@ -37,7 +37,7 @@ import com.webank.weid.protocol.response.ResponseData;
 public class TestGetCredentialHash extends TestBaseServcie {
 
     @Test
-    public void testGetCredentialHashCase1() {
+    public void testGetCredentialHash_success() {
         Credential credential = buildCredential();
         ResponseData<String> response1 = credentialService.getCredentialHash(credential);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());

@@ -64,11 +64,11 @@ import com.webank.weid.util.DataToolUtils;
 
 /**
  * testing basic entity object building classes.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestBaseUtil {
+
     /**
      * log4j.
      */
@@ -104,12 +104,13 @@ public class TestBaseUtil {
 
     /**
      * build CreateCredentialPojoArgs no cptId.
+     *
      * @return CreateCredentialPojoArgs
      */
     public static CreateCredentialPojoArgs<Map<String, Object>> buildCreateCredentialPojoArgs(
         CreateWeIdDataResult createWeId) {
 
-        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = 
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
             new CreateCredentialPojoArgs<Map<String, Object>>();
 
         createCredentialPojoArgs.setIssuer(createWeId.getWeId());
@@ -117,7 +118,10 @@ public class TestBaseUtil {
             System.currentTimeMillis() + (1000 * 60 * 60 * 24));
         createCredentialPojoArgs.setWeIdAuthentication(buildWeIdAuthentication(createWeId));
         try {
-            createCredentialPojoArgs.setClaim(buildCptJsonSchemaDataFromFile());
+            Map<String, Object> claimMap = buildCptJsonSchemaDataFromFile();
+            claimMap.put("id", createWeId.getWeId());
+            createCredentialPojoArgs.setClaim(claimMap);
+
         } catch (IOException e) {
             logger.error("buildCreateCredentialPojoArgs failed. ", e);
             return null;
@@ -125,9 +129,10 @@ public class TestBaseUtil {
 
         return createCredentialPojoArgs;
     }
-    
+
     /**
      * buildWeIdAuthentication.
+     *
      * @param weIdData weId
      * @return WeIdAuthentication
      */
@@ -135,12 +140,15 @@ public class TestBaseUtil {
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(weIdData.getWeId());
         weIdAuthentication.setWeIdPublicKeyId(weIdData.getWeId() + "#keys-0");
-        weIdAuthentication.setWeIdPrivateKey(weIdData.getUserWeIdPrivateKey());
+        weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
+        weIdAuthentication.getWeIdPrivateKey().setPrivateKey(
+            weIdData.getUserWeIdPrivateKey().getPrivateKey());
         return weIdAuthentication;
     }
-    
+
     /**
      * build cpt json schemaData.
+     *
      * @return HashMap
      * @throws IOException IOException
      */
@@ -154,9 +162,10 @@ public class TestBaseUtil {
         );
         return cptJsonSchemaData;
     }
-    
+
     /**
      * build default CptMapArgs.
+     *
      * @param createWeId WeId
      * @return CptMapArgs
      */
@@ -205,6 +214,7 @@ public class TestBaseUtil {
 
     /**
      * build cpt json schema.
+     *
      * @return HashMap
      */
     public static HashMap<String, Object> buildCptJsonSchema() {
@@ -245,6 +255,7 @@ public class TestBaseUtil {
 
     /**
      * build cpt json schemaData.
+     *
      * @return HashMap
      */
     public static HashMap<String, Object> buildCptJsonSchemaData() {
@@ -259,10 +270,11 @@ public class TestBaseUtil {
 
     /**
      * build default RegisterAuthorityIssuerArgs.
+     *
      * @return RegisterAuthorityIssuerArgs
      */
     public static RegisterAuthorityIssuerArgs buildRegisterAuthorityIssuerArgs(
-        CreateWeIdDataResult createWeId, 
+        CreateWeIdDataResult createWeId,
         String privateKey) {
 
         AuthorityIssuer authorityIssuer = new AuthorityIssuer();
@@ -280,8 +292,8 @@ public class TestBaseUtil {
 
     /**
      * build default CreateWeIdArgs.
+     *
      * @return CreateWeIdArgs
-     * 
      */
     public static CreateWeIdArgs buildCreateWeIdArgs() {
         CreateWeIdArgs args = new CreateWeIdArgs();
@@ -298,6 +310,7 @@ public class TestBaseUtil {
 
     /**
      * buildSetPublicKeyArgs.
+     *
      * @return SetAuthenticationArgs
      */
     public static SetAuthenticationArgs buildSetAuthenticationArgs(
@@ -315,6 +328,7 @@ public class TestBaseUtil {
 
     /**
      * buildSetPublicKeyArgs.
+     *
      * @param createWeId WeId
      * @return SetPublicKeyArgs
      */
@@ -332,6 +346,7 @@ public class TestBaseUtil {
 
     /**
      * buildSetPublicKeyArgs.
+     *
      * @param createWeId WeId
      * @return SetServiceArgs
      */
@@ -350,12 +365,13 @@ public class TestBaseUtil {
 
     /**
      * buildRemoveAuthorityIssuerArgs.
+     *
      * @param createWeId WeId
      * @param privateKey privateKey
      * @return RemoveAuthorityIssuerArgs
      */
     public static RemoveAuthorityIssuerArgs buildRemoveAuthorityIssuerArgs(
-        CreateWeIdDataResult createWeId, 
+        CreateWeIdDataResult createWeId,
         String privateKey) {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs = new RemoveAuthorityIssuerArgs();
@@ -368,6 +384,7 @@ public class TestBaseUtil {
 
     /**
      * create a new public key - private key.
+     *
      * @return PasswordKey
      */
     public static PasswordKey createEcKeyPair() {
@@ -392,12 +409,12 @@ public class TestBaseUtil {
 
     /**
      * to test the public and private key from the file.
-     * 
+     *
      * @param fileName fileName
      * @return PasswordKey
      */
     public static PasswordKey resolvePk(String fileName) {
-        
+
         BufferedReader br = null;
         FileInputStream fis = null;
         InputStreamReader isr = null;
@@ -423,7 +440,7 @@ public class TestBaseUtil {
             String line = null;
             while ((line = br.readLine()) != null) {
                 strList.add(line);
-            } 
+            }
 
             String[] pk = new String[2];
             for (int i = 0; i < strList.size(); i++) {
@@ -446,7 +463,7 @@ public class TestBaseUtil {
             logger.error("the file is not exists:", e);
         } catch (IOException e) {
             logger.error("resolvePk error:", e);
-        }  finally {
+        } finally {
             if (br != null) {
                 try {
                     br.close();
@@ -475,6 +492,7 @@ public class TestBaseUtil {
 
     /**
      * Read key form file.
+     *
      * @param fileName filename
      * @return private key
      */
