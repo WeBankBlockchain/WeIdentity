@@ -20,6 +20,7 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -186,6 +187,10 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         if (innerCode != ErrorCode.SUCCESS) {
             return new ResponseData<>(false, innerCode);
         }
+        innerCode = isCallerAuthValid(callerAuth);
+        if (innerCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(false, innerCode);
+        }
         try {
             return engine
                 .registerIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
@@ -323,6 +328,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         String issuerType,
         String targetIssuerWeId
     ) {
+        if (!WeIdUtils.isWeIdValid(targetIssuerWeId)) {
+            return ErrorCode.WEID_INVALID;
+        }
         if (!weIdService.isWeIdExist(targetIssuerWeId).getResult()) {
             return ErrorCode.WEID_DOES_NOT_EXIST;
         }
@@ -337,12 +345,15 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         if (callerAuth == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
+        if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {
+            return ErrorCode.WEID_INVALID;
+        }
+        if (!weIdService.isWeIdExist(callerAuth.getWeId()).getResult()) {
+            return ErrorCode.WEID_DOES_NOT_EXIST;
+        }
         if (callerAuth.getWeIdPrivateKey() == null
             || StringUtils.isEmpty(callerAuth.getWeIdPrivateKey().getPrivateKey())) {
             return ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL;
-        }
-        if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {
-            return ErrorCode.WEID_INVALID;
         }
         return ErrorCode.SUCCESS;
     }
@@ -415,6 +426,9 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         try {
             BigInteger accValueBigInteger = new BigInteger(accValue);
             logger.info(args.getWeId() + " accValue is: " + accValueBigInteger.longValue());
+            if (accValueBigInteger.compareTo(BigInteger.ZERO) < 0) {
+                return ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL;
+            }
         } catch (Exception e) {
             return ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL;
         }
@@ -424,9 +438,8 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
 
     private boolean isValidAuthorityIssuerName(String name) {
         return !StringUtils.isEmpty(name)
-            && name.length() < WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH
-            && !StringUtils.isWhitespace(name)
-            && StringUtils.isAsciiPrintable(name);
+            && name.getBytes(StandardCharsets.UTF_8).length
+            < WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH
+            && !StringUtils.isWhitespace(name);
     }
-
 }

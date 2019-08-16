@@ -392,16 +392,16 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             .append(WeIdConstant.SEPARATOR)
             .append(weAddress)
             .toString();
-        String created = DateUtils.getCurrentTimeStampString();
+        String created = DateUtils.getNoMillisecondTimeStampString();
         TransactionReceipt receipt;
+        WeIdContract weIdContract =
+            reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
         try {
-            WeIdContract weIdContract =
-                reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
             receipt = weIdContract.createWeId(
                 weAddress,
                 DataToolUtils.stringToByteArray(auth),
                 DataToolUtils.stringToByteArray(created),
-                BigInteger.valueOf(DateUtils.getCurrentTimeStamp())
+                BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp())
             ).send();
 
             TransactionInfo info = new TransactionInfo(receipt);
@@ -433,7 +433,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             WeIdContract weIdContract =
                 reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
             byte[] attrValue = value.getBytes();
-            BigInteger updated = BigInteger.valueOf(System.currentTimeMillis());
+            BigInteger updated = BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp());
             TransactionReceipt transactionReceipt =
                 weIdContract.setAttribute(
                     weAddress,

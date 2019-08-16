@@ -328,14 +328,8 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             cpt.setCreated(longArray[1]);
             cpt.setUpdated(longArray[2]);
 
-            String[] jsonSchemaArray =
-                DataToolUtils.bytes32DynamicArrayToStringArrayWithoutTrim(
-                    (DynamicArray<Bytes32>) typeList.get(3)
-                );
-            StringBuffer jsonSchema = new StringBuffer();
-            for (int i = 0; i < jsonSchemaArray.length; i++) {
-                jsonSchema.append(jsonSchemaArray[i]);
-            }
+            String jsonSchema = DataToolUtils.bytes32DynamicArrayToStringWithoutTrim(
+                (DynamicArray<Bytes32>) typeList.get(3));
 
             Map<String, Object> jsonSchemaMap = DataToolUtils
                 .deserialize(jsonSchema.toString().trim(), HashMap.class);
