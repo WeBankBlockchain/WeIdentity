@@ -56,6 +56,7 @@ import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.AuthorityIssuerServiceEngine;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -141,7 +142,7 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
         String weAddress = WeIdUtils.convertWeIdToAddress(authorityIssuer.getWeId());
         String[] stringAttributes = loadNameToStringAttributes(authorityIssuer.getName());
         long[] longAttributes = new long[16];
-        Long createDate = System.currentTimeMillis();
+        Long createDate = DateUtils.getNoMillisecondTimeStamp();
         longAttributes[0] = createDate;
         Address addr = new Address(weAddress);
 

@@ -116,7 +116,7 @@ public class CredentialPojo implements IProof, JsonSerializer {
      * @return signature value
      */
     public String getSignature() {
-        return getValueFromProof(proof, ParamKeyConstant.PROOF_SIGNATURE).toString();
+        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_SIGNATURE));
     }
 
     /**
@@ -125,7 +125,7 @@ public class CredentialPojo implements IProof, JsonSerializer {
      * @return proof type
      */
     public String getProofType() {
-        return getValueFromProof(proof, ParamKeyConstant.PROOF_TYPE).toString();
+        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_TYPE));
     }
     
     /**

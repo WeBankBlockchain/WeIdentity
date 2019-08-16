@@ -20,6 +20,7 @@
 package com.webank.weid.full.transportation;
 
 import java.util.HashMap;
+import java.util.List;
 
 import mockit.Mock;
 import mockit.MockUp;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.TransportationFactory;
@@ -41,36 +43,36 @@ import com.webank.weid.suite.entity.CryptType;
 
 /**
  * 二维码协议反序列化测试.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestJsonDeserialize extends TestBaseTransportation {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestJsonDeserialize.class);
-    
+
     private static PresentationE presentation;
-    
+
     private static String original_transString;
-    
+
     @Override
     public synchronized void testInit() {
         if (presentation == null) {
             super.testInit();
             mockMysqlDriver();
             presentation = this.getPresentationE();
-            original_transString = 
+            original_transString =
                 TransportationFactory.newJsonTransportation().serialize(
-                    presentation, 
+                    presentation,
                     new ProtocolProperty(EncodeType.ORIGINAL)
                 ).getResult();
-        } 
+        }
     }
-    
+
     /**
      * 使用原文方式构建协议数据并解析.
      */
     @Test
-    public void testDeserializeCase1() {
+    public void testDeserialize_EncodeTypeOriginal() {
         ResponseData<String> response =
             TransportationFactory.newJsonTransportation().serialize(
                 presentation,
@@ -82,29 +84,75 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
         Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
     }
-    
+
     /**
      * 使用密文方式构建协议数据并解析.
      */
     @Test
-    public void testDeserializeCase2() {
+    public void testDeserialize_EncodeTypeCipher() {
+        ResponseData<String> response =
+            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
+                presentation,
+                new ProtocolProperty(EncodeType.CIPHER)
+            );
+        ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
+            .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
+        LogUtil.info(logger, "deserialize", wrapperRes);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
+        Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
+    }
+
+    /**
+     * 使用密文方式构建协议数据并解析.
+     */
+    @Test
+    public void testDeserialize_credentialPojo() {
+        List<CredentialPojo> credentialPojoList = presentation.getVerifiableCredential();
+        CredentialPojo credentialPojo = new CredentialPojo();
+        if (credentialPojoList.size() > 0) {
+            credentialPojo = credentialPojoList.get(0);
+        }
+
         ResponseData<String> response =
             TransportationFactory.newJsonTransportation().serialize(
-                presentation,
+                credentialPojo,
+                new ProtocolProperty(EncodeType.CIPHER)
+            );
+        ResponseData<CredentialPojo> wrapperRes = TransportationFactory.newJsonTransportation()
+            .deserialize(response.getResult(), CredentialPojo.class);
+        LogUtil.info(logger, "deserialize", wrapperRes);
+        Assert.assertEquals(ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCode(),
+            wrapperRes.getErrorCode().intValue());  
+    }
+
+    /**
+     * 解析的数据和解析类型不匹配.
+     */
+    @Test
+    public void testDeserialize_transNotMath() {
+        List<CredentialPojo> credentialPojoList = presentation.getVerifiableCredential();
+        CredentialPojo credentialPojo = new CredentialPojo();
+        if (credentialPojoList.size() > 0) {
+            credentialPojo = credentialPojoList.get(0);
+        }
+
+        ResponseData<String> response =
+            TransportationFactory.newJsonTransportation().serialize(
+                credentialPojo,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
         ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
             .deserialize(response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
-        Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
-    }   
-    
+        Assert.assertEquals(ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCode(),
+                wrapperRes.getErrorCode().intValue());        
+    }
+
     /**
      * 协议字符串输入为空.
      */
     @Test
-    public void testDeserializeCase3() {
+    public void testDeserialize_dataNull() {
         String transString = null;
         ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
             .deserialize(transString, PresentationE.class);
@@ -112,15 +160,15 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
-        ); 
+        );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * 协议字符串输入非法.
      */
     @Test
-    public void testDeserializeCase4() {
+    public void testDeserialize_transStrig() {
         String transString = "abcd";
         ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
             .deserialize(transString, PresentationE.class);
@@ -131,18 +179,18 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * mock异常情况.
      */
     @Test
-    public void testDeserializeCase5() {       
+    public void testDeserializeCase5() {
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
+            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
-        
+
         MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
             @Mock
             public CryptService getCryptService(CryptType cryptType) {
@@ -150,9 +198,9 @@ public class TestJsonDeserialize extends TestBaseTransportation {
             }
         };
 
-        ResponseData<PresentationE> wrapperRes = 
+        ResponseData<PresentationE> wrapperRes =
             TransportationFactory.newJsonTransportation()
-                .deserialize(response.getResult(), PresentationE.class);
+                .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         mockTest.tearDown();
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
@@ -161,7 +209,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         );
         Assert.assertNull(wrapperRes.getResult());
     }
-    
+
     /**
      * mock异常情况.
      */
@@ -172,7 +220,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
             public EncodeType getObject(String value) {
                 return null;
             }
-        };      
+        };
         ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
             .deserialize(original_transString, PresentationE.class);
         mockTest.tearDown();
@@ -182,31 +230,31 @@ public class TestJsonDeserialize extends TestBaseTransportation {
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
-    }  
-    
+    }
+
     /**
      * mock异常情况.
      */
     @Test
-    public void testDeserializeCase7() {     
+    public void testDeserializeCase7() {
         MockUp<EncodeType> mockTest = new MockUp<EncodeType>() {
             @Mock
             public EncodeType getObject(String value) {
                 return null;
             }
         };
-        
+
         ResponseData<PresentationE> response =
             TransportationFactory.newJsonTransportation().deserialize(
-                original_transString, 
+                original_transString,
                 PresentationE.class
             );
         mockTest.tearDown();
         LogUtil.info(logger, "deserialize", response);
         Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(), 
+            ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(null, response.getResult());
-    }   
+    }
 }

@@ -19,10 +19,6 @@
 
 package com.webank.weid;
 
-import java.io.IOException;
-
-import org.bcos.web3j.protocol.core.Response;
-import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,7 +61,7 @@ public abstract class BaseTest extends BaseService {
      * initialization some for test.
      */
     @Before
-    public void setUp() {
+    public void setUp()  {
 
         authorityIssuerService = new AuthorityIssuerServiceImpl();
         cptService = new CptServiceImpl();
@@ -73,7 +69,7 @@ public abstract class BaseTest extends BaseService {
         credentialService = new CredentialServiceImpl();
         evidenceService = new EvidenceServiceImpl();
         credentialPojoService = new CredentialPojoServiceImpl();
-        
+
         privateKey = TestBaseUtil.readPrivateKeyFromFile("ecdsa_key");
 
         testInit();
@@ -91,7 +87,7 @@ public abstract class BaseTest extends BaseService {
         credentialService = null;
         evidenceService = null;
         credentialPojoService = null;
-        
+
         testFinalize();
     }
 
