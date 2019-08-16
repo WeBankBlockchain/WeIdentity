@@ -36,11 +36,6 @@ public class TestAddIssuerIntoIssuerType extends TestBaseServcie {
         }
     }
 
-    @Before
-    public void setup() throws Exception {
-
-    }
-
     /**
      * case : test add issuer into issuer type success.
      */
@@ -209,7 +204,6 @@ public class TestAddIssuerIntoIssuerType extends TestBaseServcie {
     /**
      * case: private key is belong other weId.
      */
-   // @Test
     public void testAddIssuerIntoIssuerType_otherPriKey() {
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         weIdAuthentication.setWeIdPrivateKey(createWeIdResult.getUserWeIdPrivateKey());
@@ -226,7 +220,6 @@ public class TestAddIssuerIntoIssuerType extends TestBaseServcie {
     /**
      * case: private key is belong other weId.
      */
-    //@Test
     public void testAddIssuerIntoIssuerType_otherAuthorPriKey() {
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         CreateWeIdDataResult weIdDataResult = super.registerAuthorityIssuer();
