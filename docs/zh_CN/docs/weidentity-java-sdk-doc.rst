@@ -9426,8 +9426,8 @@ com.webank.weid.protocol.response.TransactionInfo
    opt 入参校验失败
    CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
    end
-loop 遍历credentialPojo列表
-  CredentialPojoService->>CredentialPojoService: 验证policy和claim里的key是否一致
+   loop 遍历credentialPojo列表
+   CredentialPojoService->>CredentialPojoService: 验证policy和claim里的key是否一致
    opt 任一验证失败
    CredentialPojoService-->>调用者: 报错并退出
    end
@@ -9446,7 +9446,7 @@ loop 遍历credentialPojo列表
    opt 验证签名失败
    CredentialPojoService-->>调用者: 报错并退出
    end
-end
+   end
    CredentialPojoService-->>调用者: 返回成功
 
 ----
@@ -9877,8 +9877,8 @@ com.webank.weid.protocol.base.PresentationE
    opt 入参校验失败
    CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
    end
-loop 遍历credentialPojo列表
-  CredentialPojoService->>CredentialPojoService: 根据credentialPojo中的cptId获取对应的claimPolicy
+   loop 遍历credentialPojo列表
+   CredentialPojoService->>CredentialPojoService: 根据credentialPojo中的cptId获取对应的claimPolicy
    opt claimPolicy
    CredentialPojoService-->>调用者: continue
    end
@@ -9886,10 +9886,10 @@ loop 遍历credentialPojo列表
    opt 选择性披露失败
    CredentialPojoService-->>调用者: 失败退出
    end
-end
-  CredentialPojoService->>CredentialPojoService: 设置context等元数据属性
-  CredentialPojoService->>CredentialPojoService: 对presentation整体签名，放入proof结构，同时设置其他proof属性，用于验证
-  CredentialPojoService-->>调用者: 返回成功
+   end
+   CredentialPojoService->>CredentialPojoService: 设置context等元数据属性
+   CredentialPojoService->>CredentialPojoService: 对presentation整体签名，放入proof结构，同时设置其他proof属性，用于验证
+   CredentialPojoService-->>调用者: 返回成功
 
 ----
 
@@ -10489,7 +10489,7 @@ java.util.List<java.lang.String>
    opt 入参校验失败
    JsonTransportation-->>调用者: 报错，提示参数不合法并退出
    end
-loop 遍历每个WeID
+   loop 遍历每个WeID
    JsonTransportation->>WeIdService: 判断WeID的合法性，以及存在性，调用isWeIdExist()方法
    WeIdService->>区块链: 查询该WeID是否存在
    区块链-->>WeIdService: 返回查询结果
@@ -10498,7 +10498,7 @@ loop 遍历每个WeID
    JsonTransportation-->>调用者: 报错，提示WeID不存在
    end
    JsonTransportation->>JsonTransportation: 放入verifier list里
-end
+   end
    JsonTransportation-->>调用者: 返回成功
 
 
@@ -10896,7 +10896,7 @@ java.util.List<java.lang.String>
    opt 入参校验失败
    QrCodeTransportation-->>调用者: 报错，提示参数不合法并退出
    end
-loop 遍历每个WeID
+   loop 遍历每个WeID
    QrCodeTransportation->>WeIdService: 判断WeID的合法性，以及存在性，调用isWeIdExist()方法
    WeIdService->>区块链: 查询该WeID是否存在
    区块链-->>WeIdService: 返回查询结果
@@ -10905,7 +10905,7 @@ loop 遍历每个WeID
    QrCodeTransportation-->>调用者: 报错，提示WeID不存在
    end
    QrCodeTransportation->>QrCodeTransportation: 放入verifier list里
-end
+   end
    QrCodeTransportation-->>调用者: 返回成功
 
 ----
