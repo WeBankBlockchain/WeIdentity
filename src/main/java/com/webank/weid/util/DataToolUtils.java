@@ -111,6 +111,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -144,6 +145,8 @@ public final class DataToolUtils {
 
     // LOGO高度
     private static final int LOGO_HEIGHT = 60;
+    
+    private static final int SERIALIZED_SIGNATUREDATA_LENGTH = 65;
 
     private static final int radix = 10;
     
@@ -634,6 +637,9 @@ public final class DataToolUtils {
      */
     public static Sign.SignatureData simpleSignatureDeserialization(
         byte[] serializedSignatureData) {
+        if (SERIALIZED_SIGNATUREDATA_LENGTH != serializedSignatureData.length) {
+            throw new WeIdBaseException("signature data illegal");
+        }
         byte v = serializedSignatureData[0];
         byte[] r = new byte[32];
         byte[] s = new byte[32];
@@ -673,8 +679,13 @@ public final class DataToolUtils {
         String rawData,
         String signature,
         WeIdDocument weIdDocument) {
-
-        Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
+        Sign.SignatureData signatureData = null;
+        try {
+            signatureData = convertBase64StringToSignatureData(signature);
+        } catch (Exception e) {
+            logger.error("verify Signature failed.", e);
+            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
+        }
         return verifySignatureFromWeId(rawData, signatureData, weIdDocument);
     }
 
@@ -1308,6 +1319,21 @@ public final class DataToolUtils {
     }
 
     /**
+     * byte array List to bytes 32 static array.
+     *
+     * @param bytes the byte array List
+     * @return the static array
+     */
+    public static StaticArray<Bytes32> byteArrayListToBytes32StaticArray(List<byte[]> bytes) {
+        List<Bytes32> bytes32List = new ArrayList<Bytes32>();
+        for (int i = 0; i < bytes.size(); i++) {
+            bytes32List.add(DataToolUtils.bytesArrayToBytes32(bytes.get(i)));
+        }
+        StaticArray<Bytes32> bytes32StaticArray = new StaticArray<Bytes32>(bytes32List);
+        return bytes32StaticArray;
+    }
+    
+    /**
      * String array to bytes 32 static array.
      *
      * @param addressArray the string array
@@ -1340,6 +1366,23 @@ public final class DataToolUtils {
         return stringArray;
     }
 
+    /**
+     * Bytes 32 dynamic array to stringwithout trim.
+     *
+     * @param bytes32DynamicArray the bytes 32 dynamic array
+     * @return the string
+     */
+    public static String bytes32DynamicArrayToStringWithoutTrim(
+        DynamicArray<Bytes32> bytes32DynamicArray) {
+
+        List<Bytes32> bytes32List = bytes32DynamicArray.getValue();
+        List<byte[]> byteArraylist = new ArrayList<>();
+        for (int i = 0; i < bytes32List.size(); i++) {
+            byteArraylist.add(bytes32ToBytesArray(bytes32List.get(i)));
+        }
+        return byte32ListToString(byteArraylist, bytes32List.size());       
+    }
+    
     /**
      * Int 256 dynamic array to long array.
      *
@@ -1481,7 +1524,7 @@ public final class DataToolUtils {
      * @return the StaticArray
      */
     public static List<BigInteger> getParamCreatedList(int length) {
-        long created = System.currentTimeMillis();
+        long created = DateUtils.getNoMillisecondTimeStamp();
         List<BigInteger> createdList = new ArrayList<>();
         createdList.add(BigInteger.valueOf(created));
         return createdList;
@@ -1548,19 +1591,19 @@ public final class DataToolUtils {
             } else {
                 if (list.contains(key)) {
                     if (TO_JSON.equals(type)) {
-                        if (isValidLongString(obj.toString())) {
+                        if (isValidLongString(String.valueOf(obj))) {
                             resJson.put(
                                 key, 
                                 DateUtils.convertNoMillisecondTimestampToUtc(
-                                    Long.parseLong(obj.toString())));
+                                    Long.parseLong(String.valueOf(obj))));
                         } else {
                             resJson.put(key, obj);
                         }
                     } else {
-                        if (DateUtils.isValidDateString(obj.toString())) {
+                        if (DateUtils.isValidDateString(String.valueOf(obj))) {
                             resJson.put(
                                 key, 
-                                DateUtils.convertUtcDateToNoMillisecondTime(obj.toString()));
+                                DateUtils.convertUtcDateToNoMillisecondTime(String.valueOf(obj)));
                         } else {
                             resJson.put(key, obj);
                         }
