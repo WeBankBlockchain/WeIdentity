@@ -13,15 +13,25 @@ Endpoint Service在代理端依托于RestService，环境要求也与其一致�
 
 .. code-block:: bash
 
-    # 默认的服务端开启端口，用于在访问未指定服务端主机端口的主机时使用
-    default.listener.port=10090
     # 向服务端周期拉取Endpoint配置的时间间隔，单位为秒
     fetch.period.seconds=60
     # 服务端所有主机端口列表
-    server.hostport.list=127.0.0.1:10090,10.105.107.225:10090
+    server.hostport.list=127.0.0.1:6090,127.0.0.2:6097
 
+2. 在服务端注册您的Endpoint
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2. 服务端部署
+为了注册您的Endpoint以调用所需的Java方法，您需要在您集成Java-SDK时执行以下步骤：
+- 为您需要注册的每个Endpoint，实现一个对应的 ``EndpointFunctor`` 接口。此接口包括两个方法： ``execute()`` 和 ``getDescription()`` 
+    - 实现 ``execute()`` ，用来决定具体当代理端的RPC请求发送过来时需要进行的操作
+    - 实现 ``getDescription()`` ，用来提供一段对此接口功能的描述
+- 在实现完成之后，调用 ``EndpointHandler`` 获取一个实例，并通过 ``registerEndpoint()`` 方法向此EndpointHandler内注册您的Endpoint
+- 服务端会自动将您的Endpoint写入本地Endpoint数据配置项中
+- 为了确保RPC服务端能够正确地获取这些Endpoint，需要使用之前获取的EndpointHandler实例，启动 ``RpcServer`` 的 ``main()`` 进程。
+
+详细的相关实现，可以参考源代码的 `EndpointSample.java <https://github.com/WeBankFinTech/weid-java-sdk/blob/master/src/main/java/com/webank/weid/suite/endpoint/EndpointSample.java>`_ 。
+
+3. 启动服务端
 ^^^^^^^^^^^^^^^^^^^
 
 Endpoint Service在服务端依托于WeIdentity-Java-SDK，环境要求也与其一致，请见 `Java-SDK 部署环境要求 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-installation.html>`_。
@@ -31,56 +41,23 @@ Endpoint Service在服务端依托于WeIdentity-Java-SDK，环境要求也与其
 .. code-block:: bash
 
     # RPC服务端的监听端口
-    rpc.listener.port=10090
+    rpc.listener.port=6090
 
-随后，您可以通过以下命令操作RPC服务端：
+随后，您需要执行您在上一步骤中注册Endpoint的方法。以 ``EndpointSample.java`` 为例，执行：
 
 .. code-block:: bash
 
-    # 为脚本文件增加权限
-    $ chmod +x *.sh
-    # 启动应用
-    $ ./rpc_start.sh
-    # 观察应用状态
-    $ ./rpc_health.sh
-    # 停止应用
-    $ ./rpc_stop.sh
+    java -cp <$your class path> com.webank.weid.suite.endpoint.EndpointSample
 
-执行 ``./rpc_start.sh`` 之后会输出以下提示，表示 RestServer 已经顺利启动：
+您也可以在IDE环境里执行您的注册方法。当您看到以下提示，表示RPC Server已经启动完毕：
 
 .. code-block:: text
 
-    ================================================================
-    Starting com.webank.weid.suite.endpoint.RpcServer ... [SUCCESS]
-    ================================================================
-
-请您通过执行 ``./rpc_health.sh`` 确认 RestServer 已经成功启动：
-
-.. code-block:: text
-
-    ================================================================
-    com.webank.weid.suite.endpoint.RpcServer is running(PID=100891)
-    ================================================================
-
-如果需要停止服务，请执行 ``./rpc_stop`` ，之后会输出以下提示，表示 RestServer 已经顺利停止：
-
-.. code-block:: text
-
-    ================================================================
-    Stopping com.webank.weid.suite.endpoint.RpcServer ... [SUCCESS]
-    ================================================================
-
-
-3. 在服务端注册或注销您的Endpoint
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-为了注册您的Endpoint以调用所需的Java方法，您需要在服务端集成时，为您需要注册的每个Endpoint，实现一个对应的 ``EndpointFunctor`` 接口。此接口包括两个方法： ``execute()`` 和 ``getDescription()`` ，其中前者界定了具体当代理端的RPC请求发送过来时需要进行的操作，后者则需要提供一段对此接口功能的描述。在实现完成之后，还需要调用 ``EndpointHandler`` 类的 ``registerEndpoint()`` 方法进行注册。
-
-您可以参考SampleEndpointFunctor.java的相关实现。
+    Trying to receive incoming traffic at Port: 6090
 
 4. 在代理端调用您的Endpoint
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-当您注册Endpoint完毕之后，等待您之前所设定的拉取时间间隔，以保证此Endpoint被代理端正确地拉取到。随后，您就可以在代理端调用此接口了。
+当您注册Endpoint完毕之后，等待您之前所设定的拉取时间间隔（默认为60秒），以保证此Endpoint被代理端正确地拉取到。随后，您就可以在代理端调用此接口了。
 
 您可以参见\ `REST API文档 <./weidentity-endpoint-deploy.html>`_\ 中的“WeIdentity Endpoint Service API”一节，了解如何获取和调用注册的Endpoint。
