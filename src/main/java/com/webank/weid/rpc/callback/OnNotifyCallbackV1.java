@@ -67,7 +67,12 @@ public class OnNotifyCallbackV1 extends ChannelPushCallback implements RegistCal
             amopCallBack = defaultAmopCallback;
         }
         String messageBody = amopRequestBody.getMsgBody();
-        String result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
+        String result = null;
+        try {
+            result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
+        } catch (Exception e) {
+            logger.error("callOnPush error, please check the log.", e);
+        }
         
         /*
          * 接收到以后需要给发送端回包

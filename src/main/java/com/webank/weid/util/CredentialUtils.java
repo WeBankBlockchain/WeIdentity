@@ -40,6 +40,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 
@@ -124,6 +125,48 @@ public final class CredentialUtils {
         ct.setIssuer(credential.getIssuer());
         ct.setId(credential.getId());
         return ct;
+    }
+
+
+    /**
+     * A clean deep copy method of a CredentialPojo which pays special attention on Map object.
+     *
+     * @param credentialPojo target CredentialPojo object
+     * @return new credentialPojo
+     */
+    public static CredentialPojo copyCredential(CredentialPojo credentialPojo) {
+        CredentialPojo cpj = new CredentialPojo();
+        cpj.setContext(credentialPojo.getContext());
+        cpj.setIssuanceDate(credentialPojo.getIssuanceDate());
+        cpj.setCptId(credentialPojo.getCptId());
+        cpj.setExpirationDate(credentialPojo.getExpirationDate());
+        cpj.setIssuer(credentialPojo.getIssuer());
+        cpj.setId(credentialPojo.getId());
+
+        Map<String, Object> originalProof = credentialPojo.getProof();
+        if (originalProof != null) {
+            Map<String, Object> proof = DataToolUtils
+                .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
+            cpj.setProof(proof);
+        }
+        Map<String, Object> originalClaim = credentialPojo.getClaim();
+        if (originalClaim != null) {
+            Map<String, Object> claim = DataToolUtils
+                .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
+            cpj.setClaim(claim);
+        }
+        List<String> originalType = credentialPojo.getType();
+        if (originalType != null) {
+            List<String> type = new ArrayList<>(originalType.size());
+            if (originalType.size() > 0) {
+                for (String originalTypeItem : originalType) {
+                    type.add(originalTypeItem);
+                }
+            }
+            cpj.setType(type);
+        }
+
+        return cpj;
     }
 
     /**
@@ -312,21 +355,21 @@ public final class CredentialUtils {
             return ErrorCode.ILLEGAL_INPUT;
         }
         if (args.getCptId() == null || args.getCptId().intValue() < 0) {
-            return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
+            return ErrorCode.CPT_ID_ILLEGAL;
         }
         if (!WeIdUtils.isWeIdValid(args.getIssuer())) {
             return ErrorCode.CREDENTIAL_ISSUER_INVALID;
         }
         Long issuanceDate = args.getIssuanceDate();
         if (issuanceDate != null && issuanceDate <= 0) {
-            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         Long expirationDate = args.getExpirationDate();
         if (expirationDate == null
             || expirationDate.longValue() < 0
             || expirationDate.longValue() == 0
             || (issuanceDate != null && expirationDate < issuanceDate)
-            || (issuanceDate == null && expirationDate < System.currentTimeMillis())) {
+            || expirationDate < System.currentTimeMillis()) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
         }
         if (args.getClaim() == null || args.getClaim().isEmpty()) {
@@ -374,7 +417,7 @@ public final class CredentialUtils {
         }
         Long issuanceDate = args.getIssuanceDate();
         if (issuanceDate == null) {
-            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         if (issuanceDate.longValue() > args.getExpirationDate().longValue()) {
             return ErrorCode.CREDENTIAL_EXPIRED;
@@ -394,7 +437,7 @@ public final class CredentialUtils {
         // Created is not obligatory
         Long created = Long.valueOf(proof.get(ParamKeyConstant.PROOF_CREATED));
         if (created.longValue() <= 0) {
-            return ErrorCode.CREDENTIAL_CREATE_DATE_ILLEGAL;
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         // Creator is not obligatory either
         String creator = proof.get(ParamKeyConstant.PROOF_CREATOR);

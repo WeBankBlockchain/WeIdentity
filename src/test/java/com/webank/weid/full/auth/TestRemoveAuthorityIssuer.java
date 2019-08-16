@@ -19,14 +19,6 @@
 
 package com.webank.weid.full.auth;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Future;
-
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,10 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.AuthorityIssuerController;
-import com.webank.weid.contract.v1.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
@@ -46,7 +37,7 @@ import com.webank.weid.protocol.response.ResponseData;
 /**
  * removeAuthorityIssuer method for testing AuthorityIssuerService.
  *
- * @author v_wbgyang
+ * @author v_wbgyang/rockyxia
  */
 public class TestRemoveAuthorityIssuer extends TestBaseServcie {
 
@@ -57,11 +48,11 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
      * case: WeIdentity DID is invalid.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase1() {
+    public void testRemoveAuthorityIssuer_invalidWeId() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
-        removeAuthorityIssuerArgs.setWeId("xxxxxxxx");
+        removeAuthorityIssuerArgs.setWeId("x123~-=><?:',bvhgf;,");
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
@@ -72,10 +63,10 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: WeIdentity DID is blank.
+     * case: WeIdentity DID is null.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase2() {
+    public void testRemoveAuthorityIssuer_weIdNull() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -90,10 +81,28 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
+     * case: WeIdentity DID is blank.
+     */
+    @Test
+    public void testRemoveAuthorityIssuer_weIdBlank() {
+
+        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
+            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
+        removeAuthorityIssuerArgs.setWeId("");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
      * case: WeIdentity DID is bad format.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase3() {
+    public void testRemoveAuthorityIssuer_weIdFormat() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -108,14 +117,70 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: WeIdentity DID is not exists.
+     * case: WeIdentity DID contains zh.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase4() {
+    public void testRemoveAuthorityIssuer_weIdContainZh() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
-        removeAuthorityIssuerArgs.setWeId("did:weid:0x21f3fe8d4536966af41392f7ddc756b6f452df09");
+        removeAuthorityIssuerArgs.setWeId("中国");
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: WeIdentity DID is exist but toUpper.
+     */
+    @Test
+    public void testRemoveAuthorityIssuer_weIdUpper() {
+
+        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
+            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
+        removeAuthorityIssuerArgs.setWeId(createWeIdResult.getWeId().toUpperCase());
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: WeIdentity DID is not exists.
+     */
+    @Test
+    public void testRemoveAuthorityIssuer_weIdNotExist() {
+
+        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
+            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
+        String weId = createWeIdResult.getWeId();
+        removeAuthorityIssuerArgs
+            .setWeId(weId.replace(weId.substring(weId.length() - 4, weId.length()), "ffff"));
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: remove AuthorityIssuer repeat.
+     */
+    @Test
+    public void testRemoveAuthorityIssuer_removeRepeat() {
+
+        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs = removeAuthoritySuccess();
+        Assert.assertNotNull(removeAuthorityIssuerArgs);
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
@@ -130,7 +195,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
      * case: remove success.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase5() {
+    public void testRemoveAuthorityIssuer_success() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs = removeAuthoritySuccess();
         Assert.assertNotNull(removeAuthorityIssuerArgs);
@@ -172,28 +237,9 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
      * case: the WeIdentity DID is removed.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase6() {
+    public void testRemoveAuthorityIssuer_weIdIsRemoved() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs = removeAuthoritySuccess();
-
-        ResponseData<Boolean> response =
-            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        LogUtil.info(logger, "removeAuthorityIssuer", response);
-
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: the WeIdentity DID is register by other.
-     */
-    @Test
-    public void testRemoveAuthorityIssuerCase7() {
-
-        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
-            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
-        removeAuthorityIssuerArgs.setWeId("did:weid:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d8773b");
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
@@ -208,7 +254,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
      * case: removeAuthorityIssuerArgs is null.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase8() {
+    public void testRemoveAuthorityIssuer_issuerArgsIsNull() {
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(null);
@@ -222,7 +268,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
      * case: weIdPrivateKey is null.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase9() {
+    public void testRemoveAuthorityIssuer_priKeyNull() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -241,7 +287,7 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
      * case: privateKey is null.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase10() {
+    public void testRemoveAuthorityIssuer_setPriKeyNull() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
@@ -257,20 +303,61 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: privateKey is invalid.
+     * case: weIdPrivateKey is blank.
      */
     @Test
-    public void testRemoveAuthorityIssuerCase11() {
+    public void testRemoveAuthorityIssuer_priKeyBlank() {
 
         RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
             TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
-        removeAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey("xxxxxxx");
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey("");
+        removeAuthorityIssuerArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: privateKey is invalid.
+     */
+    @Test
+    public void testRemoveAuthorityIssuer_invalidPriKey() {
+
+        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
+            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
+        removeAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey("123~!@#$<>?-+sz中国");
 
         ResponseData<Boolean> response =
             authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
         LogUtil.info(logger, "removeAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: privateKey is valid,but not the sdk admin.
+     */
+    @Test
+    public void testRemoveAuthorityIssuer_noPermission() {
+
+        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
+            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
+        String badPrikey = privateKey.substring(0, privateKey.length() - 2);
+        removeAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey(badPrikey);
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
+        LogUtil.info(logger, "removeAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.CONTRACT_ERROR_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -346,95 +433,5 @@ public class TestRemoveAuthorityIssuer extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.CONTRACT_ERROR_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: mock an InterruptedException.
-     */
-    @Test
-    public void testRemoveAuthorityIssuerCase14() {
-
-        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
-            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
-
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-
-        ResponseData<Boolean> response1 =
-            removeAuthorityIssuerForMock(removeAuthorityIssuerArgs, mockFuture);
-        LogUtil.info(logger, "removeAuthorityIssuer", response1);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response1.getErrorCode().intValue());
-        Assert.assertEquals(false, response1.getResult());
-    }
-
-    private ResponseData<Boolean> removeAuthorityIssuerForMock(
-        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs,
-        MockUp<Future<?>> mockFuture) {
-
-        MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
-            @Mock
-            public Future<?> removeAuthorityIssuer(Address addr) {
-
-                return mockFuture.getMockInstance();
-            }
-        };
-
-        ResponseData<Boolean> response1 =
-            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        mockTest.tearDown();
-        mockFuture.tearDown();
-        return response1;
-    }
-
-    /**
-     * case: mock an TimeoutException.
-     */
-    @Test
-    public void testRemoveAuthorityIssuerCase15() {
-
-        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
-            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
-
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-
-        ResponseData<Boolean> response1 =
-            removeAuthorityIssuerForMock(removeAuthorityIssuerArgs, mockFuture);
-        LogUtil.info(logger, "removeAuthorityIssuer", response1);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
-            response1.getErrorCode().intValue());
-        Assert.assertEquals(false, response1.getResult());
-    }
-
-    /**
-     * case:  mock returns null when invoking the getAuthorityIssuerRetLogEvents.
-     */
-    @Test
-    public void testRemoveAuthorityIssuerCase16() {
-
-        RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
-            TestBaseUtil.buildRemoveAuthorityIssuerArgs(createWeIdResult, privateKey);
-
-        MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
-            @Mock
-            public List<AuthorityIssuerRetLogEventResponse> getAuthorityIssuerRetLogEvents(
-                TransactionReceipt transactionReceipt) {
-                List<AuthorityIssuerRetLogEventResponse> list =
-                    new ArrayList<AuthorityIssuerRetLogEventResponse>();
-                list.add(null);
-                return list;
-            }
-        };
-
-        ResponseData<Boolean> response1 =
-            authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
-        LogUtil.info(logger, "removeAuthorityIssuer", response1);
-
-        mockTest.tearDown();
-
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
-            response1.getErrorCode().intValue());
-        Assert.assertEquals(false, response1.getResult());
     }
 }
