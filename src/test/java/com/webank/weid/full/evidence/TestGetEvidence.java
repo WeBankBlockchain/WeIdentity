@@ -19,18 +19,12 @@
 
 package com.webank.weid.full.evidence;
 
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
-import mockit.Mock;
-import mockit.MockUp;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.Evidence;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.EvidenceInfo;
@@ -62,7 +56,7 @@ public class TestGetEvidence extends TestBaseServcie {
      * case1: success.
      */
     @Test
-    public void testGetEvidenceCase1() {
+    public void testGetEvidence_success() {
         ResponseData<EvidenceInfo> responseData = evidenceService
             .getEvidence(evidenceAddress);
         logger.info("testGetEvidenceCase1 result :" + responseData);
@@ -81,8 +75,8 @@ public class TestGetEvidence extends TestBaseServcie {
      * case2: address is null.
      */
     @Test
-    public void testGetEvidenceCase2() {
-        
+    public void testGetEvidence_addressNull() {
+
         ResponseData<EvidenceInfo> responseData = evidenceService.getEvidence(null);
         logger.info("testGetEvidenceCase2 result :" + responseData);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
@@ -92,10 +86,10 @@ public class TestGetEvidence extends TestBaseServcie {
     }
 
     /**
-     * case3: credentialId is "".
+     * case3: address is "".
      */
     @Test
-    public void testGetEvidenceCase3() {
+    public void testGetEvidence_addressBlank() {
         String evidenceAddress = "";
         ResponseData<EvidenceInfo> responseData = evidenceService.getEvidence(evidenceAddress);
         logger.info("testGetEvidenceCase3 result :" + responseData);
@@ -105,98 +99,15 @@ public class TestGetEvidence extends TestBaseServcie {
     }
 
     /**
-     * case5: mock exception.
+     * case3: address Contain SpecialChar.
      */
     @Test
-    public void testGetEvidenceCase5() {
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-        MockUp<Evidence> mockTest = getEvidence(mockFuture);
-        ResponseData<EvidenceInfo> responseData = evidenceService
-            .getEvidence(evidenceAddress);
-        logger.info("testGetEvidenceCase5 result :" + responseData);
-        mockFuture.tearDown();
-        mockTest.tearDown();
-        Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.TRANSACTION_TIMEOUT.getCode());
-    }
-
-    /**
-     * case6: mock exception.
-     */
-    @Test
-    public void testGetEvidenceCase6() {
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-        MockUp<Evidence> mockTest = getEvidence(mockFuture);
-
-        ResponseData<EvidenceInfo> responseData = evidenceService
-            .getEvidence(evidenceAddress);
-        logger.info("testGetEvidenceCase6 result :" + responseData);
-        mockFuture.tearDown();
-        mockTest.tearDown();
-        Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode());
-    }
-
-    /**
-     * case7: mock exception.
-     */
-    @Test
-    public void testGetEvidenceCase7() {
-        MockUp<Future<?>> mockFuture = new MockUp<Future<?>>() {
-            @Mock
-            public Future<?> get() {
-                return null;
-            }
-
-            @Mock
-            public Future<?> get(long timeout, TimeUnit unit) {
-                return null;
-            }
-        };
-        MockUp<Evidence> mockTest = getEvidence(mockFuture);
-        ResponseData<EvidenceInfo> responseData = evidenceService
-            .getEvidence(evidenceAddress);
-        logger.info("testGetEvidenceCase7 result :" + responseData);
-        mockFuture.tearDown();
-        mockTest.tearDown();
+    public void testGetEvidence_addressContainSpecialChar() {
+        String evidenceAddress = "";
+        ResponseData<EvidenceInfo> responseData = evidenceService.getEvidence(evidenceAddress);
+        logger.info("testGetEvidenceCase3 result :" + responseData);
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
+            responseData.getErrorCode().intValue());
         Assert.assertNull(responseData.getResult());
-        Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR.getCode());
     }
-
-    /**
-     * case8: mock exception.
-     */
-    @Test
-    public void testGetEvidenceCase8() {
-
-        MockUp<Evidence> mockTest
-            = new MockUp<Evidence>() {
-                @Mock
-                public Future<?> getInfo() {
-                    return null;
-                }
-            };
-        ResponseData<EvidenceInfo> responseData = evidenceService
-            .getEvidence(evidenceAddress);
-        logger.info("testGetEvidenceCase8 result :" + responseData);
-        mockTest.tearDown();
-        Assert.assertNull(responseData.getResult());
-        Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR.getCode());
-    }
-
-
-    private MockUp<Evidence> getEvidence(
-        MockUp<Future<?>> mockFuture) {
-        MockUp<Evidence> mockTest
-            = new MockUp<Evidence>() {
-                @Mock
-                public Future<?> getInfo() {
-                    return mockFuture.getMockInstance();
-                }
-            };
-        return mockTest;
-    }
-
 }

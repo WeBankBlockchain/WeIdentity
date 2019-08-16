@@ -19,6 +19,7 @@
 
 package com.webank.weid.suite.persistence.sql.driver;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -70,7 +71,18 @@ public class MysqlDriver implements Persistence {
         }
         String dataKey = DataToolUtils.getHash(id);
         try {
-            return new SqlExecutor(domain).executeQuery(SqlExecutor.SQL_QUERY, dataKey);
+            ResponseData<String> response = new SqlExecutor(domain)
+                .executeQuery(SqlExecutor.SQL_QUERY, dataKey);
+            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
+                && response.getResult() != null) {
+                response.setResult(
+                    new String(
+                        response.getResult().getBytes(StandardCharsets.ISO_8859_1),
+                        StandardCharsets.UTF_8
+                    )
+                );
+            }
+            return response;
         } catch (WeIdBaseException e) {
             logger.error("[mysql->get] get the data error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
