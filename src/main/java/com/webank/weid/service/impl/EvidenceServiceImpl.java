@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -195,6 +196,10 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                     return innerResponseData;
                 }
             }
+        } catch (WeIdBaseException e) {
+            logger.error(
+                "Generic error occurred during verify evidenceInfo: ", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN);
         } catch (Exception e) {
             logger.error(
                 "Generic error occurred during verify evidenceInfo: ", e);

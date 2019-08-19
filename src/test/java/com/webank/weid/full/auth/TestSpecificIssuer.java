@@ -46,7 +46,7 @@ public class TestSpecificIssuer extends TestBaseServcie {
     public void integrationSpecificIssuerTest() {
         // register an issue type (may already exist)
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthority(createWeIdResult);
-        ResponseData<Boolean> response1 = 
+        ResponseData<Boolean> response1 =
             authorityIssuerService.registerIssuerType(weIdAuthentication, defaultType);
         Assert.assertTrue(response1.getResult() || (response1.getErrorCode()
             == ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS.getCode()));
@@ -87,7 +87,7 @@ public class TestSpecificIssuer extends TestBaseServcie {
     public void integrationSpecificIssuerListTest() {
         // register an issue type (may already exist)
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthority(createWeIdResult);
-        ResponseData<Boolean> response1 = 
+        ResponseData<Boolean> response1 =
             authorityIssuerService.registerIssuerType(weIdAuthentication, defaultType);
         Assert.assertTrue(response1.getResult() || (response1.getErrorCode()
             == ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS.getCode()));

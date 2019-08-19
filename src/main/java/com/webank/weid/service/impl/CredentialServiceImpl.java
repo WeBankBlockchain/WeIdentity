@@ -36,6 +36,7 @@ import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
@@ -90,7 +91,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setIssuer(args.getIssuer());
             Long issuanceDate = args.getIssuanceDate();
             if (issuanceDate == null) {
-                result.setIssuanceDate(DateUtils.getCurrentTimeStamp());
+                result.setIssuanceDate(System.currentTimeMillis());
             } else {
                 result.setIssuanceDate(issuanceDate);
             }
@@ -350,6 +351,10 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 "Generic signatureException occurred during verify signature "
                     + "when verifyCredential: ", e);
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
+        } catch (WeIdBaseException e) {
+            logger.error(
+                "Generic signatureException occurred during verify signature ", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
         } catch (Exception e) {
             logger.error(
                 "Generic exception occurred during verify signature when verifyCredential: ", e);
