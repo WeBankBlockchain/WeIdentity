@@ -70,5 +70,13 @@ public final class ParamKeyConstant {
     public static final String PROOF_SALT = "salt";
     public static final String PROOF_VERIFICATION_METHOD = "verificationMethod";
     public static final String PROOF_NONCE = "nonce";
+    
+    /**
+     * 秘钥存储KEY.
+     */
+    public static final String KEY_DATA = "keyData"; 
+    public static final String KEY_VERIFIERS = "verifiers";
+    public static final String KEY_EXPIRE = "expirationDate";
+    
 
 }
