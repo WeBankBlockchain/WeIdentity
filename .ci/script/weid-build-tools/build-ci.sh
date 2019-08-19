@@ -2,8 +2,8 @@
 
 if [ "$TRAVIS_BRANCH" = "master" ];then
     echo "This is a master branch PR, starting build-tools CI pipeline.."
-    chmod +x ci/script/build-ci.sh
-    ci/script/build-ci.sh
+    chmod u+x .ci/script/build-ci.sh
+    .ci/script/build-ci.sh
 
     # clone repo
     rm -rf weid-build-tools/
@@ -33,23 +33,23 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     # install fisco-solc
     wget https://github.com/FISCO-BCOS/fisco-solc/raw/master/fisco-solc-ubuntu
     sudo cp fisco-solc-ubuntu /usr/bin/fisco-solc
-    sudo chmod +x /usr/bin/fisco-solc
+    sudo chmod u+x /usr/bin/fisco-solc
 
     # copy blockchain cfg files
-    cp ci/ca.crt weid-build-tools/resources/
-    cp ci/client.keystore weid-build-tools/resources/
+    cp .ci/ca.crt weid-build-tools/resources/
+    cp .ci/client.keystore weid-build-tools/resources/
 
     # run repo ci scripts
     cd weid-build-tools/
     sed -i -e '$a\org_id=test' run.config
     sed -i -e '$a\blockchain_address=$NODE_IP' run.config
     sed -i -e '$a\blockchain_fiscobcos_version=1' run.config
-    chmod +x compile.sh
+    chmod u+x compile.sh
     ./compile.sh
-    chmod +x deploy.sh
+    chmod u+x deploy.sh
     ./deploy.sh
     cp ./script/build_tools_ci.sh .
-    chmod +x build_tools_ci.sh
+    chmod u+x build_tools_ci.sh
     ./build_tools_ci.sh
 else
     echo "This is not a master branch PR (commit omitted). CI skipped."

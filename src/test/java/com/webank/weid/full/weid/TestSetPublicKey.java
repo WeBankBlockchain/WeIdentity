@@ -19,12 +19,6 @@
 
 package com.webank.weid.full.weid;
 
-import java.util.List;
-import java.util.concurrent.Future;
-
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -33,30 +27,26 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.WeIdContract;
-import com.webank.weid.contract.v1.WeIdContract.WeIdAttributeChangedEventResponse;
-import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * setPublicKey method for testing WeIdService.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestSetPublicKey extends TestBaseServcie {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestSetPublicKey.class);
 
     /**
-     * case: create success.
-     *
+     * case: set one public key for authentication success.
      */
     @Test
-    public void testSetPublicKeyCase1() {
+    public void testSetPublicKey_oneAuthPubKeySuccess() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
@@ -68,10 +58,9 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is blank.
-     *
      */
     @Test
-    public void testSetPublicKeyCase2() {
+    public void testSetPublicKey_weIdIsNull() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setWeId(null);
@@ -85,12 +74,12 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is bad format.
-     *
      */
     @Test
-    public void testSetPublicKeyCase3() {
+    public void testSetPublicKey_badFormat() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
+        System.out.println(setPublicKeyArgs);
         setPublicKeyArgs.setWeId("di:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac73");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
@@ -102,7 +91,6 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is not exists.
-     *
      */
     @Test
     public void testSetPublicKeyCase4() {
@@ -119,28 +107,11 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: type is null or other string.
-     *
-     */
-    @Test
-    public void testSetPublicKeyCase5() {
-
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-        setPublicKeyArgs.setType(null);
-
-        ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        LogUtil.info(logger, "setPublicKey", response);
-
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
      * case: publicKey is a new key.
      *
      */
     @Test
-    public void testSetPublicKeyCase6() {
+    public void testSetPublicKey_newKey() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
@@ -156,10 +127,9 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: publicKey is null.
-     *
      */
     @Test
-    public void testSetPublicKeyCase7() {
+    public void testSetPublicKey_pubKeyIsNull() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setPublicKey(null);
@@ -172,28 +142,47 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: publicKey is invalid ("xxxxxxxxxx" or "1111111111111").
-     *
+     * case: publicKey is blank.
      */
     @Test
-    public void testSetPublicKeyCase8() {
+    public void testSetPublicKey_pubKeyIsBlank() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-        setPublicKeyArgs.setPublicKey("xxxxxxxxxxxxxxxxxxx");
+        SetPublicKeyArgs setPublicKeyArgs =
+            TestBaseUtil.buildSetPublicKeyArgs(createWeIdResultWithSetAttr);
+        setPublicKeyArgs.setPublicKey(" ");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
         LogUtil.info(logger, "setPublicKey", response);
 
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+
+    }
+
+    /**
+     * case: publicKey contain specialChar.
+     */
+    @Test
+    public void testSetPublicKey_pubKeyIsAnyString() {
+
+        final CreateWeIdDataResult weId = super.createWeId();
+        SetPublicKeyArgs setPublicKeyArgs =
+            TestBaseUtil.buildSetPublicKeyArgs(weId);
+        setPublicKeyArgs.setPublicKey(" a!~@#$%^&*(123456789asfs ");
+
+        ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
+        LogUtil.info(logger, "setPublicKey", response);
+
+        System.out.println(response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
     }
 
     /**
      * case: userWeIdPrivateKey is null.
-     *
      */
     @Test
-    public void testSetPublicKeyCase9() {
+    public void testSetPublicKey_privateKeyIsNull() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setUserWeIdPrivateKey(null);
@@ -207,7 +196,6 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: privateKey is null.
-     *
      */
     @Test
     public void testSetPublicKeyCase10() {
@@ -225,14 +213,12 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: privateKey is invalid.
-     *
      */
     @Test
-    public void testSetPublicKeyCase11() {
+    public void testSetPublicKey_priKeyIsInvalid() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.getUserWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxxxxxxxxx");
-
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
         LogUtil.info(logger, "setPublicKey", response);
 
@@ -243,10 +229,9 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: privateKey and privateKey of WeIdentity DID does not match.
-     *
      */
     @Test
-    public void testSetPublicKeyCase12() {
+    public void testSetPublicKey_priKeyNotMatch() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
@@ -261,8 +246,7 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: the private key belongs to the private key of other WeIdentity DID. 
-     *
+     * case: the private key belongs to the private key of other WeIdentity DID.
      */
     @Test
     public void testSetPublicKeyCase13() {
@@ -280,7 +264,6 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: other WeIdentity DID.
-     *
      */
     @Test
     public void testSetPublicKeyCase14() {
@@ -298,10 +281,9 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: owner is the WeIdentity DID.
-     *
      */
     @Test
-    public void testSetPublicKeyCase15() {
+    public void testSetPublicKey_ownerIsWeId() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setOwner(setPublicKeyArgs.getWeId());
@@ -315,10 +297,9 @@ public class TestSetPublicKey extends TestBaseServcie {
 
     /**
      * case: owner is other WeIdentity DID.
-     *
      */
     @Test
-    public void testSetPublicKeyCase16() {
+    public void testSetPublicKey_ownerIsOtherWeId() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setOwner(createWeIdNew.getWeId());
@@ -331,11 +312,10 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: owner is invalid. 
-     *
+     * case: owner is invalid.
      */
     @Test
-    public void testSetPublicKeyCase17() {
+    public void testSetPublicKey_ownerIsInvalid() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
         setPublicKeyArgs.setOwner("xxxxxxxxxxxxxxxxx");
@@ -348,87 +328,46 @@ public class TestSetPublicKey extends TestBaseServcie {
     }
 
     /**
-     * case: Simulation throws an InterruptedException when calling the
-     *       setPublicKey method.
-     *
+     * case: owner is invalid.
      */
     @Test
-    public void testSetPublicKeyCase18() {
+    public void testSetPublicKey_ownerIsNull() {
 
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-
-        ResponseData<Boolean> response = setPublicKeyForMock(setPublicKeyArgs, mockFuture);
-        LogUtil.info(logger, "setPublicKey", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    private ResponseData<Boolean> setPublicKeyForMock(
-        SetPublicKeyArgs setPublicKeyArgs,
-        MockUp<Future<?>> mockFuture) {
-        
-        MockUp<WeIdContract> mockTest = mockSetAttribute(mockFuture);
-
-        ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
-        mockTest.tearDown();
-        mockFuture.tearDown();
-        return response;
-    }
-
-    /**
-     * case: Simulation throws an TimeoutException when calling the
-     *       setAttribute method.
-     *       
-     */
-    @Test
-    public void testSetPublicKeyCase19() {
-
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-
-        ResponseData<Boolean> response = setPublicKeyForMock(setPublicKeyArgs, mockFuture);
-        LogUtil.info(logger, "setPublicKey", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: Simulation throws an InterruptedException when calling the
-     *       setAttribute method.
-     *
-     */
-    @Test
-    public void testSetPublicKeyCase20() {
-
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-
-        MockUp<WeIdContract> mockTest = new MockUp<WeIdContract>() {
-            @Mock
-            public List<WeIdAttributeChangedEventResponse> getWeIdAttributeChangedEvents(
-                TransactionReceipt transactionReceipt) {
-                throw new WeIdBaseException("mock exception");
-            }
-        };
+        SetPublicKeyArgs setPublicKeyArgs =
+            TestBaseUtil.buildSetPublicKeyArgs(super.createWeId());
+        setPublicKeyArgs.setOwner(null);
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
         LogUtil.info(logger, "setPublicKey", response);
 
-        mockTest.tearDown();
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+    }
 
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+    /**
+     * case: owner is invalid.
+     */
+    @Test
+    public void testSetPublicKey_ownerIsTooLong() {
+
+        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
+        char[] chars = new char[1000];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) (i % 127);
+        }
+        String owner = String.valueOf(chars);
+        System.out.println(owner);
+        setPublicKeyArgs.setOwner(owner);
+        System.out.println(setPublicKeyArgs);
+        ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
+        LogUtil.info(logger, "setPublicKey", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 
     /**
      * case: setAuthenticationArgs is null.
-     *
      */
     @Test
     public void testSetPublicKeyCase21() {

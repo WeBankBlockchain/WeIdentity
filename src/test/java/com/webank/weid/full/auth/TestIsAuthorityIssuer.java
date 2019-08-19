@@ -19,12 +19,6 @@
 
 package com.webank.weid.full.auth;
 
-import java.util.concurrent.Future;
-
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.Bool;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -32,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.AuthorityIssuerController;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
@@ -41,17 +34,17 @@ import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * isAuthorityIssuer method for testing AuthorityIssuerService.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestIsAuthorityIssuer extends TestBaseServcie {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestIsAuthorityIssuer.class);
 
     private static CreateWeIdDataResult createWeId;
 
     @Override
-    public synchronized void testInit() {
+    public synchronized void testInit()  {
 
         super.testInit();
         if (createWeId == null) {
@@ -61,11 +54,28 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: is authority issuer.
-     *
+     * case: test many times isAuthorityIssuer success.
      */
     @Test
-    public void testIsAuthorityIssuerCase1() {
+    public void testIsAuthorityIssuerRepeatSuccess() {
+
+        String weId = createWeId.getWeId();
+        for (int i = 0; i < 3; i++) {
+            ResponseData<Boolean> response =
+                authorityIssuerService.isAuthorityIssuer(weId);
+            LogUtil.info(logger, "isAuthorityIssuer", response);
+
+            Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+            Assert.assertEquals(true, response.getResult());
+        }
+
+    }
+
+    /**
+     * case: is authority issuer success .
+     */
+    @Test
+    public void testIsAuthorityIssuerSuccess() {
 
         ResponseData<Boolean> response =
             authorityIssuerService.isAuthorityIssuer(createWeId.getWeId());
@@ -77,12 +87,11 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: WeIdentity DID is bad format.
-     *
      */
     @Test
-    public void testIsAuthorityIssuerCase2() {
+    public void testIsAuthorityIssuerWeIdFormat() {
 
-        ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer("xxxxxxxxxxx");
+        ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer("as~12345678>?<");
         LogUtil.info(logger, "isAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
@@ -90,11 +99,58 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: WeIdentity DID is blank.
-     *
+     * case: the WeIdentity DID is not exists.
      */
     @Test
-    public void testIsAuthorityIssuerCase3() {
+    public void testIsAuthorityIssuerWeIdSorted() {
+
+        String weId = "weid:did:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d87733";
+        ResponseData<Boolean> response = authorityIssuerService
+            .isAuthorityIssuer(weId);
+        LogUtil.info(logger, "isAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: the WeIdentity DID is not start with 0x.
+     */
+    @Test
+    public void testIsAuthorityIssuerWeIdnotHex() {
+
+        String weId = "weid:did:00f3d8234e93823fac7ebdf0cfaa03b6a43d87733";
+        ResponseData<Boolean> response = authorityIssuerService
+            .isAuthorityIssuer(weId);
+        LogUtil.info(logger, "isAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: the WeIdentity DID is not start with space and end with space.
+     */
+    @Test
+    public void testIsAuthorityIssuerWeIdContainSpace() {
+
+        String weId = "weid:did:0xf3d8234e93823fac7ebdf0cfaa03b6a43d87733";
+        ResponseData<Boolean> response = authorityIssuerService
+            .isAuthorityIssuer(weId);
+        LogUtil.info(logger, "isAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: WeIdentity DID is null.
+     */
+    @Test
+    public void testIsAuthorityIssuerWeIdNull() {
 
         ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer(null);
         LogUtil.info(logger, "isAuthorityIssuer", response);
@@ -104,14 +160,27 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
     }
 
     /**
-     * case: the WeIdentity DID is registed by other.
-     *
+     * case: WeIdentity DID is blank.
      */
     @Test
-    public void testIsAuthorityIssuerCase4() {
+    public void testIsAuthorityIssuerWeIdBlank() {
 
+        ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer("");
+        LogUtil.info(logger, "isAuthorityIssuer", response);
+
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * case: the WeIdentity DID is registed by other.
+     */
+    @Test
+    public void testIsAuthorityIssuerWeIdNotRegister() {
+
+        String weId = createWeId().getWeId();
         ResponseData<Boolean> response = authorityIssuerService
-            .isAuthorityIssuer("did:weid:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d8773b");
+            .isAuthorityIssuer(weId);
         LogUtil.info(logger, "isAuthorityIssuer", response);
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
@@ -121,10 +190,9 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the WeIdentity DID is not exists.
-     *
      */
     @Test
-    public void testIsAuthorityIssuerCase5() {
+    public void testIsAuthorityIssuerWeIdNotExist() {
 
         ResponseData<Boolean> response = authorityIssuerService
             .isAuthorityIssuer("did:weid:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d87733");
@@ -137,10 +205,9 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
 
     /**
      * case: the WeIdentity DID is removed.
-     *
      */
     @Test
-    public void testIsAuthorityIssuerCase6() {
+    public void testIsAuthorityIssuerRemovedWeId() {
 
         CreateWeIdDataResult createWeId = super.registerAuthorityIssuer();
         LogUtil.info(logger, "registerAuthorityIssuer", createWeId);
@@ -162,81 +229,5 @@ public class TestIsAuthorityIssuer extends TestBaseServcie {
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
-
-    /**
-     * case: Simulation throws an InterruptedException when calling the
-     *       isAuthorityIssuer method.
-     *
-     */
-    @Test
-    public void testIsAuthorityIssuerCase7() {
-
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-
-        ResponseData<Boolean> response = isAuthorityIssuerForMock(mockFuture);
-        LogUtil.info(logger, "isAuthorityIssuer", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: Simulation throws an TimeoutException when calling the
-     *       isAuthorityIssuer method.
-     *
-     */
-    @Test
-    public void testIsAuthorityIssuerCase8() {
-
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-
-        ResponseData<Boolean> response = isAuthorityIssuerForMock(mockFuture);
-        LogUtil.info(logger, "isAuthorityIssuer", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    private ResponseData<Boolean> isAuthorityIssuerForMock(MockUp<Future<?>> mockFuture) {
-        
-        MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
-            @Mock
-            public Future<?> isAuthorityIssuer(Address addr) {
-                return mockFuture.getMockInstance();
-            }
-        };
-
-        ResponseData<Boolean> response =
-            authorityIssuerService.isAuthorityIssuer(createWeId.getWeId());
-        mockTest.tearDown();
-        mockFuture.tearDown();
-        return response;
-    }
-
-    /**
-     * case: Simulation returns null when invoking the isAuthorityIssuer method.
-     *
-     */
-    @Test
-    public void testIsAuthorityIssuerCase9() {
-
-        MockUp<AuthorityIssuerController> mockTest = new MockUp<AuthorityIssuerController>() {
-            @Mock
-            public Future<Bool> isAuthorityIssuer(Address addr) {
-                return null;
-            }
-        };
-
-        ResponseData<Boolean> response =
-            authorityIssuerService.isAuthorityIssuer(createWeId.getWeId());
-        LogUtil.info(logger, "isAuthorityIssuer", response);
-
-        mockTest.tearDown();
-
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
+   
 }
