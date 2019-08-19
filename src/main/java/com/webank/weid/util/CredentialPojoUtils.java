@@ -271,7 +271,7 @@ public final class CredentialPojoUtils {
      * @param credentialPojo credentialPojo
      * @return claimData of remove not disclosure data
      */
-    public static Map<String, Object> getDisclosuredClaimData(CredentialPojo credentialPojo) {
+    public static Map<String, Object> getDisclosedClaim(CredentialPojo credentialPojo) {
         if (credentialPojo == null
             || !validClaimAndSaltForMap(credentialPojo.getClaim(), credentialPojo.getSalt())) {
             logger.error("getDisclosuredClaimData failed, credentialPojo is null or "
@@ -304,6 +304,17 @@ public final class CredentialPojoUtils {
                 removeNotDisclosureData(claim, saltKey, saltV);
             }
         }
+    }
+
+    /**
+     * remove credentialPojo not disclosure claimData with salt.
+     * @param <T>
+     *
+     * @param credentialPojo credentialPojo
+     * @return policy CPT object
+     */
+    public static <T> T getDisclosedClaimPojo(CredentialPojo credentialPojo) {
+        return null;
     }
 
     private static void removeNotDisclosureData(
