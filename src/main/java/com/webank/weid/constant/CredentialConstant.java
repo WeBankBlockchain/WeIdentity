@@ -57,7 +57,7 @@ public final class CredentialConstant {
      * The Credential Proof Type Enumerate.
      */
     public static enum CredentialProofType {
-        ECDSA("EcdsaSignature");
+        ECDSA("Secp256k1");
 
         /**
          * The Type Name of the Credential Proof.
