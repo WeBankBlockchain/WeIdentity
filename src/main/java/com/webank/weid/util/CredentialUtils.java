@@ -41,6 +41,7 @@ import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 
@@ -217,12 +218,7 @@ public final class CredentialUtils {
         }
 
         for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
-            if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(entry.getValue())) {
-                claimHashMap.put(
-                    entry.getKey(),
-                    getFieldHash(claimHashMap.get(entry.getKey()))
-                );
-            }
+            claimHashMap.put(entry.getKey(), getFieldHash(claimHashMap.get(entry.getKey())));
         }
 
         List<Map.Entry<String, Object>> list = new ArrayList<Map.Entry<String, Object>>(
@@ -304,13 +300,28 @@ public final class CredentialUtils {
     /**
      * Create a full Credential Hash for a Credential based on all its fields. This should be
      * invoked when getting Credential Evidence. Please note: the result is a String with fixed
-     * length 66 bytes including the first two bytes ("0x") and 64 bytes Hash value..
+     * length 66 bytes including the first two bytes ("0x") and 64 bytes Hash value.
      *
      * @param arg the args
      * @return Hash in byte array
      */
     public static String getCredentialHash(Credential arg) {
         String rawData = getCredentialThumbprint(arg, null);
+        if (StringUtils.isEmpty(rawData)) {
+            return StringUtils.EMPTY;
+        }
+        return DataToolUtils.sha3(rawData);
+    }
+
+    /**
+     * Create a full CredentialWrapper Hash for a Credential based on all its fields, which is
+     * resistant to selective disclosure.
+     *
+     * @param arg the args
+     * @return Hash in byte array
+     */
+    public static String getCredentialWrapperHash(CredentialWrapper arg) {
+        String rawData = getCredentialThumbprint(arg.getCredential(), arg.getDisclosure());
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
