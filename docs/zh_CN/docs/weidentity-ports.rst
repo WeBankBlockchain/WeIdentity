@@ -6,31 +6,25 @@ WeIdentity 网络端口
 
    * - 默认端口
      - 协议说明
-     - 源服务
-     - 目的地服务
+     - 对应服务
      - 端口描述
-   * - 6080
+   * - 6000
      - HTTPS
-     - 任意
      - WeIdentity RestService服务端
-     - RestService监听外部RESTful API请求
-   * - 6081
+     - RestService及Endpoint Service监听来自外部RESTful API请求
+   * - 6001
      - HTTP
-     - 任意
      - WeIdentity RestService服务端
-     - RestService监听外部RESTful API请求
-   * - 6090
+     - RestService及Endpoint Service监听来自外部RESTful API请求
+   * - 6010
      - TCP
-     - WeIdentity RestService服务端
-     - Endpoint Service服务端
-     - Endpoint Service监听来自RestService的RPC请求
-   * - 6190
+     - Endpoint Service服务端，集成于Java-SDK
+     - Endpoint Service服务端监听来自RestService的RPC请求
+   * - 6100
      - HTTPS
-     - 任意
      - WeIdentity Sample服务端
-     - Sample监听外部请求
-   * - 6191
+     - Sample监听来自外部请求
+   * - 6101
      - HTTP
-     - 任意
      - WeIdentity Sample服务端
-     - Sample监听外部请求
+     - Sample监听来自外部请求

@@ -903,16 +903,16 @@ WeIdentity Endpoint Service API
             {
                 "requestName": "create-passphrase",
                 "inAddr": [
-                    "127.0.0.1:6090",
-                    "127.0.0.1:6190"
+                    "127.0.0.1:6010",
+                    "127.0.0.1:6011"
                 ],
                 "description": "Create a valid random passphrase"
             },
             {
                 "requestName": "verify-passphrase",
                 "inAddr": [
-                    "127.0.0.1:6290",
-                    "127.0.0.1:6390"
+                    "127.0.0.1:6012",
+                    "127.0.0.1:6013"
                 ],
                 "description": "Verify a passphrase"
             }

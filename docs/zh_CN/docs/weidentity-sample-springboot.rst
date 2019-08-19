@@ -64,25 +64,25 @@ spring-boot服务方式使用
 ::
 
     [main] INFO  AnnotationMBeanExporter() - Registering beans for JMX exposure on startup
-    [main] INFO  Http11NioProtocol() - Initializing ProtocolHandler ["https-jsse-nio-6191"]
-    [main] INFO  Http11NioProtocol() - Starting ProtocolHandler ["https-jsse-nio-6190"]
+    [main] INFO  Http11NioProtocol() - Initializing ProtocolHandler ["https-jsse-nio-6101"]
+    [main] INFO  Http11NioProtocol() - Starting ProtocolHandler ["https-jsse-nio-6100"]
     [main] INFO  NioSelectorPool() - Using a shared selector for servlet write/read
-    [main] INFO  Http11NioProtocol() - Initializing ProtocolHandler ["http-nio-6191"]
+    [main] INFO  Http11NioProtocol() - Initializing ProtocolHandler ["http-nio-6101"]
     [main] INFO  NioSelectorPool() - Using a shared selector for servlet write/read
-    [main] INFO  Http11NioProtocol() - Starting ProtocolHandler ["http-nio-6191"]
-    [main] INFO  TomcatEmbeddedServletContainer() - Tomcat started on port(s): 6190 (https) 6191 (http)
+    [main] INFO  Http11NioProtocol() - Starting ProtocolHandler ["http-nio-6101"]
+    [main] INFO  TomcatEmbeddedServletContainer() - Tomcat started on port(s): 6100 (https) 6101 (http)
     [main] INFO  SampleApp() - Started SampleApp in 3.588 seconds (JVM running for 4.294)
 
 2.2.2 流程演示
 >>>>>>>>>>>>>>>>>>>>>>>>
 
 以下将为您演示
-假设您的服务部署在本地，地址是 ``127.0.0.1``，服务端口是 ``6191``。您可以在 ``src/main/resources`` 里修改端口信息。
+假设您的服务部署在本地，地址是 ``127.0.0.1``，服务端口是 ``6101``。您可以在 ``src/main/resources`` 里修改端口信息。
 
 - 创建 WeID
 .. code:: shell
 
-    curl -l -H "Content-type: application/json" -X POST   http://127.0.0.1:6191/createWeId
+    curl -l -H "Content-type: application/json" -X POST   http://127.0.0.1:6101/createWeId
 
 若调用成功，则会打印以下信息：
 ::
@@ -112,7 +112,7 @@ spring-boot服务方式使用
 .. code:: shell
 
     curl -l -H "Content-type: application/json" -X POST -d '{"issuer":"did:weid:101:0xd613fbc0249f2ce5088ed484fa6b7b51ecb95e24","org-id":"webank"}'  
-    http://127.0.0.1:6191/registerAuthorityIssuer
+    http://127.0.0.1:6101/registerAuthorityIssuer
 
 运行成功，则会打印以下信息：
 
@@ -136,7 +136,7 @@ spring-boot服务方式使用
 
     curl -l -H "Content-type: application/json" -X POST -d '{"publisher": "did:weid:101:0xd613fbc0249f2ce5088ed484fa6b7b51ecb95e24",
     "claim": {"properties": {"id":{"type":"string","description":"user weid"},"name":{"type":"string","description":"user name"},"gender":{"type":"string","description":"user gender"}}}}' 
-    http://127.0.0.1:6191/registCpt
+    http://127.0.0.1:6101/registCpt
 
 
 运行成功，则会打印以下信息：
@@ -168,7 +168,7 @@ spring-boot服务方式使用
     curl -l -H "Content-type: application/json" -X POST -d 
     '{"cptId": "1189","issuer": "did:weid:101:0xd613fbc0249f2ce5088ed484fa6b7b51ecb95e24",
     "claimData": {"id":"did:weid:101:0xf36fb2308d36bb94c579f568bdf670743d949deb","name":"zhangsan","gender":"F"}}' 
-    http://127.0.0.1:6191/createCredential
+    http://127.0.0.1:6101/createCredential
 
 若运行成功，则会打印以下信息：
 
@@ -223,7 +223,7 @@ spring-boot服务方式使用
     "proof":{"creator":"did:weid:101:0xd613fbc0249f2ce5088ed484fa6b7b51ecb95e24","signature":"G2kD4u4jrnmYbq/oVl9idmTEQzP3a0KEomHGJaVpWzhITIE+dDYSRMyF9TDy+jPANpYRJGg7pGnANM+QeJ9Ba00=",
     "created":"1564371227764","type":"EcdsaSignature"},"signature":"G2kD4u4jrnmYbq/oVl9idmTEQzP3a0KEomHGJaVpWzhITIE+dDYSRMyF9TDy+jPANpYRJGg7pGnANM+QeJ9Ba00=","proofType":"EcdsaSignature"},
     "disclosure":{"name":1,"id":1,"gender":1}'  
-    http://127.0.0.1:6191/verifyCredential
+    http://127.0.0.1:6101/verifyCredential
 
 
 若运行成功，则会打印以下信息：

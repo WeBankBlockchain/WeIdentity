@@ -16,7 +16,7 @@ Endpoint Service在代理端依托于RestService，环境要求也与其一致�
     # 向服务端周期拉取Endpoint配置的时间间隔，单位为秒
     fetch.period.seconds=60
     # 服务端所有主机端口列表
-    server.hostport.list=127.0.0.1:6090,127.0.0.2:6097
+    server.hostport.list=127.0.0.1:6010,127.0.0.2:6011
 
 2. 在服务端注册您的Endpoint
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -41,7 +41,7 @@ Endpoint Service在服务端依托于WeIdentity-Java-SDK，环境要求也与其
 .. code-block:: bash
 
     # RPC服务端的监听端口
-    rpc.listener.port=6090
+    rpc.listener.port=6010
 
 随后，您需要执行您在上一步骤中注册Endpoint的方法。以 ``EndpointSample.java`` 为例，执行：
 
@@ -53,7 +53,7 @@ Endpoint Service在服务端依托于WeIdentity-Java-SDK，环境要求也与其
 
 .. code-block:: text
 
-    Trying to receive incoming traffic at Port: 6090
+    Trying to receive incoming traffic at Port: 6010
 
 4. 在代理端调用您的Endpoint
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
