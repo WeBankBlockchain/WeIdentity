@@ -2,8 +2,8 @@
 
 if [ "$TRAVIS_BRANCH" = "master" ];then
     echo "This is a master branch PR, starting Http Service CI pipeline.."
-    chmod +x ci/script/build-ci.sh
-    ci/script/build-ci.sh
+    chmod u+x .ci/script/build-ci.sh
+    .ci/script/build-ci.sh
 
     # clone repo
     rm -rf weid-http-service/
@@ -31,10 +31,10 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     cp ecdsa_key weid-http-service/keys/priv/
     cp src/main/resources/* weid-http-service/src/main/resources/
     cp src/main/resources/* weid-http-service/src/test/resources/
-    cp ci/ca.crt weid-http-service/src/test/resources/
-    cp ci/ca.crt weid-http-service/src/main/resources/
-    cp ci/client.keystore weid-http-service/src/test/resources/
-    cp ci/client.keystore weid-http-service/src/main/resources/
+    cp .ci/ca.crt weid-http-service/src/test/resources/
+    cp .ci/ca.crt weid-http-service/src/main/resources/
+    cp .ci/client.keystore weid-http-service/src/test/resources/
+    cp .ci/client.keystore weid-http-service/src/main/resources/
 
     # run repo ci scripts
     cd weid-http-service/

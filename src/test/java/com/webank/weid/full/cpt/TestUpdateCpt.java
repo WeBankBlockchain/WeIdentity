@@ -21,18 +21,8 @@ package com.webank.weid.full.cpt;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.concurrent.Future;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import mockit.Mock;
-import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.StaticArray;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -42,7 +32,6 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.contract.v1.CptController;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Cpt;
@@ -56,7 +45,7 @@ import com.webank.weid.util.WeIdUtils;
 /**
  * updateCpt method for testing CptService.
  *
- * @author v_wbgyang
+ * @author v_wbgyang/rockyxia
  */
 public class TestUpdateCpt extends TestBaseServcie {
 
@@ -68,14 +57,15 @@ public class TestUpdateCpt extends TestBaseServcie {
         super.testInit();
         if (cptBaseInfo == null) {
             cptBaseInfo = super.registerCpt(createWeIdResultWithSetAttr);
+            Assert.assertTrue(cptBaseInfo.getCptId() > 2000000);
         }
     }
 
     /**
-     * case： cpt updateCpt success.
+     * case： cpt updateCpt success, used no auth issuer to update no auth cpt.
      */
     @Test
-    public void testUpdateCptCase1() {
+    public void testUpdateCpt_success() {
 
         CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
 
@@ -93,13 +83,103 @@ public class TestUpdateCpt extends TestBaseServcie {
     }
 
     /**
+     * case： cpt updateCpt success, used auth issuer to update no auth cpt.
+     */
+    @Test
+    public void testUpdateCpt_AuthIssuerUpdateSuccess() {
+
+        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
+
+        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId);
+
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+
+        ResponseData<CptBaseInfo> response = cptService.updateCpt(
+            cptMapArgs,
+            cptBaseInfo.getCptId());
+        LogUtil.info(logger, "updateCpt", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+    }
+
+    /**
+     * case： used no auth issuer to update no auth cpt.
+     */
+    @Test
+    public void testUpdateCpt_updateJsonSchema() throws IOException {
+
+        CreateWeIdDataResult createWeId = super.createWeIdWithSetAttr();
+
+        CptBaseInfo cptBaseInfo = super.registerCpt(createWeId);
+
+        CptStringArgs cptMapStringArgs
+            = TestBaseUtil.buildCptStringArgs(createWeId, false);
+        cptMapStringArgs.setCptJsonSchema("{\"student\":{\"name\":\"rocky\",\"age\":20}}");
+
+        ResponseData<CptBaseInfo> response = cptService.updateCpt(
+            cptMapStringArgs,
+            cptBaseInfo.getCptId());
+        LogUtil.info(logger, "updateCpt", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+
+        ResponseData<Cpt> res = cptService.queryCpt(cptBaseInfo.getCptId());
+        LogUtil.info(logger, "updateCpt", res.getResult().toString());
+
+        Assert.assertNotNull(res.getResult().getCptJsonSchema().get("student"));
+
+        //update again
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        ResponseData<CptBaseInfo> response2 = cptService.updateCpt(
+            cptMapArgs,
+            cptBaseInfo.getCptId());
+        LogUtil.info(logger, "updateCpt", response2);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response2.getErrorCode().intValue());
+        Assert.assertNotNull(response2.getResult());
+
+        ResponseData<Cpt> res2 = cptService.queryCpt(cptBaseInfo.getCptId());
+        LogUtil.info(logger, "updateCpt", res2.getResult().toString());
+
+        Assert.assertNull(res2.getResult().getCptJsonSchema().get("student"));
+
+    }
+
+    /**
+     * case：used auth issuer to update no auth cpt.
+     */
+    @Test
+    public void testUpdateCpt_noAuthIssuerUpdateAuthCptFail() {
+
+        CreateWeIdDataResult createWeId = super.registerAuthorityIssuer();
+
+        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
+        CptBaseInfo cptBaseInfo = cptService.registerCpt(cptMapArgs).getResult();
+        Assert.assertTrue(cptBaseInfo.getCptId() < 2000000);
+
+        CreateWeIdDataResult createWeIdNew = super.createWeId();
+        CptMapArgs cptMapArgs1 = TestBaseUtil.buildCptArgs(createWeIdNew);
+
+        ResponseData<CptBaseInfo> response = cptService.updateCpt(
+            cptMapArgs1,
+            cptBaseInfo.getCptId());
+        LogUtil.info(logger, "updateCpt", response);
+
+        Assert.assertEquals(ErrorCode.CPT_NO_PERMISSION.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertNull(response.getResult());
+    }
+
+    /**
      * case： updateCptArgs is null.
      */
     @Test
-    public void testUpdateCptCase2() {
+    public void testUpdateCpt_cptMapAgsNull() {
 
         CptMapArgs cptMapArgs = null;
-        ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, null);
+        ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, 500000);
         LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -110,7 +190,7 @@ public class TestUpdateCpt extends TestBaseServcie {
      * case： cptId is null.
      */
     @Test
-    public void testUpdateCptCase3() {
+    public void testUpdateCpt_cptIdNull() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
@@ -118,7 +198,8 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, null);
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_ID_NULL.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(), 
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
@@ -126,7 +207,7 @@ public class TestUpdateCpt extends TestBaseServcie {
      * case： cptId is minus number.
      */
     @Test
-    public void testUpdateCptCase4() {
+    public void testUpdateCpt_minusCptId() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
@@ -134,7 +215,8 @@ public class TestUpdateCpt extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, -1);
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(), 
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
@@ -142,16 +224,16 @@ public class TestUpdateCpt extends TestBaseServcie {
      * case： cptId is not exists.
      */
     @Test
-    public void testUpdateCptCase5() {
+    public void testUpdateCpt_cptIdNotExist() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
 
-        ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, 10000);
+        ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, 999999999);
         LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(
-            ErrorCode.CPT_NO_PERMISSION.getCode(), 
+            ErrorCode.CPT_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertNull(response.getResult());
@@ -161,7 +243,7 @@ public class TestUpdateCpt extends TestBaseServcie {
      * case： cptJsonSchema is null.
      */
     @Test
-    public void testUpdateCptCase6() {
+    public void testUpdateCpt_cptJsonSchemaNull() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
@@ -178,45 +260,10 @@ public class TestUpdateCpt extends TestBaseServcie {
     }
 
     /**
-     * case： cptJsonSchema is invalid.
-     */
-    @Test
-    public void testUpdateCptCase7() {
-
-        CptMapArgs cptMapArgs =
-            TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
-
-        MockUp<CptController> mockTest = new MockUp<CptController>() {
-            @Mock
-            public Future<TransactionReceipt> updateCpt(
-                Uint256 cptId,
-                Address publisher,
-                StaticArray<Int256> intArray,
-                StaticArray<Bytes32> bytes32Array,
-                StaticArray<Bytes32> jsonSchemaArray,
-                Uint8 v,
-                Bytes32 r,
-                Bytes32 s) {
-                return null;
-            }
-        };
-
-        ResponseData<CptBaseInfo> response = cptService.updateCpt(
-            cptMapArgs,
-            cptBaseInfo.getCptId());
-        LogUtil.info(logger, "updateCpt", response);
-
-        mockTest.tearDown();
-
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
-    }
-
-    /**
      * case： cptJsonSchema too long.
      */
     @Test
-    public void testUpdateCptCase8() throws JsonProcessingException, IOException {
+    public void testUpdateCpt_cptJsonSchemaTooLong() throws JsonProcessingException, IOException {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
@@ -244,7 +291,7 @@ public class TestUpdateCpt extends TestBaseServcie {
      * case： cptPublisher is blank.
      */
     @Test
-    public void testUpdateCptCase9() {
+    public void testUpdateCpt_cptPublisherBlank() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
@@ -263,7 +310,7 @@ public class TestUpdateCpt extends TestBaseServcie {
      * case： cptPublisher is invalid.
      */
     @Test
-    public void testUpdateCptCase10() {
+    public void testUpdateCpt_invalidCptPublisher() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
@@ -282,7 +329,7 @@ public class TestUpdateCpt extends TestBaseServcie {
      * case： cptPublisher is not exists and the private key does not match.
      */
     @Test
-    public void testUpdateCptCase11() {
+    public void testUpdateCpt_cptPublisherNotExist() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
@@ -306,7 +353,7 @@ public class TestUpdateCpt extends TestBaseServcie {
      * case： cptPublisherPrivateKey is null.
      */
     @Test
-    public void testUpdateCptCase12() {
+    public void testUpdateCptCase_priKeyNull() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
@@ -428,7 +475,7 @@ public class TestUpdateCpt extends TestBaseServcie {
      * success,we will deal with the two issue.
      */
     @Test
-    public void testUpdateCptCase18() {
+    public void testUpdateCpt_updatePublisher() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResult);
@@ -444,7 +491,6 @@ public class TestUpdateCpt extends TestBaseServcie {
             ErrorCode.CPT_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue()
         );
-        Assert.assertNull(response.getResult());
     }
 
     /**
@@ -494,71 +540,6 @@ public class TestUpdateCpt extends TestBaseServcie {
 
         ResponseData<Cpt> responseCpt = cptService.queryCpt(cptBaseInfo.getCptId());
         LogUtil.info(logger, "updateCpt", responseCpt);
-    }
-
-    /**
-     * case： mock an InterruptedException.
-     */
-    @Test
-    public void testUpdateCptCase21() {
-
-        CptMapArgs cptMapArgs =
-            TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
-
-        MockUp<Future<?>> mockFuture = mockInterruptedFuture();
-
-        ResponseData<CptBaseInfo> response = updateCptForMock(cptMapArgs, mockFuture);
-        LogUtil.info(logger, "updateCpt", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
-    }
-
-    private ResponseData<CptBaseInfo> updateCptForMock(
-        CptMapArgs cptMapArgs,
-        MockUp<Future<?>> mockFuture) {
-
-        MockUp<CptController> mockTest = new MockUp<CptController>() {
-            @Mock
-            public Future<?> updateCpt(
-                Uint256 cptId,
-                Address publisher,
-                StaticArray<Int256> intArray,
-                StaticArray<Bytes32> bytes32Array,
-                StaticArray<Bytes32> jsonSchemaArray,
-                Uint8 v,
-                Bytes32 r,
-                Bytes32 s) {
-                return mockFuture.getMockInstance();
-            }
-        };
-
-        ResponseData<CptBaseInfo> response = cptService.updateCpt(
-            cptMapArgs,
-            cptBaseInfo.getCptId());
-        mockTest.tearDown();
-        mockFuture.tearDown();
-        return response;
-    }
-
-    /**
-     * case： mock an TimeoutException.
-     */
-    @Test
-    public void testUpdateCptCase22() {
-
-        CptMapArgs cptMapArgs =
-            TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
-
-        MockUp<Future<?>> mockFuture = mockTimeoutFuture();
-
-        ResponseData<CptBaseInfo> response = updateCptForMock(cptMapArgs, mockFuture);
-        LogUtil.info(logger, "updateCpt", response);
-
-        Assert.assertEquals(ErrorCode.TRANSACTION_TIMEOUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
     }
 
     /**

@@ -36,12 +36,11 @@ import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * performance testing.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestWeIdPerformance extends BaseTest {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestWeIdPerformance.class);
 
     @Test
@@ -69,7 +68,7 @@ public class TestWeIdPerformance extends BaseTest {
 
         long gasTime = System.currentTimeMillis() - startTime;
         logger.info("use time:{}ms", gasTime);
-        
+
         Assert.assertNotNull(result);
     }
 

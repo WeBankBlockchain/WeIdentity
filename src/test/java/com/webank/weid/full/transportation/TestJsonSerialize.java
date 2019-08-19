@@ -63,11 +63,8 @@ public class TestJsonSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase1() {
-        ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.ORIGINAL)
-            );
+        ResponseData<String> response = TransportationFactory.newJsonTransportation()
+            .serialize(presentation, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -78,11 +75,9 @@ public class TestJsonSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase2() {
-        ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.CIPHER)
-            );
+        ResponseData<String> response = TransportationFactory.newJsonTransportation()
+            .specify(verifier)
+            .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -93,8 +88,8 @@ public class TestJsonSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase3() {
-        ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(presentation, null);
+        ResponseData<String> response = TransportationFactory.newJsonTransportation()
+            .serialize(presentation, null);
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR.getCode(),
@@ -124,11 +119,8 @@ public class TestJsonSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase5() {
         PresentationE presentation = null;
-        ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.ORIGINAL)
-            );
+        ResponseData<String> response = TransportationFactory.newJsonTransportation()
+            .serialize(presentation, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID.getCode(),
@@ -150,11 +142,9 @@ public class TestJsonSerialize extends TestBaseTransportation {
             }
         };
         
-        ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.CIPHER)
-            );
+        ResponseData<String> response = TransportationFactory.newJsonTransportation()
+            .specify(verifier)
+            .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
         mockTest.tearDown();
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
