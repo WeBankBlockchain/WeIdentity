@@ -94,10 +94,10 @@ Server 的环境要求与 WeIdentity-Java-SDK 的 `环境要求 <https://weident
 
 .. code-block:: bash
 
-    # Server监听端口地址
-    server.port=6091
-    # HTTP重定向地址
-    server.http.port=6090
+    # HTTPS请求端口
+    server.port=6081
+    # HTTP请求端口
+    server.http.port=6080
     # 合约部署者私钥暗语
     default.passphrase=ecdsa_key
 
