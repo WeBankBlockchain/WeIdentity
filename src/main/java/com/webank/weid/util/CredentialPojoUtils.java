@@ -308,7 +308,7 @@ public final class CredentialPojoUtils {
 
     /**
      * remove credentialPojo not disclosure claimData with salt.
-     * @param <T>
+     * @param <T> any object
      *
      * @param credentialPojo credentialPojo
      * @return policy CPT object
