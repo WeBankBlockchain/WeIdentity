@@ -439,12 +439,12 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
                     .append(weAddress)
                     .toString());
             DynamicBytes created = DataToolUtils
-                .stringToDynamicBytes(DateUtils.getCurrentTimeStampString());
+                .stringToDynamicBytes(DateUtils.getNoMillisecondTimeStampString());
             Future<TransactionReceipt> future = weIdContract.createWeId(
                 new Address(weAddress),
                 auth,
                 created,
-                DateUtils.getCurrentTimeStampInt256()
+                DateUtils.getNoMillisecondTimeStampInt256()
             );
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
@@ -493,7 +493,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
                     DataToolUtils.stringToBytes32(attributeKey),
                     DataToolUtils.stringToDynamicBytes(
                         value),
-                    DateUtils.getCurrentTimeStampInt256()
+                    DateUtils.getNoMillisecondTimeStampInt256()
                 );
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);

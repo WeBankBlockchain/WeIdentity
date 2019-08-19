@@ -19,6 +19,8 @@
 
 package com.webank.weid.full.weid;
 
+import java.util.Arrays;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import mockit.Mock;
@@ -33,6 +35,8 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -56,17 +60,150 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
     }
 
     /**
-     * case: success.
+     * case: get and fromJson success.
      */
     @Test
-    public void testGetWeIdDocumentJsonCase1() {
+    public void testGetWeIdDocumentJson_withAttrSuccess() {
 
         ResponseData<String> weIdDoc =
             weIdService.getWeIdDocumentJson(createWeIdForGetJson.getWeId());
         LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertNotNull(weIdDoc.getResult());
+        WeIdDocument weIdDocument = WeIdDocument.fromJson(weIdDoc.getResult());
+        Assert.assertEquals(1, weIdDocument.getService().size());
+        Assert.assertEquals(1, weIdDocument.getAuthentication().size());
+        Assert.assertEquals(1, weIdDocument.getPublicKey().size());
+    }
+
+    /**
+     * case: get and fromJson success.
+     */
+    @Test
+    public void testGetWeIdDocumentJson_noAttrSuccess() {
+
+        ResponseData<String> weIdDoc =
+            weIdService.getWeIdDocumentJson(super.createWeId().getWeId());
+        LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
+        WeIdDocument weIdDocument = WeIdDocument.fromJson(weIdDoc.getResult());
+        Assert.assertEquals(0, weIdDocument.getService().size());
+        Assert.assertEquals(1, weIdDocument.getAuthentication().size());
+        Assert.assertEquals(1, weIdDocument.getPublicKey().size());
+    }
+
+    /**
+     * case: get weIdDomJson that setService and setAuthentication .
+     */
+    @Test
+    public void testGetWeIdDocument_twoServiceAndAuthentication() {
+        CreateWeIdDataResult createWeIdResult = this.createWeId();
+        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+
+        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        LogUtil.info(logger, "setService", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(true, response.getResult());
+
+        SetServiceArgs setServiceArgs1 = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        setServiceArgs1.setType("123");
+        setServiceArgs1.setServiceEndpoint("http://test.com");
+
+        ResponseData<Boolean> response1 = weIdService.setService(setServiceArgs1);
+        LogUtil.info(logger, "setService", response1);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
+        Assert.assertEquals(true, response1.getResult());
+
+
+        ResponseData<WeIdDocument> weIdDoc =
+            weIdService.getWeIdDocument(createWeIdResult.getWeId());
+        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(2, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
+        Assert.assertEquals(1, weIdDoc.getResult().getPublicKey().size());
+    }
+
+
+    /**
+     * case: weid is invalid.
+     */
+    @Test
+    public void testGetWeIdDocumentJson_weIdInvalid() {
+
+        ResponseData<String> weIdDoc =
+            weIdService.getWeIdDocumentJson("weid:did:123");
+        LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
+        System.out.println(weIdDoc);
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
+    }
+
+    /**
+     * case: weid format is right but not exist.
+     */
+    @Test
+    public void testGetWeIdDocumentJson_weIdNotExist() {
+        String weid = createWeIdForGetJson.getWeId();
+        weid = weid.replace(weid.substring(weid.length() - 4, weid.length()), "ffff");
+        ResponseData<String> weIdDoc =
+            weIdService.getWeIdDocumentJson(weid);
+        LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
+        System.out.println(weIdDoc);
+        Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
+            weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
+    }
+
+    /**
+     * case: weid UPPER.
+     */
+    @Test
+    public void testGetWeIdDocumentJson_weIdIsUpper() {
+        String weid = createWeIdForGetJson.getWeId();
+        weid = weid.toUpperCase();
+        ResponseData<String> weIdDoc =
+            weIdService.getWeIdDocumentJson(weid);
+        LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
+        System.out.println(weIdDoc);
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
+    }
+
+    /**
+     * case: weid is null.
+     */
+    @Test
+    public void testGetWeIdDocumentJson_weIdIsNull() {
+
+        ResponseData<String> weIdDoc =
+            weIdService.getWeIdDocumentJson(null);
+        LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
+        System.out.println(weIdDoc);
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
+    }
+
+    /**
+     * case: weid is too long .
+     */
+    @Test
+    public void testGetWeIdDocumentJson_weIdIsTooLong() {
+        char[] chars = new char[1000];
+        for (int i = 0; i < chars.length; i++) {
+            chars[i] = (char) (i % 127);
+        }
+        System.out.println(Arrays.toString(chars));
+        ResponseData<String> weIdDoc =
+            weIdService.getWeIdDocumentJson(Arrays.toString(chars));
+        LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
+        System.out.println(weIdDoc);
+        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
+        Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
     }
 
     /**
@@ -103,34 +240,6 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
         LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
-    }
-
-    /**
-     * case: WeIdentity DID is null.
-     */
-    @Test
-    public void testGetWeIdDocumentJsonCase4() {
-
-        ResponseData<String> weIdDoc = weIdService.getWeIdDocumentJson(null);
-        LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
-
-        Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
-    }
-
-    /**
-     * case: WeIdentity DID is not exists.
-     */
-    @Test
-    public void testGetWeIdDocumentJsonCase5() {
-
-        ResponseData<String> weIdDoc =
-            weIdService.getWeIdDocumentJson("did:weid:0xa1c93e93622c6a0b2f52c90741e0b98ab77385a9");
-        LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
-
-        Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
-            weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
     }
 
