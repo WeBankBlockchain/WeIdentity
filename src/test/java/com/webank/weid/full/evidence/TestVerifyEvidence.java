@@ -35,6 +35,8 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.EvidenceServiceImpl;
@@ -205,7 +207,20 @@ public class TestVerifyEvidence extends TestBaseServcie {
      */
     @Test
     public void testVerifyEvidenceCase12() {
-        ResponseData<Boolean> responseData = evidenceService.verify(null, evidenceAddress);
+        Credential credential = null;
+        ResponseData<Boolean> responseData = evidenceService.verify(credential, evidenceAddress);
+        logger.info("testVerifyEvidenceCase12 result :" + responseData);
+        Assert.assertFalse(responseData.getResult());
+        Assert.assertEquals(responseData.getErrorCode().intValue(),
+            ErrorCode.ILLEGAL_INPUT.getCode());
+        CredentialWrapper credentialWrapper = null;
+        responseData = evidenceService.verify(credentialWrapper, evidenceAddress);
+        logger.info("testVerifyEvidenceCase12 result :" + responseData);
+        Assert.assertFalse(responseData.getResult());
+        Assert.assertEquals(responseData.getErrorCode().intValue(),
+            ErrorCode.ILLEGAL_INPUT.getCode());
+        CredentialPojo credentialPojo = null;
+        responseData = evidenceService.verify(credentialPojo, evidenceAddress);
         logger.info("testVerifyEvidenceCase12 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
         Assert.assertEquals(responseData.getErrorCode().intValue(),

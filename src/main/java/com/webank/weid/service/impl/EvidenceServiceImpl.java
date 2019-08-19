@@ -34,6 +34,8 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -43,6 +45,7 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
+import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -62,13 +65,16 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         EngineFactory.createEvidenceServiceEngine();
 
     /**
-     * Create a new evidence to the blockchain and store its address into the credential.
+     * Create a new evidence to the blockchain and get the evidence address.
+     *
+     * @param credential the input Credential
+     * @param weIdPrivateKey the caller WeID Authentication
+     * @return Evidence address
      */
     @Override
     public ResponseData<String> createEvidence(
         Credential credential,
         WeIdPrivateKey weIdPrivateKey) {
-
         ErrorCode innerResponse = CredentialUtils
             .isCreateEvidenceArgsValid(credential, weIdPrivateKey);
         if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
@@ -82,9 +88,76 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             return new ResponseData<>(StringUtils.EMPTY, innerResponse);
         }
 
+        String credentialHash = CredentialUtils.getCredentialHash(credential);
+        return hashToChain(credentialHash, weIdPrivateKey.getPrivateKey());
+    }
+
+    /**
+     * Create a new evidence to blockchain, and return the evidence address on-chain.
+     *
+     * @param credentialWrapper the given credentialWrapper
+     * @param weIdPrivateKey the signer WeID's private key
+     * @return evidence address. Return empty string if failed due to any reason.
+     */
+    @Override
+    public ResponseData<String> createEvidence(CredentialWrapper credentialWrapper,
+        WeIdPrivateKey weIdPrivateKey) {
+
+        if (credentialWrapper == null) {
+            logger.error("Create Evidence input format error!");
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (credentialWrapper.getDisclosure() == null
+            || credentialWrapper.getDisclosure().size() == 0) {
+            return createEvidence(credentialWrapper.getCredential(), weIdPrivateKey);
+        }
+
+        ErrorCode innerResponse = CredentialUtils
+            .isCreateEvidenceArgsValid(credentialWrapper.getCredential(), weIdPrivateKey);
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
+            logger.error("Create Evidence input format error!");
+            return new ResponseData<>(StringUtils.EMPTY, innerResponse);
+        }
+
+        innerResponse = CredentialUtils.isCredentialValid(credentialWrapper.getCredential());
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
+            logger.error("Create Evidence input format error: credential!");
+            return new ResponseData<>(StringUtils.EMPTY, innerResponse);
+        }
+
+        String credentialHash = CredentialUtils.getCredentialWrapperHash(credentialWrapper);
+        return hashToChain(credentialHash, weIdPrivateKey.getPrivateKey());
+    }
+
+    /**
+     * Create a new evidence to blockchain, and return the evidence address on-chain.
+     *
+     * @param credentialPojo the given credentialPojo
+     * @param weIdPrivateKey the signer WeID's private key
+     * @return evidence address. Return empty string if failed due to any reason.
+     */
+    @Override
+    public ResponseData<String> createEvidence(
+        CredentialPojo credentialPojo,
+        WeIdPrivateKey weIdPrivateKey) {
+        ErrorCode innerResponse = CredentialPojoUtils.isCredentialPojoValid(credentialPojo);
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
+            logger.error("Create Evidence input format error!");
+            return new ResponseData<>(StringUtils.EMPTY, innerResponse);
+        }
+        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
+            return new ResponseData<>(StringUtils.EMPTY,
+                ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
+        }
+
+        String credentialHash = CredentialPojoUtils
+            .getCredentialPojoHash(credentialPojo, null);
+        return hashToChain(credentialHash, weIdPrivateKey.getPrivateKey());
+    }
+
+    private ResponseData<String> hashToChain(String hashValue, String privateKey) {
         try {
-            String credentialHash = CredentialUtils.getCredentialHash(credential);
-            String credentialHashOnChain = credentialHash
+            String credentialHashOnChain = hashValue
                 .replaceAll(WeIdConstant.HEX_PREFIX, StringUtils.EMPTY);
             List<String> hashAttributes = new ArrayList<>();
             hashAttributes.add(
@@ -97,12 +170,12 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             List<String> extraValueList = new ArrayList<>();
             extraValueList.add(StringUtils.EMPTY);
             Sign.SignatureData sigData =
-                DataToolUtils.signMessage(credentialHash, weIdPrivateKey.getPrivateKey());
+                DataToolUtils.signMessage(hashValue, privateKey);
             return evidenceServiceEngine.createEvidence(
                 sigData,
                 hashAttributes,
                 extraValueList,
-                weIdPrivateKey.getPrivateKey()
+                privateKey
             );
         } catch (Exception e) {
             logger.error("create evidence failed due to system error. ", e);
@@ -131,50 +204,136 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
     }
 
     /**
-     * Verify a Credential based on its Evidence info. A Credential might contain multiple evidence
-     * addresses. Anyone successfully verified will lead to a true outcome.
+     * Verify a Credential based on the provided Evidence info.
      *
      * @param credential the args
+     * @param evidenceAddress the evidence address
      * @return true if succeeds, false otherwise
      */
     @Override
     public ResponseData<Boolean> verify(Credential credential, String evidenceAddress) {
-        ErrorCode innerResponse = CredentialUtils
-            .isCredentialValid(credential);
+        ErrorCode innerResponse = CredentialUtils.isCredentialValid(credential);
         if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
             logger.error("Verify EvidenceInfo input illegal: credential");
-            return new ResponseData<>(
-                false,
-                innerResponse
-            );
-        }
-        if (!WeIdUtils.isValidAddress(evidenceAddress)) {
-            logger.error("Verify EvidenceInfo input illegal: evidenceInfo address");
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+            return new ResponseData<>(false, innerResponse);
         }
 
         // Step 1: Get EvidenceInfo from chain
+        ResponseData<EvidenceInfo> evidenceInfoResponseData = verifyAndGetEvidenceFromChain(
+            evidenceAddress);
+        if (evidenceInfoResponseData.getResult() == null) {
+            return new ResponseData<>(false, evidenceInfoResponseData.getErrorCode(),
+                evidenceInfoResponseData.getErrorMessage());
+        }
+        EvidenceInfo evidenceInfo = evidenceInfoResponseData.getResult();
+
+        // Step 2: Verify Hash value
+        String hashValue = CredentialUtils.getCredentialHash(credential);
+
+        // Step 3: Verify each signature value in EvidenceInfo wrt the signer based on their their
+        // publickeys from WeIDContract. Here each signature/signer pair must pass the verification.
+        return verifyHashToEvidenceSignature(hashValue, evidenceInfo);
+    }
+
+    /**
+     * Verify a selectively-disclosed Credential against the provided Evidence info.
+     *
+     * @param credentialWrapper the given CredentialWrapper
+     * @param evidenceAddress the evidence address to be verified
+     * @return true if succeeds, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> verify(CredentialWrapper credentialWrapper,
+        String evidenceAddress) {
+        if (credentialWrapper == null) {
+            logger.error("Create Evidence input format error!");
+            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (credentialWrapper.getDisclosure() == null
+            || credentialWrapper.getDisclosure().size() == 0) {
+            return verify(credentialWrapper.getCredential(), evidenceAddress);
+        }
+
+        ErrorCode innerResponse = CredentialUtils
+            .isCredentialValid(credentialWrapper.getCredential());
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
+            logger.error("Verify EvidenceInfo input illegal: credential");
+            return new ResponseData<>(false, innerResponse);
+        }
+
+        // Step 1: Get EvidenceInfo from chain
+        ResponseData<EvidenceInfo> evidenceInfoResponseData = verifyAndGetEvidenceFromChain(
+            evidenceAddress);
+        if (evidenceInfoResponseData.getResult() == null) {
+            return new ResponseData<>(false, evidenceInfoResponseData.getErrorCode(),
+                evidenceInfoResponseData.getErrorMessage());
+        }
+        EvidenceInfo evidenceInfo = evidenceInfoResponseData.getResult();
+
+        // Step 2: Verify Hash value
+        String hashValue = CredentialUtils.getCredentialWrapperHash(credentialWrapper);
+
+        // Step 3: Verify each signature value in EvidenceInfo wrt the signer based on their their
+        // publickeys from WeIDContract. Here each signature/signer pair must pass the verification.
+        return verifyHashToEvidenceSignature(hashValue, evidenceInfo);
+    }
+
+    /**
+     * Verify a (possibly) selectively-disclosed CredentialPojo against the provided Evidence info.
+     *
+     * @param credentialPojo the given credentialPojo
+     * @param evidenceAddress the evidence address to be verified
+     * @return true if succeeds, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> verify(CredentialPojo credentialPojo,
+        String evidenceAddress) {
+        ErrorCode innerResponse = CredentialPojoUtils.isCredentialPojoValid(credentialPojo);
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
+            logger.error("Verify EvidenceInfo input illegal: credentialPojo");
+            return new ResponseData<>(false, innerResponse);
+        }
+
+        // Step 1: Get EvidenceInfo from chain
+        ResponseData<EvidenceInfo> evidenceInfoResponseData = verifyAndGetEvidenceFromChain(
+            evidenceAddress);
+        if (evidenceInfoResponseData.getResult() == null) {
+            return new ResponseData<>(false, evidenceInfoResponseData.getErrorCode(),
+                evidenceInfoResponseData.getErrorMessage());
+        }
+        EvidenceInfo evidenceInfo = evidenceInfoResponseData.getResult();
+
+        // Step 2: Verify Hash value
+        String hashValue = CredentialPojoUtils.getCredentialPojoHash(credentialPojo, null);
+
+        // Step 3: Verify each signature value in EvidenceInfo wrt the signer based on their their
+        // publickeys from WeIDContract. Here each signature/signer pair must pass the verification.
+        return verifyHashToEvidenceSignature(hashValue, evidenceInfo);
+    }
+
+    private ResponseData<EvidenceInfo> verifyAndGetEvidenceFromChain(String evidenceAddress) {
+        if (!WeIdUtils.isValidAddress(evidenceAddress)) {
+            logger.error("Verify EvidenceInfo input illegal: evidenceInfo address");
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+        }
         ResponseData<EvidenceInfo> innerEvidenceResponseData = getEvidence(evidenceAddress);
         if (innerEvidenceResponseData.getResult() == null) {
             return new ResponseData<>(
-                false,
+                null,
                 ErrorCode.getTypeByErrorCode(innerEvidenceResponseData.getErrorCode())
             );
         }
+        return new ResponseData<>(innerEvidenceResponseData.getResult(), ErrorCode.SUCCESS);
+    }
 
-        EvidenceInfo evidenceInfo = innerEvidenceResponseData.getResult();
-
-        // Step 2: Verify Hash value
-        String hashOffChain = CredentialUtils.getCredentialHash(credential);
+    private ResponseData<Boolean> verifyHashToEvidenceSignature(String hashOffChain,
+        EvidenceInfo evidenceInfo) {
         if (!StringUtils.equalsIgnoreCase(hashOffChain, evidenceInfo.getCredentialHash())) {
             logger.error(
                 "credential hash mismatches. Off-chain: {}, on-chain: {}", hashOffChain,
                 evidenceInfo.getCredentialHash());
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
         }
-
-        // Step 3: Verify each signature value in EvidenceInfo wrt the signer based on their their
-        // publickeys from WeIDContract. Here each signature/signer pair must pass the verification.
         try {
             for (int i = 0; i < evidenceInfo.getSignatures().size(); i++) {
                 String signer = evidenceInfo.getSigners().get(i);
@@ -208,12 +367,12 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         return new ResponseData<>(true, ErrorCode.SUCCESS);
     }
 
+
     private ResponseData<Boolean> verifySignatureToSigner(
         String rawData,
         String signerWeId,
         SignatureData signatureData
     ) {
-
         try {
             ResponseData<WeIdDocument> innerResponseData =
                 weIdService.getWeIdDocument(signerWeId);
