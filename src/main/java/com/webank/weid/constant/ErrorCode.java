@@ -73,9 +73,9 @@ public enum ErrorCode {
     CPT_JSON_SCHEMA_INVALID(100301, "cpt json schema is invalid"),
 
     /**
-     * cptId is null.
+     * cptId illegal.
      */
-    CPT_ID_NULL(100303, "cptId is null"),
+    CPT_ID_ILLEGAL(100303, "cptId illegal"),
 
     /**
      * cpt event log is null.
@@ -95,7 +95,7 @@ public enum ErrorCode {
     /**
      * The credential issuer mismatch.
      */
-    CREDENTIAL_ISSUER_MISMATCH(100403, "credential issuer does not match the signature"),
+    CREDENTIAL_ISSUER_MISMATCH(100403, "issuer weId does not match the weId of credential"),
 
     /**
      * The credential signature broken.
@@ -108,9 +108,9 @@ public enum ErrorCode {
     CREDENTIAL_ISSUER_NOT_EXISTS(100407, "credential issuer does not exist"),
 
     /**
-     * The credential create date illegal.
+     * The credential issuance date illegal.
      */
-    CREDENTIAL_CREATE_DATE_ILLEGAL(100408, "create date illegal"),
+    CREDENTIAL_ISSUANCE_DATE_ILLEGAL(100408, "credential issuance date illegal"),
 
     /**
      * The credential expire date illegal.
@@ -136,6 +136,11 @@ public enum ErrorCode {
      * The credential context not exists.
      */
     CREDENTIAL_CONTEXT_NOT_EXISTS(100413, "credential context does not exist"),
+    
+    /**
+     * The credential type is null.
+     */
+    CREDENTIAL_TYPE_IS_NULL(100414, "credential type is null"),
 
     /**
      * The credential private key not exists.
@@ -209,10 +214,25 @@ public enum ErrorCode {
     ),
 
     /**
+     * credential disclosure data illegal.
+     */
+    CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL(100428, "credential disclosure data illegal"),
+    
+    /**
      * The credential signature broken.
      */
     CREDENTIAL_SIGNATURE_TYPE_ILLEGAL(100429, "credential signature type unknown"),
+    
+    /**
+     * credential salt illegal.
+     */
+    CREDENTIAL_SALT_ILLEGAL(100430, "credential salt illegal"),
 
+    /**
+     * credential evidence cannot be extracted.
+     */
+    CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN(100431, "credential evidence cannot be extracted"),
+    
     /**
      * The credential evidence contract failure: illegal input.
      */
@@ -296,6 +316,23 @@ public enum ErrorCode {
         100608,
         "the weid of the claim of the presentation does not exist."
     ),
+    
+    /**
+     * the publisherWeId of policy is invalid.
+     */
+    PRESENTATION_POLICY_PUBLISHER_WEID_INVALID(
+        100609,
+        "the publisherWeId of policy is invalid."
+    ),
+    
+    /**
+     * the publisherWeId of policy does not exist.
+     */
+    PRESENTATION_POLICY_PUBLISHER_WEID_NOT_EXIST(
+        100610,
+        "the publisherWeId of policy does not exist."
+    ), 
+    
     /**
      * the encrypt key is not exists.
      */
@@ -310,6 +347,23 @@ public enum ErrorCode {
      * the policy service call fail.
      */
     POLICY_SERVICE_CALL_FAIL(100702, "the policy service call fail, please check the error log."),
+    
+    /**
+     * the policy service call fail.
+     */
+    ENCRYPT_KEY_NO_PERMISSION(100703, "no permission to get the key."),
+    
+    /**
+     * the key is invalid.
+     */
+    ENCRYPT_KEY_INVALID(100704, "the key is invalid."),
+    
+    
+    /**
+     * the key is expire.
+     */
+    ENCRYPT_KEY_EXPIRE(100705, "the key is expire."),
+
 
     /**
      * suite基本异常.
@@ -394,13 +448,37 @@ public enum ErrorCode {
     ),
 
     /**
-     * The Authority Issuer Contract level error: subject already exists.
+     * the key of the data is empty.
      */
     PRESISTENCE_DATA_KEY_INVALID(
         100901,
         "the key of the data is empty."
     ),
+    
+    /**
+     * the domain is illegal.
+     */
+    PRESISTENCE_DOMAIN_ILLEGAL(
+        100902,
+        "the domain is illegal."
+    ),
 
+    /**
+     * the domain is illegal.
+     */
+    PRESISTENCE_DOMAIN_INVALID(
+        100903,
+        "the domain is invalid."
+    ),
+    
+    /**
+     * the data does not match for batch save.
+     */
+    PRESISTENCE_BATCH_SAVE_DATA_MISMATCH(
+        100904,
+        "the data does not match for batch save."
+    ),
+    
     /**
      * The Authority Issuer Contract level error: subject already exists.
      */
@@ -491,6 +569,13 @@ public enum ErrorCode {
      * the authority of the weIdentity DID is invalid.
      */
     WEID_AUTHORITY_INVALID(100109, "the authority of the weIdentity DID is invalid."),
+    
+    /**
+     * the length of the setService type is overlimit.
+     */
+    WEID_SERVICE_TYPE_OVERLIMIT(
+        100110, "the length of service type is overlimit."
+    ),
 
     /**
      * transaction timeout.
@@ -528,7 +613,7 @@ public enum ErrorCode {
     DATA_TYPE_CASE_ERROR(160008, "data type cast exception error, please check the error log."),
 
     DIRECT_ROUTE_REQUEST_TIMEOUT(160009, "amop timeout"),
-    DIRECT_ROUTE_MSG_BASE_ERROR(160010, "amop timeout"),
+    DIRECT_ROUTE_MSG_BASE_ERROR(160010, "amop response messageBody error."),
 
     /**
      * sql execute failed.

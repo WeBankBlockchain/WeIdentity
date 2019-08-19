@@ -14,7 +14,7 @@ gradle clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x 
 cp -r ./build-tools/* dist/
 
 cd dist/bin
-chmod +x ./*.sh
+chmod u+x ./*.sh
 ./setup.sh "com.webank.weid.contract" "$source_code_dir"
 
 

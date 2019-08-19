@@ -19,7 +19,10 @@
 
 package com.webank.weid.service.impl;
 
+import java.nio.charset.StandardCharsets;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
@@ -285,14 +288,21 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         if (!WeIdUtils.isPrivateKeyValid(setServiceArgs.getUserWeIdPrivateKey())) {
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
+        if (!verifyServiceType(setServiceArgs.getType())) {
+            logger.error("[setService]: the length of service type is overlimit");
+            return new ResponseData<>(false, ErrorCode.WEID_SERVICE_TYPE_OVERLIMIT);
+        }
         String weId = setServiceArgs.getWeId();
         String serviceType = setServiceArgs.getType();
         String serviceEndpoint = setServiceArgs.getServiceEndpoint();
         if (WeIdUtils.isWeIdValid(weId)) {
             String privateKey = setServiceArgs.getUserWeIdPrivateKey().getPrivateKey();
             try {
-                String attributeKey = WeIdConstant.WEID_DOC_SERVICE_PREFIX + WeIdConstant.SEPARATOR
-                    + serviceType;
+                String attributeKey = new StringBuffer()
+                    .append(WeIdConstant.WEID_DOC_SERVICE_PREFIX)
+                    .append(WeIdConstant.SEPARATOR)
+                    .append(serviceType)
+                    .toString();
                 return weIdServiceEngine
                     .setAttribute(WeIdUtils.convertWeIdToAddress(weId), attributeKey,
                         serviceEndpoint, privateKey);
@@ -390,6 +400,16 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             || StringUtils.isBlank(setServiceArgs.getType())
             || setServiceArgs.getUserWeIdPrivateKey() == null
             || StringUtils.isBlank(setServiceArgs.getServiceEndpoint()));
+    }
+    
+    private boolean verifyServiceType(String type) {
+        String serviceType = new StringBuffer()
+            .append(WeIdConstant.WEID_DOC_SERVICE_PREFIX)
+            .append(WeIdConstant.SEPARATOR)
+            .append(type)
+            .toString();
+        int serviceTypeLength = serviceType.getBytes(StandardCharsets.UTF_8).length;
+        return serviceTypeLength <= WeIdConstant.BYTES32_FIXED_LENGTH;
     }
 
     private ResponseData<Boolean> processCreateWeId(String weId, String publicKey,

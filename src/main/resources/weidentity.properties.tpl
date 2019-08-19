@@ -1,5 +1,5 @@
 # The organization ID for AMOP communication.
-blockchain.orgid=organizationA
+blockchain.orgid=organizationName
 
 # Persistence Layer configurations. Do NOT change this if you are not using Persistence Layer features!
 # MySQL connection config

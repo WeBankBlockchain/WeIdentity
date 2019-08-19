@@ -30,18 +30,16 @@ import com.webank.weid.common.PasswordKey;
 import com.webank.weid.full.TestBaseUtil;
 
 /**
- * the role of this class is to handle the private key required 
- * in the testing process.
- * 
- * @author v_wbgyang
+ * the role of this class is to handle the private key required in the testing process.
  *
+ * @author v_wbgyang
  */
 public class TestBuildPrivateKey {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestBuildPrivateKey.class);
 
-    /** 
-     * extract the private key in org1.txt and transform it into 16 binary system 
+    /**
+     * extract the private key in org1.txt and transform it into 16 binary system
      */
     @Test
     public void testBuildPrivateKey() {
