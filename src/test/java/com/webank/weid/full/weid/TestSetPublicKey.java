@@ -79,7 +79,6 @@ public class TestSetPublicKey extends TestBaseServcie {
     public void testSetPublicKey_badFormat() {
 
         SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createWeIdResult);
-        System.out.println(setPublicKeyArgs);
         setPublicKeyArgs.setWeId("di:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac73");
 
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
@@ -173,7 +172,6 @@ public class TestSetPublicKey extends TestBaseServcie {
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
         LogUtil.info(logger, "setPublicKey", response);
 
-        System.out.println(response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
     }
@@ -356,9 +354,7 @@ public class TestSetPublicKey extends TestBaseServcie {
             chars[i] = (char) (i % 127);
         }
         String owner = String.valueOf(chars);
-        System.out.println(owner);
         setPublicKeyArgs.setOwner(owner);
-        System.out.println(setPublicKeyArgs);
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
         LogUtil.info(logger, "setPublicKey", response);
 
