@@ -20,7 +20,9 @@
 package com.webank.weid.full.evidence;
 
 import java.util.HashMap;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,6 +36,9 @@ import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialWrapper;
+import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -79,10 +84,22 @@ public class TestCreateEvidence extends TestBaseServcie {
     public void testCreateEvidence_credentialNull() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
+        Credential credential = null;
         ResponseData<String> response = evidenceService
-            .createEvidence(null, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+            .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         LogUtil.info(logger, "createEvidence", response);
-
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+        CredentialWrapper credentialWrapper = new CredentialWrapper();
+        response = evidenceService.createEvidence(credentialWrapper,
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertFalse(!response.getResult().isEmpty());
+        CredentialPojo credentialPojo = null;
+        response = evidenceService.createEvidence(credentialPojo,
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createEvidence", response);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
@@ -380,7 +397,7 @@ public class TestCreateEvidence extends TestBaseServcie {
     @Test
     public void testCreateEvidence_issuerNotExist() {
         Credential tempCredential = copyCredential(credential);
-        tempCredential.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+        tempCredential.setIssuer("did:weid:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
         ResponseData<String> response = evidenceService
             .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
@@ -555,4 +572,58 @@ public class TestCreateEvidence extends TestBaseServcie {
         Assert.assertFalse(!response.getResult().isEmpty());
     }
 
+    /**
+     * case13: selectively disclosure: credentialPojo.
+     */
+    @Test
+    public void testEvidenceFull_SelectivelyDisclosurePojo() {
+        if (credentialPojo == null) {
+            credentialPojo = super.createCredentialPojo(createCredentialPojoArgs);
+        }
+        CredentialPojo originalCredential = copyCredentialPojo(credentialPojo);
+        CredentialPojo sdCredential = copyCredentialPojo(selectiveCredentialPojo);
+        Assert.assertTrue(originalCredential.getSignature().equals(sdCredential.getSignature()));
+        String originalAddr = evidenceService
+            .createEvidence(originalCredential, createWeIdNew.getUserWeIdPrivateKey()).getResult();
+        String sdAddr = evidenceService
+            .createEvidence(sdCredential, createWeIdNew.getUserWeIdPrivateKey()).getResult();
+        Assert.assertTrue(!StringUtils.isEmpty(originalAddr));
+        Assert.assertTrue(!StringUtils.isEmpty(sdAddr));
+        EvidenceInfo originalEvi = evidenceService.getEvidence(originalAddr).getResult();
+        EvidenceInfo sdEvi = evidenceService.getEvidence(sdAddr).getResult();
+        Assert.assertTrue(
+            originalEvi.getCredentialHash().equalsIgnoreCase(sdEvi.getCredentialHash()));
+        Assert.assertTrue(evidenceService.verify(originalCredential, originalAddr).getResult());
+        Assert.assertTrue(evidenceService.verify(sdCredential, sdAddr).getResult());
+    }
+
+
+    /**
+     * case14: selectively disclosure: credential.
+     */
+    @Test
+    public void testEvidenceFull_SelectivelyDisclosure() {
+        Credential tempCredential = copyCredential(credential);
+        Map<String, Object> claim = tempCredential.getClaim();
+        Map<String, Object> disclosure = new HashMap<>(claim);
+        // Set a nothing-to-disclose CredentialWrapper flag
+        for (Map.Entry<String, Object> entry : claim.entrySet()) {
+            disclosure.put(entry.getKey(), "0");
+        }
+        CredentialWrapper credentialWrapper = new CredentialWrapper();
+        credentialWrapper.setCredential(tempCredential);
+        credentialWrapper.setDisclosure(disclosure);
+        String originalAddr = evidenceService
+            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey()).getResult();
+        String sdAddr = evidenceService
+            .createEvidence(credentialWrapper, createWeIdNew.getUserWeIdPrivateKey()).getResult();
+        Assert.assertTrue(!StringUtils.isEmpty(originalAddr));
+        Assert.assertTrue(!StringUtils.isEmpty(sdAddr));
+        EvidenceInfo originalEvi = evidenceService.getEvidence(originalAddr).getResult();
+        EvidenceInfo sdEvi = evidenceService.getEvidence(sdAddr).getResult();
+        Assert.assertTrue(
+            originalEvi.getCredentialHash().equalsIgnoreCase(sdEvi.getCredentialHash()));
+        Assert.assertTrue(evidenceService.verify(tempCredential, originalAddr).getResult());
+        Assert.assertTrue(evidenceService.verify(credentialWrapper, sdAddr).getResult());
+    }
 }
