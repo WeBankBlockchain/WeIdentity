@@ -19,7 +19,11 @@
 
 package com.webank.weid.rpc;
 
+import java.util.Map;
+
 import com.webank.weid.protocol.base.Credential;
+import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
@@ -41,6 +45,26 @@ public interface EvidenceService {
     ResponseData<String> createEvidence(Credential credential, WeIdPrivateKey weIdPrivateKey);
 
     /**
+     * Create a new evidence to blockchain, and return the evidence address on-chain.
+     *
+     * @param credentialWrapper the given credentialWrapper
+     * @param weIdPrivateKey the signer WeID's private key
+     * @return evidence address. Return empty string if failed due to any reason.
+     */
+    ResponseData<String> createEvidence(CredentialWrapper credentialWrapper,
+        WeIdPrivateKey weIdPrivateKey);
+
+    /**
+     * Create a new evidence to blockchain, and return the evidence address on-chain.
+     *
+     * @param credentialPojo the given credentialPojo
+     * @param weIdPrivateKey the signer WeID's private key
+     * @return evidence address. Return empty string if failed due to any reason.
+     */
+    ResponseData<String> createEvidence(CredentialPojo credentialPojo,
+        WeIdPrivateKey weIdPrivateKey);
+
+    /**
      * Get the evidence from blockchain.
      *
      * @param evidenceAddress the evidence address on chain
@@ -49,11 +73,29 @@ public interface EvidenceService {
     ResponseData<EvidenceInfo> getEvidence(String evidenceAddress);
 
     /**
-     * Verify a Credential based on its Evidence info.
+     * Verify a Credential based against the provided Evidence info.
      *
      * @param credential the given credential
      * @param evidenceAddress the evidence address to be verified
      * @return true if succeeds, false otherwise
      */
     ResponseData<Boolean> verify(Credential credential, String evidenceAddress);
+
+    /**
+     * Verify a (possibly) selectively-disclosed Credential against the provided Evidence info.
+     *
+     * @param credentialWrapper the given CredentialWrapper
+     * @param evidenceAddress the evidence address to be verified
+     * @return true if succeeds, false otherwise
+     */
+    ResponseData<Boolean> verify(CredentialWrapper credentialWrapper, String evidenceAddress);
+
+    /**
+     * Verify a (possibly) selectively-disclosed CredentialPojo against the provided Evidence info.
+     *
+     * @param credentialPojo the given credentialPojo
+     * @param evidenceAddress the evidence address to be verified
+     * @return true if succeeds, false otherwise
+     */
+    ResponseData<Boolean> verify(CredentialPojo credentialPojo, String evidenceAddress);
 }
