@@ -209,7 +209,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
     public void testCreateWeId_pubKeyUsed() {
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         String publicKey = createWeIdArgs.getPublicKey();
-        System.out.println(publicKey);
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
         LogUtil.info(logger, "createWeId", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
