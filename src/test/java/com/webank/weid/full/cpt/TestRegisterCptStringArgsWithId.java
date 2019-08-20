@@ -118,7 +118,6 @@ public class TestRegisterCptStringArgsWithId extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs, issuerCptId);
         LogUtil.info(logger, "testRegisterCptArgs with cptid", response);
 
-        System.out.println(response);
         Assert.assertEquals(ErrorCode.CPT_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
