@@ -329,7 +329,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         ErrorCode errorCode = verifyCptFormat(
                 credential.getCptId(),
                 credential.getClaim(),
-                isSelectivelyDisclosed(credential.getSalt())
+                CredentialPojoUtils.isSelectivelyDisclosed(credential.getSalt())
             );
         if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
             return errorCode;
@@ -373,66 +373,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
 
-    /**
-     * Check if the given CredentialPojo is selectively disclosed, or not.
-     *
-     * @param saltMap the saltMap
-     * @return true if yes, false otherwise
-     */
-    private static boolean isSelectivelyDisclosed(Map<String, Object> saltMap) {
-        if (saltMap == null) {
-            return false;
-        }
-        for (Map.Entry<String, Object> entry : saltMap.entrySet()) {
-            Object v = entry.getValue();
-            if (v instanceof Map) {
-                if (isSelectivelyDisclosed((HashMap) v)) {
-                    return true;
-                }
-            } else if (v instanceof List) {
-                if (isSelectivelyDisclosed((ArrayList<Object>) v)) {
-                    return true;
-                }
-            }
-            if (v == null) {
-                throw new WeIdBaseException(ErrorCode.CREDENTIAL_SALT_ILLEGAL);
-            }
-            if ("0".equals(v.toString())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if the given CredentialPojo is selectively disclosed, or not.
-     *
-     * @param disclosureList the disclosureList
-     * @return true if yes, false otherwise
-     */
-    private static boolean isSelectivelyDisclosed(List<Object> saltList) {
-        if (saltList == null) {
-            return false;
-        }
-        for (Object saltObj : saltList) {
-            if (saltObj instanceof Map) {
-                if (isSelectivelyDisclosed((HashMap) saltObj)) {
-                    return true;
-                }
-            } else if (saltObj instanceof List) {
-                if (isSelectivelyDisclosed((ArrayList<Object>) saltObj)) {
-                    return true;
-                }
-            }
-            if (saltObj == null) {
-                throw new WeIdBaseException(ErrorCode.CREDENTIAL_SALT_ILLEGAL);
-            }
-            if ("0".equals(saltObj.toString())) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     private static ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim,
         boolean isSelectivelyDisclosed) {
