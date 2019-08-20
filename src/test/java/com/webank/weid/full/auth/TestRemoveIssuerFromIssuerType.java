@@ -126,7 +126,6 @@ public class TestRemoveIssuerFromIssuerType extends TestBaseServcie {
         LogUtil.info(logger, "removeIssuerFromIssuerType", response);
 
         callerAuth.setWeIdPrivateKey(key);
-        System.out.println(callerAuth.toString());
 
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_PRIVATE_KEY_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
