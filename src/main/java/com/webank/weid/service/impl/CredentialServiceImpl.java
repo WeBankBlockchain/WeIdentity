@@ -22,7 +22,6 @@ package com.webank.weid.service.impl;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SignatureException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -88,14 +87,29 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setContext(context);
             result.setId(UUID.randomUUID().toString());
             result.setCptId(args.getCptId());
+
             result.setIssuer(args.getIssuer());
             Long issuanceDate = args.getIssuanceDate();
             if (issuanceDate == null) {
-                result.setIssuanceDate(System.currentTimeMillis());
+                result.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
             } else {
-                result.setIssuanceDate(issuanceDate);
+                Long newIssuanceDate =
+                    DateUtils.convertToNoMillisecondTimeStamp(args.getIssuanceDate());
+                if (newIssuanceDate == null) {
+                    logger.error("Create Credential Args illegal.");
+                    return new ResponseData<>(null, ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL);
+                } else {
+                    result.setIssuanceDate(newIssuanceDate);
+                }
             }
-            result.setExpirationDate(args.getExpirationDate());
+            Long newExpirationDate =
+                DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate());
+            if (newExpirationDate == null) {
+                logger.error("Create Credential Args illegal.");
+                return new ResponseData<>(null, ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL);
+            } else {
+                result.setExpirationDate(newExpirationDate);
+            }
             result.setClaim(args.getClaim());
             Map<String, Object> disclosureMap = new HashMap<>(args.getClaim());
             for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
@@ -105,7 +119,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 );
             }
             credentialWrapper.setDisclosure(disclosureMap);
-            
+
             // Construct Credential Proof
             Map<String, String> credentialProof = CredentialUtils.buildCredentialProof(
                 result,
@@ -284,13 +298,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
 
     private ResponseData<Boolean> verifyNotExpired(Credential credential) {
         try {
-            Date expireDate = new Date(credential.getExpirationDate().longValue());
-            Date currentDate = new Date();
-            boolean result = currentDate.before(expireDate);
-            ResponseData<Boolean> responseData = new ResponseData<>(
-                result,
-                ErrorCode.SUCCESS
-            );
+            boolean result = DateUtils.isAfterCurrentTime(credential.getExpirationDate());
+            ResponseData<Boolean> responseData = new ResponseData<>(result, ErrorCode.SUCCESS);
             if (!result) {
                 responseData.setErrorCode(ErrorCode.CREDENTIAL_EXPIRED);
             }
@@ -330,7 +339,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
                 } else {
                     WeIdDocument weIdDocument = innerResponseData.getResult();
-                    ErrorCode errorCode =  DataToolUtils
+                    ErrorCode errorCode = DataToolUtils
                         .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
                     if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                         return new ResponseData<>(false, errorCode);
