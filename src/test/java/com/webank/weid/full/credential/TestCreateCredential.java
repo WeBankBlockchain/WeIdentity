@@ -420,7 +420,7 @@ public class TestCreateCredential extends TestBaseServcie {
             credentialService.createCredential(createCredentialArgs);
         LogUtil.info(logger, "createCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
