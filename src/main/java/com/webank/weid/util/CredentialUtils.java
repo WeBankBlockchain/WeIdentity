@@ -378,10 +378,14 @@ public final class CredentialUtils {
         Long expirationDate = args.getExpirationDate();
         if (expirationDate == null
             || expirationDate.longValue() < 0
-            || expirationDate.longValue() == 0
-            || (issuanceDate != null && expirationDate < issuanceDate)
-            || expirationDate < System.currentTimeMillis()) {
+            || expirationDate.longValue() == 0) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
+        }
+        if (!DateUtils.isAfterCurrentTime(expirationDate)) {
+            return ErrorCode.CREDENTIAL_EXPIRED;
+        }
+        if (issuanceDate != null && expirationDate < issuanceDate) {
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         if (args.getClaim() == null || args.getClaim().isEmpty()) {
             return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
