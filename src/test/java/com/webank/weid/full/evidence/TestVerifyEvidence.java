@@ -40,6 +40,7 @@ import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.EvidenceServiceImpl;
+import com.webank.weid.util.DateUtils;
 
 /**
  * TestVerifyEvidence v_wbpenghu.
@@ -151,7 +152,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
         logger.info("testVerifyEvidenceCase7 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
         Assert.assertTrue(
-            responseData.getErrorCode() == ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode()
+            responseData.getErrorCode() == ErrorCode.CREDENTIAL_EXPIRED.getCode()
                 || responseData.getErrorCode() == ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH
                 .getCode());
     }
@@ -162,7 +163,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
     @Test
     public void testVerifyEvidenceCase8() {
         Credential credential = copyCredential(evidenceCredential);
-        credential.setIssuanceDate(System.currentTimeMillis());
+        credential.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase8 result :" + responseData);
