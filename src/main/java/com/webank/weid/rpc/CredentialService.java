@@ -19,6 +19,8 @@
 
 package com.webank.weid.rpc;
 
+import java.util.Map;
+
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdPublicKey;
@@ -86,17 +88,29 @@ public interface CredentialService {
      * method should be called when creating and verifying the Credential Evidence.
      *
      * @param credential the args
-     * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
+     * @return the Credential Hash value
      */
     ResponseData<String> getCredentialHash(Credential credential);
 
     /**
+     * Get the full hash value of a Credential with its selectively-disclosure map. All fields in
+     * the Credential will be included. This method should be called when creating and verifying the
+     * Credential Evidence and the result is selectively-disclosure irrelevant.
+     *
+     * @param credential the args
+     * @return the Credential Hash value
+     */
+    ResponseData<String> getCredentialHash(CredentialWrapper credential);
+
+    /**
+     * To be deprecated in near future - use DataToolUtils.serialize() instead!
      * Get the Json String of a Credential. All fields in the Credential will be included. This also
      * supports the selectively disclosed Credential.
      *
      * @param credential the credential
      * @return the Credential Json value in String
      */
+    @Deprecated
     ResponseData<String> getCredentialJson(Credential credential);
 
 }
