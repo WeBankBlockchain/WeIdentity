@@ -507,7 +507,7 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
             credentialPojoService.createCredential(createCredentialPojoArgs);
         LogUtil.info(logger, "createCredentialPojo", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
