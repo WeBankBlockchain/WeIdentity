@@ -489,23 +489,4 @@ public final class CredentialUtils {
         }
         return false;
     }
-
-    /**
-     * Check the given CreateEvidenceArgs validity based on its input params.
-     *
-     * @param credential the given credential
-     * @param weIdPrivateKey the signer WeID's private key
-     * @return evidence address. Return empty string if failed due to any reason.
-     */
-    public static ErrorCode isCreateEvidenceArgsValid(
-        Credential credential,
-        WeIdPrivateKey weIdPrivateKey) {
-        if (credential == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
-            return ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS;
-        }
-        return ErrorCode.SUCCESS;
-    }
 }
