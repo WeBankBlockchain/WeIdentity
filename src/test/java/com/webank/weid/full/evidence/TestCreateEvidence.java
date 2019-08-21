@@ -42,6 +42,7 @@ import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.CredentialPojoUtils;
 
 /**
  * Test CreateEvidence.
@@ -531,7 +532,7 @@ public class TestCreateEvidence extends TestBaseServcie {
         LogUtil.info(logger, "createEvidence", response);
 
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+            ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
@@ -582,6 +583,7 @@ public class TestCreateEvidence extends TestBaseServcie {
         }
         CredentialPojo originalCredential = copyCredentialPojo(credentialPojo);
         CredentialPojo sdCredential = copyCredentialPojo(selectiveCredentialPojo);
+        Assert.assertTrue(CredentialPojoUtils.isSelectivelyDisclosed(sdCredential.getSalt()));
         Assert.assertTrue(originalCredential.getSignature().equals(sdCredential.getSignature()));
         String originalAddr = evidenceService
             .createEvidence(originalCredential, createWeIdNew.getUserWeIdPrivateKey()).getResult();
