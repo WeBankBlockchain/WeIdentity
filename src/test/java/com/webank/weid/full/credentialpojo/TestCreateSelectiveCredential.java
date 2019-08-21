@@ -439,7 +439,7 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
         LogUtil.info(logger, "TestCreateSelectiveCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
