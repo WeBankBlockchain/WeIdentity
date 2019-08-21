@@ -196,15 +196,35 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     public ResponseData<String> getCredentialHash(Credential args) {
         ErrorCode innerResponse = CredentialUtils.isCredentialValid(args);
         if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
-            logger.error("Credential input format error!");
             return new ResponseData<>(StringUtils.EMPTY, innerResponse);
         }
+        return new ResponseData<>(CredentialUtils.getCredentialHash(args), ErrorCode.SUCCESS);
+    }
 
-        ResponseData<String> responseData = new ResponseData<>(
-            CredentialUtils.getCredentialHash(args),
-            ErrorCode.SUCCESS
-        );
-        return responseData;
+    /**
+     * Get the full hash value of a Credential with its selectively-disclosure map. All fields in
+     * the Credential will be included. This method should be called when creating and verifying the
+     * Credential Evidence and the result is selectively-disclosure irrelevant.
+     *
+     * @param credentialWrapper the args
+     * @return the Credential Hash value in byte array, fixed to be 32 Bytes length
+     */
+    @Override
+    public ResponseData<String> getCredentialHash(CredentialWrapper credentialWrapper) {
+        if (credentialWrapper == null) {
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (credentialWrapper.getDisclosure() == null
+            || credentialWrapper.getDisclosure().size() == 0) {
+            return getCredentialHash(credentialWrapper.getCredential());
+        }
+        Credential credential = credentialWrapper.getCredential();
+        ErrorCode innerResponse = CredentialUtils.isCredentialValid(credential);
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
+            return new ResponseData<>(StringUtils.EMPTY, innerResponse);
+        }
+        return new ResponseData<>(CredentialUtils.getCredentialWrapperHash(credentialWrapper),
+            ErrorCode.SUCCESS);
     }
 
     private ResponseData<Boolean> verifyCredentialContent(CredentialWrapper credentialWrapper,
