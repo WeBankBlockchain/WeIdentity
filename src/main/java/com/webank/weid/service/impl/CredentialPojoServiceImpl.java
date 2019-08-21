@@ -20,7 +20,6 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -313,7 +312,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     private static ErrorCode verifyContent(CredentialPojo credential, String publicKey) {
         try {
-            return verifyContent(credential, publicKey, null);  
+            return verifyContent(credential, publicKey, null);
         } catch (WeIdBaseException ex) {
             logger.error("[verifyContent] verify credential has exception.", ex);
             return ex.getErrorCode();
@@ -327,10 +326,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             return checkResp;
         }
         ErrorCode errorCode = verifyCptFormat(
-                credential.getCptId(),
-                credential.getClaim(),
-                CredentialPojoUtils.isSelectivelyDisclosed(credential.getSalt())
-            );
+            credential.getCptId(),
+            credential.getClaim(),
+            CredentialPojoUtils.isSelectivelyDisclosed(credential.getSalt())
+        );
         if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
             return errorCode;
         }
@@ -371,7 +370,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             return ErrorCode.SUCCESS;
         }
     }
-
 
 
     private static ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim,
@@ -438,13 +436,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 } else {
                     result.setIssuanceDate(newIssuanceDate);
                 }
-            }  
+            }
             if (!WeIdUtils.validatePrivateKeyWeIdMatches(
-                args.getWeIdAuthentication().getWeIdPrivateKey(), 
+                args.getWeIdAuthentication().getWeIdPrivateKey(),
                 args.getIssuer())) {
                 logger.error("Create Credential, private key does not match the current weid.");
                 return new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
-            } 
+            }
             result.setIssuer(args.getIssuer());
             Long newExpirationDate =
                 DateUtils.convertToNoMillisecondTimeStamp(args.getExpirationDate());
@@ -551,6 +549,25 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             logger.error("Generate SelectiveCredential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }
+    }
+
+    /**
+     * Get the full hash value of a CredentialPojo. All fields in the CredentialPojo will be
+     * included. This method should be called when creating and verifying the Credential Evidence
+     * and the result is selectively-disclosure irrelevant.
+     *
+     * @param credentialPojo the args
+     * @return the Credential Hash value
+     */
+    @Override
+    public ResponseData<String> getCredentialPojoHash(CredentialPojo credentialPojo) {
+        ErrorCode innerResponse = CredentialPojoUtils.isCredentialPojoValid(credentialPojo);
+        if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
+            logger.error("Create Evidence input format error!");
+            return new ResponseData<>(StringUtils.EMPTY, innerResponse);
+        }
+        return new ResponseData<>(CredentialPojoUtils.getCredentialPojoHash(credentialPojo, null),
+            ErrorCode.SUCCESS);
     }
 
     /* (non-Javadoc)
