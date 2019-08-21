@@ -59,6 +59,16 @@ public interface CredentialPojoService {
     );
 
     /**
+     * Get the full hash value of a CredentialPojo. All fields in the CredentialPojo will be
+     * included. This method should be called when creating and verifying the Credential Evidence
+     * and the result is selectively-disclosure irrelevant.
+     *
+     * @param credentialPojo the args
+     * @return the Credential Hash value
+     */
+    ResponseData<String> getCredentialPojoHash(CredentialPojo credentialPojo);
+
+    /**
      * Verify the validity of a credential. Public key will be fetched from chain.
      *
      * @param issuerWeId the issuer WeId
@@ -75,10 +85,10 @@ public interface CredentialPojoService {
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
     ResponseData<Boolean> verify(WeIdPublicKey issuerPublicKey, CredentialPojo credential);
-    
+
     /**
      * verify the presentation with presenter's weid and policy.
-     * 
+     *
      * @param presenterWeId the presenter's weid
      * @param presentationPolicyE policy of the presentation
      * @param challenge challenge
@@ -92,10 +102,10 @@ public interface CredentialPojoService {
         PresentationE presentationE
     );
 
-    
+
     /**
      * packing according to original vouchers and disclosure strategies.
-     * 
+     *
      * @param credentialList original credential list
      * @param presentationPolicyE the disclosure strategies.
      * @param challenge used for authentication
