@@ -44,8 +44,9 @@ public class TestGetEvidence extends TestBaseServcie {
         super.testInit();
         if (evidenceCredential == null) {
             Credential credential = super.createCredential(createCredentialArgs).getCredential();
+            String hashValue = credentialService.getCredentialHash(credential).getResult();
             ResponseData<String> evidence = evidenceService
-                .createEvidence(credential, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+                .createEvidence(hashValue, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
             Assert.assertTrue(!evidence.getResult().isEmpty());
             evidenceCredential = credential;
             evidenceAddress = evidence.getResult();
