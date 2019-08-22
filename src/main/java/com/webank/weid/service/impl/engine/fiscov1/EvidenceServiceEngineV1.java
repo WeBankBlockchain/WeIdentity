@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.Evidence;
+import com.webank.weid.contract.v1.Evidence.AddSignatureLogEventResponse;
 import com.webank.weid.contract.v1.EvidenceFactory;
 import com.webank.weid.contract.v1.EvidenceFactory.CreateEvidenceLogEventResponse;
 import com.webank.weid.protocol.base.EvidenceInfo;
@@ -53,20 +54,34 @@ import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.WeIdUtils;
 
 /**
  * EvidenceServiceEngineV1 calls the evidence contract which runs on FISCO BCOS 1.3.x version.
+ *
+ * @author yanggang, chaoxinhu
  */
 public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV1.class);
 
+    /**
+     * Create evidence in 1.x FISCO-BCOS.
+     *
+     * @param sigData signature Data
+     * @param hashAttributes hash value
+     * @param extraValueList extra value
+     * @param privateKey private key
+     * @param signerList declared signers
+     * @return evidence address
+     */
     @Override
     public ResponseData<String> createEvidence(
         Sign.SignatureData sigData,
         List<String> hashAttributes,
         List<String> extraValueList,
-        String privateKey
+        String privateKey,
+        List<String> signerList
     ) {
 
         try {
@@ -74,9 +89,16 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
             Bytes32 s = DataToolUtils.bytesArrayToBytes32(sigData.getS());
             Uint8 v = DataToolUtils.intToUnt8(Integer.valueOf(sigData.getV()));
             List<Address> signer = new ArrayList<>();
-            ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-            signer.add(new Address(Keys.getAddress(keyPair)));
-
+            if (signerList == null || signerList.size() == 0) {
+                // Evidence has only one signer - default to be the WeID behind the private key
+                ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+                signer.add(new Address(Keys.getAddress(keyPair)));
+            } else {
+                // Evidence has a pre-defined signer list
+                for (String signerWeId : signerList) {
+                    signer.add(new Address(WeIdUtils.convertWeIdToAddress(signerWeId)));
+                }
+            }
             EvidenceFactory evidenceFactory =
                 reloadContract(
                     fiscoConfig.getEvidenceAddress(),
@@ -126,6 +148,56 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
         }
     }
 
+    /**
+     * Add signature to an evidence.
+     *
+     * @param sigData signature data
+     * @param privateKey private key
+     * @return true if succeeded, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> addSignature(Sign.SignatureData sigData, String privateKey,
+        String evidenceAddress) {
+        Evidence evidence =
+            reloadContract(
+                evidenceAddress,
+                privateKey,
+                Evidence.class
+            );
+        Bytes32 r = DataToolUtils.bytesArrayToBytes32(sigData.getR());
+        Bytes32 s = DataToolUtils.bytesArrayToBytes32(sigData.getS());
+        Uint8 v = DataToolUtils.intToUnt8(Integer.valueOf(sigData.getV()));
+        Future<TransactionReceipt> future = evidence.addSignature(r, s, v);
+        try {
+            TransactionReceipt receipt = future.get(
+                WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
+                TimeUnit.SECONDS);
+            TransactionInfo info = new TransactionInfo(receipt);
+            List<AddSignatureLogEventResponse> eventResponseList =
+                Evidence.getAddSignatureLogEvents(receipt);
+            AddSignatureLogEventResponse event = eventResponseList.get(0);
+            if (event != null) {
+                if (event.retCode.getValue().intValue()
+                    == ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode()) {
+                    return new ResponseData<>(false,
+                        ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT, info);
+                }
+                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+            } else {
+                logger.error(
+                    "add signature failed due to transcation event decoding failure."
+                );
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            }
+        } catch (TimeoutException e) {
+            logger.error("add signature failed due to system timeout. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("add signature failed due to transaction error. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
     private List<Bytes32> generateBytes32List(List<String> bytes32List) {
         int desiredLength = bytes32List.size();
         List<Bytes32> finalList = new ArrayList<>();
@@ -135,6 +207,12 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
         return finalList;
     }
 
+    /**
+     * Get an evidence info.
+     *
+     * @param evidenceAddress evidence addr
+     * @return evidence info
+     */
     @Override
     public ResponseData<EvidenceInfo> getInfo(String evidenceAddress) {
         try {
@@ -173,6 +251,10 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
                 v = (byte) (vlist.get(index).getValue().intValue());
                 r = rlist.get(index).getValue();
                 s = slist.get(index).getValue();
+                if ((int) v == 0) {
+                    // skip empty signatures
+                    continue;
+                }
                 SignatureData sigData = new SignatureData(v, r, s);
                 signaturesList.add(
                     new String(
