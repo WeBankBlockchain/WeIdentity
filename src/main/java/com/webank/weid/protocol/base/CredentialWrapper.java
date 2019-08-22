@@ -22,6 +22,11 @@ package com.webank.weid.protocol.base;
 import java.util.Map;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
+
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.protocol.inf.Hashable;
+import com.webank.weid.util.CredentialUtils;
 
 /**
  * Credential response.
@@ -29,7 +34,7 @@ import lombok.Data;
  * @author tonychen 2019年1月24日
  */
 @Data
-public class CredentialWrapper {
+public class CredentialWrapper implements Hashable {
 
     /**
      * Required: The Credential.
@@ -41,4 +46,23 @@ public class CredentialWrapper {
      * for no disclosure.
      */
     private Map<String, Object> disclosure;
+
+    /**
+     * Generate the unique hash of this CredentialWrapper.
+     *
+     * @return hash value
+     */
+    public String getHash() {
+        if (this == null) {
+            return StringUtils.EMPTY;
+        }
+        if (this.getDisclosure() == null || this.getDisclosure().size() == 0) {
+            return this.getCredential().getHash();
+        }
+        Credential credential = this.getCredential();
+        if (CredentialUtils.isCredentialValid(credential) != ErrorCode.SUCCESS) {
+            return StringUtils.EMPTY;
+        }
+        return CredentialUtils.getCredentialWrapperHash(this);
+    }
 }
