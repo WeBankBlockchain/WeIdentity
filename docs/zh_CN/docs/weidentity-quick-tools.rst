@@ -44,8 +44,8 @@ WeIdentity JAVA SDK 便捷使用工具
 
 ::
 
-    new weid has been created ----> did:weid:1:0x405a7ae297fc6d6fb02fb548db64b29f08114ca1
-    the related private key and public key can be found at /home/app/tonychen/test_gradle/weid-build-tools/output/create_weid/0x405a7ae297fc6d6fb02fb548db64b29f08114ca1.
+    New weid has been created ----> did:weid:1:0x405a7ae297fc6d6fb02fb548db64b29f08114ca1
+    The related private key and public key can be found at /home/app/tonychen/test_gradle/weid-build-tools/output/create_weid/0x405a7ae297fc6d6fb02fb548db64b29f08114ca1.
 
 表明创建的 ``WeID`` 是did:weid:1:0x405a7ae297fc6d6fb02fb548db64b29f08114ca1。
 
@@ -67,8 +67,8 @@ WeIdentity JAVA SDK 便捷使用工具
 如果执行成功，会打印以下信息。
 ::
 
-    registering authorityissuer ---> did:weid:1:0x5efd256d02c1a27675de085b86989fa2ac1baddb, name is :test
-    success.
+    Registering authorityissuer ---> did:weid:1:0x5efd256d02c1a27675de085b86989fa2ac1baddb, name is :test
+    Execute succeed.
 
 - 移除Authority Issuer
 
@@ -81,8 +81,8 @@ WeIdentity JAVA SDK 便捷使用工具
 若执行成功，则会打印以下信息。
 ::
 
-    removing authority issuer ---> did:weid:1:0x5efd256d02c1a27675de085b86989fa2ac1baddb...
-    success.
+    Removing authority issuer ---> did:weid:1:0x5efd256d02c1a27675de085b86989fa2ac1baddb...
+    Execute succeed.
 
 
 3 注册 Specific Issuer(特定类型的发行者)
@@ -103,7 +103,7 @@ WeIdentity JAVA SDK 便捷使用工具
 ::
 
     [RegisterIssuer] Adding WeIdentity DID did:weid:1:0xe10e52f6b7c6751bd03afc023b8e617d7fd0429c in type: college
-    specific issuers and types have been successfully registered on blockchain.
+    Specific issuers and types have been successfully registered on blockchain.
 
 如果您需要注册多个机构，请将其 WeIdentity DID 用分号分割开，如下所示：
 
@@ -139,7 +139,7 @@ WeIdentity JAVA SDK 便捷使用工具
 
     [RegisterCpt] register cpt file:JsonSchema.json result ---> success. cpt id ---> 1000
     [RegisterCpt] register cpt file:JsonSchema.json with success.
-    finished.
+    Execute succeed.
 
 如果您是通过其他途径创建的 WeIdentity DID，您需要自己指定私钥的位置。
 假如机构的 WeID 是 did:weid:1:0x5efd256d02c1a27675de085b86989fa2ac1baddb，私钥文件路径为 ``/home/test/private_key/ecdsa_key``：
@@ -153,7 +153,7 @@ WeIdentity JAVA SDK 便捷使用工具
 
     [RegisterCpt] register cpt file:JsonSchema.json result ---> success. cpt id ---> 1000
     [RegisterCpt] register cpt file:JsonSchema.json with success.
-    finished.
+    Execute succeed.
 
 
 5 拉取CPT并生成presentation policy模板
@@ -171,11 +171,11 @@ WeIdentity JAVA SDK 便捷使用工具
 若执行成功，则会打印以下信息。
 ::
  
-    begin to generate pojo from cpt...
+    Begin to generate pojo from cpt...
     All cpt:[1000] are successfully transformed to pojo.
 
-    the weidentity-cpt.jar can be found in /home/app/tonychen/test_gradle/weid-build-tools/dist/app/
-    begin to generate presentation policy ...
-    presentation policy template is successfully generated, you can find it at /home/app/tonychen/test_gradle/weid-build-tools/output/presentation_policy.
+    The weidentity-cpt.jar can be found in /home/app/tonychen/test_gradle/weid-build-tools/dist/app/
+    Begin to generate presentation policy ...
+    Presentation policy template is successfully generated, you can find it at /home/app/tonychen/test_gradle/weid-build-tools/output/presentation_policy.
 
 表明生成的 CPT 的 POJO 的jar包在 ``/home/app/tonychen/test_gradle/weid-build-tools/dist/app/`` 目录下， 生成的 presentation policy 模板在 ``/home/app/tonychen/test_gradle/weid-build-tools/output/presentation_policy`` 。
