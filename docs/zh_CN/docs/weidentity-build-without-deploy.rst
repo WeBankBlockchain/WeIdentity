@@ -103,6 +103,8 @@ FISCO BCOS 1.3请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documen
 
 
 - 如果您是第一次使用本工具，您需要先进行编译：
+.. note::
+  | 如果您重新修改了 ``run.config``里的配置项，您也需要重新编译。
 
 ::
 
@@ -147,7 +149,7 @@ FISCO BCOS 1.3请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documen
 
 ::
 
-    compile("com.webank:weid-java-sdk:1.3.1")
+    compile("com.webank:weid-java-sdk:1.3.2")
 
 
 2.2 配置您的Java应用

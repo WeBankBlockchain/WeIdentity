@@ -84,6 +84,7 @@ weid-java-sdk 可以同时支持 FISCO BCOS 1.3 版本和 FISCO BCOS 2.0 版本�
 
 保存退出，即完成基本配置。
 
+
 1.2.2 配置节点证书和秘钥文件
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -106,6 +107,9 @@ FISCO BCOS 1.3请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documen
 
 - 如果您是第一次使用本工具，您需要先进行编译：
 
+.. note::
+  | 如果您重新修改了 ``run.config``里的配置项，您也需要重新编译。
+
 ::
 
     cd ..
@@ -113,6 +117,7 @@ FISCO BCOS 1.3请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documen
     ./compile.sh
 
 如果执行过程没报错，大约半分钟左右可以编译完成。
+
 
 - 执行脚本 deploy.sh 进行 WeIdentity 智能合约的发布。
 
@@ -152,11 +157,11 @@ FISCO BCOS 1.3请参考\ `1.3 web3sdk客户端配置 <https://fisco-bcos-documen
 2.1 在自己的 Java 应用中引入 weid-java-sdk
 '''''''''''''''''''''''''''''''''''''''''''''
 
-在自己的 Java 应用通过 ``build.gradle`` 引入，目前weid-java-sdk暂时只支持gradle方式引入。
+在自己的 Java 应用通过 ``build.gradle`` 引入，目前 weid-java-sdk 暂时只支持 gradle 方式引入。
 
 ::
 
-    compile("com.webank:weid-java-sdk:1.3.1")
+    compile("com.webank:weid-java-sdk:1.3.2")
 
 
 2.2 配置您的 Java 应用
