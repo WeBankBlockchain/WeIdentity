@@ -515,6 +515,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 return new ResponseData<CredentialPojo>(null,
                     ErrorCode.CREDENTIAL_CLAIM_POLICY_NOT_EXIST);
             }
+            if (CredentialPojoUtils.isSelectivelyDisclosed(credential.getSalt())) {
+                return new ResponseData<CredentialPojo>(null, ErrorCode.CREDENTIAL_RE_DISCLOSED);
+            }
             String disclosure = claimPolicy.getFieldsToBeDisclosed();
             Map<String, Object> saltMap = credentialClone.getSalt();
             Map<String, Object> claim = credentialClone.getClaim();
