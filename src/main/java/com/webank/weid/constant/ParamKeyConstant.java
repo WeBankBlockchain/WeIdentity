@@ -46,6 +46,7 @@ public final class ParamKeyConstant {
      */
     public static final String CPT_JSON_SCHEMA = "cptJsonSchema";
     public static final String CPT_SIGNATURE = "cptSignature";
+    public static final String CPT = "Cpt";
 
     /**
      * CredentialService related param names.
@@ -58,6 +59,8 @@ public final class ParamKeyConstant {
     public static final String CONTEXT = "context";
     public static final String CREDENTIAL_ID = "id";
     public static final String ISSUANCE_DATE = "issuanceDate";
+    public static final String POLICY = "Policy";
+    public static final String POLICY_PACKAGE = "com.webank.weid.cpt.policy.";
 
     /**
      * proof key.
@@ -70,13 +73,13 @@ public final class ParamKeyConstant {
     public static final String PROOF_SALT = "salt";
     public static final String PROOF_VERIFICATION_METHOD = "verificationMethod";
     public static final String PROOF_NONCE = "nonce";
-    
+
     /**
      * 秘钥存储KEY.
      */
-    public static final String KEY_DATA = "keyData"; 
+    public static final String KEY_DATA = "keyData";
     public static final String KEY_VERIFIERS = "verifiers";
     public static final String KEY_EXPIRE = "expirationDate";
-    
+
 
 }
