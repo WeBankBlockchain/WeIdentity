@@ -399,10 +399,43 @@ public final class CredentialPojoUtils {
      *
      * @param <T> any object
      * @param credentialPojo credentialPojo
+     * @param presentationPolicyId the presentation Policy Id
      * @return policy CPT object
      */
-    public static <T> T getDisclosedClaimPojo(CredentialPojo credentialPojo) {
-        return null;
+    public static <T> T getDisclosedClaimPojo(
+        CredentialPojo credentialPojo,
+        String presentationPolicyId) {
+
+        ErrorCode errorCode = isCredentialPojoValid(credentialPojo);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[getDisclosedClaimPojo]The input credential is not a valid credential! errorCode is {}",
+                errorCode);
+            return null;
+        }
+        if (StringUtils.isEmpty(presentationPolicyId)) {
+            logger.error("[getDisclosedClaimPojo]The input presentation policy id is empty.");
+            return null;
+        }
+        Integer cptId = credentialPojo.getCptId();
+        String pojoClass = new StringBuffer()
+            .append(ParamKeyConstant.POLICY_PACKAGE)
+            .append(ParamKeyConstant.CPT)
+            .append(cptId)
+            .append(ParamKeyConstant.POLICY)
+            .append(presentationPolicyId)
+            .toString();
+
+        Map<String, Object> claim = credentialPojo.getClaim();
+        Object claimPojoData = null;
+        try {
+            claimPojoData = DataToolUtils.mapToObj(claim, Class.forName(pojoClass));
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            logger.error("[getDisclosedClaimPojo] Convert claim to POJO failed, Error msg:", e);
+        } catch (Exception e) {
+            logger.error("[getDisclosedClaimPojo] Convert claim to POJO failed, Exception msg:", e);
+        }
+        return (T) claimPojoData;
     }
 
     private static void removeNotDisclosureData(
