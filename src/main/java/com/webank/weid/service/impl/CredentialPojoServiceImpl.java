@@ -139,18 +139,16 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
 
         //检查每个map里的key个数是否相同
-        Set<String> claimKeys = claim.keySet();
-        Set<String> saltKeys = salt.keySet();
-        
-        if (claimKeys.size() != saltKeys.size()) {
+        if (!claim.keySet().equals(salt.keySet())) {
             return false;
         }
+        
         //检查key值是否一致
         for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
             String k = entry.getKey();
             Object v = entry.getValue();
-            //如果disclosureMap中的key 再claim或者claim中没有则返回false
-            if (!claim.containsKey(k) || !salt.containsKey(k)) {
+            //如果disclosureMap中的key在claim中没有则返回false
+            if (!claim.containsKey(k)) {
                 return false;
             }
             Object saltV = salt.get(k);
@@ -279,27 +277,28 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         for (int i = 0; i < claimList.size(); i++) {
             Object claimObj = claimList.get(i);
             if (claimObj instanceof Map) {
-                HashMap claimHashMap = (HashMap)claimObj;
-                Object disclosureObj = disclosureList.get(0);
+                Object disclosureObj = disclosureList.size() == 0 ? null : disclosureList.get(0);
                 if (disclosureObj == null) {
                     disclosureList.add(new HashMap());
                 }
                 HashMap disclosureHashMap = (HashMap)disclosureList.get(0);
-                addKeyToPolicy(disclosureHashMap, claimHashMap);
+                addKeyToPolicy(disclosureHashMap, (HashMap)claimObj);
                 break;
             } else if (claimObj instanceof List) {
-                ArrayList claimArrayList = (ArrayList)claimObj;
                 Object disclosureObj = disclosureList.get(i);
                 if (disclosureObj == null) {
                     disclosureList.add(new ArrayList());
                 }
                 ArrayList disclosureArrayList = (ArrayList)disclosureList.get(i);
-                addKeyToPolicyList(disclosureArrayList, claimArrayList);
+                addKeyToPolicyList(disclosureArrayList, (ArrayList)claimObj);
             }
         }
     }
     
     private static boolean isSampleListForClaim(ArrayList claimList) {
+        if (CollectionUtils.isEmpty(claimList)) {
+            return true;
+        }
         Object claimObj = claimList.get(0);
         if (claimObj instanceof Map) {
             return false;
