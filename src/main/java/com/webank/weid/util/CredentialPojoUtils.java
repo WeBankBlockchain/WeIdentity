@@ -409,7 +409,8 @@ public final class CredentialPojoUtils {
         ErrorCode errorCode = isCredentialPojoValid(credentialPojo);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
-                "[getDisclosedClaimPojo]The input credential is not a valid credential! errorCode is {}",
+                "[getDisclosedClaimPojo]The input credential is not a valid credential! "
+                    + "errorCode is {}",
                 errorCode);
             return null;
         }
