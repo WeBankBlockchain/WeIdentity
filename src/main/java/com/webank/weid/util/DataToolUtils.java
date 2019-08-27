@@ -351,10 +351,12 @@ public final class DataToolUtils {
     }
 
     /**
-     * Convert a POJO to Map.
+     * Convert a MAP to POJO.
      *
-     * @param object POJO
-     * @return Map
+     * @param map the input data
+     * @param <T> the type of the element
+     * @param clazz the output class type
+     * @return object in T type
      * @throws Exception IOException
      */
     public static <T> T mapToObj(Map<String, Object> map, Class<T> clazz) throws Exception {
