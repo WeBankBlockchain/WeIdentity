@@ -25,10 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.bcos.web3j.crypto.ECKeyPair;
+import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple6;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.Evidence;
+import com.webank.weid.contract.v2.Evidence.AddSignatureLogEventResponse;
 import com.webank.weid.contract.v2.EvidenceFactory;
 import com.webank.weid.contract.v2.EvidenceFactory.CreateEvidenceLogEventResponse;
 import com.webank.weid.protocol.base.EvidenceInfo;
@@ -45,20 +47,34 @@ import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.WeIdUtils;
 
 /**
  * EvidenceServiceEngine calls evidence contract which runs on FISCO BCOS 2.0.
+ *
+ * @author yanggang, chaoxinhu
  */
 public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV2.class);
 
+    /**
+     * Create Evidence on a FISCO-BCOS 2.x blockchain.
+     *
+     * @param sigData signature data
+     * @param hashAttributes hash value
+     * @param extraValueList extra value
+     * @param privateKey private key
+     * @param signerList declared signers
+     * @return evidence address
+     */
     @Override
     public ResponseData<String> createEvidence(
         Sign.SignatureData sigData,
         List<String> hashAttributes,
         List<String> extraValueList,
-        String privateKey
+        String privateKey,
+        List<String> signerList
     ) {
         try {
             List<byte[]> hashAttributesByte = new ArrayList<>();
@@ -70,8 +86,16 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 extraValueListByte.add(DataToolUtils.stringToByte32Array(extraValue));
             }
             List<String> signer = new ArrayList<>();
-            ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-            signer.add(Keys.getAddress(keyPair));
+            if (signerList == null || signerList.size() == 0) {
+                // Evidence has only one signer - default to be the WeID behind the private key
+                ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+                signer.add(Keys.getAddress(keyPair));
+            } else {
+                // Evidence has a pre-defined signer list
+                for (String signerWeId : signerList) {
+                    signer.add(WeIdUtils.convertWeIdToAddress(signerWeId));
+                }
+            }
 
             EvidenceFactory evidenceFactory =
                 reloadContract(
@@ -114,6 +138,56 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         }
     }
 
+
+    /**
+     * Add signature to an evidence.
+     *
+     * @param sigData signature data
+     * @param privateKey private key
+     * @return true if succeeded, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> addSignature(Sign.SignatureData sigData, String privateKey,
+        String evidenceAddress) {
+        Evidence evidence =
+            reloadContract(
+                evidenceAddress,
+                privateKey,
+                Evidence.class
+            );
+        try {
+            TransactionReceipt receipt = evidence
+                .addSignature(sigData.getR(), sigData.getS(), BigInteger.valueOf(sigData.getV()))
+                .send();
+            TransactionInfo info = new TransactionInfo(receipt);
+            List<AddSignatureLogEventResponse> eventResponseList =
+                evidence.getAddSignatureLogEvents(receipt);
+            AddSignatureLogEventResponse event = eventResponseList.get(0);
+            if (event != null) {
+                if (event.retCode.intValue()
+                    == ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode()) {
+                    return new ResponseData<>(false,
+                        ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT, info);
+                }
+                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+            } else {
+                logger.error(
+                    "add signature failed due to transcation event decoding failure."
+                );
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            }
+        } catch (Exception e) {
+            logger.error("add signature failed due to transaction error. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    /**
+     * Get an evidence full info.
+     *
+     * @param evidenceAddress evidence addr
+     * @return evidence info
+     */
     @Override
     public ResponseData<EvidenceInfo> getInfo(String evidenceAddress) {
         try {
@@ -155,6 +229,10 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 v = (byte) (vlist.get(index).intValue());
                 r = rlist.get(index);
                 s = slist.get(index);
+                if ((int) v == 0) {
+                    // skip empty signatures
+                    continue;
+                }
                 SignatureData sigData = new SignatureData(v, r, s);
                 signaturesList.add(
                     new String(
