@@ -19,25 +19,30 @@
 
 package com.webank.weid.protocol.cpt;
 
+import java.util.List;
+
 import com.github.reinert.jjschema.Attributes;
 import lombok.Data;
 
 /**
  * Api endpoint address disclosure.
  *
- * @author Created by Junqi Zhang on 2019/4/9.
+ * @author junqizhang, chaoxinhu 2019.8
  */
 @Data
 @Attributes(title = "API Endpoint", description = "API Endpoint address disclosure")
 public class Cpt105 {
-    @Attributes(required = true, description = "The WeIdentity DID of owner")
-    private String ownerWeId;
-    @Attributes(required = true, description = "The URL")
-    private String url;
-    @Attributes(required = true, description = "The port")
-    private String port;
-    @Attributes(required = true, description = "The policy ID")
-    private Integer policyId;
-    @Attributes(required = true, description = "The org ID")
-    private String orgId;
+
+    @Attributes(required = true, description = "Owner WeIdentity DID")
+    private String id;
+    @Attributes(required = true, description = "Network host and port")
+    private String hostport;
+    @Attributes(required = true, description = "Endpoint name")
+    private String endpointName;
+    @Attributes(required = true, description = "Description")
+    private String description;
+    @Attributes(required = true, description = "API Version")
+    private String version;
+    @Attributes(required = true, description = "Argument types in sequence")
+    private List<String> argType;
 }
