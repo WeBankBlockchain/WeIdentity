@@ -24,7 +24,10 @@ import java.util.Map;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.protocol.inf.Hashable;
+import com.webank.weid.util.CredentialUtils;
 
 /**
  * The base data structure to handle Credential info.
@@ -32,7 +35,7 @@ import com.webank.weid.constant.ParamKeyConstant;
  * @author chaoxinhu 2018.10
  */
 @Data
-public class Credential {
+public class Credential implements Hashable {
 
     /**
      * Required: The context field.
@@ -97,5 +100,17 @@ public class Credential {
             return proof.get(key);
         }
         return StringUtils.EMPTY;
+    }
+
+    /**
+     * Get the unique hash value of this Credential.
+     *
+     * @return hash value
+     */
+    public String getHash() {
+        if (CredentialUtils.isCredentialValid(this) != ErrorCode.SUCCESS) {
+            return StringUtils.EMPTY;
+        }
+        return CredentialUtils.getCredentialHash(this);
     }
 }
