@@ -22,6 +22,8 @@ package com.webank.weid.suite.endpoint;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -54,8 +56,10 @@ public class RpcServer {
     private static Integer LISTENER_PORT =
         Integer.valueOf(PropertyUtils.getProperty("rpc.listener.port"));
 
-    @Setter
-    private static EndpointHandler endpointHandler;
+    /**
+     * Map structure to store requestName and its registered EndpointFunctor Impl.
+     */
+    private static Map<String, EndpointFunctor> implMap = new ConcurrentHashMap<>();
 
     /**
      * The main entrance for RPC server process.
@@ -64,7 +68,7 @@ public class RpcServer {
      * @throws Exception any exception
      */
     public static void main(String[] args) throws Exception {
-        if (endpointHandler == null) {
+        if (implMap.size() == 0) {
             logger.error("Initialization failed, exiting..");
             System.exit(1);
         }
@@ -127,7 +131,7 @@ public class RpcServer {
         if (requestName.equalsIgnoreCase(EndpointServiceConstant.FETCH_FUNCTION)) {
             return processFetch();
         }
-        return endpointHandler.execute(requestName, clientMsgArray[1]);
+        return execute(requestName, clientMsgArray[1]);
     }
 
     private static String processFetch() {
@@ -144,5 +148,50 @@ public class RpcServer {
                 .substring(0, reply.length() - EndpointServiceConstant.EPS_SEPARATOR.length());
         }
         return reply;
+    }
+
+    /**
+     * Register an endpoint with specified impl object and host address and store in both local
+     * memory and config file.
+     *
+     * @param requestName request name
+     * @param functorImpl the implemented fuctor
+     * @throws Exception save to files exception
+     */
+    public static void registerEndpoint(String requestName, EndpointFunctor functorImpl)
+        throws Exception {
+        implMap.put(requestName, functorImpl);
+        EndpointInfo endpointInfo = new EndpointInfo();
+        endpointInfo.setRequestName(requestName);
+        endpointInfo.setDescription(functorImpl.getDescription());
+        EndpointDataUtil.mergeToCentral(endpointInfo);
+        EndpointDataUtil.saveEndpointsToFile();
+    }
+
+    /**
+     * Remove an endpoint from local memory and config file.
+     *
+     * @param requestName given request name
+     */
+    public static void removeEndpoint(String requestName) {
+        implMap.remove(requestName);
+        EndpointInfo endpointInfo = new EndpointInfo();
+        endpointInfo.setRequestName(requestName);
+        EndpointDataUtil.removeEndpoint(endpointInfo);
+    }
+
+    /**
+     * The actual execute method. Implementations must be done by caller first.
+     *
+     * @param requestName the request name to check in the mapping
+     * @param requestBody the request body to pass in
+     * @return the serialized Object
+     */
+    public static String execute(String requestName, String requestBody) {
+        EndpointFunctor functorImpl = implMap.get(requestName);
+        if (functorImpl == null) {
+            return StringUtils.EMPTY;
+        }
+        return functorImpl.execute(requestBody);
     }
 }
