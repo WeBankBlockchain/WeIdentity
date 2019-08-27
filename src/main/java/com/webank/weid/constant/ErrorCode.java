@@ -136,7 +136,7 @@ public enum ErrorCode {
      * The credential context not exists.
      */
     CREDENTIAL_CONTEXT_NOT_EXISTS(100413, "credential context does not exist"),
-    
+
     /**
      * The credential type is null.
      */
@@ -176,30 +176,30 @@ public enum ErrorCode {
      * The credential private key not exists.
      */
     CREDENTIAL_PUBLIC_KEY_NOT_EXISTS(
-        100421, 
+        100421,
         "public key for verifying credential signature does not exist"
     ),
-    
+
     /**
      * The signature for verifying credential does not exist.
      */
     CREDENTIAL_SIGNATURE_NOT_EXISTS(100422, "signature for verifying credential does not exist"),
-    
+
     /**
      * The credential policy disclosurevalue illegal.
      */
     CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL(100423, "policy disclosurevalue illegal"),
-    
+
     /**
      * The credential disclosurevalue notmatch saltvalue.
      */
     CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE(100424, "disclosurevalue notmatch saltvalue"),
-    
+
     /**
      * The credential cptId notmatch.
      */
     CREDENTIAL_CPTID_NOTMATCH(100425, "credential cptId notmatch"),
-    
+
     /**
      * The credential presenterWeId notmatch.
      */
@@ -217,12 +217,12 @@ public enum ErrorCode {
      * credential disclosure data illegal.
      */
     CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL(100428, "credential disclosure data illegal"),
-    
+
     /**
      * The credential signature broken.
      */
     CREDENTIAL_SIGNATURE_TYPE_ILLEGAL(100429, "credential signature type unknown"),
-    
+
     /**
      * credential salt illegal.
      */
@@ -232,7 +232,13 @@ public enum ErrorCode {
      * credential evidence cannot be extracted.
      */
     CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN(100431, "credential evidence cannot be extracted"),
-    
+
+    /**
+     * credential has already been disclosed once.
+     */
+    CREDENTIAL_RE_DISCLOSED(100432,
+        "credential has already been disclosed once, can not be re-disclosed"),
+
     /**
      * The credential evidence contract failure: illegal input.
      */
@@ -292,7 +298,7 @@ public enum ErrorCode {
         100605,
         "the nonce of challenge does not match the nonce of presentation."
     ),
-    
+
     /**
      * the signature of presentation does not match the presenter.
      */
@@ -300,7 +306,7 @@ public enum ErrorCode {
         100606,
         "the signature of presentation does not match the presenter."
     ),
-    
+
     /**
      * the presenter weid of presentation does not match the credential.
      */
@@ -316,7 +322,7 @@ public enum ErrorCode {
         100608,
         "the weid of the claim of the presentation does not exist."
     ),
-    
+
     /**
      * the publisherWeId of policy is invalid.
      */
@@ -324,15 +330,15 @@ public enum ErrorCode {
         100609,
         "the publisherWeId of policy is invalid."
     ),
-    
+
     /**
      * the publisherWeId of policy does not exist.
      */
     PRESENTATION_POLICY_PUBLISHER_WEID_NOT_EXIST(
         100610,
         "the publisherWeId of policy does not exist."
-    ), 
-    
+    ),
+
     /**
      * the encrypt key is not exists.
      */
@@ -347,18 +353,18 @@ public enum ErrorCode {
      * the policy service call fail.
      */
     POLICY_SERVICE_CALL_FAIL(100702, "the policy service call fail, please check the error log."),
-    
+
     /**
      * the policy service call fail.
      */
     ENCRYPT_KEY_NO_PERMISSION(100703, "no permission to get the key."),
-    
+
     /**
      * the key is invalid.
      */
     ENCRYPT_KEY_INVALID(100704, "the key is invalid."),
-    
-    
+
+
     /**
      * the key is expire.
      */
@@ -366,45 +372,45 @@ public enum ErrorCode {
 
 
     /**
-     * suite基本异常.
+     * transportation base error.
      */
     TRANSPORTATION_BASE_ERROR(100800, "suite baes exception error, please check the error log."),
 
     /**
-     * 协议配置不能为空.
+     * transportation protocol error.
      */
     TRANSPORTATION_PROTOCOL_PROPERTY_ERROR(100801, "the protocol property is error."),
 
     /**
-     * 协议版本不能为空.
+     * transportation protocol version error.
      */
     TRANSPORTATION_PROTOCOL_VERSION_ERROR(100802, "the protocol version is error."),
 
     /**
-     * 协议编码方式不能为空.
+     * transportation protocol encode error.
      */
     TRANSPORTATION_PROTOCOL_ENCODE_ERROR(100803, "the protocol encode is error."),
 
     /**
-     * 无效的协议字符串.
+     * transportation protocol value error.
      */
     TRANSPORTATION_PROTOCOL_STRING_INVALID(100804, "the protocol string is invalid."),
 
     /**
-     * 协议数据无效.
+     * transportation protocol data error.
      */
     TRANSPORTATION_PROTOCOL_DATA_INVALID(100805, "the protocol data is invalid."),
 
     /**
-     * 协议字段值不能包含"|".
+     * transportation protocol field invalid.
      */
     TRANSPORTATION_PROTOCOL_FIELD_INVALID(
-        100806, 
+        100806,
         "the protocol field values cannot be included '|'."
     ),
 
     /**
-     * 编解码异常.
+     * transportation protocol encode error.
      */
     TRANSPORTATION_ENCODE_BASE_ERROR(100807, "encode base error, please check the error log."),
 
@@ -454,7 +460,7 @@ public enum ErrorCode {
         100901,
         "the key of the data is empty."
     ),
-    
+
     /**
      * the domain is illegal.
      */
@@ -470,7 +476,7 @@ public enum ErrorCode {
         100903,
         "the domain is invalid."
     ),
-    
+
     /**
      * the data does not match for batch save.
      */
@@ -478,7 +484,7 @@ public enum ErrorCode {
         100904,
         "the data does not match for batch save."
     ),
-    
+
     /**
      * The Authority Issuer Contract level error: subject already exists.
      */
@@ -569,7 +575,7 @@ public enum ErrorCode {
      * the authority of the weIdentity DID is invalid.
      */
     WEID_AUTHORITY_INVALID(100109, "the authority of the weIdentity DID is invalid."),
-    
+
     /**
      * the length of the setService type is overlimit.
      */
@@ -624,18 +630,18 @@ public enum ErrorCode {
      * AMOP server side has no direct route callback.
      */
     AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(
-        160012, 
+        160012,
         "amop server side has no direct route callback."
     ),
-    
+
     /**
      * can not get the connection from pool.
      */
     SQL_GET_CONNECTION_ERROR(
-        160013, 
+        160013,
         "can not get the connection from pool, please check the error log."
     ),
-    
+
     /**
      * other uncatched exceptions or error.
      */
@@ -660,6 +666,21 @@ public enum ErrorCode {
     ErrorCode(int code, String codeDesc) {
         this.code = code;
         this.codeDesc = codeDesc;
+    }
+
+    /**
+     * get ErrorType By errcode.
+     *
+     * @param errorCode the ErrorCode
+     * @return errorCode
+     */
+    public static ErrorCode getTypeByErrorCode(int errorCode) {
+        for (ErrorCode type : ErrorCode.values()) {
+            if (type.getCode() == errorCode) {
+                return type;
+            }
+        }
+        return ErrorCode.UNKNOW_ERROR;
     }
 
     /**
@@ -696,20 +717,5 @@ public enum ErrorCode {
      */
     protected void setCodeDesc(String codeDesc) {
         this.codeDesc = codeDesc;
-    }
-
-    /**
-     * get ErrorType By errcode.
-     *
-     * @param errorCode the ErrorCode
-     * @return errorCode
-     */
-    public static ErrorCode getTypeByErrorCode(int errorCode) {
-        for (ErrorCode type : ErrorCode.values()) {
-            if (type.getCode() == errorCode) {
-                return type;
-            }
-        }
-        return ErrorCode.UNKNOW_ERROR;
     }
 }
