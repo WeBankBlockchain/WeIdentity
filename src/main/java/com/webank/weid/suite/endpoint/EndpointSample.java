@@ -43,7 +43,7 @@ public class EndpointSample {
     }
 
     /**
-     * This piece of code shows a sample how to register, call and remove.
+     * This piece of code is a simple sample showing how to register, call and remove.
      *
      * @param args input args (omitted)
      * @throws Exception interrupted exception
@@ -53,10 +53,7 @@ public class EndpointSample {
         EndpointDataUtil.clearProps();
         EndpointFunctor functor = new DuplicateFunctor();
         String requestName = "duplicate-input";
-        EndpointHandler endpointHandler = EndpointHandler.getInstance();
-        endpointHandler.registerEndpoint(requestName, functor);
-        // System.out.println(endpointHandler.execute("duplicate-input", "abcabc"));
-        RpcServer.setEndpointHandler(endpointHandler);
+        RpcServer.registerEndpoint(requestName, functor);
         RpcServer.main(null);
     }
 }
