@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.inf.IProof;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.util.CredentialPojoUtils;
@@ -45,7 +46,7 @@ import com.webank.weid.util.DataToolUtils;
  * @author junqizhang 2019.04
  */
 @Data
-public class CredentialPojo implements IProof, JsonSerializer {
+public class CredentialPojo implements IProof, JsonSerializer, Hashable {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojo.class);
 
@@ -201,5 +202,17 @@ public class CredentialPojo implements IProof, JsonSerializer {
             throw new DataTypeCastException("claim and salt of credentialPojo not match.");
         }
         return credentialPojo;
+    }
+
+    /**
+     * Generate the unique hash of this CredentialPojo.
+     *
+     * @return hash value
+     */
+    public String getHash() {
+        if (CredentialPojoUtils.isCredentialPojoValid(this) != ErrorCode.SUCCESS) {
+            return StringUtils.EMPTY;
+        }
+        return CredentialPojoUtils.getCredentialPojoHash(this, null);
     }
 }
