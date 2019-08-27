@@ -7500,12 +7500,12 @@ EvidenceService
 .. code-block:: text
 
    接口名称:com.webank.weid.rpc.EvidenceService.createEvidence
-   接口定义:ResponseData<String> createEvidence(String hashValue, WeIdPrivateKey weIdPrivateKey)
-   接口描述: 将Hash值生成存证上链。传入的私钥将会成为链上存证的签名方。此签名方和凭证的Issuer可以不是同一方。
+   接口定义:ResponseData<String> createEvidence(Hashable object, WeIdPrivateKey weIdPrivateKey)
+   接口描述: 将传入Object计算Hash值生成存证上链。传入的私钥将会成为链上存证的签名方。此签名方和凭证的Issuer可以不是同一方。
 
 **接口入参**\ :
 
-java.lang.String
+Hashable java.lang.Object
 
 .. list-table::
    :header-rows: 1
@@ -7515,12 +7515,11 @@ java.lang.String
      - 非空
      - 说明
      - 备注
-   * - hashValue
-     - String
+   * - Object
+     - Hashable object
      - Y
-     - Hash值
-     -
-     -
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
 
 com.webank.weid.protocol.base.WeIdPrivateKey
 
@@ -7648,7 +7647,220 @@ com.webank.weid.protocol.response.TransactionInfo
    ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
 
    //创建Evidence Address
-   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(credentialService.getCredentialHash(response.getResult().getCredential()), weIdPrivateKey);
+   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(response.getResult().getCredential(), weIdPrivateKey);
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: 0xa3203e054bb7a7f0dec134c7510299869e343e8d
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30014
+      transactionHash: 0x1f9e62fa152eb5fce859dcf81c7c0eddcbcab63c40629d1c745058c227693dae
+      transactionIndex: 0
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用CreateEvidence()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService->>EvidenceService: 生成凭证Hash
+   EvidenceService->>EvidenceService: 基于凭证Hash生成签名值
+   EvidenceService->>区块链节点: 调用智能合约，创建并上传凭证存证
+   区块链节点-->>EvidenceService: 返回创建结果
+   opt 创建失败
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService-->>调用者: 返回成功
+
+----
+
+2. createEvidence （多个签名者）
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.createEvidence
+   接口定义:ResponseData<String> createEvidence(Hashable object, List<String> signers, WeIdPrivateKey weIdPrivateKey)
+   接口描述: 将传入Object计算Hash值生成存证上链。此方法允许在创建存证时传入多个签名方的WeID；但是，必须传入一个这些签名方WeID所对应持有的私钥进行签名。同样地，此签名方和凭证的Issuer可以不是同一方。
+
+**接口入参**\ :
+
+Hashable java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - Hashable object
+     - Y
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
+
+java.util.ArrayList
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - signers
+     - List<String>
+     - Y
+     - 声明的签名者的WeID
+     - 至少有一个签名者需要传入自己的私钥（在下个参数中）
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - String
+     - 创建的凭证合约地址
+     - 业务数据
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT
+     - 500401
+     - Evidence参数非法
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialService credentialService = new CredentialServiceImpl();
+   EvidenceService evidenceService = new EvidenceServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+   createCredentialArgs.setClaim(claim);
+   createCredentialArgs.setCptId(1017);
+   createCredentialArgs.setExpirationDate(1561448312461L);
+   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   // 创建Credential
+   ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
+
+   List<String> signer = new ArrayList<>();
+   signer.add("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   signer.add("did:weid:101:0x48f6f6f663ef77409144014ceb063713b65611f8");
+
+   //创建Evidence Address
+   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(response.getResult().getCredential(), signer, weIdPrivateKey);
 
 
 .. code-block:: text
@@ -7688,7 +7900,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 ----
 
-2. getEvidence
+3. getEvidence
 ~~~~~~~~~~~~~~~~~~~
 
 
@@ -7843,21 +8055,37 @@ com.webank.weid.protocol.base.EvidenceInfo
    end
    EvidenceService-->>调用者: 返回成功
 
-
 ----
 
-3. verify
-~~~~~~~~~~~~~~~~~~~~~
+
+4. addSignature
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.verify
-   接口定义:ResponseData<Boolean> verify(String hashValue, String evidenceAddress)
-   接口描述: 根据传入的存证Hash值和链上值对比，验证其是否遭到篡改。
+   接口名称:com.webank.weid.rpc.EvidenceService.addSignature
+   接口定义:ResponseData<String> addSignature(Hashable object, String evidenceAddress, WeIdPrivateKey weIdPrivateKey)
+   接口描述: 对传入的Object及链上地址，加一个签名存入链上的存证。要求：传入的签名方必须隶属于在创建存证时传入多个签名方的WeID之一。
 
 **接口入参**\ :
+
+Hashable java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - Hashable object
+     - Y
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
 
 java.lang.String
 
@@ -7869,11 +8097,211 @@ java.lang.String
      - 非空
      - 说明
      - 备注
-   * - hashValue
+   * - evidenceAddress
      - String
      - Y
-     - Hash值
+     - 存证地址
      -
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - String
+     - 创建的凭证合约地址
+     - 业务数据
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT
+     - 500401
+     - Evidence参数非法
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialService credentialService = new CredentialServiceImpl();
+   EvidenceService evidenceService = new EvidenceServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+   createCredentialArgs.setClaim(claim);
+   createCredentialArgs.setCptId(1017);
+   createCredentialArgs.setExpirationDate(1561448312461L);
+   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   // 创建Credential
+   ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
+
+   List<String> signer = new ArrayList<>();
+   signer.add("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   signer.add("did:weid:101:0x48f6f6f663ef77409144014ceb063713b65611f8");
+
+   //创建Evidence Address
+   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(response.getResult().getCredential(), signer, weIdPrivateKey);
+
+   String eviAddr = responseCreateEvidence.getResult();
+   weIdPrivateKey.setPrivateKey("3171324536025850958917764441489874006048340539971987768716844")
+   ResponseData<Boolean> resp = evidenceService.addSignature(response.getResult().getCredential, eviAddr, weIdPrivateKey);
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30014
+      transactionHash: 0x1f9e62fa152eb5fce859dcf81c7c0eddcbcab63c40629d1c745058c227693dae
+      transactionIndex: 0
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用addSignature()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService->>EvidenceService: 根据凭证Hash计算签名值
+   EvidenceService->>区块链节点: 调用智能合约，上传签名值
+   区块链节点-->>EvidenceService: 返回创建结果
+   opt 创建失败
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService-->>调用者: 返回成功
+
+----
+
+5. verify
+~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.verify
+   接口定义:ResponseData<Boolean> verify(Hashable object, String evidenceAddress)
+   接口描述: 根据传入的Object计算存证Hash值和链上值对比，验证其是否遭到篡改。当存证包含多个签名时，将会依次验证每个签名，必须确实由签名者列表中的某个WeID所签发才算验证成功。
+
+**接口入参**\ :
+
+java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - Hashable object
+     - Y
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
 
 java.lang.String
 
