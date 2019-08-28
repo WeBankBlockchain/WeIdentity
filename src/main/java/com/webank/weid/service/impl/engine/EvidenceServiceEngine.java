@@ -40,6 +40,9 @@ public interface EvidenceServiceEngine {
     ResponseData<Boolean> addSignature(Sign.SignatureData sigData, String privateKey,
         String eviAddress);
 
+    ResponseData<Boolean> setHashValue(List<String> hashAttributes, String privateKey,
+        String eviAddress);
+
     ResponseData<EvidenceInfo> getInfo(String evidenceAddress);
 
     /**

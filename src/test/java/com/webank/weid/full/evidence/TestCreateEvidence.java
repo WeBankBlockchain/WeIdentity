@@ -82,22 +82,6 @@ public class TestCreateEvidence extends TestBaseServcie {
     }
 
     /**
-     * case2: credential is null.
-     */
-    @Test
-    public void testCreateEvidence_credentialNull() {
-        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
-            super.copyCreateWeId(createWeIdResultWithSetAttr);
-        Credential credential = null;
-        ResponseData<String> hashResp = credentialService.getCredentialHash(credential);
-        ResponseData<String> response = evidenceService
-            .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), hashResp.getErrorCode().intValue());
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
      * case3: weIdPrivateKey is null.
      */
     @Test
@@ -643,5 +627,24 @@ public class TestCreateEvidence extends TestBaseServcie {
         eviInfo = evidenceService.getEvidence(eviAddr).getResult();
         Assert.assertEquals(eviInfo.getSignatures().size(), 2);
         Assert.assertTrue(evidenceService.verify(credential, eviAddr).getResult());
+    }
+
+    /**
+     * Case: empty evidence.
+     */
+    @Test
+    public void testEmptyEvidenceAll() {
+        WeIdPrivateKey privKey = createWeIdNew.getUserWeIdPrivateKey();
+        String eviAddr = evidenceService.createEvidence(null, privKey).getResult();
+        Assert.assertFalse(StringUtils.isEmpty(eviAddr));
+        EvidenceInfo evidenceInfo = evidenceService.getEvidence(eviAddr).getResult();
+        Assert.assertTrue(StringUtils.isEmpty(evidenceInfo.getCredentialHash()));
+        String hashValue = credential.getHash();
+        ResponseData<Boolean> resp = evidenceService.setHashValue(hashValue, eviAddr, privKey);
+        System.out.println(resp);
+        Assert.assertTrue(resp.getResult());
+        System.out.println(evidenceService.getEvidence(eviAddr).getResult());
+        Assert.assertTrue(evidenceService.verify(credential, eviAddr).getResult());
+        Assert.assertTrue(evidenceService.verify(hashValue, eviAddr).getResult());
     }
 }
