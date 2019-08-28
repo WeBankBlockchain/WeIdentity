@@ -65,7 +65,7 @@ The design goals of WeIdentity DID:
 WeIdentity Credential
 ^^^^^^^^^^^^^^^^^^^^^
 
-There are a lot of credentials describing identity in daily life such as personal identity card, driving license, account book, prescription, graduate certificate, property ownership certificate and credit report. WeIdentity Credential offers a complete set of `W3C Verifiable Credentials <https://w3c.github.io/vc-data-model/>`_ based solutions designated to standardize and digitize such credentials into a verifiable and interchangeable format.
+There are a lot of credentials describing identity in daily life such as personal identity card, driving license, account book, prescription, graduate certificate, property ownership certificate and credit report. WeIdentity Credential offers a complete set of `W3C Verifiable Credentials <https://w3c.github.io/vc-data-model/>`_ based solutions designated to standardize and digitize such credentials into a verifiable and interchangeable format. The solution also supports Selectively Disclosure of Credential attributes and generating evidence of Credentials on blockchain.
 
 WeIdentity encourages certificate organization to issue their own standardized credential templates to enrich the ecosystem on open consortium chain.
 
@@ -119,6 +119,12 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
       </table>
       <br />
     </embed>
+
+Diving in
+----------------
+
+Now, please feel free to dive in via \ `this page <https://weidentity.readthedocs.io/zh_CN/latest/docs/one-stop-experience.html>`_ for a one-stop experience of WeIdentity.
+
 
 Contact Us
 ----------

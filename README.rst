@@ -66,7 +66,7 @@ WeIdentity DID秉承以下设计理念：
 可验证数字凭证 (WeIdentity Credential)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-现实世界中存在着各种各样用于描述实体身份、实体间关系的数据，如身份证、行驶证、存款证明、处方、毕业证、房产证、信用报告等。WeIdentity Credential提供了一整套基于\ `W3C VC规范 <https://w3c.github.io/vc-data-model/>`_\ 的解决方案，旨在对这一类数据进行标准化、电子化，生成可验证、可交换的「凭证」（Credential）。
+现实世界中存在着各种各样用于描述实体身份、实体间关系的数据，如身份证、行驶证、存款证明、处方、毕业证、房产证、信用报告等。WeIdentity Credential提供了一整套基于\ `W3C VC规范 <https://w3c.github.io/vc-data-model/>`_\ 的解决方案，旨在对这一类数据进行标准化、电子化，生成可验证、可交换的「凭证」（Credential），支持对凭证的属性进行选择性披露，及生成链上存证（Evidence）。
 
 WeIdentity支持认证机构自行注册标准化凭证模板，共同丰富公众联盟链的生态。
 
@@ -118,8 +118,21 @@ WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestSer
       <br />
     </embed>
 
+感受WeIdentity
+----------------
+
+接下来，您可以在\ `此页<https://weidentity.readthedocs.io/zh_CN/latest/docs/one-stop-experience.html>`_，一站式了解WeIdentity的参考场景，体验Demo流程，并了解完整的部署方式及参考实现。
+
 
 联系我们
 --------
 
 邮箱：weidentity@webank.com
+
+
+如何贡献
+--------
+
+*
+   详见：\ `如何贡献 <https://github.com/WeBankFinTech/WeIdentity/blob/master/.github/CONTRIBUTING.md>`_
+

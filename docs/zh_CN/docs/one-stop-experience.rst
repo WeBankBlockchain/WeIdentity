@@ -29,7 +29,9 @@ WeIdentity参考场景
    * - User Agent / Credential Repository
      - 用户（实体）在此生成WeIdentity DID。为了便于使用，实体也可将自己的私钥、持有的Credential托管于此。
 
-在实际业务里，WeIdentity可以被广泛运用在「实体身份标识」及「可信数据交换」场景中。首先，User Agent会为不同的实体生成独立唯一互不相同的DID；其次，Issuer在验证了实体身份及DID所有权后，会为实体发行各种各样的电子化Credential。实体可以将这些Credential存在实体私有本地存储，也可以托管给某个凭证存储机构；当实体需要去Verifier办理某种业务的时候，实体可以直接将Credential出示给Verifier，也可以通过在链上进行主动授权的方式由凭证存储机构转发给Verifier。以上流程保证了数据以实体用户为中心，同时实体身份、确权、授权等操作在链上完成，可以追溯，不可篡改。
+在实际业务里，WeIdentity可以被广泛运用在「实体身份标识」及「可信数据交换」场景中。首先，通过User Agent为不同的实体生成独立唯一的DID；其次，Issuer验证实体身份及DID所有权，为实体发行各种各样的电子化Credential。当实体需要办理业务的时候，可以直接将Credential出示给Verifier，也可以通过在链上进行主动授权 + 授权存证上链的方式，由之前授权的凭证存储机构转发给Verifier。
+
+以上流程，保证了数据以实体用户为中心，同时实体身份、确权、授权等操作在链上完成，可追溯，可验证，不可篡改。
 
 Demo体验
 ---------- 
@@ -54,14 +56,14 @@ Demo体验
 快速部署与上手
 ----------------
 
-您可以参照 \ `部署文档 <./weidentity-installation.html>`_\，体验WeIdentity的快速部署与上手流程。
+您可以参照\ `部署文档 <./weidentity-installation.html>`_\，体验WeIdentity的快速部署与上手流程。
 
 深入了解：SDK文档
 ------------------
 
-您可以参照\ `RestService文档 <./weidentity-rest.html>`_\，或 \ `Java SDK文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>`_\，深入了解WeIdentity的设计与技术细节。
+您可以参照\ `RestService文档 <./weidentity-rest.html>`_\，或\ `Java SDK文档 <https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/>`_\，深入了解WeIdentity的设计与技术细节。
 
 参考实现
 ---------------
 
-您可以参考  \ `开发样例使用 <./weidentity-sample.html>`_\，体验WeIdentity的业务流程，并参考进行您的Java应用开发。
+您可以参考\ `开发样例使用 <./weidentity-sample.html>`_\，体验WeIdentity的业务流程，并参考进行您的Java应用开发。
