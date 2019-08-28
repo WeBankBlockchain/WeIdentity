@@ -111,11 +111,24 @@ public abstract class BaseService {
      * @return return blockNumber
      * @throws IOException possible exceptions to sending transactions
      */
-    protected static int getBlockNumber() throws IOException {
+    public static int getBlockNumber() throws IOException {
         if (weServer == null) {
             init();
         }
         return weServer.getBlockNumber();
+    }
+    
+    /**
+     * get FISCO-BCOS version.
+     *
+     * @return return nodeVersion
+     * @throws Exception possible exceptions to sending transactions
+     */
+    public static String getVersion() throws Exception {
+        if (weServer == null) {
+            init();
+        }
+        return weServer.getVersion();
     }
 
     /**
