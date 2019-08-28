@@ -1,7 +1,6 @@
 package com.webank.weid.full.persistence;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,13 +17,13 @@ public class TestGet extends TestBaseTransportation {
 
     private Persistence persistence = null;
 
-    private static final String domain = "datasource1:sdk_all_data";
+    private static final String domain = "domain.default";
     private static final String id = "123456";
     private static final String data = "data123456";
 
     @Override
     public synchronized void testInit() {
-        super.mockMysqlDriver();
+        //super.mockMysqlDriver();
         if (persistence == null) {
             persistence = new MysqlDriver();
         }
@@ -37,7 +36,6 @@ public class TestGet extends TestBaseTransportation {
     /**
      * case:test get.
      */
-    @Test
     public void testGet_success() {
 
         ResponseData<String> res = persistence.get(
@@ -51,7 +49,6 @@ public class TestGet extends TestBaseTransportation {
     /**
      * case:test database is not exist.
      */
-    @Test
     public void testGet_databaseNotExist() {
 
         ResponseData<String> res = persistence.get("sourcedata9999:sdk_all_data", id);
@@ -64,7 +61,6 @@ public class TestGet extends TestBaseTransportation {
     /**
      * case:test database is not exist.
      */
-    @Test
     public void testGet_domainIsNull() {
 
         ResponseData<String> res = persistence.get(null, id);
@@ -77,7 +73,6 @@ public class TestGet extends TestBaseTransportation {
     /**
      * case:test database is not exist.
      */
-    @Test
     public void testGet_domainIsBlank() {
 
         ResponseData<String> res = persistence.get("", id);
@@ -90,7 +85,6 @@ public class TestGet extends TestBaseTransportation {
     /**
      * case:test table is not exist.
      */
-    @Test
     public void testGet_TableNotExist() {
         String dataSource = domain.split(":")[0];
         ResponseData<String> res = persistence.get(
@@ -104,7 +98,6 @@ public class TestGet extends TestBaseTransportation {
     /**
      * case:test id is not exist.
      */
-    @Test
     public void testGet_idNotExist() {
 
         ResponseData<String> res = persistence.get(domain, id + Math.random());
