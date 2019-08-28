@@ -30,11 +30,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DateUtils;
 
 /**
  * createCredential method for testing CredentialService.
@@ -67,6 +73,31 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
         LogUtil.info(logger, "selectiveCredentialPojo", selectiveCredentialPojo);
         LogUtil.info(logger, "verifyCredentialPojo", verify);
         Assert.assertTrue(verify.getResult());
+    }
+
+    /**
+     * case：when issuer and cpt publisher is same,createCredentialPojo success.
+     */
+    @Test
+    public void testCreateMultiSignSdCredentialPojo_success() {
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(selectiveCredentialPojo);
+        CreateWeIdDataResult weIdResult = createWeIdWithSetAttr();
+        WeIdAuthentication callerAuth = TestBaseUtil.buildWeIdAuthentication(weIdResult);
+        CredentialPojo doubleSigned = credentialPojoService.addSignature(credPojoList, callerAuth)
+            .getResult();
+        Assert.assertEquals(doubleSigned.getCptId(),
+            CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT);
+
+        ResponseData<Boolean> verifyResp = credentialPojoService
+            .verify(doubleSigned.getIssuer(), doubleSigned);
+        Assert.assertTrue(verifyResp.getResult());
+        credPojoList = new ArrayList<>();
+        credPojoList.add(doubleSigned);
+        CredentialPojo tripleSigned = credentialPojoService.addSignature(credPojoList, callerAuth)
+            .getResult();
+        verifyResp = credentialPojoService.verify(doubleSigned.getIssuer(), tripleSigned);
+        Assert.assertTrue(verifyResp.getResult());
     }
 
     /**
