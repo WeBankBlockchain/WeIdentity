@@ -19,7 +19,9 @@
 
 package com.webank.weid.full.credentialpojo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -28,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
@@ -38,6 +41,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DateUtils;
 
 /**
  * createCredential method for testing CredentialService.
@@ -77,6 +81,58 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
         ResponseData<Boolean> verify = credentialPojoService.verify(
             createCredentialPojoArgs.getIssuer(), response.getResult());
         Assert.assertTrue(verify.getResult());
+    }
+
+    /**
+     * case：when issuer and cpt publisher is same,createCredentialPojo success.
+     */
+    @Test
+    public void testCreateMultiSignCredentialPojo_success() {
+
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
+            TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
+        createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
+        ResponseData<CredentialPojo> credResp1 =
+            credentialPojoService.createCredential(createCredentialPojoArgs);
+        LogUtil.info(logger, "createCredentialPojo", credResp1);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), credResp1.getErrorCode().intValue());
+        ResponseData<Boolean> verify = credentialPojoService.verify(
+            createCredentialPojoArgs.getIssuer(), credResp1.getResult());
+        Assert.assertTrue(verify.getResult());
+
+        CreateWeIdDataResult weIdResult2 = createWeIdWithSetAttr();
+        createCredentialPojoArgs = TestBaseUtil.buildCreateCredentialPojoArgs(weIdResult2);
+        createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
+        Long expirationDate = DateUtils.convertToNoMillisecondTimeStamp(
+            createCredentialPojoArgs.getExpirationDate() + 24 * 60 * 60);
+        createCredentialPojoArgs.setExpirationDate(expirationDate);
+        ResponseData<CredentialPojo> credResp2 =
+            credentialPojoService.createCredential(createCredentialPojoArgs);
+        LogUtil.info(logger, "createCredentialPojo", credResp2);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), credResp2.getErrorCode().intValue());
+        verify = credentialPojoService.verify(
+            createCredentialPojoArgs.getIssuer(), credResp2.getResult());
+        Assert.assertTrue(verify.getResult());
+
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(credResp1.getResult());
+        credPojoList.add(credResp2.getResult());
+        CreateWeIdDataResult weIdResult3 = createWeIdWithSetAttr();
+        WeIdAuthentication callerAuth = TestBaseUtil.buildWeIdAuthentication(weIdResult3);
+        CredentialPojo doubleSigned = credentialPojoService.addSignature(credPojoList, callerAuth)
+            .getResult();
+        Assert.assertEquals(doubleSigned.getCptId(),
+            CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT);
+        Assert.assertEquals(doubleSigned.getExpirationDate(), expirationDate);
+        ResponseData<Boolean> verifyResp = credentialPojoService
+            .verify(doubleSigned.getIssuer(), doubleSigned);
+        Assert.assertTrue(verifyResp.getResult());
+        credPojoList = new ArrayList<>();
+        credPojoList.add(doubleSigned);
+        CredentialPojo tripleSigned = credentialPojoService.addSignature(credPojoList, callerAuth)
+            .getResult();
+        verifyResp = credentialPojoService.verify(doubleSigned.getIssuer(), tripleSigned);
+        Assert.assertTrue(verifyResp.getResult());
     }
 
     /**
@@ -236,7 +292,7 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
 
         CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
             TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
-        
+
         ResponseData<CredentialPojo> response =
             credentialPojoService.createCredential(createCredentialPojoArgs);
         LogUtil.info(logger, "createCredentialPojo", response);
@@ -391,7 +447,7 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
         LogUtil.info(logger, "createCredentialPojo", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
-                response.getErrorCode().intValue());
+            response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 
@@ -646,7 +702,7 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
             credentialPojoService.createCredential(createCredentialPojoArgs);
         LogUtil.info(logger, "createCredentialPojo", response);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),  response.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
 
         ResponseData<Boolean> verify = credentialPojoService
             .verify(createCredentialPojoArgs.getIssuer(), response.getResult());
