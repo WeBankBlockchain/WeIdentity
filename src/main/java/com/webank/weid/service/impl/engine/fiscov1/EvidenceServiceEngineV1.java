@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.Evidence;
+import com.webank.weid.contract.v1.Evidence.AddHashLogEventResponse;
 import com.webank.weid.contract.v1.Evidence.AddSignatureLogEventResponse;
 import com.webank.weid.contract.v1.EvidenceFactory;
 import com.webank.weid.contract.v1.EvidenceFactory.CreateEvidenceLogEventResponse;
@@ -186,6 +187,54 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
             } else {
                 logger.error(
                     "add signature failed due to transcation event decoding failure."
+                );
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            }
+        } catch (TimeoutException e) {
+            logger.error("add signature failed due to system timeout. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
+        } catch (InterruptedException | ExecutionException e) {
+            logger.error("add signature failed due to transaction error. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    /**
+     * Set hash value an evidence.
+     *
+     * @param hashAttributes hash value
+     * @param privateKey private key
+     * @param evidenceAddress evidence address
+     * @return true if succeeded, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> setHashValue(List<String> hashAttributes, String privateKey,
+        String evidenceAddress) {
+        Evidence evidence =
+            reloadContract(
+                evidenceAddress,
+                privateKey,
+                Evidence.class
+            );
+        Future<TransactionReceipt> future = evidence
+            .setHash(new DynamicArray<Bytes32>(generateBytes32List(hashAttributes)));
+        try {
+            TransactionReceipt receipt = future.get(
+                WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
+                TimeUnit.SECONDS);
+            TransactionInfo info = new TransactionInfo(receipt);
+            List<AddHashLogEventResponse> eventResponseList = Evidence.getAddHashLogEvents(receipt);
+            AddHashLogEventResponse event = eventResponseList.get(0);
+            if (event != null) {
+                if (event.retCode.getValue().intValue()
+                    == ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode()) {
+                    return new ResponseData<>(false,
+                        ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT, info);
+                }
+                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+            } else {
+                logger.error(
+                    "set hash value failed due to transaction event decoding failure."
                 );
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
             }
