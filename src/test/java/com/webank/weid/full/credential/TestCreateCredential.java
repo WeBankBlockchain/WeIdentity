@@ -19,7 +19,9 @@
 
 package com.webank.weid.full.credential;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,14 +29,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DateUtils;
 
 /**
  * createCredential method for testing CredentialService.
@@ -68,6 +75,52 @@ public class TestCreateCredential extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
+    }
+
+    /**
+     * case：cptjsonshema and claim is same,createCredential success.
+     */
+    @Test
+    public void testMultiSignedCredential_noSd() {
+
+        CreateCredentialArgs createCredentialArgs =
+            TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
+        Credential credential =
+            credentialService.createCredential(createCredentialArgs).getResult().getCredential();
+        Assert.assertTrue(credentialService.verify(credential).getResult());
+        List<Credential> credentialList = new ArrayList<>();
+        credentialList.add(credential);
+        Long expirationDate = DateUtils.convertToNoMillisecondTimeStamp(
+            createCredentialArgs.getExpirationDate() + 24 * 60 * 60);
+        createCredentialArgs.setExpirationDate(expirationDate);
+        Credential tempCredential =
+            credentialService.createCredential(createCredentialArgs).getResult().getCredential();
+        credentialList.add(tempCredential);
+        CreateWeIdDataResult weId2Result = createWeIdWithSetAttr();
+        Credential doubleSignedCredential =
+            credentialService.addSignature(credentialList, weId2Result.getUserWeIdPrivateKey())
+                .getResult();
+        Assert.assertNotNull(doubleSignedCredential);
+        Assert.assertEquals(doubleSignedCredential.getCptId(),
+            CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT);
+        Assert.assertEquals(doubleSignedCredential.getExpirationDate(), expirationDate);
+        ResponseData<Boolean> verifyResp = credentialService.verify(doubleSignedCredential);
+        System.out.println(verifyResp);
+        Assert.assertTrue(verifyResp.getResult());
+        CreateWeIdDataResult weId3Result = createWeIdWithSetAttr();
+        credentialList = new ArrayList<>();
+        credentialList.add(doubleSignedCredential);
+        Credential tripleSignedCredential =
+            credentialService.addSignature(credentialList, weId3Result.getUserWeIdPrivateKey())
+                .getResult();
+        System.out.println(DataToolUtils.serialize(tripleSignedCredential));
+        Assert.assertNotNull(tripleSignedCredential);
+        Assert.assertEquals(tripleSignedCredential.getCptId(),
+            CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT);
+        Assert.assertEquals(tripleSignedCredential.getExpirationDate(), expirationDate);
+        verifyResp = credentialService.verify(tripleSignedCredential);
+        System.out.println(verifyResp);
+        Assert.assertTrue(verifyResp.getResult());
     }
 
     /**
@@ -425,7 +478,7 @@ public class TestCreateCredential extends TestBaseServcie {
     }
 
     /**
-     * case： claim is null. 
+     * case： claim is null.
      */
     @Test
     public void testCreateCredential_claimNull() {
