@@ -39,6 +39,7 @@ import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 
 /**
@@ -568,10 +569,20 @@ public final class CredentialPojoUtils {
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return errorCode;
         }
-        if (args.getWeIdAuthentication() == null
-            || args.getWeIdAuthentication().getWeIdPrivateKey() == null
-            || StringUtils.isBlank(args.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
-            || StringUtils.isBlank(args.getWeIdAuthentication().getWeIdPublicKeyId())) {
+        return isWeIdAuthenticationValid(args.getWeIdAuthentication());
+    }
+
+    /**
+     * Check WeIdAuthentication validity.
+     *
+     * @param callerAuth WeIdAuthentication
+     * @return true if yes, false otherwise
+     */
+    public static ErrorCode isWeIdAuthenticationValid(WeIdAuthentication callerAuth) {
+        if (callerAuth == null
+            || callerAuth.getWeIdPrivateKey() == null
+            || StringUtils.isBlank(callerAuth.getWeIdPrivateKey().getPrivateKey())
+            || StringUtils.isBlank(callerAuth.getWeIdPublicKeyId())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
         return ErrorCode.SUCCESS;
