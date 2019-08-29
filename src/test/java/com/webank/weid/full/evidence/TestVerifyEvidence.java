@@ -215,7 +215,8 @@ public class TestVerifyEvidence extends TestBaseServcie {
      */
     @Test
     public void testVerifyEvidenceCase12() {
-        ResponseData<Boolean> responseData = evidenceService.verify(null, evidenceAddress);
+        Credential credential = null;
+        ResponseData<Boolean> responseData = evidenceService.verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase12 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
         Assert.assertEquals(responseData.getErrorCode().intValue(),
