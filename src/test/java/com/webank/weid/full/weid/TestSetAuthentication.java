@@ -194,7 +194,6 @@ public class TestSetAuthentication extends TestBaseServcie {
         List<String> arrayList = Arrays.asList("*", "+", "=");
         for (String c : arrayList) {
             weId = weId + c;
-            System.out.println(c);
             setAuthenticationArgs.setWeId(weId);
 
             ResponseData<Boolean> response = weIdService.setAuthentication(setAuthenticationArgs);

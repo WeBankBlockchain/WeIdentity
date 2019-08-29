@@ -138,7 +138,6 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
         ResponseData<String> weIdDoc =
             weIdService.getWeIdDocumentJson("weid:did:123");
         LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
-        System.out.println(weIdDoc);
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
     }
@@ -153,7 +152,6 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
         ResponseData<String> weIdDoc =
             weIdService.getWeIdDocumentJson(weid);
         LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
-        System.out.println(weIdDoc);
         Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
             weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
@@ -169,7 +167,6 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
         ResponseData<String> weIdDoc =
             weIdService.getWeIdDocumentJson(weid);
         LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
-        System.out.println(weIdDoc);
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
     }
@@ -183,7 +180,6 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
         ResponseData<String> weIdDoc =
             weIdService.getWeIdDocumentJson(null);
         LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
-        System.out.println(weIdDoc);
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
     }
@@ -197,11 +193,9 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
         for (int i = 0; i < chars.length; i++) {
             chars[i] = (char) (i % 127);
         }
-        System.out.println(Arrays.toString(chars));
         ResponseData<String> weIdDoc =
             weIdService.getWeIdDocumentJson(Arrays.toString(chars));
         LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
-        System.out.println(weIdDoc);
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
     }
