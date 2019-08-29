@@ -233,7 +233,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
         registerAuthorityIssuerArgs.getAuthorityIssuer()
             .setCreated(-19600101L);
-        System.out.println(registerAuthorityIssuerArgs);
         ResponseData<Boolean> response = new ResponseData<>(false,
             ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
 
@@ -858,7 +857,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
     public void testRegisterAuthorityIssuer_issuerNameIsDigtal() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(super.createWeId(), privateKey);
 
         ResponseData<Boolean> response = new ResponseData<>(false,
             ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
@@ -978,7 +977,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseServcie {
             == ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS.getCode()) {
             registerAuthorityIssuerArgs.getAuthorityIssuer()
                 .setName("！@#￥%……&*-+<>?x" + (int)(Math.random() * 1000));
-            System.out.println(registerAuthorityIssuerArgs.toString());
             response = authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         }
         LogUtil.info(logger, "registerAuthorityIssuer", response);

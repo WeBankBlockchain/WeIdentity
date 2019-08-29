@@ -19,6 +19,7 @@
 
 package com.webank.weid.protocol.base;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -92,8 +93,15 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
     public static PresentationPolicyE create(String policyFileName) {
         PresentationPolicyE policy = null;
         try {
+            JsonNode jsonNode = null;
             //获取policyJson文件 转换成JsonNode
-            JsonNode jsonNode = JsonLoader.fromResource("/" + policyFileName);
+            File file = new File(policyFileName);
+            if (file.exists()) {
+                jsonNode = JsonLoader.fromFile(file);
+            } else {
+                jsonNode = JsonLoader.fromResource("/" + policyFileName);
+            }
+           
             if (jsonNode == null) {
                 logger.error("can not find the {} file in your classpath.", policyFileName);
                 return policy;

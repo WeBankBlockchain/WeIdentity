@@ -156,7 +156,6 @@ public class TestRegisterIssuerType extends TestBaseServcie {
             authorityIssuerService.registerIssuerType(weIdAuthentication, "");
         LogUtil.info(logger, "registerIssuerType", response);
 
-        System.out.println(response);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertFalse(response.getResult());
     }
@@ -175,7 +174,6 @@ public class TestRegisterIssuerType extends TestBaseServcie {
             authorityIssuerService.registerIssuerType(weIdAuthentication, name);
         LogUtil.info(logger, "registerIssuerType", response);
 
-        System.out.println(response);
         Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_TYPE_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(response.getResult());
