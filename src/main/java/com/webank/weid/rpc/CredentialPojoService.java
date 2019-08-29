@@ -24,6 +24,7 @@ import java.util.List;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -57,6 +58,18 @@ public interface CredentialPojoService {
         CredentialPojo credential,
         ClaimPolicy claimPolicy
     );
+
+    /**
+     * Add an extra signer and signature to a Credential. Multiple signatures will be appended in
+     * an embedded manner.
+     *
+     * @param credentialList original credential list
+     * @param callerAuth the passed-in privateKey and WeID bundle to sign
+     * @return the modified CredentialWrapper
+     */
+    ResponseData<CredentialPojo> addSignature(
+        List<CredentialPojo> credentialList,
+        WeIdAuthentication callerAuth);
 
     /**
      * Get the full hash value of a CredentialPojo. All fields in the CredentialPojo will be
