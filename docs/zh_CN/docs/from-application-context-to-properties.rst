@@ -100,7 +100,7 @@
     amop.request.timeout=5000
 
     # Blockchain node info.
-    nodes=10.107.106.107:20102
+    nodes=127.0.0.1:8888
 
 
 调用方式
