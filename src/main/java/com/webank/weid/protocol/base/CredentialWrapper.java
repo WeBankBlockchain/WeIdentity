@@ -65,4 +65,22 @@ public class CredentialWrapper implements Hashable {
         }
         return CredentialUtils.getCredentialWrapperHash(this);
     }
+
+    /**
+     * Directly extract the signature value from credential.
+     *
+     * @return signature value
+     */
+    public String getSignature() {
+        return credential.getSignature();
+    }
+
+    /**
+     * Get the signature thumbprint for re-signing.
+     *
+     * @return thumbprint
+     */
+    public String getSignatureThumbprint() {
+        return CredentialUtils.getCredentialThumbprint(this.getCredential(), this.getDisclosure());
+    }
 }
