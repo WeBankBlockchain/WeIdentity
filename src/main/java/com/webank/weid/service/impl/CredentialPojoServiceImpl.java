@@ -30,6 +30,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.crypto.ECKeyPair;
+import org.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -400,6 +403,51 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
             return checkResp;
         }
+        if (credential.getCptId() == CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT
+            .intValue()) {
+            return ErrorCode.CPT_ID_ILLEGAL;
+        }
+        if (credential.getCptId() == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT
+            .intValue()) {
+            // This is a multi-signed Credential. We firstly verify itself (i.e. external check)
+            ErrorCode errorCode = verifySingleSignedCredential(credential, publicKey, null);
+            if (errorCode != ErrorCode.SUCCESS) {
+                if (!(credential.getCptId()
+                    == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT.intValue()
+                    && errorCode == ErrorCode.CREDENTIAL_CPT_NOT_EXISTS)) {
+                    return errorCode;
+                }
+            }
+            // Then, we verify its list members one-by-one
+            List<CredentialPojo> innerCredentialList;
+            try {
+                if (credential.getClaim().get("credentialList") instanceof String) {
+                    // For selectively-disclosed credential, stop here. External check is enough.
+                    return ErrorCode.SUCCESS;
+                } else {
+                    innerCredentialList = (ArrayList) credential.getClaim().get("credentialList");
+                }
+            } catch (Exception e) {
+                return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+            }
+            for (CredentialPojo innerCredential : innerCredentialList) {
+                // PublicKey can only be used in the passed-external check, so pass-in null key
+                errorCode = verifyContent(innerCredential, null, null);
+                if (errorCode != ErrorCode.SUCCESS) {
+                    if (!(credential.getCptId()
+                        == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT.intValue()
+                        && errorCode == ErrorCode.CREDENTIAL_CPT_NOT_EXISTS)) {
+                        return errorCode;
+                    }
+                }
+            }
+            return ErrorCode.SUCCESS;
+        }
+        return verifySingleSignedCredential(credential, publicKey, null);
+    }
+
+    private static ErrorCode verifySingleSignedCredential(CredentialPojo credential,
+        String publicKey, ClaimPolicy claimPolicy) {
         ErrorCode errorCode = verifyCptFormat(
             credential.getCptId(),
             credential.getClaim(),
@@ -569,6 +617,78 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
     }
 
+    /**
+     * Add an extra signer and signature to a Credential. Multiple signatures will be appended in an
+     * embedded manner.
+     *
+     * @param credentialList original credential list
+     * @param callerAuth the passed-in privateKey and WeID bundle to sign
+     * @return the modified CredentialWrapper
+     */
+    @Override
+    public ResponseData<CredentialPojo> addSignature(
+        List<CredentialPojo> credentialList,
+        WeIdAuthentication callerAuth) {
+        if (credentialList == null || credentialList.size() == 0
+            || CredentialPojoUtils.isWeIdAuthenticationValid(callerAuth) != ErrorCode.SUCCESS) {
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        CredentialPojo result = new CredentialPojo();
+        result.setCptId(CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT);
+        result.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
+        result.setId(UUID.randomUUID().toString());
+        result.setContext(CredentialUtils.getDefaultCredentialContext());
+        Long expirationDate = 0L;
+        for (CredentialPojo arg : credentialList) {
+            if (arg.getExpirationDate() > expirationDate) {
+                expirationDate = arg.getExpirationDate();
+            }
+        }
+        Long newExpirationDate =
+            DateUtils.convertToNoMillisecondTimeStamp(expirationDate);
+        if (newExpirationDate == null) {
+            logger.error("Create Credential Args illegal.");
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL);
+        } else {
+            result.setExpirationDate(newExpirationDate);
+        }
+        if (!WeIdUtils.validatePrivateKeyWeIdMatches(
+            callerAuth.getWeIdPrivateKey(),
+            callerAuth.getWeId())) {
+            logger.error("Create Credential, private key does not match the current weid.");
+            return new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+        }
+        String privateKey = callerAuth.getWeIdPrivateKey().getPrivateKey();
+        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils
+            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+        result.setIssuer(keyWeId);
+        result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
+
+        // The claim will be the wrapper of the to-be-signed credentialpojos
+        HashMap<String, Object> claim = new HashMap<>();
+        claim.put("credentialList", credentialList);
+        result.setClaim(claim);
+
+        Map<String, Object> saltMap = DataToolUtils.clone(claim);
+        generateSalt(saltMap);
+        String rawData = CredentialPojoUtils
+            .getCredentialThumbprintWithoutSig(result, saltMap, null);
+        String signature = DataToolUtils.sign(rawData, privateKey);
+
+        result.putProofValue(ParamKeyConstant.PROOF_CREATED, result.getIssuanceDate());
+
+        String weIdPublicKeyId = callerAuth.getWeIdPublicKeyId();
+        result.putProofValue(ParamKeyConstant.PROOF_CREATOR, weIdPublicKeyId);
+
+        String proofType = CredentialProofType.ECDSA.getTypeName();
+        result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
+        result.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
+        result.setSalt(saltMap);
+
+        return new ResponseData<>(result, ErrorCode.SUCCESS);
+    }
+
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#createSelectiveCredential(
      *          com.webank.weid.protocol.base.CredentialPojo,
@@ -584,6 +704,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialClone);
             if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
                 return new ResponseData<CredentialPojo>(null, checkResp);
+            }
+            if (credentialClone.getCptId()
+                .equals(CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT)) {
+                return new ResponseData<>(null, ErrorCode.CPT_ID_ILLEGAL);
             }
             if (claimPolicy == null) {
                 logger.error("[createSelectiveCredential] claimPolicy is null.");
@@ -675,6 +799,28 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#verify(
+     *          com.webank.weid.protocol.base.CredentialPojo,
+     *          com.webank.weid.protocol.base.WeIdPublicKey
+     *      )
+     */
+    @Override
+    public ResponseData<Boolean> verify(
+        WeIdPublicKey issuerPublicKey,
+        CredentialPojo credential) {
+
+        String publicKey = issuerPublicKey.getPublicKey();
+        if (StringUtils.isEmpty(publicKey)) {
+            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
+        }
+        ErrorCode errorCode = verifyContent(credential, publicKey);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<Boolean>(false, errorCode);
+        }
+        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.CredentialPojoService#verify(
      *          java.lang.String,
      *          com.webank.weid.protocol.base.PresentationPolicyE,
      *           com.webank.weid.protocol.base.Challenge,
@@ -731,28 +877,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 "[verify] verify credential error.", e);
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
-    }
-
-    /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#verify(
-     *          com.webank.weid.protocol.base.CredentialPojo,
-     *          com.webank.weid.protocol.base.WeIdPublicKey
-     *      )
-     */
-    @Override
-    public ResponseData<Boolean> verify(
-        WeIdPublicKey issuerPublicKey,
-        CredentialPojo credential) {
-
-        String publicKey = issuerPublicKey.getPublicKey();
-        if (StringUtils.isEmpty(publicKey)) {
-            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
-        }
-        ErrorCode errorCode = verifyContent(credential, publicKey);
-        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            return new ResponseData<Boolean>(false, errorCode);
-        }
-        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
 
     private ErrorCode checkInputArgs(

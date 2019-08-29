@@ -79,4 +79,14 @@ public final class CredentialConstant {
             return typeName;
         }
     }
+
+    /**
+     * Default CPT value for embedded credential signature subject (multi-sign support).
+     */
+    public static final Integer CREDENTIAL_EMBEDDED_SIGNATURE_CPT = 106;
+
+    /**
+     * Default CPT value for embedded credentialPojo subject (multi-sign support).
+     */
+    public static final Integer CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT = 107;
 }
