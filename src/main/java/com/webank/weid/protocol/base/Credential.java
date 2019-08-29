@@ -113,4 +113,13 @@ public class Credential implements Hashable {
         }
         return CredentialUtils.getCredentialHash(this);
     }
+
+    /**
+     * Get the signature thumbprint for re-signing.
+     *
+     * @return thumbprint
+     */
+    public String getSignatureThumbprint() {
+        return CredentialUtils.getCredentialThumbprint(this, null);
+    }
 }
