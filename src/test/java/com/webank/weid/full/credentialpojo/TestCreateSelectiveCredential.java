@@ -557,9 +557,9 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
             credentialPojoService.createSelectiveCredential(credentialPojo, claimPolicy);
         LogUtil.info(logger, "TestCreateSelectiveCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
+        Assert.assertNotNull(response.getResult());
     }
 
     /**
