@@ -109,6 +109,7 @@ configurations {
 }
 
 dependencies {
+    compile group: 'org.apache.pdfbox', name: 'pdfbox', version: '2.0.16'
     localDeps 'org.projectlombok:lombok:1.16.14'
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
