@@ -82,6 +82,11 @@ public class SqlExecutor {
     private static final String DEFAULT_TABLE = "sdk_all_data";
     
     /**
+     * 表的默认前缀.
+     */
+    private static final String DEFAULT_TABLE_PREFIX = "weidentity_";
+    
+    /**
      * domain 分隔符.
      */
     private static final String SPLIT_CHAR = ":";
@@ -325,12 +330,13 @@ public class SqlExecutor {
         synchronized (TABLE_CACHE) {
             //说明本地没有此tableDomain
             if (StringUtils.isBlank(tableName)) {
+                tableName = getTableName();
                 //检查数据库中是否存在此表
                 ResponseData<String>  result =  this.executeQuery(checkTableSql);
                 //如果数据库中存在此表
-                if (tableDomain.equals(result.getResult())) {
+                if (tableName.equals(result.getResult())) {
                     //本地缓存记录此表
-                    TABLE_CACHE.put(tableDomain, tableDomain);
+                    TABLE_CACHE.put(tableDomain, tableName);
                     return;
                 }
                 //动态创建此表
@@ -342,16 +348,20 @@ public class SqlExecutor {
                 //再查询一次，确认是否创建成功
                 result =  this.executeQuery(checkTableSql);
                 //如果不相等 则表示创建失败
-                if (!tableDomain.equals(result.getResult())) {
+                if (!tableName.equals(result.getResult())) {
                     throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
                 }
                 //本地缓存记录此表
-                TABLE_CACHE.put(tableDomain, tableDomain);
+                TABLE_CACHE.put(tableDomain, tableName);
             }
         }
     }
     
     private String buildExecuteSql(String sql) {
-        return new StringBuffer(sql).toString().replace(TABLE_CHAR, tableDomain);
+        return new StringBuffer(sql).toString().replace(TABLE_CHAR, getTableName());
+    }
+    
+    private String getTableName() {
+        return new StringBuffer(DEFAULT_TABLE_PREFIX).append(tableDomain).toString();
     }
 }
