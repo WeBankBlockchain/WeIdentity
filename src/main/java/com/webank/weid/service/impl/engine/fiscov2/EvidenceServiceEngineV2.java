@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.Evidence;
+import com.webank.weid.contract.v2.Evidence.AddHashLogEventResponse;
 import com.webank.weid.contract.v2.Evidence.AddSignatureLogEventResponse;
 import com.webank.weid.contract.v2.EvidenceFactory;
 import com.webank.weid.contract.v2.EvidenceFactory.CreateEvidenceLogEventResponse;
@@ -173,6 +173,51 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             } else {
                 logger.error(
                     "add signature failed due to transcation event decoding failure."
+                );
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            }
+        } catch (Exception e) {
+            logger.error("add signature failed due to transaction error. ", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    /**
+     * Set hash value an evidence.
+     *
+     * @param hashAttributes hash value
+     * @param privateKey private key
+     * @param evidenceAddress evidence address
+     * @return true if succeeded, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> setHashValue(List<String> hashAttributes, String privateKey,
+        String evidenceAddress) {
+        Evidence evidence =
+            reloadContract(
+                evidenceAddress,
+                privateKey,
+                Evidence.class
+            );
+        try {
+            List<byte[]> hashAttributesByte = new ArrayList<>();
+            for (String hashValue : hashAttributes) {
+                hashAttributesByte.add(DataToolUtils.stringToByte32Array(hashValue));
+            }
+            TransactionReceipt receipt = evidence.setHash(hashAttributesByte).send();
+            TransactionInfo info = new TransactionInfo(receipt);
+            List<AddHashLogEventResponse> eventResponseList = evidence.getAddHashLogEvents(receipt);
+            AddHashLogEventResponse event = eventResponseList.get(0);
+            if (event != null) {
+                if (event.retCode.intValue()
+                    == ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode()) {
+                    return new ResponseData<>(false,
+                        ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT, info);
+                }
+                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+            } else {
+                logger.error(
+                    "set hash value failed due to transcation event decoding failure."
                 );
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
             }
