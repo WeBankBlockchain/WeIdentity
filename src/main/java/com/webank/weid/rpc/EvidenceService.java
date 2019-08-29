@@ -36,6 +36,8 @@ public interface EvidenceService {
     /**
      * Create a new evidence to blockchain, and return the evidence address on-chain. Supports
      * following types of input: Credential, CredentialWrapper, CredentialPojo, plain hash value.
+     * This also supports to create an empty evidence if the passed-in object is null. Afterwards,
+     * setHashValue() must be called to set a valid hash value.
      *
      * @param object the given Java object
      * @param weIdPrivateKey the signer WeID's private key
@@ -48,7 +50,8 @@ public interface EvidenceService {
      * on-chain. Supports following types input: Credential, CredentialWrapper, CredentialPojo, and
      * plain hash value. This allows multiple WeIDs to be declared as signers. Here, one signer must
      * provide his/her private key to create evidence. The rest of signers can append their
-     * signature via AddSignature() in future.
+     * signature via AddSignature() in future. This also supports to create an empty evidence if the
+     * passed-in object is null.
      *
      * @param object the given Java object
      * @param signers declared signers WeID
@@ -72,6 +75,19 @@ public interface EvidenceService {
         WeIdPrivateKey weIdPrivateKey);
 
     /**
+     * Set a hash value to an empty evidence, and append a valid signature. Note that if the
+     * evidence already has a valid hash value, this will always fail. Empty evidence can be created
+     * via invoking createEvidence() with a null passed-in object.
+     *
+     * @param hashValue the hash value
+     * @param evidenceAddress the evidence address on chain
+     * @param weIdPrivateKey the signer WeID's private key
+     * @return true if succeed, false otherwise
+     */
+    ResponseData<Boolean> setHashValue(String hashValue, String evidenceAddress,
+        WeIdPrivateKey weIdPrivateKey);
+
+    /**
      * Get the evidence from blockchain.
      *
      * @param evidenceAddress the evidence address on chain
@@ -80,13 +96,23 @@ public interface EvidenceService {
     ResponseData<EvidenceInfo> getEvidence(String evidenceAddress);
 
     /**
-     * Verify a Hash value based against the provided Evidence info. Supports following types of
-     * input: Credential, CredentialWrapper, CredentialPojo, and plain hash value. This will
-     * traverse all the listed signatures against its singers.
+     * Verify an object based against the provided Evidence info. Supports following types of input:
+     * Credential, CredentialWrapper, CredentialPojo, and plain hash value. This will traverse all
+     * the listed signatures against its singers.
      *
      * @param object the given Java object
      * @param evidenceAddress the evidence address to be verified
      * @return true if succeeds, false otherwise
      */
     ResponseData<Boolean> verify(Hashable object, String evidenceAddress);
+
+    /**
+     * Verify a Hash value based against the provided Evidence info. This will traverse all the
+     * listed signatures against its singers.
+     *
+     * @param hashValue the given hashValue
+     * @param evidenceAddress the evidence address to be verified
+     * @return true if succeeds, false otherwise
+     */
+    ResponseData<Boolean> verify(String hashValue, String evidenceAddress);
 }
