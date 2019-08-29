@@ -124,7 +124,6 @@ public class TestRegisterCptArgsWithId extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs, issuerCptId);
         LogUtil.info(logger, "testRegisterCptArgs with cptid", response);
 
-        System.out.println(response);
         Assert.assertEquals(ErrorCode.CPT_NO_PERMISSION.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
@@ -147,7 +146,6 @@ public class TestRegisterCptArgsWithId extends TestBaseServcie {
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs, issuerCptId);
         LogUtil.info(logger, "testRegisterCptArgs with cptid", response);
 
-        System.out.println(response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
     }
@@ -268,7 +266,6 @@ public class TestRegisterCptArgsWithId extends TestBaseServcie {
         cptJsonSchema.put("name", "rocky xia is good man");
         cptJsonSchema.put("年龄", 18);
         cptJsonSchema.put("account", 192.5);
-        System.out.println(cptMapArgs);
 
         Integer issuerCptId = 20000;
         while (cptService.queryCpt(issuerCptId).getResult() != null) {
