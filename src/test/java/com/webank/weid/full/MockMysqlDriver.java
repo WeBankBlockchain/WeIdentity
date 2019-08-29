@@ -110,7 +110,8 @@ public interface MockMysqlDriver {
                         return new ResponseData<String>(
                             (String)mockDbMap.get(data[0]), ErrorCode.SUCCESS);
                     }
-                    return new ResponseData<String>(tableDomain, ErrorCode.SUCCESS);
+                    String tableName = (String)Deencapsulation.invoke(executor, "getTableName");
+                    return new ResponseData<String>(tableName, ErrorCode.SUCCESS);
                 }
                 return new ResponseData<String>(null, ErrorCode.SQL_EXECUTE_FAILED);
             }

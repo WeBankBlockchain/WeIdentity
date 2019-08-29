@@ -71,17 +71,17 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
 
-    private static WeIdService weIdService = new WeIdServiceImpl();
+    private static  WeIdService weIdService = new WeIdServiceImpl();
 
     private static CptService cptService = new CptServiceImpl();
 
-    private static String NOT_DISCLOSED =
+    private static final String NOT_DISCLOSED =
         CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().toString();
 
-    private static String DISCLOSED =
+    private static final String DISCLOSED =
         CredentialFieldDisclosureValue.DISCLOSED.getStatus().toString();
 
-    private static String EXISTED =
+    private static final String EXISTED =
         CredentialFieldDisclosureValue.EXISTED.getStatus().toString();
 
     /**
@@ -126,7 +126,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return true;
     }
-
+    
     /**
      * 校验claim、salt和disclosureMap的格式是否一致.
      */
@@ -139,23 +139,20 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
 
         //检查每个map里的key个数是否相同
-        Set<String> claimKeys = claim.keySet();
-        Set<String> saltKeys = salt.keySet();
-        Set<String> disclosureKeys = disclosureMap.keySet();
-
-        if (claimKeys.size() != saltKeys.size() || saltKeys.size() != disclosureKeys.size()) {
+        if (!claim.keySet().equals(salt.keySet())) {
             return false;
         }
-
+        
         //检查key值是否一致
         for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
             String k = entry.getKey();
             Object v = entry.getValue();
-            Object saltV = salt.get(k);
-            Object claimV = claim.get(k);
-            if (!salt.containsKey(k) || !disclosureMap.containsKey(k)) {
+            //如果disclosureMap中的key在claim中没有则返回false
+            if (!claim.containsKey(k)) {
                 return false;
             }
+            Object saltV = salt.get(k);
+            Object claimV = claim.get(k);
             if (v instanceof Map) {
                 //递归检查
                 if (!validCredentialMapArgs((HashMap) claimV, (HashMap) saltV, (HashMap) v)) {
@@ -234,7 +231,84 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return true;
     }
-
+    
+    //向policy中补充缺失的key
+    private static void addKeyToPolicy(
+        Map<String, Object> disclosureMap,
+        Map<String, Object> claimMap
+    ) {
+        for (Map.Entry<String, Object> entry : claimMap.entrySet()) {
+            String claimK = entry.getKey();
+            Object claimV = entry.getValue();
+            if (claimV instanceof Map) {
+                HashMap claimHashMap = (HashMap)claimV;
+                if (!disclosureMap.containsKey(claimK)) {
+                    disclosureMap.put(claimK, new HashMap());
+                }
+                HashMap disclosureHashMap = (HashMap)disclosureMap.get(claimK);
+                addKeyToPolicy(disclosureHashMap, claimHashMap);
+            } else if (claimV instanceof List) {
+                ArrayList claimList = (ArrayList)claimV;
+                //判断claimList中是否包含Map结构，还是单一结构
+                boolean isSampleList = isSampleListForClaim(claimList);
+                if (isSampleList) {
+                    if (!disclosureMap.containsKey(claimK)) {
+                        disclosureMap.put(claimK, Integer.parseInt(NOT_DISCLOSED));
+                    }
+                } else {
+                    if (!disclosureMap.containsKey(claimK)) {
+                        disclosureMap.put(claimK, new ArrayList());
+                    }
+                    ArrayList disclosureList = (ArrayList)disclosureMap.get(claimK);
+                    addKeyToPolicyList(disclosureList, claimList);
+                }
+            } else {
+                if (!disclosureMap.containsKey(claimK)) {
+                    disclosureMap.put(claimK, Integer.parseInt(NOT_DISCLOSED));
+                }
+            }
+        }
+    }
+    
+    private static void addKeyToPolicyList(
+        ArrayList disclosureList,
+        ArrayList claimList
+    ) {
+        for (int i = 0; i < claimList.size(); i++) {
+            Object claimObj = claimList.get(i);
+            if (claimObj instanceof Map) {
+                Object disclosureObj = disclosureList.size() == 0 ? null : disclosureList.get(0);
+                if (disclosureObj == null) {
+                    disclosureList.add(new HashMap());
+                }
+                HashMap disclosureHashMap = (HashMap)disclosureList.get(0);
+                addKeyToPolicy(disclosureHashMap, (HashMap)claimObj);
+                break;
+            } else if (claimObj instanceof List) {
+                Object disclosureObj = disclosureList.get(i);
+                if (disclosureObj == null) {
+                    disclosureList.add(new ArrayList());
+                }
+                ArrayList disclosureArrayList = (ArrayList)disclosureList.get(i);
+                addKeyToPolicyList(disclosureArrayList, (ArrayList)claimObj);
+            }
+        }
+    }
+    
+    private static boolean isSampleListForClaim(ArrayList claimList) {
+        if (CollectionUtils.isEmpty(claimList)) {
+            return true;
+        }
+        Object claimObj = claimList.get(0);
+        if (claimObj instanceof Map) {
+            return false;
+        }
+        if (claimObj instanceof List) {
+            return isSampleListForClaim((ArrayList)claimObj);
+        }
+        return true;
+    }
+    
     private static void addSelectSalt(
         Map<String, Object> disclosureMap,
         Map<String, Object> saltMap,
@@ -269,7 +343,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Object saltV,
         Object claimV
     ) {
-        if (((Integer) value).equals(Integer.parseInt(NOT_DISCLOSED))) {
+        if (((Integer) value).equals(Integer.parseInt(NOT_DISCLOSED)) 
+            && claim.containsKey(disclosureKey)) {
             saltMap.put(disclosureKey, NOT_DISCLOSED);
             String hash =
                 CredentialPojoUtils.getFieldSaltHash(
@@ -524,7 +599,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             Map<String, Object> disclosureMap = DataToolUtils
                 .deserialize(disclosure, HashMap.class);
-
+            
             if (!validCredentialMapArgs(claim, saltMap, disclosureMap)) {
                 logger.error(
                     "[createSelectiveCredential] create failed. message is {}",
@@ -533,6 +608,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 return new ResponseData<CredentialPojo>(null,
                     ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM);
             }
+            // 补 policy
+            addKeyToPolicy(disclosureMap, claim);
+            // 加盐处理
             addSelectSalt(disclosureMap, saltMap, claim);
             credentialClone.setSalt(saltMap);
 
@@ -776,20 +854,18 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 }
             } else {
                 String disclosure = String.valueOf(disclosureV);
-                String salt = String.valueOf(saltV);
-                if (!disclosure.equals(NOT_DISCLOSED) && !disclosure.equals(DISCLOSED)
-                    && !disclosure.equals(EXISTED)) {
+               
+                if (saltV == null 
+                    || (!disclosure.equals(NOT_DISCLOSED) && !disclosure.equals(DISCLOSED)
+                        && !disclosure.equals(EXISTED))) {
                     logger.error(
                         "[verifyDisclosureAndSalt] policy disclosureValue {} illegal.",
                         disclosureMap
                     );
                     return ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL;
                 }
-
-                if (StringUtils.isEmpty(salt)) {
-                    return ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL;
-                }
-
+                
+                String salt = String.valueOf(saltV);
                 if ((disclosure.equals(NOT_DISCLOSED) && salt.length() > 1)
                     || (disclosure.equals(NOT_DISCLOSED) && !salt.equals(NOT_DISCLOSED))) {
                     return ErrorCode.CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE;

@@ -93,7 +93,6 @@ public class TestGet extends TestBaseTransportation {
     @Test
     public void testGet_TableNotExist() {
         String dataSource = domain.split(":")[0];
-        System.out.println(dataSource);
         ResponseData<String> res = persistence.get(
             dataSource + ":table_not_exist", "123456");
         LogUtil.info(logger, "persistence", res);

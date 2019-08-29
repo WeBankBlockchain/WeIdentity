@@ -61,7 +61,6 @@ public class TestCreateCredential extends TestBaseServcie {
 
         CreateCredentialArgs createCredentialArgs =
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr, cptBaseInfo);
-        System.out.println(createCredentialArgs);
 
         ResponseData<CredentialWrapper> response =
             credentialService.createCredential(createCredentialArgs);
