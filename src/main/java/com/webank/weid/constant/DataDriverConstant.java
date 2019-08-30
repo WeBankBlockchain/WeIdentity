@@ -168,7 +168,13 @@ public final class DataDriverConstant {
     public static final String POOL_MIN_EITM_DEFAULT_VALUE = "1800000";
 
     /**
+     * 系统默认的domain.
+     */
+    public static final String DOMAIN_DEFAULT = "domain.default";
+    public static final String DOMAIN_DEFAULT_TIMEOUT = "domain.default.timeout";
+    
+    /**
      * 系统domain之私钥存储domainKey.
      */
-    public static final String DEFAULT_DOMAIN = "default.domain";
+    public static final String DOMAIN_ENCRYPTKEY = "domain.encryptKey";
 }
