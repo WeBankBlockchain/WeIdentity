@@ -1,7 +1,6 @@
 package com.webank.weid.full.persistence;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,7 @@ public class TestUpdate extends TestBaseTransportation {
 
     private static final Logger logger = LoggerFactory.getLogger(TestUpdate.class);
 
-    private static String domain = "datasource1:sdk_all_data";
+    private static String domain = "domain.default";
 
     private static String id = "123456";
 
@@ -26,7 +25,7 @@ public class TestUpdate extends TestBaseTransportation {
 
     @Override
     public synchronized void testInit() {
-        super.mockMysqlDriver();
+        //super.mockMysqlDriver();
         persistence = new MysqlDriver();
 
         persistence.delete(domain, id);
@@ -38,7 +37,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update.
      */
-    @Test
     public void testUpdate_success() {
 
         ResponseData<Integer> res = persistence.update(
@@ -54,7 +52,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update domain is null.
      */
-    @Test
     public void testUpdate_domainNull() {
         String afterData = data + Math.random();
         ResponseData<Integer> res = persistence.update(null, id, afterData);
@@ -69,7 +66,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:domain is blank.
      */
-    @Test
     public void testUpdate_domainBlank() {
         String afterData = data + Math.random();
         ResponseData<Integer> res = persistence.update("", id, afterData);
@@ -84,7 +80,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update.
      */
-    @Test
     public void testUpdate_databaseNotExist() {
 
         ResponseData<Integer> res = persistence.update(
@@ -98,7 +93,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update database is null.
      */
-    @Test
     public void testUpdate_databaseNull() {
 
         ResponseData<Integer> res = persistence.update(
@@ -112,7 +106,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update database is blank.
      */
-    @Test
     public void testUpdate_databaseBlank() {
 
         ResponseData<Integer> res = persistence.update(":sdk_all_data", id, data);
@@ -125,7 +118,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update table is not exist.
      */
-    @Test
     public void testUpdate_tableNotExist() {
 
         ResponseData<Integer> res = persistence.update(
@@ -138,7 +130,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update table is null.
      */
-    @Test
     public void testUpdate_tableNull() {
 
         ResponseData<Integer> res = persistence.update("datasource1:null", id, data);
@@ -152,7 +143,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update table is blank.
      */
-    @Test
     public void testUpdate_tableBlank() {
 
         ResponseData<Integer> res = persistence.update("datasource1:", id, data);
@@ -165,7 +155,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update id is not exist.
      */
-    @Test
     public void testUpdate_idNotExist() {
 
         ResponseData<Integer> res = persistence.update(
@@ -179,7 +168,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update table is not exist.
      */
-    @Test
     public void testUpdate_idNull() {
 
         ResponseData<Integer> res = persistence.update(domain, null, data);
@@ -192,7 +180,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update id is blank.
      */
-    @Test
     public void testUpdate_idBlank() {
 
         ResponseData<Integer> res = persistence.update(
@@ -206,7 +193,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update data is null.
      */
-    @Test
     public void testUpdate_dataNull() {
 
         ResponseData<Integer> res = persistence.update(
@@ -220,7 +206,6 @@ public class TestUpdate extends TestBaseTransportation {
     /**
      * case:test update data is blank.
      */
-    @Test
     public void testUpdate_dataBlank() {
 
         ResponseData<Integer> res = persistence.update(
