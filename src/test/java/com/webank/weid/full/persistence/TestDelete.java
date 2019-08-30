@@ -1,7 +1,6 @@
 package com.webank.weid.full.persistence;
 
 import org.junit.Assert;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +18,7 @@ public class TestDelete extends TestBaseTransportation {
 
     private Persistence persistence = null;
 
-    private static final String domain = "datasource1:sdk_all_data";
+    private static final String domain = "domain.default";
 
     private  static final String id = "123456";
 
@@ -27,7 +26,7 @@ public class TestDelete extends TestBaseTransportation {
 
     @Override
     public synchronized void testInit() {
-        super.mockMysqlDriver();
+        //super.mockMysqlDriver();
         if (persistence == null) {
             persistence = new MysqlDriver();
         }
@@ -52,12 +51,11 @@ public class TestDelete extends TestBaseTransportation {
     /**
      * case:test delete database not exist.
      */
-    @Test
     public void testDelete_databaseNotExist() {
-        String table = domain.split(":")[1];
+        String table = domain.split("\\.")[1];
 
         ResponseData<Integer> res = persistence.delete(
-            "9999999:" + table, "123456");
+            "9999999." + table, "123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
@@ -67,11 +65,10 @@ public class TestDelete extends TestBaseTransportation {
     /**
      * case:test database is null.
      */
-    @Test
     public void testDelete_databaseNull() {
-        String table = domain.split(":")[1];
+        String table = domain.split("\\.")[1];
         ResponseData<Integer> res = persistence.delete(
-            "null:" + table, id);
+            "null." + table, id);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
@@ -81,11 +78,10 @@ public class TestDelete extends TestBaseTransportation {
     /**
      * case:test database is blank.
      */
-    @Test
     public void testDelete_databaseBlank() {
 
-        String table = domain.split(":")[1];
-        ResponseData<Integer> res = persistence.delete(":" + table, id);
+        String table = domain.split("\\.")[1];
+        ResponseData<Integer> res = persistence.delete("." + table, id);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
@@ -95,11 +91,10 @@ public class TestDelete extends TestBaseTransportation {
     /**
      * case:test table is not exist.
      */
-    @Test
     public void testDelete_tableNotExist() {
-        String dataSource = domain.split(":")[0];
+        String dataSource = domain.split("\\.")[0];
         ResponseData<Integer> res = persistence.delete(
-            dataSource + ":table_not_exist", id);
+            dataSource + ".table_not_exist", id);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res.getErrorCode().intValue());
@@ -108,10 +103,9 @@ public class TestDelete extends TestBaseTransportation {
     /**
      * case:test table is null.
      */
-    @Test
     public void testDelete_tableNull() {
-        String dataSource = domain.split(":")[0];
-        ResponseData<Integer> res = persistence.delete(dataSource + ":", id);
+        String dataSource = domain.split("\\.")[0];
+        ResponseData<Integer> res = persistence.delete(dataSource + ".", id);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
@@ -122,7 +116,6 @@ public class TestDelete extends TestBaseTransportation {
     /**
      * case:id is not exist.
      */
-    @Test
     public void testDelete_idNotExist() {
 
         ResponseData<Integer> res = persistence.delete(domain, "id_is_not_exist");
@@ -135,7 +128,6 @@ public class TestDelete extends TestBaseTransportation {
     /**
      * case:test id is null.
      */
-    @Test
     public void testDelete_idNull() {
 
         ResponseData<Integer> res = persistence.delete(domain, null);
@@ -148,7 +140,6 @@ public class TestDelete extends TestBaseTransportation {
     /**
      * case:test id is blank.
      */
-    @Test
     public void testDelete_idBlank() {
 
         ResponseData<Integer> res = persistence.delete(domain, "");
