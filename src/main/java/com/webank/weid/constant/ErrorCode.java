@@ -364,13 +364,6 @@ public enum ErrorCode {
      */
     ENCRYPT_KEY_INVALID(100704, "the key is invalid."),
 
-
-    /**
-     * the key is expire.
-     */
-    ENCRYPT_KEY_EXPIRE(100705, "the key is expire."),
-
-
     /**
      * transportation base error.
      */
@@ -641,7 +634,17 @@ public enum ErrorCode {
         160013,
         "can not get the connection from pool, please check the error log."
     ),
-
+    
+    /**
+     * the orgid is null.
+     */
+    ORG_ID_IS_NULL(160014, "the orgid is null."),
+    
+    /**
+     * the data is expire.
+     */
+    SQL_DATA_EXPIRE(160015, "the data is expire."),
+    
     /**
      * other uncatched exceptions or error.
      */

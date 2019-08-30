@@ -47,7 +47,6 @@ import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.EncodeData;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.PropertyUtils;
 
 /**
  * 密文编解码处理器.
@@ -59,12 +58,16 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
     
     private static final Logger logger = LoggerFactory.getLogger(CipherEncodeProcessor.class);
     
-    private Persistence dataDriver = new MysqlDriver();
+    private Persistence dataDriver;
     
     protected AmopService amopService = new AmopServiceImpl();
     
-    private static final String ENCRYPTIONDOMAIN = 
-        PropertyUtils.getProperty(DataDriverConstant.DEFAULT_DOMAIN);
+    private Persistence getDataDriver() {
+        if (dataDriver == null) {
+            dataDriver = new MysqlDriver();
+        }
+        return dataDriver;
+    }
     
     /**
      * 密文编码处理：先进行压缩，然后进行AES加密.
@@ -77,9 +80,6 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             Map<String, Object> keyMap = new HashMap<String, Object>();
             keyMap.put(ParamKeyConstant.KEY_DATA, key);
             keyMap.put(ParamKeyConstant.KEY_VERIFIERS, encodeData.getVerifiers());
-            //当前时间 + 过期时间
-            long expireTime = System.currentTimeMillis() + encodeData.getExpireTime() * 1000;
-            keyMap.put(ParamKeyConstant.KEY_EXPIRE, expireTime);
             String saveData = DataToolUtils.serialize(keyMap);
             
             //将数据进行AES加密处理
@@ -89,8 +89,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
                     .encrypt(encodeData.getData(), key);
             
             //保存秘钥
-            ResponseData<Integer> response = 
-                this.dataDriver.save(ENCRYPTIONDOMAIN, encodeData.getId(), saveData);
+            ResponseData<Integer> response = this.getDataDriver().save(
+                DataDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId(), saveData);
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
                     ErrorCode.getTypeByErrorCode(response.getErrorCode().intValue())
@@ -143,7 +143,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         if (fiscoConfig.getCurrentOrgId().equals(encodeData.getOrgId())) {
             //保存秘钥
             ResponseData<String> response = 
-                this.dataDriver.get(ENCRYPTIONDOMAIN, encodeData.getId());
+                this.getDataDriver().get(DataDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId());
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
                     ErrorCode.getTypeByErrorCode(response.getErrorCode().intValue())
@@ -181,10 +181,6 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
                 || !verifiers.contains(weId)) {
                 logger.error("[getEncryptKey] no access to get the data, this weid is {}.", weId);
                 throw new EncodeSuiteException(ErrorCode.ENCRYPT_KEY_NO_PERMISSION);
-            }
-            if (isExpire(keyMap)) {
-                logger.error("[getEncryptKey] the encrypt key is expire, this weid is {}.", weId);
-                throw new EncodeSuiteException(ErrorCode.ENCRYPT_KEY_EXPIRE);
             }
             return (String)keyMap.get(ParamKeyConstant.KEY_DATA);
         } catch (DataTypeCastException e) {
@@ -240,11 +236,5 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             throw new EncodeSuiteException(errorCode);
         }
         return keyResponse.getEncryptKey();
-    }
-
-    private boolean isExpire(Map<String, Object> keyMap) {
-        //获取过期时间
-        long expire = (long)keyMap.get(ParamKeyConstant.KEY_EXPIRE);
-        return System.currentTimeMillis() > expire;
     }
 }
