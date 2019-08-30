@@ -22,6 +22,7 @@ package com.webank.weid.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,5 +80,14 @@ public final class PropertyUtils {
      */
     public static String getProperty(String key, String defaultValue) {
         return prop.getProperty(key, defaultValue);
+    }
+    
+    /**
+     * get the all key from Properties.
+     * 
+     * @return value of the key Set
+     */
+    public static Set<Object> getAllPropertyKey() {
+        return prop.keySet();
     }
 }

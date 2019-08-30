@@ -104,8 +104,7 @@ public class QrCodeJsonTransportationImpl
                     qrCodeData.getId(),
                     qrCodeData.getOrgId(),
                     object.toJson(),
-                    super.getVerifiers(),
-                    property.getKeyExpireTime()
+                    super.getVerifiers()
                 );
             logger.info("[serialize] encode by {}.", property.getEncodeType().name());
             // 进行编码处理
