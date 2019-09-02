@@ -604,7 +604,7 @@ public class TestCreateEvidence extends TestBaseServcie {
         Assert.assertEquals(eviInfo.getSigners().size(), 3);
         List<String> signersAddrList = new ArrayList<>();
         for (String weId : signersList) {
-            signersAddrList.add(WeIdUtils.convertWeIdToAddress(weId));
+            signersAddrList.add(weId);
         }
         List<String> onChainSigners = eviInfo.getSigners();
         for (String weId : signersAddrList) {
