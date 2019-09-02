@@ -168,7 +168,8 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         List<String> onChainSignerAddrs = eviInfo.getSigners();
         String privateKey = weIdPrivateKey.getPrivateKey();
         String signerAddr =
-            WeIdConstant.HEX_PREFIX + Keys.getAddress(ECKeyPair.create(new BigInteger(privateKey)));
+            WeIdUtils.convertAddressToWeId(
+                Keys.getAddress(ECKeyPair.create(new BigInteger(privateKey))));
         if (!onChainSignerAddrs.contains(signerAddr)) {
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }
@@ -257,7 +258,11 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             return new ResponseData<>(WeIdConstant.HEX_PREFIX, ErrorCode.SUCCESS);
         }
         try {
-            return new ResponseData<>(object.getHash(), ErrorCode.SUCCESS);
+            String hashValue = object.getHash();
+            if (StringUtils.isEmpty(hashValue)) {
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+            }
+            return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("Input Object type unsupported: " + object.getClass().getName());
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
@@ -404,8 +409,9 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                 // iterate through each signer
                 boolean foundMatchedSigner = false;
                 for (int j = 0; j < evidenceInfo.getSigners().size(); j++) {
-                    String signer = evidenceInfo.getSigners().get(j);
-                    if (WeIdUtils.isEmptyAddress(new Address(signer))) {
+                    String signerWeId = evidenceInfo.getSigners().get(j);
+                    if (WeIdUtils
+                        .isEmptyAddress(new Address(WeIdUtils.convertWeIdToAddress(signerWeId)))) {
                         break;
                     }
                     SignatureData signatureData =
@@ -414,7 +420,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                         );
                     ResponseData<Boolean> innerResponseData = verifySignatureToSigner(
                         hashOffChain,
-                        WeIdUtils.convertAddressToWeId(signer),
+                        WeIdUtils.convertAddressToWeId(signerWeId),
                         signatureData
                     );
                     if (innerResponseData.getResult()) {
