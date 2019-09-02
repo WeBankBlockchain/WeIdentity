@@ -285,7 +285,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
 
             List<String> signerStringList = new ArrayList<>();
             for (Address addr : issuerList) {
-                signerStringList.add(addr.toString());
+                signerStringList.add(WeIdUtils.convertAddressToWeId(addr.toString()));
             }
             evidenceInfoData.setSigners(signerStringList);
 
