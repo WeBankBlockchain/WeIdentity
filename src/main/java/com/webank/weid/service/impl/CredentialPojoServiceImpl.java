@@ -412,11 +412,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             // This is a multi-signed Credential. We firstly verify itself (i.e. external check)
             ErrorCode errorCode = verifySingleSignedCredential(credential, publicKey, null);
             if (errorCode != ErrorCode.SUCCESS) {
-                if (!(credential.getCptId()
-                    == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT.intValue()
-                    && errorCode == ErrorCode.CREDENTIAL_CPT_NOT_EXISTS)) {
-                    return errorCode;
-                }
+                return errorCode;
             }
             // Then, we verify its list members one-by-one
             List<CredentialPojo> innerCredentialList;
@@ -434,11 +430,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 // PublicKey can only be used in the passed-external check, so pass-in null key
                 errorCode = verifyContent(innerCredential, null, null);
                 if (errorCode != ErrorCode.SUCCESS) {
-                    if (!(credential.getCptId()
-                        == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT.intValue()
-                        && errorCode == ErrorCode.CREDENTIAL_CPT_NOT_EXISTS)) {
-                        return errorCode;
-                    }
+                    return errorCode;
                 }
             }
             return ErrorCode.SUCCESS;
@@ -497,7 +489,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     private static ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim,
         boolean isSelectivelyDisclosed) {
-
+        if (cptId == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT.intValue()) {
+            if (!claim.containsKey("credentialList")) {
+                return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+            } else {
+                return ErrorCode.SUCCESS;
+            }
+        }
         try {
             String claimStr = DataToolUtils.serialize(claim);
             Cpt cpt = cptService.queryCpt(cptId).getResult();
