@@ -312,12 +312,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             ResponseData<Boolean> innerResp = verifySingleSignedCredential(credentialWrapper,
                 publicKey);
             if (!innerResp.getResult()) {
-                if (!(credentialWrapper.getCredential().getCptId()
-                    == CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT.intValue()
-                    && innerResp.getErrorCode() == ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCode())) {
-                    return new ResponseData<>(false, innerResp.getErrorCode(),
-                        innerResp.getErrorMessage());
-                }
+                return new ResponseData<>(false, innerResp.getErrorCode(),
+                    innerResp.getErrorMessage());
             }
             // Then, we verify its list members one-by-one
             credentialWrapper.setDisclosure(disclosure);
@@ -343,13 +339,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 }
                 innerResp = verifyCredentialContent(credentialWrapper, publicKey);
                 if (!innerResp.getResult()) {
-                    if (!(credentialWrapper.getCredential().getCptId()
-                        == CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT.intValue()
-                        && innerResp.getErrorCode() == ErrorCode.CREDENTIAL_CPT_NOT_EXISTS
-                        .getCode())) {
-                        return new ResponseData<>(false, innerResp.getErrorCode(),
-                            innerResp.getErrorMessage());
-                    }
+                    return new ResponseData<>(false, innerResp.getErrorCode(),
+                        innerResp.getErrorMessage());
                 }
             }
             return new ResponseData<>(true, ErrorCode.SUCCESS);
@@ -406,7 +397,13 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
     }
 
     private ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim) {
-
+        if (cptId == CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT.intValue()) {
+            if (!claim.containsKey("credentialList")) {
+                return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+            } else {
+                return ErrorCode.SUCCESS;
+            }
+        }
         try {
             //String claimStr = JsonUtil.objToJsonStr(claim);
             String claimStr = DataToolUtils.serialize(claim);

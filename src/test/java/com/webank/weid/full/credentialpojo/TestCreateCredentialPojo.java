@@ -136,6 +136,58 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
     }
 
     /**
+     * case：when issuer and cpt publisher is same,createCredentialPojo success.
+     */
+    @Test
+    public void testCreateMultiSignCredentialPojo_failure() {
+
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
+            TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
+        createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
+        ResponseData<CredentialPojo> credResp1 =
+            credentialPojoService.createCredential(createCredentialPojoArgs);
+        LogUtil.info(logger, "createCredentialPojo", credResp1);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), credResp1.getErrorCode().intValue());
+        ResponseData<Boolean> verify = credentialPojoService.verify(
+            createCredentialPojoArgs.getIssuer(), credResp1.getResult());
+        Assert.assertTrue(verify.getResult());
+
+        CreateWeIdDataResult weIdResult2 = createWeIdWithSetAttr();
+        createCredentialPojoArgs = TestBaseUtil.buildCreateCredentialPojoArgs(weIdResult2);
+        createCredentialPojoArgs.setCptId(10);
+        Long expirationDate = DateUtils.convertToNoMillisecondTimeStamp(
+            createCredentialPojoArgs.getExpirationDate() + 24 * 60 * 60);
+        createCredentialPojoArgs.setExpirationDate(expirationDate);
+        ResponseData<CredentialPojo> credResp2 =
+            credentialPojoService.createCredential(createCredentialPojoArgs);
+        LogUtil.info(logger, "createCredentialPojo", credResp2);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), credResp2.getErrorCode().intValue());
+        verify = credentialPojoService.verify(
+            createCredentialPojoArgs.getIssuer(), credResp2.getResult());
+        Assert.assertFalse(verify.getResult());
+
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(credResp1.getResult());
+        credPojoList.add(credResp2.getResult());
+        CreateWeIdDataResult weIdResult3 = createWeIdWithSetAttr();
+        WeIdAuthentication callerAuth = TestBaseUtil.buildWeIdAuthentication(weIdResult3);
+        CredentialPojo doubleSigned = credentialPojoService.addSignature(credPojoList, callerAuth)
+            .getResult();
+        Assert.assertEquals(doubleSigned.getCptId(),
+            CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT);
+        Assert.assertEquals(doubleSigned.getExpirationDate(), expirationDate);
+        ResponseData<Boolean> verifyResp = credentialPojoService
+            .verify(doubleSigned.getIssuer(), doubleSigned);
+        Assert.assertFalse(verifyResp.getResult());
+        credPojoList = new ArrayList<>();
+        credPojoList.add(doubleSigned);
+        CredentialPojo tripleSigned = credentialPojoService.addSignature(credPojoList, callerAuth)
+            .getResult();
+        verifyResp = credentialPojoService.verify(tripleSigned.getIssuer(), tripleSigned);
+        Assert.assertFalse(verifyResp.getResult());
+    }
+
+    /**
      * case：when issuer is register authentication issuer， cpt publisher is not auth issuer,
      * createCredentialPojo success.
      */
