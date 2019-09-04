@@ -656,6 +656,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             logger.error("Create Credential, private key does not match the current weid.");
             return new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
+        if (!weIdService.isWeIdExist(callerAuth.getWeId()).getResult()) {
+            return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
+        }
         String privateKey = callerAuth.getWeIdPrivateKey().getPrivateKey();
         ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
@@ -663,9 +666,23 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         result.setIssuer(keyWeId);
         result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
 
+        // Check and remove duplicates in the credentialList
+        List<String> hashList = new ArrayList<>();
+        List<CredentialPojo> trimmedCredentialList = new ArrayList<>();
+        for (CredentialPojo arg : credentialList) {
+            String credHash = arg.getHash();
+            if (StringUtils.isEmpty(credHash)) {
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+            if (!hashList.contains(credHash)) {
+                hashList.add(credHash);
+                trimmedCredentialList.add(arg);
+            }
+        }
+
         // The claim will be the wrapper of the to-be-signed credentialpojos
         HashMap<String, Object> claim = new HashMap<>();
-        claim.put("credentialList", credentialList);
+        claim.put("credentialList", trimmedCredentialList);
         result.setClaim(claim);
 
         Map<String, Object> saltMap = DataToolUtils.clone(claim);
