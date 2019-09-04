@@ -1,6 +1,6 @@
 #!/bin/bash
 
-classpathDir="./src/main/resources"
+classpathDir="./dist/conf"
 libDir="./dist/lib"
 set -- `getopt c:l: "$@"`
 while [ -n "$1" ]
@@ -153,8 +153,8 @@ function check_user_config() {
     do
 		var=${var##*@}
 	    echo begin test $var
-		ip=`echo $var | cut -d \: -f 1`
-		port=`echo $var | cut -d \: -f 2`
+		ip=`echo $var | cut -d : -f 1`
+		port=`echo $var | cut -d : -f 2`
 		result=`echo -e "\n" | timeout 5 telnet $ip $port 2>/dev/null | grep Connected | wc -l`
 		if [ $result -eq 1 ]; then
 			echo "Network is Open."
@@ -171,8 +171,9 @@ function  check_jar_version() {
 	echo "----------------------------" 
 	bcos_version=$(grep "bcos.version" $fisco_properties |awk -F"=" '{print $2}')
 	echo "the bcos version is: $bcos_version"
-	for file in `ls $libDir`
+	for file in $libDir/*
 	do
+		file=${file##*/}
 		if [[ $file == weid-contract-java* ]];
 		then
 			echo "the weid contract jar: "$file
@@ -205,8 +206,9 @@ function check_node_version() {
 	echo "----------------------------"
 	isSdk=1
 	version_default=1.4
-	for file in `ls $libDir`
+	for file in $libDir/*
 	do
+		file=${file##*/}
 		if [[ $file == weid-java-sdk* ]];
 		then
 			isSdk=0
@@ -224,8 +226,9 @@ function check_node_version() {
 	then
 		if [ -d "./dist/app/" ];
 		then
-			for file in `ls ./dist/app/`
+			for file in ./dist/app/*
 			do
+				file=${file##*/}
 				if [[ $file == weid-java-sdk* ]];
 				then
 					get_the_version $file
@@ -244,6 +247,7 @@ function check_node_version() {
 
 function get_the_version() {
 	sdk_version=$1
+	sdk_version=${sdk_version/.rc-/}
 	sdk_version=${sdk_version##*-}
 	sdk_version=${sdk_version%.jar}
 	sdk_version=${sdk_version%.*}
