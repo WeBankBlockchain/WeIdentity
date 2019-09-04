@@ -122,9 +122,9 @@ public abstract class BaseService {
      * get FISCO-BCOS version.
      *
      * @return return nodeVersion
-     * @throws Exception possible exceptions to sending transactions
+     * @throws IOException possible exceptions to sending transactions
      */
-    public static String getVersion() throws Exception {
+    public static String getVersion() throws IOException {
         if (weServer == null) {
             init();
         }
