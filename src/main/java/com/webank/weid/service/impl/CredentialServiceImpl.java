@@ -194,9 +194,27 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
             .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+        if (!weIdService.isWeIdExist(keyWeId).getResult()) {
+            return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
+        }
         result.setIssuer(keyWeId);
+
+        // Check and remove duplicates in the credentialList
+        List<String> hashList = new ArrayList<>();
+        List<Credential> trimmedCredentialList = new ArrayList<>();
+        for (Credential arg : credentialList) {
+            String credHash = arg.getHash();
+            if (StringUtils.isEmpty(credHash)) {
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+            if (!hashList.contains(credHash)) {
+                hashList.add(credHash);
+                trimmedCredentialList.add(arg);
+            }
+        }
+
         Map<String, Object> claim = new HashMap<>();
-        claim.put("credentialList", credentialList);
+        claim.put("credentialList", trimmedCredentialList);
         result.setClaim(claim);
         Map<String, String> credentialProof = CredentialUtils
             .buildCredentialProof(result, privateKey, null);
