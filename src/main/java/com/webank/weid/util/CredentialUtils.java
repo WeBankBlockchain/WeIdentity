@@ -42,7 +42,6 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialWrapper;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 
 /**
@@ -73,6 +72,30 @@ public final class CredentialUtils {
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
+    }
+
+    /**
+     * Check if the two credentials are equal. Will traverse each field.
+     *
+     * @param credOld first credential
+     * @param credNew second credential
+     * @return true if yes, false otherwise
+     */
+    public static boolean isEqual(Credential credOld, Credential credNew) {
+        if (credOld == null && credNew == null) {
+            return true;
+        }
+        if (credOld == null || credNew == null) {
+            return false;
+        }
+        return credOld.getHash().equalsIgnoreCase(credNew.getHash())
+            && credOld.getCptId().equals(credNew.getCptId())
+            && credOld.getExpirationDate().equals(credNew.getExpirationDate())
+            && credOld.getProof().equals(credNew.getProof())
+            && credOld.getContext().equalsIgnoreCase(credNew.getContext())
+            && credOld.getId().equalsIgnoreCase(credNew.getId())
+            && credOld.getIssuanceDate().equals(credNew.getIssuanceDate())
+            && credOld.getIssuer().equalsIgnoreCase(credNew.getIssuer());
     }
 
     /**

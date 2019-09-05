@@ -74,7 +74,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
 
-    private static  WeIdService weIdService = new WeIdServiceImpl();
+    private static WeIdService weIdService = new WeIdServiceImpl();
 
     private static CptService cptService = new CptServiceImpl();
 
@@ -129,7 +129,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return true;
     }
-    
+
     /**
      * 校验claim、salt和disclosureMap的格式是否一致.
      */
@@ -145,7 +145,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (!claim.keySet().equals(salt.keySet())) {
             return false;
         }
-        
+
         //检查key值是否一致
         for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
             String k = entry.getKey();
@@ -234,7 +234,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         return true;
     }
-    
+
     //向policy中补充缺失的key
     private static void addKeyToPolicy(
         Map<String, Object> disclosureMap,
@@ -244,14 +244,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             String claimK = entry.getKey();
             Object claimV = entry.getValue();
             if (claimV instanceof Map) {
-                HashMap claimHashMap = (HashMap)claimV;
+                HashMap claimHashMap = (HashMap) claimV;
                 if (!disclosureMap.containsKey(claimK)) {
                     disclosureMap.put(claimK, new HashMap());
                 }
-                HashMap disclosureHashMap = (HashMap)disclosureMap.get(claimK);
+                HashMap disclosureHashMap = (HashMap) disclosureMap.get(claimK);
                 addKeyToPolicy(disclosureHashMap, claimHashMap);
             } else if (claimV instanceof List) {
-                ArrayList claimList = (ArrayList)claimV;
+                ArrayList claimList = (ArrayList) claimV;
                 //判断claimList中是否包含Map结构，还是单一结构
                 boolean isSampleList = isSampleListForClaim(claimList);
                 if (isSampleList) {
@@ -262,7 +262,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     if (!disclosureMap.containsKey(claimK)) {
                         disclosureMap.put(claimK, new ArrayList());
                     }
-                    ArrayList disclosureList = (ArrayList)disclosureMap.get(claimK);
+                    ArrayList disclosureList = (ArrayList) disclosureMap.get(claimK);
                     addKeyToPolicyList(disclosureList, claimList);
                 }
             } else {
@@ -272,7 +272,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             }
         }
     }
-    
+
     private static void addKeyToPolicyList(
         ArrayList disclosureList,
         ArrayList claimList
@@ -284,20 +284,20 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 if (disclosureObj == null) {
                     disclosureList.add(new HashMap());
                 }
-                HashMap disclosureHashMap = (HashMap)disclosureList.get(0);
-                addKeyToPolicy(disclosureHashMap, (HashMap)claimObj);
+                HashMap disclosureHashMap = (HashMap) disclosureList.get(0);
+                addKeyToPolicy(disclosureHashMap, (HashMap) claimObj);
                 break;
             } else if (claimObj instanceof List) {
                 Object disclosureObj = disclosureList.get(i);
                 if (disclosureObj == null) {
                     disclosureList.add(new ArrayList());
                 }
-                ArrayList disclosureArrayList = (ArrayList)disclosureList.get(i);
-                addKeyToPolicyList(disclosureArrayList, (ArrayList)claimObj);
+                ArrayList disclosureArrayList = (ArrayList) disclosureList.get(i);
+                addKeyToPolicyList(disclosureArrayList, (ArrayList) claimObj);
             }
         }
     }
-    
+
     private static boolean isSampleListForClaim(ArrayList claimList) {
         if (CollectionUtils.isEmpty(claimList)) {
             return true;
@@ -307,11 +307,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             return false;
         }
         if (claimObj instanceof List) {
-            return isSampleListForClaim((ArrayList)claimObj);
+            return isSampleListForClaim((ArrayList) claimObj);
         }
         return true;
     }
-    
+
     private static void addSelectSalt(
         Map<String, Object> disclosureMap,
         Map<String, Object> saltMap,
@@ -346,7 +346,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Object saltV,
         Object claimV
     ) {
-        if (((Integer) value).equals(Integer.parseInt(NOT_DISCLOSED)) 
+        if (((Integer) value).equals(Integer.parseInt(NOT_DISCLOSED))
             && claim.containsKey(disclosureKey)) {
             saltMap.put(disclosureKey, NOT_DISCLOSED);
             String hash =
@@ -667,15 +667,16 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
 
         // Check and remove duplicates in the credentialList
-        List<String> hashList = new ArrayList<>();
         List<CredentialPojo> trimmedCredentialList = new ArrayList<>();
         for (CredentialPojo arg : credentialList) {
-            String credHash = arg.getHash();
-            if (StringUtils.isEmpty(credHash)) {
-                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            boolean found = false;
+            for (CredentialPojo credAlive : trimmedCredentialList) {
+                if (CredentialPojoUtils.isEqual(arg, credAlive)) {
+                    found = true;
+                    break;
+                }
             }
-            if (!hashList.contains(credHash)) {
-                hashList.add(credHash);
+            if (!found) {
                 trimmedCredentialList.add(arg);
             }
         }
@@ -738,7 +739,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             Map<String, Object> disclosureMap = DataToolUtils
                 .deserialize(disclosure, HashMap.class);
-            
+
             if (!validCredentialMapArgs(claim, saltMap, disclosureMap)) {
                 logger.error(
                     "[createSelectiveCredential] create failed. message is {}",
@@ -993,17 +994,17 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 }
             } else {
                 String disclosure = String.valueOf(disclosureV);
-               
-                if (saltV == null 
+
+                if (saltV == null
                     || (!disclosure.equals(NOT_DISCLOSED) && !disclosure.equals(DISCLOSED)
-                        && !disclosure.equals(EXISTED))) {
+                    && !disclosure.equals(EXISTED))) {
                     logger.error(
                         "[verifyDisclosureAndSalt] policy disclosureValue {} illegal.",
                         disclosureMap
                     );
                     return ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL;
                 }
-                
+
                 String salt = String.valueOf(saltV);
                 if ((disclosure.equals(NOT_DISCLOSED) && salt.length() > 1)
                     || (disclosure.equals(NOT_DISCLOSED) && !salt.equals(NOT_DISCLOSED))) {
