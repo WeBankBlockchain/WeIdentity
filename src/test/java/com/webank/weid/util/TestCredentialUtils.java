@@ -98,5 +98,7 @@ public class TestCredentialUtils {
         Assert.assertNotNull(thumbprint);
         String thumbprintAll = CredentialUtils.getCredentialThumbprintWithoutSig(arg, null);
         Assert.assertNotNull(thumbprintAll);
+        Credential test = CredentialUtils.copyCredential(arg);
+        Assert.assertTrue(CredentialUtils.isEqual(arg, test));
     }
 }
