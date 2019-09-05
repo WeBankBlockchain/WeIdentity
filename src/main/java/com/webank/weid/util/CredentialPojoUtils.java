@@ -87,6 +87,52 @@ public final class CredentialPojoUtils {
     }
 
     /**
+     * Check if the two credentials are equal. Will traverse each field.
+     *
+     * @param credOld first credential
+     * @param credNew second credential
+     * @return true if yes, false otherwise
+     */
+    public static boolean isEqual(CredentialPojo credOld, CredentialPojo credNew) {
+        if (credOld == null && credNew == null) {
+            return true;
+        }
+        if (credOld == null || credNew == null) {
+            return false;
+        }
+        return credOld.getHash().equalsIgnoreCase(credNew.getHash())
+            && credOld.getCptId().equals(credNew.getCptId())
+            && credOld.getExpirationDate().equals(credNew.getExpirationDate())
+            && credOld.getType().equals(credNew.getType())
+            && isProofContentEqual(credOld.getProof(), credNew.getProof())
+            && credOld.getContext().equalsIgnoreCase(credNew.getContext())
+            && credOld.getId().equalsIgnoreCase(credNew.getId())
+            && credOld.getIssuanceDate().equals(credNew.getIssuanceDate())
+            && credOld.getIssuer().equalsIgnoreCase(credNew.getIssuer());
+    }
+
+    private static boolean isProofContentEqual(Object a, Object b) {
+        if (a instanceof Map && b instanceof Map) {
+            if (!((Map) a).keySet().equals(((Map) b).keySet())) {
+                return false;
+            }
+            Set<String> keySet = ((Map) a).keySet();
+            boolean equals = true;
+            for (String key : keySet) {
+                equals = isProofContentEqual(((Map) a).get(key), ((Map) b).get(key));
+                if (!equals) {
+                    return false;
+                }
+            }
+        } else if (a instanceof String && b instanceof String) {
+            return ((String) a).equalsIgnoreCase((String) b);
+        } else if (a instanceof Number && b instanceof Number) {
+            return ((Number) a).intValue() == ((Number) b).intValue();
+        }
+        return true;
+    }
+
+    /**
      * Concat all fields of Credential info, with signature. This should be invoked when calculating
      * Credential Evidence. Return null if credential format is illegal.
      *
