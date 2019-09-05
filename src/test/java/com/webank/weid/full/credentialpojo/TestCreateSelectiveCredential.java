@@ -37,10 +37,9 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.CredentialPojoUtils;
 
 /**
  * createCredential method for testing CredentialService.
@@ -73,6 +72,12 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
         LogUtil.info(logger, "selectiveCredentialPojo", selectiveCredentialPojo);
         LogUtil.info(logger, "verifyCredentialPojo", verify);
         Assert.assertTrue(verify.getResult());
+    }
+
+    @Test
+    public void testTwoCredentialPojoEqual() {
+        CredentialPojo tmpCred = copyCredentialPojo(selectiveCredentialPojo);
+        Assert.assertTrue(CredentialPojoUtils.isEqual(selectiveCredentialPojo, tmpCred));
     }
 
     /**
@@ -642,7 +647,7 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
         LogUtil.info(logger, "TestCreateSelectiveCredential", response);
 
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL.getCode(), 
+            ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertNull(response.getResult());
