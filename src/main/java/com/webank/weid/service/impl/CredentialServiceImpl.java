@@ -200,15 +200,16 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         result.setIssuer(keyWeId);
 
         // Check and remove duplicates in the credentialList
-        List<String> hashList = new ArrayList<>();
         List<Credential> trimmedCredentialList = new ArrayList<>();
         for (Credential arg : credentialList) {
-            String credHash = arg.getHash();
-            if (StringUtils.isEmpty(credHash)) {
-                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            boolean found = false;
+            for (Credential credAlive : trimmedCredentialList) {
+                if (CredentialUtils.isEqual(arg, credAlive)) {
+                    found = true;
+                    break;
+                }
             }
-            if (!hashList.contains(credHash)) {
-                hashList.add(credHash);
+            if (!found) {
                 trimmedCredentialList.add(arg);
             }
         }
