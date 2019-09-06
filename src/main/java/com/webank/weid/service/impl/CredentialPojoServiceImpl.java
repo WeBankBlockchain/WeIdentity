@@ -390,15 +390,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     private static ErrorCode verifyContent(CredentialPojo credential, String publicKey) {
         try {
-            return verifyContent(credential, publicKey, null);
+            return verifyContentInner(credential, publicKey);
         } catch (WeIdBaseException ex) {
             logger.error("[verifyContent] verify credential has exception.", ex);
             return ex.getErrorCode();
         }
     }
 
-    private static ErrorCode verifyContent(CredentialPojo credential,
-        String publicKey, ClaimPolicy claimPolicy) {
+    private static ErrorCode verifyContentInner(CredentialPojo credential, String publicKey) {
         ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credential);
         if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
             return checkResp;
@@ -410,7 +409,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (credential.getCptId() == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT
             .intValue()) {
             // This is a multi-signed Credential. We firstly verify itself (i.e. external check)
-            ErrorCode errorCode = verifySingleSignedCredential(credential, publicKey, null);
+            ErrorCode errorCode = verifySingleSignedCredential(credential, publicKey);
             if (errorCode != ErrorCode.SUCCESS) {
                 return errorCode;
             }
@@ -428,18 +427,20 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             }
             for (CredentialPojo innerCredential : innerCredentialList) {
                 // PublicKey can only be used in the passed-external check, so pass-in null key
-                errorCode = verifyContent(innerCredential, null, null);
+                errorCode = verifyContentInner(innerCredential, null);
                 if (errorCode != ErrorCode.SUCCESS) {
                     return errorCode;
                 }
             }
             return ErrorCode.SUCCESS;
         }
-        return verifySingleSignedCredential(credential, publicKey, null);
+        return verifySingleSignedCredential(credential, publicKey);
     }
 
-    private static ErrorCode verifySingleSignedCredential(CredentialPojo credential,
-        String publicKey, ClaimPolicy claimPolicy) {
+    private static ErrorCode verifySingleSignedCredential(
+        CredentialPojo credential, 
+        String publicKey
+    ) {
         ErrorCode errorCode = verifyCptFormat(
             credential.getCptId(),
             credential.getClaim(),
