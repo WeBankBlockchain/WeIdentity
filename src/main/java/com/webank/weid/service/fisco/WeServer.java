@@ -211,4 +211,12 @@ public abstract class WeServer<W, C, S> {
      * @throws IOException 可能出现的异常.
      */
     public abstract int getBlockNumber() throws IOException;
+    
+    /**
+     * 获取FISCO-BCOS版本.
+     * 
+     * @return 返回版本信息
+     * @throws IOException 可能出现的异常.
+     */
+    public abstract String getVersion() throws IOException;
 }

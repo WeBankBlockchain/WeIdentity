@@ -24,10 +24,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 
@@ -55,7 +57,8 @@ public class AppCommand {
             }
             String command = args[0];
             if (!StringUtils.equals(command, "--checkhealth")
-                && !StringUtils.equals(command, "--checkweid")) {
+                && !StringUtils.equals(command, "--checkweid")
+                && !StringUtils.equals(command, "--checkversion")) {
                 logger.error("[AppCommand] input command :{} is illegal.", command);
                 System.err.println("Parameter illegal, please check your input command.");
                 System.exit(1);
@@ -64,10 +67,13 @@ public class AppCommand {
             switch (command) {
                 case "--checkhealth":
                     result = checkAmopHealth(args[1]);
-                    return;
+                    break;
                 case "--checkweid":
                     result = checkWeid(args[1]);
-                    return;
+                    break;
+                case "--checkversion":
+                    result = checkVersion();
+                    break;
                 default:
                     logger.error("[AppCommand]: the command -> {} is not supported .", command);
             }
@@ -76,6 +82,23 @@ public class AppCommand {
             System.exit(1);
         }
         System.exit(result);
+    }
+
+    private static int checkVersion() {
+        try {
+            String version = BaseService.getVersion();
+            System.out.println("you can connection the node. ");
+            System.out.println("the node version is: " + version);
+            int blockNumer = BaseService.getBlockNumber();
+            System.out.println("the current blockNumer is: " + blockNumer);
+        } catch (InitWeb3jException e) {
+            System.err.println("ERROR: InitWeb3j error:" + e.getMessage());
+            logger.error("[checkVersion] checkVersion with exception.", e);
+        } catch (Exception e) {
+            System.err.println("ERROR: unknow error:" + e.getMessage());
+            logger.error("[checkVersion] checkVersion with exception.", e);
+        }
+        return 0;
     }
 
     /**

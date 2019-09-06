@@ -178,4 +178,9 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     public Class<?> getWeb3jClass() {
         return Web3j.class;
     }
+
+    @Override
+    public String getVersion() throws IOException {
+        return this.getWeb3j().web3ClientVersion().send().getResult();
+    }
 }
