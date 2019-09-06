@@ -104,6 +104,11 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         if (signers == null || signers.size() == 0) {
             return createEvidence(object, weIdPrivateKey);
         }
+        for (String signer : signers) {
+            if (!WeIdUtils.isWeIdValid(signer)) {
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_INVALID);
+            }
+        }
         ResponseData<String> hashResp = getHashValue(object);
         if (StringUtils.isEmpty(hashResp.getResult())) {
             return new ResponseData<>(StringUtils.EMPTY, hashResp.getErrorCode(),
@@ -335,15 +340,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         }
     }
 
-    /**
-     * Verify a Hash value based against the provided Evidence info. This will traverse all the
-     * listed signatures against its singers.
-     *
-     * @param hashValue the given hashValue
-     * @param evidenceAddress the evidence address to be verified
-     * @return true if succeeds, false otherwise
-     */
-    public ResponseData<Boolean> verify(String hashValue, String evidenceAddress) {
+    private ResponseData<Boolean> verify(String hashValue, String evidenceAddress) {
         if (!verifyHashValueFormat(hashValue)) {
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }
