@@ -105,14 +105,4 @@ public interface EvidenceService {
      * @return true if succeeds, false otherwise
      */
     ResponseData<Boolean> verify(Hashable object, String evidenceAddress);
-
-    /**
-     * Verify a Hash value based against the provided Evidence info. This will traverse all the
-     * listed signatures against its singers.
-     *
-     * @param hashValue the given hashValue
-     * @param evidenceAddress the evidence address to be verified
-     * @return true if succeeds, false otherwise
-     */
-    ResponseData<Boolean> verify(String hashValue, String evidenceAddress);
 }
