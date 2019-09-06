@@ -66,15 +66,15 @@ public interface PdfTransportation {
      * @param object 协议存储的实体数据对象
      * @param <T> the type of the element
      * @param property 协议类型，支持加密和非加密两种
-     * @param inputPdfTemplatePath presentation的PDF模板
      * @param weIdAuthentication WeID公私钥信息
+     * @param inputPdfTemplatePath presentation的PDF模板
      * @return OutputStream
      */
     <T extends JsonSerializer> ResponseData<OutputStream> serialize(
         T object,
         ProtocolProperty property,
-        String inputPdfTemplatePath,
-        WeIdAuthentication weIdAuthentication
+        WeIdAuthentication weIdAuthentication,
+        String inputPdfTemplatePath
     );
 
 
