@@ -287,6 +287,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             String credentialHashOnChain = hashValue
                 .replaceAll(WeIdConstant.HEX_PREFIX, StringUtils.EMPTY);
             List<String> hashAttributes = new ArrayList<>();
+            Sign.SignatureData sigData;
             if (!StringUtils.isEmpty(credentialHashOnChain)) {
                 hashAttributes.add(
                     credentialHashOnChain.substring(0, WeIdConstant.BYTES32_FIXED_LENGTH));
@@ -295,14 +296,18 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
                         WeIdConstant.BYTES32_FIXED_LENGTH,
                         WeIdConstant.BYTES32_FIXED_LENGTH * 2
                     ));
+                sigData =
+                    DataToolUtils.signMessage(hashValue, privateKey);
             } else {
                 hashAttributes.add(StringUtils.EMPTY);
                 hashAttributes.add(StringUtils.EMPTY);
+                byte v = (byte) 0;
+                byte[] r = new byte[32];
+                byte[] s = new byte[32];
+                sigData = new SignatureData(v, r, s);
             }
             List<String> extraValueList = new ArrayList<>();
             extraValueList.add(StringUtils.EMPTY);
-            Sign.SignatureData sigData =
-                DataToolUtils.signMessage(hashValue, privateKey);
             return evidenceServiceEngine.createEvidence(
                 sigData,
                 hashAttributes,
