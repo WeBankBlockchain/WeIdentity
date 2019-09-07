@@ -41,6 +41,7 @@ import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.EvidenceInfo;
+import com.webank.weid.protocol.base.HashString;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -639,12 +640,13 @@ public class TestCreateEvidence extends TestBaseServcie {
         Assert.assertFalse(StringUtils.isEmpty(eviAddr));
         EvidenceInfo evidenceInfo = evidenceService.getEvidence(eviAddr).getResult();
         Assert.assertTrue(StringUtils.isEmpty(evidenceInfo.getCredentialHash()));
+        for (String sig : evidenceInfo.getSignatures()) {
+            Assert.assertTrue(StringUtils.isEmpty(sig));
+        }
         String hashValue = credential.getHash();
         ResponseData<Boolean> resp = evidenceService.setHashValue(hashValue, eviAddr, privKey);
-        System.out.println(resp);
         Assert.assertTrue(resp.getResult());
-        System.out.println(evidenceService.getEvidence(eviAddr).getResult());
         Assert.assertTrue(evidenceService.verify(credential, eviAddr).getResult());
-        Assert.assertTrue(evidenceService.verify(hashValue, eviAddr).getResult());
+        Assert.assertTrue(evidenceService.verify(new HashString(hashValue), eviAddr).getResult());
     }
 }
