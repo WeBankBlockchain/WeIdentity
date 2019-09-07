@@ -352,8 +352,12 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             for (Credential innerCredential : innerCredentialList) {
                 credentialWrapper.setCredential(innerCredential);
                 // Make sure that this disclosure is a meaningful one
-                if (disclosure.size() <= 1 && disclosure.size() != innerCredential.getClaim().size()
+                if (disclosure != null && disclosure.size() <= 1
+                    && disclosure.size() != innerCredential.getClaim().size()
                     && disclosure.containsKey("credentialList")) {
+                    credentialWrapper.setDisclosure(null);
+                }
+                if (disclosure == null) {
                     credentialWrapper.setDisclosure(null);
                 }
                 innerResp = verifyCredentialContent(credentialWrapper, publicKey);
