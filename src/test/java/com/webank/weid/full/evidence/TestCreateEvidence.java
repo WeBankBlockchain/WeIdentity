@@ -648,5 +648,7 @@ public class TestCreateEvidence extends TestBaseServcie {
         Assert.assertTrue(resp.getResult());
         Assert.assertTrue(evidenceService.verify(credential, eviAddr).getResult());
         Assert.assertTrue(evidenceService.verify(new HashString(hashValue), eviAddr).getResult());
+        // Any second attempt will fail
+        Assert.assertFalse(evidenceService.setHashValue(hashValue, eviAddr, privKey).getResult());
     }
 }
