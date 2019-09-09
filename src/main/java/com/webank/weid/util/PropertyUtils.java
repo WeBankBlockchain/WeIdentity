@@ -19,8 +19,10 @@
 
 package com.webank.weid.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
 import java.util.Set;
 
@@ -57,7 +59,9 @@ public final class PropertyUtils {
 
         InputStream in;
         in = PropertyUtils.class.getClassLoader().getResourceAsStream(filePath);
-        prop.load(in);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        prop.load(br);
+        br.close();
         in.close();
     }
 
