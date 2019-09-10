@@ -678,6 +678,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 }
             }
             if (!found) {
+                ErrorCode errorCode = CredentialPojoUtils.isCredentialPojoValid(arg);
+                if (errorCode != ErrorCode.SUCCESS) {
+                    return new ResponseData<>(null, errorCode);
+                }
                 trimmedCredentialList.add(arg);
             }
         }
