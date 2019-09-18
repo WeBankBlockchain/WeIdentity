@@ -187,7 +187,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/jsonSchemaCpt.json");
+            JsonNode jsonNode = JsonLoader.fromResource("/json-schema-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
