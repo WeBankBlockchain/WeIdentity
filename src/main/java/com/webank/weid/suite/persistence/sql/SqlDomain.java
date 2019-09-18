@@ -23,6 +23,8 @@ import java.util.Date;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
@@ -31,6 +33,8 @@ import com.webank.weid.util.PropertyUtils;
 
 @Getter
 public class SqlDomain {
+    
+    private static final Logger logger = LoggerFactory.getLogger(SqlDomain.class);
     
     /**
      * the split for key.
@@ -115,9 +119,15 @@ public class SqlDomain {
             this.baseDomain = domains[0];
             this.tableDomain = domains[1];
             if (!ConnectionPool.checkDataSourceName(this.baseDomain)) {
+                logger.error(
+                    "[resolveDomain] the domain {{}:{}} is invalid.",
+                    this.key, 
+                    this.value
+                );
                 throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
             }
         } else {
+            logger.error("[resolveDomain] the domain {{}} is illegal", this.key);
             throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL);
         }
         resolveDomainTimeout();
@@ -139,6 +149,7 @@ public class SqlDomain {
      */
     public String getTableName() {
         if (StringUtils.isBlank(ORG_ID)) {
+            logger.error("[getTableName] the orgid is blank.");
             throw new WeIdBaseException(ErrorCode.ORG_ID_IS_NULL);
         }
         return new StringBuffer(DEFAULT_TABLE_PREFIX)
