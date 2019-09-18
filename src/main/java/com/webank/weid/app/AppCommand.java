@@ -19,6 +19,8 @@
 
 package com.webank.weid.app;
 
+import java.io.PrintStream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,13 +88,14 @@ public class AppCommand {
 
     private static int checkVersion() {
         try {
+            System.setOut(new PrintStream("./sdk.out"));
             String version = BaseService.getVersion();
-            System.out.println("you can connection the node. ");
-            System.out.println("the node version is: " + version);
+            System.err.println("block chain nodes connected successfully. ");
+            System.err.println("the FISCO-BCOS version is: " + version);
             int blockNumer = BaseService.getBlockNumber();
-            System.out.println("the current blockNumer is: " + blockNumer);
+            System.err.println("the current blockNumer is: " + blockNumer);
         } catch (InitWeb3jException e) {
-            System.err.println("ERROR: InitWeb3j error:" + e.getMessage());
+            System.err.println("ERROR: initWeb3j error:" + e.getMessage());
             logger.error("[checkVersion] checkVersion with exception.", e);
         } catch (Exception e) {
             System.err.println("ERROR: unknow error:" + e.getMessage());
