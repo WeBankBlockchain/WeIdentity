@@ -283,35 +283,65 @@ public class SqlExecutor {
             String tableName = TABLE_CACHE.get(sqlDomain.getKey());
             //说明本地没有此tableDomain
             if (StringUtils.isBlank(tableName)) {
-                tableName = sqlDomain.getTableName();
-                //检查数据库中是否存在此表
-                Map<String, String>  result =  this.executeQuery(checkTableSql).getResult();
-                //如果数据库中存在此表
-                if (result != null 
-                    && tableName.equalsIgnoreCase(result.get(DataDriverConstant.SQL_COLUMN_DATA))) {
-                    //本地缓存记录此表
-                    TABLE_CACHE.put(sqlDomain.getKey(), tableName);
-                    return;
+                if (this.initLocalTable(checkTableSql)) {
+                    return; 
                 }
-                //动态创建此表
-                ResponseData<Integer> createRes = this.execute(createTableSql);
-                //创建失败
-                if (createRes.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+                this.createTable(createTableSql);
+                if (!this.initLocalTable(checkTableSql)) {
+                    logger.error(
+                        "[resolveTableDomain] the domain {{}:{}} is invalid.",
+                        sqlDomain.getKey(),
+                        sqlDomain.getValue()
+                    );
                     throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
                 }
-                //再查询一次，确认是否创建成功
-                result =  this.executeQuery(checkTableSql).getResult();
-                //如果不相等 则表示创建失败
-                if (result == null 
-                    || !tableName.equalsIgnoreCase(
-                            result.get(DataDriverConstant.SQL_COLUMN_DATA))) {
-                    throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
-                }
-                //本地缓存记录此表
-                TABLE_CACHE.put(sqlDomain.getKey(), tableName);
             }
         }
     }
+    
+    private boolean initLocalTable(String checkTableSql) {
+        //检查数据库中是否存在此表
+        ResponseData<Map<String, String>>  resultRes =  this.executeQuery(checkTableSql);
+        if (resultRes.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[initLocalTable] execute query table name fail, code:{}, message:{}.",
+                resultRes.getErrorCode(),
+                resultRes.getErrorMessage() 
+            );
+            throw new WeIdBaseException(
+                ErrorCode.getTypeByErrorCode(resultRes.getErrorCode()));
+        }
+        String tableName = sqlDomain.getTableName();
+        Map<String, String> result = resultRes.getResult();
+        //如果数据库中存在此表
+        if (result != null 
+            && tableName.equalsIgnoreCase(result.get(DataDriverConstant.SQL_COLUMN_DATA))) {
+            //本地缓存记录此表
+            TABLE_CACHE.put(sqlDomain.getKey(), tableName);
+            logger.info(
+                "[initLocalTable] the domain {{}:{}} is init success.",
+                sqlDomain.getKey(),
+                sqlDomain.getValue()
+            );
+            return true;
+        }
+        return false;
+    }
+    
+    private void createTable(String createTableSql) {
+        //动态创建此表
+        ResponseData<Integer> createRes = this.execute(createTableSql);
+        //创建失败
+        if (createRes.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[createTable] execute create table fail, code:{}, message:{}.",
+                createRes.getErrorCode(),
+                createRes.getErrorMessage() 
+            );
+            throw new WeIdBaseException(
+                ErrorCode.getTypeByErrorCode(createRes.getErrorCode()));
+        }
+    }   
     
     private String buildExecuteSql(String sql) {
         return new StringBuffer(sql).toString().replace(TABLE_CHAR, sqlDomain.getTableName());
