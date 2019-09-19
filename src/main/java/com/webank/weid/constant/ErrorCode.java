@@ -408,6 +408,11 @@ public enum ErrorCode {
     TRANSPORTATION_ENCODE_BASE_ERROR(100807, "encode base error, please check the error log."),
 
     /**
+     * transportation protocol encode error.
+     */
+    TRANSPORTATION_PDF_TRANSFER_ERROR(100808, "pdf transfer error, please check the error log."),
+
+    /**
      * Authority issuer main error code.
      */
     AUTHORITY_ISSUER_ERROR(100200, "error occured during processing authority issuer tasks"),
