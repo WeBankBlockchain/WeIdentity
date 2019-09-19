@@ -100,11 +100,11 @@ public final class CredentialPojoUtils {
         if (credOld == null || credNew == null) {
             return false;
         }
-        return credOld.getHash().equalsIgnoreCase(credNew.getHash())
+        return isProofContentEqual(credOld.getProof(), credNew.getProof())
             && credOld.getCptId().equals(credNew.getCptId())
             && credOld.getExpirationDate().equals(credNew.getExpirationDate())
             && credOld.getType().equals(credNew.getType())
-            && isProofContentEqual(credOld.getProof(), credNew.getProof())
+            && credOld.getHash().equalsIgnoreCase(credNew.getHash())
             && credOld.getContext().equalsIgnoreCase(credNew.getContext())
             && credOld.getId().equalsIgnoreCase(credNew.getId())
             && credOld.getIssuanceDate().equals(credNew.getIssuanceDate())
@@ -113,10 +113,18 @@ public final class CredentialPojoUtils {
 
     private static boolean isProofContentEqual(Object a, Object b) {
         if (a instanceof Map && b instanceof Map) {
-            if (!((Map) a).keySet().equals(((Map) b).keySet())) {
-                return false;
-            }
             Set<String> keySet = ((Map) a).keySet();
+            Set<String> keySetb = ((Map) b).keySet();
+            for (String key : keySet) {
+                if (!keySetb.contains(key)) {
+                    return false;
+                }
+            }
+            for (String key : keySetb) {
+                if (!keySet.contains(key)) {
+                    return false;
+                }
+            }
             boolean equals = true;
             for (String key : keySet) {
                 equals = isProofContentEqual(((Map) a).get(key), ((Map) b).get(key));
