@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -21,19 +21,15 @@ package com.webank.weid.suite.transportation;
 
 import java.util.List;
 
-import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
+import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
 
-/**
- * 二维码传输协议抽象类定义.
- * @author v_wbgyang
- *
- */
-public abstract class AbstractJsonTransportation 
+
+public abstract class AbstractPdfTransportation
     extends AbstractTransportation
-    implements JsonTransportation {
+    implements PdfTransportation {
 
     @Override
-    public JsonTransportation specify(List<String> verifierWeIdList) {
+    public PdfTransportation specify(List<String> verifierWeIdList) {
         this.setVerifier(verifierWeIdList);
         return this;
     }
