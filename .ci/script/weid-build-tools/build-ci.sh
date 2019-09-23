@@ -37,7 +37,8 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
 
     # copy blockchain cfg files
     cp .ci/ca.crt weid-build-tools/resources/
-    cp .ci/client.keystore weid-build-tools/resources/
+    cp .ci/node.crt weid-build-tools/resources/
+    cp .ci/node.key weid-build-tools/resources/
 
     # run repo ci scripts
     cd weid-build-tools/
