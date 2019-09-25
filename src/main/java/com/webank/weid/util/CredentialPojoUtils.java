@@ -555,9 +555,13 @@ public final class CredentialPojoUtils {
                 }
             } else if (claimV instanceof List) {
                 ArrayList<Object> claimValue = (ArrayList<Object>) claimV;
-                ArrayList<Object> saltValue = (ArrayList<Object>) saltV;
-                if (!validClaimAndSaltForList(claimValue, saltValue)) {
-                    return false;
+                if (saltV instanceof ArrayList) {
+                    ArrayList<Object> saltValue = (ArrayList<Object>) saltV;
+                    if (!validClaimAndSaltForList(claimValue, saltValue)) {
+                        return false;
+                    }
+                } else {
+                    continue;
                 }
             }
         }
@@ -569,9 +573,6 @@ public final class CredentialPojoUtils {
         List<Object> saltList) {
         //检查是否为空
         if (claimList == null || saltList == null) {
-            return false;
-        }
-        if (claimList.size() != saltList.size()) {
             return false;
         }
         for (int i = 0; i < claimList.size(); i++) {
