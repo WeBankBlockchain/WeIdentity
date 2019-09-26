@@ -84,51 +84,94 @@ public class PdfTransportationImpl
     private static final PdfVersion version = PdfVersion.V1;
 
     //默认PDF模板单行写入的边界长度值
-    private static final float margin = 408;
+    private static final float MARGIN = 408;
+
+    private static final float POS_CONTENT_X = 100;
+
+    private static final float POS_CONTENT_Y = 700;
+
+    private static final float BOTTOM = 50;
+
+    private static final float POS_TITLE_X = 260;
+
+    private static final float POS_TITLE_Y = 750;
+
+    private static final int FONT_SIZE_TITLE = 18;
+
+    private static final int FONT_SIZE_CONTENT = 12;
+
+    private static final String MD_ALGORITHM = "SHA-256";
+
+    private static final String EVIDENCE_FILE_PATH = "evidence.pdf";
+
+    private static final int BUFFER_SIZE = 1024;
 
     private static CptService cptService = new CptServiceImpl();
 
     private static EvidenceService evidenceService = new EvidenceServiceImpl();
 
+
     /**
-     * 根据Cliam和Salt把需要显示的数据写入到disclosureInfo中.
+     * 根据Claim和Salt把需要显示的数据写入到disclosureInfo中.
      *
      * @param disclosureInfo credentialList包含元素个数
      * @param salt 当前credential对应的盐值
      * @param claim 当前credential对应的claim
      * @param prefix 递归时用于处理字符串的前缀
      * @param propMap CPT的properties值，用于获取CPT中name字段
+     * @param isSpecTpl 是否是指定pdf模板情况
      */
     private void buildDisclosureInfo(
         LinkedHashMap<String, String> disclosureInfo,
         Map<String, Object> salt,
         Map<String, Object> claim,
         StringBuilder prefix,
-        Map<String, Object> propMap) throws WeIdBaseException {
+        Map<String, Object> propMap,
+        Boolean isSpecTpl) throws WeIdBaseException {
+
+        if (salt == null) {
+            logger.error("buildDisclosureInfo due to salt illegal error.");
+            throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+        }
 
         for (Map.Entry<String, Object> entry : salt.entrySet()) {
             Object saltV = entry.getValue();
 
             //获取与盐值的key对应的claim的value
-            Object claimV = claim.get(entry.getKey());
-            Map<String, Object> propMapV;
-            try {
-                propMapV = DataToolUtils.objToMap(propMap.get(entry.getKey()));
-            } catch (Exception e) {
-                logger.error("buildDisclosureInfo error due to objToMap propMap.", e);
+            Object claimV;
+            if (claim.containsKey(entry.getKey())) {
+                claimV = claim.get(entry.getKey());
+            } else {
+                logger.error("buildDisclosureInfo due to claimV illegal error.");
                 throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+            }
+
+            //propMapv为cpt中的properties信息，用于设置默认模板显示name值
+            Map<String, Object> propMapV = new HashMap<>(3);
+
+            //如果当前cpt为简单单级cpt不包含properties字段，由下面判断name来获取prefix
+            if (!propMap.isEmpty()) {
+                try {
+                    propMapV = DataToolUtils.objToMap(propMap.get(entry.getKey()));
+                } catch (Exception e) {
+                    logger.error("buildDisclosureInfo due to propMap cast to propMapV error.", e);
+                    throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+                }
             }
 
             //1. 如果claim为多层Map则递归解析数据
             if (saltV instanceof Map) {
                 //判断name是否存在
                 if (propMapV != null) {
-                    if (!propMapV.containsKey("name")
-                        || propMapV.get("name").toString().equals("")) {
+                    if (isSpecTpl || !propMapV.containsKey("name")
+                        || String.valueOf(propMapV.get("name")).equals("")) {
                         prefix.append(entry.getKey());
                     } else {
-                        prefix.append(propMapV.get("name").toString());
+                        prefix.append(propMapV.get("name"));
                     }
+                } else {
+                    logger.error("buildDisclosureInfo duo to propMapV is null error.");
+                    throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
                 prefix.append(".");
                 Map<String, Object> certProp = null;
@@ -137,7 +180,7 @@ public class PdfTransportationImpl
                         certProp = DataToolUtils.objToMap(propMapV.get("properties"));
                     }
                 } catch (Exception e) {
-                    logger.error("buildDisclosureInfo error duo to objToMap propMapV.", e);
+                    logger.error("buildDisclosureInfo duo to objToMap propMapV error.", e);
                     throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
 
@@ -147,10 +190,11 @@ public class PdfTransportationImpl
                     (HashMap) saltV,
                     (HashMap) claimV,
                     prefix,
-                    certProp);
+                    certProp,
+                    isSpecTpl);
                 stringTools(prefix);
 
-                //2. 如果claim为List则根据List内部结构来处理
+            //2. 如果claim为List则根据List内部结构来处理
             } else if (saltV instanceof List) {
                 Map<String, Object> items;
                 Map<String, Object> itemsProp;
@@ -158,22 +202,20 @@ public class PdfTransportationImpl
                     items = DataToolUtils.objToMap(propMapV.get("items"));
                     itemsProp = DataToolUtils.objToMap(items.get("properties"));
                 } catch (Exception e) {
-                    logger.error("buildDisclosureInfo error due to objToMap items.", e);
+                    logger.error("buildDisclosureInfo due to objToMap items error.", e);
                     throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
 
                 int i = 0;
                 //判断name是否存在
-                if (!propMapV.containsKey("name") || propMapV.get("name").toString()
-                    .equals("")) {
+                if (isSpecTpl
+                    || !propMapV.containsKey("name")
+                    || String.valueOf(propMapV.get("name")).equals("")) {
                     prefix.insert(0, entry.getKey());
                 } else {
-                    prefix.insert(0, propMapV.get("name").toString());
+                    prefix.insert(0, propMapV.get("name"));
                 }
-                prefix.append("[");
-                prefix.append(i++);
-                prefix.append("]");
-                prefix.append(".");
+                prefix.append("[").append(i++).append("]").append(".");
 
                 //处理List结构的claim
                 buildDisclosureInfoByList(
@@ -181,10 +223,11 @@ public class PdfTransportationImpl
                     (ArrayList<Object>) saltV,
                     (ArrayList<Object>) claimV,
                     prefix,
-                    itemsProp
+                    itemsProp,
+                    isSpecTpl
                 );
 
-                //3. 如果claim为单层Map则直接处理
+            //3. 如果claim为单层Map则直接处理
             } else {
                 //盐值为0，说明是非披露字段
                 if (entry.getValue().equals("0")) {
@@ -193,16 +236,17 @@ public class PdfTransportationImpl
 
                 //判断name是否存在
                 try {
-                    if (!propMapV.containsKey("name") || propMapV.get("name").toString()
-                        .equals("")) {
-                        disclosureInfo.put(prefix + entry.getKey(), claimV.toString());
+                    if (isSpecTpl
+                        || !propMapV.containsKey("name")
+                        || String.valueOf(propMapV.get("name")).equals("")) {
+                        disclosureInfo.put(prefix + entry.getKey(), String.valueOf(claimV));
                     } else {
                         disclosureInfo.put(
-                            prefix + propMapV.get("name").toString(),
-                            claimV.toString());
+                            prefix + String.valueOf(propMapV.get("name")),
+                            String.valueOf(claimV));
                     }
                 } catch (WeIdBaseException e) {
-                    logger.error("buildDisclosureInfo error due to get name.", e);
+                    logger.error("buildDisclosureInfo due to get name error.", e);
                     throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
             }
@@ -248,7 +292,8 @@ public class PdfTransportationImpl
         List<Object> salt,
         List<Object> claim,
         StringBuilder prefix,
-        Map<String, Object> items) throws WeIdBaseException {
+        Map<String, Object> items,
+        Boolean isSpecTpl) throws WeIdBaseException {
 
         try {
             //传入的salt就是List，需要遍历每一个salt[i]
@@ -263,7 +308,8 @@ public class PdfTransportationImpl
                         (HashMap) saltObj,
                         (HashMap) claimObj,
                         prefix,
-                        items);
+                        items,
+                        isSpecTpl);
                 } else if (saltObj instanceof List) {
                     //List里面是List,就一直递归直到是Map
                     buildDisclosureInfoByList(
@@ -271,7 +317,8 @@ public class PdfTransportationImpl
                         (ArrayList<Object>) saltObj,
                         (ArrayList<Object>) claimObj,
                         prefix,
-                        items);
+                        items,
+                        isSpecTpl);
                 }
                 prefix.replace(0, prefix.length(), prefix.substring(0, prefix.length() - 3));
                 prefix.append(i + 1).append("]").append(".");
@@ -305,24 +352,22 @@ public class PdfTransportationImpl
 
     /**
      * 处理单条disclosureInfo数据过长需要分行显示问题.
-     *
-     * @param output 需要处理的字符串
+     *  @param output 需要处理的字符串
      * @param fontSize 字体大小
      * @param font 具体字体
-     * @param margin PDF中单行容纳最大长度
      * @param lines 处理后存储结果的ArrayList
      */
     private void buildLines(
-        String output, int fontSize,
-        PDFont font, float margin,
-        ArrayList<String> lines) throws WeIdBaseException {
+            String output, int fontSize,
+            PDFont font,
+            ArrayList<String> lines) throws WeIdBaseException {
 
         try {
             String str;
             int startPos = 0;
             for (int i = 0; i < output.length(); i++) {
                 str = output.substring(startPos, i);
-                if (calcStrLength(str, fontSize, font) > margin) {
+                if (calcStrLength(str, fontSize, font) > MARGIN) {
                     lines.add(str);
                     startPos = i;
                 }
@@ -333,7 +378,6 @@ public class PdfTransportationImpl
             logger.error("buildLines error.", e);
             throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
         }
-
     }
 
     /**
@@ -351,38 +395,48 @@ public class PdfTransportationImpl
         PDPageContentStream contents,
         int fontSize,
         PDFont font,
-        int pos,
-        ArrayList<String> lines) throws WeIdBaseException {
+        float pos,
+        ArrayList<String> lines) {
+
+        String text;
+        for (int j = 0; j < lineSize; j++) {
+            text = lines.get(j);
+            addContent(contents, text, POS_CONTENT_X, pos, font, fontSize);
+            pos = pos - 15;
+        }
+    }
+
+    private void addContent(
+            PDPageContentStream contents,
+            String text,
+            float posX,
+            float posY,
+            PDFont font,
+            int fontSize) {
 
         try {
-            String text;
-            for (int j = 0; j < lineSize; j++) {
-                text = lines.get(j);
-                contents.beginText();
-                contents.setFont(font, fontSize);
-                contents.newLineAtOffset(100, pos);
-                contents.showText(text);
-                pos = pos - 15;
-                contents.endText();
-            }
+            contents.beginText();
+            contents.setFont(font, fontSize);
+            contents.newLineAtOffset(posX, posY);
+            contents.showText(text);
+            contents.endText();
         } catch (Exception e) {
-            logger.error("addMultiLine2Pdf error.", e);
+            logger.error("addContent error.", e);
             throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
         }
     }
 
     /**
-     * 把lines写入到PDF中.
-     *
-     * @param document 当前PDF
+     * 为PDF添加属性信息.
+     *  @param document 当前PDF
      * @param pdfBaseData PDF协议数据
      */
-    private void addAttr4Pdf(PDDocument document, PdfBaseData pdfBaseData) {
+    private void addAttributeInfo(PDDocument document, PdfBaseData pdfBaseData) {
 
         PDDocumentInformation pdd = document.getDocumentInformation();
         pdd.setCustomMetadataValue("id", pdfBaseData.getId());
         pdd.setCustomMetadataValue("orgId", pdfBaseData.getOrgId());
-        pdd.setCustomMetadataValue("data", pdfBaseData.getData().toString());
+        pdd.setCustomMetadataValue("data", String.valueOf(pdfBaseData.getData()));
         pdd.setCustomMetadataValue("encodeType", String.valueOf(pdfBaseData.getEncodeType()));
         pdd.setCustomMetadataValue("version", String.valueOf(pdfBaseData.getVersion()));
         pdd.setCustomMetadataValue("address", String.valueOf(pdfBaseData.getAddress()));
@@ -407,52 +461,62 @@ public class PdfTransportationImpl
     /**
      * 把presentation数据写入默认PDF模板，输出PDF流.
      *
+     * @param <T> JsonSerializer
      * @param object serialize函数输入的object
      * @param pdfBaseData PDF协议数据
-     * @param filePath 指定用于存证的PDF文件输出位置
-     * @param <T> JsonSerializer
      * @return PDF流数据
      * @throws WeIdBaseException exception
      */
     private <T extends JsonSerializer>  OutputStream buildPdf4DefaultTpl(
-        T object,
-        PdfBaseData pdfBaseData,
-        String filePath) throws WeIdBaseException {
+            T object,
+            PdfBaseData pdfBaseData) throws WeIdBaseException {
 
         try {
-            //创建包含一个空白页的PDF
-            PDDocument document = new PDDocument();
-
             PresentationE presentation;
             CredentialPojo credentialPojo;
             List<CredentialPojo> credentialPojoList = new ArrayList<>(3);
+            List<CredentialPojo> creList = new ArrayList<>(1);
 
             //获取credentialPojoList
             if (object instanceof PresentationE) {
-                try {
-                    presentation = (PresentationE) object;
-                } catch (Exception e) {
-                    logger.error(
-                            "buildPdf4SpecTpl due to cast object to presentation error.", e);
-                    throw new WeIdBaseException(ErrorCode.DATA_TYPE_CASE_ERROR);
+                presentation = (PresentationE) object;
+
+                creList = new ArrayList<>(1);
+                CredentialPojo cp = presentation.getVerifiableCredential().get(0);
+
+                //多签情况递归获取最内层credentialList，否则直接获取credentialList
+                if (cp.getClaim().containsKey("credentialList") && cp.getClaim().size() == 1) {
+                    getMultiSignClaim(presentation.getVerifiableCredential().get(0), creList);
+                    credentialPojoList = creList;
+                } else {
+                    credentialPojoList = presentation.getVerifiableCredential();
                 }
-                credentialPojoList = presentation.getVerifiableCredential();
             } else if (object instanceof CredentialPojo) {
-                try {
-                    credentialPojo = (CredentialPojo) object;
-                } catch (Exception e) {
-                    logger.error(
-                            "buildPdf4SpecTpl due to cast object to credential error.", e);
-                    throw new WeIdBaseException(ErrorCode.DATA_TYPE_CASE_ERROR);
+                credentialPojo = (CredentialPojo) object;
+
+                //多签情况递归获取最内层credentialList，否则直接获取credentialList
+                if (credentialPojo.getClaim().containsKey("credentialList")
+                    && credentialPojo.getClaim().size() == 1) {
+                    getMultiSignClaim(credentialPojo, creList);
+                    credentialPojoList = creList;
+                } else {
+                    credentialPojoList.add(credentialPojo);
                 }
-                credentialPojoList.add(credentialPojo);
             } else {
                 logger.error(
-                        "buildPdf4SpecTpl due to object illegal error.");
+                        "buildPdf4DefaultTpl due to object illegal error.");
                 throw new WeIdBaseException(ErrorCode.DATA_TYPE_CASE_ERROR);
             }
 
             int creListSize = credentialPojoList.size();
+            if (creListSize == 0) {
+                logger.error(
+                        "buildPdf4DefaultTpl due to credentialList size equal to zero error.");
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+            }
+
+            //创建包含一个空白页的PDF
+            PDDocument document = new PDDocument();
 
             //通过creListSize来新增PDF页面
             addPdfPage(creListSize, document);
@@ -461,14 +525,14 @@ public class PdfTransportationImpl
             addClaim2Pdf(credentialPojoList, document);
 
             //设置输出pdf文件的属性信息
-            addAttr4Pdf(document, pdfBaseData);
+            addAttributeInfo(document, pdfBaseData);
 
             //定义OutputStream
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             //把PDF写入到OutputStream和文件中
             document.save(out);
-            document.save(filePath);
+            document.save(EVIDENCE_FILE_PATH);
             document.close();
             return out;
         } catch (Exception e) {
@@ -493,33 +557,85 @@ public class PdfTransportationImpl
         PdfBaseData pdfBaseData) throws WeIdBaseException {
 
         try {
-            PresentationE presentation;
+            PresentationE presentation = new PresentationE();
             CredentialPojo credentialPojo;
-            Map<String, Object> claimMap;
+            LinkedHashMap<String, String> plainClaimMap = new LinkedHashMap<>(5);
+            List<CredentialPojo> credentialPojoList = new ArrayList<>(3);
+            List<CredentialPojo> creList = new ArrayList<>(1);
 
             //获取presentation中的cliam信息为map
             if (object instanceof PresentationE) {
-                try {
-                    presentation = (PresentationE) object;
-                } catch (Exception e) {
+                presentation = (PresentationE) object;
+
+                //处理credentialList不存在的情况
+                if (presentation.getVerifiableCredential().size() == 0) {
                     logger.error(
-                            "buildPdf4SpecTpl due to cast object to presentation error.", e);
-                    throw new WeIdBaseException(ErrorCode.DATA_TYPE_CASE_ERROR);
+                            "buildPdf4SpecTpl due to credentialList size equal to zero error.");
+                    throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
-                claimMap = presentation.getVerifiableCredential().get(0).getClaim();
+
+                //多签情况递归获取最内层credentialList，否则直接获取credentialList
+                CredentialPojo cp = presentation.getVerifiableCredential().get(0);
+                if (cp.getClaim().containsKey("credentialList") && cp.getClaim().size() == 1) {
+                    getMultiSignClaim(presentation.getVerifiableCredential().get(0), creList);
+                    credentialPojoList = creList;
+                } else {
+                    credentialPojoList = presentation.getVerifiableCredential();
+                }
             } else if (object instanceof CredentialPojo) {
-                try {
-                    credentialPojo = (CredentialPojo) object;
-                } catch (Exception e) {
-                    logger.error(
-                            "buildPdf4SpecTpl due to cast object to credential error.", e);
-                    throw new WeIdBaseException(ErrorCode.DATA_TYPE_CASE_ERROR);
+                credentialPojo = (CredentialPojo) object;
+
+                //多签情况递归获取最内层credentialList，否则直接获取credentialList
+                if (credentialPojo.getClaim().containsKey("credentialList")
+                        && credentialPojo.getClaim().size() == 1) {
+                    getMultiSignClaim(credentialPojo, creList);
+                    credentialPojoList = creList;
+                } else {
+                    credentialPojoList.add(credentialPojo);
                 }
-                claimMap = credentialPojo.getClaim();
             } else {
                 logger.error(
                         "buildPdf4SpecTpl due to object illegal error.");
                 throw new WeIdBaseException(ErrorCode.DATA_TYPE_CASE_ERROR);
+            }
+
+            int creListSize = credentialPojoList.size();
+
+            Map<String, Object>[] salt = new HashMap[creListSize];
+            Map<String, Object>[] claim = new HashMap[creListSize];
+            StringBuilder prefix = new StringBuilder();
+
+            //处理credentialList，把多级claimMap转为单级map
+            for (int i = 0;i < creListSize; i++) {
+                //利用cptId到链上获取CPT
+                Integer cptId = presentation.getVerifiableCredential().get(i).getCptId();
+                ResponseData<Cpt> res = cptService.queryCpt(cptId);
+                Cpt cpt = res.getResult();
+                Map<String, Object> cptMap = cpt.getCptJsonSchema();
+                Map<String, Object> propMap = new HashMap<>(3);
+
+                //多级cpt包含properties
+                if (cptMap.containsKey("properties")) {
+                    try {
+                        propMap = DataToolUtils.objToMap(cptMap.get("properties"));
+                    } catch (Exception e) {
+                        logger.error("addClaim2Pdf error due to objToMap cptMap.", e);
+                        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+                    }
+                }
+
+
+                //从presentation获取salt和claim
+                salt[i] = presentation.getVerifiableCredential().get(i).getSalt();
+                claim[i] = presentation.getVerifiableCredential().get(i).getClaim();
+
+                //获取claim的k-v数据
+                if (salt[i] != null && claim[i] != null) {
+                    buildDisclosureInfo(plainClaimMap, salt[i], claim[i], prefix, propMap, true);
+                } else {
+                    logger.error("addClaim2Pdf due claim or salt does not exist error.");
+                    throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+                }
             }
 
             InputStream is = this
@@ -527,6 +643,11 @@ public class PdfTransportationImpl
                 .getClassLoader()
                 .getResourceAsStream("NotoSansCJKtc-Regular.ttf");
             TTFParser parser = new TTFParser();
+            if (is == null) {
+                logger.error(
+                        "buildPdf4SpecTpl due to font stream is null error.");
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+            }
             TrueTypeFont font = parser.parse(is);
             PDType0Font fontChinese = PDType0Font.load(document, font, true);
 
@@ -535,23 +656,26 @@ public class PdfTransportationImpl
 
             if (acroForm == null) {
                 logger.error(
-                        "buildPdf4SpecTpl due to acroForm is null error.");
-                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_BASE_ERROR);
+                        "buildPdf4SpecTpl due to pdf template acroForm is null error.");
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
             }
 
             PDResources resources = new PDResources();
             resources.add(fontChinese);
 
-            resources.put(COSName.getPDFName("FCH"), fontChinese);
-            String defaultAppearanceString = "/FCH 0 Tf 0 g";
+            resources.put(COSName.getPDFName("NotoSansCJKTC"), fontChinese);
+            String defaultAppearanceString = "/NotoSansCJKTC 0 Tf 0 g";
             acroForm.setDefaultAppearance(defaultAppearanceString);
             acroForm.setDefaultResources(resources);
             acroForm.setNeedAppearances(false);
 
             //遍历PDFDocumnet中的key值，设置相应的value值
             for (PDField field : acroForm.getFields()) {
-                if (claimMap.containsKey(field.getPartialName())) {
-                    String text = claimMap.get(field.getPartialName()).toString();
+                if (plainClaimMap.containsKey(field.getPartialName().replace('-', '.'))) {
+                    String text =
+                        String
+                        .valueOf(plainClaimMap
+                        .get(field.getPartialName().replace('-', '.')));
                     if (fontChinese.willBeSubset()) {
                         int offset = 0;
                         while (offset < text.length()) {
@@ -563,13 +687,13 @@ public class PdfTransportationImpl
                     field.setValue(text);
                 } else {
                     logger.error(
-                            "buildPdf4SpecTpl due to pdf template not match with claim error.");
+                            "buildPdf4SpecTpl due to pdf template doesn't match with claim error.");
                     throw new WeIdBaseException(ErrorCode.TRANSPORTATION_BASE_ERROR);
                 }
             }
 
             //设置输出pdf文件的属性信息(PdfBaseData中每个字段），并关闭PDDocument
-            addAttr4Pdf(document, pdfBaseData);
+            addAttributeInfo(document, pdfBaseData);
 
             //定义OutputStream
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -578,11 +702,9 @@ public class PdfTransportationImpl
             fontChinese.subset();
             document.registerTrueTypeFontForClosing(font);
 
-            document.save(out);
-
             //把PDF写入到OutputStream和文件中
-            String filePath = "tmp.pdf";
-            document.save(filePath);
+            document.save(out);
+            document.save(EVIDENCE_FILE_PATH);
             document.close();
             return out;
         } catch (Exception e) {
@@ -596,26 +718,29 @@ public class PdfTransportationImpl
      *
      * @param pdfTransportation  PDF流数据
      * @param pdfBaseData 存PDF属性信息的PdfBaseData
-     * @param filePath 输出文件的位置
      * @throws WeIdBaseException exception
      */
     private void resolvePdfStream(
-        OutputStream pdfTransportation,
-        PdfBaseData pdfBaseData,
-        String filePath) throws WeIdBaseException {
+            OutputStream pdfTransportation,
+            PdfBaseData pdfBaseData) throws WeIdBaseException {
 
         try {
             //加载文件流为PDDocument
             PDDocument document;
 
-            document = PDDocument.load(parse(pdfTransportation));
+            if (pdfTransportation == null) {
+                logger.error("resolvePdfStream due to pdfTransportation stream is null error.");
+                throw new WeIdBaseException(ErrorCode.ILLEGAL_INPUT);
+            } else {
+                document = PDDocument.load(parse(pdfTransportation));
+            }
 
             //将PDF中属性信息解析到PdfBaseData数据结构中
             PDDocumentInformation pdd = document.getDocumentInformation();
             buildPdfDataFromPdf(pdd, pdfBaseData);
 
-            //把doc转为pdf文件
-            document.save(filePath);
+            //把document转为pdf文件
+            document.save(EVIDENCE_FILE_PATH);
             document.close();
         } catch (Exception e) {
             logger.error("resolvePdfStream error.", e);
@@ -656,18 +781,10 @@ public class PdfTransportationImpl
             PdfBaseData pdfBaseData = setPdfBaseData(object, property, evidenceAddress);
 
             //处理PDF显示信息和属性信息
-            String filePath = "tmp.pdf";
-            OutputStream ret = buildPdf4DefaultTpl(object, pdfBaseData, filePath);
+            OutputStream ret = buildPdf4DefaultTpl(object, pdfBaseData);
 
-            //对文件的SHA-256哈希值进行存证
-            ResponseData<Boolean> setEvidenceRes = evidenceService
-                .setHashValue(getChecksum(filePath), evidenceAddress.getResult(),
-                    weIdAuthentication.getWeIdPrivateKey());
-            if (!setEvidenceRes.getResult()) {
-                logger.error("SetHashValue error.");
-                return new ResponseData<>(null,
-                    ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
-            }
+            //对文件的SHA-256哈希值进行存证,完成后删除存证文件
+            setEvidence(evidenceAddress, weIdAuthentication);
 
             logger.info("PdfTransportationImpl serialization finished.");
             return new ResponseData<>(ret, ErrorCode.SUCCESS);
@@ -730,18 +847,10 @@ public class PdfTransportationImpl
             PdfBaseData pdfBaseData = setPdfBaseData(object, property, evidenceAddress);
 
             //处理PDF显示信息和属性信息
-            String filePath = "tmp.pdf";
             OutputStream ret = buildPdf4SpecTpl(object, document, pdfBaseData);
 
-            //对文件的SHA-256哈希值进行存证
-            ResponseData<Boolean> setEvidenceRes = evidenceService
-                .setHashValue(getChecksum(filePath), evidenceAddress.getResult(),
-                    weIdAuthentication.getWeIdPrivateKey());
-            if (!setEvidenceRes.getResult()) {
-                logger.error("SetHashValue error.");
-                return new ResponseData<>(null,
-                    ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
-            }
+            //对文件的SHA-256哈希值进行存证,完成后删除存证文件
+            setEvidence(evidenceAddress, weIdAuthentication);
 
             logger.info("PdfTransportationImpl serialization finished.");
             return new ResponseData<>(ret, ErrorCode.SUCCESS);
@@ -781,11 +890,10 @@ public class PdfTransportationImpl
         logger.info("begin to execute PdfTransportationImpl deserialization from InputStream.");
         try {
             PdfBaseData pdfBaseData = new PdfBaseData();
-            String filePath = "tmp.pdf";
-            resolvePdfStream(pdfTransportation, pdfBaseData, filePath);
+            resolvePdfStream(pdfTransportation, pdfBaseData);
 
             //验证存证逻辑
-            HashString checkSum = new HashString(getChecksum(filePath));
+            HashString checkSum = new HashString(getChecksum(EVIDENCE_FILE_PATH));
             String address = pdfBaseData.getAddress();
             ResponseData<Boolean> resVerify = evidenceService
                 .verify(checkSum, address);
@@ -794,11 +902,18 @@ public class PdfTransportationImpl
                 return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
             }
 
+            //存证完成后删除文件
+            File evidenceFile = new File(EVIDENCE_FILE_PATH);
+            if (!evidenceFile.delete()) {
+                logger.error("Evidence file does not exist error.");
+                return new ResponseData<>(null, ErrorCode.BASE_ERROR);
+            }
+
             //创建编解码实体对象并对pdfBaseData中的数据进行解码
             EncodeData encodeData = new EncodeData(
                 pdfBaseData.getId(),
                 pdfBaseData.getOrgId(),
-                pdfBaseData.getData().toString(),
+                String.valueOf(pdfBaseData.getData()),
                 super.getWeIdAuthentication()
             );
 
@@ -913,11 +1028,16 @@ public class PdfTransportationImpl
             //生成一个中间数据
             disclosureInfo[i] = new LinkedHashMap<>();
             StringBuilder prefix = new StringBuilder();
-            buildDisclosureInfo(disclosureInfo[i], salt, claim, prefix, propMap);
+            if (claim != null && salt != null) {
+                buildDisclosureInfo(disclosureInfo[i], salt, claim, prefix, propMap, false);
+            } else {
+                logger.error("addClaim2Pdf due to claim or salt does not exist error.");
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+            }
 
             //把中间数据写入到对应PDF页面中
             if (i + pageAddNum <= document.getPages().getCount()) {
-                pageAddNum = addData2Pdf(i + pageAddNum, document, disclosureInfo[i], cptMap);
+                pageAddNum = drawPdf(i + pageAddNum, document, disclosureInfo[i], cptMap);
             }
         }
     }
@@ -931,7 +1051,7 @@ public class PdfTransportationImpl
      * @param cptJson 用于获取当前CLaim的title
      * @return 增对单条disclosureInfo信息跨行，以及Claim跨页情况，返回本函数新增的page数量
      */
-    private int addData2Pdf(
+    private int drawPdf(
         int i,
         PDDocument document,
         LinkedHashMap<String, String> disclosureInfo,
@@ -939,9 +1059,6 @@ public class PdfTransportationImpl
 
         try {
             int pageAddNum = 0;
-
-            //设置字体大小
-            int fontSize = 12;
 
             //获取需要写入PDF的索引
             PDPageContentStream contents;
@@ -957,16 +1074,12 @@ public class PdfTransportationImpl
 
             //为当前页面加入标题
             if (cptJson.containsKey("title")) {
-                String title = cptJson.get("title").toString();
-                contents.beginText();
-                contents.setFont(fontChinese, 18);
-                contents.newLineAtOffset(260, 750);
-                contents.showText(title);
-                contents.endText();
+                String title = String.valueOf(cptJson.get("title"));
+                addContent(contents, title, POS_TITLE_X, POS_TITLE_Y, fontChinese, FONT_SIZE_TITLE);
             }
 
             //设置写入内容的初始位置
-            int pos = 700;
+            float pos = POS_CONTENT_Y;
 
             //遍历disclosureInfo写入到PDF中
             for (Map.Entry<String, String> entry : disclosureInfo.entrySet()) {
@@ -974,28 +1087,35 @@ public class PdfTransportationImpl
                 output = output + entry.getValue();
 
                 //获取当前字符串长度并处理多行情况
-                float outputLength = calcStrLength(output, fontSize, fontChinese);
+                float outputLength = calcStrLength(output, FONT_SIZE_CONTENT, fontChinese);
                 ArrayList<String> lines = new ArrayList<>();
                 int lineSize;
-                if (outputLength > margin) {
-                    buildLines(output, fontSize, fontChinese, margin, lines);
+                if (outputLength > MARGIN) {
+                    buildLines(output, FONT_SIZE_CONTENT, fontChinese, lines);
                     lineSize = lines.size();
 
                     //输出当前行的lines
-                    addMultiLine2Pdf(lineSize, contents, fontSize, fontChinese, pos, lines);
+                    addMultiLine2Pdf(
+                        lineSize,
+                        contents,
+                        FONT_SIZE_CONTENT,
+                        fontChinese,
+                        pos,
+                        lines);
                     pos = pos - 15 * (lineSize - 1);
                     pos = pos - 30;
                 } else {
-                    contents.beginText();
-                    contents.setFont(fontChinese, fontSize);
-                    contents.newLineAtOffset(100, pos);
-                    contents.showText(output);
-                    contents.endText();
+                    addContent(
+                        contents,
+                        output,
+                        POS_CONTENT_X,
+                        pos, fontChinese,
+                        FONT_SIZE_CONTENT);
                     pos = pos - 30;
                 }
 
                 //单个Claim跨多页情况
-                if (pos < 50) {
+                if (pos < BOTTOM) {
                     //关闭旧页面
                     contents.close();
                     PDPage page = new PDPage();
@@ -1005,7 +1125,7 @@ public class PdfTransportationImpl
                     pageAddNum++;
 
                     //设置新页面的位置
-                    pos = 700;
+                    pos = POS_CONTENT_Y;
                 }
             }
             contents.close();
@@ -1029,11 +1149,17 @@ public class PdfTransportationImpl
         return new ByteArrayInputStream(baos.toByteArray());
     }
 
+    /**
+     * 用MD_ALGORITHM算法计算文件哈希值.
+     * @param filePath 需计算HASH的文件路径
+     * @return 产生哈希值的字节数组
+     * @throws Exception 异常
+     */
     private byte[] createChecksum(String filePath) throws Exception {
 
         InputStream fis = new FileInputStream(filePath);
-        byte[] buffer = new byte[1024];
-        MessageDigest checksum = MessageDigest.getInstance("SHA-256");
+        byte[] buffer = new byte[BUFFER_SIZE];
+        MessageDigest checksum = MessageDigest.getInstance(MD_ALGORITHM);
         int num = 0;
 
         do {
@@ -1062,7 +1188,7 @@ public class PdfTransportationImpl
         for (byte b : bytes) {
             ret.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
         }
-        return "0x" + ret.toString();
+        return "0x" +  ret.toString();
     }
 
     /**
@@ -1139,5 +1265,56 @@ public class PdfTransportationImpl
             pdfBaseData.setData(data);
         }
         return pdfBaseData;
+    }
+
+    /**
+     * 处理多签情况，获取最内层的credentialList.
+     * @param credentialPojo 多签的credentialPojo
+     * @param creList 用于返回的最内层credentialList
+     * @return 最内层的credentialList
+     */
+    private List<CredentialPojo> getMultiSignClaim(
+        CredentialPojo credentialPojo,
+        List<CredentialPojo> creList) {
+
+
+        Map<String, Object> claim = credentialPojo.getClaim();
+
+        //如果是多签情况，claim只包含一个key值，且为credentialList
+        if (claim.containsKey("credentialList")  && claim.size() == 1) {
+            Object obj = claim.get("credentialList");
+            if (!(obj instanceof List)) {
+                logger.error("getMultiSignClaim due to error.");
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+            }
+            ArrayList<Object> objList = (ArrayList<Object>) obj;
+            if (!(objList.get(0) instanceof CredentialPojo)) {
+                logger.error("getMultiSignClaim error.");
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+            }
+            //logic
+            getMultiSignClaim((CredentialPojo) objList.get(0), creList);
+        } else {
+            creList.add(credentialPojo);
+        }
+        return creList;
+    }
+
+    private void setEvidence(
+        ResponseData<String> evidenceAddress,
+        WeIdAuthentication weIdAuthentication) throws Exception {
+
+        ResponseData<Boolean> setEvidenceRes = evidenceService
+                .setHashValue(getChecksum(EVIDENCE_FILE_PATH), evidenceAddress.getResult(),
+                        weIdAuthentication.getWeIdPrivateKey());
+        if (!setEvidenceRes.getResult()) {
+            logger.error("SetHashValue error.");
+            throw new WeIdBaseException(ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
+        File evidenceFile = new File(EVIDENCE_FILE_PATH);
+        if (!evidenceFile.delete()) {
+            logger.error("Evidence file does not exist error.");
+            throw new WeIdBaseException(ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
     }
 }
