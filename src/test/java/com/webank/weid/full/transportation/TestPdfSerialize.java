@@ -1,10 +1,7 @@
 package com.webank.weid.full.transportation;
 
 import java.io.OutputStream;
-import java.util.HashMap;
 
-import mockit.Mock;
-import mockit.MockUp;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -17,9 +14,6 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.TransportationFactory;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.crypto.CryptService;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.entity.CryptType;
 
 /**
  * test serialize class.
@@ -31,7 +25,6 @@ public class TestPdfSerialize extends TestBaseTransportation {
     private static PresentationE presentation4MlCpt;
     private static PresentationE presentation4MultiCpt;
     private static PresentationE presentation4SpecTpl;
-
 
     @Override
     public synchronized void testInit() {
@@ -207,10 +200,30 @@ public class TestPdfSerialize extends TestBaseTransportation {
     }
 
     /**
-     * 传入指定模板目录为空字符串.
+     * 指定复杂PDF模板测试.
      */
     @Test
     public void testSerializeCase10() {
+        ResponseData<OutputStream> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(
+                        presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "src/test/resources/test-template-complex.pdf"
+                );
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(
+                ErrorCode.SUCCESS.getCode(),
+                response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+    }
+
+    /**
+     * 传入指定模板目录为空字符串.
+     */
+    @Test
+    public void testSerializeCase11() {
         ResponseData<OutputStream> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
@@ -230,7 +243,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
      * 传入指定模板目录为非法字符串.
      */
     @Test
-    public void testSerializeCase11() {
+    public void testSerializeCase12() {
         ResponseData<OutputStream> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
@@ -246,30 +259,22 @@ public class TestPdfSerialize extends TestBaseTransportation {
     }
 
     /**
-     * mock异常情况.
+     * 传入模板与披露信息不匹配.
      */
     @Test
-    public void testSerializeCase12() {
-
-        MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
-            @Mock
-            public CryptService getCryptService(CryptType cryptType) {
-                return new HashMap<String, CryptService>().get("key");
-            }
-        };
-
+    public void testSerializeCase13() {
         ResponseData<OutputStream> response = TransportationFactory
-            .newPdfTransportation()
-            .specify(verifier)
-            .serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.CIPHER),
-                weIdAuthentication);
-        mockTest.tearDown();
+                .newPdfTransportation()
+                .serialize(
+                        presentation4SpecTpl,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "src/test/resources/test-template-complex.pdf"
+                );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
-            response.getErrorCode().intValue());
+                ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR.getCode(),
+                response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
 }
