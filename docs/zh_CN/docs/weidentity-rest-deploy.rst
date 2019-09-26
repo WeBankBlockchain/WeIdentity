@@ -149,12 +149,6 @@ Server 的环境要求与 WeIdentity-Java-SDK 的 `环境要求 <https://weident
 
 RestServer 支持任何使用标准 HTTP/HTTPS 协议的 RESTful API 客户端访问，详细接口说明可见 API 文档。我们提供了一套 Postman 的环境与请求集供快速集成。使用步骤如下：
 
-* 点击Postman的Import按钮，导入环境文件 ``weidentity-restservice.postman_environment.json`` 和请求集 ``invoke.postman_collection.json``
-* 首先确认weidentity-restservice这个Environment已导入成功，它包含两个变量host和httpport
-    * 修改环境变量host属性的值为安装部署RestServer的服务器地址
-    * 修改环境变量httpport属性的值为1.3节中的Server监听端口地址
-* 接下来确认Invoke这个Collection已导入成功，可以从侧边栏中找到
-* 现在，可以调用Invoke这个Collection中的各类API了。您可以从无参数请求CreateWeId开始——看看返回结果是不是和API文档中一致，成功创建一个WeIdentity DID
 * 点击Postman的Import按钮，导入环境文件 ``weidentity-restservice.postman_environment.json`` 和请求集 ``invoke.postman_collection.json`` 。这两个文件可以在 GitHub代码仓库的 \ `对应目录 <https://github.com/WeBankFinTech/weid-http-service/tree/develop/PostmanConfig>`_\ 下找到
 * 确认 ``weidentity-restservice`` 这个环境文件已导入成功，它包含两个环境变量 ``host`` 和 ``httpport``
     * 修改环境变量 ``host`` 属性的值为安装部署 ``RestServer`` 的服务器地址
