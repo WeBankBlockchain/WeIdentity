@@ -1,0 +1,65 @@
+{
+    "courses": [
+        {
+            "code": "123456",
+            "duration": "2019-08-19",
+            "endDate": "2019-08-19",
+            "grade": "A",
+            "language": "中文",
+            "score": 99,
+            "startDate": "2019-08-19",
+            "title": {
+                "cn": "語文",
+                "en": 0
+            }
+        },
+        {
+            "code": 321654,
+            "duration": "2019-08-19",
+            "endDate": "2019-08-19",
+            "grade": "A",
+            "language": "英文",
+            "score": 99,
+            "startDate": "2019-08-19",
+            "title": {
+                "cn": "數學",
+                "en": 0
+            }
+        }
+    ],
+    "cert": {
+        "category": {
+            "cn": "證書",
+            "en": 0
+        },
+        "code": "123456",
+        "issueDate": "2019-08-19",
+        "permanent": "shenzhen",
+        "title": {
+            "cn": "學生證書",
+            "en": 0
+        },
+        "totalDuration": "10年",
+        "validBefore": "2029-08-19"
+    },
+    "fullname": {
+        "cn": 0,
+        "en": "shenzhen studentcert"
+    },
+    "issuers": [
+        {
+            "name": {
+                "cn": "深圳市教育局",
+                "en": 0
+            }
+        },
+        {
+            "name": {
+                "cn": "教育部",
+                "en": 0
+            }
+        }
+    ],
+    "did": "123456789",
+    "weid": "did:weid:101:0xa2c6ef0ea932fd3332da818a2608cb7665e55895"
+}
