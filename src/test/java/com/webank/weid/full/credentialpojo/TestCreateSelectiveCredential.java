@@ -40,6 +40,7 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialPojoUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * createCredential method for testing CredentialService.
@@ -103,6 +104,39 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
             .getResult();
         verifyResp = credentialPojoService.verify(doubleSigned.getIssuer(), tripleSigned);
         Assert.assertTrue(verifyResp.getResult());
+    }
+
+    @Test
+    public void testMultiSignPojo_fromToJson() throws Exception {
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(selectiveCredentialPojo);
+        credPojoList.add(credentialPojo);
+        WeIdAuthentication callerAuth = TestBaseUtil
+            .buildWeIdAuthentication(createWeIdResultWithSetAttr);
+        CredentialPojo doubleSigned =
+            credentialPojoService.addSignature(credPojoList, callerAuth).getResult();
+        System.out.println(doubleSigned);
+        String serializedjson = doubleSigned.toJson();
+        System.out.println(serializedjson);
+        CredentialPojo cpj = CredentialPojo.fromJson(serializedjson);
+        Assert.assertTrue(CredentialPojoUtils.isEqual(cpj, doubleSigned));
+    }
+
+    @Test
+    public void testMultiSignPojo_sedeserialize() throws Exception {
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(selectiveCredentialPojo);
+        credPojoList.add(credentialPojo);
+        WeIdAuthentication callerAuth = TestBaseUtil
+            .buildWeIdAuthentication(createWeIdResultWithSetAttr);
+        CredentialPojo doubleSigned =
+            credentialPojoService.addSignature(credPojoList, callerAuth).getResult();
+        System.out.println(doubleSigned);
+        String serializedjson = DataToolUtils.serialize(doubleSigned);
+        System.out.println(serializedjson);
+        CredentialPojo testcpj = DataToolUtils.deserialize(serializedjson, CredentialPojo.class);
+        System.out.println(testcpj);
+        Assert.assertTrue(CredentialPojoUtils.isEqual(doubleSigned, testcpj));
     }
 
     /**
