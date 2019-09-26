@@ -5,7 +5,7 @@ app_xml_config_tpl=${java_source_code_dir}/src/main/resources/fisco.properties.t
 app_xml_config=${java_source_code_dir}/src/main/resources/fisco.properties
 weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties.tpl
 weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
-font=${java_source_code_dir}/src/test/resources/NotoSansCJKtc-Regular.ttf
+font=${java_source_code_dir}/src/main/resources/NotoSansCJKtc-Regular.ttf
 
 function modify_config()
 {
@@ -94,7 +94,7 @@ function deploy_contract()
 function  install_font()
 {
     sudo mkdir -p /usr/share/fonts/custom&&
-    sudo cp ${font}  /usr/share/fonts/custom/&&
+    sudo cp ${font} /usr/share/fonts/custom/&&
     sudo apt install xfonts-utils -y&&
     sudo mkfontscale&&
     sudo mkfontdir&&
@@ -104,8 +104,8 @@ function  install_font()
 
 function main()
 {
-    install_font
     gradle_build_sdk
+    install_font
     check
     deploy_contract
     modify_config
