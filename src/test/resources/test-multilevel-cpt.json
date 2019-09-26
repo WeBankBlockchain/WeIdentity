@@ -1,0 +1,171 @@
+{
+    "$id": "certs/v1.0",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "StudentCert",
+    "type": "object",
+    "required": [ "did", "fullname", "cert", "issuers"],
+    "properties": {
+        "did":
+        {"type": "string",
+            "name": "DID"
+        },
+        "weid":
+        {"type": "string",
+            "name": "WEID"
+        },
+        "fullname": {
+            "type": "object",
+            "properties": {
+                "cn": {
+                    "type": "string",
+                    "name": "中文全名"
+                },
+                "en": {
+                    "type": "string",
+                    "name": "英文全名"
+                }
+            }
+        },
+
+        "cert":{
+            "type": "object",
+            "name": "证书",
+            "required": ["code", "title", "category", "issueDate"],
+            "properties": {
+                "code":
+                {"type": "string",
+                    "name": "证书代码"
+                },
+                "title": {
+                    "type": "object",
+                    "name": "题目",
+                    "properties": {
+                        "cn":
+                        {"type": "string",
+                            "name": "中文名称"
+                        },
+                        "en":
+                        {"type": "string",
+                            "name": "英文名称："
+                        }
+                    }
+                },
+                "category": {
+                    "type": "object",
+                    "name": "种类",
+                    "properties": {
+                        "cn":
+                        {"type": "string",
+                            "name": "中文名称"
+                        },
+                        "en":
+                        {"type": "string",
+                            "name": "英文名称"
+                        }
+                    }
+                },
+                "totalDuration": {
+                    "type": "number",
+                    "name": "有效时长"
+                },
+                "issueDate": {
+                    "type": "string",
+                    "name": "签发时间",
+                    "format": "date-time"
+                },
+                "validBefore": {
+                    "type": "string",
+                    "name": "验证有效期",
+                    "format": "date-time"
+                },
+                "permanent":
+                {"type": "boolean",
+                    "name": "是否永久有效"
+                }
+            }
+        },
+
+        "issuers": {
+            "type": "array",
+            "name": "发布机构",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "name": "机构名称",
+                "properties": {
+                    "name": {
+                        "type": "object",
+                        "name": "发布机构名称",
+                        "properties": {
+                            "cn":
+                            {"type": "string",
+                                "name": "机构中文名"
+                            },
+                            "en":
+                            {"type": "string",
+                                "name": "机构英文名"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+
+        "courses": {
+            "type": "array",
+            "name": "课程",
+            "items": {
+                "type": "object",
+                "name": "课程名称",
+                "properties": {
+                    "code":
+                    {"type": "string",
+                        "name": "课程代码"
+
+                    },
+                    "title": {
+                        "type": "object",
+                        "name": "课程名称",
+                        "properties": {
+                            "cn":
+                            {"type": "string",
+                                "name": "课程中文名"
+                            },
+                            "en":
+                            {"type": "string",
+                                "name": "课程英文名"
+                            }
+                        }
+                    },
+                    "startDate": {
+                        "type": "string",
+                        "name": "开始时间",
+                        "format": "date"
+                    },
+                    "endDate": {
+                        "type": "string",
+                        "name": "终止时间",
+                        "format": "date"
+                    },
+                    "duration": {
+                        "type": "number"
+                    },
+                    "grade":
+                    {"type": "string",
+                        "name": "等级"
+                    },
+                    "score":
+                    {
+                        "type": "string",
+                        "name": "分数"
+                    },
+                    "language":
+                    {
+                        "type": "string",
+                        "name": "语言"
+                    }
+                }
+            }
+        }
+    }
+}

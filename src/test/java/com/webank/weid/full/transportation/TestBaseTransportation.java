@@ -107,7 +107,7 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
         List<CredentialPojo> credentialList = new ArrayList<>();
         credentialList.add(credentialPojoResponse.getResult());
 
-        PresentationPolicyE presentationPolicyE = PresentationPolicyE.create("testPolicy.json");
+        PresentationPolicyE presentationPolicyE = PresentationPolicyE.create("test-policy.json");
         if (presentationPolicyE == null) {
             return null;
         }
@@ -157,7 +157,7 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
         credentialList.add(credentialPojoResponse2.getResult());
         credentialList.add(credentialPojoResponse3.getResult());
 
-        PresentationPolicyE presentationPolicyE = PresentationPolicyE.create("testPolicy.json");
+        PresentationPolicyE presentationPolicyE = PresentationPolicyE.create("test-policy.json");
         if (presentationPolicyE == null) {
             return null;
         }
@@ -201,7 +201,7 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
         credentialList.add(credentialPojoResponse.getResult());
 
         PresentationPolicyE presentationPolicyE = PresentationPolicyE
-            .create("testSpecTplPolicy.json");
+            .create("test-spectpl-policy.json");
         if (presentationPolicyE == null) {
             return null;
         }
