@@ -89,6 +89,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
 
         ResponseData<PresentationE> resDeserialize = TransportationFactory
             .newPdfTransportation()
+            .specify(verifier)
             .deserialize(
                 response.getResult(),
                 PresentationE.class,
@@ -176,76 +177,12 @@ public class TestPdfDeserialize extends TestBaseTransportation {
         Assert.assertEquals(null, resDeserialize.getResult());
     }
 
-    /**
-     * mock异常情况.
-     */
-    @Test
-    public void testDeserializeCase7() {
-        ResponseData<OutputStream> response = TransportationFactory
-            .newPdfTransportation()
-            .specify(verifier)
-            .serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.CIPHER),
-                weIdAuthentication
-            );
-
-        MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
-            @Mock
-            public CryptService getCryptService(CryptType cryptType) {
-                return new HashMap<String, CryptService>().get("key");
-            }
-        };
-
-        ResponseData<PresentationE> resDeserialize = TransportationFactory
-            .newPdfTransportation()
-            .deserialize(response.getResult(), PresentationE.class, weIdAuthentication);
-        mockTest.tearDown();
-        LogUtil.info(logger, "deserialize", resDeserialize);
-        Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
-            resDeserialize.getErrorCode().intValue()
-        );
-        Assert.assertNull(resDeserialize.getResult());
-    }
-
-    /**
-     * mock异常情况.
-     */
-    @Test
-    public void testDeserializeCase8() {
-        ResponseData<OutputStream> response = TransportationFactory
-            .newPdfTransportation()
-            .specify(verifier)
-            .serialize(
-                presentation,
-                new ProtocolProperty(EncodeType.CIPHER),
-                weIdAuthentication);
-
-        MockUp<EncodeType> mockTest = new MockUp<EncodeType>() {
-            @Mock
-            public EncodeType getObject(String value) {
-                return null;
-            }
-        };
-
-        ResponseData<PresentationE> resDeserialize = TransportationFactory
-            .newPdfTransportation()
-            .deserialize(response.getResult(), PresentationE.class, weIdAuthentication);
-        mockTest.tearDown();
-        LogUtil.info(logger, "deserialize", resDeserialize);
-        Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
-            resDeserialize.getErrorCode().intValue()
-        );
-        Assert.assertNull(resDeserialize.getResult());
-    }
 
     /**
      * credentialPojo测试.
      */
     @Test
-    public void testDeserializeCase9() {
+    public void testDeserializeCase7() {
         List<CredentialPojo> credentialPojoList = presentation.getVerifiableCredential();
         CredentialPojo credentialPojo = new CredentialPojo();
         if (credentialPojoList.size() > 0) {

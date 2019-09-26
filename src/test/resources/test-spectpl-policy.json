@@ -1,0 +1,15 @@
+{
+    "id": 123456,
+    "version": 1,
+    "orgId": "organizationA",
+    "policyPublisherWeId": "did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0",
+    "policy": {
+        "1005": {
+            "fieldsToBeDisclosed": {
+                "name" : 1,
+                "date" : 1,
+                "issuer" : 1
+            }
+        }
+    }
+}
