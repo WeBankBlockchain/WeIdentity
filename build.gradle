@@ -198,6 +198,14 @@ jar {
             from file('src/main/resources/')
             into 'dist/conf'
         }
+        copy {
+            from file('dist/lib/NotoSansCJKtc-Regular.ttf')
+            into 'src/main/resources/'
+        }
+        copy {
+            from file('dist/lib/NotoSansCJKtc-Regular.ttf')
+            into 'src/test/resources/'
+        }
         if (!gradle.startParameter.isOffline()) {
             copy {
                 from configurations.runtime
@@ -274,7 +282,7 @@ if (!gradle.startParameter.isOffline()) {
                 pom.project {
                     name project.name
                     packaging 'jar'
-                    description 'Java sdk for WeIdentity.'
+                    description 'Java SDK for WeIdentity.'
                     url 'https://github.com/WeBankFinTech/weid-java-sdk'
 
                     scm {
