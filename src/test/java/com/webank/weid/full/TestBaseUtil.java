@@ -243,7 +243,7 @@ public class TestBaseUtil {
         buildCptJsonSchemaDataFromFile4MultiCpt() throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/testSingleLevelClaim.json");
+        JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -257,7 +257,7 @@ public class TestBaseUtil {
         buildCptJsonSchemaDataFromFile4MlCpt() throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/testMultiLevelClaim.json");
+        JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -271,7 +271,7 @@ public class TestBaseUtil {
         buildCptJsonSchemaDataFromFile4SpecTplCpt() throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/testSpecTplClaim.json");
+        JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -388,7 +388,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/testMultiLevelCpt.json");
+            JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -408,7 +408,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/testSingleLevelCpt.json");
+            JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -428,7 +428,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/testSpecTplCpt.json");
+            JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -461,7 +461,7 @@ public class TestBaseUtil {
     public static HashMap<String, Object> buildCptJsonSchema() {
 
         HashMap<String, Object> cptJsonSchemaNew = new HashMap<String, Object>(3);
-        cptJsonSchemaNew.put(JsonSchemaConstant.TITLE_KEY, "cpt template");
+        cptJsonSchemaNew.put(JsonSchemaConstant.TITLE_KEY, "Digital Identity");
         cptJsonSchemaNew.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is a cpt template");
 
         HashMap<String, Object> propertitesMap1 = new HashMap<String, Object>(2);

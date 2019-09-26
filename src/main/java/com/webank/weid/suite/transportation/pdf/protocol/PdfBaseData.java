@@ -1,41 +1,33 @@
+/*
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *
+ *       This file is part of weid-java-sdk.
+ *
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weid-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.webank.weid.suite.transportation.pdf.protocol;
 
 import lombok.Getter;
 import lombok.Setter;
 
+import com.webank.weid.suite.transportation.json.protocol.JsonBaseData;
+
+
 @Getter
 @Setter
-public class PdfBaseData {
-
-    /**
-     * 协议版本.
-     */
-    private int version;
-
-    /**
-     * 协议编解码方式-加密/非加密.
-     */
-    private int encodeType;
-
-    /**
-     * 协议数据签发机构.
-     */
-    private String orgId;
-
-    /**
-     * 协议负载数据编码.
-     */
-    private String id;
-
-    /**
-     * 协议数据体.
-     */
-    private Object data;
-
-    /**
-     * 协议通讯类型.
-     */
-    private String type = "AMOP";
+public class PdfBaseData extends JsonBaseData {
 
     /**
      * 存证地址.
