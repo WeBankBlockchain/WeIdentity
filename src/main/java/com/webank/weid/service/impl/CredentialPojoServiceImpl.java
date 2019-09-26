@@ -414,7 +414,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 return errorCode;
             }
             // Then, we verify its list members one-by-one
-            List<CredentialPojo> innerCredentialList;
+            List<Object> innerCredentialList;
             try {
                 if (credential.getClaim().get("credentialList") instanceof String) {
                     // For selectively-disclosed credential, stop here. External check is enough.
@@ -425,11 +425,19 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             } catch (Exception e) {
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
             }
-            for (CredentialPojo innerCredential : innerCredentialList) {
+            for (Object innerCredentialObject : innerCredentialList) {
                 // PublicKey can only be used in the passed-external check, so pass-in null key
-                errorCode = verifyContentInner(innerCredential, null);
-                if (errorCode != ErrorCode.SUCCESS) {
-                    return errorCode;
+                try {
+                    Map<String, Object> map = (Map<String, Object>) innerCredentialObject;
+                    CredentialPojo innerCredential = DataToolUtils
+                        .mapToObj(map, CredentialPojo.class);
+                    errorCode = verifyContentInner(innerCredential, null);
+                    if (errorCode != ErrorCode.SUCCESS) {
+                        return errorCode;
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to convert credentialPojo to object: " + e.getMessage());
+                    return ErrorCode.ILLEGAL_INPUT;
                 }
             }
             return ErrorCode.SUCCESS;
@@ -686,9 +694,19 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             }
         }
 
+        List<Map> trimmedCredentialMapList = new ArrayList<>();
+        for (CredentialPojo credAlive : trimmedCredentialList) {
+            try {
+                trimmedCredentialMapList.add(DataToolUtils.objToMap(credAlive));
+            } catch (Exception e) {
+                logger.error("Failed to convert Credential to map structure.");
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+        }
+
         // The claim will be the wrapper of the to-be-signed credentialpojos
         HashMap<String, Object> claim = new HashMap<>();
-        claim.put("credentialList", trimmedCredentialList);
+        claim.put("credentialList", trimmedCredentialMapList);
         result.setClaim(claim);
 
         Map<String, Object> saltMap = DataToolUtils.clone(claim);
