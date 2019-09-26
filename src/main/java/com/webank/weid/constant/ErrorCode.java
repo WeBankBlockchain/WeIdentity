@@ -408,7 +408,7 @@ public enum ErrorCode {
     TRANSPORTATION_ENCODE_BASE_ERROR(100807, "encode base error, please check the error log."),
 
     /**
-     * transportation protocol encode error.
+     * pdf transfer error.
      */
     TRANSPORTATION_PDF_TRANSFER_ERROR(100808, "pdf transfer error, please check the error log."),
 
