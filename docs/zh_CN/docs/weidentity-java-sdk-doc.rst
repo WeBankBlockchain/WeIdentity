@@ -12935,3 +12935,873 @@ java.util.List<java.lang.String>
 
 ----
 
+PdfTransportation
+^^^^^^^^^^^^^^^^^
+
+1. specify
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.specify
+   接口定义: PdfTransportation specify(List<String> verifierWeIdList)
+   接口描述: 指定transportation的认证者,用于权限控制。
+
+**接口入参**\ :
+
+java.util.List<java.lang.String>
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - verifierWeIdList
+     - List<String>
+     - N
+     - verifierWeId列表
+     -
+
+
+**接口返回**\ :   com.webank.weid.suite.api.transportation.inf.PdfTransportation;
+
+**调用示例**
+
+.. code-block:: java
+
+   PPdfTransportation pdfTransportation = TransportationFactory.newPdfTransportation();
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   pdfTransportation = PdfTransportation.specify(verifierWeIdList);
+
+
+
+----
+
+2. serialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serialize
+   接口定义: <T extends JsonSerializer> ResponseData<byte[]> serialize(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication);
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     -
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<byte[]>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - byte[]
+     - 序列化后PDF文件的byte数组
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - TRANSPORTATION_PDF_TRANSFER_ERROR
+     - 100808
+     - Pdf转换异常
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+
+
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();;
+
+   //原文方式调用
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL),weIdAuthentication);
+
+   //密文方式调用
+   ResponseData<byte[]> result2 =
+      TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER),weIdAuthentication);
+
+
+
+----
+
+
+3. serialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serialize
+   接口定义: <T extends JsonSerializer> ResponseData<Boolean> serialize(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String outputPdfFilePath);
+   接口描述: 用于序列化对象并输出PDF文件,要求对象实现JsonSerializer接口
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     -
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+   * - outputPdfFilePath
+     - String
+     - Y
+     - 输出文件的路径
+     -
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 序列化生成文件的结果
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - TRANSPORTATION_PDF_TRANSFER_ERROR
+     - 100808
+     - Pdf转换异常
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+
+
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();;
+
+   //原文方式调用
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL),weIdAuthentication,"./");
+
+   //密文方式调用
+   ResponseData<byte[]> result2 =
+      TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER),weIdAuthentication,"./");
+
+
+
+----
+
+4. serializeWithTemplate
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serializeWithTemplate
+   接口定义: <T extends JsonSerializer> ResponseData<byte[]> serializeWithTemplate(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String inputPdfTemplatePath);
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     -
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+   * - inputPdfTemplatePath
+     - String
+     - Y
+     - 指定模板位置
+     -
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<byte[]>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - byte[]
+     - 序列化后PDF文件的byte数组
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - TRANSPORTATION_PDF_TRANSFER_ERROR
+     - 100808
+     - Pdf转换异常
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+
+
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+
+   //原文方式调用
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serializeWithTemplate(
+               presentation,
+               new ProtocolProperty(EncodeType.ORIGINAL),
+               weIdAuthentication,
+               "./test-template.pdf");
+
+   //密文方式调用
+   ResponseData<byte[]> result2 =
+      TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serializeWithTemplate(
+               presentation,
+               new ProtocolProperty(EncodeType.CIPHER),
+               weIdAuthentication,
+               "./test-template.pdf");
+
+
+
+----
+
+5. serializeWithTemplate
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serializeWithTemplate
+   接口定义: <T extends JsonSerializer> ResponseData<Boolean> serializeWithTemplate(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String inputPdfTemplatePath,String outputPdfFilePath);
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     -
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+   * - inputPdfTemplatePath
+     - String
+     - Y
+     - 指定模板位置
+     -
+   * - outputPdfFilePath
+     - String
+     - Y
+     - 输出PDF文件位置
+     -
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 序列化生成文件的结果
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - TRANSPORTATION_PDF_TRANSFER_ERROR
+     - 100808
+     - Pdf转换异常
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+
+
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+
+   //原文方式调用
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serializeWithTemplate(
+               presentation,
+               new ProtocolProperty(EncodeType.ORIGINAL),
+               weIdAuthentication,
+               "./test-template.pdf",
+               "./");
+
+   //密文方式调用
+   ResponseData<byte[]> result2 =
+      TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serializeWithTemplate(
+               presentation,
+               new ProtocolProperty(EncodeType.CIPHER),
+               weIdAuthentication,
+               "./test-template.pdf",
+               "./");
+
+
+
+----
+
+6. deserialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.deserialize
+   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(byte[] pdfTransportation, Class clazz, WeIdAuthentication weIdAuthentication);
+   接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - pdfTransportation
+     - byte[ ]
+     - Y
+     - 待反序列化的包含PDF信息的byte数组
+     -
+   * - clazz
+     - Class<T>
+     - Y
+     - 目标类型
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+
+**接口返回**\ :  <T extends JsonSerializer> com.webank.weid.protocol.response.ResponseData\<T>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - <T extends JsonSerializer>
+     - 反序列化后的对象
+     - 业务数据
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - ENCRYPT_KEY_NOT_EXISTS
+     - 100700
+     -  无法获取秘钥
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_VERSION_ERROR
+     - 100802
+     - 协议版本错误
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
+     - 100805
+     - 协议数据无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+
+   //序列化
+   ResponseData<byte[]> result =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL),weIdAuthentication);
+
+   //序列化
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER),weIdAuthentication);
+
+   //原文方式调用反序列化
+   ResponseData<PresentationE> resDeserialize =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .deserialize(response.getResult(),PresentationE.class,weIdAuthentication);
+
+   //密文方式调用反序列化
+   ResponseData<PresentationE> resDeserialize1 =
+      TransportationFactory
+           .newJsonTransportation()
+           .specify(verifierWeIdList)
+           .deserialize(response1.getResult(),PresentationE.class,weIdAuthentication);
+
+
+----
