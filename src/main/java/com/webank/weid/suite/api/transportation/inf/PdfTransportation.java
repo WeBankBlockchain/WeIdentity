@@ -50,12 +50,30 @@ public interface PdfTransportation {
      * @param <T> the type of the element
      * @param property 协议类型，支持加密和非加密两种
      * @param weIdAuthentication WeID公私钥信息
-     * @return outputstream
+     * @return 序列化以后生成PDF文件的byte[]
      */
-    <T extends JsonSerializer> ResponseData<OutputStream> serialize(
-        T object,
-        ProtocolProperty property,
-        WeIdAuthentication weIdAuthentication
+    <T extends JsonSerializer> ResponseData<byte[]> serialize(
+            T object,
+            ProtocolProperty property,
+            WeIdAuthentication weIdAuthentication
+    );
+
+    /**
+     * 协议传输序列化接口. 此方法会将presentation按PDF模板的样式数据序列化为PDF文件，PDF文件的内容为claim表单，
+     * presentation和协议头会放到自定义属性里，同时生成PDF文件。
+     *
+     * @param object 协议存储的实体数据对象
+     * @param property 协议类型，支持加密和非加密两种
+     * @param weIdAuthentication WeID公私钥信息
+     * @param outputPdfFilePath 输出PDF文件的路径
+     * @param <T> the type of the element
+     * @return 序列化结果
+     */
+    <T extends JsonSerializer> ResponseData<Boolean> serialize(
+            T object,
+            ProtocolProperty property,
+            WeIdAuthentication weIdAuthentication,
+            String outputPdfFilePath
     );
 
 
@@ -68,15 +86,34 @@ public interface PdfTransportation {
      * @param property 协议类型，支持加密和非加密两种
      * @param weIdAuthentication WeID公私钥信息
      * @param inputPdfTemplatePath presentation的PDF模板
-     * @return OutputStream
+     * @return byte[] 序列化以后生成PDF文件的byte[]
      */
-    <T extends JsonSerializer> ResponseData<OutputStream> serialize(
-        T object,
-        ProtocolProperty property,
-        WeIdAuthentication weIdAuthentication,
-        String inputPdfTemplatePath
+    <T extends JsonSerializer> ResponseData<byte[]> serializeWithTemplate(
+            T object,
+            ProtocolProperty property,
+            WeIdAuthentication weIdAuthentication,
+            String inputPdfTemplatePath
     );
 
+    /**
+     * 协议传输序列化接口. 此方法会将presentation按PDF模板的样式数据序列化为PDF文件，PDF文件的内容为claim表单，
+     * presentation和协议头会放到自定义属性里，同时生成PDF文件。
+     *
+     * @param object 协议存储的实体数据对象
+     * @param property 协议类型，支持加密和非加密两种
+     * @param weIdAuthentication WeID公私钥信息
+     * @param inputPdfTemplatePath presentation的PDF模板
+     * @param outputPdfFilePath 输出PDF文件的路径
+     * @param <T> the type of the element
+     * @return 序列化结果
+     */
+    <T extends JsonSerializer> ResponseData<Boolean> serializeWithTemplate(
+            T object,
+            ProtocolProperty property,
+            WeIdAuthentication weIdAuthentication,
+            String inputPdfTemplatePath,
+            String outputPdfFilePath
+    );
 
     /**
      * 反序列化PDF方法，输入数据为PDF流数据。 此方法主要处理流程：1.解析PDF流。2.判断加密类型，如果加密，则需要通过AMOP去wallet那边获取秘钥，非加密则直接读PDF内容。
@@ -89,8 +126,8 @@ public interface PdfTransportation {
      * @return 返回PresentationE对象数据
      */
     <T extends JsonSerializer> ResponseData<T> deserialize(
-        OutputStream pdfTransportation,
-        Class<T> clazz,
-        WeIdAuthentication weIdAuthentication
+            byte[] pdfTransportation,
+            Class<T> clazz,
+            WeIdAuthentication weIdAuthentication
     );
 }
