@@ -154,3 +154,62 @@ Credential的重新生成则为重新发行一个Credential ID不相同的全新
 详见 [WeIdentity 存储容量预估](./capacity-estimation.md)
 
 ---
+- **字体安装说明**  
+
+**Centos**   
+1. 下载NotoSansCJKtc-Regular.ttf字体 <br>
+[字体下载链接](https://github.com/WeBankFinTech/WeIdentity/blob/master/context/NotoSansCJKtc-Regular.ttf)
+
+ 2. 新建中文字体目录并拷贝字体到该目录
+    ~~~
+    sudo mkdir -p /usr/share/fonts/chinese
+    sudo cp ./NotoSansCJKtc-Regular.ttf  /usr/share/fonts/chinese
+    ~~~
+
+3. 安装相关依赖
+    ~~~
+    sudo yum -y install fontconfig ttmkfdir mkfontscale
+    ~~~
+
+4. 安装字体
+    ~~~
+    sudo mkfontscale&&
+    sudo mkfontdir&&
+    sudo fc-cache -fv
+    ~~~
+
+5. 查看字体是否成功安装
+    ~~~
+    fc-list
+    ~~~
+
+<br>
+
+**Ubuntu**<br>
+
+1. 新建中文字体目录并拷贝字体到该目录
+    ~~~
+    sudo mkdir -p /usr/share/fonts/chinese
+    sudo cp ./NotoSansCJKtc-Regular.ttf  /usr/share/fonts/chinese
+    ~~~
+
+2. 安装相关依赖
+    ~~~
+    sudo apt install xfonts-utils -y
+    ~~~
+
+3. 安装字体
+    ~~~
+    sudo mkfontscale
+    sudo mkfontdir
+    sudo fc-cache -fv
+    ~~~
+
+4.  查看字体是否成功安装
+    ~~~
+    fc-list
+    ~~~
+
+**Window**<br>
+1. 双击字体文件进行安装即可。（window10可能存在安装字体后程序仍然报字体错误情况，此时右键点击字体文件选择为所有用户安装）
+---
