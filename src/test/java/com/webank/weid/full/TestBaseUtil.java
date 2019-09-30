@@ -131,6 +131,80 @@ public class TestBaseUtil {
     }
 
     /**
+     * build CreateCredentialPojoArgs no cptId.
+     * @return CreateCredentialPojoArgs
+     */
+    public static CreateCredentialPojoArgs<Map<String, Object>> buildCreateCredentialPojoArgs4MlCpt(
+            CreateWeIdDataResult createWeId) {
+
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
+                new CreateCredentialPojoArgs<Map<String, Object>>();
+
+        createCredentialPojoArgs.setIssuer(createWeId.getWeId());
+        createCredentialPojoArgs.setExpirationDate(
+                System.currentTimeMillis() + (1000 * 60 * 60 * 24));
+        createCredentialPojoArgs.setWeIdAuthentication(buildWeIdAuthentication(createWeId));
+        try {
+            createCredentialPojoArgs.setClaim(buildCptJsonSchemaDataFromFile4MlCpt());
+        } catch (IOException e) {
+            logger.error("buildCreateCredentialPojoArgs failed. ", e);
+            return null;
+        }
+
+        return createCredentialPojoArgs;
+    }
+
+    /**
+     * build CreateCredentialPojoArgs no cptId.
+     * @return CreateCredentialPojoArgs
+     */
+    public static CreateCredentialPojoArgs<Map<String, Object>>
+        buildCreateCredentialPojoArgs4MultiCpt(
+            CreateWeIdDataResult createWeId) {
+
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
+                new CreateCredentialPojoArgs<Map<String, Object>>();
+
+        createCredentialPojoArgs.setIssuer(createWeId.getWeId());
+        createCredentialPojoArgs.setExpirationDate(
+                System.currentTimeMillis() + (1000 * 60 * 60 * 24));
+        createCredentialPojoArgs.setWeIdAuthentication(buildWeIdAuthentication(createWeId));
+        try {
+            createCredentialPojoArgs.setClaim(buildCptJsonSchemaDataFromFile4MultiCpt());
+        } catch (IOException e) {
+            logger.error("buildCreateCredentialPojoArgs failed. ", e);
+            return null;
+        }
+
+        return createCredentialPojoArgs;
+    }
+
+    /**
+     * build CreateCredentialPojoArgs no cptId.
+     * @return CreateCredentialPojoArgs
+     */
+    public static CreateCredentialPojoArgs<Map<String, Object>>
+        buildCreateCredentialPojoArgs4SpecTplCpt(
+        CreateWeIdDataResult createWeId) {
+
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs4 =
+            new CreateCredentialPojoArgs<Map<String, Object>>();
+
+        createCredentialPojoArgs4.setIssuer(createWeId.getWeId());
+        createCredentialPojoArgs4.setExpirationDate(
+            System.currentTimeMillis() + (1000 * 60 * 60 * 24));
+        createCredentialPojoArgs4.setWeIdAuthentication(buildWeIdAuthentication(createWeId));
+        try {
+            createCredentialPojoArgs4.setClaim(buildCptJsonSchemaDataFromFile4SpecTplCpt());
+        } catch (IOException e) {
+            logger.error("buildCreateCredentialPojoArgs failed. ", e);
+            return null;
+        }
+
+        return createCredentialPojoArgs4;
+    }
+
+    /**
      * buildWeIdAuthentication.
      *
      * @param weIdData weId
@@ -156,10 +230,49 @@ public class TestBaseUtil {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
         JsonNode jsonNode = JsonLoader.fromResource("/claim.json");
-        cptJsonSchemaData = DataToolUtils.deserialize(
-            jsonNode.toString(),
-            HashMap.class
-        );
+        cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
+        return cptJsonSchemaData;
+    }
+
+    /**
+     * build cpt json schemaData.
+     * @return HashMap
+     * @throws IOException IOException
+     */
+    public static HashMap<String, Object>
+        buildCptJsonSchemaDataFromFile4MultiCpt() throws IOException {
+
+        HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
+        JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-claim.json");
+        cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
+        return cptJsonSchemaData;
+    }
+
+    /**
+     * build cpt json schemaData.
+     * @return HashMap
+     * @throws IOException IOException
+     */
+    public static HashMap<String, Object>
+        buildCptJsonSchemaDataFromFile4MlCpt() throws IOException {
+
+        HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
+        JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-claim.json");
+        cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
+        return cptJsonSchemaData;
+    }
+
+    /**
+     * build cpt json schemaData.
+     * @return HashMap
+     * @throws IOException IOException
+     */
+    public static HashMap<String, Object>
+        buildCptJsonSchemaDataFromFile4SpecTplCpt() throws IOException {
+
+        HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
+        JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-claim.json");
+        cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
 
@@ -179,6 +292,75 @@ public class TestBaseUtil {
     }
 
     /**
+     * build MultiLevel CptMapArgs.
+     * @param createWeId WeId
+     * @return CptMapArgs
+     */
+    public static CptMapArgs buildCptArgs4MlCpt(CreateWeIdDataResult createWeId) {
+
+        //build cpt from file
+        CptStringArgs cptStringArgs = new CptStringArgs();
+        try {
+            cptStringArgs = buildCptStringArgs4MlCpt(createWeId, true);
+        } catch (IOException e) {
+            logger.error("buildCptArgs4MlCpt failed. ", e);
+        }
+
+        CptMapArgs cptMapArgs = new CptMapArgs();
+        cptMapArgs.setWeIdAuthentication(buildWeIdAuthority(createWeId));
+        cptMapArgs.setCptJsonSchema(
+            DataToolUtils.deserialize(cptStringArgs.getCptJsonSchema(), HashMap.class));
+
+        return cptMapArgs;
+    }
+
+    /**
+     * build default CptMapArgs.
+     * @param createWeId WeId
+     * @return CptMapArgs
+     */
+    public static CptMapArgs buildCptArgs4MultiCpt(CreateWeIdDataResult createWeId) {
+
+        //build cpt from file
+        CptStringArgs cptStringArgs = new CptStringArgs();
+        try {
+            cptStringArgs = buildCptStringArgs4MultiCpt(createWeId, true);
+        } catch (IOException e) {
+            logger.error("buildCptArgs4MultiCpt failed. ", e);
+        }
+
+        CptMapArgs cptMapArgs = new CptMapArgs();
+        cptMapArgs.setWeIdAuthentication(buildWeIdAuthority(createWeId));
+        cptMapArgs.setCptJsonSchema(
+            DataToolUtils.deserialize(cptStringArgs.getCptJsonSchema(), HashMap.class));
+
+        return cptMapArgs;
+    }
+
+    /**
+     * build default CptMapArgs.
+     * @param createWeId WeId
+     * @return CptMapArgs
+     */
+    public static CptMapArgs buildCptArgs4SpecTplCpt(CreateWeIdDataResult createWeId) {
+
+        //build cpt from file
+        CptStringArgs cptStringArgs = new CptStringArgs();
+        try {
+            cptStringArgs = buildCptStringArgs4SpecTplCpt(createWeId, true);
+        } catch (IOException e) {
+            logger.error("buildCptArgs4SpecTplCpt failed. ", e);
+        }
+
+        CptMapArgs cptMapArgs = new CptMapArgs();
+        cptMapArgs.setWeIdAuthentication(buildWeIdAuthority(createWeId));
+        cptMapArgs.setCptJsonSchema(
+            DataToolUtils.deserialize(cptStringArgs.getCptJsonSchema(), HashMap.class));
+
+        return cptMapArgs;
+    }
+
+    /**
      * build default buildCptStringArgs.
      */
     public static CptStringArgs buildCptStringArgs(
@@ -187,7 +369,66 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/jsonSchemaCpt.json");
+            JsonNode jsonNode = JsonLoader.fromResource("/json-schema-cpt.json");
+            jsonSchema = jsonNode.toString();
+        }
+
+        CptStringArgs cptStringArgs = new CptStringArgs();
+        cptStringArgs.setCptJsonSchema(jsonSchema);
+        cptStringArgs.setWeIdAuthentication(buildWeIdAuthority(createWeId));
+        return cptStringArgs;
+    }
+
+    /**
+     * build MultiLevel buildCptStringArgs.
+     */
+    public static CptStringArgs buildCptStringArgs4MlCpt(
+        CreateWeIdDataResult createWeId,
+        Boolean isFormatFile) throws IOException {
+
+        String jsonSchema = TestData.SCHEMA;
+        if (isFormatFile) {
+            JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-cpt.json");
+            jsonSchema = jsonNode.toString();
+        }
+
+        CptStringArgs cptStringArgs = new CptStringArgs();
+        cptStringArgs.setCptJsonSchema(jsonSchema);
+        cptStringArgs.setWeIdAuthentication(buildWeIdAuthority(createWeId));
+
+        return cptStringArgs;
+    }
+
+    /**
+     * build MultiLevel buildCptStringArgs.
+     */
+    public static CptStringArgs buildCptStringArgs4MultiCpt(
+        CreateWeIdDataResult createWeId,
+        Boolean isFormatFile) throws IOException {
+
+        String jsonSchema = TestData.SCHEMA;
+        if (isFormatFile) {
+            JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-cpt.json");
+            jsonSchema = jsonNode.toString();
+        }
+
+        CptStringArgs cptStringArgs = new CptStringArgs();
+        cptStringArgs.setCptJsonSchema(jsonSchema);
+        cptStringArgs.setWeIdAuthentication(buildWeIdAuthority(createWeId));
+
+        return cptStringArgs;
+    }
+
+    /**
+     * build specify pdf template cpt.
+     */
+    public static CptStringArgs buildCptStringArgs4SpecTplCpt(
+        CreateWeIdDataResult createWeId,
+        Boolean isFormatFile) throws IOException {
+
+        String jsonSchema = TestData.SCHEMA;
+        if (isFormatFile) {
+            JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -220,7 +461,7 @@ public class TestBaseUtil {
     public static HashMap<String, Object> buildCptJsonSchema() {
 
         HashMap<String, Object> cptJsonSchemaNew = new HashMap<String, Object>(3);
-        cptJsonSchemaNew.put(JsonSchemaConstant.TITLE_KEY, "cpt template");
+        cptJsonSchemaNew.put(JsonSchemaConstant.TITLE_KEY, "Digital Identity");
         cptJsonSchemaNew.put(JsonSchemaConstant.DESCRIPTION_KEY, "this is a cpt template");
 
         HashMap<String, Object> propertitesMap1 = new HashMap<String, Object>(2);

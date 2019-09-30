@@ -92,8 +92,7 @@ public class JsonTransportationImpl
                         jsonBaseData.getId(),
                         jsonBaseData.getOrgId(),
                         object.toJson(),
-                        super.getVerifiers(),
-                        property.getKeyExpireTime()
+                        super.getVerifiers()
                     );
 
                 String data =

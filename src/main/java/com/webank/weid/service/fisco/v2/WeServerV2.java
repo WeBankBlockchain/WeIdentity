@@ -173,4 +173,9 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
         BlockNumber response = this.getWeb3j().getBlockNumber().send();
         return response.getBlockNumber().intValue();
     }
+
+    @Override
+    public String getVersion() throws IOException {
+        return this.getWeb3j().getNodeVersion().send().getNodeVersion().getVersion();
+    }
 }

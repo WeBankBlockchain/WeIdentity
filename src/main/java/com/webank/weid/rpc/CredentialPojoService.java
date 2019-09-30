@@ -24,6 +24,7 @@ import java.util.List;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -59,6 +60,28 @@ public interface CredentialPojoService {
     );
 
     /**
+     * Add an extra signer and signature to a Credential. Multiple signatures will be appended in
+     * an embedded manner.
+     *
+     * @param credentialList original credential list
+     * @param callerAuth the passed-in privateKey and WeID bundle to sign
+     * @return the modified CredentialWrapper
+     */
+    ResponseData<CredentialPojo> addSignature(
+        List<CredentialPojo> credentialList,
+        WeIdAuthentication callerAuth);
+
+    /**
+     * Get the full hash value of a CredentialPojo. All fields in the CredentialPojo will be
+     * included. This method should be called when creating and verifying the Credential Evidence
+     * and the result is selectively-disclosure irrelevant.
+     *
+     * @param credentialPojo the args
+     * @return the Credential Hash value
+     */
+    ResponseData<String> getCredentialPojoHash(CredentialPojo credentialPojo);
+
+    /**
      * Verify the validity of a credential. Public key will be fetched from chain.
      *
      * @param issuerWeId the issuer WeId
@@ -75,10 +98,10 @@ public interface CredentialPojoService {
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
     ResponseData<Boolean> verify(WeIdPublicKey issuerPublicKey, CredentialPojo credential);
-    
+
     /**
      * verify the presentation with presenter's weid and policy.
-     * 
+     *
      * @param presenterWeId the presenter's weid
      * @param presentationPolicyE policy of the presentation
      * @param challenge challenge
@@ -92,10 +115,10 @@ public interface CredentialPojoService {
         PresentationE presentationE
     );
 
-    
+
     /**
      * packing according to original vouchers and disclosure strategies.
-     * 
+     *
      * @param credentialList original credential list
      * @param presentationPolicyE the disclosure strategies.
      * @param challenge used for authentication

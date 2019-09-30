@@ -76,7 +76,6 @@ public class TestRegisterCptArgs extends TestBaseServcie {
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
         LogUtil.info(logger, "registerCpt", response);
-        System.out.println(registerCptArgs);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         CptBaseInfo cptBaseInfo = response.getResult();
@@ -85,7 +84,6 @@ public class TestRegisterCptArgs extends TestBaseServcie {
 
         Integer cptId = cptBaseInfo.getCptId();
         ResponseData<Cpt> reponse = cptService.queryCpt(cptId);
-        System.out.println(reponse);
     }
 
     /**
@@ -102,7 +100,6 @@ public class TestRegisterCptArgs extends TestBaseServcie {
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
         LogUtil.info(logger, "registerCpt", response);
-        System.out.println(registerCptArgs);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         CptBaseInfo cptBaseInfo = response.getResult();
@@ -151,14 +148,11 @@ public class TestRegisterCptArgs extends TestBaseServcie {
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
         LogUtil.info(logger, "registerCpt", response);
-        System.out.println(registerCptArgs);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         CptBaseInfo cptBaseInfo = response.getResult();
-        System.out.println(cptBaseInfo);
         Assert.assertTrue(cptBaseInfo.getCptId().intValue() > 1000);
         Assert.assertTrue(cptBaseInfo.getCptId().intValue() < 3000000);
-
     }
 
     /**
@@ -239,7 +233,6 @@ public class TestRegisterCptArgs extends TestBaseServcie {
         cptJsonSchema.put("name", "rocky xia is good man");
         cptJsonSchema.put("年龄", 18);
         cptJsonSchema.put("account", 192.5);
-        System.out.println(cptMapArgs);
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
         LogUtil.info(logger, "registerCpt", response);
@@ -298,7 +291,6 @@ public class TestRegisterCptArgs extends TestBaseServcie {
 
         ResponseData<CptBaseInfo> response = cptService.registerCpt(registerCptArgs);
         LogUtil.info(logger, "registerCpt", response);
-        System.out.println(registerCptArgs);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         CptBaseInfo cptBaseInfo = response.getResult();
@@ -379,27 +371,6 @@ public class TestRegisterCptArgs extends TestBaseServcie {
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
-    }
-
-    /**
-     * case： cpt register again.
-     */
-    @Test
-    public void testRegisterCpt_repeat() {
-
-        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
-
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
-        LogUtil.info(logger, "registerCpt", response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
-
-        response = cptService.registerCpt(cptMapArgs);
-        LogUtil.info(logger, "registerCpt again", response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
     }
 
     /**

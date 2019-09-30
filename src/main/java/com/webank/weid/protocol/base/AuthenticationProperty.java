@@ -32,7 +32,7 @@ public class AuthenticationProperty {
     /**
      * Required: The type.
      */
-    private String type = "Secp256k1SignatureAuthentication2018";
+    private String type = "Secp256k1";
 
     /**
      * Required: The public key.
