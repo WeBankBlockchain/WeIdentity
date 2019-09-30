@@ -1,6 +1,8 @@
 package com.webank.weid.full.transportation;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +58,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase1() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
                 presentation,
@@ -79,7 +81,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase2() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .specify(verifier)
             .serialize(
@@ -104,7 +106,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase3() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
                 presentation4MlCpt,
@@ -127,9 +129,9 @@ public class TestPdfDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase4() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
-            .serialize(
+            .serializeWithTemplate(
                 presentation4SpecTpl,
                 new ProtocolProperty((EncodeType.ORIGINAL)),
                 weIdAuthentication,
@@ -152,7 +154,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase5() {
-        OutputStream out = null;
+        byte[] out = null;
         ResponseData<PresentationE> resDeserialize = TransportationFactory
             .newPdfTransportation()
             .deserialize(out, PresentationE.class, weIdAuthentication);
@@ -167,7 +169,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase6() {
-        OutputStream out = new ByteArrayOutputStream();
+        byte[] out = new byte[0];
         ResponseData<PresentationE> resDeserialize = TransportationFactory
             .newPdfTransportation()
             .deserialize(out, PresentationE.class, weIdAuthentication);
@@ -189,7 +191,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
             credentialPojo = credentialPojoList.get(0);
         }
 
-        ResponseData<OutputStream> response =
+        ResponseData<byte[]> response =
                 TransportationFactory.newPdfTransportation().serialize(
                         credentialPojo,
                         new ProtocolProperty(EncodeType.CIPHER),
@@ -203,5 +205,84 @@ public class TestPdfDeserialize extends TestBaseTransportation {
         LogUtil.info(logger, "deserialize", resDeserialize);
         Assert.assertEquals(ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCode(),
                 resDeserialize.getErrorCode().intValue());
+    }
+
+    /**
+     * 读入默认模板PDF文件反序列化.
+     */
+    public void testDeserializeCase8() {
+
+        //1. 序列化presentation4MultiCpt为pdf文件
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./out.pdf");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+
+        //2. 从pdf文件读取到byte[]
+        File file = new File("./out.pdf");
+        byte[] bytesArray = new byte[(int) file.length()];
+        try {
+
+            FileInputStream fis = new FileInputStream(file);
+            fis.read(bytesArray); //read file into bytes[]
+            fis.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //3. 对读取到byte[]做反序列化
+        ResponseData<PresentationE> resDeserialize = TransportationFactory
+                .newPdfTransportation()
+                .deserialize(
+                        bytesArray,
+                        PresentationE.class,
+                        weIdAuthentication);
+        LogUtil.info(logger, "deserialize", resDeserialize);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), resDeserialize.getErrorCode().intValue());
+        Assert.assertEquals(presentation4MultiCpt.toJson(), resDeserialize.getResult().toJson());
+    }
+
+    /**
+     * 读入指定模板PDF文件反序列化.
+     */
+    public void testDeserializeCase9() {
+
+        //1. 序列化presentation4MultiCpt为pdf文件
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./test-template-complex-out.pdf");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+
+        //2. 从pdf文件读取到byte[]
+        File file = new File("./test-template-complex-out.pdf");
+        byte[] bytesArray = new byte[(int) file.length()];
+        try {
+            FileInputStream fis = new FileInputStream(file);
+            fis.read(bytesArray);
+            fis.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        //3. 对读取到byte[]做反序列化
+        ResponseData<PresentationE> resDeserialize = TransportationFactory
+                .newPdfTransportation()
+                .deserialize(
+                        bytesArray,
+                        PresentationE.class,
+                        weIdAuthentication);
+        LogUtil.info(logger, "deserialize", resDeserialize);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), resDeserialize.getErrorCode().intValue());
+        Assert.assertEquals(presentation4MultiCpt.toJson(), resDeserialize.getResult().toJson());
     }
 }
