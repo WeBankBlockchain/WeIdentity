@@ -56,6 +56,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
 import javax.imageio.ImageIO;
 
 import com.alibaba.fastjson.JSONArray;
@@ -145,27 +146,27 @@ public final class DataToolUtils {
 
     // LOGO高度
     private static final int LOGO_HEIGHT = 60;
-    
+
     private static final int SERIALIZED_SIGNATUREDATA_LENGTH = 65;
 
     private static final int radix = 10;
-    
+
     private static final String TO_JSON = "toJson";
-    
+
     private static final String FROM_JSON = "fromJson";
 
     private static final String KEY_CREATED = "created";
-    
+
     private static final String KEY_ISSUANCEDATE = "issuanceDate";
-    
+
     private static final String KEY_EXPIRATIONDATE = "expirationDate";
-    
+
     private static final String KEY_CLAIM = "claim";
-    
+
     private static final String KEY_FROM_TOJSON = "$from";
-    
+
     private static final List<String> CONVERT_UTC_LONG_KEYLIST = new ArrayList<>();
-        
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     //private static final ObjectWriter OBJECT_WRITER;
@@ -179,14 +180,14 @@ public final class DataToolUtils {
         OBJECT_MAPPER.configure(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS, true);
         // ignore mismatched fields
         OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
+        OBJECT_MAPPER.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
         // use field for serialize and deSerialize
         OBJECT_MAPPER.setVisibility(PropertyAccessor.SETTER, JsonAutoDetect.Visibility.NONE);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
         OBJECT_MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         OBJECT_WRITER_UN_PRETTY_PRINTER = OBJECT_MAPPER.writer();
-        
+
         CONVERT_UTC_LONG_KEYLIST.add(KEY_CREATED);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_ISSUANCEDATE);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_EXPIRATIONDATE);
@@ -269,7 +270,7 @@ public final class DataToolUtils {
                     + "please use fromJson() to deserialize it");
                 throw new DataTypeCastException("deserialize json to Object error");
             }
-            object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));  
+            object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));
         } catch (JsonParseException e) {
             logger.error("JsonParseException when deserialize json to object", e);
             throw new DataTypeCastException(e);
@@ -279,7 +280,7 @@ public final class DataToolUtils {
         } catch (IOException e) {
             logger.error("IOException when deserialize json to object", e);
             throw new DataTypeCastException(e);
-        }        
+        }
         return (T) object;
     }
 
@@ -347,6 +348,20 @@ public final class DataToolUtils {
     public static Map<String, Object> objToMap(Object object) throws Exception {
         JsonNode jsonNode = OBJECT_MAPPER.readTree(serialize(object));
         return (HashMap<String, Object>) OBJECT_MAPPER.convertValue(jsonNode, HashMap.class);
+    }
+
+    /**
+     * Convert a MAP to POJO.
+     *
+     * @param map the input data
+     * @param <T> the type of the element
+     * @param clazz the output class type
+     * @return object in T type
+     * @throws Exception IOException
+     */
+    public static <T> T mapToObj(Map<String, Object> map, Class<T> clazz) throws Exception {
+        final T pojo = (T) OBJECT_MAPPER.convertValue(map, clazz);
+        return pojo;
     }
 
     /**
@@ -626,7 +641,7 @@ public final class DataToolUtils {
         System.arraycopy(signatureData.getS(), 0, serializedSignatureData, 33, 32);
         return serializedSignatureData;
     }
-    
+
 
     /**
      * The De-Serialization class of Signatures. This is simply a de-concatenation of bytes of the
@@ -663,7 +678,7 @@ public final class DataToolUtils {
         byte valueByte = (byte) v;
         return new Sign.SignatureData(valueByte, r, s);
     }
-    
+
     /**
      * Verify a signature based on the provided raw data, and the WeID Document from chain. This
      * will traverse each public key in the WeID Document and fetch all keys which belongs to the
@@ -1138,6 +1153,7 @@ public final class DataToolUtils {
 
     /**
      * convert bytesArrayList to Bytes32ArrayList.
+     *
      * @param list byte size
      * @param size size
      * @return result
@@ -1332,7 +1348,7 @@ public final class DataToolUtils {
         StaticArray<Bytes32> bytes32StaticArray = new StaticArray<Bytes32>(bytes32List);
         return bytes32StaticArray;
     }
-    
+
     /**
      * String array to bytes 32 static array.
      *
@@ -1380,9 +1396,9 @@ public final class DataToolUtils {
         for (int i = 0; i < bytes32List.size(); i++) {
             byteArraylist.add(bytes32ToBytesArray(bytes32List.get(i)));
         }
-        return byte32ListToString(byteArraylist, bytes32List.size());       
+        return byte32ListToString(byteArraylist, bytes32List.size());
     }
-    
+
     /**
      * Int 256 dynamic array to long array.
      *
@@ -1401,6 +1417,7 @@ public final class DataToolUtils {
 
     /**
      * convert list to BigInteger list.
+     *
      * @param list BigInteger list
      * @param size size
      * @return result
@@ -1420,7 +1437,7 @@ public final class DataToolUtils {
         }
         return bigIntegerList;
     }
-    
+
     /**
      * Generate Default CPT Json Schema based on a given CPT ID.
      *
@@ -1479,9 +1496,10 @@ public final class DataToolUtils {
         cptSchemaMap.put("patternProperties", patternMap);
         return DataToolUtils.objToJsonStrWithNoPretty(cptSchemaMap);
     }
-    
+
     /**
      * convert byte32List to String.
+     *
      * @param bytesList list
      * @param size size
      * @return reuslt
@@ -1517,9 +1535,10 @@ public final class DataToolUtils {
 
         return (new String(newByte)).toString();
     }
-    
+
     /**
      * Get the current timestamp as the param "created". May be called elsewhere.
+     *
      * @param length length
      * @return the StaticArray
      */
@@ -1529,18 +1548,19 @@ public final class DataToolUtils {
         createdList.add(BigInteger.valueOf(created));
         return createdList;
     }
-    
+
     /**
      * convert timestamp to UTC of json string.
+     *
      * @param jsonString json string
      * @return timestampToUtcString
      */
-    public static String convertTimestampToUtc(String jsonString) { 
+    public static String convertTimestampToUtc(String jsonString) {
         String timestampToUtcString;
         try {
             timestampToUtcString = dealObjectOfConvertUtcAndLong(
                 JSONObject.parseObject(jsonString),
-                CONVERT_UTC_LONG_KEYLIST, 
+                CONVERT_UTC_LONG_KEYLIST,
                 TO_JSON
             ).toString();
         } catch (ParseException | JSONException e) {
@@ -1549,18 +1569,19 @@ public final class DataToolUtils {
         }
         return timestampToUtcString;
     }
-    
+
     /**
      * convert UTC Date to timestamp of Json string.
+     *
      * @param jsonString presentationJson
      * @return presentationJson after convert
      */
-    public static String convertUtcToTimestamp(String jsonString) { 
+    public static String convertUtcToTimestamp(String jsonString) {
         String utcToTimestampString;
         try {
             utcToTimestampString = dealObjectOfConvertUtcAndLong(
-                JSONObject.parseObject(jsonString), 
-                CONVERT_UTC_LONG_KEYLIST, 
+                JSONObject.parseObject(jsonString),
+                CONVERT_UTC_LONG_KEYLIST,
                 FROM_JSON
             ).toString();
         } catch (ParseException | JSONException e) {
@@ -1569,31 +1590,31 @@ public final class DataToolUtils {
         }
         return utcToTimestampString;
     }
-    
+
     private static JSONObject dealObjectOfConvertUtcAndLong(
-        JSONObject jsonObj, 
-        List<String> list, 
-        String type) throws ParseException { 
-        JSONObject resJson = new JSONObject(); 
-        Set<String> keySet = jsonObj.keySet(); 
-        for (String key : keySet) { 
+        JSONObject jsonObj,
+        List<String> list,
+        String type) throws ParseException {
+        JSONObject resJson = new JSONObject();
+        Set<String> keySet = jsonObj.keySet();
+        for (String key : keySet) {
             Object obj = jsonObj.get(key);
             if (obj instanceof JSONObject) {
                 //JSONObject
                 if (key.equals(KEY_CLAIM)) {
-                    resJson.put(key, obj); 
+                    resJson.put(key, obj);
                 } else {
-                    resJson.put(key, dealObjectOfConvertUtcAndLong((JSONObject)obj, list, type));
+                    resJson.put(key, dealObjectOfConvertUtcAndLong((JSONObject) obj, list, type));
                 }
             } else if (obj instanceof JSONArray) {
                 //JSONArray 
-                resJson.put(key, dealArrayOfConvertUtcAndLong((JSONArray)obj, list, type)); 
+                resJson.put(key, dealArrayOfConvertUtcAndLong((JSONArray) obj, list, type));
             } else {
                 if (list.contains(key)) {
                     if (TO_JSON.equals(type)) {
                         if (isValidLongString(String.valueOf(obj))) {
                             resJson.put(
-                                key, 
+                                key,
                                 DateUtils.convertNoMillisecondTimestampToUtc(
                                     Long.parseLong(String.valueOf(obj))));
                         } else {
@@ -1602,38 +1623,39 @@ public final class DataToolUtils {
                     } else {
                         if (DateUtils.isValidDateString(String.valueOf(obj))) {
                             resJson.put(
-                                key, 
+                                key,
                                 DateUtils.convertUtcDateToNoMillisecondTime(String.valueOf(obj)));
                         } else {
                             resJson.put(key, obj);
                         }
-                    } 
+                    }
                 } else {
                     resJson.put(key, obj);
                 }
             }
         }
-        return resJson; 
-    } 
+        return resJson;
+    }
 
     private static JSONArray dealArrayOfConvertUtcAndLong(
-        JSONArray jsonArr, 
-        List<String> list, 
-        String type) throws ParseException { 
-        JSONArray resJson = new JSONArray(); 
-        for (int i = 0; i < jsonArr.size(); i++) { 
-            Object jsonObj = jsonArr.get(i); 
+        JSONArray jsonArr,
+        List<String> list,
+        String type) throws ParseException {
+        JSONArray resJson = new JSONArray();
+        for (int i = 0; i < jsonArr.size(); i++) {
+            Object jsonObj = jsonArr.get(i);
             if (jsonObj instanceof JSONObject) {
-                resJson.add(dealObjectOfConvertUtcAndLong((JSONObject)jsonObj, list, type)); 
+                resJson.add(dealObjectOfConvertUtcAndLong((JSONObject) jsonObj, list, type));
             } else {
-                resJson.add(jsonObj); 
+                resJson.add(jsonObj);
             }
-        } 
-        return resJson; 
+        }
+        return resJson;
     }
 
     /**
      * valid string is a long type.
+     *
      * @param str string
      * @return result
      */
@@ -1643,14 +1665,14 @@ public final class DataToolUtils {
         }
 
         long result = 0;
-        int i = 0; 
+        int i = 0;
         int len = str.length();
         long limit = -Long.MAX_VALUE;
         long multmin;
         int digit;
 
         char firstChar = str.charAt(0);
-        if (firstChar <= '0') { 
+        if (firstChar <= '0') {
             return false;
         }
         multmin = limit / radix;
@@ -1667,12 +1689,13 @@ public final class DataToolUtils {
                 return false;
             }
             result -= digit;
-        }    
+        }
         return true;
     }
-    
+
     /**
      * valid the json string is converted by toJson().
+     *
      * @param json jsonString
      * @return result
      */
@@ -1682,7 +1705,7 @@ public final class DataToolUtils {
             return false;
         }
         JSONObject jsonObject = null;
-        try { 
+        try {
             jsonObject = JSONObject.parseObject(json);
         } catch (JSONException e) {
             logger.error("convert jsonString to JSONObject failed." + e);
@@ -1690,9 +1713,10 @@ public final class DataToolUtils {
         }
         return jsonObject.containsKey(KEY_FROM_TOJSON);
     }
-    
+
     /**
      * add tag which the json string is converted by toJson().
+     *
      * @param json jsonString
      * @return result
      */
@@ -1703,9 +1727,10 @@ public final class DataToolUtils {
         }
         return jsonObject.toString();
     }
-    
+
     /**
      * remove tag which the json string is converted by toJson().
+     *
      * @param json jsonString
      * @return result
      */

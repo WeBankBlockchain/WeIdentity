@@ -30,26 +30,13 @@ public class ProtocolProperty {
      * 协议编解码类型.
      */
     private EncodeType encodeType;
-    
-    /**
-     * 秘钥过期时间配置,单位秒,默认为24小时.
-     */
-    private int keyExpireTime = 86400;
 
     public EncodeType getEncodeType() {
         return encodeType;
     }
     
-    public int getKeyExpireTime() {
-        return keyExpireTime;
-    }
-    
     public ProtocolProperty(EncodeType encodeType) {
         this.encodeType = encodeType;
     }
-    
-    public ProtocolProperty(EncodeType encodeType, int keyExpireTime) {
-        this(encodeType);
-        this.keyExpireTime = keyExpireTime;
-    }
+
 }

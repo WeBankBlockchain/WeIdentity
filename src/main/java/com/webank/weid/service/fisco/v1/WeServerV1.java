@@ -122,7 +122,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
         channelConnections
             .setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
         channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
-        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(",")));
+        channelConnections.setConnectionsStr(processNodes(fiscoConfig.getNodes()));
         ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
             new ConcurrentHashMap<>();
         allChannelConnections.put(fiscoConfig.getCurrentOrgId(), channelConnections);
@@ -131,6 +131,18 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
         // thread pool params
         service.setThreadPool(super.initializePool());
         return service;
+    }
+    
+    private List<String> processNodes(String nodes) {
+        List<String> listTmp = Arrays.asList(nodes.split(","));
+        List<String> nodeList = new ArrayList<String>();
+        for (String node : listTmp) {
+            if (node.indexOf("@") == -1) {
+                node = "WeIdentity@" + node;
+            }
+            nodeList.add(node);
+        }
+        return nodeList;
     }
 
     @Override
@@ -177,5 +189,10 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     @Override
     public Class<?> getWeb3jClass() {
         return Web3j.class;
+    }
+
+    @Override
+    public String getVersion() throws IOException {
+        return this.getWeb3j().web3ClientVersion().send().getResult();
     }
 }

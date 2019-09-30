@@ -56,6 +56,7 @@ public class WeIdBaseException extends RuntimeException {
      * @param errorCode the errorCode
      */
     public WeIdBaseException(ErrorCode errorCode) {
+        this(errorCode.getCode() + " - " + errorCode.getCodeDesc());
         this.errorCode = errorCode;
     }
 

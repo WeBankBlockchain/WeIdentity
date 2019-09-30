@@ -1,0 +1,19 @@
+{
+    "title": "cpt templet for specify pdf template",
+    "description": "three information requirements for users",
+    "properties" : {
+        "name": {
+            "type": "string",
+            "description": "the name of certificate owner"
+        },
+        "date": {
+            "type": "string",
+            "description": "the date of issue"
+        },
+        "issuer": {
+            "type": "string",
+            "description": "the issuer"
+        }
+    },
+    "required": ["name", "date", "issuer"]
+}
