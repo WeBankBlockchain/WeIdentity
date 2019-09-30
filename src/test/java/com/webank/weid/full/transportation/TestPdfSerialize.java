@@ -46,7 +46,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase1() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
                 presentation,
@@ -63,7 +63,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase2() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
                 presentation4MlCpt,
@@ -80,7 +80,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase3() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(presentation4MultiCpt,
                 new ProtocolProperty(EncodeType.ORIGINAL),
@@ -91,11 +91,163 @@ public class TestPdfSerialize extends TestBaseTransportation {
     }
 
     /**
+     * 多CPT，指定已存在目录，不指定文件名，生成文件测试.
+     */
+    public void testSerializeCase31() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+
+    /**
+     * 多CPT，指定已存在目录,指定文件名，生成文件测试.
+     */
+    public void testSerializeCase32() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./out.pdf");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
+     * 多CPT测试，指定不存在目录,不指定文件名，生成文件测试.
+     */
+    public void testSerializeCase33() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./out");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
+     * 多CPT，指定已存在多层目录,不指定文件名，生成文件测试.
+     */
+    public void testSerializeCase34() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./test");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
+     * 多CPT测试，指定已存在多层目录,指定文件名，生成文件测试.
+     */
+    public void testSerializeCase35() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./test/out.pdf");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
+     * 多CPT测试，指定不存在多层目录,不指定文件名，生成文件测试.
+     */
+    public void testSerializeCase36() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./test/test/test/test/out");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
+     * 多CPT测试，指定已存在包含多个"."的路径，生成文件测试.
+     */
+    public void testSerializeCase37() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./test/test.test.test");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
+     * 多CPT测试，指定已存在包含多个"."的路径和文件名，生成文件测试.
+     */
+    public void testSerializeCase38() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./test/te.te.te/a.b.c.pdf");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
+     * 多CPT测试，指定不存在包含多个"."的路径和文件名，生成文件测试.
+     */
+    public void testSerializeCase39() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "./test/test.test.test/a.b.c.pdf");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
+     * 多CPT测试，指定输出目录为空.
+     */
+    public void testSerializeCase310() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serialize(presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "");
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(!response.getResult());
+    }
+
+
+    /**
      * 使用密文方式构建协议数据.
      */
     @Test
     public void testSerializeCase4() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation().specify(verifier)
             .serialize(
                 presentation,
@@ -111,7 +263,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase5() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(presentation,
                 new ProtocolProperty(null),
@@ -129,7 +281,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase6() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
                 presentation,
@@ -148,7 +300,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase7() {
         PresentationE presentation = null;
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
                 presentation,
@@ -166,7 +318,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase8() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
             .serialize(
                 presentation,
@@ -184,9 +336,9 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase9() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
-            .serialize(
+            .serializeWithTemplate(
                 presentation4SpecTpl,
                 new ProtocolProperty(EncodeType.ORIGINAL),
                 weIdAuthentication,
@@ -200,13 +352,33 @@ public class TestPdfSerialize extends TestBaseTransportation {
     }
 
     /**
+     * 指定PDF模板测试.
+     */
+    public void testSerializeCase91() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serializeWithTemplate(
+                        presentation4SpecTpl,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "src/test/resources/test-template.pdf",
+                        "./"
+                );
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(
+                ErrorCode.SUCCESS.getCode(),
+                response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+
+    /**
      * 指定复杂PDF模板测试.
      */
     @Test
     public void testSerializeCase10() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
                 .newPdfTransportation()
-                .serialize(
+                .serializeWithTemplate(
                         presentation4MultiCpt,
                         new ProtocolProperty(EncodeType.ORIGINAL),
                         weIdAuthentication,
@@ -220,13 +392,33 @@ public class TestPdfSerialize extends TestBaseTransportation {
     }
 
     /**
+     * 指定复杂PDF模板测试.
+     */
+    public void testSerializeCase101() {
+        ResponseData<Boolean> response = TransportationFactory
+                .newPdfTransportation()
+                .serializeWithTemplate(
+                        presentation4MultiCpt,
+                        new ProtocolProperty(EncodeType.ORIGINAL),
+                        weIdAuthentication,
+                        "src/test/resources/test-template-complex.pdf",
+                        "./test-template-complex-out.pdf"
+                );
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(
+                ErrorCode.SUCCESS.getCode(),
+                response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+    }
+
+    /**
      * 传入指定模板目录为空字符串.
      */
     @Test
     public void testSerializeCase11() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
-            .serialize(
+            .serializeWithTemplate(
                 presentation4SpecTpl,
                 new ProtocolProperty(EncodeType.ORIGINAL),
                 weIdAuthentication,
@@ -244,9 +436,9 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase12() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
             .newPdfTransportation()
-            .serialize(
+            .serializeWithTemplate(
                 presentation4SpecTpl,
                 new ProtocolProperty(EncodeType.ORIGINAL),
                 weIdAuthentication,
@@ -263,9 +455,9 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     @Test
     public void testSerializeCase13() {
-        ResponseData<OutputStream> response = TransportationFactory
+        ResponseData<byte[]> response = TransportationFactory
                 .newPdfTransportation()
-                .serialize(
+                .serializeWithTemplate(
                         presentation4SpecTpl,
                         new ProtocolProperty(EncodeType.ORIGINAL),
                         weIdAuthentication,
