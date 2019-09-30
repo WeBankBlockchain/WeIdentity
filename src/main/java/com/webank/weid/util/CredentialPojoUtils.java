@@ -35,9 +35,11 @@ import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 
 /**
@@ -85,6 +87,60 @@ public final class CredentialPojoUtils {
     }
 
     /**
+     * Check if the two credentials are equal. Will traverse each field.
+     *
+     * @param credOld first credential
+     * @param credNew second credential
+     * @return true if yes, false otherwise
+     */
+    public static boolean isEqual(CredentialPojo credOld, CredentialPojo credNew) {
+        if (credOld == null && credNew == null) {
+            return true;
+        }
+        if (credOld == null || credNew == null) {
+            return false;
+        }
+        return isProofContentEqual(credOld.getProof(), credNew.getProof())
+            && credOld.getCptId().equals(credNew.getCptId())
+            && credOld.getExpirationDate().equals(credNew.getExpirationDate())
+            && credOld.getType().equals(credNew.getType())
+            && credOld.getHash().equalsIgnoreCase(credNew.getHash())
+            && credOld.getContext().equalsIgnoreCase(credNew.getContext())
+            && credOld.getId().equalsIgnoreCase(credNew.getId())
+            && credOld.getIssuanceDate().equals(credNew.getIssuanceDate())
+            && credOld.getIssuer().equalsIgnoreCase(credNew.getIssuer());
+    }
+
+    private static boolean isProofContentEqual(Object a, Object b) {
+        if (a instanceof Map && b instanceof Map) {
+            Set<String> keySet = ((Map) a).keySet();
+            Set<String> keySetb = ((Map) b).keySet();
+            for (String key : keySet) {
+                if (!keySetb.contains(key)) {
+                    return false;
+                }
+            }
+            for (String key : keySetb) {
+                if (!keySet.contains(key)) {
+                    return false;
+                }
+            }
+            boolean equals = true;
+            for (String key : keySet) {
+                equals = isProofContentEqual(((Map) a).get(key), ((Map) b).get(key));
+                if (!equals) {
+                    return false;
+                }
+            }
+        } else if (a instanceof String && b instanceof String) {
+            return ((String) a).equalsIgnoreCase((String) b);
+        } else if (a instanceof Number && b instanceof Number) {
+            return ((Number) a).intValue() == ((Number) b).intValue();
+        }
+        return true;
+    }
+
+    /**
      * Concat all fields of Credential info, with signature. This should be invoked when calculating
      * Credential Evidence. Return null if credential format is illegal.
      *
@@ -93,20 +149,107 @@ public final class CredentialPojoUtils {
      * @param disclosures Disclosure Map
      * @return Hash value in String.
      */
-    public static String getCredentialThumbprint(
+    public static String getCredentialPojoThumbprint(
         CredentialPojo credential,
         Map<String, Object> salt,
         Map<String, Object> disclosures
     ) {
         try {
             Map<String, Object> credMap = DataToolUtils.objToMap(credential);
+            // Replace the Claim value object with claim hash value to preserve immutability
             String claimHash = getClaimHash(credential, salt, disclosures);
             credMap.put(ParamKeyConstant.CLAIM, claimHash);
+            // Remove the whole Salt field to preserve immutability
+            Map<String, Object> proof = (Map<String, Object>) credMap.get(ParamKeyConstant.PROOF);
+            proof.remove(ParamKeyConstant.PROOF_SALT);
+            proof.put(ParamKeyConstant.PROOF_SALT, null);
+            credMap.remove(ParamKeyConstant.PROOF);
+            credMap.put(ParamKeyConstant.PROOF, proof);
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
             logger.error("get Credential Thumbprint error.", e);
             return StringUtils.EMPTY;
         }
+    }
+
+    /**
+     * Create a full CredentialPojo Hash for a Credential based on all its fields, which is
+     * resistant to selective disclosure.
+     *
+     * @param credentialPojo target Credential object
+     * @param disclosures Disclosure Map
+     * @return Hash value in String.
+     */
+    public static String getCredentialPojoHash(CredentialPojo credentialPojo,
+        Map<String, Object> disclosures) {
+        String rawData = getCredentialPojoThumbprint(credentialPojo, credentialPojo.getSalt(),
+            disclosures);
+        if (StringUtils.isEmpty(rawData)) {
+            return StringUtils.EMPTY;
+        }
+        return DataToolUtils.sha3(rawData);
+    }
+
+
+    /**
+     * Check if the given CredentialPojo is selectively disclosed, or not.
+     *
+     * @param saltMap the saltMap
+     * @return true if yes, false otherwise
+     */
+    public static boolean isSelectivelyDisclosed(Map<String, Object> saltMap) {
+        if (saltMap == null) {
+            return false;
+        }
+        for (Map.Entry<String, Object> entry : saltMap.entrySet()) {
+            Object v = entry.getValue();
+            if (v instanceof Map) {
+                if (isSelectivelyDisclosed((HashMap) v)) {
+                    return true;
+                }
+            } else if (v instanceof List) {
+                if (isSelectivelyDisclosed((ArrayList<Object>) v)) {
+                    return true;
+                }
+            }
+            if (v == null) {
+                throw new WeIdBaseException(ErrorCode.CREDENTIAL_SALT_ILLEGAL);
+            }
+            if ("0".equals(v.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the given CredentialPojo is selectively disclosed, or not.
+     *
+     * @param saltList the saltList
+     * @return true if yes, false otherwise
+     */
+    public static boolean isSelectivelyDisclosed(List<Object> saltList) {
+        if (saltList == null) {
+            return false;
+        }
+        for (Object saltObj : saltList) {
+            if (saltObj instanceof Map) {
+                if (isSelectivelyDisclosed((HashMap) saltObj)) {
+                    return true;
+                }
+            } else if (saltObj instanceof List) {
+                if (isSelectivelyDisclosed((ArrayList<Object>) saltObj)) {
+                    return true;
+                }
+            }
+            if (saltObj == null) {
+                throw new WeIdBaseException(ErrorCode.CREDENTIAL_SALT_ILLEGAL);
+            }
+            if ("0".equals(saltObj.toString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -271,7 +414,7 @@ public final class CredentialPojoUtils {
      * @param credentialPojo credentialPojo
      * @return claimData of remove not disclosure data
      */
-    public static Map<String, Object> getDisclosuredClaimData(CredentialPojo credentialPojo) {
+    public static Map<String, Object> getDisclosedClaim(CredentialPojo credentialPojo) {
         if (credentialPojo == null
             || !validClaimAndSaltForMap(credentialPojo.getClaim(), credentialPojo.getSalt())) {
             logger.error("getDisclosuredClaimData failed, credentialPojo is null or "
@@ -304,6 +447,51 @@ public final class CredentialPojoUtils {
                 removeNotDisclosureData(claim, saltKey, saltV);
             }
         }
+    }
+
+    /**
+     * remove credentialPojo not disclosure claimData with salt.
+     *
+     * @param <T> any object
+     * @param credentialPojo credentialPojo
+     * @param presentationPolicyId the presentation Policy Id
+     * @return policy CPT object
+     */
+    public static <T> T getDisclosedClaimPojo(
+        CredentialPojo credentialPojo,
+        String presentationPolicyId) {
+
+        ErrorCode errorCode = isCredentialPojoValid(credentialPojo);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[getDisclosedClaimPojo]The input credential is not a valid credential! "
+                    + "errorCode is {}",
+                errorCode);
+            return null;
+        }
+        if (StringUtils.isEmpty(presentationPolicyId)) {
+            logger.error("[getDisclosedClaimPojo]The input presentation policy id is empty.");
+            return null;
+        }
+        Integer cptId = credentialPojo.getCptId();
+        String pojoClass = new StringBuffer()
+            .append(ParamKeyConstant.POLICY_PACKAGE)
+            .append(ParamKeyConstant.CPT)
+            .append(cptId)
+            .append(ParamKeyConstant.POLICY)
+            .append(presentationPolicyId)
+            .toString();
+
+        Map<String, Object> claim = credentialPojo.getClaim();
+        Object claimPojoData = null;
+        try {
+            claimPojoData = DataToolUtils.mapToObj(claim, Class.forName(pojoClass));
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            logger.error("[getDisclosedClaimPojo] Convert claim to POJO failed, Error msg:", e);
+        } catch (Exception e) {
+            logger.error("[getDisclosedClaimPojo] Convert claim to POJO failed, Exception msg:", e);
+        }
+        return (T) claimPojoData;
     }
 
     private static void removeNotDisclosureData(
@@ -367,9 +555,13 @@ public final class CredentialPojoUtils {
                 }
             } else if (claimV instanceof List) {
                 ArrayList<Object> claimValue = (ArrayList<Object>) claimV;
-                ArrayList<Object> saltValue = (ArrayList<Object>) saltV;
-                if (!validClaimAndSaltForList(claimValue, saltValue)) {
-                    return false;
+                if (saltV instanceof ArrayList) {
+                    ArrayList<Object> saltValue = (ArrayList<Object>) saltV;
+                    if (!validClaimAndSaltForList(claimValue, saltValue)) {
+                        return false;
+                    }
+                } else {
+                    continue;
                 }
             }
         }
@@ -381,9 +573,6 @@ public final class CredentialPojoUtils {
         List<Object> saltList) {
         //检查是否为空
         if (claimList == null || saltList == null) {
-            return false;
-        }
-        if (claimList.size() != saltList.size()) {
             return false;
         }
         for (int i = 0; i < claimList.size(); i++) {
@@ -435,12 +624,22 @@ public final class CredentialPojoUtils {
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return errorCode;
         }
-        if (args.getWeIdAuthentication() == null
-            || args.getWeIdAuthentication().getWeIdPrivateKey() == null
-            || StringUtils.isBlank(args.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
-            || StringUtils.isBlank(args.getWeIdAuthentication().getWeIdPublicKeyId())) {
+        return isWeIdAuthenticationValid(args.getWeIdAuthentication());
+    }
+
+    /**
+     * Check WeIdAuthentication validity.
+     *
+     * @param callerAuth WeIdAuthentication
+     * @return true if yes, false otherwise
+     */
+    public static ErrorCode isWeIdAuthenticationValid(WeIdAuthentication callerAuth) {
+        if (callerAuth == null
+            || callerAuth.getWeIdPrivateKey() == null
+            || StringUtils.isBlank(callerAuth.getWeIdPrivateKey().getPrivateKey())
+            || StringUtils.isBlank(callerAuth.getWeIdPublicKeyId())) {
             return ErrorCode.ILLEGAL_INPUT;
-        }    
+        }
         return ErrorCode.SUCCESS;
     }
 
@@ -450,16 +649,18 @@ public final class CredentialPojoUtils {
         }
         if (expirationDate == null
             || expirationDate.longValue() < 0
-            || expirationDate.longValue() == 0
-            || !DateUtils.isAfterCurrentTime(expirationDate)) {
+            || expirationDate.longValue() == 0) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
-        } 
+        }
+        if (!DateUtils.isAfterCurrentTime(expirationDate)) {
+            return ErrorCode.CREDENTIAL_EXPIRED;
+        }
         if (issuanceDate != null && expirationDate < issuanceDate) {
             return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         return ErrorCode.SUCCESS;
     }
-    
+
     /**
      * Check the given CredentialPojo validity based on its input params.
      *
@@ -520,7 +721,7 @@ public final class CredentialPojoUtils {
         if (proof == null) {
             return ErrorCode.ILLEGAL_INPUT;
         }
-        
+
         String type = null;
         if (proof.get(ParamKeyConstant.PROOF_TYPE) == null) {
             return ErrorCode.CREDENTIAL_SIGNATURE_TYPE_ILLEGAL;
@@ -533,7 +734,7 @@ public final class CredentialPojoUtils {
         // Created is not obligatory
         if (proof.get(ParamKeyConstant.PROOF_CREATED) == null) {
             return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
-        } else { 
+        } else {
             Long created = Long.valueOf(String.valueOf(proof.get(ParamKeyConstant.PROOF_CREATED)));
             if (created.longValue() <= 0) {
                 return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
@@ -542,7 +743,7 @@ public final class CredentialPojoUtils {
         // Creator is not obligatory either
         if (proof.get(ParamKeyConstant.PROOF_CREATOR) == null) {
             return ErrorCode.CREDENTIAL_ISSUER_INVALID;
-        } else { 
+        } else {
             String creator = String.valueOf(proof.get(ParamKeyConstant.PROOF_CREATOR));
             //if (!StringUtils.isEmpty(creator) && !WeIdUtils.isWeIdValid(creator)) {
             if (StringUtils.isEmpty(creator)) {
@@ -555,7 +756,7 @@ public final class CredentialPojoUtils {
                 return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
             } else {
                 String signature = String.valueOf(proof.get(ParamKeyConstant.PROOF_SIGNATURE));
-                if (StringUtils.isEmpty(signature) 
+                if (StringUtils.isEmpty(signature)
                     || !DataToolUtils.isValidBase64String(signature)) {
                     return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
                 }

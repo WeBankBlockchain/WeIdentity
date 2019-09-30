@@ -57,11 +57,6 @@ public class EncodeData {
      * 解码者身份信息.
      */
     private WeIdAuthentication weIdAuthentication;
-    
-    /**
-     * 密文方式的过期时间.
-     */
-    private int expireTime;
    
     private EncodeData(String id, String orgId, String data) {
         this.id = id;
@@ -75,18 +70,15 @@ public class EncodeData {
      * @param id 数据编号
      * @param data 需要编解码数据
      * @param verifiers 协议数据指定用户
-     * @param expireTime 协议加密时秘钥的有效时间,单位(秒)
      */
     public EncodeData(
         String id,
         String orgId,
         String data,
-        List<String> verifiers,
-        int expireTime
+        List<String> verifiers
     ) {
         this(id, orgId, data);
         this.verifiers = verifiers;
-        this.expireTime = expireTime;
     }
     
     /**
