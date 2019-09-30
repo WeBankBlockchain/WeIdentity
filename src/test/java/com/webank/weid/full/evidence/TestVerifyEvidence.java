@@ -23,6 +23,7 @@ import java.util.Map;
 
 import mockit.Mock;
 import mockit.MockUp;
+
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.junit.Assert;
 import org.junit.Test;
@@ -38,6 +39,7 @@ import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.EvidenceServiceImpl;
+import com.webank.weid.util.DateUtils;
 
 /**
  * TestVerifyEvidence v_wbpenghu.
@@ -81,12 +83,14 @@ public class TestVerifyEvidence extends TestBaseServcie {
     public void testVerifyEvidenceCase2() {
         Credential credential = copyCredential(evidenceCredential);
         credential.setId("");
+        ResponseData<String> innerResp = credentialService.getCredentialHash(credential);
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
+            innerResp.getErrorCode().intValue());
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase2 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
-        Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode());
     }
 
     /**
@@ -96,12 +100,14 @@ public class TestVerifyEvidence extends TestBaseServcie {
     public void testVerifyEvidenceCase3() {
         Credential credential = copyCredential(evidenceCredential);
         credential.setId(null);
+        ResponseData<String> innerResp = credentialService.getCredentialHash(credential);
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
+            innerResp.getErrorCode().intValue());
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase3 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
-        Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode());
     }
 
 
@@ -113,12 +119,14 @@ public class TestVerifyEvidence extends TestBaseServcie {
         Credential credential = copyCredential(evidenceCredential);
         credential.setId(credential.getId());
         credential.setIssuer("");
+        ResponseData<String> innerResp = credentialService.getCredentialHash(credential);
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
+            innerResp.getErrorCode().intValue());
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase5 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
-        Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode());
     }
 
     /**
@@ -129,12 +137,14 @@ public class TestVerifyEvidence extends TestBaseServcie {
         Credential credential = copyCredential(evidenceCredential);
         credential.setId(credential.getId());
         credential.setCptId(-1);
+        ResponseData<String> innerResp = credentialService.getCredentialHash(credential);
+        Assert.assertEquals(
+            ErrorCode.CPT_ID_ILLEGAL.getCode(),
+            innerResp.getErrorCode().intValue());
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase6 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
-        Assert.assertEquals(responseData.getErrorCode().intValue(),
-            ErrorCode.CPT_ID_ILLEGAL.getCode());
     }
 
     /**
@@ -144,14 +154,14 @@ public class TestVerifyEvidence extends TestBaseServcie {
     public void testVerifyEvidenceCase7() {
         Credential credential = copyCredential(evidenceCredential);
         credential.setExpirationDate(System.currentTimeMillis() - 5000);
+        ResponseData<String> innerResp = credentialService.getCredentialHash(credential);
+        Assert.assertTrue(innerResp.getErrorCode() == ErrorCode.CREDENTIAL_EXPIRED.getCode()
+            || innerResp.getErrorCode() == ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH.getCode());
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase7 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
-        Assert.assertTrue(
-            responseData.getErrorCode() == ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode()
-                || responseData.getErrorCode() == ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH
-                .getCode());
+
     }
 
     /**
@@ -160,7 +170,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
     @Test
     public void testVerifyEvidenceCase8() {
         Credential credential = copyCredential(evidenceCredential);
-        credential.setIssuanceDate(System.currentTimeMillis());
+        credential.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp() + 10);
         ResponseData<Boolean> responseData = evidenceService
             .verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase8 result :" + responseData);
@@ -205,7 +215,8 @@ public class TestVerifyEvidence extends TestBaseServcie {
      */
     @Test
     public void testVerifyEvidenceCase12() {
-        ResponseData<Boolean> responseData = evidenceService.verify(null, evidenceAddress);
+        Credential credential = null;
+        ResponseData<Boolean> responseData = evidenceService.verify(credential, evidenceAddress);
         logger.info("testVerifyEvidenceCase12 result :" + responseData);
         Assert.assertFalse(responseData.getResult());
         Assert.assertEquals(responseData.getErrorCode().intValue(),
@@ -227,7 +238,7 @@ public class TestVerifyEvidence extends TestBaseServcie {
             .verify(evidenceCredential, responseData.getResult());
         logger.info("testVerifyEvidenceCase13 result :" + responseData1);
         Assert.assertEquals(responseData1.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL.getCode());
+            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode());
         Assert.assertFalse(responseData1.getResult());
     }
 

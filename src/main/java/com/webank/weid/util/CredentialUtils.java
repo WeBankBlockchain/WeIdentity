@@ -41,7 +41,7 @@ import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 
 /**
@@ -72,6 +72,30 @@ public final class CredentialUtils {
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
+    }
+
+    /**
+     * Check if the two credentials are equal. Will traverse each field.
+     *
+     * @param credOld first credential
+     * @param credNew second credential
+     * @return true if yes, false otherwise
+     */
+    public static boolean isEqual(Credential credOld, Credential credNew) {
+        if (credOld == null && credNew == null) {
+            return true;
+        }
+        if (credOld == null || credNew == null) {
+            return false;
+        }
+        return credOld.getHash().equalsIgnoreCase(credNew.getHash())
+            && credOld.getCptId().equals(credNew.getCptId())
+            && credOld.getExpirationDate().equals(credNew.getExpirationDate())
+            && credOld.getProof().equals(credNew.getProof())
+            && credOld.getContext().equalsIgnoreCase(credNew.getContext())
+            && credOld.getId().equalsIgnoreCase(credNew.getId())
+            && credOld.getIssuanceDate().equals(credNew.getIssuanceDate())
+            && credOld.getIssuer().equalsIgnoreCase(credNew.getIssuer());
     }
 
     /**
@@ -217,12 +241,7 @@ public final class CredentialUtils {
         }
 
         for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
-            if (CredentialFieldDisclosureValue.DISCLOSED.getStatus().equals(entry.getValue())) {
-                claimHashMap.put(
-                    entry.getKey(),
-                    getFieldHash(claimHashMap.get(entry.getKey()))
-                );
-            }
+            claimHashMap.put(entry.getKey(), getFieldHash(claimHashMap.get(entry.getKey())));
         }
 
         List<Map.Entry<String, Object>> list = new ArrayList<Map.Entry<String, Object>>(
@@ -304,13 +323,28 @@ public final class CredentialUtils {
     /**
      * Create a full Credential Hash for a Credential based on all its fields. This should be
      * invoked when getting Credential Evidence. Please note: the result is a String with fixed
-     * length 66 bytes including the first two bytes ("0x") and 64 bytes Hash value..
+     * length 66 bytes including the first two bytes ("0x") and 64 bytes Hash value.
      *
      * @param arg the args
      * @return Hash in byte array
      */
     public static String getCredentialHash(Credential arg) {
         String rawData = getCredentialThumbprint(arg, null);
+        if (StringUtils.isEmpty(rawData)) {
+            return StringUtils.EMPTY;
+        }
+        return DataToolUtils.sha3(rawData);
+    }
+
+    /**
+     * Create a full CredentialWrapper Hash for a Credential based on all its fields, which is
+     * resistant to selective disclosure.
+     *
+     * @param arg the args
+     * @return Hash in byte array
+     */
+    public static String getCredentialWrapperHash(CredentialWrapper arg) {
+        String rawData = getCredentialThumbprint(arg.getCredential(), arg.getDisclosure());
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
@@ -367,10 +401,14 @@ public final class CredentialUtils {
         Long expirationDate = args.getExpirationDate();
         if (expirationDate == null
             || expirationDate.longValue() < 0
-            || expirationDate.longValue() == 0
-            || (issuanceDate != null && expirationDate < issuanceDate)
-            || expirationDate < System.currentTimeMillis()) {
+            || expirationDate.longValue() == 0) {
             return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
+        }
+        if (!DateUtils.isAfterCurrentTime(expirationDate)) {
+            return ErrorCode.CREDENTIAL_EXPIRED;
+        }
+        if (issuanceDate != null && expirationDate < issuanceDate) {
+            return ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL;
         }
         if (args.getClaim() == null || args.getClaim().isEmpty()) {
             return ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS;
@@ -473,24 +511,5 @@ public final class CredentialUtils {
             }
         }
         return false;
-    }
-
-    /**
-     * Check the given CreateEvidenceArgs validity based on its input params.
-     *
-     * @param credential the given credential
-     * @param weIdPrivateKey the signer WeID's private key
-     * @return evidence address. Return empty string if failed due to any reason.
-     */
-    public static ErrorCode isCreateEvidenceArgsValid(
-        Credential credential,
-        WeIdPrivateKey weIdPrivateKey) {
-        if (credential == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
-            return ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS;
-        }
-        return ErrorCode.SUCCESS;
     }
 }

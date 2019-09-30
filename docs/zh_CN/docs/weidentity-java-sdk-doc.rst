@@ -28,7 +28,6 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 
 按照以下流程可以完整地体验本SDK的核心功能：
 
-
 #. 注册DID：通过WeIdService的createWeId()生成一个WeIdentity DID并注册到链上；
 #. 设置DID属性：分别调用WeIdService的set方法组，为此DID设置公钥、认证方式、服务端点等属性；
 #. 查询DID属性：调用WeIdService的getWeIdDocumentJson()查阅生成的WeIdentity DID数据；
@@ -36,8 +35,8 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 #. 查询授权机构：调用AuthorityIssuerService的queryAuthorityIssuerInfo()查阅生成的授权机构数据；
 #. 注册CPT：通过CptService的registerCpt()，通过之前生成的WeIdentity DID身份创建一个你喜欢的CPT模板；
 #. 查询CPT：调用CptService的queryCpt()查阅生成的CPT模板；
-#. 生成凭证：通过CredentialService的CreateCredential()，根据CPT模板，生成一份Credential；
-#. 查询凭证：调用CredentialService的VerifyCredential()，验证此Credential是否合法；
+#. 生成凭证：通过CredentialPojoService的CreateCredential()，根据CPT模板，生成一份Credential；
+#. 查询凭证：调用CredentialPojoService的Verify()，验证此Credential是否合法；
 #. 凭证存证上链：调用EvidenceService的CreateEvidence()，将之前生成的Credential生成一份Hash存证上链；
 #. 验证链上凭证存证：调用EvidenceService的VerifyEvidence()，和链上对比，验证Credential是否被篡改。
 
@@ -46,16 +45,19 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 
 .. code-block:: text
 
+   ├─ app：测试小工具
    ├─ config：FISCO-BCOS的合约配置
    ├─ constant：系统常量相关
    └─ contract：通过FISCO-BCOS Web3sdk生成的合约Java接口文件
       └─ deploy: 合约部署相关
+   ├─ exception: 异常定义
    └─ protocol：接口参数相关定义
       ├─ base: 基础数据类型定义
       ├─ request: 接口入参定义
       └─ response: 接口出参定义
    ├─ rpc：接口定义
    ├─ service：接口相关实现
+   ├─ suite：一些配套的工具
    └─ util：工具类实现
 
 基本数据结构
@@ -116,7 +118,7 @@ com.webank.weid.protocol.base.PublicKeyProperty
    * - type
      - String
      - 类型
-     - 默认为：Secp256k1VerificationKey2018
+     - 默认为：Secp256k1
    * - owner
      - String
      - 拥有者WeIdentity DID
@@ -139,7 +141,7 @@ com.webank.weid.protocol.base.AuthenticationProperty
    * - type
      - String
      - 类型
-     - 默认为：Secp256k1SignatureAuthentication2018
+     - 默认为：Secp256k1
    * - publicKey
      - String
      - 
@@ -904,7 +906,14 @@ com.webank.weid.protocol.base.PresentationE
 接口简介
 --------
 
-整体上，WeIdentity Java SDK包括五个主要的接口，它们分别是：AuthorityIssuerService、CptService、CredentialService、WeIdService、EvidenceService。
+整体上，WeIdentity Java SDK包括五个主要的接口，它们分别是：WeIdService、AuthorityIssuerService、CptService、CredentialService / CredentialPojoService、EvidenceService、AmopService。
+
+
+* WeIdService
+
+WeIdentity DID相关功能的核心接口。
+
+本接口提供WeIdentity DID的创建、获取信息、设置属性等相关操作。
 
 
 * AuthorityIssuerService
@@ -921,25 +930,11 @@ com.webank.weid.protocol.base.PresentationE
 本接口提供了对CPT的注册、更新、查询等操作。
 
 
-* CredentialService
+* CredentialService / CredentialPojoService
 
 凭证签发相关功能的核心接口。
 
-本接口提供凭证的签发和验证操作。
-
-
-* CredentialPojoService
-
-凭证签发相关功能的核心接口(操作Pojo)。
-
-本接口提供凭证的签发和验证操作。
-
-
-* WeIdService
-
-WeIdentity DID相关功能的核心接口。
-
-本接口提供WeIdentity DID的创建、获取信息、设置属性等相关操作。
+本接口提供凭证的签发和验证操作、Verifiable Presentation的签发和验证操作。
 
 
 * EvidenceService
@@ -954,13 +949,6 @@ WeIdentity DID相关功能的核心接口。
 AMOP通讯相关接口。
 
 本接口提供AMOP的请求和注册。
-
-
-* Persistence
-
-数据持久化接口，默认为MySql存储操作处理。
-
-本接口提供K-V方式的数据存储服务。
 
 
 接口列表
@@ -1439,12 +1427,12 @@ com.webank.weid.protocol.response.TransactionInfo
       "updated" : 1560419409898,
       "publicKey" : [ {
          "id" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0",
-         "type" : "Secp256k1VerificationKey2018",
+         "type" : "Secp256k1",
          "owner" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a",
          "publicKey" : "2905679808560626772263712571437125497429146398815877180317365034921958007199576809718056336050058032599743534507469742764670961100255274766148096681073592"
       } ],
       "authentication" : [ {
-         "type" : "Secp256k1SignatureAuthentication2018",
+         "type" : "Secp256k1",
          "publicKey" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0"
       } ],
       "service" : [ {
@@ -1612,7 +1600,7 @@ com.webank.weid.protocol.base.PublicKeyProperty
    * - type
      - String
      - 类型
-     - 默认为：Secp256k1VerificationKey2018
+     - 默认为：Secp256k1
    * - owner
      - String
      - 拥有者WeIdentity DID
@@ -1635,7 +1623,7 @@ com.webank.weid.protocol.base.AuthenticationProperty
    * - type
      - String
      - 类型
-     - 默认为：Secp256k1SignatureAuthentication2018
+     - 默认为：Secp256k1
    * - publicKey
      - String
      - 
@@ -1707,12 +1695,12 @@ com.webank.weid.protocol.base.ServiceProperty
       publicKey:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.PublicKeyProperty
             id: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
-            type: Secp256k1VerificationKey2018
+            type: Secp256k18
             owner: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
             publicKey: 2905679808560626772263712571437125497429146398815877180317365034921958007199576809718056336050058032599743534507469742764670961100255274766148096681073592
       authentication:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.AuthenticationProperty
-            type: Secp256k1SignatureAuthentication2018
+            type: Secp256k1
             publicKey: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
       service:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.ServiceProperty
@@ -6463,7 +6451,7 @@ com.webank.weid.protocol.base.Credential
             creator: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
             signature: HHQwJ9eEpyv/BgwtWDveFYAPsKOPtEEWt6ieb28PS76pDwlpFKtbh9Ygog8SUPIXUaWNYS2pLkk4E91hpP8IdbU=
             created: 1560416978296
-            type: EcdsaSignature
+            type: Secp256k1
       disclosure:(java.util.HashMap)
          name: 1
          gender: 1
@@ -7046,7 +7034,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
    接口名称:com.webank.weid.rpc.CredentialService.getCredentialHash
    接口定义:ResponseData<String> getCredentialHash(Credential args)
-   接口描述: 传入Credential信息生成Credential整体的Hash值。
+   接口描述: 传入Credential信息生成Credential整体的Hash值，一般在生成Evidence时调用。
 
 **接口入参**\ :   com.webank.weid.protocol.base.Credential
 
@@ -7251,25 +7239,372 @@ com.webank.weid.protocol.response.TransactionInfo
 
 ----
 
-
-EvidenceService
-^^^^^^^^^^^^^^^^^
-
-1. createEvidence
-~~~~~~~~~~~~~~~~~~~
+5. getCredentialHash
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.createEvidence
-   接口定义:ResponseData<String> createEvidence(Credential credential, WeIdPrivateKey weIdPrivateKey)
-   接口描述: 生成凭证存证信息并上链，有判断要求数据有效，相关非空验证等。
-   注意：本接口并不进行凭证的有效性验证，也就是说，上链的凭证源有可能无效。
-   调用方有义务事先调用CredentialService.verifyCredential()进行判断以避免脏数据。
-   传入的私钥将会成为链上存证的签名方。此签名方和凭证的Issuer可以不是同一方。
+   接口名称:com.webank.weid.rpc.CredentialService.getCredentialHash
+   接口定义:ResponseData<String> getCredentialHash(CredentialWrapper args)
+   接口描述: 传入Credential信息生成Credential整体的Hash值，一般在生成Evidence时调用。
 
-**接口入参**\ : 
+**接口入参**\ :   com.webank.weid.protocol.base.CredentialWrapper
+
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - credential
+     - Credential
+     - Y
+     - 凭证信息
+     - 具体见下
+   * - disclosure
+     - Map<String, Object>
+     - Y
+     - 披露属性
+     - 默认为全披露
+
+
+com.webank.weid.protocol.base.Credential
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 版本
+     - 默认为v1
+   * - id
+     - String
+     - Y
+     - 证书ID
+     -
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     -
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     -
+   * - issuanceDate
+     - Long
+     - Y
+     - 创建日期
+     -
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     -
+   * - claim
+     - Map<String, Object>
+     - Y
+     - Claim数据
+     -
+   * - proof
+     - Map<String, Object>
+     - Y
+     - 签名数据结构体
+     -
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - String
+     - 返回结果值
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
+   * - CREDENTIAL_EXPIRED
+     - 100402
+     - 过期
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名破坏
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialService credentialService = new CredentialServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+   createCredentialArgs.setClaim(claim);
+   createCredentialArgs.setCptId(1017);
+   createCredentialArgs.setExpirationDate(1561448312461L);
+   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+	 createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+   //创建CredentialWrapper
+   ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
+
+   //获取CredentialWrapper的Hash
+   ResponseData<String> responseHash = credentialService.getCredentialHash(response.getResult());
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: 0x06173e4b714d57565ae5ddf23c4e84cb0a9824cb72eab476303d2dd1cc0a4728
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialService
+   调用者->>CredentialService: 调用GetCredentialHash()
+   CredentialService->>CredentialService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialService->>CredentialService: 生成凭证Hash
+   CredentialService-->>调用者: 返回凭证Hash
+
+
+6. addSignature
+~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialService.addSignature
+   接口定义:ResponseData<Credential> addSignature(List<Credential> credentialList, WeIdPrivateKey weIdPrivateKey)
+   接口描述:多签，在原凭证列表的基础上，创建包裹成一个新的多签凭证，由传入的私钥所签名。此凭证的CPT为一个固定值。在验证一个多签凭证时，会迭代验证其包裹的所有子凭证。本接口不支持创建选择性披露的多签凭证。
+
+**接口入参**\ :   java.util.ArrayList
+
+
+com.webank.weid.protocol.base.Credential
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 版本
+     - 默认为v1
+   * - id
+     - String
+     - Y
+     - 证书ID
+     -
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     -
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     -
+   * - issuanceDate
+     - Long
+     - Y
+     - 创建日期
+     -
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     -
+   * - claim
+     - Map<String, Object>
+     - Y
+     - Claim数据
+     -
+   * - proof
+     - Map<String, Object>
+     - Y
+     - 签名数据结构体
+     -
+
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - Y
+     - 私钥值
+     - 使用十进制数字表示
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<Credential>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Credential
+     - 
+     - 见下
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+
 
 com.webank.weid.protocol.base.Credential
 
@@ -7295,7 +7630,7 @@ com.webank.weid.protocol.base.Credential
      - Integer
      - Y
      - cptId
-     - 
+     - 默认为106
    * - issuer
      - String
      - Y
@@ -7322,6 +7657,200 @@ com.webank.weid.protocol.base.Credential
      - 签名数据结构体
      - 
 
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_JSON_SCHEMA_INVALID
+     - 100301
+     - JsonSchema无效
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
+   * - CREDENTIAL_ERROR
+     - 100400
+     - Credential标准错误
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期无效
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialService credentialService = new CredentialServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+   createCredentialArgs.setClaim(claim);
+   createCredentialArgs.setCptId(1017);
+   createCredentialArgs.setExpirationDate(1551448312461L);
+   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+   createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
+   List<Credential> credList = new ArrayList<>();
+   credList.add(response.getResult().getCredential());
+      Long expirationDate = DateUtils.convertToNoMillisecondTimeStamp(
+       createCredentialArgs.getExpirationDate() + 24 * 60 * 60);
+   createCredentialArgs.setExpirationDate(expirationDate);
+   Credential tempCredential =
+       credentialService.createCredential(createCredentialArgs).getResult().getCredential();
+   credentialList.add(tempCredential);
+   ResponseData<Credential> multiSignedResp = credentialService.addSignature(credList, weIdPrivateKey);
+   System.out.println(multiSignedResp);
+
+.. code-block:: text
+
+   返回结果如：
+   result:(com.webank.weid.protocol.base.CredentialWrapper)
+      credential:(com.webank.weid.protocol.base.Credential) {
+        "claim": {
+          "credentialList": [
+            {
+              "claim": {
+                "age": 18,
+                "gender": "F",
+                "id": "did:weid:101:0xe4bee5a07f282ffd3109699e21663cde0210fb64",
+                "name": "zhang san"
+              },
+              "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+              "cptId": 2000084,
+              "expirationDate": 1567488114,
+              "id": "a8b1c030-231d-49de-9618-b5ed7f3e6d2e",
+              "issuanceDate": 1567401714,
+              "issuer": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+              "proof": {
+                "created": "1567401714",
+                "creator": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+                "signature": "GwKcDoEseYdJxI7M\/R4RAdGcV5SJoFVvg8Z53BVa76LMV8eqbX3F4rb1dWjhqI286AvPECx6uuuo9cTAKuNHRXM=",
+                "type": "Secp256k1"
+              }
+            },
+            {
+              "claim": {
+                "age": 18,
+                "gender": "F",
+                "id": "did:weid:101:0xe4bee5a07f282ffd3109699e21663cde0210fb64",
+                "name": "zhang san"
+              },
+              "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+              "cptId": 2000084,
+              "expirationDate": 1567488201,
+              "id": "2130908d-fb2a-4675-8bf1-727f354ca8e4",
+              "issuanceDate": 1567401715,
+              "issuer": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+              "proof": {
+                "created": "1567401715",
+                "creator": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+                "signature": "HJXDuvg2l8jRbL5ymmBSAo\/6DMKbCv3P1XoP67S+OVzSbRVDNFXY1CsqpTqT5MAkSY4+UwPLwCfXrLtHsZQ6GOo=",
+                "type": "Secp256k1"
+              }
+            }
+          ]
+        },
+        "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+        "cptId": 106,
+        "expirationDate": 1567488201,
+        "id": "d8642623-703f-447a-8765-dab1dab4df0a",
+        "issuanceDate": 1567401717,
+        "issuer": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+        "proof": {
+          "created": "1567401717",
+          "creator": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+          "signature": "HKXEwzDEwqte4aAUBLvQjiI3C0cw5V\/iWeKWmBs7HIG0IRzgbXnMj8kYw37y5yJE4KdsWCuehBUGuW7WdihL560=",
+          "type": "Secp256k1"
+        }
+      }
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialService
+   调用者->>CredentialService: 调用addSignature()
+   CredentialService->>CredentialService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialService->>CredentialService: 生成签发日期、以原凭证列表为Claim生成数字签名
+   CredentialService-->>调用者: 返回凭证
+
+
+----
+
+EvidenceService
+^^^^^^^^^^^^^^^^^
+
+1. createEvidence
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.createEvidence
+   接口定义:ResponseData<String> createEvidence(Hashable object, WeIdPrivateKey weIdPrivateKey)
+   接口描述: 将传入Object计算Hash值生成存证上链，返回存证地址。传入的私钥将会成为链上存证的签名方。此签名方和凭证的Issuer可以不是同一方。当传入的object为null时，则会创建一个空的存证并返回其地址，空存证中仅包含签名方，不含Hash值。可以随后调用SetHashValue()方法，为空存证添加Hash值和签名。
+
+**接口入参**\ :
+
+Hashable java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - Hashable object
+     - N
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
 
 com.webank.weid.protocol.base.WeIdPrivateKey
 
@@ -7399,39 +7928,12 @@ com.webank.weid.protocol.response.TransactionInfo
    * - SUCCESS
      - 0
      - 成功
-   * - CPT_ID_ILLEGAL
-     - 100303
-     - cptId无效
-   * - CREDENTIAL_EXPIRED
-     - 100402
-     - 过期
-   * - CREDENTIAL_SIGNATURE_BROKEN
-     - 100405
-     - 签名破坏
-   * - CREDENTIAL_CREATE_DATE_ILLEGAL
-     - 100408
-     - 创建日期格式非法
-   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
-     - 100409
-     - 到期日期格式非法
-   * - CREDENTIAL_CLAIM_NOT_EXISTS
-     - 100410
-     - Claim数据不能为空
-   * - CREDENTIAL_ID_NOT_EXISTS
-     - 100412
-     - ID为空
-   * - CREDENTIAL_CONTEXT_NOT_EXISTS
-     - 100413
-     - context为空   
    * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
      - 100415
      - 私钥为空
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
-   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
-     - 100429
-     - 验证签名类型异常
    * - CREDENTIAL_EVIDENCE_BASE_ERROR
      - 100500
      - Evidence标准错误
@@ -7471,7 +7973,7 @@ com.webank.weid.protocol.response.TransactionInfo
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
    createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
- 
+
    // 创建Credential
    ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
 
@@ -7513,10 +8015,223 @@ com.webank.weid.protocol.response.TransactionInfo
    end
    EvidenceService-->>调用者: 返回成功
 
+----
+
+2. createEvidence （多个签名方）
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.createEvidence
+   接口定义:ResponseData<String> createEvidence(Hashable object, List<String> signers, WeIdPrivateKey weIdPrivateKey)
+   接口描述: 将传入Object计算Hash值生成存证上链。此方法允许在创建存证时传入多个签名方的WeID；但是，必须传入一个这些签名方WeID所对应持有的私钥进行签名。同样地，此签名方和凭证的Issuer可以不是同一方。当传入的object为null时，则会创建一个空的存证并返回其地址，空存证中仅包含签名方，不含Hash值。可以随后调用SetHashValue()方法，为空存证添加Hash值和签名。
+
+**接口入参**\ :
+
+Hashable java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - Hashable object
+     - N
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
+
+java.util.ArrayList
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - signers
+     - List<String>
+     - Y
+     - 声明的签名者的WeID
+     - 至少有一个签名者需要传入自己的私钥（在下个参数中）
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - String
+     - 创建的凭证合约地址
+     - 业务数据
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT
+     - 500401
+     - Evidence参数非法
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialService credentialService = new CredentialServiceImpl();
+   EvidenceService evidenceService = new EvidenceServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+   createCredentialArgs.setClaim(claim);
+   createCredentialArgs.setCptId(1017);
+   createCredentialArgs.setExpirationDate(1561448312461L);
+   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   // 创建Credential
+   ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
+
+   List<String> signer = new ArrayList<>();
+   signer.add("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   signer.add("did:weid:101:0x48f6f6f663ef77409144014ceb063713b65611f8");
+
+   //创建Evidence Address
+   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(response.getResult().getCredential(), signer, weIdPrivateKey);
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: 0xa3203e054bb7a7f0dec134c7510299869e343e8d
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30014
+      transactionHash: 0x1f9e62fa152eb5fce859dcf81c7c0eddcbcab63c40629d1c745058c227693dae
+      transactionIndex: 0
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用CreateEvidence()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService->>EvidenceService: 生成凭证Hash
+   EvidenceService->>EvidenceService: 基于凭证Hash生成签名值
+   EvidenceService->>区块链节点: 调用智能合约，创建并上传凭证存证
+   区块链节点-->>EvidenceService: 返回创建结果
+   opt 创建失败
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService-->>调用者: 返回成功
+
 
 ----
 
-2. getEvidence
+3. getEvidence
 ~~~~~~~~~~~~~~~~~~~
 
 
@@ -7671,21 +8386,23 @@ com.webank.weid.protocol.base.EvidenceInfo
    end
    EvidenceService-->>调用者: 返回成功
 
-
 ----
 
-3. verify
-~~~~~~~~~~~~~~~~~~~~~
+
+4. addSignature
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.verify
-   接口定义:ResponseData<Boolean> verify(Credential credential, String evidenceAddress)
-   接口描述: 根据传入的凭证和链上凭证对比，验证其是否遭到篡改。
+   接口名称:com.webank.weid.rpc.EvidenceService.addSignature
+   接口定义:ResponseData<String> addSignature(Hashable object, String evidenceAddress, WeIdPrivateKey weIdPrivateKey)
+   接口描述: 对传入的Object及链上地址，加一个签名存入链上的存证。要求：传入的签名方必须隶属于在创建存证时传入多个签名方的WeID之一。
 
-**接口入参**\ : com.webank.weid.protocol.base.Credential
+**接口入参**\ :
+
+Hashable java.lang.Object
 
 .. list-table::
    :header-rows: 1
@@ -7695,48 +8412,244 @@ com.webank.weid.protocol.base.EvidenceInfo
      - 非空
      - 说明
      - 备注
-   * - context
-     - String
+   * - Object
+     - Hashable object
      - Y
-     - 版本
-     - 默认为v1
-   * - id
-     - String
-     - Y
-     - 证书ID
-     - 
-   * - cptId
-     - Integer
-     - Y
-     - cptId
-     - 
-   * - issuer
-     - String
-     - Y
-     - WeIdentity DID
-     - 
-   * - issuanceDate
-     - Long
-     - Y
-     - 创建日期
-     - 
-   * - expirationDate
-     - Long
-     - Y
-     - 到期日期
-     - 
-   * - claim
-     - Map<String, Object>
-     - Y
-     - Claim数据
-     - 
-   * - proof
-     - Map<String, Object>
-     - Y
-     - 签名数据结构体
-     - 
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
 
-String：以地址形式存在的String，会进行入参检查
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - evidenceAddress
+     - String
+     - Y
+     - 存证地址
+     -
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - String
+     - 创建的凭证合约地址
+     - 业务数据
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT
+     - 500401
+     - Evidence参数非法
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialService credentialService = new CredentialServiceImpl();
+   EvidenceService evidenceService = new EvidenceServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+   createCredentialArgs.setClaim(claim);
+   createCredentialArgs.setCptId(1017);
+   createCredentialArgs.setExpirationDate(1561448312461L);
+   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   // 创建Credential
+   ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
+
+   List<String> signer = new ArrayList<>();
+   signer.add("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   signer.add("did:weid:101:0x48f6f6f663ef77409144014ceb063713b65611f8");
+
+   //创建Evidence Address
+   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(response.getResult().getCredential(), signer, weIdPrivateKey);
+
+   String eviAddr = responseCreateEvidence.getResult();
+   weIdPrivateKey.setPrivateKey("3171324536025850958917764441489874006048340539971987768716844")
+   ResponseData<Boolean> resp = evidenceService.addSignature(response.getResult().getCredential, eviAddr, weIdPrivateKey);
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30014
+      transactionHash: 0x1f9e62fa152eb5fce859dcf81c7c0eddcbcab63c40629d1c745058c227693dae
+      transactionIndex: 0
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用addSignature()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService->>EvidenceService: 根据凭证Hash计算签名值
+   EvidenceService->>区块链节点: 调用智能合约，上传签名值
+   区块链节点-->>EvidenceService: 返回创建结果
+   opt 创建失败
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService-->>调用者: 返回成功
+
+----
+
+5. verify
+~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.verify
+   接口定义:ResponseData<Boolean> verify(Hashable object, String evidenceAddress)
+   接口描述: 根据传入的Object计算存证Hash值和链上值对比，验证其是否遭到篡改。当存证包含多个签名时，将会依次验证每个签名，必须确实由签名者列表中的某个WeID所签发才算验证成功。
+
+**接口入参**\ :
+
+java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - Hashable object
+     - Y
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - evidenceAddress
+     - String
+     - Y
+     - 存证地址
+     -
+
 
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
@@ -7937,7 +8850,218 @@ com.webank.weid.protocol.response.TransactionInfo
    EvidenceService-->>调用者: 返回验证失败，报错并退出
    end
    EvidenceService-->>调用者: 返回验证成功
-   
+
+
+6. setHashValue
+~~~~~~~~~~~~~~~~~
+
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.setHashValue
+   接口定义:ResponseData<String> setHashValue(String hashValue, String evidenceAddress, WeIdPrivateKey weIdPrivateKey)
+   接口描述: 对指定的空存证地址，将其链上的Hash值设定为所传入的Hash值。传入的私钥必须是创建存证时所声明的签名者之一。注意：当存证非空时，接口将返回失败。
+
+**接口入参**\ :
+
+Hashable java.lang.Object
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - Y
+     - 存证Hash值
+     - SHA3算法生成，符合SECP256K1规范，共64个字节，以“0x”开头
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - evidenceAddress
+     - String
+     - Y
+     - 存证地址
+     -
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - String
+     - 创建的凭证合约地址
+     - 业务数据
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+   * - CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT
+     - 500401
+     - Evidence参数非法
+
+
+**调用示例**
+
+.. code-block:: java
+
+   EvidenceService evidenceService = new EvidenceServiceImpl();
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+   List<String> signer = new ArrayList<>();
+   signer.add("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   signer.add("did:weid:101:0x48f6f6f663ef77409144014ceb063713b65611f8");
+
+   //创建空Evidence
+   ResponseData<String> emptyEvidenceResp = evidenceService.createEvidence(null, signer, weIdPrivateKey);
+
+   String eviAddr = emptyEvidenceResp.getResult();
+   weIdPrivateKey.setPrivateKey("3171324536025850958917764441489874006048340539971987768716844");
+   String hash = "0x1f9e62fa152eb5fce859dcf81c7c0eddcbcab63c40629d1c745058c227693dae";
+   ResponseData<Boolean> resp = evidenceService.setHashValue(hash, eviAddr, weIdPrivateKey);
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30014
+      transactionHash: 0x3e8f711b236fc6fce859dcf81c7c0eddcbcab63c40629d1c745058c338704fbf
+      transactionIndex: 0
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用setHashValue()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService->>区块链节点: 检查存证是否为空存证
+   区块链节点-->>EvidenceService: 返回检查结果
+   opt 非空
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService->>区块链节点: 设置Hash值
+   区块链节点-->>EvidenceService: 返回结果
+   opt 失败
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService->>区块链节点: 设置根据Hash值生成签名值并设置存证签名
+   区块链节点-->>EvidenceService: 返回结果
+   opt 失败
+   EvidenceService-->>调用者: 报错并退出
+   end
+   EvidenceService-->>调用者: 返回成功
    
 ----
 
@@ -8017,7 +9141,7 @@ com.webank.weid.protocol.base.WeIdAuthentication
    * - weIdPrivateKey
      - WeIdPrivateKey
      - Y
-     - 
+     -
      - 交易私钥，见下
      
 com.webank.weid.protocol.base.WeIdPrivateKey
@@ -8222,7 +9346,7 @@ com.webank.weid.protocol.base.CredentialPojo
             name: el1w8
             age: ajqkr
          created: 1560420878712
-         type: EcdsaSignature
+         type: Secp256k1
          signatureValue: G7UPiw08P5E9dEcSJEo9zpKu/nsUrpn00xDE+mwDXn9gJEohIlRUX5XTGQB4G1w3yThp6R/2RqjUYkuQTaUXbIU=
       type:(java.util.ArrayList)
          [0]:VerifiableCredential
@@ -8230,7 +9354,24 @@ com.webank.weid.protocol.base.CredentialPojo
    errorMessage: success
    transactionInfo:null
 	
-	
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用CreateCredential()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 为claim中的每个字段生成盐值
+   CredentialPojoService->>CredentialPojoService: 生成签发日期、生成数字签名
+   CredentialPojoService-->>调用者: 返回凭证
+
 ----
 
 2. createSelectiveCredential
@@ -8490,13 +9631,31 @@ com.webank.weid.protocol.response.TransactionInfo
             name: rr3g0
             age: 9ysgr
          created: 1560420975268
-         type: EcdsaSignature
+         type: Secp256k1
          signatureValue: GxVcZJFEnC7w+ZKOZAjmKy5JfFxoEFqffmCMvbUnVYmzEVKIUtDCiDmokZ2X3jIV/uFvUHQ4DWXksrD6Opr1vLo=
       type:(java.util.ArrayList)
          [0]:VerifiableCredential
    errorCode: 0
    errorMessage: success
    transactionInfo:null
+
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用createSelectiveCredential()，传入原始凭证
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 根据claimPolicy来隐藏不披露的字段
+   CredentialPojoService->>CredentialPojoService: 生成签发日期、生成数字签名
+   CredentialPojoService-->>调用者: 返回凭证
 
 
 ----
@@ -8735,6 +9894,51 @@ com.webank.weid.protocol.response.TransactionInfo
    errorMessage: success
    transactionInfo:null
 
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   participant CptService
+   participant WeIdService
+   participant 区块链节点
+   调用者->>CredentialPojoService: 调用verify()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>WeIdService: 查询WeIdentity DID存在性
+   WeIdService->>区块链节点: 调用智能合约，查询WeIdentity DID属性
+   区块链节点-->>WeIdService: 返回查询结果
+   WeIdService-->>CredentialPojoService: 返回查询结果
+   opt 查询不存在
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CptService: 查询CPT存在性及Claim关联语义
+   CptService->>区块链节点: 调用智能合约，查询CPT
+   区块链节点-->>CptService: 返回查询结果
+   CptService-->>CredentialPojoService: 返回查询结果
+   opt 不符合CPT格式要求
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 验证过期、撤销与否
+   opt 任一验证失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   opt 未提供验签公钥
+   CredentialPojoService->>WeIdService: 查询Issuer对应公钥
+   WeIdService->>区块链节点: 调用智能合约，查询Issuer的WeIdentity DID Document
+   区块链节点-->>WeIdService: 返回查询结果
+   WeIdService-->>CredentialPojoService: 返回查询结果
+   end
+   CredentialPojoService->>CredentialPojoService: 通过公钥与签名对比，验证Issuer是否签发此凭证
+   opt 验证签名失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService-->>调用者: 返回成功
 
 ----
 
@@ -8979,7 +10183,39 @@ com.webank.weid.protocol.response.TransactionInfo
    transactionInfo:null
 
 
-----    
+**时序图**
+
+.. mermaid::
+
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   participant CptService
+   participant 区块链节点
+   调用者->>CredentialPojoService: 调用verify()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CptService: 查询CPT存在性及Claim关联语义
+   CptService->>区块链节点: 调用智能合约，查询CPT
+   区块链节点-->>CptService: 返回查询结果
+   CptService-->>CredentialPojoService: 返回查询结果
+   opt 不符合CPT格式要求
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 验证过期、撤销与否
+   opt 任一验证失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 通过公钥与签名对比，验证Issuer是否签发此凭证
+   opt 验证签名失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService-->>调用者: 返回成功
+
+----
 
 5. verify
 ~~~~~~~~~~~~~~~~~~~
@@ -9295,6 +10531,44 @@ com.webank.weid.protocol.response.TransactionInfo
    errorMessage: success
    transactionInfo:null
 
+
+**时序图**
+
+.. mermaid::
+
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   participant CptService
+   participant 区块链节点
+   调用者->>CredentialPojoService: 调用verify()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   loop 遍历credentialPojo列表
+   CredentialPojoService->>CredentialPojoService: 验证policy和claim里的key是否一致
+   opt 任一验证失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CptService: 查询CPT存在性及Claim关联语义
+   CptService->>区块链节点: 调用智能合约，查询CPT
+   区块链节点-->>CptService: 返回查询结果
+   CptService-->>CredentialPojoService: 返回查询结果
+   opt 不符合CPT格式要求
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 验证过期、撤销与否
+   opt 任一验证失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 通过公钥与签名对比，验证Issuer是否签发此凭证
+   opt 验证签名失败
+   CredentialPojoService-->>调用者: 报错并退出
+   end
+   end
+   CredentialPojoService-->>调用者: 返回成功
 
 ----
 
@@ -9696,13 +10970,13 @@ com.webank.weid.protocol.base.PresentationE
                   name: yjckg
                   age: 0
                created: 1560425696276
-               type: EcdsaSignature
+               type: Secp256k1
                signatureValue: HCgmoX0f7ZYkwpd+pJ2+RCRKNt5lf9nbl8g9YWTSuA32IIoRSjMr7GPZVbe5bcu+hD/pnkAJbbinJo4/YqOOync=
             type:(java.util.ArrayList)
                [0]:VerifiableCredential
       proof:(java.util.HashMap)
          created: 1560425696412
-         type: EcdsaSignature
+         type: Secp256k1
          verificationMethod: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
          nonce: DJulONVxD2TFidB8vaYH
          signatureValue: G8ivS1e625NT8qSzLEugbqkRW6HDJNA4Lfcl7uCXV+uEffPMVF6Bwnk0pyCOd+4bbw90pMaj+EVxeL79acYPzM4=
@@ -9711,7 +10985,627 @@ com.webank.weid.protocol.base.PresentationE
    transactionInfo:null
 
 
+**时序图**
+
+.. mermaid::
+
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用verify()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   loop 遍历credentialPojo列表
+   CredentialPojoService->>CredentialPojoService: 根据credentialPojo中的cptId获取对应的claimPolicy
+   opt claimPolicy
+   CredentialPojoService-->>调用者: continue
+   end
+   CredentialPojoService->>CredentialPojoService: 根据claimPolicy，调用createSelectiveCredential()方法，做选择性披露
+   opt 选择性披露失败
+   CredentialPojoService-->>调用者: 失败退出
+   end
+   end
+   CredentialPojoService->>CredentialPojoService: 设置context等元数据属性
+   CredentialPojoService->>CredentialPojoService: 对presentation整体签名，放入proof结构，同时设置其他proof属性，用于验证
+   CredentialPojoService-->>调用者: 返回成功
+
 ----
+
+
+7. getCredentialPojoHash
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService.getCredentialPojoHash
+   接口定义:ResponseData<String> getCredentialHash(CredentialPojo args)
+   接口描述: 传入CredentialPojo信息生成CredentialPojo整体的Hash值，一般在生成Evidence时调用。
+
+**接口入参**\ :   com.webank.weid.protocol.base.CredentialPojo
+
+
+com.webank.weid.protocol.base.CredentialPojo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     -
+     -
+   * - type
+     - List<String>
+     - Y
+     -
+     -
+   * - id
+     - String
+     - Y
+     - 证书ID
+     -
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     -
+   * - issuer
+     - String
+     - Y
+     - issuer 的 WeIdentity DID
+     -
+   * - issuanceDate
+     - Long
+     - Y
+     - 创建日期
+     -
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     -
+   * - claim
+     - Map<String, Object>
+     - Y
+     - Claim数据
+     -
+   * - proof
+     - Map<String, Object>
+     - Y
+     - 签名数据结构体
+     -
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - String
+     - 返回结果值
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
+   * - CREDENTIAL_EXPIRED
+     - 100402
+     - 过期
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名破坏
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+
+
+   CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+   CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
+   createCredentialPojoArgs.setCptId(1017);
+   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
+
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
+
+   Map<String, Object> claim = new HashMap<String, Object>();
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 22);
+   createCredentialPojoArgs.setClaim(claim);
+
+   //创建CredentialPojo
+   ResponseData<CredentialPojo> response = credentialPojoService.createCredential(createCredentialPojoArgs);
+
+   ResponseData<String> resp = credentialPojoService.getCredentialPojoHash(response.getResult());
+
+.. code-block:: text
+
+   返回结果如：
+   result: 0x06173e4b714d57565ae5ddf23c4e84cb0a9824cb72eab476303d2dd1cc0a4728
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用GetCredentialPojoHash()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 生成凭证Hash
+   CredentialPojoService-->>调用者: 返回凭证Hash
+
+
+8. addSignature
+~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService.addSignature
+   接口定义:ResponseData<Credential> addSignature(List<Credential> credentialList, WeIdPrivateKey weIdPrivateKey)
+   接口描述:多签，在原凭证列表的基础上，创建包裹成一个新的多签凭证，由传入的私钥所签名。此凭证的CPT为一个固定值。在验证一个多签凭证时，会迭代验证其包裹的所有子凭证。本接口不支持创建选择性披露的多签凭证。
+
+**接口入参**\ :   java.util.ArrayList
+
+
+com.webank.weid.protocol.base.Credential
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 版本
+     - 默认为v1
+   * - id
+     - String
+     - Y
+     - 证书ID
+     -
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     -
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     -
+   * - issuanceDate
+     - Long
+     - Y
+     - 创建日期
+     -
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     -
+   * - claim
+     - Map<String, Object>
+     - Y
+     - Claim数据
+     -
+   * - proof
+     - Map<String, Object>
+     - Y
+     - 签名数据结构体
+     -
+
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - Y
+     - 私钥值
+     - 使用十进制数字表示
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<Credential>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Credential
+     - 
+     - 见下
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+     
+     
+com.webank.weid.protocol.response.TransactionInfo 
+  
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     - 
+   * - transactionHash
+     - String
+     - 交易hash
+     - 
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     - 
+
+
+com.webank.weid.protocol.base.Credential
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 版本
+     - 默认为v1
+   * - id
+     - String
+     - Y
+     - 证书ID
+     - 
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     - 默认为106
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     - 
+   * - issuanceDate
+     - Long
+     - Y
+     - 创建日期
+     - 
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     - 
+   * - claim
+     - Map<String, Object>
+     - Y
+     - Claim数据
+     - 
+   * - proof
+     - Map<String, Object>
+     - Y
+     - 签名数据结构体
+     - 
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_JSON_SCHEMA_INVALID
+     - 100301
+     - JsonSchema无效
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
+   * - CREDENTIAL_ERROR
+     - 100400
+     - Credential标准错误
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期无效
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialPojoArgs createCredentialPojoArgs = new CreateCredentialPojoArgs();
+   createCredentialPojoArgs.setClaim(claim);
+   createCredentialPojoArgs.setCptId(1017);
+   createCredentialPojoArgs.setExpirationDate(1551448312461L);
+   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+   createCredentialPojoArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   ResponseData<CredentialWrapper> response = credentialPojoService.createCredentialPojo(createCredentialArgs);
+   List<CredentialPojo> credList = new ArrayList<>();
+   credList.add(response.getResult().getCredentialPojo());
+   Long expirationDate = DateUtils.convertToNoMillisecondTimeStamp(
+      createCredentialPojoArgs.getExpirationDate() + 24 * 60 * 60);
+   createCredentialPojoArgs.setExpirationDate(expirationDate);
+   CredentialPojo tempCredential =
+       credentialPojoService.createCredentialPojo(createCredentialPojoArgs).getResult().getCredentialPojo();
+   credentialList.add(tempCredential);
+   ResponseData<CredentialPojo> multiSignedResp = credentialService.addSignature(credList, weIdPrivateKey);
+   System.out.println(multiSignedResp);
+
+.. code-block:: text
+
+   返回结果如：
+   result:(com.webank.weid.protocol.base.CredentialPojo)
+      credentialPojo:(com.webank.weid.protocol.base.CredentialPojo) {
+      {
+        "claim": {
+          "credentialList": [
+            {
+              "claim": {
+                "age": 1,
+                "gender": "F",
+                "id": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
+                "name": "1"
+              },
+              "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+              "cptId": 2000087,
+              "expirationDate": 1567491752,
+              "id": "6ea6e209-10e9-4a93-b6be-12af1a32655b",
+              "issuanceDate": 1567405352,
+              "issuer": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
+              "proof": {
+                "created": 1567405352,
+                "creator": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33#keys-0",
+                "salt": {
+                  "age": "yOwN7",
+                  "gender": "jjB85",
+                  "id": "BmRYI",
+                  "name": "BjYqF"
+                },
+                "signatureValue": "G+SNG3rBZNDvRNgRtJugPtX1FmE8XJIkV4CGPK\/nt\/breIPMJ5wYxImTp2QAxBUe5HMwCe9PPGhhMJJAazM5u9k=",
+                "type": "Secp256k1"
+              },
+              "type": [
+                "VerifiableCredential"
+              ]
+            },
+            {
+              "claim": {
+                "age": 1,
+                "gender": "F",
+                "id": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
+                "name": "1"
+              },
+              "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+              "cptId": 2000087,
+              "expirationDate": 1567491842,
+              "id": "a3544a9c-6cb6-4688-9622-bb935fb0d93f",
+              "issuanceDate": 1567405355,
+              "issuer": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
+              "proof": {
+                "created": 1567405355,
+                "creator": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53#keys-0",
+                "salt": {
+                  "age": "5nImi",
+                  "gender": "Me224",
+                  "id": "5pYs2",
+                  "name": "z6VmW"
+                },
+                "signatureValue": "HC8OAG\/dRmteGSIGWIDekp8fC1KJI8EEDZBb29HiTLXvVj350l9yTOHeGSBCr2VRY\/DSHT5ONjlvcrO4Mqa3Auo=",
+                "type": "Secp256k1"
+              },
+              "type": [
+                "VerifiableCredential"
+              ]
+            }
+          ]
+        },
+        "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+        "cptId": 107,
+        "expirationDate": 1567491842,
+        "id": "ad5d5a54-4574-4b3b-b1df-9d0687b6a0ac",
+        "issuanceDate": 1567405359,
+        "issuer": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6",
+        "proof": {
+          "created": 1567405359,
+          "creator": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6#keys-0",
+          "salt": {
+            "credentialList": "UuJHx"
+          },
+          "signatureValue": "HC1y3rfyb\/2sg+E2Uulczm8VDtmQ6VrU\/9ow4e4nP3lVUOv4Gz41pfBrJHnV4wQoUbQsCYpezFx5sdaUwUILV1I=",
+          "type": "Secp256k1"
+        },
+        "type": [
+          "VerifiableCredential"
+        ]
+      }
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用addSignature()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 生成签发日期、以原凭证列表为Claim生成数字签名
+   CredentialPojoService-->>调用者: 返回凭证
 
 
 AmopService
@@ -10293,6 +12187,35 @@ java.util.List<java.lang.String>
    verifierWeIdList.add(weId);
    jsonTransportation = jsonTransportation.specify(verifierWeIdList);
    
+
+**时序图**
+
+.. mermaid::
+
+
+   sequenceDiagram
+   participant 调用者
+   participant JsonTransportation
+   participant WeIdService
+   participant 区块链
+   调用者->>JsonTransportation: 调用specify()
+   JsonTransportation->>JsonTransportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   JsonTransportation-->>调用者: 报错，提示参数不合法并退出
+   end
+   loop 遍历每个WeID
+   JsonTransportation->>WeIdService: 判断WeID的合法性，以及存在性，调用isWeIdExist()方法
+   WeIdService->>区块链: 查询该WeID是否存在
+   区块链-->>WeIdService: 返回查询结果
+   WeIdService-->>JsonTransportation: 返回查询结果
+   opt WeID不存在
+   JsonTransportation-->>调用者: 报错，提示WeID不存在
+   end
+   JsonTransportation->>JsonTransportation: 放入verifier list里
+   end
+   JsonTransportation-->>调用者: 返回成功
+
+
 ----
 
 2. serialize
@@ -10419,7 +12342,41 @@ java.util.List<java.lang.String>
            .newJsonTransportation()
            .specify(verifierWeIdList)
            .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
-           
+
+
+
+**时序图**
+
+.. mermaid::
+
+
+  sequenceDiagram
+  participant 调用者
+  participant JsonTransportation
+  调用者->>JsonTransportation: 调用serialize()
+  JsonTransportation->>JsonTransportation: 入参非空、格式及合法性检查
+  opt 入参校验失败
+  JsonTransportation-->>调用者: 报错，提示参数不合法并退出
+  end
+  JsonTransportation->>JsonTransportation: 拼装Json格式的协议头数据
+  JsonTransportation->>JsonTransportation: 判断是采用加密方式还是非加密方式
+  opt 非加密方式
+  JsonTransportation->>JsonTransportation: 将presentation原文放入协议里
+  end
+  opt 加密方式
+  JsonTransportation->>EncodeProcessor: 调用encode方法
+  EncodeProcessor->>EncodeProcessor: 采用AES算法，生成对称加密秘钥
+  EncodeProcessor->>persistence: 保存至存储库里
+  persistence-->>EncodeProcessor: 返回
+  EncodeProcessor-->>JsonTransportation: 返回加密之后的presentation数据
+  JsonTransportation->>JsonTransportation: 将presentation密文放入协议里
+  end
+  JsonTransportation->>DataToolUtils: 调用objToJsonStrWithNoPretty()将协议序列化成Json数据
+  DataToolUtils-->>JsonTransportation:返回包含presentation的Json数据
+  JsonTransportation-->>调用者: 返回成功
+
+
+
 ----
 
 3. deserialize
@@ -10554,6 +12511,40 @@ java.util.List<java.lang.String>
            .newJsonTransportation()
            .specify(verifierWeIdList)
            .deserialize(transString,PresentationE.class);
+
+
+**时序图**
+
+.. mermaid::
+
+
+   sequenceDiagram
+   participant 调用者
+   participant JsonTransportation
+   调用者->>JsonTransportation: 调用deserialize()
+   JsonTransportation->>JsonTransportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   JsonTransportation-->>调用者: 报错，提示参数不合法并退出
+   end
+   JsonTransportation->>DataToolUtils: 调用deserialize()方法，反序列化协议数据
+   DataToolUtils-->>JsonTransportation:返回Json格式的协议数据
+   JsonTransportation->>JsonTransportation: 解析协议，判断是采用加密方式还是非加密方式
+   opt 非加密方式
+   JsonTransportation->>DataToolUtils: 调用deserialize方法将协议里的presentation反序列化为对象
+   DataToolUtils-->>JsonTransportation: 返回PresentationE对象
+   end
+   opt 加密方式
+   JsonTransportation->>EncodeProcessor: 调用decode方法
+   EncodeProcessor->>User Agent: 发送AMOP请求，获取对称加密秘钥
+   User Agent-->>EncodeProcessor: 返回加密秘钥
+   EncodeProcessor->>EncodeProcessor: 解密协议数据
+   EncodeProcessor-->>JsonTransportation: 返回解密后的presentation数据
+   JsonTransportation->>DataToolUtils: 调用deserialize方法将协议里的presentation反序列化
+   DataToolUtils-->>JsonTransportation: 返回PresentationE对象presentation反序列化为对象
+   end
+
+ JsonTransportation-->>调用者: 返回成功
+
 ----
 
 
@@ -10603,6 +12594,34 @@ java.util.List<java.lang.String>
    verifierWeIdList.add(weId);
    JsonTransportation jsonTransportation = qrCodeTransportation.specify(verifierWeIdList);
    
+
+**时序图**
+
+.. mermaid::
+
+
+   sequenceDiagram
+   participant 调用者
+   participant QrCodeTransportation
+   participant WeIdService
+   participant 区块链
+   调用者->>QrCodeTransportation: 调用specify()
+   QrCodeTransportation->>QrCodeTransportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   QrCodeTransportation-->>调用者: 报错，提示参数不合法并退出
+   end
+   loop 遍历每个WeID
+   QrCodeTransportation->>WeIdService: 判断WeID的合法性，以及存在性，调用isWeIdExist()方法
+   WeIdService->>区块链: 查询该WeID是否存在
+   区块链-->>WeIdService: 返回查询结果
+   WeIdService-->>QrCodeTransportation: 返回查询结果
+   opt WeID不存在
+   QrCodeTransportation-->>调用者: 报错，提示WeID不存在
+   end
+   QrCodeTransportation->>QrCodeTransportation: 放入verifier list里
+   end
+   QrCodeTransportation-->>调用者: 返回成功
+
 ----
 
 2. serialize
@@ -10723,7 +12742,36 @@ java.util.List<java.lang.String>
            .newQrCodeTransportation()
            .specify(verifierWeIdList)
            .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
-           
+
+
+**时序图**
+
+.. mermaid::
+
+
+  sequenceDiagram
+  participant 调用者
+  participant QrCodeTransportation
+  调用者->>QrCodeTransportation: 调用serialize()
+  QrCodeTransportation->>QrCodeTransportation: 入参非空、格式及合法性检查
+  opt 入参校验失败
+  QrCodeTransportation-->>调用者: 报错，提示参数不合法并退出
+  end
+  QrCodeTransportation->>QrCodeTransportation: 拼装协议头数据
+  QrCodeTransportation->>QrCodeTransportation: 判断是采用加密方式还是非加密方式
+  opt 非加密方式
+  QrCodeTransportation->>QrCodeTransportation: 将presentation原文放入协议里
+  end
+  opt 加密方式
+  QrCodeTransportation->>EncodeProcessor: 调用encode方法
+  EncodeProcessor->>EncodeProcessor: 采用AES算法，生成对称加密秘钥
+  EncodeProcessor->>persistence: 保存至存储库里
+  persistence-->>EncodeProcessor: 返回
+  EncodeProcessor-->>QrCodeTransportation: 返回加密之后的presentation数据
+  QrCodeTransportation->>QrCodeTransportation: 将presentation密文放入协议里
+  end
+  QrCodeTransportation-->>调用者: 返回QRCode协议数据
+
 ----
 
 3. deserialize
@@ -10852,24 +12900,58 @@ java.util.List<java.lang.String>
            .newQrCodeTransportation()
            .specify(verifierWeIdList)
            .deserialize(transString,PresentationE.class);
+
+
+**时序图**
+
+.. mermaid::
+
+
+   sequenceDiagram
+   participant 调用者
+   participant QrCodeTransportation
+   调用者->>QrCodeTransportation: 调用deserialize()
+   QrCodeTransportation->>QrCodeTransportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   QrCodeTransportation-->>调用者: 报错，提示参数不合法并退出
+   end
+   QrCodeTransportation->>QrCodeTransportation: 解析协议，判断是采用加密方式还是非加密方式
+   opt 非加密方式
+   QrCodeTransportation->>DataToolUtils: 调用deserialize方法将协议里的presentation反序列化为对象
+   DataToolUtils-->>QrCodeTransportation: 返回PresentationE对象
+   end
+   opt 加密方式
+   QrCodeTransportation->>EncodeProcessor: 调用decode方法
+   EncodeProcessor->>User Agent: 发送AMOP请求，获取对称加密秘钥
+   User Agent-->>EncodeProcessor: 返回加密秘钥
+   EncodeProcessor->>EncodeProcessor: 解密协议数据
+   EncodeProcessor-->>QrCodeTransportation: 返回解密后的presentation数据
+   QrCodeTransportation->>DataToolUtils: 调用deserialize方法将协议里的presentation反序列化
+   DataToolUtils-->>QrCodeTransportation: 返回PresentationE对象presentation反序列化为对象
+   end
+
+ QrCodeTransportation-->>调用者: 返回成功
+
+
 ----
 
-
-Persistence
+PdfTransportation
 ^^^^^^^^^^^^^^^^^
 
-1. save
+1. specify
 ~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.Persistence.save
-   接口定义: ResponseData<Integer> save(String domain, String id, String data)
-   接口描述: 根据domain定向存储数据。
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.specify
+   接口定义: PdfTransportation specify(List<String> verifierWeIdList)
+   接口描述: 指定transportation的认证者,用于权限控制。
 
-**接口入参**\ : 
+**接口入参**\ :
+
+java.util.List<java.lang.String>
 
 .. list-table::
    :header-rows: 1
@@ -10879,231 +12961,42 @@ Persistence
      - 非空
      - 说明
      - 备注
-   * - domain
-     - String
-     - Y
-     - domain用于分布式存储数据
-     - 
-   * - id
-     - String
-     - Y
-     - 数据存储编号
-     - 
-   * - data
-     - String
-     - Y
-     - 存储的数据体
-     -           
-     
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     - 
-   * - errorMessage
-     - String
-     - 返回结果描述
-     - 
-   * - result
-     - Integer
-     - 存储数据行数
-     - 业务数据
-
-
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - PRESISTENCE_DATA_KEY_INVALID
-     - 100901
-     - id无效
-   * - PRESISTENCE_DOMAIN_ILLEGAL
-     - 100902
-     - domain非法
-   * - PRESISTENCE_DOMAIN_INVALID
-     - 100903
-     - domain无效
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常，需核对日志
-   * - SQL_EXECUTE_FAILED
-     - 160011
-     - SQL执行异常
-   * - SQL_GET_CONNECTION_ERROR
-     - 160013
-     - 获取数据源连接异常
-     
-
-**调用示例**
-
-.. code-block:: java
-
-   Persistence persistence = new MysqlDriver();
-   ResponseData<Integer> res = persistence.save("datasource1:sdk_all_data", "123456", "data123456");
-   
-   
-.. code-block:: text
-
-返回结果如：
-   result: 1
-   errorCode: 0
-   errorMessage: success
-   transactionInfo:null
-   
-   
-----  
-
-
-2. batchSave
-~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称: com.webank.weid.suite.api.persistence.Persistence.batchSave
-   接口定义: ResponseData<Integer> batchSave(String domain, List<String> ids, List<String> dataList)
-   接口描述: 根据domain定向批量存储数据。
-
-**接口入参**\ : 
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - domain
-     - String
-     - Y
-     - domain用于分布式存储数据
-     - 
-   * - ids
+   * - verifierWeIdList
      - List<String>
-     - Y
-     - 数据存储编号集合
-     - 
-   * - data
-     - List<String>
-     - Y
-     - 存储的数据体集合
-     -           
-     
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     - 
-   * - errorMessage
-     - String
-     - 返回结果描述
-     - 
-   * - result
-     - Integer
-     - 存储数据行数
-     - 业务数据
+     - N
+     - verifierWeId列表
+     -
 
 
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - PRESISTENCE_DATA_KEY_INVALID
-     - 100901
-     - id无效
-   * - PRESISTENCE_DOMAIN_ILLEGAL
-     - 100902
-     - domain非法
-   * - PRESISTENCE_DOMAIN_INVALID
-     - 100903
-     - domain无效
-   * - PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
-     - 100904
-     - 保存数据不匹配
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常，需核对日志
-   * - SQL_EXECUTE_FAILED
-     - 160011
-     - SQL执行异常
-   * - SQL_GET_CONNECTION_ERROR
-     - 160013
-     - 获取数据源连接异常
-     
+**接口返回**\ :   com.webank.weid.suite.api.transportation.inf.PdfTransportation;
 
 **调用示例**
 
 .. code-block:: java
 
-   Persistence persistence = new MysqlDriver();
-   
-   List<String> ids = new ArrayList<String>();
-   ids.add("123457");
-   ids.add("123458");
-   
-   List<String> datas = new ArrayList<String>();
-   datas.add("123457");
-   datas.add("123458");
-   
-   ResponseData<Integer> res = persistence.batchSave("datasource1:sdk_all_data", ids, datas);
-   
-   
-.. code-block:: text
+   PPdfTransportation pdfTransportation = TransportationFactory.newPdfTransportation();
 
-返回结果如：
-   result: 2
-   errorCode: 0
-   errorMessage: success
-   transactionInfo:null
-   
-   
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   pdfTransportation = PdfTransportation.specify(verifierWeIdList);
+
+
+
 ----
 
-
-3. get
+2. serialize
 ~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.Persistence.get
-   接口定义: ResponseData<String> get(String domain, String id)
-   接口描述: 根据domain定向查询数据。
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serialize
+   接口定义: <T extends JsonSerializer> ResponseData<byte[]> serialize(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication);
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
 
-**接口入参**\ : 
+**接口入参**\ :
 
 .. list-table::
    :header-rows: 1
@@ -11113,18 +13006,23 @@ Persistence
      - 非空
      - 说明
      - 备注
-   * - domain
-     - String
+   * - object
+     - <T extends JsonSerializer>
      - Y
-     - domain用于分布式存储数据
-     - 
-   * - id
-     - String
+     - 待序列化对象
+     -
+   * - property
+     - ProtocolProperty
      - Y
-     - 数据存储编号
-     -     
-     
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+     - 协议配置
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<byte[]>;
 
 .. list-table::
    :header-rows: 1
@@ -11136,14 +13034,14 @@ Persistence
    * - errorCode
      - Integer
      - 返回结果码
-     - 
+     -
    * - errorMessage
      - String
      - 返回结果描述
-     - 
+     -
    * - result
-     - String
-     - 查询结果
+     - byte[]
+     - 序列化后PDF文件的byte数组
      - 业务数据
 
 
@@ -11158,57 +13056,102 @@ Persistence
    * - SUCCESS
      - 0
      - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - TRANSPORTATION_PDF_TRANSFER_ERROR
+     - 100808
+     - Pdf转换异常
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
    * - PRESISTENCE_DATA_KEY_INVALID
      - 100901
-     - id无效
-   * - PRESISTENCE_DOMAIN_ILLEGAL
-     - 100902
-     - domain非法
-   * - PRESISTENCE_DOMAIN_INVALID
-     - 100903
-     - domain无效
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常，需核对日志
+     - dataKey无效
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
    * - SQL_EXECUTE_FAILED
      - 160011
      - SQL执行异常
    * - SQL_GET_CONNECTION_ERROR
      - 160013
      - 获取数据源连接异常
-     
+
+
+
+
+
 
 **调用示例**
 
 .. code-block:: java
 
-   Persistence persistence = new MysqlDriver();
-   ResponseData<String> res = persistence.get("datasource1:sdk_all_data", "123456");
-   
-   
-.. code-block:: text
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
 
-返回结果如：
-   result: data123456
-   errorCode: 0
-   errorMessage: success
-   transactionInfo:null
-   
-   
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();;
+
+   //原文方式调用
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL),weIdAuthentication);
+
+   //密文方式调用
+   ResponseData<byte[]> result2 =
+      TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER),weIdAuthentication);
+
+
+
 ----
 
-4. delete
+
+3. serialize
 ~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.Persistence.delete
-   接口定义: ResponseData<Integer> delete(String domain, String id)
-   接口描述: 根据domain定向删除数据。
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serialize
+   接口定义: <T extends JsonSerializer> ResponseData<Boolean> serialize(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String outputPdfFilePath);
+   接口描述: 用于序列化对象并输出PDF文件,要求对象实现JsonSerializer接口
 
-**接口入参**\ : 
+**接口入参**\ :
 
 .. list-table::
    :header-rows: 1
@@ -11218,18 +13161,28 @@ Persistence
      - 非空
      - 说明
      - 备注
-   * - domain
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     -
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+   * - outputPdfFilePath
      - String
      - Y
-     - domain用于分布式存储数据
-     - 
-   * - id
-     - String
-     - Y
-     - 数据存储编号
-     -     
-     
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
+     - 输出文件的路径
+     -
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
 
 .. list-table::
    :header-rows: 1
@@ -11241,15 +13194,15 @@ Persistence
    * - errorCode
      - Integer
      - 返回结果码
-     - 
+     -
    * - errorMessage
      - String
      - 返回结果描述
-     - 
+     -
    * - result
-     - Integer
-     - 删除数据行数
-     - 业务数据
+     - Boolean
+     - 序列化生成文件的结果
+     -
 
 
 **此方法返回code**
@@ -11263,58 +13216,104 @@ Persistence
    * - SUCCESS
      - 0
      - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - TRANSPORTATION_PDF_TRANSFER_ERROR
+     - 100808
+     - Pdf转换异常
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
    * - PRESISTENCE_DATA_KEY_INVALID
      - 100901
-     - id无效
-   * - PRESISTENCE_DOMAIN_ILLEGAL
-     - 100902
-     - domain非法
-   * - PRESISTENCE_DOMAIN_INVALID
-     - 100903
-     - domain无效
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常，需核对日志
+     - dataKey无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
    * - SQL_EXECUTE_FAILED
      - 160011
      - SQL执行异常
    * - SQL_GET_CONNECTION_ERROR
      - 160013
      - 获取数据源连接异常
-     
+
+
+
+
+
 
 **调用示例**
 
 .. code-block:: java
 
-   Persistence persistence = new MysqlDriver();
-   ResponseData<Integer> res = persistence.delete("datasource1:sdk_all_data", "123456");
-   
-   
-.. code-block:: text
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
 
-返回结果如：
-   result: 1
-   errorCode: 0
-   errorMessage: success
-   transactionInfo:null
-   
-   
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();;
+
+   //原文方式调用
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL),weIdAuthentication,"./");
+
+   //密文方式调用
+   ResponseData<byte[]> result2 =
+      TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER),weIdAuthentication,"./");
+
+
+
 ----
 
-
-5. update
+4. serializeWithTemplate
 ~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.Persistence.update
-   接口定义: ResponseData<Integer> update(String domain, String id, String data)
-   接口描述: 根据domain定向更新数据。
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serializeWithTemplate
+   接口定义: <T extends JsonSerializer> ResponseData<byte[]> serializeWithTemplate(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String inputPdfTemplatePath);
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
 
-**接口入参**\ : 
+**接口入参**\ :
 
 .. list-table::
    :header-rows: 1
@@ -11324,22 +13323,28 @@ Persistence
      - 非空
      - 说明
      - 备注
-   * - domain
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     -
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+   * - inputPdfTemplatePath
      - String
      - Y
-     - domain用于分布式存储数据
-     - 
-   * - id
-     - String
-     - Y
-     - 更新数据编号
-     -     
-   * - data
-     - String
-     - Y
-     - 数据体
-     -       
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
+     - 指定模板位置
+     -
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<byte[]>;
 
 .. list-table::
    :header-rows: 1
@@ -11351,14 +13356,14 @@ Persistence
    * - errorCode
      - Integer
      - 返回结果码
-     - 
+     -
    * - errorMessage
      - String
      - 返回结果描述
-     - 
+     -
    * - result
-     - Integer
-     - 更新数据行数
+     - byte[]
+     - 序列化后PDF文件的byte数组
      - 业务数据
 
 
@@ -11373,42 +13378,430 @@ Persistence
    * - SUCCESS
      - 0
      - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - TRANSPORTATION_PDF_TRANSFER_ERROR
+     - 100808
+     - Pdf转换异常
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
    * - PRESISTENCE_DATA_KEY_INVALID
      - 100901
-     - id无效
-   * - PRESISTENCE_DOMAIN_ILLEGAL
-     - 100902
-     - domain非法
-   * - PRESISTENCE_DOMAIN_INVALID
-     - 100903
-     - domain无效
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常，需核对日志
+     - dataKey无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
    * - SQL_EXECUTE_FAILED
      - 160011
      - SQL执行异常
    * - SQL_GET_CONNECTION_ERROR
      - 160013
      - 获取数据源连接异常
-     
+
+
+
+
+
 
 **调用示例**
 
 .. code-block:: java
 
-   Persistence persistence = new MysqlDriver();
-   ResponseData<Integer> res = persistence.update("datasource1:sdk_all_data", "123456", "data456789");
-   
-   
-.. code-block:: text
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
 
-返回结果如：
-   result: 1
-   errorCode: 0
-   errorMessage: success
-   transactionInfo:null
-   
-   
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+
+   //原文方式调用
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serializeWithTemplate(
+               presentation,
+               new ProtocolProperty(EncodeType.ORIGINAL),
+               weIdAuthentication,
+               "./test-template.pdf");
+
+   //密文方式调用
+   ResponseData<byte[]> result2 =
+      TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serializeWithTemplate(
+               presentation,
+               new ProtocolProperty(EncodeType.CIPHER),
+               weIdAuthentication,
+               "./test-template.pdf");
+
+
+
 ----
 
+5. serializeWithTemplate
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serializeWithTemplate
+   接口定义: <T extends JsonSerializer> ResponseData<Boolean> serializeWithTemplate(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String inputPdfTemplatePath,String outputPdfFilePath);
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     -
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+   * - inputPdfTemplatePath
+     - String
+     - Y
+     - 指定模板位置
+     -
+   * - outputPdfFilePath
+     - String
+     - Y
+     - 输出PDF文件位置
+     -
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 序列化生成文件的结果
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN
+     - 100431
+     - 存证签名异常
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - CREDENTIAL_EVIDENCE_HASH_MISMATCH
+     - 100501
+     - Evidence Hash不匹配
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - TRANSPORTATION_PDF_TRANSFER_ERROR
+     - 100808
+     - Pdf转换异常
+   * - WEID_AUTHORITY_INVALID
+     - 100109
+     - 授权信息无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥与WeIdentity DID不匹配
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+
+
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+
+   //原文方式调用
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serializeWithTemplate(
+               presentation,
+               new ProtocolProperty(EncodeType.ORIGINAL),
+               weIdAuthentication,
+               "./test-template.pdf",
+               "./");
+
+   //密文方式调用
+   ResponseData<byte[]> result2 =
+      TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serializeWithTemplate(
+               presentation,
+               new ProtocolProperty(EncodeType.CIPHER),
+               weIdAuthentication,
+               "./test-template.pdf",
+               "./");
+
+
+
+----
+
+6. deserialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.deserialize
+   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(byte[] pdfTransportation, Class clazz, WeIdAuthentication weIdAuthentication);
+   接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - pdfTransportation
+     - byte[ ]
+     - Y
+     - 待反序列化的包含PDF信息的byte数组
+     -
+   * - clazz
+     - Class<T>
+     - Y
+     - 目标类型
+     -
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - WeID公私钥信息
+     -
+
+**接口返回**\ :  <T extends JsonSerializer> com.webank.weid.protocol.response.ResponseData\<T>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - <T extends JsonSerializer>
+     - 反序列化后的对象
+     - 业务数据
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - ENCRYPT_KEY_NOT_EXISTS
+     - 100700
+     -  无法获取秘钥
+   * - TRANSPORTATION_BASE_ERROR
+     - 100800
+     - transportation基本未知异常
+   * - TRANSPORTATION_PROTOCOL_VERSION_ERROR
+     - 100802
+     - 协议版本错误
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
+     - 100805
+     - 协议数据无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - dataKey无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+
+   //序列化
+   ResponseData<byte[]> result =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL),weIdAuthentication);
+
+   //序列化
+   ResponseData<byte[]> result1 =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER),weIdAuthentication);
+
+   //原文方式调用反序列化
+   ResponseData<PresentationE> resDeserialize =
+       TransportationFactory
+           .newPdfTransportation()
+           .specify(verifierWeIdList)
+           .deserialize(response.getResult(),PresentationE.class,weIdAuthentication);
+
+   //密文方式调用反序列化
+   ResponseData<PresentationE> resDeserialize1 =
+      TransportationFactory
+           .newJsonTransportation()
+           .specify(verifierWeIdList)
+           .deserialize(response1.getResult(),PresentationE.class,weIdAuthentication);
+
+
+----

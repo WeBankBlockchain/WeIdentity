@@ -19,7 +19,9 @@
 
 package com.webank.weid.full.transportation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import mockit.Mock;
 import mockit.MockUp;
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.TransportationFactory;
@@ -39,25 +42,26 @@ import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.crypto.CryptService;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
+import com.webank.weid.util.CredentialPojoUtils;
 
 /**
  * 二维码协议序列化测试.
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class TestJsonSerialize extends TestBaseTransportation {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(TestJsonSerialize.class);
-    
+
     private PresentationE presentation;
-    
+
     @Override
     public synchronized void testInit() {
         super.testInit();
         mockMysqlDriver();
         presentation = getPresentationE();
     }
-    
+
     /**
      * 使用原文方式构建协议数据.
      */
@@ -69,7 +73,7 @@ public class TestJsonSerialize extends TestBaseTransportation {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
     }
-    
+
     /**
      * 使用密文方式构建协议数据.
      */
@@ -82,7 +86,33 @@ public class TestJsonSerialize extends TestBaseTransportation {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
     }
-    
+
+    @Test
+    public void testSerializeCase7() {
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(selectiveCredentialPojo);
+        CredentialPojo doubleSigned =
+            credentialPojoService.addSignature(credPojoList, weIdAuthentication)
+                .getResult();
+        credPojoList = new ArrayList<>();
+        credPojoList.add(doubleSigned);
+        CredentialPojo triSigned =
+            credentialPojoService.addSignature(credPojoList, weIdAuthentication)
+                .getResult();
+
+        ResponseData<String> response = TransportationFactory.newJsonTransportation()
+            .serialize(triSigned, new ProtocolProperty(EncodeType.ORIGINAL));
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+
+        ResponseData<CredentialPojo> wrapperRes = TransportationFactory.newJsonTransportation()
+            .deserialize(weIdAuthentication, response.getResult(), CredentialPojo.class);
+        LogUtil.info(logger, "deserialize", wrapperRes);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
+        Assert.assertTrue(CredentialPojoUtils.isEqual(triSigned, wrapperRes.getResult()));
+    }
+
     /**
      * 传入的协议配置为null.
      */
@@ -97,7 +127,7 @@ public class TestJsonSerialize extends TestBaseTransportation {
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
     }
-    
+
     /**
      * 传入协议配置的编解码为null.
      */
@@ -112,7 +142,7 @@ public class TestJsonSerialize extends TestBaseTransportation {
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
     }
-    
+
     /**
      * 传入实体数据为null.
      */
@@ -128,20 +158,20 @@ public class TestJsonSerialize extends TestBaseTransportation {
         );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
     }
-    
+
     /**
      * mock异常情况.
      */
     @Test
     public void testSerializeCase6() {
-        
+
         MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
             @Mock
             public CryptService getCryptService(CryptType cryptType) {
                 return new HashMap<String, CryptService>().get("key");
             }
         };
-        
+
         ResponseData<String> response = TransportationFactory.newJsonTransportation()
             .specify(verifier)
             .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
