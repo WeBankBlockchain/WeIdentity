@@ -23,7 +23,6 @@ public class TestJsonSpecify extends TestBaseServcie {
         weIdList.add(createWeIdResult.getWeId());
         weIdList.add(createWeIdNew.getWeId());
         jsonTransportation = jsonTransportation.specify(weIdList);
-        System.out.println(jsonTransportation);
         Assert.assertNotNull(jsonTransportation);
         
     }

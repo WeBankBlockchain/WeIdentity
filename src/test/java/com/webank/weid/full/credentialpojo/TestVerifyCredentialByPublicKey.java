@@ -371,7 +371,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseServcie {
             copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -560,7 +560,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseServcie {
 
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }

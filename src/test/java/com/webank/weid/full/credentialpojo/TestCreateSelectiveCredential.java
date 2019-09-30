@@ -30,11 +30,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.CredentialPojoUtils;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * createCredential method for testing CredentialService.
@@ -67,6 +73,70 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
         LogUtil.info(logger, "selectiveCredentialPojo", selectiveCredentialPojo);
         LogUtil.info(logger, "verifyCredentialPojo", verify);
         Assert.assertTrue(verify.getResult());
+    }
+
+    @Test
+    public void testTwoCredentialPojoEqual() {
+        CredentialPojo tmpCred = copyCredentialPojo(selectiveCredentialPojo);
+        Assert.assertTrue(CredentialPojoUtils.isEqual(selectiveCredentialPojo, tmpCred));
+    }
+
+    /**
+     * case：when issuer and cpt publisher is same,createCredentialPojo success.
+     */
+    @Test
+    public void testCreateMultiSignSdCredentialPojo_success() {
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(selectiveCredentialPojo);
+        CreateWeIdDataResult weIdResult = createWeIdWithSetAttr();
+        WeIdAuthentication callerAuth = TestBaseUtil.buildWeIdAuthentication(weIdResult);
+        CredentialPojo doubleSigned = credentialPojoService.addSignature(credPojoList, callerAuth)
+            .getResult();
+        Assert.assertEquals(doubleSigned.getCptId(),
+            CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT);
+
+        ResponseData<Boolean> verifyResp = credentialPojoService
+            .verify(doubleSigned.getIssuer(), doubleSigned);
+        Assert.assertTrue(verifyResp.getResult());
+        credPojoList = new ArrayList<>();
+        credPojoList.add(doubleSigned);
+        CredentialPojo tripleSigned = credentialPojoService.addSignature(credPojoList, callerAuth)
+            .getResult();
+        verifyResp = credentialPojoService.verify(doubleSigned.getIssuer(), tripleSigned);
+        Assert.assertTrue(verifyResp.getResult());
+    }
+
+    @Test
+    public void testMultiSignPojo_fromToJson() throws Exception {
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(selectiveCredentialPojo);
+        credPojoList.add(credentialPojo);
+        WeIdAuthentication callerAuth = TestBaseUtil
+            .buildWeIdAuthentication(createWeIdResultWithSetAttr);
+        CredentialPojo doubleSigned =
+            credentialPojoService.addSignature(credPojoList, callerAuth).getResult();
+        System.out.println(doubleSigned);
+        String serializedjson = doubleSigned.toJson();
+        System.out.println(serializedjson);
+        CredentialPojo cpj = CredentialPojo.fromJson(serializedjson);
+        Assert.assertTrue(CredentialPojoUtils.isEqual(cpj, doubleSigned));
+    }
+
+    @Test
+    public void testMultiSignPojo_sedeserialize() throws Exception {
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(selectiveCredentialPojo);
+        credPojoList.add(credentialPojo);
+        WeIdAuthentication callerAuth = TestBaseUtil
+            .buildWeIdAuthentication(createWeIdResultWithSetAttr);
+        CredentialPojo doubleSigned =
+            credentialPojoService.addSignature(credPojoList, callerAuth).getResult();
+        System.out.println(doubleSigned);
+        String serializedjson = DataToolUtils.serialize(doubleSigned);
+        System.out.println(serializedjson);
+        CredentialPojo testcpj = DataToolUtils.deserialize(serializedjson, CredentialPojo.class);
+        System.out.println(testcpj);
+        Assert.assertTrue(CredentialPojoUtils.isEqual(doubleSigned, testcpj));
     }
 
     /**
@@ -439,7 +509,7 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
         LogUtil.info(logger, "TestCreateSelectiveCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXPIRED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
@@ -557,9 +627,9 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
             credentialPojoService.createSelectiveCredential(credentialPojo, claimPolicy);
         LogUtil.info(logger, "TestCreateSelectiveCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
-        Assert.assertNull(response.getResult());
+        Assert.assertNotNull(response.getResult());
     }
 
     /**
@@ -611,7 +681,7 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
         LogUtil.info(logger, "TestCreateSelectiveCredential", response);
 
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL.getCode(), 
+            ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertNull(response.getResult());

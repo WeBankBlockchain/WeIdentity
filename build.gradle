@@ -36,7 +36,7 @@ if (!gradle.startParameter.isOffline()) {
 
 group 'com.webank'
 
-version = "1.3.2"
+version = "1.4.0"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -65,7 +65,8 @@ List logger = [
         "org.apache.logging.log4j:log4j-api:2.1",
         "org.apache.logging.log4j:log4j-core:2.1",
         "org.apache.logging.log4j:log4j-slf4j-impl:2.1",
-        "org.apache.logging.log4j:log4j-web:2.1"
+        "org.apache.logging.log4j:log4j-web:2.1",
+        "org.apache.logging.log4j:log4j-jcl:2.3"
 ]
 
 // junit test
@@ -89,10 +90,6 @@ List json = [
         "com.github.reinert:jjschema:1.16"
 ]
 
-List weidentity_contract = [
-        "com.webank:weid-contract-java:1.2.4"
-]
-
 List mysql_driver = [
         "mysql:mysql-connector-java:5.1.44",
         "org.apache.commons:commons-dbcp2:2.5.0"
@@ -100,6 +97,15 @@ List mysql_driver = [
 
 List zxing = [
         "com.google.zxing:core:3.3.0"
+]
+
+List rpc = [
+        'org.smartboot.socket:aio-core:1.4.2',
+        'org.smartboot.socket:aio-pro:1.4.2'
+]
+
+List pdfbox = [
+        "org.apache.pdfbox:pdfbox:2.0.16"
 ]
 
 configurations {
@@ -110,11 +116,11 @@ dependencies {
     localDeps 'org.projectlombok:lombok:1.16.14'
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
-            compile logger, lombok, apache_commons, json, mysql_driver, zxing
-            compile("com.webank:weid-contract-java:1.2.4") {
-               exclude group:"org.slf4j", module: "slf4j-log4j12"
+            compile logger, lombok, apache_commons, json, mysql_driver, zxing, rpc, pdfbox
+            compile("com.webank:weid-contract-java:1.2.9") {
+                exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
-            testCompile logger, lombok, apache_commons, json, junit, jmockit
+            testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox
         } else {
             compile fileTree(dir: 'dist/lib', include: '*.jar')
         }
@@ -125,11 +131,11 @@ dependencies {
             annotationProcessor 'org.projectlombok:lombok:1.16.14'
             testAnnotationProcessor 'org.projectlombok:lombok:1.16.14'
             testCompileOnly 'org.projectlombok:lombok:1.16.14'
-            compile logger, apache_commons, json, mysql_driver, zxing
-            compile("com.webank:weid-contract-java:1.2.4") {
-               exclude group:"org.slf4j", module: "slf4j-log4j12"
+            compile logger, apache_commons, json, mysql_driver, zxing, rpc, pdfbox
+            compile("com.webank:weid-contract-java:1.2.9") {
+                exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
-            testCompile logger, apache_commons, json, junit, jmockit
+            testCompile logger, apache_commons, json, junit, jmockit, rpc, pdfbox
         } else {
             compileOnly files('dist/lib/lombok-1.16.14.jar')
             annotationProcessor files('dist/lib/lombok-1.16.14.jar')
@@ -192,6 +198,14 @@ jar {
             from file('src/main/resources/')
             into 'dist/conf'
         }
+        copy {
+            from file('dist/lib/NotoSansCJKtc-Regular.ttf')
+            into 'src/main/resources/'
+        }
+        copy {
+            from file('dist/lib/NotoSansCJKtc-Regular.ttf')
+            into 'src/test/resources/'
+        }
         if (!gradle.startParameter.isOffline()) {
             copy {
                 from configurations.runtime
@@ -200,10 +214,6 @@ jar {
                 from configurations.localDeps
                 into 'dist/lib'
             }
-        }
-        copy {
-            from file('.').listFiles().findAll { File f -> (f.name.endsWith('.bat') || f.name.endsWith('.sh') || f.name.endsWith('.env')) }
-            into 'dist'
         }
     }
 }
@@ -229,7 +239,11 @@ if (!gradle.startParameter.isOffline()) {
 
     tasks.withType(Checkstyle) {
         include '**/*.java'
-        exclude '**/contract/*.java'
+        exclude '**/contract/deploy/*.java'
+        exclude '**/contract/deploy/v1/*.java'
+        exclude '**/contract/deploy/v2/*.java'
+        exclude '**/contract/v1/*.java'
+        exclude '**/contract/v2/*.java'
         reports {
             xml.enabled false
             html.enabled true
@@ -252,52 +266,61 @@ if (!gradle.startParameter.isOffline()) {
             html.stylesheet resources.text.fromFile('config/spotbugs.xsl')
         }
     }
-}
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
-            }
-
-            pom.project {
-                name project.name
-                packaging 'jar'
-                description 'Java sdk for WeIdentity.'
-                url 'https://github.com/WeBankFinTech/weid-java-sdk'
-
-                scm {
-                    url 'scm:git@github.com:WeBankFinTech/weid-java-sdk.git'
-                    connection 'scm:git@github.com:WeBankFinTech/weid-java-sdk.git'
-                    developerConnection 'git@github.com:WeBankFinTech/weid-java-sdk.git'
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
                 }
 
-                licenses {
-                    license {
-                        name 'GNU Lesser General Public License version 3'
-                        url 'https://opensource.org/licenses/LGPL-3.0'
-                        distribution 'repo'
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
+                    authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
+                }
+
+                pom.project {
+                    name project.name
+                    packaging 'jar'
+                    description 'Java SDK for WeIdentity.'
+                    url 'https://github.com/WeBankFinTech/weid-java-sdk'
+
+                    scm {
+                        url 'scm:git@github.com:WeBankFinTech/weid-java-sdk.git'
+                        connection 'scm:git@github.com:WeBankFinTech/weid-java-sdk.git'
+                        developerConnection 'git@github.com:WeBankFinTech/weid-java-sdk.git'
                     }
-                }
 
-                developers {
-                    developer {
-                        id 'tonychen'
-                        name 'tonychen'
+                    licenses {
+                        license {
+                            name 'GNU Lesser General Public License version 3'
+                            url 'https://opensource.org/licenses/LGPL-3.0'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'tonychen'
+                            name 'tonychen'
+                        }
                     }
                 }
             }
         }
     }
+
+    signing
+            {
+                required { gradle.taskGraph.hasTask("uploadArchives") }
+                sign configurations.archives
+            }
+
+
 }
 
 import org.gradle.plugins.signing.Sign
+
 gradle.taskGraph.whenReady { taskGraph ->
     if (taskGraph.allTasks.any { it instanceof Sign }) {
         allprojects { ext."signing.keyId" = System.getenv('GPG_KEY_ID') }
@@ -306,15 +329,10 @@ gradle.taskGraph.whenReady { taskGraph ->
     }
     // Do not sign archives by default (a local build without gpg keyring should succeed)
     if (taskGraph.allTasks.any { it.name == 'build' || it.name == 'assemble' }) {
-        tasks.findAll { it.name == 'signArchives' || it.name == 'signDocsJar' || it.name == 'signTestJar' }.each { task ->
+        tasks.findAll {
+            it.name == 'signArchives' || it.name == 'signDocsJar' || it.name == 'signTestJar'
+        }.each { task ->
             task.enabled = false
         }
     }
 }
-
-signing
-{
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
-
