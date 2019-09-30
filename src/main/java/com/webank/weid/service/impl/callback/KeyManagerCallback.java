@@ -43,18 +43,14 @@ import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.PropertyUtils;
 
 public class KeyManagerCallback extends AmopCallback {
     
     private static final Logger logger =  LoggerFactory.getLogger(KeyManagerCallback.class);
 
-    private Persistence dataDriver = new MysqlDriver();
+    private Persistence dataDriver;
     
     private WeIdService weidService;
-    
-    private static final String TRANSENCRYPTIONDOMAIN = 
-        PropertyUtils.getProperty(DataDriverConstant.DEFAULT_DOMAIN);
     
     private WeIdService getWeIdService() {
         if (weidService == null) {
@@ -63,11 +59,19 @@ public class KeyManagerCallback extends AmopCallback {
         return weidService;
     }
     
+    private Persistence getDataDriver() {
+        if (dataDriver == null) {
+            dataDriver = new MysqlDriver();
+        }
+        return dataDriver;
+    }
+    
     @Override
     public GetEncryptKeyResponse onPush(GetEncryptKeyArgs arg) {
         logger.info("[KeyManagerCallback.onPush] begin query key param:{}", arg);
         GetEncryptKeyResponse encryptResponse = new GetEncryptKeyResponse(); 
-        ResponseData<String>  keyResponse = dataDriver.get(TRANSENCRYPTIONDOMAIN, arg.getKeyId());
+        ResponseData<String>  keyResponse = this.getDataDriver().get(
+            DataDriverConstant.DOMAIN_ENCRYPTKEY, arg.getKeyId());
         if (keyResponse.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
             && StringUtils.isBlank(keyResponse.getResult())) {
             logger.info("[KeyManagerCallback.onPush] the encrypt key is not exists.");
@@ -90,10 +94,6 @@ public class KeyManagerCallback extends AmopCallback {
                     encryptResponse.setErrorCode(ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCode());
                     encryptResponse.setErrorMessage(
                         ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCodeDesc());
-                } else if (isExpire(keyMap)) { //检查是否过期 
-                    logger.info("[KeyManagerCallback.onPush]  the key is expire.");
-                    encryptResponse.setErrorCode(ErrorCode.ENCRYPT_KEY_EXPIRE.getCode());
-                    encryptResponse.setErrorMessage(ErrorCode.ENCRYPT_KEY_EXPIRE.getCodeDesc());
                 } else {
                     encryptResponse.setEncryptKey((String)keyMap.get(ParamKeyConstant.KEY_DATA));
                     encryptResponse.setErrorCode(ErrorCode.SUCCESS.getCode());
@@ -152,11 +152,5 @@ public class KeyManagerCallback extends AmopCallback {
             return false;
         }
         return true;
-    }
-    
-    private boolean isExpire(Map<String, Object> keyMap) {
-        //获取过期时间
-        long expire = (long)keyMap.get(ParamKeyConstant.KEY_EXPIRE);
-        return System.currentTimeMillis() > expire;
     }
 }

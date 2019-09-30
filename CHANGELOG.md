@@ -1,3 +1,22 @@
+### V1.4.0 (2019-09-30)
+- Features:
+1. Supports PDF creation and transportation from CredentialPojo and Presentation.
+2. Credential, CredentialPojo and CredentialWrapper now supports Evidence.
+3. Credential supports multi-sign
+4. Evidence supports multi-sign
+5. Empty Evidence can be created with hash value appended separately.
+6. Add an reference implementation of Endpoint Service (used w/ Rest Service).
+7. Travis CI pipeline now resides on FISCO-BCOS 2.0.
+8. Add an information collection command line tool.
+9. Support data timeout in domain storage.
+
+- Bugfixes:
+1. Re-Selectively disclose a selectively disclosed Credential is disallowed.
+2. Evidence Info fetched from getEvidence() now uses WeID instead of plain address.
+3. Credential and CredentialPojo dates are now in second format.
+4. Cipher suites are now unified in Secp256k1.
+5. Fix miscellenous errors in sequence diagrams.
+
 ### v1.3.2 (2019-08-16)
 - Features:
 1. weid-java-sdk supports ci pipeline.

@@ -5,6 +5,7 @@ app_xml_config_tpl=${java_source_code_dir}/src/main/resources/fisco.properties.t
 app_xml_config=${java_source_code_dir}/src/main/resources/fisco.properties
 weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties.tpl
 weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
+font=${java_source_code_dir}/src/main/resources/NotoSansCJKtc-Regular.ttf
 
 function modify_config()
 {
@@ -19,7 +20,7 @@ function modify_config()
     export ISSUER_ADDRESS=${issuer_address}
     export EVIDENCE_ADDRESS=${evidence_address}
     export SPECIFICISSUER_ADDRESS=${specificissuer_address}
-    export FISCO_BCOS_VERSION="1"
+    export FISCO_BCOS_VERSION="2"
     MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}:${FISCO_BCOS_VERSION}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${java_source_code_dir}/src/test/resources/
@@ -30,8 +31,9 @@ function modify_config()
         cp ${java_source_code_dir}/ecdsa_key ${java_source_code_dir}/src/test/resources/
     fi
     #cat $app_xml_config
-	cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/test/resources
-    cp ${java_source_code_dir}/.ci/client.keystore ${java_source_code_dir}/src/test/resources
+    cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/test/resources
+    cp ${java_source_code_dir}/.ci/node.crt ${java_source_code_dir}/src/test/resources
+    cp ${java_source_code_dir}/.ci/node.key ${java_source_code_dir}/src/test/resources
     echo "modify sdk config finished..."
 }
 
@@ -40,15 +42,16 @@ function gradle_build_sdk()
 {
     #run gradle build
     cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/main/resources
-    cp ${java_source_code_dir}/.ci/client.keystore ${java_source_code_dir}/src/main/resources
-    content="WeIdentity@$NODE_IP"
+    cp ${java_source_code_dir}/.ci/node.crt ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/.ci/node.key ${java_source_code_dir}/src/main/resources
+    content="$NODE_IP"
     export BLOCKCHIAN_NODE_INFO=${content}
     export WEID_ADDRESS="0x0"
     export CPT_ADDRESS="0x0"
     export ISSUER_ADDRESS="0x0"
     export EVIDENCE_ADDRESS="0x0"
     export SPECIFICISSUER_ADDRESS="0x0"
-    export FISCO_BCOS_VERSION="1"
+    export FISCO_BCOS_VERSION="2"
     MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}:${FISCO_BCOS_VERSION}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     NODEVAR='${BLOCKCHIAN_NODE_INFO}'
@@ -60,6 +63,14 @@ function gradle_build_sdk()
     fi
     gradle clean build -x test
     echo "compile java code done."
+}
+
+function check()
+{
+    echo "begin check-info..."
+    chmod u+x check-info.sh
+    ./check-info.sh
+    echo "check-info done."
 }
 
 function deploy_contract()
@@ -80,9 +91,22 @@ function deploy_contract()
     echo "contract deployment done."
 }
 
+function  install_font()
+{
+    sudo mkdir -p /usr/share/fonts/custom&&
+    sudo cp ${font} /usr/share/fonts/custom/&&
+    sudo apt install xfonts-utils -y&&
+    sudo mkfontscale&&
+    sudo mkfontdir&&
+    sudo fc-cache -fv
+    echo "font install done."
+}
+
 function main()
 {
     gradle_build_sdk
+    install_font
+    check
     deploy_contract
     modify_config
 }
