@@ -21,8 +21,12 @@ package com.webank.weid.suite.persistence.sql.driver;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,8 +37,11 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.sql.DefaultTable;
+import com.webank.weid.suite.persistence.sql.SqlDomain;
 import com.webank.weid.suite.persistence.sql.SqlExecutor;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.PropertyUtils;
 
 /**
  * mysql operations.
@@ -46,7 +53,9 @@ public class MysqlDriver implements Persistence {
     private static final Logger logger = LoggerFactory.getLogger(MysqlDriver.class);
     
     private static final String CHECK_TABLE_SQL =
-        "SELECT table_name data FROM information_schema.TABLES WHERE table_name ='$1'";
+        "SELECT table_name " 
+        + DataDriverConstant.SQL_COLUMN_DATA 
+        + " FROM information_schema.TABLES WHERE table_name ='$1'";
     
     private static final String CREATE_TABLE_SQL =
         "CREATE TABLE `$1` ("
@@ -55,12 +64,34 @@ public class MysqlDriver implements Persistence {
         + "`created` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'created', "
         + "`updated` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'updated', "
         + "`protocol` varchar(32) DEFAULT NULL COMMENT 'protocol', "
+        + "`expire` datetime DEFAULT NULL COMMENT 'the expire time', "
+        + "`version` varchar(10) DEFAULT NULL COMMENT 'the data version', "
+        + "`ext1` int DEFAULT NULL COMMENT 'extend field1', "
+        + "`ext2` int DEFAULT NULL COMMENT 'extend field2', "
+        + "`ext3` varchar(500) DEFAULT NULL COMMENT 'extend field3', "
+        + "`ext4` varchar(500) DEFAULT NULL COMMENT 'extend field4', "
         + "PRIMARY KEY (`id`) "
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='the data table'";
 
     private static final Integer FAILED_STATUS = DataDriverConstant.SQL_EXECUTE_FAILED_STATUS;
     
     private static final ErrorCode KEY_INVALID = ErrorCode.PRESISTENCE_DATA_KEY_INVALID;
+    
+    private static Boolean isinit = false;
+    
+    /**
+     * the Constructor and init all domain.
+     */
+    public MysqlDriver() {
+        if (!isinit) {
+            synchronized (MysqlDriver.class) {
+                if (!isinit) {
+                    initDomain();
+                    isinit = true;
+                }
+            }
+        }
+    }
     
     @Override
     public ResponseData<String> get(String domain, String id) {
@@ -71,18 +102,30 @@ public class MysqlDriver implements Persistence {
         }
         String dataKey = DataToolUtils.getHash(id);
         try {
-            ResponseData<String> response = new SqlExecutor(domain)
+            ResponseData<String> result = new ResponseData<String>();
+            result.setResult(StringUtils.EMPTY);
+            SqlDomain sqlDomain = new SqlDomain(domain);
+            ResponseData<Map<String, String>> response = new SqlExecutor(sqlDomain)
                 .executeQuery(SqlExecutor.SQL_QUERY, dataKey);
             if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
                 && response.getResult() != null) {
-                response.setResult(
-                    new String(
-                        response.getResult().getBytes(StandardCharsets.ISO_8859_1),
-                        StandardCharsets.UTF_8
-                    )
-                );
+                DefaultTable tableData = DataToolUtils.deserialize(
+                    DataToolUtils.serialize(response.getResult()), DefaultTable.class);
+                if (tableData.getExpire() != null && tableData.getExpire().before(new Date())) {
+                    logger.error("[mysql->get] the data is expire.");
+                    return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.SQL_DATA_EXPIRE);
+                }
+                if (StringUtils.isNotBlank(tableData.getData())) {
+                    result.setResult(
+                        new String(
+                            tableData.getData().getBytes(StandardCharsets.ISO_8859_1),
+                            StandardCharsets.UTF_8
+                        )
+                    );
+                }
             }
-            return response;
+            result.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
+            return result;
         } catch (WeIdBaseException e) {
             logger.error("[mysql->get] get the data error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
@@ -101,14 +144,9 @@ public class MysqlDriver implements Persistence {
         }
         String dataKey = DataToolUtils.getHash(id);
         try {
-            return new SqlExecutor(domain)
-                .executeSave(
-                    SqlExecutor.SQL_SAVE,
-                    CHECK_TABLE_SQL,
-                    CREATE_TABLE_SQL,
-                    dataKey,
-                    data
-                );
+            SqlDomain sqlDomain = new SqlDomain(domain);
+            Object[] datas = {dataKey, data, sqlDomain.getExpire()};
+            return new SqlExecutor(sqlDomain).execute(SqlExecutor.SQL_SAVE, datas);
         } catch (WeIdBaseException e) {
             logger.error("[mysql->save] save the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -120,25 +158,26 @@ public class MysqlDriver implements Persistence {
      */
     @Override
     public ResponseData<Integer> batchSave(String domain, List<String> ids, List<String> dataList) {
-        List<List<String>> dataLists = new ArrayList<List<String>>();
-        List<String> idHashList = new ArrayList<>();
-        for (String id : ids) {
-            if (StringUtils.isEmpty(id)) {
-                logger.error("[mysql->batchSave] the id of the data is empty.");
-                return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
-            }
-            idHashList.add(DataToolUtils.getHash(id));
-        }
-        dataLists.add(idHashList);
-        dataLists.add(dataList);
         try {
-            return new SqlExecutor(domain)
-                .batchSave(
-                    SqlExecutor.SQL_SAVE,
-                    CHECK_TABLE_SQL,
-                    CREATE_TABLE_SQL, 
-                    dataLists
-                );
+            List<Object> idHashList = new ArrayList<>();
+            for (String id : ids) {
+                if (StringUtils.isEmpty(id)) {
+                    logger.error("[mysql->batchSave] the id of the data is empty.");
+                    return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+                }
+                idHashList.add(DataToolUtils.getHash(id));
+            }
+            SqlDomain sqlDomain = new SqlDomain(domain);
+            Date[] dates = new Date[ids.size()];
+            Arrays.fill(dates, sqlDomain.getExpire());
+            List<Object> timeoutList = new ArrayList<>();
+            timeoutList.addAll(Arrays.asList(dates));
+            
+            List<List<Object>> dataLists = new ArrayList<List<Object>>();
+            dataLists.add(idHashList);
+            dataLists.add(Arrays.asList(dataList.toArray()));
+            dataLists.add(timeoutList);
+            return new SqlExecutor(sqlDomain).batchSave(SqlExecutor.SQL_SAVE, dataLists);
         } catch (WeIdBaseException e) {
             logger.error("[mysql->batchSave] batchSave the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -157,7 +196,8 @@ public class MysqlDriver implements Persistence {
         }
         String dataKey = DataToolUtils.getHash(id);
         try {
-            return new SqlExecutor(domain).execute(SqlExecutor.SQL_DELETE, dataKey);
+            SqlDomain sqlDomain = new SqlDomain(domain);
+            return new SqlExecutor(sqlDomain).execute(SqlExecutor.SQL_DELETE, dataKey);
         } catch (WeIdBaseException e) {
             logger.error("[mysql->delete] delete the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -177,10 +217,40 @@ public class MysqlDriver implements Persistence {
         String dataKey = DataToolUtils.getHash(id);
         Date date = new Date();
         try {
-            return new SqlExecutor(domain).execute(SqlExecutor.SQL_UPDATE, date, data, dataKey);
+            SqlDomain sqlDomain = new SqlDomain(domain);
+            Object[] datas = {date, data, sqlDomain.getExpire(), dataKey};
+            return new SqlExecutor(sqlDomain).execute(SqlExecutor.SQL_UPDATE, datas);
         } catch (WeIdBaseException e) {
             logger.error("[mysql->update] update the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
+    }
+    
+    /**
+     * 初始化domain.
+     */
+    private void initDomain() {
+        Set<String> domainKeySet = analyzeDomainValue();
+        for (String domainKey : domainKeySet) {
+            SqlExecutor sqlExecutor = new SqlExecutor(new SqlDomain(domainKey));
+            sqlExecutor.resolveTableDomain(CHECK_TABLE_SQL, CREATE_TABLE_SQL);
+        }
+    }
+    
+    /**
+     * 分析配置中的domain配置, 并且获取对应的配置项key.
+     * @return 返回配置值
+     */
+    private Set<String> analyzeDomainValue() {
+        Set<Object> keySet = PropertyUtils.getAllPropertyKey();
+        Set<String> domainKeySet = new HashSet<>();
+        for (Object object : keySet) {
+            String key = String.valueOf(object);
+            if (key.indexOf(SqlDomain.KEY_SPLIT_CHAR) == key.lastIndexOf(SqlDomain.KEY_SPLIT_CHAR)
+                && key.startsWith(SqlDomain.PREFIX)) {
+                domainKeySet.add(key);
+            }
+        }
+        return domainKeySet;
     }
 }

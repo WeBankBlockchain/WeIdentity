@@ -19,9 +19,12 @@
 
 package com.webank.weid.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +59,9 @@ public final class PropertyUtils {
 
         InputStream in;
         in = PropertyUtils.class.getClassLoader().getResourceAsStream(filePath);
-        prop.load(in);
+        BufferedReader br = new BufferedReader(new InputStreamReader(in));
+        prop.load(br);
+        br.close();
         in.close();
     }
 
@@ -79,5 +84,14 @@ public final class PropertyUtils {
      */
     public static String getProperty(String key, String defaultValue) {
         return prop.getProperty(key, defaultValue);
+    }
+    
+    /**
+     * get the all key from Properties.
+     * 
+     * @return value of the key Set
+     */
+    public static Set<Object> getAllPropertyKey() {
+        return prop.keySet();
     }
 }

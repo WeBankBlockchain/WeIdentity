@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.inf.IProof;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.util.CredentialPojoUtils;
@@ -45,7 +45,7 @@ import com.webank.weid.util.DataToolUtils;
  * @author junqizhang 2019.04
  */
 @Data
-public class CredentialPojo implements IProof, JsonSerializer {
+public class CredentialPojo implements IProof, JsonSerializer, Hashable {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojo.class);
 
@@ -93,14 +93,15 @@ public class CredentialPojo implements IProof, JsonSerializer {
      * Required: The credential proof data.
      */
     private Map<String, Object> proof;
-    
+
     /**
      * Required: The credential type default is VerifiableCredential.
      */
     private List<String> type;
-    
+
     /**
      * 添加type.
+     *
      * @param typeValue the typeValue
      */
     public void addType(String typeValue) {
@@ -127,19 +128,19 @@ public class CredentialPojo implements IProof, JsonSerializer {
     public String getProofType() {
         return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_TYPE));
     }
-    
+
     /**
      * Directly extract the salt from credential.
      *
      * @return salt
      */
     public Map<String, Object> getSalt() {
-        return (Map<String, Object>)getValueFromProof(proof, ParamKeyConstant.PROOF_SALT);
+        return (Map<String, Object>) getValueFromProof(proof, ParamKeyConstant.PROOF_SALT);
     }
-    
+
     /**
      * put the salt into proof.
-     * 
+     *
      * @param salt map of salt
      */
     public void setSalt(Map<String, Object> salt) {
@@ -147,29 +148,32 @@ public class CredentialPojo implements IProof, JsonSerializer {
     }
 
     /**
-     *  put the key-value into proof.
+     * put the key-value into proof.
+     *
      * @param key the key of proof
      * @param value the value of proof
      */
     public void putProofValue(String key, Object value) {
         if (proof == null) {
-            proof = new HashMap<>(); 
+            proof = new HashMap<>();
         }
         proof.put(key, value);
     }
-    
+
     /**
      * convert CredentialPojo to JSON String.
+     *
      * @return CredentialPojo
      */
     @Override
-    public String toJson() {     
+    public String toJson() {
         String json = DataToolUtils.convertTimestampToUtc(DataToolUtils.serialize(this));
         return DataToolUtils.addTagFromToJson(json);
     }
-    
+
     /**
      * create CredentialPojo with JSON String.
+     *
      * @param credentialJson the CredentialPojo JSON String
      * @return CredentialPojo
      */
@@ -184,22 +188,43 @@ public class CredentialPojo implements IProof, JsonSerializer {
             credentialString = DataToolUtils.removeTagFromToJson(credentialJson);
         }
         CredentialPojo credentialPojo = DataToolUtils.deserialize(
-            DataToolUtils.convertUtcToTimestamp(credentialString), 
+            DataToolUtils.convertUtcToTimestamp(credentialString),
             CredentialPojo.class
         );
         ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialPojo);
         if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
-            logger.error("create CredentialPojo with JSON String failed, {}", 
+            logger.error("create CredentialPojo with JSON String failed, {}",
                 checkResp.getCodeDesc());
             throw new DataTypeCastException(checkResp.getCodeDesc());
         }
         if (!CredentialPojoUtils.validClaimAndSaltForMap(
-            credentialPojo.getClaim(), 
+            credentialPojo.getClaim(),
             credentialPojo.getSalt())) {
             logger.error("create PresentationE with JSON String failed, claim and salt of "
                 + "credentialPojo not match.");
             throw new DataTypeCastException("claim and salt of credentialPojo not match.");
         }
         return credentialPojo;
+    }
+
+    /**
+     * Generate the unique hash of this CredentialPojo.
+     *
+     * @return hash value
+     */
+    public String getHash() {
+        if (CredentialPojoUtils.isCredentialPojoValid(this) != ErrorCode.SUCCESS) {
+            return StringUtils.EMPTY;
+        }
+        return CredentialPojoUtils.getCredentialPojoHash(this, null);
+    }
+
+    /**
+     * Get the signature thumbprint for re-signing.
+     *
+     * @return thumbprint
+     */
+    public String getSignatureThumbprint() {
+        return CredentialPojoUtils.getCredentialThumbprintWithoutSig(this, this.getSalt(), null);
     }
 }

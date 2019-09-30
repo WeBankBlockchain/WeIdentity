@@ -66,12 +66,10 @@ public class TestCreateWeId1 extends TestBaseServcie {
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
         LogUtil.info(logger, "createWeId", response);
-        System.out.println(response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
         ResponseData<CreateWeIdDataResult> response1 = weIdService.createWeId();
         LogUtil.info(logger, "createWeId", response1);
-        System.out.println(response1);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
         Assert.assertNotNull(response1.getResult());
         Assert.assertNotEquals(response.getResult().getWeId(), response1.getResult().getWeId());

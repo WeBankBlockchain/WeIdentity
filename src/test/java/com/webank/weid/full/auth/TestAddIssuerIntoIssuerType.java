@@ -1,7 +1,6 @@
 package com.webank.weid.full.auth;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -204,6 +203,7 @@ public class TestAddIssuerIntoIssuerType extends TestBaseServcie {
     /**
      * case: private key is belong other weId.
      */
+    @Test
     public void testAddIssuerIntoIssuerType_otherPriKey() {
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         weIdAuthentication.setWeIdPrivateKey(createWeIdResult.getUserWeIdPrivateKey());
@@ -220,6 +220,7 @@ public class TestAddIssuerIntoIssuerType extends TestBaseServcie {
     /**
      * case: private key is belong other weId.
      */
+    @Test
     public void testAddIssuerIntoIssuerType_otherAuthorPriKey() {
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         CreateWeIdDataResult weIdDataResult = super.registerAuthorityIssuer();

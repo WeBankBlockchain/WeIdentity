@@ -33,13 +33,21 @@ public interface EvidenceServiceEngine {
         Sign.SignatureData sigData,
         List<String> hashAttributes,
         List<String> extraValueList,
-        String privateKey
+        String privateKey,
+        List<String> signerWeIdList
     );
+
+    ResponseData<Boolean> addSignature(Sign.SignatureData sigData, String privateKey,
+        String eviAddress);
+
+    ResponseData<Boolean> setHashValue(List<String> hashAttributes, String privateKey,
+        String eviAddress);
 
     ResponseData<EvidenceInfo> getInfo(String evidenceAddress);
 
     /**
      * verify create evidence event.
+     *
      * @param eventRetCode eventRetCode
      * @param address evidence contract address
      * @return ErrorCode
