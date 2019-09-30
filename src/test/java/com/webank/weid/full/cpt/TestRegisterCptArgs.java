@@ -374,27 +374,6 @@ public class TestRegisterCptArgs extends TestBaseServcie {
     }
 
     /**
-     * case： cpt register again.
-     */
-    @Test
-    public void testRegisterCpt_repeat() {
-
-        CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
-
-        ResponseData<CptBaseInfo> response = cptService.registerCpt(cptMapArgs);
-        LogUtil.info(logger, "registerCpt", response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
-
-        response = cptService.registerCpt(cptMapArgs);
-        LogUtil.info(logger, "registerCpt again", response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
-    }
-
-    /**
      * case： cptPublisherPrivateKey is null.
      */
     @Test
