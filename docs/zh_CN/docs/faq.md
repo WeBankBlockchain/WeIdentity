@@ -156,29 +156,30 @@ Credential的重新生成则为重新发行一个Credential ID不相同的全新
 ---
 - **字体安装说明**  
 
-**Centos**   
-1. 下载NotoSansCJKtc-Regular.ttf字体 <br>
-[字体下载链接](https://github.com/WeBankFinTech/WeIdentity/blob/master/context/NotoSansCJKtc-Regular.ttf)
+**字体下载**<br>
 
- 2. 新建中文字体目录并拷贝字体到该目录
+ [下载NotoSansCJKtc-Regular.ttf字体](https://github.com/WeBankFinTech/WeIdentity/blob/master/context/NotoSansCJKtc-Regular.ttf)
+
+**Centos**   
+1. 新建中文字体目录并拷贝字体到该目录
     ~~~
     sudo mkdir -p /usr/share/fonts/chinese
     sudo cp ./NotoSansCJKtc-Regular.ttf  /usr/share/fonts/chinese
     ~~~
 
-3. 安装相关依赖
+2. 安装相关依赖
     ~~~
     sudo yum -y install fontconfig ttmkfdir mkfontscale
     ~~~
 
-4. 安装字体
+3. 安装字体
     ~~~
     sudo mkfontscale&&
     sudo mkfontdir&&
     sudo fc-cache -fv
     ~~~
 
-5. 查看字体是否成功安装
+4.  查看字体是否成功安装
     ~~~
     fc-list
     ~~~

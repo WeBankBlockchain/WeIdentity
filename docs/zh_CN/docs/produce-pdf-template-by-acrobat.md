@@ -34,11 +34,11 @@
 
     ![插入表单](./images/produce-pdf-template-8.png) <br> 
 
-11. 设置表单的名称属性，若cpt包含多级，则用“-”连接各级的key值，以确保唯一性。如cpt中各级为courses、title、cn等，其中courses是一个数组，则必须使用courses[0]来标识<br>
+11. 设置表单的名称属性，若cpt包含多级，则用“-”连接各级的key值，以确保唯一性。如cpt中各级为courses、title、cn等，其中courses是一个数组，则必须使用courses[i]来标识是第几个元素<br>
 
     ![设置表单一般属性](./images/produce-pdf-template-9.png) <br> 
 
-12. 设置表单文本域中填入文本的字体及其字体大小。请使用前面步骤安装的NotoSansCJKtc-Regular.ttf字体作为文本字体。选择字体大小时注意文本框大小，如果无法确认讲填入的文本长度，可选择字体大小为自动<br>
+12. 设置表单文本域中填入文本的字体及其字体大小。请使用前面步骤安装的NotoSansCJKtc-Regular.ttf字体作为文本字体。选择字体大小时注意文本框大小，如果无法确认将填入的文本长度，可选择字体大小为自动<br>
 
     ![设置表单外观属性](./images/produce-pdf-template-10.png) <br>
 <br>
@@ -55,4 +55,5 @@
 - 必须要先安装指定字体，并用指定字体设置文本以及表单。
 - NotoSansCJKtc-Regular.ttf字体为google开源字体，不存在商用版权问题。
 - 确保多级cpt中各级使用“-”连接。
+- 如果编辑PDF文件时遇到“无法找到或创建字体XXX，某些字体可能无法正确显示或打印”问题时，把相应字体文件复制到Adobe安装目录下的Adobe/Acroba DC/Resource/CIDFont文件夹中，重启Acrobat Pro DC即可。
 
