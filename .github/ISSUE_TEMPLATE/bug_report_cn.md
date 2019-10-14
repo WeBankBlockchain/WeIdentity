@@ -23,7 +23,6 @@ about: 根据使用WeIdentity过程中发现的问题，提交一份错误报告
 ## 其他内容
 #### 配置文件
 
-- FISCO-BCOS: 请访问 [FISCO-BCOS官网](https://github.com/FISCO-BCOS/FISCO-BCOS) 以获得更多细节信息。
 - WeIdentity: 请上传所有位于 /src/main/resources/ 目录下的文件。
 
 #### 日志文件
