@@ -27,8 +27,8 @@ Server 的环境要求与 WeIdentity-Java-SDK 的 `环境要求 <https://weident
      - 1.8+
      - 推荐使用 1.8u141 及以上
    * - FISCO-BCOS 节点
-     - 1.2.5（目前暂不支持 2.x）
-     - 确保它可以和部署 Server 机器互相 telnet 连通其 channelPort 端口
+     - 1.3.8（即中央仓库的1.2.5）或 2.x
+     - 确保它可以和部署 Server 机器互相连通，可 telnet 其 channelPort 端口
    * - Gradle
      - 4.6+
      - 同时支持 4.x 和 5.x 版本的 Gradle
@@ -57,18 +57,19 @@ Server 的环境要求与 WeIdentity-Java-SDK 的 `环境要求 <https://weident
 
 .. code-block:: text
 
-   └─ dist：部署物料
-      ├─ app: 启动jar包
-      ├─ lib: 依赖库
-      └─ conf: 配置文件
-   ├─ server_status.sh：监控系统运行进度
-   ├─ start.sh：启动RestServer
-   └─ stop.sh：停止RestServer
+   └─ dist
+     ├─ app: 启动jar包
+     ├─ lib: 依赖库
+     ├─ conf: 配置文件
+     ├─ keys/priv: 托管私钥
+     ├─ server_status.sh：监控系统运行状态
+     ├─ start.sh：启动RestServer
+     └─ stop.sh：停止RestServer
 
 1.3 修改配置文件
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* 首先，确认 WeIdentity 合约已部署完毕，同时您所部署的 FISCO-BCOS 节点可以正常连通。
+* 首先，确认 WeIdentity 合约已部署完毕，同时您所部署的 FISCO-BCOS 节点可以正常连通。目前支持 1.3.x 及 2.x 的 FISCO-BCOS 节点。
 * 修改合约地址。如果您使用部署工具部署了 WeIdentity 合约，那么只需将部署工具生成的 ``fisco.properties`` 及 ``weidentity.properties`` 拷贝到 ``dist/conf`` 目录下即可。如果您使用源码部署，请手动修改 ``dist/conf/fisco.properties.tpl`` 及 ``dist/conf/weidentity.properties.tpl`` ，更新合约地址及区块链节点信息；修改完成后，将两个文件的子扩展名 ``.tpl`` 去掉。详情：
 
 合约地址修改示例：更新 ``dist/conf/fisco.properties.tpl`` 下列属性中weId、cpt、issuer、evidence合约地址的值。
@@ -88,7 +89,7 @@ Server 的环境要求与 WeIdentity-Java-SDK 的 `环境要求 <https://weident
 
     nodes=WeIdentity@127.0.0.1:8812,WeIdentity@127.0.0.1:8900
 
-* 拷贝您 WeIdentity 合约部署者的私钥到 ``dist/conf`` 目录下，并重命名为``ecdsa_key``。如果您使用部署工具部署了 WeIdentity 合约，这个文件在 ``output/admin/`` 目录。如果您使用源码部署，这个文件在源代码根目录下。
+* 拷贝您 WeIdentity 合约部署者的私钥到 ``keys/priv`` 目录下，并重命名为 ``ecdsa_key``。如果您使用部署工具部署了 WeIdentity 合约，这个文件在 ``output/admin/`` 目录。如果您使用源码部署，这个文件在源代码根目录下。
 
 * 修改 ``dist/conf/application.properties`` ，填入需要打开的监听端口地址（用于 RestServer 监听外来的 HTTP/HTTPS RESTful 请求，默认为 6000/6001，不可被其他程序占用）。同时，请确认用来调用默认合约部署者私钥的暗语；由于此暗语可直接调用 WeIdentity 合约部署者的私钥，权限较高（详见 \ `RestService API 说明文档 <./weidentity-rest-api.html>`_\ ），因此请您务必对其进行修改。
 
@@ -107,7 +108,7 @@ Server 的环境要求与 WeIdentity-Java-SDK 的 `环境要求 <https://weident
 2.1 Server 启动/停止
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-进入 dist 目录执行以下应用以启动或停止 Rest Server：
+进入 dist 目录，执行以下命令以启动或停止 Rest Server：
 
 .. code-block:: bash
 
