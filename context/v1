@@ -1,0 +1,10 @@
+{
+  "@context": {
+    "id": "@id",
+    "type": "@type",
+
+    "weidentity": "https://github.com/WeBankFinTech/WeIdentity/blob/master/context/vocabulary.md",
+
+    "Secp256k1": "weidentity:Secp256k1"
+  }
+}
