@@ -177,7 +177,6 @@ build.tar.gz
 .rsync.sh
 rsync.ex
 build/
-dist/
 bak/
 *docx
 *pdf
