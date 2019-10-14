@@ -23,7 +23,6 @@ Describe what you expected to happen and what actually happened.
 ## Additional context
 #### Config Files
 
-- FISCO-BCOS: Please refer to [FISCO-BCOS site](https://github.com/FISCO-BCOS/FISCO-BCOS) for more details.
 - WeIdentity: Grab them at /src/main/resources/.
 
 #### Log Files
