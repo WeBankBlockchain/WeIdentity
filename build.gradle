@@ -280,15 +280,15 @@ if (!gradle.startParameter.isOffline()) {
                 }
 
                 pom.project {
-                    name project.name
+                    name 'weid-java-sdk'
                     packaging 'jar'
                     description 'Java SDK for WeIdentity.'
-                    url 'https://github.com/WeBankFinTech/weid-java-sdk'
+                    url 'https://github.com/WeBankFinTech/WeIdentity'
 
                     scm {
-                        url 'scm:git@github.com:WeBankFinTech/weid-java-sdk.git'
-                        connection 'scm:git@github.com:WeBankFinTech/weid-java-sdk.git'
-                        developerConnection 'git@github.com:WeBankFinTech/weid-java-sdk.git'
+                        url 'scm:git@github.com:WeBankFinTech/WeIdentity.git'
+                        connection 'scm:git@github.com:WeBankFinTech/WeIdentity.git'
+                        developerConnection 'git@github.com:WeBankFinTech/WeIdentity.git'
                     }
 
                     licenses {
