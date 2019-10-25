@@ -90,3 +90,16 @@ Control）。此外，在一个不需要token的区块链世界里，tx.origin�
 - **我原来的配置文件是applicationContext.xml，现在怎么兼容properties？**
 
 详见\ `从ApplicationContext.xml兼容properties的配置方式 <./from-application-context-to-properties.html>`__\ 。
+--------------
+
+- **我使用的是maven方式集成，怎么集成WeID SDK相关依赖？**
+
+请您参考源代码根目录下build.gradle的依赖，按照以下格式添加到您的pom.xml里。添加之前请先确定要使用的SDK版本。
+
+   .. code:: shell
+
+       <dependency>
+           <groupId>com.webank</groupId>
+           <artifactId>weid-java-sdk</artifactId>
+           <version>1.4.0</version>
+       </dependency>
