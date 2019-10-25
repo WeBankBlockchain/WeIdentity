@@ -484,15 +484,15 @@ public class PdfTransportationImpl
             if (object instanceof PresentationE) {
                 presentation = (PresentationE) object;
 
-                //多签情况递归获取最内层credentialList，否则直接获取credentialList
-                CredentialPojo cp = presentation.getVerifiableCredential().get(0);
-                //多签情况目前只支持当层嵌套
-                if (cp.getClaim().containsKey("credentialList") && cp.getClaim().size() == 1) {
-                    getMultiSignClaim(presentation.getVerifiableCredential().get(0), creList);
-                    credentialPojoList = creList;
-                } else {
-                    credentialPojoList = presentation.getVerifiableCredential();
+                //处理credentialList不存在的情况
+                if (presentation.getVerifiableCredential().size() == 0) {
+                    logger.error(
+                            "buildPdf4SpecTpl due to credentialList size equal to zero error.");
+                    throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
+
+                //presentationE不存在多签情况，直接获取credentialList
+                credentialPojoList = presentation.getVerifiableCredential();
             } else if (object instanceof CredentialPojo) {
                 credentialPojo = (CredentialPojo) object;
 
@@ -565,7 +565,7 @@ public class PdfTransportationImpl
             List<CredentialPojo> credentialPojoList = new ArrayList<>(3);
             List<CredentialPojo> creList = new ArrayList<>(1);
 
-            //获取presentation中的cliam信息为map
+            //获取presentation中的credentialList
             if (object instanceof PresentationE) {
                 presentation = (PresentationE) object;
 
@@ -576,14 +576,8 @@ public class PdfTransportationImpl
                     throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
 
-                //多签情况递归获取最内层credentialList，否则直接获取credentialList
-                CredentialPojo cp = presentation.getVerifiableCredential().get(0);
-                if (cp.getClaim().containsKey("credentialList") && cp.getClaim().size() == 1) {
-                    getMultiSignClaim(presentation.getVerifiableCredential().get(0), creList);
-                    credentialPojoList = creList;
-                } else {
-                    credentialPojoList = presentation.getVerifiableCredential();
-                }
+                //presentationE不存在多签情况，直接获取credentialList
+                credentialPojoList = presentation.getVerifiableCredential();
             } else if (object instanceof CredentialPojo) {
                 credentialPojo = (CredentialPojo) object;
 
@@ -1364,23 +1358,45 @@ public class PdfTransportationImpl
             CredentialPojo credentialPojo,
             List<CredentialPojo> creList) {
 
-
         Map<String, Object> claim = credentialPojo.getClaim();
 
-        //如果是多签情况，claim只包含一个key值，且为credentialList
+        //如果是多签情况，claim只包含一个key值，且类型为credentialList
         if (claim.containsKey("credentialList")  && claim.size() == 1) {
             Object obj = claim.get("credentialList");
             if (!(obj instanceof List)) {
-                logger.error("getMultiSignClaim due to error.");
-                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
-            }
-            ArrayList<Object> objList = (ArrayList<Object>) obj;
-            if (!(objList.get(0) instanceof CredentialPojo)) {
                 logger.error("getMultiSignClaim error.");
                 throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
             }
-            //logic
-            getMultiSignClaim((CredentialPojo) objList.get(0), creList);
+            ArrayList<Object> objList = (ArrayList<Object>) obj;
+
+            //找出credentialList中多签的CredentialPojo进行递归
+            CredentialPojo cp = null;
+            List<CredentialPojo> credentialPojos = new ArrayList<>(2);
+            for (Object innerCredentialObject : objList) {
+                Map<String, Object> map = (Map<String, Object>) innerCredentialObject;
+                try {
+                    CredentialPojo innerCredentialPojo = DataToolUtils
+                            .mapToObj(map, CredentialPojo.class);
+
+                    //处理objList内无多签credential情况
+                    credentialPojos.add(innerCredentialPojo);
+
+                    if (innerCredentialPojo.getClaim().containsKey("credentialList")
+                            && innerCredentialPojo.getClaim().size() == 1) {
+                        cp = innerCredentialPojo;
+                        break;
+                    }
+                } catch (Exception e) {
+                    logger.error("getMultiSignClaim error due to:" + e.getMessage());
+                    throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+                }
+            }
+            if (cp == null) {
+                creList.addAll(credentialPojos);
+            } else {
+                credentialPojos.clear();
+                getMultiSignClaim(cp, creList);
+            }
         } else {
             creList.add(credentialPojo);
         }

@@ -13,7 +13,7 @@
 配置文件
 ---------
 
-如果您使用上文的 `安装部署工具方式 <https://weidentity.readthedocs.io/projects/buildtools/zh_CN/latest/docs/weidentity-build-tools-doc.html>`_ ，重新部署了智能合约，那么这一部分可以跳过。
+如果您使用上文的 `安装部署工具方式 <https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-build-with-deploy.html>`_ ，重新部署了智能合约，那么这一部分可以跳过。
 
 如果您不需要重新部署合约，或不准备使用部署工具，则需要执行以下步骤：
 
