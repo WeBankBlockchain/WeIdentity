@@ -172,7 +172,7 @@ public class PdfTransportationImpl
                     }
                 } else {
                     logger.error("buildDisclosureInfo duo to "
-                        + "map type cpt missing properties, propMapV is null error.");
+                            + "map type cpt missing properties, propMapV is null error.");
                     throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
                 prefix.append("-");
@@ -483,15 +483,15 @@ public class PdfTransportationImpl
             if (object instanceof PresentationE) {
                 presentation = (PresentationE) object;
 
-                //多签情况递归获取最内层credentialList，否则直接获取credentialList
-                CredentialPojo cp = presentation.getVerifiableCredential().get(0);
-                //多签情况目前只支持当层嵌套
-                if (cp.getClaim().containsKey("credentialList") && cp.getClaim().size() == 1) {
-                    getMultiSignClaim(presentation.getVerifiableCredential().get(0), creList);
-                    credentialPojoList = creList;
-                } else {
-                    credentialPojoList = presentation.getVerifiableCredential();
+                //处理credentialList不存在的情况
+                if (presentation.getVerifiableCredential().size() == 0) {
+                    logger.error(
+                            "buildPdf4SpecTpl due to credentialList size equal to zero error.");
+                    throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
+
+                //presentationE不存在多签情况，直接获取credentialList
+                credentialPojoList = presentation.getVerifiableCredential();
             } else if (object instanceof CredentialPojo) {
                 credentialPojo = (CredentialPojo) object;
 
@@ -512,7 +512,7 @@ public class PdfTransportationImpl
             int creListSize = credentialPojoList.size();
             if (creListSize == 0) {
                 logger.error(
-                    "buildPdf4DefaultTpl due to credentialList size equal to zero error.");
+                        "buildPdf4DefaultTpl due to credentialList size equal to zero error.");
                 throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
             }
 
@@ -564,25 +564,19 @@ public class PdfTransportationImpl
             List<CredentialPojo> credentialPojoList = new ArrayList<>(3);
             List<CredentialPojo> creList = new ArrayList<>(1);
 
-            //获取presentation中的cliam信息为map
+            //获取presentation中的credentialList
             if (object instanceof PresentationE) {
                 presentation = (PresentationE) object;
 
                 //处理credentialList不存在的情况
                 if (presentation.getVerifiableCredential().size() == 0) {
                     logger.error(
-                        "buildPdf4SpecTpl due to credentialList size equal to zero error.");
+                            "buildPdf4SpecTpl due to credentialList size equal to zero error.");
                     throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
                 }
 
-                //多签情况递归获取最内层credentialList，否则直接获取credentialList
-                CredentialPojo cp = presentation.getVerifiableCredential().get(0);
-                if (cp.getClaim().containsKey("credentialList") && cp.getClaim().size() == 1) {
-                    getMultiSignClaim(presentation.getVerifiableCredential().get(0), creList);
-                    credentialPojoList = creList;
-                } else {
-                    credentialPojoList = presentation.getVerifiableCredential();
-                }
+                //presentationE不存在多签情况，直接获取credentialList
+                credentialPojoList = presentation.getVerifiableCredential();
             } else if (object instanceof CredentialPojo) {
                 credentialPojo = (CredentialPojo) object;
 
@@ -596,7 +590,7 @@ public class PdfTransportationImpl
                 }
             } else {
                 logger.error(
-                    "buildPdf4SpecTpl due to object illegal error.");
+                        "buildPdf4SpecTpl due to object illegal error.");
                 throw new WeIdBaseException(ErrorCode.DATA_TYPE_CASE_ERROR);
             }
 
@@ -646,7 +640,7 @@ public class PdfTransportationImpl
             TTFParser parser = new TTFParser();
             if (is == null) {
                 logger.error(
-                    "buildPdf4SpecTpl due to font stream is null error.");
+                        "buildPdf4SpecTpl due to font stream is null error.");
                 throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
             }
             TrueTypeFont font = parser.parse(is);
@@ -657,7 +651,7 @@ public class PdfTransportationImpl
 
             if (acroForm == null) {
                 logger.error(
-                    "buildPdf4SpecTpl due to pdf template acroForm is null error.");
+                        "buildPdf4SpecTpl due to pdf template acroForm is null error.");
                 throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
             }
 
@@ -685,7 +679,7 @@ public class PdfTransportationImpl
                     field.setValue(text);
                 } else {
                     logger.error(
-                        "buildPdf4SpecTpl due to pdf template doesn't match with claim error.");
+                            "buildPdf4SpecTpl due to pdf template doesn't match with claim error.");
                     throw new WeIdBaseException(ErrorCode.TRANSPORTATION_BASE_ERROR);
                 }
             }
@@ -759,8 +753,8 @@ public class PdfTransportationImpl
             WeIdAuthentication weIdAuthentication) {
 
         logger.info(
-            "begin to execute PdfTransportationImpl serialization, property:{}.",
-            property
+                "begin to execute PdfTransportationImpl serialization, property:{}.",
+                property
         );
 
         ResponseData<byte[]> errorCode1 = checkPara(object, property, weIdAuthentication);
@@ -771,14 +765,14 @@ public class PdfTransportationImpl
         try {
             //建立用于存证的address
             ResponseData<String> evidenceAddress = evidenceService
-                .createEvidence(null, weIdAuthentication.getWeIdPrivateKey());
+                    .createEvidence(null, weIdAuthentication.getWeIdPrivateKey());
 
             if (evidenceAddress.getResult().isEmpty()) {
                 logger.error("[serialize] PdfTransportation serialization "
-                    + "due to build evidenceAddress error.");
+                        + "due to build evidenceAddress error.");
                 return new ResponseData<>(
-                    null,
-                    ErrorCode.getTypeByErrorCode(evidenceAddress.getErrorCode()));
+                        null,
+                        ErrorCode.getTypeByErrorCode(evidenceAddress.getErrorCode()));
             }
 
             //构建PDF协议数据
@@ -820,8 +814,8 @@ public class PdfTransportationImpl
         try {
             if (outputPdfFilePath == null || outputPdfFilePath.length() == 0) {
                 logger.error(
-                    "[serialize] PdfTransportation "
-                    + "serialization due to File Path illegal error.");
+                        "[serialize] PdfTransportation "
+                                + "serialization due to File Path illegal error.");
                 return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
             }
 
@@ -831,8 +825,8 @@ public class PdfTransportationImpl
             if (res.getResult() == null) {
                 logger.error("[serialize] PdfTransportation serialization due to serialize error.");
                 return new ResponseData<>(
-                    false,
-                    ErrorCode.getTypeByErrorCode(res.getErrorCode()));
+                        false,
+                        ErrorCode.getTypeByErrorCode(res.getErrorCode()));
             } else {
                 //生成文件
                 FileOutputStream outputStream  = new FileOutputStream(file);
@@ -893,11 +887,11 @@ public class PdfTransportationImpl
 
             //build 存证address
             ResponseData<String> evidenceAddress = evidenceService
-                .createEvidence(null, weIdAuthentication.getWeIdPrivateKey());
+                    .createEvidence(null, weIdAuthentication.getWeIdPrivateKey());
 
             if (evidenceAddress.getResult().isEmpty()) {
                 logger.error("[serializeWithTemplate] PdfTransportation serialization "
-                    + "due to build evidenceAddress error.");
+                        + "due to build evidenceAddress error.");
                 return new ResponseData<>(
                         null,
                         ErrorCode.getTypeByErrorCode(evidenceAddress.getErrorCode()));
@@ -945,25 +939,25 @@ public class PdfTransportationImpl
         try {
             if (outputPdfFilePath == null || outputPdfFilePath.length() == 0) {
                 logger.error(
-                    "[serialize] PdfTransportation "
-                        + "serialization due to File Path illegal error.");
+                        "[serialize] PdfTransportation "
+                                + "serialization due to File Path illegal error.");
                 return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
             }
 
             File file = createFileByPath(outputPdfFilePath);
 
             ResponseData<byte[]> res = serializeWithTemplate(
-                object,
-                property,
-                weIdAuthentication,
-                inputPdfTemplatePath);
+                    object,
+                    property,
+                    weIdAuthentication,
+                    inputPdfTemplatePath);
             if (res.getResult() == null) {
                 logger.error(
-                    "[serialize] PdfTransportation "
-                    + "serialization due to serializeWithTemplate error.");
+                        "[serialize] PdfTransportation "
+                                + "serialization due to serializeWithTemplate error.");
                 return new ResponseData<>(
-                    false,
-                    ErrorCode.getTypeByErrorCode(res.getErrorCode()));
+                        false,
+                        ErrorCode.getTypeByErrorCode(res.getErrorCode()));
             } else {
                 FileOutputStream outputStream  = new FileOutputStream(file);
                 outputStream.write(res.getResult());
@@ -972,13 +966,13 @@ public class PdfTransportationImpl
             return new ResponseData<>(true, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error(
-                "[serializeWithTemplate] PdfTransportation "
-                + "serialization due to base error.", e);
+                    "[serializeWithTemplate] PdfTransportation "
+                            + "serialization due to base error.", e);
             return new ResponseData<>(false, e.getErrorCode());
         } catch (Exception e) {
             logger.error(
-                "[serializeWithTemplate] PdfTransportation "
-                + "serialization due to unknown error.", e);
+                    "[serializeWithTemplate] PdfTransportation "
+                            + "serialization due to unknown error.", e);
             return new ResponseData<>(false, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
     }
@@ -1020,8 +1014,8 @@ public class PdfTransportationImpl
             if (resVerify.getResult() == null || !resVerify.getResult()) {
                 logger.info("Evidence verify fail.");
                 return new ResponseData<>(
-                    null,
-                    ErrorCode.getTypeByErrorCode(resVerify.getErrorCode()));
+                        null,
+                        ErrorCode.getTypeByErrorCode(resVerify.getErrorCode()));
             }
 
             //创建编解码实体对象并对pdfBaseData中的数据进行解码
@@ -1379,23 +1373,45 @@ public class PdfTransportationImpl
             CredentialPojo credentialPojo,
             List<CredentialPojo> creList) {
 
-
         Map<String, Object> claim = credentialPojo.getClaim();
 
-        //如果是多签情况，claim只包含一个key值，且为credentialList
+        //如果是多签情况，claim只包含一个key值，且类型为credentialList
         if (claim.containsKey("credentialList")  && claim.size() == 1) {
             Object obj = claim.get("credentialList");
             if (!(obj instanceof List)) {
-                logger.error("getMultiSignClaim due to error.");
-                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
-            }
-            ArrayList<Object> objList = (ArrayList<Object>) obj;
-            if (!(objList.get(0) instanceof CredentialPojo)) {
                 logger.error("getMultiSignClaim error.");
                 throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
             }
-            //logic
-            getMultiSignClaim((CredentialPojo) objList.get(0), creList);
+            ArrayList<Object> objList = (ArrayList<Object>) obj;
+
+            //找出credentialList中多签的CredentialPojo进行递归
+            CredentialPojo cp = null;
+            List<CredentialPojo> credentialPojos = new ArrayList<>(2);
+            for (Object innerCredentialObject : objList) {
+                Map<String, Object> map = (Map<String, Object>) innerCredentialObject;
+                try {
+                    CredentialPojo innerCredentialPojo = DataToolUtils
+                            .mapToObj(map, CredentialPojo.class);
+
+                    //处理objList内无多签credential情况
+                    credentialPojos.add(innerCredentialPojo);
+
+                    if (innerCredentialPojo.getClaim().containsKey("credentialList")
+                            && innerCredentialPojo.getClaim().size() == 1) {
+                        cp = innerCredentialPojo;
+                        break;
+                    }
+                } catch (Exception e) {
+                    logger.error("getMultiSignClaim error due to:" + e.getMessage());
+                    throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+                }
+            }
+            if (cp == null) {
+                creList.addAll(credentialPojos);
+            } else {
+                credentialPojos.clear();
+                getMultiSignClaim(cp, creList);
+            }
         } else {
             creList.add(credentialPojo);
         }
@@ -1409,13 +1425,13 @@ public class PdfTransportationImpl
 
         ResponseData<Boolean> setEvidenceRes = evidenceService
                 .setHashValue(
-                    getChecksum(pdfFileByte),
-                    evidenceAddress.getResult(),
-                    weIdAuthentication.getWeIdPrivateKey());
+                        getChecksum(pdfFileByte),
+                        evidenceAddress.getResult(),
+                        weIdAuthentication.getWeIdPrivateKey());
         if (setEvidenceRes.getResult() == null || !setEvidenceRes.getResult()) {
             logger.error("SetHashValue error.");
             throw new WeIdBaseException(
-                ErrorCode.getTypeByErrorCode(setEvidenceRes.getErrorCode()));
+                    ErrorCode.getTypeByErrorCode(setEvidenceRes.getErrorCode()));
         }
     }
 
@@ -1427,7 +1443,7 @@ public class PdfTransportationImpl
 
             //outputPdfFilePath是文件还是路径
             if (outputPdfFilePath.contains(FILE_SEPARATOR)
-                && outputPdfFilePath.substring(
+                    && outputPdfFilePath.substring(
                     outputPdfFilePath.lastIndexOf(FILE_SEPARATOR)).equals(PDF_SUFFIX)) {
                 file = new File(outputPdfFilePath);
 
@@ -1452,14 +1468,14 @@ public class PdfTransportationImpl
                         throw new WeIdBaseException(ErrorCode.BASE_ERROR);
                     }
                     fileName = outputPdfFilePath
-                        + PATH_LINKER
-                        + calendar.getTimeInMillis() + PDF_SUFFIX;
+                            + PATH_LINKER
+                            + calendar.getTimeInMillis() + PDF_SUFFIX;
                     file = new File(fileName);
                     //文件路径不存在，则新建目录，并使用默认文件名新建文件
                 } else {
                     fileName = outputPdfFilePath
-                        + PATH_LINKER
-                        + calendar.getTimeInMillis() + PDF_SUFFIX;
+                            + PATH_LINKER
+                            + calendar.getTimeInMillis() + PDF_SUFFIX;
                     file = new File(fileName);
                 }
             }
