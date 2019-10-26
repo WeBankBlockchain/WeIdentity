@@ -47,6 +47,7 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
+import org.fisco.bcos.web3j.crypto.SHA3Digest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -781,7 +782,7 @@ public class PdfTransportationImpl
             //处理PDF显示信息和属性信息
             byte[] pdfFileByte = buildPdf4DefaultTpl(object, pdfBaseData);
 
-            //对文件的SHA-256哈希值进行存证,完成后删除存证文件
+            //对byte数组的Keccak-256哈希值进行存证
             setEvidence(evidenceAddress, weIdAuthentication, pdfFileByte);
 
             logger.info("PdfTransportationImpl serialization finished.");
@@ -903,7 +904,7 @@ public class PdfTransportationImpl
             //处理PDF显示信息和属性信息
             byte[] pdfFileByte = buildPdf4SpecTpl(object, document, pdfBaseData);
 
-            //对文件的SHA-256哈希值进行存证,完成后删除存证文件
+            //对byte数组的Keccak-256哈希值进行存证
             setEvidence(evidenceAddress, weIdAuthentication, pdfFileByte);
 
             logger.info("PdfTransportationImpl serialization finished.");
@@ -1256,35 +1257,19 @@ public class PdfTransportationImpl
         return new ByteArrayInputStream(out);
     }
 
-    /**
-     * 用MD_ALGORITHM算法计算文件哈希值.
-     * @param pdfFileByte 需计算HASH的byte数组
-     * @return 产生哈希值的字节数组
-     * @throws Exception 异常
-     */
-    private byte[] createChecksum(byte[] pdfFileByte) throws Exception {
-
-        MessageDigest checksum = MessageDigest.getInstance(MD_ALGORITHM);
-        checksum.update(pdfFileByte);
-        return checksum.digest();
-    }
 
     /**
      * 计算指定路径文件的哈希值.
      *
      * @param pdfFileByte 输入文件路径
-     * @return 返回文件的SHA-256哈希值
-     * @throws Exception IO异常
+     * @return 返回文件的Keccak-256哈希值
      */
-    private String getChecksum(byte[] pdfFileByte) throws Exception {
+    private String getChecksum(byte[] pdfFileByte) {
 
-        byte[] bytes = createChecksum(pdfFileByte);
-        StringBuilder ret = new StringBuilder();
-        //注意生成的16进制字符串字母大小写问题,这里使用默认小写
-        for (byte b : bytes) {
-            ret.append(Integer.toString((b & 0xff) + 0x100, 16).substring(1));
-        }
-        return "0x" +  ret.toString();
+        //使用web3j中的sha3算法：keccak-256
+        SHA3Digest digestSha3 = new SHA3Digest();
+        byte[] digest = digestSha3.hash(pdfFileByte);
+        return "0x" + org.bcos.web3j.crypto.sm2.util.encoders.Hex.toHexString(digest);
     }
 
     /**
