@@ -191,6 +191,9 @@ public final class WeIdUtils {
      * @return true if yes, false otherwise.
      */
     public static boolean isEmptyAddress(Address addr) {
+        if (addr == null) {
+            return false;
+        }
         return addr.getValue().equals(BigInteger.ZERO);
     }
     
