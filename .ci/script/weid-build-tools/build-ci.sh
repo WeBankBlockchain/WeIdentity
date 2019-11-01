@@ -44,7 +44,6 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     cd weid-build-tools/
     sed -i -e '$a\org_id=test' run.config
     sed -i -e '$a\blockchain_address=$NODE_IP' run.config
-    sed -i -e '$a\blockchain_fiscobcos_version=1' run.config
     chmod u+x compile.sh
     ./compile.sh
     chmod u+x deploy.sh
