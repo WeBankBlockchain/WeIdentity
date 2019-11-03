@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright漏 (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -20,9 +20,10 @@
 package com.webank.weid.service.impl;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.ECKeyPair;
 import org.bcos.web3j.crypto.Keys;
@@ -33,6 +34,8 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
+import com.webank.weid.protocol.base.AuthenticationProperty;
+import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
@@ -170,7 +173,35 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             logger.error("Input weId : {} is invalid.", weId);
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
-        return weIdServiceEngine.getWeIdDocument(weId);
+        ResponseData<WeIdDocument> weIdDocResp = weIdServiceEngine.getWeIdDocument(weId);
+        if (weIdDocResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return weIdDocResp;
+        }
+        return new ResponseData<>(trimObsoleteWeIdDocument(weIdDocResp.getResult()),
+            weIdDocResp.getErrorCode(), weIdDocResp.getErrorMessage());
+    }
+
+    private WeIdDocument trimObsoleteWeIdDocument(WeIdDocument originalDocument) {
+        List<PublicKeyProperty> pubKeysToRemove = new ArrayList<>();
+        List<AuthenticationProperty> authToRemove = new ArrayList<>();
+        for (PublicKeyProperty pr : originalDocument.getPublicKey()) {
+            if (pr.getPublicKey().contains(WeIdConstant.REMOVED_PUBKEY_TAG)) {
+                pubKeysToRemove.add(pr);
+                for (AuthenticationProperty ap : originalDocument.getAuthentication()) {
+                    if (ap.getPublicKey().equalsIgnoreCase(pr.getId())) {
+                        authToRemove.add(ap);
+                    }
+                }
+            }
+        }
+        for (AuthenticationProperty ap : originalDocument.getAuthentication()) {
+            if (ap.getPublicKey().contains(WeIdConstant.REMOVED_AUTHENTICATION_TAG)) {
+                authToRemove.add(ap);
+            }
+        }
+        originalDocument.getPublicKey().removeAll(pubKeysToRemove);
+        originalDocument.getAuthentication().removeAll(authToRemove);
+        return originalDocument;
     }
 
     /**
@@ -212,6 +243,95 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         responseDataJson.setErrorCode(ErrorCode.getTypeByErrorCode(responseData.getErrorCode()));
 
         return responseDataJson;
+    }
+
+    /**
+     * Remove a public key enlisted in WeID document together with the its authentication.
+     *
+     * @param setPublicKeyArgs the to-be-deleted publicKey
+     * @return true if succeeds, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> removePublicKeyWithAuthentication(
+        SetPublicKeyArgs setPublicKeyArgs) {
+        if (!verifySetPublicKeyArgs(setPublicKeyArgs)) {
+            logger.error("[removePublicKey]: input parameter setPublicKeyArgs is illegal.");
+            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (!WeIdUtils.isPrivateKeyValid(setPublicKeyArgs.getUserWeIdPrivateKey())) {
+            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
+        }
+
+        String weId = setPublicKeyArgs.getWeId();
+        ResponseData<WeIdDocument> responseData = this.getWeIdDocument(weId);
+        if (responseData.getResult() == null) {
+            return new ResponseData<>(false,
+                ErrorCode.getTypeByErrorCode(responseData.getErrorCode())
+            );
+        }
+        List<PublicKeyProperty> publicKeys = responseData.getResult().getPublicKey();
+        for (PublicKeyProperty pk : publicKeys) {
+            // TODO in future, add authorization check
+            if (pk.getPublicKey().equalsIgnoreCase(setPublicKeyArgs.getPublicKey())) {
+                if (publicKeys.size() == 1) {
+                    return new ResponseData<>(false,
+                        ErrorCode.WEID_CANNOT_REMOVE_ITS_OWN_PUB_KEY_WITHOUT_BACKUP);
+                }
+            }
+        }
+
+        // Add correct tag by externally call removeAuthentication once
+        SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
+        setAuthenticationArgs.setWeId(weId);
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey(setPublicKeyArgs.getUserWeIdPrivateKey().getPrivateKey());
+        setAuthenticationArgs.setUserWeIdPrivateKey(weIdPrivateKey);
+        setAuthenticationArgs.setPublicKey(setPublicKeyArgs.getPublicKey());
+        setAuthenticationArgs.setOwner(setPublicKeyArgs.getOwner());
+        ResponseData<Boolean> removeAuthResp = this.removeAuthentication(setAuthenticationArgs);
+        if (!removeAuthResp.getResult()) {
+            logger.error("Failed to remove authentication: " + removeAuthResp.getErrorMessage());
+            return removeAuthResp;
+        }
+
+        String owner = setPublicKeyArgs.getOwner();
+        String weAddress = WeIdUtils.convertWeIdToAddress(setPublicKeyArgs.getWeId());
+
+        if (StringUtils.isEmpty(owner)) {
+            owner = weAddress;
+        } else {
+            if (WeIdUtils.isWeIdValid(owner)) {
+                owner = WeIdUtils.convertWeIdToAddress(owner);
+            } else {
+                logger.error("removePublicKey: owner : {} is invalid.", owner);
+                return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+            }
+        }
+        try {
+            String attributeKey =
+                new StringBuffer()
+                    .append(WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)
+                    .append(WeIdConstant.SEPARATOR)
+                    .append(setPublicKeyArgs.getType())
+                    .append(WeIdConstant.SEPARATOR)
+                    .append("base64")
+                    .toString();
+            String privateKey = setPublicKeyArgs.getUserWeIdPrivateKey().getPrivateKey();
+            String publicKey = setPublicKeyArgs.getPublicKey();
+            String attrValue = new StringBuffer()
+                .append(publicKey)
+                .append(WeIdConstant.REMOVED_PUBKEY_TAG).append("/")
+                .append(owner)
+                .toString();
+            return weIdServiceEngine.setAttribute(weAddress, attributeKey, attrValue, privateKey);
+        } catch (PrivateKeyIllegalException e) {
+            logger.error("[removePublicKey] set PublicKey failed because privateKey is illegal. ",
+                e);
+            return new ResponseData<>(false, e.getErrorCode());
+        } catch (Exception e) {
+            logger.error("[removePublicKey] set PublicKey failed with exception. ", e);
+            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+        }
     }
 
     /**
@@ -394,6 +514,64 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         }
     }
 
+    /**
+     * Remove an authentication tag in WeID document only - will not affect its public key.
+     *
+     * @param setAuthenticationArgs the to-be-deleted publicKey
+     * @return true if succeeds, false otherwise
+     */
+    public ResponseData<Boolean> removeAuthentication(SetAuthenticationArgs setAuthenticationArgs) {
+
+        if (!verifySetAuthenticationArgs(setAuthenticationArgs)) {
+            logger
+                .error("[removeAuthentication]: input parameter setAuthenticationArgs is illegal.");
+            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (!WeIdUtils.isPrivateKeyValid(setAuthenticationArgs.getUserWeIdPrivateKey())) {
+            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
+        }
+        String weId = setAuthenticationArgs.getWeId();
+        if (WeIdUtils.isWeIdValid(weId)) {
+            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
+
+            String owner = setAuthenticationArgs.getOwner();
+            if (StringUtils.isEmpty(owner)) {
+                owner = weAddress;
+            } else {
+                if (WeIdUtils.isWeIdValid(owner)) {
+                    owner = WeIdUtils.convertWeIdToAddress(owner);
+                } else {
+                    logger.error("[removeAuthentication]: owner : {} is invalid.", owner);
+                    return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+                }
+            }
+            String privateKey = setAuthenticationArgs.getUserWeIdPrivateKey().getPrivateKey();
+            try {
+                String attrValue = new StringBuffer()
+                    .append(setAuthenticationArgs.getPublicKey())
+                    .append(WeIdConstant.REMOVED_AUTHENTICATION_TAG)
+                    .append(WeIdConstant.SEPARATOR)
+                    .append(owner)
+                    .toString();
+                return weIdServiceEngine
+                    .setAttribute(weAddress,
+                        WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX,
+                        attrValue,
+                        privateKey);
+            } catch (PrivateKeyIllegalException e) {
+                logger
+                    .error("remove authenticate with private key exception. Error message :{}", e);
+                return new ResponseData<>(false, e.getErrorCode());
+            } catch (Exception e) {
+                logger.error("remove authenticate failed. Error message :{}", e);
+                return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+            }
+        } else {
+            logger.error("Set authenticate failed. weid : {} is invalid.", weId);
+            return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+        }
+    }
+
     private boolean verifySetServiceArgs(SetServiceArgs setServiceArgs) {
 
         return !(setServiceArgs == null
@@ -401,7 +579,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
             || setServiceArgs.getUserWeIdPrivateKey() == null
             || StringUtils.isBlank(setServiceArgs.getServiceEndpoint()));
     }
-    
+
     private boolean verifyServiceType(String type) {
         String serviceType = new StringBuffer()
             .append(WeIdConstant.WEID_DOC_SERVICE_PREFIX)
