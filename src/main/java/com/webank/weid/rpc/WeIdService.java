@@ -97,4 +97,20 @@ public interface WeIdService {
      * @return true if exists, false otherwise.
      */
     ResponseData<Boolean> isWeIdExist(String weId);
+
+    /**
+     * Remove a public key enlisted in WeID document together with the its authentication.
+     *
+     * @param setPublicKeyArgs the to-be-deleted publicKey
+     * @return true if succeeds, false otherwise
+     */
+    ResponseData<Boolean> removePublicKeyWithAuthentication(SetPublicKeyArgs setPublicKeyArgs);
+
+    /**
+     * Remove an authentication tag in WeID document only - will not affect its public key.
+     *
+     * @param setAuthenticationArgs the to-be-deleted publicKey
+     * @return true if succeeds, false otherwise
+     */
+    ResponseData<Boolean> removeAuthentication(SetAuthenticationArgs setAuthenticationArgs);
 }
