@@ -549,7 +549,9 @@ public final class DataToolUtils {
         Sign.SignatureData signatureData,
         BigInteger publicKey)
         throws SignatureException {
-
+        if (message == null) {
+            return false;
+        }
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
     }
@@ -568,7 +570,9 @@ public final class DataToolUtils {
         String signature,
         BigInteger publicKey)
         throws SignatureException {
-
+        if (message == null) {
+            return false;
+        }
         Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
