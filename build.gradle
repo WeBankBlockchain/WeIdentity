@@ -36,7 +36,7 @@ if (!gradle.startParameter.isOffline()) {
 
 group 'com.webank'
 
-version = "1.4.0"
+version = "1.4.1"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -57,7 +57,7 @@ repositories {
 }
 
 List lombok = [
-        "org.projectlombok:lombok:1.16.14"
+        "org.projectlombok:lombok:1.18.10"
 ]
 
 List logger = [
@@ -113,7 +113,7 @@ configurations {
 }
 
 dependencies {
-    localDeps 'org.projectlombok:lombok:1.16.14'
+    localDeps 'org.projectlombok:lombok:1.18.10'
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
             compile logger, lombok, apache_commons, json, mysql_driver, zxing, rpc, pdfbox
@@ -127,20 +127,20 @@ dependencies {
     }
     if (gradleVer.startsWith("5")) {
         if (!gradle.startParameter.isOffline()) {
-            compileOnly 'org.projectlombok:lombok:1.16.14'
-            annotationProcessor 'org.projectlombok:lombok:1.16.14'
-            testAnnotationProcessor 'org.projectlombok:lombok:1.16.14'
-            testCompileOnly 'org.projectlombok:lombok:1.16.14'
+            compileOnly 'org.projectlombok:lombok:1.18.10'
+            annotationProcessor 'org.projectlombok:lombok:1.18.10'
+            testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
+            testCompileOnly 'org.projectlombok:lombok:1.18.10'
             compile logger, apache_commons, json, mysql_driver, zxing, rpc, pdfbox
             compile("com.webank:weid-contract-java:1.2.9") {
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
             testCompile logger, apache_commons, json, junit, jmockit, rpc, pdfbox
         } else {
-            compileOnly files('dist/lib/lombok-1.16.14.jar')
-            annotationProcessor files('dist/lib/lombok-1.16.14.jar')
-            testAnnotationProcessor files('dist/lib/lombok-1.16.14.jar')
-            testCompileOnly files('dist/lib/lombok-1.16.14.jar')
+            compileOnly files('dist/lib/lombok-1.18.10.jar')
+            annotationProcessor files('dist/lib/lombok-1.18.10.jar')
+            testAnnotationProcessor files('dist/lib/lombok-1.18.10.jar')
+            testCompileOnly files('dist/lib/lombok-1.18.10.jar')
             compile fileTree(dir: 'dist/lib', include: '*.jar')
         }
     }
