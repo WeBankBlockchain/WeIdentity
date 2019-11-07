@@ -1,3 +1,10 @@
+### V1.4.1 (2019-11-01)
+- Bugfixes:
+1. Fixed multiple potential leaks which might cause NPE.
+2. Change default deposit signature algorithm when creating PDF to keccak256.
+3. Fixed multiple invalid URL links in documentation.
+4. Bump lombok to 1.18.10 to be compatible for OpenJDK11.
+
 ### V1.4.0 (2019-09-30)
 - Features:
 1. Supports PDF creation and transportation from CredentialPojo and Presentation.
