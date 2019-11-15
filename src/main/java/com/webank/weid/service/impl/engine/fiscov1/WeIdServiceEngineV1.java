@@ -186,8 +186,12 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
         logger.info("method buildWeIdPublicKeys() parameter::value:{}, weId:{}, "
             + "result:{}", value, weId, result);
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
+        // Only store the latest public key
+        // OBSOLETE and non-OBSOLETE public keys are regarded as the same
+        String trimmedPubKey = StringUtils
+            .splitByWholeSeparator(value.replace(WeIdConstant.REMOVED_PUBKEY_TAG, ""), "/")[0];
         for (PublicKeyProperty pr : pubkeyList) {
-            if (StringUtils.contains(value, pr.getPublicKey())) {
+            if (pr.getPublicKey().contains(trimmedPubKey)) {
                 return;
             }
         }
@@ -216,6 +220,33 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
         AuthenticationProperty auth = new AuthenticationProperty();
         List<PublicKeyProperty> keys = result.getPublicKey();
         List<AuthenticationProperty> authList = result.getAuthentication();
+
+        // Firstly, if this is an obsolete auth, directly append it and return unless a same
+        // one exists; if this is a normal auth, then check whether there is an existing obsolete
+        // one. if so, return. if not, go down further.
+        if (value.contains(WeIdConstant.REMOVED_AUTHENTICATION_TAG)) {
+            for (AuthenticationProperty ap : authList) {
+                String pubKeyId = ap.getPublicKey();
+                for (PublicKeyProperty pkp : keys) {
+                    if (pubKeyId.equalsIgnoreCase(pkp.getId()) && value
+                        .contains(pkp.getPublicKey())) {
+                        return;
+                    }
+                }
+            }
+            auth.setPublicKey(value);
+            result.getAuthentication().add(auth);
+        } else {
+            for (AuthenticationProperty ap : authList) {
+                if (ap.getPublicKey()
+                    .replace(WeIdConstant.REMOVED_AUTHENTICATION_TAG, "")
+                    .contains(value) && ap
+                    .getPublicKey()
+                    .contains(WeIdConstant.REMOVED_AUTHENTICATION_TAG)) {
+                    return;
+                }
+            }
+        }
 
         for (PublicKeyProperty r : keys) {
             if (StringUtils.contains(value, r.getPublicKey())) {
