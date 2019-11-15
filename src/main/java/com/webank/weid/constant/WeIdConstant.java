@@ -219,4 +219,14 @@ public final class WeIdConstant {
      * The FISCO-BCOS Address pattern.
      */
     public static final String FISCO_BCOS_1_X_VERSION_PREFIX = "1";
+
+    /**
+     * Removed WeID public key specified tag.
+     */
+    public static final String REMOVED_PUBKEY_TAG = "OBSOLETE";
+
+    /**
+     * Removed WeID authentication specified tag.
+     */
+    public static final String REMOVED_AUTHENTICATION_TAG = "OBSOLETEAUTH";
 }
