@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -190,6 +191,66 @@ public final class CredentialPojoUtils {
         return DataToolUtils.sha3(rawData);
     }
 
+    /**
+     * Concat the credential list (embedded) into a selective disclosure resistant String.
+     *
+     * @param credentialList the credential list
+     * @return the String
+     */
+    public static String getEmbeddedCredentialThumbprintWithoutSig(
+        List<CredentialPojo> credentialList) {
+        String result = StringUtils.EMPTY;
+        // 1. sort against id
+        Map<String, CredentialPojo> credMap = new HashMap<>();
+        for (CredentialPojo credential : credentialList) {
+            credMap.put(credential.getId(), credential);
+        }
+        Map<String, CredentialPojo> treeMap = new TreeMap<>(credMap);
+        List<CredentialPojo> credList = new ArrayList<>();
+        for (String id : treeMap.keySet()) {
+            credList.add(treeMap.get(id));
+        }
+        // 2. do recursive compute
+        for (CredentialPojo credential : credList) {
+            if (!isEmbeddedCredential(credential)) {
+                result += getCredentialPojoHash(credential, null);
+            } else {
+                List<Object> objList = (ArrayList<Object>) credential.getClaim()
+                    .get("credentialList");
+                List<CredentialPojo> newList = new ArrayList<>();
+                try {
+                    for (Object obj : objList) {
+                        if (obj instanceof CredentialPojo) {
+                            newList.add((CredentialPojo) obj);
+                        } else {
+                            newList.add(DataToolUtils
+                                .mapToObj((HashMap<String, Object>) obj, CredentialPojo.class));
+                        }
+                    }
+                } catch (Exception e) {
+                    logger.error("Failed to convert credentialPojo: " + e.getMessage());
+                    return null;
+                }
+                result += getEmbeddedCredentialThumbprintWithoutSig(newList);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Check whether a Credential is an embedded credential. Embedded Credential does not support
+     * Selective disclosure and its proof is empty.
+     *
+     * @param credential the credentialPojo
+     * @return true if yes, false otherwise
+     */
+    public static boolean isEmbeddedCredential(CredentialPojo credential) {
+        int cptId = credential.getCptId();
+        return cptId == CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT
+            || cptId == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT
+            || cptId == CredentialConstant.EMBEDDED_TIMESTAMP_CPT
+            || cptId == CredentialConstant.EMBEDDED_TIMESTAMP_ENVELOP_CPT;
+    }
 
     /**
      * Check if the given CredentialPojo is selectively disclosed, or not.
@@ -363,6 +424,38 @@ public final class CredentialPojoUtils {
                     (ArrayList<Object>) saltObj,
                     disclosureObjList
                 );
+            }
+        }
+    }
+
+    /**
+     * Set all the values in a map to be null while preserving its key structure recursively.
+     *
+     * @param map the map
+     */
+    public static void clearMap(Map<String, Object> map) {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            String key = entry.getKey();
+            Object mapObj = map.get(key);
+            if (mapObj instanceof Map) {
+                clearMap((HashMap<String, Object>) mapObj);
+            } else if (mapObj instanceof List) {
+                clearMapList((ArrayList<Object>) mapObj);
+            } else {
+                map.put(key, StringUtils.EMPTY);
+            }
+        }
+    }
+
+    private static void clearMapList(ArrayList<Object> listObj) {
+        for (int i = 0; listObj != null && i < listObj.size(); i++) {
+            Object obj = listObj.get(i);
+            if (obj instanceof Map) {
+                clearMap((HashMap<String, Object>) obj);
+            } else if (obj instanceof List) {
+                clearMapList((ArrayList<Object>) obj);
+            } else {
+                listObj.set(i, StringUtils.EMPTY);
             }
         }
     }
