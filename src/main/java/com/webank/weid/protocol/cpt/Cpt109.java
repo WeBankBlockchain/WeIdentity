@@ -19,8 +19,6 @@
 
 package com.webank.weid.protocol.cpt;
 
-import com.webank.weid.protocol.base.CredentialPojo;
-import java.util.List;
 import lombok.Data;
 
 /**
@@ -38,21 +36,18 @@ public class Cpt109 {
     String claimHash;
 
     /**
-     * trusted timestamping provided by the trusted third party or by the consensus of each node
-     * in the consortium chain.
+     * trusted timestamping provided by the trusted third party or by the consensus of each node in
+     * the consortium chain.
      */
     Long timestamp;
 
-
     /**
-     * hashKey = hash(claimHash + timestamp)
-     * hashKey will be the key in the smart contract.
+     * hashKey = hash(claimHash + timestamp) hashKey will be the key in the smart contract.
      */
     String hashKey;
 
     /**
-     * signed by Timestamp authority
-     * signature = sign( hashKey )
+     * signed by Timestamp authority signature = sign( hashKey ).
      */
     String signatureList;
 }

@@ -19,10 +19,12 @@
 
 package com.webank.weid.protocol.cpt;
 
-import com.github.reinert.jjschema.Attributes;
-import com.webank.weid.protocol.base.CredentialPojo;
 import java.util.List;
+
+import com.github.reinert.jjschema.Attributes;
 import lombok.Data;
+
+import com.webank.weid.protocol.base.CredentialPojo;
 
 /**
  * Trusted timestamping envelope.
@@ -37,12 +39,12 @@ public class Cpt108 {
     /**
      * ID of timestamp authority.
      */
-    String TimestampAuthorityId;
+    String timestampAuthorityId;
 
     /**
      * information about timestamp authority.
      */
-    String TimestampAuthority;
+    String timestampAuthority;
 
     /**
      * caculate the hash from the credentials.
@@ -50,14 +52,13 @@ public class Cpt108 {
     String claimHash;
 
     /**
-     * trusted timestamping provided by the trusted third party or by the consensus of each node
-     * in the consortium chain.
+     * trusted timestamping provided by the trusted third party or by the consensus of each node in
+     * the consortium chain.
      */
     Long timestamp;
 
     /**
-     * signed by Timestamp authority.
-     * authoritySignature = sign( hashKey )
+     * signed by Timestamp authority. authoritySignature = sign( hashKey )
      */
     String authoritySignature;
 
