@@ -65,6 +65,7 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
 
+
 /**
  * Service implementations for operations on Credential.
  *
@@ -428,9 +429,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             for (Object innerCredentialObject : innerCredentialList) {
                 // PublicKey can only be used in the passed-external check, so pass-in null key
                 try {
-                    Map<String, Object> map = (Map<String, Object>) innerCredentialObject;
-                    CredentialPojo innerCredential = DataToolUtils
-                        .mapToObj(map, CredentialPojo.class);
+                    CredentialPojo innerCredential;
+                    if (!(innerCredentialObject instanceof CredentialPojo)) {
+                        Map<String, Object> map = (Map<String, Object>) innerCredentialObject;
+                        innerCredential = DataToolUtils
+                            .mapToObj(map, CredentialPojo.class);
+                    } else {
+                        innerCredential = (CredentialPojo) innerCredentialObject;
+                    }
                     errorCode = verifyContentInner(innerCredential, null);
                     if (errorCode != ErrorCode.SUCCESS) {
                         return errorCode;
@@ -446,7 +452,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     private static ErrorCode verifySingleSignedCredential(
-        CredentialPojo credential, 
+        CredentialPojo credential,
         String publicKey
     ) {
         ErrorCode errorCode = verifyCptFormat(
@@ -458,8 +464,28 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             return errorCode;
         }
         Map<String, Object> salt = credential.getSalt();
-        String rawData = CredentialPojoUtils
-            .getCredentialThumbprintWithoutSig(credential, salt, null);
+        String rawData;
+        if (CredentialPojoUtils.isEmbeddedCredential(credential)) {
+            List<Object> objList = (ArrayList<Object>) credential.getClaim().get("credentialList");
+            List<CredentialPojo> credentialList = new ArrayList<>();
+            try {
+                for (Object obj : objList) {
+                    if (obj instanceof CredentialPojo) {
+                        credentialList.add((CredentialPojo) obj);
+                    } else {
+                        credentialList.add(DataToolUtils
+                            .mapToObj((HashMap<String, Object>) obj, CredentialPojo.class));
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Failed to convert credentialPojo: " + e.getMessage());
+                return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+            }
+            rawData = CredentialPojoUtils.getEmbeddedCredentialThumbprintWithoutSig(credentialList);
+        } else {
+            rawData = CredentialPojoUtils
+                .getCredentialThumbprintWithoutSig(credential, salt, null);
+        }
         String issuerWeid = credential.getIssuer();
         if (StringUtils.isEmpty(publicKey)) {
             // Fetch public key from chain
@@ -709,10 +735,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         claim.put("credentialList", trimmedCredentialMapList);
         result.setClaim(claim);
 
+        // For embedded signature, salt here is totally meaningless - hence we left it blank
         Map<String, Object> saltMap = DataToolUtils.clone(claim);
-        generateSalt(saltMap);
+        CredentialPojoUtils.clearMap(saltMap);
         String rawData = CredentialPojoUtils
-            .getCredentialThumbprintWithoutSig(result, saltMap, null);
+            .getEmbeddedCredentialThumbprintWithoutSig(credentialList);
         String signature = DataToolUtils.sign(rawData, privateKey);
 
         result.putProofValue(ParamKeyConstant.PROOF_CREATED, result.getIssuanceDate());
