@@ -107,7 +107,7 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
     }
 
     @Test
-    public void testMultiSignPojo_fromToJson() throws Exception {
+    public void testMultiSignPojo_fromToJson_ReplaceInnerCredential() throws Exception {
         List<CredentialPojo> credPojoList = new ArrayList<>();
         credPojoList.add(selectiveCredentialPojo);
         credPojoList.add(credentialPojo);
@@ -115,11 +115,32 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
             .buildWeIdAuthentication(createWeIdResultWithSetAttr);
         CredentialPojo doubleSigned =
             credentialPojoService.addSignature(credPojoList, callerAuth).getResult();
-        System.out.println(doubleSigned);
+        System.out.println("A part: " + CredentialPojoUtils
+            .getEmbeddedCredentialThumbprintWithoutSig(credPojoList));
         String serializedjson = doubleSigned.toJson();
-        System.out.println(serializedjson);
+        System.out.println("A is: " + serializedjson);
         CredentialPojo cpj = CredentialPojo.fromJson(serializedjson);
         Assert.assertTrue(CredentialPojoUtils.isEqual(cpj, doubleSigned));
+
+        ClaimPolicy claimPolicy = new ClaimPolicy();
+        claimPolicy.setFieldsToBeDisclosed("{\"name\":0,\"gender\":0,\"age\":0,\"id\":0}");
+        ResponseData<CredentialPojo> response =
+            credentialPojoService.createSelectiveCredential(credentialPojo, claimPolicy);
+        CredentialPojo tempPojo = response.getResult();
+        credPojoList = new ArrayList<>();
+        credPojoList.add(selectiveCredentialPojo);
+        credPojoList.add(tempPojo);
+        System.out.println("B part: " + CredentialPojoUtils
+            .getEmbeddedCredentialThumbprintWithoutSig(credPojoList));
+        CredentialPojo modifiedDoubleSigned = copyCredentialPojo(doubleSigned);
+        Map<String, Object> modifiedClaim = new HashMap<>();
+        modifiedClaim.put("credentialList", credPojoList);
+        modifiedDoubleSigned.setClaim(modifiedClaim);
+        serializedjson = modifiedDoubleSigned.toJson();
+        System.out.println("B is: " + serializedjson);
+        Assert.assertTrue(
+            credentialPojoService.verify(modifiedDoubleSigned.getIssuer(), modifiedDoubleSigned)
+                .getResult());
     }
 
     @Test
