@@ -81,12 +81,23 @@ public final class CredentialConstant {
     }
 
     /**
-     * Default CPT value for embedded credential signature subject (multi-sign support).
+     * Default CPT ID for embedded credential signature subject (multi-sign support).
      */
     public static final Integer CREDENTIAL_EMBEDDED_SIGNATURE_CPT = 106;
 
     /**
-     * Default CPT value for embedded credentialPojo subject (multi-sign support).
+     * Default CPT ID for embedded credentialPojo subject (multi-sign support).
      */
     public static final Integer CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT = 107;
+
+    /**
+     * Embedded trusted timestamp default CPT ID.
+     */
+    public static final Integer EMBEDDED_TIMESTAMP_CPT = 108;
+
+    /**
+     * Embedded trusted timestamp envelop default CPT ID.
+     */
+    public static final Integer EMBEDDED_TIMESTAMP_ENVELOP_CPT = 109;
+
 }
