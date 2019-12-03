@@ -9,7 +9,7 @@ WeIdentity JAVA SDK文档
 总体介绍
 --------
 
-WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库。目前，SDK支持本地密钥管理、数字身份标识（WeIdentity DID）管理、电子凭证（WeIdentity Credential）管理、授权机构（Authority Issuer）管理、CPT管理等功能，同时也提供基于FISCO-BCOS的区块链交互、智能合约的部署与调用。未来还将支持更丰富的功能和应用。
+WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库。目前，SDK支持本地密钥管理、数字身份标识（WeIdentity DID）管理、电子凭证（WeIdentity Credential）管理、授权机构（Authority Issuer）管理、CPT（Claim Protocol Type）管理、存证（Evidence）管理、AMOP链上数据通道、凭证传输（Transportation）管理等功能，未来还将支持更丰富的功能和应用。
 
 术语
 ----
@@ -19,7 +19,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 部署SDK
 -------
 
-* `WeIdentity JAVA SDK 安装部署文档 <https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-installation.html>`_   
+* `WeIdentity JAVA SDK 安装部署文档 <https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-installation.html>`_
 
 * 开始使用之前，再次确认启动FISCO-BCOS节点已启动，确保端口可以访问。
 
