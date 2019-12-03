@@ -8,7 +8,7 @@
 
 ## 1. 发现 bug
 
-使用过程中遇到的任何问题，可以查看 [FAQ](https://github.com/WeBankFinTech/weid-doc/blob/master/docs/zh_CN/docs/faq.md) ，或者给我们提 [issue](https://github.com/WeBankFinTech/WeIdentity/issues)。
+使用过程中遇到的任何问题，可以查看 [FAQ](https://github.com/WeBankFinTech/weid-doc/blob/master/docs/zh_CN/docs/faq.md)，或者给我们提 [issue](https://github.com/WeBankFinTech/WeIdentity/issues)。
 
 ## 2. 优化建议
 
@@ -24,8 +24,8 @@
 
 #### 分支管理
 
-代码类工程我们使用 [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) 进行分支管理。包括这些工程： [WeIdentity](https://github.com/WeBankFinTech/WeIdentity)， [weid-contract](https://github.com/WeBankFinTech/weid-contract)。
-文档类工程我们使用 [github-flow](http://scottchacon.com/2011/08/31/github-flow.html) 进行分支管理。包括这些工程： [weid-doc](https://github.com/WeBankFinTech/weid-doc)。
+代码类工程我们使用 [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) 进行分支管理。包括这些工程： [WeIdentity](https://github.com/WeBankFinTech/WeIdentity)，[weid-contract](https://github.com/WeBankFinTech/weid-contract)，[weid-build-tools](https://github.com/WeBankFinTech/weid-build-tools)，[weid-sample](https://github.com/WeBankFinTech/weid-sample)。
+文档类工程我们使用 [github-flow](http://scottchacon.com/2011/08/31/github-flow.html) 进行分支管理。包括这些工程：[weid-doc](https://github.com/WeBankFinTech/weid-doc)。
 
 #### 代码规范
 
@@ -33,7 +33,7 @@
 
 #### 测试
 
-所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](https://github.com/WeBankFinTech/weid-doc/blob/master/docs/zh_CN/docs/how-to-run-unit-test.md)”。
+所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](https://weidentity.readthedocs.io/zh_CN/latest/docs/how-to-run-unit-test.html)”。
 
 #### Commit Messages
 
