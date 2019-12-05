@@ -253,6 +253,8 @@ if (!gradle.startParameter.isOffline()) {
         exclude '**/contract/deploy/v2/*.java'
         exclude '**/contract/v1/*.java'
         exclude '**/contract/v2/*.java'
+        exclude '**/protocol/response/timestamp/wesign/*.java'
+        exclude '**/protocol/request/timestamp/wesign/*.java'
         reports {
             xml.enabled false
             html.enabled true
