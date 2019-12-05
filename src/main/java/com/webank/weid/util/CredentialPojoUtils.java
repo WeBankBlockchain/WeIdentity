@@ -249,7 +249,36 @@ public final class CredentialPojoUtils {
         return cptId == CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT
             || cptId == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT
             || cptId == CredentialConstant.EMBEDDED_TIMESTAMP_CPT
-            || cptId == CredentialConstant.EMBEDDED_TIMESTAMP_ENVELOP_CPT;
+            || cptId == CredentialConstant.TIMESTAMP_ENVELOP_CPT;
+    }
+
+    /**
+     * Convert a credential to fully undisclosed.
+     *
+     * @param credential the credential
+     * @return true if yes, false otherwise
+     */
+    public static boolean convertToFullyUndisclose(CredentialPojo credential) {
+        return false;
+    }
+
+    /**
+     * Check whether a CPT ID is system CPT ID.
+     *
+     * @param id CPT ID
+     * @return true if yes, false otherwise
+     */
+    public static boolean isSystemCptId(Integer id) {
+        int cptId = id.intValue();
+        return cptId == CredentialConstant.CREDENTIAL_EMBEDDED_SIGNATURE_CPT
+            || cptId == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT
+            || cptId == CredentialConstant.EMBEDDED_TIMESTAMP_CPT
+            || cptId == CredentialConstant.TIMESTAMP_ENVELOP_CPT
+            || cptId == CredentialConstant.AUTHORIZATION_CPT
+            || cptId == CredentialConstant.CHALLENGE_CPT
+            || cptId == CredentialConstant.CHALLENGE_VERIFICATION_CPT
+            || cptId == CredentialConstant.CLAIM_POLICY_CPT
+            || cptId == CredentialConstant.SERVICE_ENDPOINT_CPT;
     }
 
     /**
@@ -312,6 +341,36 @@ public final class CredentialPojoUtils {
         }
         return false;
     }
+
+    /**
+     * Check whether a credential list contains any selectively disclosed credential.
+     *
+     * @param credentialList the credential list
+     * @return true if yes, false otherwise
+     */
+    public static boolean isSelectivelyDisclosedCredentialList(
+        List<CredentialPojo> credentialList) {
+        boolean notFound = true;
+        for (CredentialPojo credentialPojo : credentialList) {
+            if (isEmbeddedCredential(credentialPojo)) {
+                // recursive check for inner credential
+                try {
+                    notFound = (notFound & !(isSelectivelyDisclosedCredentialList(
+                        (ArrayList<CredentialPojo>) credentialPojo.getClaim()
+                            .get("credentialList"))));
+                } catch (Exception e) {
+                    return false;
+                }
+            } else {
+                notFound = (notFound & !isSelectivelyDisclosed(credentialPojo.getSalt()));
+            }
+            if (!notFound) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Get the claim hash. This is irrelevant to selective disclosure.
