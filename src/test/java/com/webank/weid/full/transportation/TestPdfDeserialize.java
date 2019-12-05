@@ -1,14 +1,9 @@
 package com.webank.weid.full.transportation;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.List;
 
-import mockit.Mock;
-import mockit.MockUp;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -22,9 +17,6 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.TransportationFactory;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.crypto.CryptService;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.entity.CryptType;
 
 /**
  * test base class.
@@ -40,12 +32,12 @@ public class TestPdfDeserialize extends TestBaseTransportation {
 
     @Override
     public synchronized void testInit() {
+        mockMysqlDriver();
         if (presentation == null) {
             super.testInit();
             super.testInit4MlCpt();
             super.testInit4MultiCpt();
             super.testInitSpecTplCpt();
-            mockMysqlDriver();
             presentation = this.getPresentationE();
             presentation4MlCpt = getPresentationE4MlCpt();
             presentation4MultiCpt = getPresentationE4MultiCpt();
