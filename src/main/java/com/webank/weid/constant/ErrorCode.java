@@ -240,6 +240,38 @@ public enum ErrorCode {
         "credential has already been disclosed once, can not be re-disclosed"),
 
     /**
+     * Timestamp service error.
+     */
+    TIMESTAMP_SERVICE_BASE_ERROR(100433, "timestamp service error"),
+
+    /**
+     * System CPT Claim verification failure.
+     */
+    CREDENTIAL_SYSTEM_CPT_CLAIM_VERIFY_ERROR(100434, "external credential verify"
+        + " succeeded, but inner content verify failed"),
+
+    /**
+     * Timestamp service unavailable.
+     */
+    TIMESTAMP_SERVICE_UNCONFIGURED(100435, "timestamp service not configured"),
+
+    /**
+     * Timestamp service: WeSign workflow error.
+     */
+    TIMESTAMP_SERVICE_WESIGN_ERROR(100436, "wesign timestamp service error: check log for details"),
+
+    /**
+     * Timestamp verification failed.
+     */
+    TIMESTAMP_VERIFICATION_FAILED(100437, "timestamp verification failed"),
+
+    /**
+     * Timestamp service does not support selectively-disclosed credential's presence.
+     */
+    TIMESTAMP_CREATION_FAILED_FOR_SELECTIVELY_DISCLOSED(100438,
+        "timestamp creation does not support selectively disclosed credential"),
+
+    /**
      * The credential evidence contract failure: illegal input.
      */
     CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT(
