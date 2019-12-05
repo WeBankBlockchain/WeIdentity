@@ -165,7 +165,7 @@ public class TestJsonSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase6() {
 
-        MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
+        new MockUp<CryptServiceFactory>() {
             @Mock
             public CryptService getCryptService(CryptType cryptType) {
                 return new HashMap<String, CryptService>().get("key");
@@ -175,7 +175,7 @@ public class TestJsonSerialize extends TestBaseTransportation {
         ResponseData<String> response = TransportationFactory.newJsonTransportation()
             .specify(verifier)
             .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
-        mockTest.tearDown();
+
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
