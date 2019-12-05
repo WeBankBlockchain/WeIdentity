@@ -49,7 +49,8 @@ public class TestPdfSerialize extends TestBaseTransportation {
             .serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.ORIGINAL),
-                weIdAuthentication);
+                weIdAuthentication
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -66,7 +67,8 @@ public class TestPdfSerialize extends TestBaseTransportation {
             .serialize(
                 presentation4MlCpt,
                 new ProtocolProperty(EncodeType.ORIGINAL),
-                weIdAuthentication);
+                weIdAuthentication
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -82,7 +84,8 @@ public class TestPdfSerialize extends TestBaseTransportation {
             .newPdfTransportation()
             .serialize(presentation4MultiCpt,
                 new ProtocolProperty(EncodeType.ORIGINAL),
-                weIdAuthentication);
+                weIdAuthentication
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -93,11 +96,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase31() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -109,11 +113,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase32() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./out.pdf");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./out.pdf"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -124,11 +129,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase33() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./out");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./out"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -139,11 +145,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase34() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./test");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./test"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -154,11 +161,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase35() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./test/out.pdf");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./test/out.pdf"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -169,11 +177,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase36() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./test/test/test/test/out");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./test/test/test/test/out"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -184,11 +193,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase37() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./test/test.test.test");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./test/test.test.test"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -199,11 +209,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase38() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./test/te.te.te/a.b.c.pdf");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./test/te.te.te/a.b.c.pdf"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -214,11 +225,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase39() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./test/test.test.test/a.b.c.pdf");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./test/test.test.test/a.b.c.pdf"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
@@ -229,11 +241,12 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase310() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                ""
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(!response.getResult());
@@ -250,7 +263,8 @@ public class TestPdfSerialize extends TestBaseTransportation {
             .serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER),
-                weIdAuthentication);
+                weIdAuthentication
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertNotNull(response.getResult());
@@ -265,7 +279,8 @@ public class TestPdfSerialize extends TestBaseTransportation {
             .newPdfTransportation()
             .serialize(presentation,
                 new ProtocolProperty(null),
-                weIdAuthentication);
+                weIdAuthentication
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
@@ -284,7 +299,8 @@ public class TestPdfSerialize extends TestBaseTransportation {
             .serialize(
                 presentation,
                 null,
-                weIdAuthentication);
+                weIdAuthentication
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR.getCode(),
@@ -303,7 +319,8 @@ public class TestPdfSerialize extends TestBaseTransportation {
             .serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.ORIGINAL),
-                weIdAuthentication);
+                weIdAuthentication
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID.getCode(),
@@ -321,7 +338,8 @@ public class TestPdfSerialize extends TestBaseTransportation {
             .serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.ORIGINAL),
-                null);
+                null
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.WEID_AUTHORITY_INVALID.getCode(),
@@ -341,7 +359,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
                 new ProtocolProperty(EncodeType.ORIGINAL),
                 weIdAuthentication,
                 "src/test/resources/test-template.pdf"
-                );
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.SUCCESS.getCode(),
@@ -354,14 +372,14 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase91() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serializeWithTemplate(
-                        presentation4SpecTpl,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "src/test/resources/test-template.pdf",
-                        "./"
-                );
+            .newPdfTransportation()
+            .serializeWithTemplate(
+                presentation4SpecTpl,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "src/test/resources/test-template.pdf",
+                "./"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
                 ErrorCode.SUCCESS.getCode(),
@@ -375,13 +393,13 @@ public class TestPdfSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase10() {
         ResponseData<byte[]> response = TransportationFactory
-                .newPdfTransportation()
-                .serializeWithTemplate(
-                        presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "src/test/resources/test-template-complex.pdf"
-                );
+            .newPdfTransportation()
+            .serializeWithTemplate(
+                presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "src/test/resources/test-template-complex.pdf"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
                 ErrorCode.SUCCESS.getCode(),
@@ -394,14 +412,14 @@ public class TestPdfSerialize extends TestBaseTransportation {
      */
     public void testSerializeCase101() {
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serializeWithTemplate(
-                        presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "src/test/resources/test-template-complex.pdf",
-                        "./test-template-complex-out.pdf"
-                );
+            .newPdfTransportation()
+            .serializeWithTemplate(
+                presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "src/test/resources/test-template-complex.pdf",
+                "./test-template-complex-out.pdf"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
                 ErrorCode.SUCCESS.getCode(),
@@ -421,7 +439,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
                 new ProtocolProperty(EncodeType.ORIGINAL),
                 weIdAuthentication,
                 ""
-                );
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.ILLEGAL_INPUT.getCode(),
@@ -441,7 +459,7 @@ public class TestPdfSerialize extends TestBaseTransportation {
                 new ProtocolProperty(EncodeType.ORIGINAL),
                 weIdAuthentication,
                 "illegal"
-                );
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -454,17 +472,55 @@ public class TestPdfSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase13() {
         ResponseData<byte[]> response = TransportationFactory
-                .newPdfTransportation()
-                .serializeWithTemplate(
-                        presentation4SpecTpl,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "src/test/resources/test-template-complex.pdf"
-                );
+            .newPdfTransportation()
+            .serializeWithTemplate(
+                presentation4SpecTpl,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "src/test/resources/test-template-complex.pdf"
+            );
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
                 ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR.getCode(),
                 response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
+    }
+    
+    /**
+     *将credentialList序列化成pdf(指定模板).
+     */
+    @Test
+    public void testSerializeWithTemplate_credentialList() {
+        ResponseData<Boolean> response = TransportationFactory
+            .newPdfTransportation()
+            .serializeWithTemplate(
+                getCredentialPojoList(presentation4MultiCpt),
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "src/test/resources/test-template-complex.pdf",
+                "./"
+            );
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(
+            ErrorCode.SUCCESS.getCode(),
+            response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+    }
+    
+    /**
+     *将credentialList序列化成pdf(不指定模板).
+     */
+    @Test
+    public void testSerialize_credentialList() {
+        ResponseData<byte[]> response = TransportationFactory
+            .newPdfTransportation()
+            .serialize(
+                getCredentialPojoList(presentation4MultiCpt),
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication
+            );
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
     }
 }
