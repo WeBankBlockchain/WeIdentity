@@ -147,7 +147,9 @@ function gradle_build_sdk()
 	
     cd ${java_source_code_dir}/
     if [ -d dist/ ];then
-	rm -rf dist/
+        rm -rf dist/app
+        rm -rf dist/conf
+        rm -rf dist/*.jar
     fi
     gradle clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
     echo "compile java code done."

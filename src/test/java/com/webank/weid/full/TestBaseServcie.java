@@ -716,44 +716,6 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
         Assert.assertEquals(true, responseSetAuth.getResult());
     }
 
-    protected MockUp<Future<?>> mockTimeoutFuture() {
-        return new MockUp<Future<?>>() {
-            @Mock
-            public Future<?> get(long timeout, TimeUnit unit)
-                throws TimeoutException {
-
-                throw new TimeoutException();
-            }
-        };
-    }
-
-    protected MockUp<Future<?>> mockInterruptedFuture() {
-        return new MockUp<Future<?>>() {
-            @Mock
-            public Future<?> get(long timeout, TimeUnit unit)
-                throws InterruptedException {
-
-                throw new InterruptedException();
-            }
-
-            @Mock
-            public Future<?> get()
-                throws InterruptedException {
-
-                throw new InterruptedException();
-            }
-        };
-    }
-
-    protected MockUp<Future<?>> mockReturnNullFuture() {
-        return new MockUp<Future<?>>() {
-            @Mock
-            public Future<?> get(long timeout, TimeUnit unit) {
-                return null;
-            }
-        };
-    }
-
     protected CredentialPojo copyCredentialPojo(CredentialPojo credentialPojo) {
         return CredentialUtils.copyCredential(credentialPojo);
     }
