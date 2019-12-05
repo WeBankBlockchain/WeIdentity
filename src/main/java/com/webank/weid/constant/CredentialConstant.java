@@ -98,6 +98,30 @@ public final class CredentialConstant {
     /**
      * Embedded trusted timestamp envelop default CPT ID.
      */
-    public static final Integer EMBEDDED_TIMESTAMP_ENVELOP_CPT = 109;
+    public static final Integer TIMESTAMP_ENVELOP_CPT = 109;
 
+    /**
+     * Authorization CPT ID.
+     */
+    public static final Integer AUTHORIZATION_CPT = 101;
+
+    /**
+     * Challenge CPT ID.
+     */
+    public static final Integer CHALLENGE_CPT = 102;
+
+    /**
+     * Challenge Verification CPT ID.
+     */
+    public static final Integer CHALLENGE_VERIFICATION_CPT = 103;
+
+    /**
+     * Claim Policy CPT ID.
+     */
+    public static final Integer CLAIM_POLICY_CPT = 104;
+
+    /**
+     * Service Endpoint CPT ID.
+     */
+    public static final Integer SERVICE_ENDPOINT_CPT = 105;
 }
