@@ -81,7 +81,7 @@ public class TestCreateWeId1 extends TestBaseServcie {
     @Test
     public void testCreateWeId_createEcKeyPairErr() {
 
-        MockUp<Keys> mockTest = new MockUp<Keys>() {
+        new MockUp<Keys>() {
             @Mock
             public ECKeyPair createEcKeyPair()
                 throws NoSuchProviderException {
@@ -93,7 +93,6 @@ public class TestCreateWeId1 extends TestBaseServcie {
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
         LogUtil.info(logger, "createWeId", response);
 
-        mockTest.tearDown();
 
         Assert.assertEquals(ErrorCode.WEID_KEYPAIR_CREATE_FAILED.getCode(),
             response.getErrorCode().intValue());

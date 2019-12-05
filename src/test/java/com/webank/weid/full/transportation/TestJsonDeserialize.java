@@ -56,9 +56,9 @@ public class TestJsonDeserialize extends TestBaseTransportation {
 
     @Override
     public synchronized void testInit() {
+        mockMysqlDriver();
         if (presentation == null) {
             super.testInit();
-            mockMysqlDriver();
             presentation = this.getPresentationE();
             original_transString =
                 TransportationFactory.newJsonTransportation().serialize(
@@ -191,7 +191,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
                 new ProtocolProperty(EncodeType.CIPHER)
             );
 
-        MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
+        new MockUp<CryptServiceFactory>() {
             @Mock
             public CryptService getCryptService(CryptType cryptType) {
                 return new HashMap<String, CryptService>().get("key");
@@ -201,7 +201,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         ResponseData<PresentationE> wrapperRes =
             TransportationFactory.newJsonTransportation()
                 .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
-        mockTest.tearDown();
+
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
@@ -215,7 +215,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase6() {
-        MockUp<EncodeType> mockTest = new MockUp<EncodeType>() {
+        new MockUp<EncodeType>() {
             @Mock
             public EncodeType getObject(String value) {
                 return null;
@@ -223,7 +223,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         };
         ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
             .deserialize(original_transString, PresentationE.class);
-        mockTest.tearDown();
+
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
@@ -237,7 +237,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase7() {
-        MockUp<EncodeType> mockTest = new MockUp<EncodeType>() {
+        new MockUp<EncodeType>() {
             @Mock
             public EncodeType getObject(String value) {
                 return null;
@@ -249,7 +249,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
                 original_transString,
                 PresentationE.class
             );
-        mockTest.tearDown();
+
         LogUtil.info(logger, "deserialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
