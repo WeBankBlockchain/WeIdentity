@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialPojoList;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.TransportationFactory;
@@ -206,17 +207,32 @@ public class TestPdfDeserialize extends TestBaseTransportation {
 
         //1. 序列化presentation4MultiCpt为pdf文件
         ResponseData<Boolean> response = TransportationFactory
-                .newPdfTransportation()
-                .serialize(presentation4MultiCpt,
-                        new ProtocolProperty(EncodeType.ORIGINAL),
-                        weIdAuthentication,
-                        "./out.pdf");
+            .newPdfTransportation()
+            .serialize(presentation4MultiCpt,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "./out.pdf");
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertTrue(response.getResult());
 
+        byte[] bytesArray = getFileByte("./out.pdf");
+
+        //3. 对读取到byte[]做反序列化
+        ResponseData<PresentationE> resDeserialize = TransportationFactory
+            .newPdfTransportation()
+            .deserialize(
+                bytesArray,
+                PresentationE.class,
+                weIdAuthentication);
+        LogUtil.info(logger, "deserialize", resDeserialize);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), resDeserialize.getErrorCode().intValue());
+        Assert.assertEquals(presentation4MultiCpt.toJson(), resDeserialize.getResult().toJson());
+    }
+
+    private byte[] getFileByte(String filePath) {
         //2. 从pdf文件读取到byte[]
-        File file = new File("./out.pdf");
+        File file = new File(filePath);
         byte[] bytesArray = new byte[(int) file.length()];
         try {
 
@@ -226,17 +242,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        //3. 对读取到byte[]做反序列化
-        ResponseData<PresentationE> resDeserialize = TransportationFactory
-                .newPdfTransportation()
-                .deserialize(
-                        bytesArray,
-                        PresentationE.class,
-                        weIdAuthentication);
-        LogUtil.info(logger, "deserialize", resDeserialize);
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), resDeserialize.getErrorCode().intValue());
-        Assert.assertEquals(presentation4MultiCpt.toJson(), resDeserialize.getResult().toJson());
+        return bytesArray;
     }
 
     /**
@@ -256,15 +262,7 @@ public class TestPdfDeserialize extends TestBaseTransportation {
         Assert.assertTrue(response.getResult());
 
         //2. 从pdf文件读取到byte[]
-        File file = new File("./test-template-complex-out.pdf");
-        byte[] bytesArray = new byte[(int) file.length()];
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            fis.read(bytesArray);
-            fis.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        byte[] bytesArray = getFileByte("./test-template-complex-out.pdf");
 
         //3. 对读取到byte[]做反序列化
         ResponseData<PresentationE> resDeserialize = TransportationFactory
@@ -276,5 +274,60 @@ public class TestPdfDeserialize extends TestBaseTransportation {
         LogUtil.info(logger, "deserialize", resDeserialize);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), resDeserialize.getErrorCode().intValue());
         Assert.assertEquals(presentation4MultiCpt.toJson(), resDeserialize.getResult().toJson());
+    }
+    
+    /**
+     * 使用原文方式构建协议数据并解析.(无模板)
+     */
+    @Test
+    public void testDeserialize_credentialList() {
+        CredentialPojoList credentialPojoList = getCredentialPojoList(presentation4MultiCpt);
+        ResponseData<byte[]> response = TransportationFactory
+            .newPdfTransportation()
+            .serialize(
+                credentialPojoList,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication);
+
+        ResponseData<CredentialPojoList> resDeserialize = TransportationFactory
+            .newPdfTransportation()
+            .deserialize(
+                response.getResult(),
+                CredentialPojoList.class,
+                weIdAuthentication);
+        LogUtil.info(logger, "deserialize", resDeserialize);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), resDeserialize.getErrorCode().intValue());
+        Assert.assertEquals(credentialPojoList.toJson(), resDeserialize.getResult().toJson());
+    }
+    
+    /**
+     * 使用原文方式构建协议数据并解析.(有模板)
+     */
+    @Test
+    public void testDeserializeWithTemplet_credentialList() {
+        CredentialPojoList credentialPojoList = getCredentialPojoList(presentation4MultiCpt);
+        ResponseData<Boolean> response = TransportationFactory
+            .newPdfTransportation()
+            .serializeWithTemplate(
+                credentialPojoList,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                weIdAuthentication,
+                "src/test/resources/test-template-complex.pdf",
+                "./out1.pdf"
+             );
+        LogUtil.info(logger, "serialize", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult());
+        
+        byte[] bytesArray = getFileByte("./out1.pdf");
+        ResponseData<CredentialPojoList> resDeserialize = TransportationFactory
+            .newPdfTransportation()
+            .deserialize(
+                bytesArray,
+                CredentialPojoList.class,
+                weIdAuthentication);
+        LogUtil.info(logger, "deserialize", resDeserialize);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), resDeserialize.getErrorCode().intValue());
+        Assert.assertEquals(credentialPojoList.toJson(), resDeserialize.getResult().toJson());
     }
 }
