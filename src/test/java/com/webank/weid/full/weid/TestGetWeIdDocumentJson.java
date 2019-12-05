@@ -243,7 +243,7 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
     @Test
     public void testGetWeIdDocumentJsonCase6() {
 
-        MockUp<ObjectMapper> mockTest = new MockUp<ObjectMapper>() {
+        new MockUp<ObjectMapper>() {
             @Mock
             public ObjectWriter writerWithDefaultPrettyPrinter() {
                 return null;
@@ -253,8 +253,6 @@ public class TestGetWeIdDocumentJson extends TestBaseServcie {
         ResponseData<String> weIdDoc =
             weIdService.getWeIdDocumentJson(createWeIdForGetJson.getWeId());
         LogUtil.info(logger, "getWeIdDocumentJson", weIdDoc);
-
-        mockTest.tearDown();
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, weIdDoc.getResult());
