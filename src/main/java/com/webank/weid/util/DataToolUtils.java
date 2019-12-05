@@ -43,7 +43,6 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -52,16 +51,12 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.imageio.ImageIO;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -75,6 +70,8 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
@@ -1562,12 +1559,12 @@ public final class DataToolUtils {
     public static String convertTimestampToUtc(String jsonString) {
         String timestampToUtcString;
         try {
-            timestampToUtcString = dealObjectOfConvertUtcAndLong(
-                JSONObject.parseObject(jsonString),
+            timestampToUtcString = dealNodeOfConvertUtcAndLong(
+                loadJsonObject(jsonString),
                 CONVERT_UTC_LONG_KEYLIST,
                 TO_JSON
             ).toString();
-        } catch (ParseException | JSONException e) {
+        } catch (IOException e) {
             logger.error("replaceJsonObj exception.", e);
             throw new DataTypeCastException(e);
         }
@@ -1583,73 +1580,88 @@ public final class DataToolUtils {
     public static String convertUtcToTimestamp(String jsonString) {
         String utcToTimestampString;
         try {
-            utcToTimestampString = dealObjectOfConvertUtcAndLong(
-                JSONObject.parseObject(jsonString),
+            utcToTimestampString = dealNodeOfConvertUtcAndLong(
+                loadJsonObject(jsonString),
                 CONVERT_UTC_LONG_KEYLIST,
                 FROM_JSON
-            ).toString();
-        } catch (ParseException | JSONException e) {
+            ).toString();  
+        } catch (IOException e) {
             logger.error("replaceJsonObj exception.", e);
             throw new DataTypeCastException(e);
         }
         return utcToTimestampString;
     }
 
-    private static JSONObject dealObjectOfConvertUtcAndLong(
-        JSONObject jsonObj,
+    private static JsonNode dealNodeOfConvertUtcAndLong(
+        JsonNode jsonObj,
         List<String> list,
-        String type) throws ParseException {
-        JSONObject resJson = new JSONObject();
-        Set<String> keySet = jsonObj.keySet();
-        for (String key : keySet) {
-            Object obj = jsonObj.get(key);
-            if (obj instanceof JSONObject) {
+        String type) {
+        if (jsonObj.isObject()) {
+            return dealObjectOfConvertUtcAndLong((ObjectNode)jsonObj, list, type);
+        } else if (jsonObj.isArray()) {
+            return dealArrayOfConvertUtcAndLong((ArrayNode)jsonObj, list, type);
+        } else {
+            return jsonObj;
+        }
+    }
+    
+    private static JsonNode dealObjectOfConvertUtcAndLong(
+        ObjectNode jsonObj,
+        List<String> list,
+        String type) {
+        ObjectNode resJson = OBJECT_MAPPER.createObjectNode();
+        jsonObj.fields().forEachRemaining(entry -> {
+            String key = entry.getKey();
+            JsonNode obj = entry.getValue();
+            if (obj.isObject()) {
                 //JSONObject
                 if (key.equals(KEY_CLAIM)) {
-                    resJson.put(key, obj);
+                    resJson.set(key, obj);
                 } else {
-                    resJson.put(key, dealObjectOfConvertUtcAndLong((JSONObject) obj, list, type));
+                    resJson.set(key, dealObjectOfConvertUtcAndLong((ObjectNode)obj, list, type));
                 }
-            } else if (obj instanceof JSONArray) {
+            } else if (obj.isArray()) {
                 //JSONArray 
-                resJson.put(key, dealArrayOfConvertUtcAndLong((JSONArray) obj, list, type));
+                resJson.set(key, dealArrayOfConvertUtcAndLong((ArrayNode)obj, list, type));
             } else {
                 if (list.contains(key)) {
                     if (TO_JSON.equals(type)) {
-                        if (isValidLongString(String.valueOf(obj))) {
+                        if (isValidLongString(obj.asText())) {
                             resJson.put(
                                 key,
                                 DateUtils.convertNoMillisecondTimestampToUtc(
-                                    Long.parseLong(String.valueOf(obj))));
+                                    Long.parseLong(obj.asText())));
                         } else {
-                            resJson.put(key, obj);
+                            resJson.set(key, obj);
                         }
                     } else {
-                        if (DateUtils.isValidDateString(String.valueOf(obj))) {
+                        if (DateUtils.isValidDateString(obj.asText())) {
                             resJson.put(
                                 key,
-                                DateUtils.convertUtcDateToNoMillisecondTime(String.valueOf(obj)));
+                                DateUtils.convertUtcDateToNoMillisecondTime(obj.asText()));
                         } else {
-                            resJson.put(key, obj);
+                            resJson.set(key, obj);
                         }
                     }
                 } else {
-                    resJson.put(key, obj);
+                    resJson.set(key, obj);
                 }
             }
-        }
+        });
         return resJson;
     }
 
-    private static JSONArray dealArrayOfConvertUtcAndLong(
-        JSONArray jsonArr,
+    private static JsonNode dealArrayOfConvertUtcAndLong(
+        ArrayNode jsonArr,
         List<String> list,
-        String type) throws ParseException {
-        JSONArray resJson = new JSONArray();
+        String type) {
+        ArrayNode resJson = OBJECT_MAPPER.createArrayNode();
         for (int i = 0; i < jsonArr.size(); i++) {
-            Object jsonObj = jsonArr.get(i);
-            if (jsonObj instanceof JSONObject) {
-                resJson.add(dealObjectOfConvertUtcAndLong((JSONObject) jsonObj, list, type));
+            JsonNode jsonObj = jsonArr.get(i);
+            if (jsonObj.isObject()) {
+                resJson.add(dealObjectOfConvertUtcAndLong((ObjectNode)jsonObj, list, type));
+            } else if (jsonObj.isArray()) {
+                resJson.add(dealArrayOfConvertUtcAndLong((ArrayNode)jsonObj, list, type));
             } else {
                 resJson.add(jsonObj);
             }
@@ -1708,14 +1720,14 @@ public final class DataToolUtils {
             logger.error("input json param is null.");
             return false;
         }
-        JSONObject jsonObject = null;
+        JsonNode jsonObject = null;
         try {
-            jsonObject = JSONObject.parseObject(json);
-        } catch (JSONException e) {
+            jsonObject = loadJsonObject(json);
+        } catch (IOException e) {
             logger.error("convert jsonString to JSONObject failed." + e);
             return false;
         }
-        return jsonObject.containsKey(KEY_FROM_TOJSON);
+        return jsonObject.has(KEY_FROM_TOJSON);
     }
 
     /**
@@ -1725,9 +1737,15 @@ public final class DataToolUtils {
      * @return result
      */
     public static String addTagFromToJson(String json) {
-        JSONObject jsonObject = JSONObject.parseObject(json);
-        if (!jsonObject.containsKey(KEY_FROM_TOJSON)) {
-            jsonObject.fluentPut(KEY_FROM_TOJSON, TO_JSON);
+        JsonNode jsonObject;
+        try {
+            jsonObject = loadJsonObject(json);
+            if (!jsonObject.has(KEY_FROM_TOJSON)) {
+                ((ObjectNode)jsonObject).put(KEY_FROM_TOJSON, TO_JSON);
+            }
+        } catch (IOException e) {
+            logger.error("addTagFromToJson fail." + e);
+            return json;
         }
         return jsonObject.toString();
     }
@@ -1739,9 +1757,15 @@ public final class DataToolUtils {
      * @return result
      */
     public static String removeTagFromToJson(String json) {
-        JSONObject jsonObject = JSONObject.parseObject(json);
-        if (jsonObject.containsKey(KEY_FROM_TOJSON)) {
-            jsonObject.fluentRemove(KEY_FROM_TOJSON);
+        JsonNode jsonObject;
+        try {
+            jsonObject = loadJsonObject(json);
+            if (jsonObject.has(KEY_FROM_TOJSON)) {
+                ((ObjectNode)jsonObject).remove(KEY_FROM_TOJSON);
+            }
+        } catch (IOException e) {
+            logger.error("removeTag fail." + e);
+            return json;
         }
         return jsonObject.toString();
     }
