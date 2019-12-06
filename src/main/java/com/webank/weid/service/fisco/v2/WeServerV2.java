@@ -110,7 +110,7 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
 
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setChannelService(service);
-        web3j = Web3j.build(channelEthereumService);
+        web3j = Web3j.build(channelEthereumService, service.getGroupId());
         if (web3j == null) {
             logger.error("[WeServiceImplV2] web3j init failed. ");
             throw new InitWeb3jException();
