@@ -46,7 +46,6 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialPojoUtils;
-import com.webank.weid.util.WeIdUtils;
 
 /**
  * Test CreateEvidence.
@@ -236,7 +235,6 @@ public class TestCreateEvidence extends TestBaseServcie {
         Credential tempCredential = copyCredential(credential);
         tempCredential.setCptId(null);
         ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        String hashValue = innerResp.getResult();
         Assert.assertEquals(
             ErrorCode.CPT_ID_ILLEGAL.getCode(),
             innerResp.getErrorCode().intValue());
