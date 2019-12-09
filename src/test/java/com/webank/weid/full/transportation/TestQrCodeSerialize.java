@@ -19,7 +19,6 @@
 
 package com.webank.weid.full.transportation;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import mockit.Mock;
@@ -211,7 +210,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase7() {
 
-        MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
+        new MockUp<CryptServiceFactory>() {
             @Mock
             public CryptService getCryptService(CryptType cryptType) {
                 return new HashMap<String, CryptService>().get("key");
@@ -221,7 +220,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         ResponseData<String> response =
             TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
-        mockTest.tearDown();
+
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
@@ -236,7 +235,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     @Test
     public void testSerializeCase8() {
 
-        MockUp<QrCodeBaseData> mockTest = new MockUp<QrCodeBaseData>() {
+        new MockUp<QrCodeBaseData>() {
             @Mock
             public QrCodeBaseData newInstance(Class<?> cls) throws ReflectiveOperationException {
                 return new HashMap<String, QrCodeBaseData>().get("key");
@@ -246,37 +245,9 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         ResponseData<String> response =
             TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
-        mockTest.tearDown();
+
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
-    }
-
-    /**
-     * mock异常情况.
-     */
-    @Test
-    public void testSerializeCase9() {
-
-        MockUp<QrCodeBaseData> mockTest = new MockUp<QrCodeBaseData>() {
-            @Mock
-            public Method getGetterMethod(
-                Class<?> cls,
-                String fieldName
-            ) throws NoSuchMethodException {
-                return cls.getMethod("get" + fieldName, new Class[0]);
-            }
-        };
-
-        ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().specify(verifier)
-                .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
-        mockTest.tearDown();
-        LogUtil.info(logger, "serialize", response);
-        Assert.assertEquals(
-            ErrorCode.BASE_ERROR.getCode(),
-            response.getErrorCode().intValue()
-        );
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
     }
 }

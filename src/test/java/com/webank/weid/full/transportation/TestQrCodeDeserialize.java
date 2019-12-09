@@ -19,7 +19,6 @@
 
 package com.webank.weid.full.transportation;
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import mockit.Mock;
@@ -236,7 +235,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
                 new ProtocolProperty(EncodeType.CIPHER)
             );
 
-        MockUp<CryptServiceFactory> mockTest = new MockUp<CryptServiceFactory>() {
+        new MockUp<CryptServiceFactory>() {
             @Mock
             public CryptService getCryptService(CryptType cryptType) {
                 return new HashMap<String, CryptService>().get("key");
@@ -246,7 +245,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         ResponseData<PresentationE> wrapperRes =
             TransportationFactory.newQrCodeTransportation()
                 .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
-        mockTest.tearDown();
+
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
@@ -260,7 +259,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
      */
     @Test
     public void testDeserializeCase11() {
-        MockUp<QrCodeBaseData> mockTest = new MockUp<QrCodeBaseData>() {
+        new MockUp<QrCodeBaseData>() {
             @Mock
             public QrCodeBaseData newInstance(Class<?> cls) throws ReflectiveOperationException {
                 return new HashMap<String, QrCodeBaseData>().get("key");
@@ -270,7 +269,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         ResponseData<PresentationE> wrapperRes =
             TransportationFactory.newQrCodeTransportation()
                 .deserialize(original_transString, PresentationE.class);
-        mockTest.tearDown();
+
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.UNKNOW_ERROR.getCode(),
@@ -280,35 +279,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
     }
 
     /**
-     * mock异常情况.
-     */
-    @Test
-    public void testSerializeCase11() {
-
-        MockUp<QrCodeBaseData> mockTest = new MockUp<QrCodeBaseData>() {
-            @Mock
-            public Method getGetterMethod(
-                Class<?> cls,
-                String fieldName
-            ) throws NoSuchMethodException {
-                return cls.getMethod("get" + fieldName, new Class[0]);
-            }
-        };
-
-        ResponseData<PresentationE> wrapperRes =
-            TransportationFactory.newQrCodeTransportation()
-                .deserialize(original_transString, PresentationE.class);
-        mockTest.tearDown();
-        LogUtil.info(logger, "deserialize", wrapperRes);
-        Assert.assertEquals(
-            ErrorCode.BASE_ERROR.getCode(),
-            wrapperRes.getErrorCode().intValue()
-        );
-        Assert.assertNull(wrapperRes.getResult());
-    }
-
-    /**
-     * 改变协议指定段数据.
+          * 改变协议指定段数据.
      *
      * @param transString 原协议数据
      * @param index 段位
