@@ -10,7 +10,6 @@ import mockit.Invocation;
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
@@ -27,16 +26,11 @@ public interface MockMysqlDriver {
     
     public static final Set<String> mockTableSet = new HashSet<String>();
 
-    public static final String ISMOCKKEY = "isMock";
-
     /**
      * the default method for mock mySqlDriver.
      */
     public default void mockMysqlDriver() {
-        String vlaue = (String)mockDbMap.get(ISMOCKKEY);
-        if (StringUtils.isNotBlank(vlaue)) {
-            return;
-        }
+
         if (!mockTableSet.contains("default_data")) {
             mockTableSet.add("default_data");
         }
@@ -150,6 +144,5 @@ public interface MockMysqlDriver {
                 mockTableSet.add(sqlDomain.getTableName());
             }
         };
-        mockDbMap.put(ISMOCKKEY, ISMOCKKEY);
     }
 }

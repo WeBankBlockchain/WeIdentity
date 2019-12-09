@@ -1,5 +1,6 @@
 #!/bin/bash
 
+JAVA_OPTS='-Djdk.tls.namedGroups="secp256k1"'
 classpathDir="./dist/conf"
 libDir="./dist/lib"
 set -- `getopt c:l: "$@"`
@@ -260,7 +261,7 @@ function check_node_version() {
 			then
 				echo "WARN: the current version of SDK does not support to check the node version, minimum version 1.4.0"
 			else
-				java -cp $libDir/*:$classpathDir/ com.webank.weid.app.AppCommand --checkversion test
+				java ${JAVA_OPTS} -cp $libDir/*:$classpathDir/ com.webank.weid.app.AppCommand --checkversion test
 			fi
 		fi
 	done
@@ -279,7 +280,7 @@ function check_node_version() {
 						echo "WARN: the current version of SDK does not support to check the node version, minimum version 1.4.0"
 					else
 						currentDir=`pwd`
-						java -cp $currentDir/dist/lib/*:$currentDir/dist/app/*:$currentDir/dist/conf/ com.webank.weid.app.AppCommand --checkversion test
+						java ${JAVA_OPTS} -cp $currentDir/dist/lib/*:$currentDir/dist/app/*:$currentDir/dist/conf/ com.webank.weid.app.AppCommand --checkversion test
 					fi
 				fi
 			done
