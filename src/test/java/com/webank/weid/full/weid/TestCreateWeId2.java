@@ -402,7 +402,7 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
 
-        MockUp<BaseEngine> mockTest = new MockUp<BaseEngine>() {
+        new MockUp<BaseEngine>() {
             @Mock
             public <T> T reloadContract(String contractAddress, String privateKey, Class<T> cls)
                 throws PrivateKeyIllegalException {
@@ -413,8 +413,6 @@ public class TestCreateWeId2 extends TestBaseServcie {
 
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
         LogUtil.info(logger, "createWeId", response);
-
-        mockTest.tearDown();
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
