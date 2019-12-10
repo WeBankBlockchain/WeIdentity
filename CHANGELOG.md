@@ -1,3 +1,15 @@
+### V1.4.2 (2019-12-10)
+- Features:
+1. Allow WeID owners to remove unused public keys and authentications in WeID Document.
+2. Embedded CredentialPojo now supports change disclosure policy of inner CredentialPojo.
+3. WeIdentity now supports deployment on different FISCO-BCOS Groups (check docs for details).
+
+- Bugfixes:
+1. Fix various issues when serializing Embedded CredentialPojo.
+2. Bump jackson, jacoco and jmockit for security concerns.
+3. WeIdentity can now work with JDK1.8+ up to openjdk13.
+4. Fix broken Document URLs and simplify the document repository structure.
+
 ### V1.4.1 (2019-11-01)
 - Bugfixes:
 1. Fixed multiple potential leaks which might cause NPE.

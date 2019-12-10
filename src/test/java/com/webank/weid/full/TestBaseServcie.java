@@ -28,10 +28,6 @@ import java.util.concurrent.TimeoutException;
 
 import mockit.Mock;
 import mockit.MockUp;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +36,6 @@ import com.webank.weid.BaseTest;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v1.WeIdContract;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
@@ -719,66 +714,6 @@ public abstract class TestBaseServcie extends BaseTest implements MockMysqlDrive
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetAuth.getErrorCode().intValue());
         Assert.assertEquals(true, responseSetAuth.getResult());
-    }
-
-    protected MockUp<Future<?>> mockTimeoutFuture() {
-        return new MockUp<Future<?>>() {
-            @Mock
-            public Future<?> get(long timeout, TimeUnit unit)
-                throws TimeoutException {
-
-                throw new TimeoutException();
-            }
-        };
-    }
-
-    protected MockUp<Future<?>> mockInterruptedFuture() {
-        return new MockUp<Future<?>>() {
-            @Mock
-            public Future<?> get(long timeout, TimeUnit unit)
-                throws InterruptedException {
-
-                throw new InterruptedException();
-            }
-
-            @Mock
-            public Future<?> get()
-                throws InterruptedException {
-
-                throw new InterruptedException();
-            }
-        };
-    }
-
-    protected MockUp<Future<?>> mockReturnNullFuture() {
-        return new MockUp<Future<?>>() {
-            @Mock
-            public Future<?> get(long timeout, TimeUnit unit) {
-                return null;
-            }
-        };
-    }
-
-    protected MockUp<WeIdContract> mockSetAttribute(MockUp<Future<?>> mockFuture) {
-        return new MockUp<WeIdContract>() {
-            @Mock
-            public Future<?> createWeId(
-                Address identity,
-                DynamicBytes auth,
-                DynamicBytes created,
-                Int256 updated) {
-                return mockFuture.getMockInstance();
-            }
-
-            @Mock
-            public Future<?> setAttribute(
-                Address identity,
-                Bytes32 key,
-                DynamicBytes value,
-                Int256 updated) {
-                return mockFuture.getMockInstance();
-            }
-        };
     }
 
     protected CredentialPojo copyCredentialPojo(CredentialPojo credentialPojo) {

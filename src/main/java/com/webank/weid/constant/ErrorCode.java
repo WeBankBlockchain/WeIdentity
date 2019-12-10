@@ -582,6 +582,14 @@ public enum ErrorCode {
     ),
 
     /**
+     * you cannot remove your last public key or your own public key.
+     */
+    WEID_CANNOT_REMOVE_ITS_OWN_PUB_KEY_WITHOUT_BACKUP(
+        100111,
+        "cannot remove this WeID's owner or last public key without an available backup."
+    ),
+
+    /**
      * transaction timeout.
      */
     TRANSACTION_TIMEOUT(160001, "the transaction is timeout."),
@@ -639,17 +647,17 @@ public enum ErrorCode {
         160013,
         "can not get the connection from pool, please check the error log."
     ),
-    
+
     /**
      * the orgid is null.
      */
     ORG_ID_IS_NULL(160014, "the orgid is null."),
-    
+
     /**
      * the data is expire.
      */
     SQL_DATA_EXPIRE(160015, "the data is expire."),
-    
+
     /**
      * other uncatched exceptions or error.
      */

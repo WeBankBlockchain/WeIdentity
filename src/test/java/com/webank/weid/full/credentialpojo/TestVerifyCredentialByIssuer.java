@@ -409,7 +409,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseServcie {
     @Test
     public void testVerifyCredentialCase20() {
 
-        MockUp<DataToolUtils> mockTest = new MockUp<DataToolUtils>() {
+        new MockUp<DataToolUtils>() {
             @Mock
             public Sign.SignatureData simpleSignatureDeserialization(
                 byte[] serializedSignatureData) throws SignatureException {
@@ -418,8 +418,6 @@ public class TestVerifyCredentialByIssuer extends TestBaseServcie {
         };
         ResponseData<Boolean> response = super.verifyCredentialPojo(credentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
-
-        mockTest.tearDown();
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
             response.getErrorCode().intValue());
@@ -524,7 +522,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseServcie {
     @Test
     public void testVerifyCredentialCase28() {
 
-        MockUp<WeIdServiceImpl> mockTest = new MockUp<WeIdServiceImpl>() {
+        new MockUp<WeIdServiceImpl>() {
             @Mock
             public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
                 ResponseData<WeIdDocument> response = new ResponseData<WeIdDocument>();
@@ -535,8 +533,6 @@ public class TestVerifyCredentialByIssuer extends TestBaseServcie {
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(credentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
-
-        mockTest.tearDown();
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL.getCode(),
             response.getErrorCode().intValue());

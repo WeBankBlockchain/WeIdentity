@@ -8,6 +8,8 @@ app_xml_config=${java_source_code_dir}/src/main/resources/fisco.properties
 weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties.tpl
 weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
 
+JAVA_OPTS='-Djdk.tls.namedGroups="secp256k1"'
+
 CLASSPATH=${java_source_code_dir}/dist/conf
 
 for jar_file in ${java_source_code_dir}/dist/lib/*.jar
@@ -145,7 +147,9 @@ function gradle_build_sdk()
 	
     cd ${java_source_code_dir}/
     if [ -d dist/ ];then
-	rm -rf dist/
+        rm -rf dist/app
+        rm -rf dist/conf
+        rm -rf dist/*.jar
     fi
     gradle clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
     echo "compile java code done."
@@ -160,7 +164,7 @@ function deploy_contract()
 	CLASSPATH=${CLASSPATH}:${jar_file}
 	done
 
-    java -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract
+    java ${JAVA_OPTS} -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract
     echo "contract deployment done."
 }
 
