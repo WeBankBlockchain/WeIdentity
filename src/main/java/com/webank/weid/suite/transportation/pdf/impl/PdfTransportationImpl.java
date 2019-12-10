@@ -26,7 +26,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -55,6 +54,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialPojoList;
 import com.webank.weid.protocol.base.HashString;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -99,8 +99,6 @@ public class PdfTransportationImpl
     private static final int FONT_SIZE_TITLE = 18;
 
     private static final int FONT_SIZE_CONTENT = 12;
-
-    private static final String MD_ALGORITHM = "SHA-256";
 
     private static final String PDF_SUFFIX = ".pdf";
 
@@ -504,6 +502,8 @@ public class PdfTransportationImpl
                 } else {
                     credentialPojoList.add(credentialPojo);
                 }
+            } else if (object instanceof CredentialPojoList) {
+                credentialPojoList = (CredentialPojoList) object;
             } else {
                 logger.error(
                         "buildPdf4DefaultTpl due to object illegal error.");
@@ -589,6 +589,8 @@ public class PdfTransportationImpl
                 } else {
                     credentialPojoList.add(credentialPojo);
                 }
+            } else if (object instanceof CredentialPojoList) {
+                credentialPojoList = (CredentialPojoList) object;
             } else {
                 logger.error(
                         "buildPdf4SpecTpl due to object illegal error.");
@@ -604,7 +606,7 @@ public class PdfTransportationImpl
             //处理credentialList，把多级claimMap转为单级map
             for (int i = 0;i < creListSize; i++) {
                 //利用cptId到链上获取CPT
-                Integer cptId = presentation.getVerifiableCredential().get(i).getCptId();
+                Integer cptId = credentialPojoList.get(i).getCptId();
                 ResponseData<Cpt> res = cptService.queryCpt(cptId);
                 Cpt cpt = res.getResult();
                 Map<String, Object> cptMap = cpt.getCptJsonSchema();
@@ -622,8 +624,8 @@ public class PdfTransportationImpl
 
 
                 //从presentation获取salt和claim
-                salt[i] = presentation.getVerifiableCredential().get(i).getSalt();
-                claim[i] = presentation.getVerifiableCredential().get(i).getClaim();
+                salt[i] = credentialPojoList.get(i).getSalt();
+                claim[i] = credentialPojoList.get(i).getClaim();
 
                 //获取claim的k-v数据
                 if (salt[i] != null && claim[i] != null) {
