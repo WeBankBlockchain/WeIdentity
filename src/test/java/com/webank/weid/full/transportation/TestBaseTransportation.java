@@ -29,6 +29,7 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
+import com.webank.weid.protocol.base.CredentialPojoList;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -228,5 +229,13 @@ public abstract class TestBaseTransportation extends TestBaseServcie {
             return null;
         }
         return response.getResult();
+    }
+    
+    protected CredentialPojoList getCredentialPojoList(PresentationE presentation4MultiCpt) {
+        CredentialPojoList list = new CredentialPojoList();
+        for (CredentialPojo credentialPojo : presentation4MultiCpt.getVerifiableCredential()) {
+            list.add(credentialPojo);
+        }
+        return list;
     }
 }
