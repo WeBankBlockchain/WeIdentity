@@ -21,10 +21,6 @@ package com.webank.weid.full.evidence;
 
 import java.util.Map;
 
-import mockit.Mock;
-import mockit.MockUp;
-
-import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -38,7 +34,6 @@ import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.impl.EvidenceServiceImpl;
 import com.webank.weid.util.DateUtils;
 
 /**
@@ -258,27 +253,5 @@ public class TestVerifyEvidence extends TestBaseServcie {
         Assert.assertEquals(responseData2.getErrorCode().intValue(),
             ErrorCode.SUCCESS.getCode());
         Assert.assertTrue(responseData2.getResult());
-    }
-
-    /**
-     * case16: mock exception.
-     */
-    @Test
-    public void testVerifyEvidenceCase16() {
-        MockUp<EvidenceServiceImpl> mockException = new MockUp<EvidenceServiceImpl>() {
-            @Mock
-            public ResponseData<Boolean> verifySignatureToSigner(String rawData,
-                String signerWeId, SignatureData signatureData) throws Exception {
-                return null;
-            }
-        };
-
-        Credential credential = copyCredential(evidenceCredential);
-        ResponseData<Boolean> responseData = evidenceService
-            .verify(credential, evidenceAddress);
-        logger.info("testVerifyEvidenceCase16 result :" + responseData);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR.getCode(),
-            responseData.getErrorCode().intValue());
-        mockException.tearDown();
     }
 }
