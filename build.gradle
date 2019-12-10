@@ -36,7 +36,7 @@ if (!gradle.startParameter.isOffline()) {
 
 group 'com.webank'
 
-version = "1.4.1"
+version = "1.4.2"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -81,11 +81,11 @@ List apache_commons = [
 ]
 
 List jmockit = [
-        "org.jmockit:jmockit:1.9"
+        "org.jmockit:jmockit:1.47"
 ]
 
 List json = [
-        "com.fasterxml.jackson.core:jackson-databind:2.8.8.1",
+        "com.fasterxml.jackson.core:jackson-databind:2.10.0",
         "com.github.fge:json-schema-validator:2.2.6",
         "com.github.reinert:jjschema:1.16"
 ]
@@ -179,6 +179,11 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from 'build/docs/javadoc'
 }
 
+test {
+   systemProperty "jdk.tls.namedGroups", "${jdkTlsNamedGroups}"
+   jvmArgs "-javaagent:${classpath.find { it.name.contains("jmockit") }.absolutePath}"
+}
+
 artifacts {
     archives jar
     archives sourcesJar
@@ -225,7 +230,11 @@ if (!gradle.startParameter.isOffline()) {
             html.enabled false
         }
     }
-
+    
+	jacoco{
+        toolVersion = "0.8.5"
+    }
+    
     check.dependsOn jacocoTestReport
 
     checkstyle {

@@ -8,7 +8,7 @@
 
 ## 1. 发现 bug
 
-使用过程中遇到的任何问题，可以查看 [FAQ](../docs/zh_CN/docs/faq.md) ，或者给我们提 [issue](https://github.com/WeBankFinTech/WeIdentity/issues)。
+使用过程中遇到的任何问题，可以查看 [FAQ](https://github.com/WeBankFinTech/weid-doc/blob/master/docs/zh_CN/docs/faq.md)，或者给我们提 [issue](https://github.com/WeBankFinTech/WeIdentity/issues)。
 
 ## 2. 优化建议
 
@@ -24,16 +24,16 @@
 
 #### 分支管理
 
-代码类工程我们使用 [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) 进行分支管理。包括这些工程： [weid-java-sdk](https://github.com/WeBankFinTech/weid-java-sdk)， [weid-contract](https://github.com/WeBankFinTech/weid-contract)。
-文档类工程我们使用 [github-flow](http://scottchacon.com/2011/08/31/github-flow.html) 进行分支管理。包括这些工程： [WeIdentity](https://github.com/WeBankFinTech/WeIdentity)。
+代码类工程我们使用 [git-flow](https://nvie.com/posts/a-successful-git-branching-model/) 进行分支管理。包括这些工程： [WeIdentity](https://github.com/WeBankFinTech/WeIdentity)，[weid-contract](https://github.com/WeBankFinTech/weid-contract)，[weid-build-tools](https://github.com/WeBankFinTech/weid-build-tools)，[weid-sample](https://github.com/WeBankFinTech/weid-sample)。
+文档类工程我们使用 [github-flow](http://scottchacon.com/2011/08/31/github-flow.html) 进行分支管理。包括这些工程：[weid-doc](https://github.com/WeBankFinTech/weid-doc)。
 
 #### 代码规范
 
-建议先浏览 [WeIdentity 代码规范](../docs/zh_CN/docs/styleguides/styleguides.md)。
+建议先浏览 [WeIdentity 代码规范](https://github.com/WeBankFinTech/weid-doc/blob/master/docs/zh_CN/docs/styleguides/styleguides.md)。
 
 #### 测试
 
-所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](../docs/zh_CN/docs/how-to-run-unit-test.md)”。
+所有提交的代码必须通过单元测试，如果提交的代码目前的单元测试用例无法覆盖，可以修改单元测试代码从而覆盖用例，或者在 Pull Request 里面说明情况，然后由我们来补充单元测试用例。详见“[如何运行单元测试](https://weidentity.readthedocs.io/zh_CN/latest/docs/how-to-run-unit-test.html)”。
 
 #### Commit Messages
 
@@ -55,7 +55,7 @@ data & logic contracts.
 
 ### 3.2 流程
 
-1. Fork 希望提交代码修改的 repository 。例如，如果想要修改 [weid-java-sdk](https://github.com/WeBankFinTech/weid-java-sdk) ，则 Fork 这个 repository。
+1. Fork 希望提交代码修改的 repository 。例如，如果想要修改 [WeIdentity](https://github.com/WeBankFinTech/WeIdentity) ，则 Fork 这个 repository。
 
 2. 创建新的分支，例如分支取名为 `feature/add-verfiy-logic` （分支名请使用 `feature/` 开头）。
 
