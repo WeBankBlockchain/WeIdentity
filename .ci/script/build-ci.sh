@@ -7,6 +7,8 @@ weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties
 weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
 font=${java_source_code_dir}/src/main/resources/NotoSansCJKtc-Regular.ttf
 
+JAVA_OPTS='-Djdk.tls.namedGroups="secp256k1"'
+
 function modify_config()
 {
     echo "begin to modify sdk config..."
@@ -87,7 +89,7 @@ function deploy_contract()
         CLASSPATH=${CLASSPATH}:${jar_file}
     done
 
-    java -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract
+    java ${JAVA_OPTS} -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract
     echo "contract deployment done."
 }
 
