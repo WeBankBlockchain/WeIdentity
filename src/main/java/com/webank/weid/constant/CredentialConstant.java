@@ -19,6 +19,9 @@
 
 package com.webank.weid.constant;
 
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.util.CredentialUtils;
+
 /**
  * The Class CredentialConstant.
  *
@@ -43,11 +46,52 @@ public final class CredentialConstant {
      */
     public static final String DEFAULT_CREDENTIAL_TYPE = "VerifiableCredential";
     
+
+    /**
+     * The Constant zkp Credential type.
+     */
+    public static final String ZKP_CREDENTIAL_TYPE = "zkp";
+
+    /**
+     * The Constant original Credential type.
+     */
+    public static final String ORIGINAL_CREDENTIAL_TYPE = "hashTree";
+
     /**
      * The Constant is an field in PresentationPolicyE.
      */
     public static final String CLAIM_POLICY_FIELD = "policy";
-    
+
+    /**
+     * credential id
+     */
+    public static final String CREDENTIAL_META_KEY_ID = "id";
+
+    /**
+     * The CPT type in standard integer format.
+     */
+    public static final String CREDENTIAL_META_KEY_CPTID = "cptId";
+
+    /**
+     * The issuer WeIdentity DID.
+     */
+    public static final String CREDENTIAL_META_KEY_ISSUER = "issuer";
+
+    /**
+     * The expire date.
+     */
+    public static final String CREDENTIAL_META_KEY_EXPIRATIONDATE = "expirationDate";
+
+    /**
+     * The issuance date of the credential.
+     */
+    public static final String CREDENTIAL_META_KEY_ISSUANCEDATE = "issuanceDate";
+
+    /**
+     * credential context.
+     */
+    public static final String CREDENTIAL_META_KEY_CONTEXT = "context";
+
     /**
      * The Constant is an field in claimPolicy.
      */

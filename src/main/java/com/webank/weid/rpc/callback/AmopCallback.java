@@ -23,10 +23,16 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
+import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
+import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
+import com.webank.weid.protocol.amop.RequestSignCredentialArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
+import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
+import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
+import com.webank.weid.protocol.response.SignCredentialResponse;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 
 /**
@@ -85,6 +91,40 @@ public class AmopCallback implements PushNotifyAllCallback {
         GetPolicyAndChallengeResponse result = new GetPolicyAndChallengeResponse();
         result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
         result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+        return result;
+    }
+
+    /**
+     * 默认获取PolicyAndChallenge的回调处理.
+     * @param arg 获取PolicyAndChallenge需要的参数
+     * @return 返回PolicyAndChallenge的响应体
+     */
+    public PolicyAndPreCredentialResponse onPush(GetPolicyAndPreCredentialArgs args) {
+
+        PolicyAndPreCredentialResponse result = new PolicyAndPreCredentialResponse();
+        result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+        result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+        return result;
+    }
+
+    /**
+     * 默认获取PolicyAndChallenge的回调处理.
+     * @param arg 获取PolicyAndChallenge需要的参数
+     * @return 返回PolicyAndChallenge的响应体
+     */
+    public RequestIssueCredentialResponse onPush(RequestIssueCredentialArgs args) {
+
+        RequestIssueCredentialResponse result = new RequestIssueCredentialResponse();
+        result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+        result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+        return result;
+    }
+ 
+    public SignCredentialResponse onPush(RequestSignCredentialArgs args) {
+
+        SignCredentialResponse result = new SignCredentialResponse();
+        //result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+        //result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
         return result;
     }
 }
