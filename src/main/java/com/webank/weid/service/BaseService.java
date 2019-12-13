@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.wedpr.common.NativeUtils;
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
@@ -61,6 +62,13 @@ public abstract class BaseService {
         if (StringUtils.isEmpty(fiscoConfig.getCurrentOrgId())) {
             logger.error("[BaseService] the blockchain orgId is blank.");
         }
+//        try {
+//			NativeUtils.loadLibraryFromJar( "/WeDPR_dynamic_lib/libeay32md.dll");
+//			NativeUtils.loadLibraryFromJar( "/WeDPR_dynamic_lib/ssleay32md.dll");
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
     }
 
     /**
