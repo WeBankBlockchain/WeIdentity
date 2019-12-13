@@ -77,4 +77,14 @@ public interface Persistence {
      * @return execute status of the "update" operation.
      */
     public ResponseData<Integer> update(String domain, String id, String data);
+    
+    /**
+     * save data to storage if not exist, others for update.
+     *
+     * @param domain the domain of the data.
+     * @param id the key of the data.
+     * @param data which you want to store to the storage.
+     * @return execute status of the "save" operation.
+     */
+    public ResponseData<Integer> saveOrUpdate(String domain, String id, String data);
 }
