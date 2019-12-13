@@ -20,10 +20,12 @@ package com.webank.weid.constant;
 import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
+import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
+import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
@@ -53,7 +55,17 @@ public enum AmopMsgType {
     /**
      * 获取policy和challenge.
      */
-    GET_POLICY_AND_CHALLENGE(4);
+    GET_POLICY_AND_CHALLENGE(4),
+
+    /**
+     * 请求issuer签credential
+     */
+    GET_POLICY_AND_PRE_CREDENTIAL(5),
+
+    /**
+     * 请求issuer签credential
+     */
+	REQUEST_SIGN_CREDENTIAL(6);
 
     private Integer value;
 
@@ -106,7 +118,15 @@ public enum AmopMsgType {
                 GetPolicyAndChallengeResponse result = amopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
-            }   
+            }
+            case GET_POLICY_AND_PRE_CREDENTIAL: {
+                // GET POLICY AND CHALLENGE
+                GetPolicyAndPreCredentialArgs args =
+                    DataToolUtils.deserialize(msgBodyStr, GetPolicyAndPreCredentialArgs.class);
+                PolicyAndPreCredentialResponse result = amopCallback.onPush(args);
+                resultBodyStr = DataToolUtils.serialize(result);
+                break;
+            }
             default:
                 break;
         }
