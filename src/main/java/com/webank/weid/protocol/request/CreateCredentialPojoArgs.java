@@ -22,6 +22,7 @@ package com.webank.weid.protocol.request;
 import lombok.Data;
 
 import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.util.CredentialUtils;
 
 /**
  * The Arguments for the following SDK API: createCredential().
@@ -60,4 +61,14 @@ public class CreateCredentialPojoArgs<T> {
      * Optional: The issuance date of the credential.
      */
     private Long issuanceDate = null;
+
+    /**
+     * 新增字段，issuer提前生成好的credential ID，对应credentialPojo里的ID.
+     */
+    private String id = null;
+
+    /**
+     * Optional:credential context.
+     */
+    private String context = CredentialUtils.getDefaultCredentialContext();
 }
