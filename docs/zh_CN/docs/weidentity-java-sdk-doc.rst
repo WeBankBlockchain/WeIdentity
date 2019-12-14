@@ -9385,6 +9385,10 @@ com.webank.weid.protocol.base.CredentialPojo
    接口定义: ResponseData<CredentialPojo> createSelectiveCredential(CredentialPojo credentialPojo, ClaimPolicy claimPolicy)
    接口描述: 通过原始凭证和披漏策略，创建选择性披露的Credential。
 
+..note::
+
+   注意：对于已经创建好的选择性披露凭证，不允许再次进行选择性披露。
+
 **接口入参**\ : 
 
 com.webank.weid.protocol.base.CredentialPojo
@@ -11578,7 +11582,7 @@ com.webank.weid.protocol.base.Credential
           "created": 1567405359,
           "creator": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6#keys-0",
           "salt": {
-            "credentialList": "UuJHx"
+            "credentialList": ""
           },
           "signatureValue": "HC1y3rfyb\/2sg+E2Uulczm8VDtmQ6VrU\/9ow4e4nP3lVUOv4Gz41pfBrJHnV4wQoUbQsCYpezFx5sdaUwUILV1I=",
           "type": "Secp256k1"
@@ -11605,6 +11609,402 @@ com.webank.weid.protocol.base.Credential
    CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
    end
    CredentialPojoService->>CredentialPojoService: 生成签发日期、以原凭证列表为Claim生成数字签名
+   CredentialPojoService-->>调用者: 返回凭证
+
+
+9. createTrustedTimestamp
+
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService.createTrustedTimestamp
+   接口定义:ResponseData<Credential> createTrustedTimestamp(List<Credential> credentialList, WeIdAuthentication weIdAuthentication)
+   接口描述: 使用第三方可信时间戳服务，创建一个可信时间戳凭证。
+
+.. note::
+     注意：本服务需要您先行配置好时间戳服务的相关参数，请参见\ `时间戳服务配置步骤 <https://weidentity.readthedocs.io/zh_CN/latest/docs/faq-java.html>`__\ 。当前，可信时间戳服务支持使用WeSign（微鉴证）集成。
+
+.. note::
+     注意：创建可信时间戳凭证的输入参数是一个凭证list。当前，因为一些技术限制，还不支持对**已经选择性披露的凭证**进行可信时间戳的创建。也就是说，如果您传入的凭证list里面有任何一个凭证是选择性披露的，那么创建将会失败。
+
+.. note::
+     注意：对于已经创建好的可信时间戳凭证，您可以通过调用createSelectiveCredential对其进行选择性披露。
+
+**接口入参**\ :   java.util.ArrayList
+
+
+com.webank.weid.protocol.base.CredentialPojo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 版本
+     - 默认为v1
+   * - id
+     - String
+     - Y
+     - 证书ID
+     -
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     -
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     -
+   * - issuanceDate
+     - Long
+     - Y
+     - 创建日期
+     -
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     -
+   * - claim
+     - Map<String, Object>
+     - Y
+     - Claim数据
+     -
+   * - proof
+     - Map<String, Object>
+     - Y
+     - 签名数据结构体
+     -
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - CPT发布者的WeIdentity DID
+     - WeIdentity DID的格式传入
+   * - weIdPublicKeyId
+     - String
+     - Y
+     - 公钥Id
+     - 
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     - 
+     - 交易私钥，见下
+
+
+**接口返回**\ :    com.webank.weid.protocol.response.ResponseData\<CredentialPojo>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - Credential
+     - 
+     - 见下
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     - 
+
+
+com.webank.weid.protocol.base.CredentialPojo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - String
+     - Y
+     - 版本
+     - 默认为v1
+   * - id
+     - String
+     - Y
+     - 证书ID
+     - 
+   * - cptId
+     - Integer
+     - Y
+     - cptId
+     - 默认为106
+   * - issuer
+     - String
+     - Y
+     - WeIdentity DID
+     - 
+   * - issuanceDate
+     - Long
+     - Y
+     - 创建日期
+     - 
+   * - expirationDate
+     - Long
+     - Y
+     - 到期日期
+     - 
+   * - claim
+     - Map<String, Object>
+     - Y
+     - Claim数据
+     - 
+   * - proof
+     - Map<String, Object>
+     - Y
+     - 签名数据结构体
+     - 
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_JSON_SCHEMA_INVALID
+     - 100301
+     - JsonSchema无效
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
+   * - CREDENTIAL_ERROR
+     - 100400
+     - Credential标准错误
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期无效
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_PRIVATE_KEY_NOT_EXISTS
+     - 100415
+     - 私钥为空
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - TIMESTAMP_SERVICE_BASE_ERROR
+     - 100433
+     - 时间戳服务一般错误，请参照log检查具体错误
+     - TIMESTAMP_SERVICE_UNCONFIGURED
+     - 100435
+     - 时间戳服务未配置
+     - TIMESTAMP_SERVICE_WESIGN_ERROR
+     - 100436
+     - 时间戳服务微鉴证侧出错，请参照log检查具体错误
+   * - TIMESTAMP_CREATION_FAILED_FOR_SELECTIVELY_DISCLOSED
+     - 100438
+     - 时间戳服务不支持对已经选择性披露的凭证进行创建时间戳
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+    /**
+     * System CPT Claim verification failure.
+     */
+    CREDENTIAL_SYSTEM_CPT_CLAIM_VERIFY_ERROR(100434, "external credential verify"
+        + " succeeded, but inner content verify failed"),
+
+    /**
+     * Timestamp verification failed.
+     */
+    TIMESTAMP_VERIFICATION_FAILED(100437, "timestamp verification failed"),
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialPojoArgs createCredentialPojoArgs = new CreateCredentialPojoArgs();
+   createCredentialPojoArgs.setClaim(claim);
+   createCredentialPojoArgs.setCptId(1017);
+   createCredentialPojoArgs.setExpirationDate(1551448312461L);
+   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+   createCredentialPojoArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   ResponseData<CredentialWrapper> response = credentialPojoService.createCredentialPojo(createCredentialArgs);
+   List<CredentialPojo> credList = new ArrayList<>();
+   credList.add(response.getResult().getCredentialPojo());
+   Long expirationDate = DateUtils.convertToNoMillisecondTimeStamp(
+      createCredentialPojoArgs.getExpirationDate() + 24 * 60 * 60);
+   createCredentialPojoArgs.setExpirationDate(expirationDate);
+   CredentialPojo tempCredential =
+       credentialPojoService.createCredentialPojo(createCredentialPojoArgs).getResult().getCredentialPojo();
+   credentialList.add(tempCredential);
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
+   ResponseData<CredentialPojo> trustedCred = credentialService.createTrustedTimestamp(credList, weIdAuthentication);
+   System.out.println(trustedCred);
+
+.. code-block:: text
+
+   返回结果如：
+   result:(com.webank.weid.protocol.base.CredentialPojo)
+      credentialPojo:(com.webank.weid.protocol.base.CredentialPojo) {
+      {
+        "claim": {
+          "credentialList": [
+            {
+              "claim": {
+                "age": 1,
+                "gender": "F",
+                "id": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
+                "name": "1"
+              },
+              "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+              "cptId": 2000087,
+              "expirationDate": 1567491752,
+              "id": "6ea6e209-10e9-4a93-b6be-12af1a32655b",
+              "issuanceDate": 1567405352,
+              "issuer": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
+              "proof": {
+                "created": 1567405352,
+                "creator": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33#keys-0",
+                "salt": {
+                  "age": "yOwN7",
+                  "gender": "jjB85",
+                  "id": "BmRYI",
+                  "name": "BjYqF"
+                },
+                "signatureValue": "G+SNG3rBZNDvRNgRtJugPtX1FmE8XJIkV4CGPK\/nt\/breIPMJ5wYxImTp2QAxBUe5HMwCe9PPGhhMJJAazM5u9k=",
+                "type": "Secp256k1"
+              },
+              "type": [
+                "VerifiableCredential"
+              ]
+            },
+            {
+              "claim": {
+                "age": 1,
+                "gender": "F",
+                "id": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
+                "name": "1"
+              },
+              "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+              "cptId": 2000087,
+              "expirationDate": 1567491842,
+              "id": "a3544a9c-6cb6-4688-9622-bb935fb0d93f",
+              "issuanceDate": 1567405355,
+              "issuer": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
+              "proof": {
+                "created": 1567405355,
+                "creator": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53#keys-0",
+                "salt": {
+                  "age": "5nImi",
+                  "gender": "Me224",
+                  "id": "5pYs2",
+                  "name": "z6VmW"
+                },
+                "signatureValue": "HC8OAG\/dRmteGSIGWIDekp8fC1KJI8EEDZBb29HiTLXvVj350l9yTOHeGSBCr2VRY\/DSHT5ONjlvcrO4Mqa3Auo=",
+                "type": "Secp256k1"
+              },
+              "type": [
+                "VerifiableCredential"
+              ]
+            }
+          ]
+        "timestampAuthority": "wesign",
+        "authoritySignature": "MhmbHC1y3rfyb\/2sg+E2Uulczm8VDtmQ6VrU\/9ow4e4nP3lVUOv4Gz41pfBrJHnV4wQoUbQsCYpezFx5sdaUwUILV1I=HC1y3rfyb\/2sg+E2Uulczm8VDtmQ6VrU\/9ow4e4nP3lVUOv4Gz41pfBrJHnV4wQoUbQsCYpezFx5sdaUwUILV1I=HC1y3rfyb\/2sg+E2Uulczm8VDtmQ6VrU\/9ow4e4nP3lVUOv4Gz41pfBrJHnV4wQoUbQsCYpezFx5sdaUwUILV1I=a235==",
+        "timestamp": 151233113000,
+        "claimHash": "0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13"
+        },
+        "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
+        "cptId": 107,
+        "expirationDate": 1567491842,
+        "id": "ad5d5a54-4574-4b3b-b1df-9d0687b6a0ac",
+        "issuanceDate": 1567405359,
+        "issuer": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6",
+        "proof": {
+          "created": 1567405359,
+          "creator": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6#keys-0",
+          "salt": {
+            "credentialList": ""
+          },
+          "signatureValue": "HC1y3rfyb\/2sg+E2Uulczm8VDtmQ6VrU\/9ow4e4nP3lVUOv4Gz41pfBrJHnV4wQoUbQsCYpezFx5sdaUwUILV1I=",
+          "type": "Secp256k1"
+        },
+        "type": [
+          "VerifiableCredential"
+        ]
+      }
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用createTrustedTimestamp()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 生成全部不披露的凭证并生成hash
+   CredentialPojoService->>时间戳服务: 发送hash，生成时间戳
+   时间戳服务-->>CredentialPojoService: 返回时间戳
+   CredentialPojoService->>CredentialPojoService: 生成时间戳凭证
    CredentialPojoService-->>调用者: 返回凭证
 
 
