@@ -60,8 +60,8 @@ public interface CredentialPojoService {
     );
 
     /**
-     * Add an extra signer and signature to a Credential. Multiple signatures will be appended in
-     * an embedded manner.
+     * Add an extra signer and signature to a Credential. Multiple signatures will be appended in an
+     * embedded manner.
      *
      * @param credentialList original credential list
      * @param callerAuth the passed-in privateKey and WeID bundle to sign
@@ -132,4 +132,16 @@ public interface CredentialPojoService {
         WeIdAuthentication weIdAuthentication
     );
 
+    /**
+     * Create a trusted timestamp credential.
+     *
+     * @param credentialList the credentialPojo list to be signed
+     * @param weIdAuthentication caller authentication
+     * @return the embedded timestamp in credentialPojo
+     */
+    ResponseData<CredentialPojo> createTrustedTimestamp(
+        List<CredentialPojo> credentialList,
+        WeIdAuthentication weIdAuthentication
+    );
 }
+
