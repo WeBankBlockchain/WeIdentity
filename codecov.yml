@@ -13,3 +13,6 @@ coverage:
       default:
         enabled: no
         if_not_found: success
+  ignore:
+    - "src/main/java/com/webank/weid/util/HttpClient.java"
+    - "src/test/**/*"
