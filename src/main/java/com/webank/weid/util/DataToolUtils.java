@@ -1055,6 +1055,7 @@ public final class DataToolUtils {
     }
 
     /**
+     * convert byte array to string.
      * @param bytearray byte[]
      * @return String
      */
