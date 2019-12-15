@@ -6,28 +6,28 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * policy and pre-credential.
  * @author tonychen 2019年12月3日
- *
  */
 @Getter
 @Setter
 public class PolicyAndPreCredential {
 
 
-	/**
-	 * policy and challenge
-	 */
-	private PolicyAndChallenge policyAndChallenge;
-	
-	/**
-     * 传CPT110的credential
+    /**
+     * policy and challenge.
+     */
+    private PolicyAndChallenge policyAndChallenge;
+
+    /**
+     * 传CPT110的credential.
      */
     private CredentialPojo preCredential;
-    
-    
+
+
     private String claim;
     /**
-     * extra
+     * extra.
      */
     private Map<String, String> extra;
 }

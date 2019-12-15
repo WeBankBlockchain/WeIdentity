@@ -20,30 +20,30 @@
 package com.webank.weid.protocol.cpt;
 
 import com.github.reinert.jjschema.Attributes;
-
 import lombok.Data;
 
 /**
  * User request issuer to sign credential.
+ *
  * @author tonychen
  */
 @Data
 @Attributes(title = "metadata CPT", description = "Reserved CPT 110")
 public class Cpt110 {
 
-	@Attributes(required = true, description = "CPT ID")
+    @Attributes(required = true, description = "CPT ID")
     private Integer cptId;
-	
-	/**
-	 * credential id
-	 */
-	@Attributes(required = true, description = "credential ID")
-	private String id;
-	
-	/**
+
+    /**
+     * credential id.
+     */
+    @Attributes(required = true, description = "credential ID")
+    private String id;
+
+    /**
      * Required: The context field.
      */
-	@Attributes(required = true, description = "context")
+    @Attributes(required = true, description = "context")
     private String context;
 
     /**

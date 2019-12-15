@@ -50,14 +50,14 @@ public interface AmopService {
         String toOrgId,
         GetEncryptKeyArgs args
     );
-    
+
     ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
-    	String toOrgId,
-    	GetPolicyAndPreCredentialArgs args
+        String toOrgId,
+        GetPolicyAndPreCredentialArgs args
     );
 
     ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
-        String toOrgId, 
+        String toOrgId,
         RequestIssueCredentialArgs args
     );
 
