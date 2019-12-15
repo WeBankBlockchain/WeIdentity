@@ -20,18 +20,18 @@
 package com.webank.weid.protocol.cpt;
 
 import com.github.reinert.jjschema.Attributes;
-
 import lombok.Data;
 
 /**
  * User request issuer to sign credential.
+ *
  * @author tonychen
  */
 @Data
 @Attributes(title = "test CPT", description = "Reserved CPT 111")
 public class Cpt111 {
 
-	@Attributes(required = true, description = "CPT ID")
+    @Attributes(required = true, description = "CPT ID")
     private String cptId;
     @Attributes(required = true, description = "credential Signature Request", minimum = 1)
     private String credentialSignatureRequest;
