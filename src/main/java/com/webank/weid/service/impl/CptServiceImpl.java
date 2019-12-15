@@ -22,12 +22,12 @@ package com.webank.weid.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
@@ -361,12 +361,12 @@ public class CptServiceImpl extends BaseService implements CptService {
         return DataToolUtils.serialize(cptJsonSchemaNew);
     }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.rpc.CptService#queryCredentialTemplate(java.lang.Integer)
-	 */
-	@Override
-	public ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId) {
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.CptService#queryCredentialTemplate(java.lang.Integer)
+     */
+    @Override
+    public ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId) {
 
         return cptServiceEngine.queryCredentialTemplate(cptId);
-	}
+    }
 }

@@ -20,6 +20,7 @@
 package com.webank.weid.rpc;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
+
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.request.CptMapArgs;
@@ -92,11 +93,10 @@ public interface CptService {
      * @return The updated CPT info
      */
     ResponseData<CptBaseInfo> updateCpt(CptStringArgs args, Integer cptId);
-    
+
     /**
      * Update the data fields of a registered CPT.
      *
-     * @param args the args
      * @param cptId the cpt id
      * @return The updated CPT info
      */
