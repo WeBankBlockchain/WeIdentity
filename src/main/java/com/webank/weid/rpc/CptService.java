@@ -24,7 +24,6 @@ import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
-import com.webank.weid.protocol.response.CptCredentialTemplate;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**

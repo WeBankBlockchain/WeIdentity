@@ -48,8 +48,8 @@ import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.IssuerClient;
 import com.webank.wedpr.selectivedisclosure.IssuerResult;
 import com.webank.wedpr.selectivedisclosure.proto.AttributeTemplate;
-import com.webank.wedpr.selectivedisclosure.proto.TemplatePublicKey;
 import com.webank.wedpr.selectivedisclosure.proto.AttributeTemplate.Builder;
+import com.webank.wedpr.selectivedisclosure.proto.TemplatePublicKey;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
@@ -60,7 +60,6 @@ import com.webank.weid.contract.v2.CptController.UpdateCptRetLogEventResponse;
 import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.response.CptCredentialTemplate;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.service.impl.engine.BaseEngine;
@@ -166,19 +165,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS().getValue()
             ).send();
 
-            List<String>attributeList = JsonUtil.extractCptProperties(cptJsonSchemaNew);
-            IssuerResult issuerResult = IssuerClient.makeCredentialTemplate(attributeList);
-            CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
-            String templateSecretKey = issuerResult.templateSecretKey;
-            ResponseData<Integer> response = dataDriver.saveOrUpdate(DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET, String.valueOf(cptId), templateSecretKey);
-            if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                    throw new DatabaseException("database error!");
-                }
-            TransactionReceipt receipt = cptController.putCredentialTemplate(
-            	new BigInteger(String.valueOf(cptId)), 
-            	template.getPublicKey().toByteArray(), 
-            	template.getCredentialKeyCorrectnessProof().getBytes()).send();
-            return processRegisterEventLog(cptController, transactionReceipt);
+            ResponseData<CptBaseInfo> response =  processRegisterEventLog(cptController, transactionReceipt);
+            processTemplate(cptId, cptJsonSchemaNew);
+            return response;
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed. exception message: ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
@@ -222,29 +211,38 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             //
             ResponseData<CptBaseInfo> response =  processRegisterEventLog(cptController, transactionReceipt);
             Integer cptId = response.getResult().getCptId();
-            List<String>attributeList = JsonUtil.extractCptProperties(cptJsonSchemaNew);
-            IssuerResult issuerResult = IssuerClient.makeCredentialTemplate(attributeList);
-            CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
-            String templateSecretKey = issuerResult.templateSecretKey;
-            ResponseData<Integer> resp = 
-            	dataDriver.saveOrUpdate(
-            		DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET, 
-            		String.valueOf(cptId), 
-            		templateSecretKey);
-            if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                throw new DatabaseException("database error!");
-            }
-            TransactionReceipt receipt = cptController.putCredentialTemplate(
-            	new BigInteger(String.valueOf(cptId)), 
-            	template.getPublicKey().getCredentialPublicKey().getBytes(), 
-            	template.getCredentialKeyCorrectnessProof().getBytes()).send();
+            processTemplate(cptId, cptJsonSchemaNew);
             return response;
-//            if(receipt.getStatus() == "0x0") {
-//            }
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed. exception message: ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.UNKNOW_ERROR);
         }
+    }
+    
+    private void processTemplate(Integer cptId, String cptJsonSchemaNew) {
+    	
+        List<String> attributeList;
+		try {
+			attributeList = JsonUtil.extractCptProperties(cptJsonSchemaNew);
+		
+        IssuerResult issuerResult = IssuerClient.makeCredentialTemplate(attributeList);
+        CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
+        String templateSecretKey = issuerResult.templateSecretKey;
+        ResponseData<Integer> resp = 
+        	dataDriver.save(
+        		DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET, 
+        		String.valueOf(cptId), 
+        		templateSecretKey);
+        if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            throw new DatabaseException("database error!");
+        }
+        TransactionReceipt receipt = cptController.putCredentialTemplate(
+        	new BigInteger(String.valueOf(cptId)), 
+        	template.getPublicKey().getCredentialPublicKey().getBytes(), 
+        	template.getCredentialKeyCorrectnessProof().getBytes()).send();
+		} catch (Exception e) {
+			logger.error("[processTemplate] process credential template failed.");
+		}
     }
 
     /**
@@ -415,8 +413,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 						byte[] credentialPubKey = eventResponse.credentialPublicKey;
 //						cptCredentialTemplate.setCredentialProof(new String(proof));
 //						cptCredentialTemplate.setCredentialPubKey(new String(credentialPubKey));
-						credentialTemplateStorage.setCredentialKeyCorrectnessProof(new String(proof));
-						TemplatePublicKey pubKey = TemplatePublicKey.newBuilder().setCredentialPublicKey(new String(credentialPubKey)).build();
+//						credentialTemplateStorage.setCredentialKeyCorrectnessProof(new String(proof));
+						credentialTemplateStorage.setCredentialKeyCorrectnessProof(DataToolUtils.byteToString(proof));
+						TemplatePublicKey pubKey = TemplatePublicKey.newBuilder().setCredentialPublicKey(DataToolUtils.byteToString(credentialPubKey)).build();
 						credentialTemplateStorage.setPublicKey(pubKey);
 						break;
 					}
@@ -428,15 +427,12 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
 			Map<String, Object> cptInfo = cpt.getCptJsonSchema();
 			List<String> attrList;
-				attrList = JsonUtil.extractCptProperties(cptInfo);
+			attrList = JsonUtil.extractCptProperties(cptInfo);
 			Builder builder = AttributeTemplate.newBuilder();
 			for (String attr : attrList) {
 				builder.addAttributeKey(attr);
 			}
 			AttributeTemplate attributes = builder.build();
-//			cptCredentialTemplate.setAttributes(attributes);
-			
-			
 			
 			credentialTemplateStorage.setCredentialSchema(attributes);
 		} catch (Exception e) {
