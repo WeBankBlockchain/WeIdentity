@@ -261,9 +261,9 @@ public class MysqlDriver implements Persistence {
 	public ResponseData<Integer> saveOrUpdate(String domain, String id, String data) {
 		 ResponseData<String> getRes = this.get(domain, id);
 	        //如果查询数据存在，或者失效 则进行更新 否则进行新增
-	        if (StringUtils.isNotBlank(getRes.getResult()) && 
-	            (getRes.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode() 
-	            || getRes.getErrorCode().intValue() == ErrorCode.SQL_DATA_EXPIRE.getCode())) {
+	        if ((StringUtils.isNotBlank(getRes.getResult()) && 
+	            getRes.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode())
+	            || getRes.getErrorCode().intValue() == ErrorCode.SQL_DATA_EXPIRE.getCode()) {
 	            return  this.update(domain, id, data);
 	        }
 	        return this.save(domain, id, data);
