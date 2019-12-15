@@ -20,13 +20,14 @@
 package com.webank.weid.service.impl.engine;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
+
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 
 /**
- * 针对不同版本的FISCO BCOS，做不同的CPT合约接口调用和数据处理 目前分为支持FISCO BCOS 1.3.x和FISCO BCOS 2.0版本
+ * 针对不同版本的FISCO BCOS，做不同的CPT合约接口调用和数据处理 目前分为支持FISCO BCOS 1.3.x和FISCO BCOS 2.0版本.
  *
  * @author tonychen 2019年6月25日
  */
@@ -91,9 +92,10 @@ public interface CptServiceEngine {
      * @return cpt info
      */
     ResponseData<Cpt> queryCpt(int cptId);
-    
+
     /**
      * query cpt credential template.
+     *
      * @param cptId the id of the cpt
      * @return Cpt Credential Template
      */
