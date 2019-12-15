@@ -87,4 +87,5 @@ public final class ParamKeyConstant {
     public static final String BLINDING_FACTORS = "credentialSecretsBlindingFactors";
 
 
+    public static final String TRNSACTION_RECEIPT_STATUS_SUCCESS = "0x0";
 }

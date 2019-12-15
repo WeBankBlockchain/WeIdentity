@@ -29,14 +29,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.wedpr.common.Utils;
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.PredicateType;
@@ -46,6 +38,14 @@ import com.webank.wedpr.selectivedisclosure.VerifierClient;
 import com.webank.wedpr.selectivedisclosure.VerifierResult;
 import com.webank.wedpr.selectivedisclosure.proto.Predicate;
 import com.webank.wedpr.selectivedisclosure.proto.VerificationRule;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.datatypes.Address;
+import org.bcos.web3j.crypto.ECKeyPair;
+import org.bcos.web3j.crypto.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
@@ -77,8 +77,8 @@ import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.TimestampUtils;
 import com.webank.weid.util.JsonUtil;
+import com.webank.weid.util.TimestampUtils;
 import com.webank.weid.util.WeIdUtils;
 
 
@@ -90,23 +90,17 @@ import com.webank.weid.util.WeIdUtils;
 public class CredentialPojoServiceImpl extends BaseService implements CredentialPojoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
-
-    private static WeIdService weIdService = new WeIdServiceImpl();
-
-    private static CptService cptService = new CptServiceImpl();
-
     private static final String NOT_DISCLOSED =
         CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus().toString();
-
     private static final String DISCLOSED =
         CredentialFieldDisclosureValue.DISCLOSED.getStatus().toString();
-
     private static final String EXISTED =
         CredentialFieldDisclosureValue.EXISTED.getStatus().toString();
+    private static WeIdService weIdService = new WeIdServiceImpl();
+    private static CptService cptService = new CptServiceImpl();
+    private static Persistence dataDriver = new MysqlDriver();
 
-    private static Persistence dataDriver  = new MysqlDriver();
-    
-//    protected AmopService amopService = new AmopServiceImpl();
+
     /**
      * Salt generator. Automatically fillin the map structure in a recursive manner.
      *
@@ -627,6 +621,182 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
     }
 
+    private static ResponseData<Boolean> verifyZkpCredential(CredentialPojo credential) {
+
+        Map<String, Object> proof = credential.getProof();
+        String encodedVerificationRule = (String) proof.get("encodedVerificationRule");
+        String verificationRequest = (String) proof.get("verificationRequest");
+        VerifierResult verifierResult =
+            VerifierClient.verifyProof(encodedVerificationRule, verificationRequest);
+        if (verifierResult.wedprErrorMessage == null) {
+            return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+        }
+        return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ERROR);
+    }
+
+    private static Boolean isZkpCredential(CredentialPojo credential) {
+
+        List<String> types = credential.getType();
+        for (String type : types) {
+            if (StringUtils.equals(type, CredentialConstant.ZKP_CREDENTIAL_TYPE)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * user build credential Info map and makeCredential.
+     */
+    private static UserResult makeCredential(
+        CredentialPojo preCredential,
+        String claimJson,
+        Integer cptId,
+        WeIdAuthentication weIdAuthentication) {
+
+        Map<String, String> credentialInfoMap = buildCredentialInfo(preCredential, claimJson);
+
+        ResponseData<CredentialTemplateEntity> resp = cptService.queryCredentialTemplate(cptId);
+        CredentialTemplateEntity credentialTemplate = resp.getResult();
+
+        UserResult userResult = UserClient.makeCredential(credentialInfoMap, credentialTemplate);
+
+        // masterSecret is saved by User
+        String masterSecret = userResult.masterSecret;
+        String credentialSecretsBlindingFactors = userResult.credentialSecretsBlindingFactors;
+
+        Map<String, String> userCredentialInfo = new HashMap<>();
+        userCredentialInfo.put(ParamKeyConstant.MASTER_SECRET, masterSecret);
+        userCredentialInfo.put(ParamKeyConstant.BLINDING_FACTORS, credentialSecretsBlindingFactors);
+        String json = DataToolUtils.serialize(userCredentialInfo);
+        String id = new StringBuffer().append(weIdAuthentication.getWeId()).append("_")
+            .append(cptId).toString();
+        //String id=(String)preCredential.getClaim().get(CredentialConstant.CREDENTIAL_META_KEY_ID);
+
+        //save masterSecret and credentialSecretsBlindingFactors to persistence.
+        ResponseData<Integer> dbResp = dataDriver
+            .saveOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
+        if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[makeCredential] save masterSecret and blindingFactors to db failed.");
+            return null;
+        }
+
+        return userResult;
+    }
+
+    /**
+     * build credentialInfoMap from pre-credential and claim sent by issuer.
+     */
+    private static Map<String, String> buildCredentialInfo(CredentialPojo preCredential,
+        String claimJson) {
+
+        CredentialPojo tempCredential = DataToolUtils.clone(preCredential);
+        Map<String, Object> claim = preCredential.getClaim();
+        Map<String, String> credentialInfo = new HashMap<String, String>();
+        Map<String, String> newCredentialInfo = new HashMap<String, String>();
+        try {
+            Map<String, Object> claimMap = DataToolUtils.deserialize(claimJson, HashMap.class);
+            tempCredential.setClaim(claimMap);
+            tempCredential.setContext(
+                String.valueOf(claim.get(CredentialConstant.CREDENTIAL_META_KEY_CONTEXT)));
+            tempCredential
+                .setCptId((Integer) claim.get(CredentialConstant.CREDENTIAL_META_KEY_CPTID));
+            Long newExpirationDate =
+                DateUtils.convertToNoMillisecondTimeStamp(
+                    (Long) (claim.get(CredentialConstant.CREDENTIAL_META_KEY_EXPIRATIONDATE)));
+            tempCredential.setExpirationDate(newExpirationDate);
+            tempCredential
+                .setId(String.valueOf(claim.get(CredentialConstant.CREDENTIAL_META_KEY_ID)));
+            Long newIssuanceDate =
+                DateUtils.convertToNoMillisecondTimeStamp(
+                    (Long) (claim.get(CredentialConstant.CREDENTIAL_META_KEY_ISSUANCEDATE)));
+            tempCredential.setIssuanceDate(newIssuanceDate);
+            tempCredential.setIssuer(
+                String.valueOf(claim.get(CredentialConstant.CREDENTIAL_META_KEY_ISSUER)));
+            credentialInfo = JsonUtil.credentialToMonolayer(tempCredential);
+            for (Map.Entry<String, String> entry : credentialInfo.entrySet()) {
+                newCredentialInfo.put(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+        } catch (IOException e) {
+            logger.error("[buildCredentialInfo] build credential info map failed.", e);
+        }
+        return newCredentialInfo;
+    }
+
+    private static void processZkpPolicy(
+        ClaimPolicy claimPolicy,
+        List<String> revealedAttributeList,
+        List<Predicate> predicateList) {
+
+        String policyJson = null;
+        try {
+            policyJson = JsonUtil.claimPolicyToMonolayer(claimPolicy);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Map<String, Object> disclosureMap = DataToolUtils
+            .deserialize(policyJson, HashMap.class);
+        for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
+
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                processExpression(key, (HashMap) value, predicateList);
+            } else if (value instanceof Integer) {
+                processBaseValue(key, String.valueOf(value), revealedAttributeList);
+            } else if (value instanceof String) {
+                processBaseValue(key, (String) value, revealedAttributeList);
+            } else {
+                return;
+            }
+        }
+
+    }
+
+    private static void processExpression(
+        String key,
+        Map<String, Object> expression,
+        List<Predicate> predicateList) {
+
+        for (Map.Entry<String, Object> entry : expression.entrySet()) {
+
+            String predicateKey = entry.getKey();
+            Object predicateValue = entry.getValue();
+            PredicateType predicateType = getPredicateType(predicateKey);
+            Predicate predicate = Utils.makePredicate(key, predicateType, (Integer) predicateValue);
+            predicateList.add(predicate);
+        }
+    }
+
+    private static void processBaseValue(
+        String key,
+        String value,
+        List<String> revealedAttributeList) {
+        if (StringUtils.equals(value, DISCLOSED)) {
+            revealedAttributeList.add(key);
+        }
+    }
+
+    private static PredicateType getPredicateType(String predicate) {
+
+        switch (predicate) {
+            case "EQ":
+                return PredicateType.EQ;
+            case "GE":
+                return PredicateType.GE;
+            case "GT":
+                return PredicateType.GT;
+            case "LE":
+                return PredicateType.LE;
+            case "LT":
+                return PredicateType.LT;
+            default:
+                return null;
+
+        }
+    }
+
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#createCredential(
      *          com.webank.weid.protocol.request.CreateCredentialPojoArgs
@@ -646,9 +816,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             CredentialPojo result = new CredentialPojo();
             String context = CredentialUtils.getDefaultCredentialContext();
             result.setContext(context);
-            if(StringUtils.isBlank(args.getId())) {
+            if (StringUtils.isBlank(args.getId())) {
                 result.setId(UUID.randomUUID().toString());
-            }else {
+            } else {
                 result.setId(args.getId());
             }
             result.setCptId(args.getCptId());
@@ -927,13 +1097,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     @Override
     public ResponseData<Boolean> verify(String issuerWeId, CredentialPojo credential) {
 
-        if(credential == null) {
-    	    logger.error("[verify] The input credential is invalid.");
+        if (credential == null) {
+            logger.error("[verify] The input credential is invalid.");
             return new ResponseData<Boolean>(false, ErrorCode.ILLEGAL_INPUT);
         }
 
-        if(isZkpCredential(credential)) {
-    	    return verifyZkpCredential(credential);
+        if (isZkpCredential(credential)) {
+            return verifyZkpCredential(credential);
         }
 
         String issuerId = credential.getIssuer();
@@ -949,29 +1119,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
 
-    private static ResponseData<Boolean>verifyZkpCredential(CredentialPojo credential){
-
-        Map<String, Object> proof = credential.getProof();
-        String encodedVerificationRule = (String) proof.get("encodedVerificationRule");
-        String verificationRequest = (String) proof.get("verificationRequest");
-        VerifierResult verifierResult =
-            VerifierClient.verifyProof(encodedVerificationRule, verificationRequest);
-        if(verifierResult.wedprErrorMessage == null) {
-            return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
-        }
-        return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ERROR);
-    }
-
-    private static Boolean isZkpCredential(CredentialPojo credential) {
-
-        List<String>types = credential.getType();
-        for(String type : types) {
-            if(StringUtils.equals(type, CredentialConstant.ZKP_CREDENTIAL_TYPE)) {
-    	        return true;
-            }
-        }
-        return false;
-    }
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#verify(
      *          com.webank.weid.protocol.base.CredentialPojo,
@@ -1039,9 +1186,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     }
                 }
                 //verify credential
-                if(isZkpCredential(credential)) {
-                  	return verifyZkpCredential(credential);
-                      
+                if (isZkpCredential(credential)) {
+                    return verifyZkpCredential(credential);
+
                 }
                 ErrorCode verifyCredentialResult = verifyContent(credential, null);
                 if (verifyCredentialResult.getCode() != ErrorCode.SUCCESS.getCode()) {
@@ -1228,38 +1375,37 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     private ErrorCode verifyPolicy(CredentialPojo credentialPojo, ClaimPolicy claimPolicy,
         String presenterWeId) {
-    	if(isZkpCredential(credentialPojo)) {
-    		return ErrorCode.SUCCESS;
-    	}
+        if (isZkpCredential(credentialPojo)) {
+            return ErrorCode.SUCCESS;
+        }
         Map<String, Object> saltMap = credentialPojo.getSalt();
         String disclosure = claimPolicy.getFieldsToBeDisclosed();
         Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
-//        Object idValue = disclosureMap.get("id");
-//        if (idValue != null) {
-//            Object weid = credentialPojo.getClaim().get("id");
-//            if (StringUtils.equals(String.valueOf(idValue), DISCLOSED)) {
-//                if (!StringUtils.equals(String.valueOf(weid), presenterWeId)) {
-//                    logger.error(
-//                        "[verifyPolicy] the presenter weid->{} of presentation does not "
-//                            + "match the credential's ->{}. ",
-//                        presenterWeId,
-//                        weid);
-//                    return ErrorCode.PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH;
-//                }
-//            } else if (StringUtils.equals(String.valueOf(idValue), EXISTED)
-//                && !credentialPojo.getClaim().containsKey("id")) {
-//                logger.error(
-//                    "[verifyPolicy] the presenter weid->{} of presentation does not "
-//                        + "match the credential's ->{}. ",
-//                    presenterWeId,
-//                    weid);
-//                return ErrorCode.PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST;
-//            }
-//        }
+        //Object idValue = disclosureMap.get("id");
+        //if (idValue != null) {
+        //Object weid = credentialPojo.getClaim().get("id");
+        //if (StringUtils.equals(String.valueOf(idValue), DISCLOSED)) {
+        //if (!StringUtils.equals(String.valueOf(weid), presenterWeId)) {
+        //logger.error(
+        //"[verifyPolicy] the presenter weid->{} of presentation does not "
+        //+ "match the credential's ->{}. ",
+        //presenterWeId,
+        //weid);
+        //return ErrorCode.PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH;
+        //}
+        //} else if (StringUtils.equals(String.valueOf(idValue), EXISTED)
+        //&& !credentialPojo.getClaim().containsKey("id")) {
+        //logger.error(
+        //"[verifyPolicy] the presenter weid->{} of presentation does not "
+        //+ "match the credential's ->{}. ",
+        //presenterWeId,
+        //weid);
+        //return ErrorCode.PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST;
+        //}
+        //}
         return this.verifyDisclosureAndSalt(disclosureMap, saltMap);
     }
-
 
     @Override
     public ResponseData<PresentationE> createPresentation(
@@ -1287,7 +1433,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 return new ResponseData<PresentationE>(null, errorCode);
             }
             // 处理credentialList数据
-            errorCode = processCredentialList(credentialList, presentationPolicyE, presentation, weIdAuthentication.getWeId());
+            errorCode = processCredentialList(credentialList, presentationPolicyE, presentation,
+                weIdAuthentication.getWeId());
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "process credentialList error:{}-{}",
@@ -1376,36 +1523,37 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         List<CredentialPojo> newCredentialList = new ArrayList<>();
         // 获取ClaimPolicyMap
         Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicy.getPolicy();
-        
+
         String policyType = presentationPolicy.getPolicyType();
-        if(StringUtils.equals(policyType, "zkp")) {
-        	newCredentialList = generateZkpCredentialList(credentialList, presentationPolicy, userId);
-        }else {
-        	// 遍历所有原始证书
-        	for (CredentialPojo credential : credentialList) {
-        		// 根据原始证书获取对应的 claimPolicy
-        		ClaimPolicy claimPolicy = claimPolicyMap.get(credential.getCptId());
-        		if (claimPolicy == null) {
-        			continue;
-        		}
-        		// 根据原始证书和claimPolicy去创建选择性披露凭证
-        		ResponseData<CredentialPojo> res =
-        				this.createSelectiveCredential(credential, claimPolicy);
-        		if (res.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-        			return ErrorCode.getTypeByErrorCode(res.getErrorCode().intValue());
-        		}
-        		newCredentialList.add(res.getResult());
-        	}
+        if (StringUtils.equals(policyType, "zkp")) {
+            newCredentialList = generateZkpCredentialList(credentialList, presentationPolicy,
+                userId);
+        } else {
+            // 遍历所有原始证书
+            for (CredentialPojo credential : credentialList) {
+                // 根据原始证书获取对应的 claimPolicy
+                ClaimPolicy claimPolicy = claimPolicyMap.get(credential.getCptId());
+                if (claimPolicy == null) {
+                    continue;
+                }
+                // 根据原始证书和claimPolicy去创建选择性披露凭证
+                ResponseData<CredentialPojo> res =
+                    this.createSelectiveCredential(credential, claimPolicy);
+                if (res.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+                    return ErrorCode.getTypeByErrorCode(res.getErrorCode().intValue());
+                }
+                newCredentialList.add(res.getResult());
+            }
         }
-        
+
         presentation.setVerifiableCredential(newCredentialList);
         return ErrorCode.SUCCESS;
     }
 
     private List<CredentialPojo> generateZkpCredentialList(
-    	List<CredentialPojo> credentialList,
-    	PresentationPolicyE presentationPolicy,
-    	String userId) {
+        List<CredentialPojo> credentialList,
+        PresentationPolicyE presentationPolicy,
+        String userId) {
 
         List<CredentialPojo> newCredentialList = new ArrayList<>();
         // 获取ClaimPolicyMap
@@ -1417,7 +1565,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 continue;
             }
             // 根据原始证书和claimPolicy去创建选择性披露凭证
-            ResponseData<CredentialPojo> res = this.createZkpCredential(credential, claimPolicy, userId);
+            ResponseData<CredentialPojo> res = this
+                .createZkpCredential(credential, claimPolicy, userId);
 
             if (res.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 return null;
@@ -1425,9 +1574,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             newCredentialList.add(res.getResult());
         }
 
-    	return newCredentialList;
+        return newCredentialList;
     }
-    
+
     private void generatePresentationProof(
         Challenge challenge,
         WeIdAuthentication weIdAuthentication,
@@ -1515,86 +1664,48 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
         return new ResponseData<>(credential, ErrorCode.SUCCESS);
     }
-    
-	/* (non-Javadoc)
-	 * @see com.webank.weid.rpc.CredentialPojoService#prepareZKPCredential(com.webank.weid.protocol.base.CredentialPojo, java.lang.Object)
-	 */
-	@Override
-	public <T> ResponseData<CredentialPojo> prepareZKPCredential(
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.CredentialPojoService#prepareZKPCredential(
+     * com.webank.weid.protocol.base.CredentialPojo, java.lang.Object)
+     */
+    @Override
+    public ResponseData<CredentialPojo> prepareZkpCredential(
         CredentialPojo preCredential,
         String claimJson,
         WeIdAuthentication weIdAuthentication) {
 
-		//1. verify pre-credential.
+        //1. verify pre-credential.
         ResponseData<Boolean> verifyResult = this.verify(preCredential.getIssuer(), preCredential);
-        if(verifyResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-        	logger.error("[prepareZKPCredential] pre-credential verified failed.");
-        	return new ResponseData<CredentialPojo>(null, ErrorCode.getTypeByErrorCode(verifyResult.getErrorCode()));
+        if (verifyResult.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            logger.error("[prepareZKPCredential] pre-credential verified failed.");
+            return new ResponseData<CredentialPojo>(null,
+                ErrorCode.getTypeByErrorCode(verifyResult.getErrorCode()));
         }
-        
+
         //2.build credentialInfoMap and make credential.
-        Integer cptId = (Integer) preCredential.getClaim().get(CredentialConstant.CREDENTIAL_META_KEY_CPTID);
+        Integer cptId = (Integer) preCredential.getClaim()
+            .get(CredentialConstant.CREDENTIAL_META_KEY_CPTID);
         UserResult userResult = makeCredential(preCredential, claimJson, cptId, weIdAuthentication);
 
         //3. generate credential based on CPT 111 and userResult.
         return generateCpt111Credential(weIdAuthentication, cptId, userResult);
-	}
+    }
 
-	/**
-	 * user build credential Info map and makeCredential.
-	 * @param preCredential
-	 * @param claimJson
-	 * @param cptId
-	 * @param weIdAuthentication
-	 * @return
-	 */
-	private static UserResult makeCredential(
-		CredentialPojo preCredential, 
-		String claimJson, 
-		Integer cptId,
-		WeIdAuthentication weIdAuthentication) {
-		
-        Map<String, String>credentialInfoMap = buildCredentialInfo(preCredential, claimJson);
+    /**
+     * generate credential based on cpt 111.
+     * @param weIdAuthentication auth
+     * @param cptId cpt id
+     * @param credentialSignatureRequest credentialSignatureRequest
+     * @param userNonce userNoce made by user
+     * @return credential signed by user.
+     */
+    private ResponseData<CredentialPojo> generateCpt111Credential(
+        WeIdAuthentication weIdAuthentication,
+        Integer cptId,
+        UserResult userResult) {
 
-        ResponseData<CredentialTemplateEntity> resp = cptService.queryCredentialTemplate(cptId);
-        CredentialTemplateEntity credentialTemplate = resp.getResult();
-
-        UserResult userResult = UserClient.makeCredential(credentialInfoMap, credentialTemplate);
-
-        // masterSecret is saved by User
-        String masterSecret = userResult.masterSecret;
-        String credentialSecretsBlindingFactors = userResult.credentialSecretsBlindingFactors;
-
-        Map<String, String>userCredentialInfo = new HashMap<>();
-        userCredentialInfo.put(ParamKeyConstant.MASTER_SECRET, masterSecret);
-        userCredentialInfo.put(ParamKeyConstant.BLINDING_FACTORS, credentialSecretsBlindingFactors);
-        String json = DataToolUtils.serialize(userCredentialInfo);
-        String id = new StringBuffer().append(weIdAuthentication.getWeId()).append("_").append(cptId).toString();
-        //String id = (String) preCredential.getClaim().get(CredentialConstant.CREDENTIAL_META_KEY_ID);
-
-        //save masterSecret and credentialSecretsBlindingFactors to persistence.
-        ResponseData<Integer> dbResp = dataDriver.saveOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
-        if(dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-        	logger.error("[makeCredential] save masterSecret and credentialSecretsBlindingFactors to db failed.");
-        	return null;
-        }
-
-        return userResult;
-	}
-	
-	/**
-	 * @param weIdAuthentication
-	 * @param cptId
-	 * @param credentialSignatureRequest
-	 * @param userNonce
-	 * @return
-	 */
-	private ResponseData<CredentialPojo> generateCpt111Credential(
-		WeIdAuthentication weIdAuthentication, 
-		Integer cptId,
-		UserResult userResult) {
-		
-		Cpt111 cpt111 = new Cpt111();
+        Cpt111 cpt111 = new Cpt111();
         cpt111.setCptId(String.valueOf(cptId));
         cpt111.setCredentialSignatureRequest(userResult.credentialSignatureRequest);
         cpt111.setUserNonce(userResult.userNonce);
@@ -1603,197 +1714,90 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         args.setWeIdAuthentication(weIdAuthentication);
         args.setCptId(111);
         args.setIssuer(weIdAuthentication.getWeId());
-//        args.setId(preCredential.getId());
+        //args.setId(preCredential.getId());
         args.setIssuanceDate(System.currentTimeMillis());
-        args.setExpirationDate(System.currentTimeMillis() + 24*60*60*1000);
+        args.setExpirationDate(System.currentTimeMillis() + 24 * 60 * 60 * 1000);
         return this.createCredential(args);
-	}
+    }
 
-	/**
-	 * build credentialInfoMap from pre-credential and claim sent by issuer.
-	 * @param preCredential
-	 * @param claimJson
-	 * @return
-	 */
-	private static Map<String, String> buildCredentialInfo(CredentialPojo preCredential, String claimJson){
-
-        CredentialPojo tempCredential = DataToolUtils.clone(preCredential);
-        Map<String, Object>claim = preCredential.getClaim();
-        Map<String, String>credentialInfo = new HashMap<String, String>();
-        Map<String, String>newCredentialInfo = new HashMap<String, String>();
+    private ResponseData<CredentialPojo> createZkpCredential(
+        CredentialPojo credential,
+        ClaimPolicy claimPolicy,
+        String userId) {
         try {
-            Map<String, Object>claimMap = DataToolUtils.deserialize(claimJson, HashMap.class);
-            tempCredential.setClaim(claimMap);
-            tempCredential.setContext(String.valueOf(claim.get(CredentialConstant.CREDENTIAL_META_KEY_CONTEXT)));
-            tempCredential.setCptId((Integer)claim.get(CredentialConstant.CREDENTIAL_META_KEY_CPTID));
-            Long newExpirationDate =
-                DateUtils.convertToNoMillisecondTimeStamp((Long)(claim.get(CredentialConstant.CREDENTIAL_META_KEY_EXPIRATIONDATE)));
-            tempCredential.setExpirationDate(newExpirationDate);
-            tempCredential.setId(String.valueOf(claim.get(CredentialConstant.CREDENTIAL_META_KEY_ID)));
-            Long newIssuanceDate =
-                DateUtils.convertToNoMillisecondTimeStamp((Long)(claim.get(CredentialConstant.CREDENTIAL_META_KEY_ISSUANCEDATE)));
-            tempCredential.setIssuanceDate(newIssuanceDate);
-            tempCredential.setIssuer(String.valueOf(claim.get(CredentialConstant.CREDENTIAL_META_KEY_ISSUER)));
-            credentialInfo = JsonUtil.credentialToMonolayer(tempCredential);
-            for(Map.Entry<String, String>entry:credentialInfo.entrySet()) {
-            	newCredentialInfo.put(entry.getKey(), String.valueOf(entry.getValue()));
+            CredentialPojo credentialClone = DataToolUtils.clone(credential);
+            ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialClone);
+            if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
+                return new ResponseData<CredentialPojo>(null, checkResp);
             }
-		} catch (IOException e) {
-			logger.error("[buildCredentialInfo] build credential info map failed.", e);
-		}
-		return newCredentialInfo;
-	}
-
-	public ResponseData<CredentialPojo> createZkpCredential(
-	    CredentialPojo credential,
-	    ClaimPolicy claimPolicy,
-	    String userId) {
-	        try {
-	            CredentialPojo credentialClone = DataToolUtils.clone(credential);
-	            ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialClone);
-	            if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
-	                return new ResponseData<CredentialPojo>(null, checkResp);
-	            }
-	            Integer cptId = credentialClone.getCptId();
-	            if (credentialClone.getCptId()
-	                .equals(CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT)) {
-	                return new ResponseData<>(null, ErrorCode.CPT_ID_ILLEGAL);
-	            }
-	            if (claimPolicy == null) {
-	                logger.error("[createZkpCredential] claimPolicy is null.");
-	                return new ResponseData<CredentialPojo>(null,
-	                    ErrorCode.CREDENTIAL_CLAIM_POLICY_NOT_EXIST);
-	            }
-	            List<String>revealedAttributeList = new ArrayList<>();
-	            List<Predicate> predicateList = new ArrayList<>();
-
-	            processZkpPolicy(cptId, claimPolicy, revealedAttributeList, predicateList);
-	            VerificationRule verificationRule =
-	                VerificationRule.newBuilder()
-	                    .addAllRevealedAttribute(revealedAttributeList)
-	                    .addAllPredicateAttribute(predicateList)
-	                    .build();
-	            String encodedVerificationRule = Utils.protoToEncodedString(verificationRule);
-	            ResponseData<String> dbResp =
-	            	dataDriver.get(
-	            		DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
-	            		credential.getId());
-	            String newCredentialSignature = dbResp.getResult();
-	            String id = new StringBuffer().append(userId).append("_").append(cptId).toString();
-	            ResponseData<String> masterKeyResp =
-	                dataDriver.get(
-	            	    DataDriverConstant.DOMAIN_USER_MASTER_SECRET,
-	            	    id);
-	            HashMap<String, String>userCredentialInfo = DataToolUtils.deserialize(masterKeyResp.getResult(), HashMap.class);
-	            String masterSecret = userCredentialInfo.get("masterSecret");
-	            Map<String,String>credentialInfoMap = new HashMap<>();
-	            ResponseData<CredentialTemplateEntity> credentialTemplateResp = cptService.queryCredentialTemplate(cptId);
-	            CredentialTemplateEntity credentialTemplate = credentialTemplateResp.getResult();
-	            credentialInfoMap = JsonUtil.credentialToMonolayer(credential);
-	            UserResult userResult =
-	                UserClient.proveCredentialInfo(
-	                    encodedVerificationRule,
-	                    newCredentialSignature, //from db
-	                    credentialInfoMap,  //from credential
-	                    credentialTemplate, //from blockchain and cpt
-	                    masterSecret); //from db
-	            String verificationRequest = userResult.verificationRequest;
-
-	            List<String>zkpTyps = new ArrayList<>();
-	            zkpTyps.add(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
-	            zkpTyps.add(CredentialConstant.ZKP_CREDENTIAL_TYPE);
-	            credentialClone.setType(zkpTyps);
-	            credentialClone.putProofValue(ParamKeyConstant.PROOF_VERIFICATIONREQUEST, verificationRequest);
-	            credentialClone.putProofValue(ParamKeyConstant.PROOF_ENCODEDVERIFICATIONRULE, encodedVerificationRule);
-	            return new ResponseData<CredentialPojo>(credentialClone, ErrorCode.SUCCESS);
-	        } catch (DataTypeCastException e) {
-	            logger.error("Generate SelectiveCredential failed, "
-	                + "credential disclosure data type illegal. ", e);
-	            return new ResponseData<>(null, ErrorCode.CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL);
-	        } catch (WeIdBaseException e) {
-	            logger.error("Generate SelectiveCredential failed, "
-	                + "policy disclosurevalue illegal. ", e);
-	            return new ResponseData<>(null, ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);
-	        } catch (Exception e) {
-	            logger.error("Generate SelectiveCredential failed due to system error. ", e);
-	            return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
-	        }
-
-	    }
-
-	private static void processZkpPolicy(
-        Integer cptId,
-        ClaimPolicy claimPolicy, 
-        List<String>revealedAttributeList, 
-        List<Predicate> predicateList) {
-
-		String policyJson = null;
-		try {
-			policyJson = JsonUtil.claimPolicyToMonolayer(claimPolicy);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		Map<String, Object> disclosureMap = DataToolUtils
-            .deserialize(policyJson, HashMap.class);
-        for(Map.Entry<String, Object>entry:disclosureMap.entrySet()) {
-
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if(value instanceof Map) {
-                processExpression(key, (HashMap)value, predicateList);
-			}else if(value instanceof Integer ) {
-                processBaseValue(key, String.valueOf(value), revealedAttributeList);
+            if (credentialClone.getCptId()
+                .equals(CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT)) {
+                return new ResponseData<>(null, ErrorCode.CPT_ID_ILLEGAL);
             }
-			else if(value instanceof String) {
-                processBaseValue(key, (String)value, revealedAttributeList);
-            }else {
-               return;
+            if (claimPolicy == null) {
+                logger.error("[createZkpCredential] claimPolicy is null.");
+                return new ResponseData<CredentialPojo>(null,
+                    ErrorCode.CREDENTIAL_CLAIM_POLICY_NOT_EXIST);
             }
-		}
-		
-	}
+            List<String> revealedAttributeList = new ArrayList<>();
+            List<Predicate> predicateList = new ArrayList<>();
 
-	private static void processExpression(
-		String key,
-		Map<String, Object> expression, 
-		List<Predicate> predicateList) {
-		
-		for(Map.Entry<String, Object>entry:expression.entrySet()) {
-			
-			String predicateKey = entry.getKey();
-			Object predicateValue = entry.getValue();
-			PredicateType predicateType = getPredicateType(predicateKey);
-			Predicate predicate = Utils.makePredicate(key, predicateType, (Integer)predicateValue);
-			predicateList.add(predicate);
-		}
-	}
-	
-	private static void processBaseValue(
-		String key,
-		String value,
-		List<String>revealedAttributeList) {
-			if(StringUtils.equals(value, DISCLOSED)) {
-				revealedAttributeList.add(key);
-			}
-		}
+            processZkpPolicy(claimPolicy, revealedAttributeList, predicateList);
+            VerificationRule verificationRule =
+                VerificationRule.newBuilder()
+                    .addAllRevealedAttribute(revealedAttributeList)
+                    .addAllPredicateAttribute(predicateList)
+                    .build();
+            String encodedVerificationRule = Utils.protoToEncodedString(verificationRule);
+            ResponseData<String> dbResp =
+                dataDriver.get(
+                    DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
+                    credential.getId());
+            Integer cptId = credentialClone.getCptId();
+            String id = new StringBuffer().append(userId).append("_").append(cptId).toString();
+            String newCredentialSignature = dbResp.getResult();
+            ResponseData<String> masterKeyResp =
+                dataDriver.get(
+                    DataDriverConstant.DOMAIN_USER_MASTER_SECRET,
+                    id);
+            HashMap<String, String> userCredentialInfo = DataToolUtils
+                .deserialize(masterKeyResp.getResult(), HashMap.class);
+            String masterSecret = userCredentialInfo.get("masterSecret");
+            ResponseData<CredentialTemplateEntity> credentialTemplateResp = cptService
+                .queryCredentialTemplate(cptId);
+            CredentialTemplateEntity credentialTemplate = credentialTemplateResp.getResult();
+            Map<String, String> credentialInfoMap = new HashMap<>();
+            credentialInfoMap = JsonUtil.credentialToMonolayer(credential);
+            UserResult userResult =
+                UserClient.proveCredentialInfo(
+                    encodedVerificationRule,
+                    newCredentialSignature, //from db
+                    credentialInfoMap,  //from credential
+                    credentialTemplate, //from blockchain and cpt
+                    masterSecret); //from db
 
+            String verificationRequest = userResult.verificationRequest;
+            credentialClone
+                .putProofValue(ParamKeyConstant.PROOF_VERIFICATIONREQUEST, verificationRequest);
+            credentialClone.putProofValue(ParamKeyConstant.PROOF_ENCODEDVERIFICATIONRULE,
+                encodedVerificationRule);
+            List<String> zkpTyps = new ArrayList<>();
+            zkpTyps.add(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
+            zkpTyps.add(CredentialConstant.ZKP_CREDENTIAL_TYPE);
+            credentialClone.setType(zkpTyps);
+            return new ResponseData<CredentialPojo>(credentialClone, ErrorCode.SUCCESS);
+        } catch (DataTypeCastException e) {
+            logger.error("Generate SelectiveCredential failed, "
+                + "credential disclosure data type illegal. ", e);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL);
+        } catch (WeIdBaseException e) {
+            logger.error("Generate SelectiveCredential failed, "
+                + "policy disclosurevalue illegal. ", e);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);
+        } catch (Exception e) {
+            logger.error("Generate SelectiveCredential failed due to system error. ", e);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
+        }
 
-	private static PredicateType getPredicateType(String predicate) {
-
-        switch(predicate) {
-        case "EQ":
-            return PredicateType.EQ;
-        case "GE":
-            return PredicateType.GE;
-        case "GT":
-            return PredicateType.GT;
-        case "LE":
-            return PredicateType.LE;
-        case "LT":
-            return PredicateType.LT;
-		default:
-            return null;
-
-		}
-	}
+    }
 }
