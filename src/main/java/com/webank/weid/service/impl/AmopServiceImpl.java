@@ -30,11 +30,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
-import com.webank.wedpr.selectivedisclosure.IssuerClient;
-import com.webank.wedpr.selectivedisclosure.IssuerResult;
 import com.webank.wedpr.selectivedisclosure.UserClient;
 import com.webank.wedpr.selectivedisclosure.UserResult;
 import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.DatabaseException;
@@ -43,20 +42,16 @@ import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
 import com.webank.weid.protocol.amop.IssueCredentialArgs;
 import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
-import com.webank.weid.protocol.amop.RequestSignCredentialArgs;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.base.PolicyAndPreCredential;
 import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.SignCredentialResponse;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
@@ -64,7 +59,6 @@ import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
-import com.webank.weid.service.impl.callback.RequesSignCredentialCallback;
 import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
@@ -233,7 +227,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 
 		PresentationE presentation = presentationResp.getResult();
 
-		Integer cptId = (Integer) userCredential.getClaim().get("cptId");
+		Integer cptId = Integer.valueOf((String) (userCredential.getClaim().get("cptId")));
 		IssueCredentialArgs issueCredentialArgs = new IssueCredentialArgs();
 		issueCredentialArgs.setClaim(claimJson);
 		issueCredentialArgs.setCptId(cptId);
@@ -252,16 +246,21 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 		    WeServer.AMOP_REQUEST_TIMEOUT
 		    );
 
+		//ResponseData<RequestIssueCredentialResponse> resp =  
+		//	Test.test( issueCredentialArgs,  policyAndChallenge);
 		RequestIssueCredentialResponse response = resp.getResult();
 		CredentialPojo credentialPojo = response.getCredentialPojo();
-		String credentialJson = null;
+		Map<String,String>credentialInfoMap = new HashMap<>();
+		Map<String,String>newCredentialInfo = new HashMap<>();
 		try {
-			credentialJson = JsonUtil.credentialToMonolayer(credentialPojo);
+			credentialInfoMap = JsonUtil.credentialToMonolayer(credentialPojo);
+			for(Map.Entry<String, String>entry:credentialInfoMap.entrySet()) {
+	            newCredentialInfo.put(entry.getKey(), String.valueOf(entry.getValue()));
+	        }
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("[requestIssueCredential] generate credentialInfoMap failed.", e);
+			return new ResponseData<RequestIssueCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
 		}
-		Map<String,String>credentialInfoMap = DataToolUtils.deserialize(credentialJson, HashMap.class);
 
 		ResponseData<CredentialTemplateEntity> resp1 = cptService.queryCredentialTemplate(cptId);
 		CredentialTemplateEntity template = resp1.getResult();
@@ -274,202 +273,28 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 		Map<String, String>userInfoMap = DataToolUtils.deserialize(userInfo, HashMap.class);
 		String masterSecret = userInfoMap.get("masterSecret");
 		String credentialSecretsBlindingFactors = userInfoMap.get("credentialSecretsBlindingFactors");
+		//有问题
 		UserResult userResult = UserClient.blindCredentialSignature(
 			response.getCredentialSignature(),  //response.getCredentialSignature()
-			credentialInfoMap,   //from credentialPojo
+			newCredentialInfo,   //from credentialPojo
 			template, //查链
 			masterSecret,   //查数据库
 			credentialSecretsBlindingFactors, //查数据库
 			response.getIssuerNonce()); //response.getUserNonce();
 		String newCredentialSignature = userResult.credentialSignature;
 
+		String dbKey = (String) preCredential.getClaim().get(CredentialConstant.CREDENTIAL_META_KEY_ID);
 		ResponseData<Integer> dbResponse = 
 			dataDriver.saveOrUpdate(
 				DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE, 
-				id, 
+				dbKey, 
 				newCredentialSignature);
 		if (dbResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             throw new DatabaseException("database error!");
         }
 		//return new ResponseData<SignCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
 		//String newCredentialSignature = userResult.credentialSignature;
-		return null;
+		return resp;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.rpc.AmopService#requestSignCredential(java.lang.String, com.webank.weid.protocol.amop.RequestIssueCredentialArgs)
-	 */
-	@Override
-	public ResponseData<SignCredentialResponse> requestSignCredential(
-		String toOrgId,
-		RequestSignCredentialArgs args,
-		WeIdAuthentication auth) {
-
-		//1.用户拿到issuer发的credential，先调用makeCredential，生成credentialSignatureRequest、userNonce、masterSecret
-		CredentialPojo credential = args.getCredentialPojo();
-		Integer cptId = credential.getCptId();
-		ResponseData<CredentialTemplateEntity> resp = cptService.queryCredentialTemplate(cptId);
-		CredentialTemplateEntity template = resp.getResult();
-		UserResult userResult;
-		try {
-			String credentialInfo = JsonUtil.credentialToMonolayer(credential);
-			HashMap<String, String>credentialInfoMap = DataToolUtils.deserialize(credentialInfo, HashMap.class);
-
-			userResult = UserClient.makeCredential(credentialInfoMap, template);
-			String credentialSignatureRequest = userResult.credentialSignatureRequest;
-			String userNonce = userResult.userNonce;
-			String masterSecret = userResult.masterSecret;
-			String credentialSecretsBlindingFactors = userResult.credentialSecretsBlindingFactors;
-
-			//2.保存masterSecret，同时将cptId、credentialSignatureRequest、userNonce生成一个credential传给issuer
-			//issuer拿到这个credential可以先验证签名，然后将credentialSignatureRequest和userNonce取出，调用signCredential，生成credentialSignature和issuerNonce回传给用户
-			ResponseData<Integer> response = dataDriver.update(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, String.valueOf(cptId), masterSecret);
-			if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                throw new DatabaseException("database error!");
-            }
-			CreateCredentialPojoArgs createCredentialPojoArgs = new CreateCredentialPojoArgs();
-			Map<String, String>claim = new HashMap<>();
-			claim.put("cptId", String.valueOf(cptId));
-			claim.put("credentialSignatureRequest", credentialSignatureRequest);
-			claim.put("userNonce", userNonce);
-			createCredentialPojoArgs.setIssuer(auth.getWeId());
-			createCredentialPojoArgs.setWeIdAuthentication(auth);
-			createCredentialPojoArgs.setCptId(111);
-			createCredentialPojoArgs.setClaim(claim);
-			createCredentialPojoArgs.setIssuanceDate(System.currentTimeMillis());
-			createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis()+1234445);
-
-			ResponseData<CredentialPojo> credentialResp = credentialPojoService.createCredential(createCredentialPojoArgs);
-			if(credentialResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
-				return new ResponseData<SignCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
-			}
-
-			args.setCredentialPojo(credentialResp.getResult());
-			args.setUserWeId(auth.getWeId());
-		
-		/**
-		 * --------------------------------------------------
-		 * 测试代码
-		 * -------------------------------------------------
-		 */
-		RequesSignCredentialCallback callback = new RequesSignCredentialCallback();
-		SignCredentialResponse signCredentialResponse  = callback.onPush(args);
-
-		String credentialSignature =  signCredentialResponse.getCredentialSignature();
-		String issuerNonce = signCredentialResponse.getIssuerNonce();
-
-		UserResult userResult1 =
-            UserClient.blindCredentialSignature(
-                credentialSignature,
-                    credentialInfoMap,
-                    template,
-                    masterSecret,
-                    credentialSecretsBlindingFactors,
-                    issuerNonce);
-        String newCredentialSignature = userResult1.credentialSignature;
-        ResponseData<Integer> dbResp =
-            dataDriver.save(
-                DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
-                String.valueOf(cptId),
-                newCredentialSignature);
-        if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-            throw new DatabaseException("database error!");
-        }
-        return new ResponseData<SignCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
-		/**
-		 * --------------------------------------------------------------
-		 * 测试代码
-		 * --------------------------------------------------------
-		 */
-		
-		//3. 用户拿到issuer的credentialSignature和issuerNonce之后，进行盲化，并生成新的credentialSignature，用于后续生成证据用
-//		ResponseData<SignCredentialResponse> signedResponse = 
-//			this.getImpl(
-//			    fiscoConfig.getCurrentOrgId(),
-//			    toOrgId,
-//			    args,
-//			    RequestSignCredentialArgs.class,
-//			    SignCredentialResponse.class,
-//			    AmopMsgType.REQUEST_SIGN_CREDENTIAL,
-//			    WeServer.AMOP_REQUEST_TIMEOUT
-//			    );
-//		SignCredentialResponse res = signedResponse.getResult();
-//		String credentialSignature =  res.getCredentialSignature();
-//		String issuerNonce = res.getIssuerNonce();
-//		
-//		UserResult userResult1 =
-//                UserClient.blindCredentialSignature(
-//                        credentialSignature,
-//                        credentialInfoMap,
-//                        credentialTemplateStorage,
-//                        masterSecret,
-//                        credentialSecretsBlindingFactors,
-//                        issuerNonce);
-//		String newCredentialSignature = userResult1.credentialSignature;
-//		ResponseData<Integer> dbResp = 
-//			dataDriver.save(
-//				DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE, 
-//				String.valueOf(cptId), 
-//				newCredentialSignature);
-//		if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-//            throw new DatabaseException("database error!");
-//        }
-//		return signedResponse;
-		} catch (IOException e) {
-			logger.error("[requestSignCredential] request sign credential with exception.", e);
-			return new ResponseData<SignCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
-		}
-//		return this.getImpl(
-//		    fiscoConfig.getCurrentOrgId(),
-//		    toOrgId,
-//		    args,
-//		    RequestSignCredentialArgs.class,
-//		    SignCredentialResponse.class,
-//		    AmopMsgType.REQUEST_SIGN_CREDENTIAL,
-//		    WeServer.AMOP_REQUEST_TIMEOUT
-//		    );
-
-	}
-	
-	public SignCredentialResponse onPush(RequestSignCredentialArgs args) {
-
-    	SignCredentialResponse result = new SignCredentialResponse();
-    	//check input parameters
-//    	if(!checkArgs(args)) {
-//    		logger.error("[RequesSignCredentialCallback] input args is illegal!");
-//    		return result;
-//    		
-//    	}
-    	//verify credential(based on cpt 111)
-    	CredentialPojo credential = args.getCredentialPojo();
-    	if(credential.getCptId() == 111) {
-
-    		ResponseData<Boolean> verifyResult = credentialPojoService.verify(credential.getIssuer(), credential);
-    		if(verifyResult.getResult()) {
-
-                Map<String, Object>claim = credential.getClaim();
-                String credentialSignatureRequest = (String) claim.get("credentialSignatureRequest");
-                String nonce = (String) claim.get("nonce");
-                String userId = args.getUserWeId();
-                String cptId = (String) claim.get("cptId");
-                ResponseData<CredentialTemplateEntity> cptTemplate = cptService.queryCredentialTemplate(Integer.valueOf(cptId));
-                CredentialTemplateEntity credentialTemplate = cptTemplate.getResult();
-                ResponseData<String> dataResp = dataDriver.get(DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET, cptId);
-                String templateSecretKey = dataResp.getResult();
-                IssuerResult issuerResult  =
-    				IssuerClient.signCredential(
-    					credentialTemplate,
-    				    templateSecretKey,
-    				    credentialSignatureRequest,
-    				    userId,
-    				    nonce);
-                String issuerNonce = issuerResult.issuerNonce;
-                String credentialSignature = issuerResult.credentialSignature;
-
-                result.setCredentialSignature(credentialSignature);
-                result.setIssuerNonce(issuerNonce);
-    		}
-    	}
-    	return result;
-    }
 }
