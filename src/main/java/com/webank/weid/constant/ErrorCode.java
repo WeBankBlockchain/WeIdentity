@@ -83,6 +83,11 @@ public enum ErrorCode {
     CPT_EVENT_LOG_NULL(100304, "cpt event log is null."),
 
     /**
+     * credential template save failed.
+     */
+    CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR(100305, "cpt credential template saved with error."),
+
+    /**
      * Credential main error code.
      */
     CREDENTIAL_ERROR(100400, "error occured during processing credential tasks"),

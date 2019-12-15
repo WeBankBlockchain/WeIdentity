@@ -58,14 +58,14 @@ public enum AmopMsgType {
     GET_POLICY_AND_CHALLENGE(4),
 
     /**
-     * 请求issuer签credential
+     * 请求issuer签 pre-credential.
      */
     GET_POLICY_AND_PRE_CREDENTIAL(5),
 
     /**
-     * 请求issuer签credential
+     * 请求issuer签credential.
      */
-	REQUEST_SIGN_CREDENTIAL(6);
+    REQUEST_SIGN_CREDENTIAL(6);
 
     private Integer value;
 
@@ -79,6 +79,7 @@ public enum AmopMsgType {
 
     /**
      * callback by type.
+     *
      * @param amopCallback the callback instance
      * @param messageId the messageId
      * @param msgBodyStr the message body
@@ -96,7 +97,7 @@ public enum AmopMsgType {
                 AmopNotifyMsgResult result = amopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
-            } 
+            }
             case TYPE_TRANSPORTATION: {
                 AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
                 AmopResponse result = amopCallback.onPush(args);
@@ -110,7 +111,7 @@ public enum AmopMsgType {
                 GetEncryptKeyResponse result = amopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
-            }   
+            }
             case GET_POLICY_AND_CHALLENGE: {
                 // GET POLICY AND CHALLENGE
                 GetPolicyAndChallengeArgs args =

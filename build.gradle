@@ -119,11 +119,6 @@ configurations {
 
 dependencies {
 
-	compile("org.fisco-bcos:web3sdk:2.0.5"){
-        exclude group:"io.netty"
-    }
-	compile("org.fisco-bcos:web3sdk-weevent:1.2.5")
-
     localDeps 'org.projectlombok:lombok:1.18.10'
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
@@ -147,6 +142,7 @@ dependencies {
             compile("com.webank:weid-contract-java:1.2.11") {
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
+			compile files("lib/WeDPR-Java-SDK.jar")
             testCompile logger, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf
         } else {
             compileOnly files('dist/lib/lombok-1.18.10.jar')
