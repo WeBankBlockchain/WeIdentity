@@ -19,9 +19,6 @@
 
 package com.webank.weid.constant;
 
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.util.CredentialUtils;
-
 /**
  * The Class CredentialConstant.
  *
@@ -40,12 +37,12 @@ public final class CredentialConstant {
      * The Constant default Credential Context field name in Credential Json String.
      */
     public static final String CREDENTIAL_CONTEXT_PORTABLE_JSON_FIELD = "@context";
-    
+
     /**
      * The Constant default Credential type.
      */
     public static final String DEFAULT_CREDENTIAL_TYPE = "VerifiableCredential";
-    
+
 
     /**
      * The Constant zkp Credential type.
@@ -63,7 +60,7 @@ public final class CredentialConstant {
     public static final String CLAIM_POLICY_FIELD = "policy";
 
     /**
-     * credential id
+     * credential id.
      */
     public static final String CREDENTIAL_META_KEY_ID = "id";
 
@@ -96,6 +93,42 @@ public final class CredentialConstant {
      * The Constant is an field in claimPolicy.
      */
     public static final String CLAIM_POLICY_DISCLOSED_FIELD = "fieldsToBeDisclosed";
+    /**
+     * Default CPT ID for embedded credential signature subject (multi-sign support).
+     */
+    public static final Integer CREDENTIAL_EMBEDDED_SIGNATURE_CPT = 106;
+    /**
+     * Default CPT ID for embedded credentialPojo subject (multi-sign support).
+     */
+    public static final Integer CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT = 107;
+    /**
+     * Embedded trusted timestamp default CPT ID.
+     */
+    public static final Integer EMBEDDED_TIMESTAMP_CPT = 108;
+    /**
+     * Embedded trusted timestamp envelop default CPT ID.
+     */
+    public static final Integer TIMESTAMP_ENVELOP_CPT = 109;
+    /**
+     * Authorization CPT ID.
+     */
+    public static final Integer AUTHORIZATION_CPT = 101;
+    /**
+     * Challenge CPT ID.
+     */
+    public static final Integer CHALLENGE_CPT = 102;
+    /**
+     * Challenge Verification CPT ID.
+     */
+    public static final Integer CHALLENGE_VERIFICATION_CPT = 103;
+    /**
+     * Claim Policy CPT ID.
+     */
+    public static final Integer CLAIM_POLICY_CPT = 104;
+    /**
+     * Service Endpoint CPT ID.
+     */
+    public static final Integer SERVICE_ENDPOINT_CPT = 105;
 
     /**
      * The Credential Proof Type Enumerate.
@@ -117,55 +150,11 @@ public final class CredentialConstant {
 
         /**
          * Getter.
+         *
          * @return typeName
          */
         public String getTypeName() {
             return typeName;
         }
     }
-
-    /**
-     * Default CPT ID for embedded credential signature subject (multi-sign support).
-     */
-    public static final Integer CREDENTIAL_EMBEDDED_SIGNATURE_CPT = 106;
-
-    /**
-     * Default CPT ID for embedded credentialPojo subject (multi-sign support).
-     */
-    public static final Integer CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT = 107;
-
-    /**
-     * Embedded trusted timestamp default CPT ID.
-     */
-    public static final Integer EMBEDDED_TIMESTAMP_CPT = 108;
-
-    /**
-     * Embedded trusted timestamp envelop default CPT ID.
-     */
-    public static final Integer TIMESTAMP_ENVELOP_CPT = 109;
-
-    /**
-     * Authorization CPT ID.
-     */
-    public static final Integer AUTHORIZATION_CPT = 101;
-
-    /**
-     * Challenge CPT ID.
-     */
-    public static final Integer CHALLENGE_CPT = 102;
-
-    /**
-     * Challenge Verification CPT ID.
-     */
-    public static final Integer CHALLENGE_VERIFICATION_CPT = 103;
-
-    /**
-     * Claim Policy CPT ID.
-     */
-    public static final Integer CLAIM_POLICY_CPT = 104;
-
-    /**
-     * Service Endpoint CPT ID.
-     */
-    public static final Integer SERVICE_ENDPOINT_CPT = 105;
 }

@@ -25,13 +25,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
+import com.webank.wedpr.selectivedisclosure.UserClient;
+import com.webank.wedpr.selectivedisclosure.UserResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
-import com.webank.wedpr.selectivedisclosure.UserClient;
-import com.webank.wedpr.selectivedisclosure.UserResult;
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.DataDriverConstant;
@@ -73,14 +73,14 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     private static final Logger logger = LoggerFactory.getLogger(AmopServiceImpl.class);
 
     private static CptService cptService = new CptServiceImpl();
-    
+
     /**
      * persistence service.
      */
     private static Persistence dataDriver = new MysqlDriver();
-    
+
     /**
-     * credentialpojo service
+     * credentialpojo service.
      */
     private static CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
 
@@ -154,7 +154,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     }
 
     /**
-     *  通过AMOP获取秘钥请求接口.
+     * 通过AMOP获取秘钥请求接口.
      */
     public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId,
         GetEncryptKeyArgs args) {
@@ -176,125 +176,133 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         super.getPushCallback().registAmopCallback(directRouteMsgType, directRouteCallback);
     }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.rpc.AmopService#requestPolicyAndPreCredential(java.lang.String, java.lang.Integer, java.lang.String)
-	 */
-	public ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
-		String toOrgId,
-		GetPolicyAndPreCredentialArgs args) {
+    /**
+     * request PolicyAndPreCredential.
+     * @param toOrgId toOrgId
+     * @param args args
+     * @return PolicyAndPreCredential
+     */
+    public ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
+        String toOrgId,
+        GetPolicyAndPreCredentialArgs args) {
 
-		return this.getImpl(
-	        fiscoConfig.getCurrentOrgId(),
-	        toOrgId,
-	        args,
-	        GetPolicyAndPreCredentialArgs.class,
-	        PolicyAndPreCredentialResponse.class,
-	        AmopMsgType.GET_POLICY_AND_PRE_CREDENTIAL,
-	        WeServer.AMOP_REQUEST_TIMEOUT
-	        );
-	}
+        return this.getImpl(
+            fiscoConfig.getCurrentOrgId(),
+            toOrgId,
+            args,
+            GetPolicyAndPreCredentialArgs.class,
+            PolicyAndPreCredentialResponse.class,
+            AmopMsgType.GET_POLICY_AND_PRE_CREDENTIAL,
+            WeServer.AMOP_REQUEST_TIMEOUT
+        );
+    }
 
-	/* (non-Javadoc)
-	 * @see com.webank.weid.rpc.AmopService#requestIssueCredential(java.lang.String, com.webank.weid.protocol.amop.RequestIssueCredentialArgs)
-	 */
-	@Override
-	public ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
-		String toOrgId,
-		RequestIssueCredentialArgs args) {
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.AmopService#requestIssueCredential(java.lang.String,
+     * com.webank.weid.protocol.amop.RequestIssueCredentialArgs)
+     */
+    @Override
+    public ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
+        String toOrgId,
+        RequestIssueCredentialArgs args) {
 
-		PolicyAndPreCredential policyAndPreCredential  = args.getPolicyAndPreCredential();
-		String claimJson = policyAndPreCredential.getClaim();
-		CredentialPojo preCredential = policyAndPreCredential.getPreCredential();
-		ResponseData<CredentialPojo> userCredentialResp =
-			credentialPojoService.prepareZKPCredential(
-				preCredential,
-				claimJson,
-				args.getAuth());
+        PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
+        String claimJson = policyAndPreCredential.getClaim();
+        CredentialPojo preCredential = policyAndPreCredential.getPreCredential();
+        ResponseData<CredentialPojo> userCredentialResp =
+            credentialPojoService.prepareZkpCredential(
+                preCredential,
+                claimJson,
+                args.getAuth());
 
-		CredentialPojo userCredential = userCredentialResp.getResult();
-		PolicyAndChallenge policyAndChallenge = policyAndPreCredential.getPolicyAndChallenge();
+        CredentialPojo userCredential = userCredentialResp.getResult();
+        PolicyAndChallenge policyAndChallenge = policyAndPreCredential.getPolicyAndChallenge();
 
-		List<CredentialPojo>credentialList = new ArrayList<>();
-		credentialList.add(preCredential);
-		credentialList.add(userCredential);
+        List<CredentialPojo> credentialList = new ArrayList<>();
+        credentialList.add(preCredential);
+        credentialList.add(userCredential);
 
-		ResponseData<PresentationE> presentationResp = 
-			credentialPojoService.createPresentation(
-				credentialList, 
-				policyAndChallenge.getPresentationPolicyE(), 
-				policyAndChallenge.getChallenge(), 
-				args.getAuth());
+        ResponseData<PresentationE> presentationResp =
+            credentialPojoService.createPresentation(
+                credentialList,
+                policyAndChallenge.getPresentationPolicyE(),
+                policyAndChallenge.getChallenge(),
+                args.getAuth());
 
-		PresentationE presentation = presentationResp.getResult();
+        PresentationE presentation = presentationResp.getResult();
 
-		Integer cptId = Integer.valueOf((String) (userCredential.getClaim().get("cptId")));
-		IssueCredentialArgs issueCredentialArgs = new IssueCredentialArgs();
-		issueCredentialArgs.setClaim(claimJson);
-		issueCredentialArgs.setCptId(cptId);
-		issueCredentialArgs.setUserWeId(args.getAuth().getWeId());
-		issueCredentialArgs.setPolicyId(args.getPolicyId());
-		issueCredentialArgs.setPresentation(presentation);
+        Integer cptId = Integer.valueOf((String) (userCredential.getClaim().get("cptId")));
+        IssueCredentialArgs issueCredentialArgs = new IssueCredentialArgs();
+        issueCredentialArgs.setClaim(claimJson);
+        issueCredentialArgs.setCptId(cptId);
+        issueCredentialArgs.setUserWeId(args.getAuth().getWeId());
+        issueCredentialArgs.setPolicyId(args.getPolicyId());
+        issueCredentialArgs.setPresentation(presentation);
 
-		//1. request issuer to issue credential
-		ResponseData<RequestIssueCredentialResponse> resp =  this.getImpl(
-		    fiscoConfig.getCurrentOrgId(),
-		    toOrgId,
-		    issueCredentialArgs,
-		    IssueCredentialArgs.class,
-		    RequestIssueCredentialResponse.class,
-		    AmopMsgType.REQUEST_SIGN_CREDENTIAL,
-		    WeServer.AMOP_REQUEST_TIMEOUT
-		    );
+        //1. request issuer to issue credential
+        ResponseData<RequestIssueCredentialResponse> resp = this.getImpl(
+            fiscoConfig.getCurrentOrgId(),
+            toOrgId,
+            issueCredentialArgs,
+            IssueCredentialArgs.class,
+            RequestIssueCredentialResponse.class,
+            AmopMsgType.REQUEST_SIGN_CREDENTIAL,
+            WeServer.AMOP_REQUEST_TIMEOUT
+        );
 
-		//ResponseData<RequestIssueCredentialResponse> resp =  
-		//	Test.test( issueCredentialArgs,  policyAndChallenge);
-		RequestIssueCredentialResponse response = resp.getResult();
-		CredentialPojo credentialPojo = response.getCredentialPojo();
-		Map<String,String>credentialInfoMap = new HashMap<>();
-		Map<String,String>newCredentialInfo = new HashMap<>();
-		try {
-			credentialInfoMap = JsonUtil.credentialToMonolayer(credentialPojo);
-			for(Map.Entry<String, String>entry:credentialInfoMap.entrySet()) {
-	            newCredentialInfo.put(entry.getKey(), String.valueOf(entry.getValue()));
-	        }
-		} catch (IOException e) {
-			logger.error("[requestIssueCredential] generate credentialInfoMap failed.", e);
-			return new ResponseData<RequestIssueCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
-		}
+        //ResponseData<RequestIssueCredentialResponse> resp =
+        //Test.test( issueCredentialArgs,  policyAndChallenge);
+        RequestIssueCredentialResponse response = resp.getResult();
+        CredentialPojo credentialPojo = response.getCredentialPojo();
+        Map<String, String> credentialInfoMap = new HashMap<>();
+        Map<String, String> newCredentialInfo = new HashMap<>();
+        try {
+            credentialInfoMap = JsonUtil.credentialToMonolayer(credentialPojo);
+            for (Map.Entry<String, String> entry : credentialInfoMap.entrySet()) {
+                newCredentialInfo.put(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+        } catch (IOException e) {
+            logger.error("[requestIssueCredential] generate credentialInfoMap failed.", e);
+            return new ResponseData<RequestIssueCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
+        }
 
-		ResponseData<CredentialTemplateEntity> resp1 = cptService.queryCredentialTemplate(cptId);
-		CredentialTemplateEntity template = resp1.getResult();
-		String id = new StringBuffer().append(args.getAuth().getWeId()).append("_").append(cptId).toString();
-		ResponseData<String> dbResp = dataDriver.get(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id);
-		if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+        ResponseData<CredentialTemplateEntity> resp1 = cptService.queryCredentialTemplate(cptId);
+        CredentialTemplateEntity template = resp1.getResult();
+        String id = new StringBuffer().append(args.getAuth().getWeId()).append("_").append(cptId)
+            .toString();
+        ResponseData<String> dbResp = dataDriver
+            .get(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id);
+        if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             throw new DatabaseException("database error!");
         }
-		String userInfo = dbResp.getResult();
-		Map<String, String>userInfoMap = DataToolUtils.deserialize(userInfo, HashMap.class);
-		String masterSecret = userInfoMap.get("masterSecret");
-		String credentialSecretsBlindingFactors = userInfoMap.get("credentialSecretsBlindingFactors");
-		//有问题
-		UserResult userResult = UserClient.blindCredentialSignature(
-			response.getCredentialSignature(),  //response.getCredentialSignature()
-			newCredentialInfo,   //from credentialPojo
-			template, //查链
-			masterSecret,   //查数据库
-			credentialSecretsBlindingFactors, //查数据库
-			response.getIssuerNonce()); //response.getUserNonce();
-		String newCredentialSignature = userResult.credentialSignature;
+        String userInfo = dbResp.getResult();
+        Map<String, String> userInfoMap = DataToolUtils.deserialize(userInfo, HashMap.class);
+        String masterSecret = userInfoMap.get("masterSecret");
+        String credentialSecretsBlindingFactors = userInfoMap
+            .get("credentialSecretsBlindingFactors");
+        //有问题
+        UserResult userResult = UserClient.blindCredentialSignature(
+            response.getCredentialSignature(),  //response.getCredentialSignature()
+            newCredentialInfo,   //from credentialPojo
+            template, //查链
+            masterSecret,   //查数据库
+            credentialSecretsBlindingFactors, //查数据库
+            response.getIssuerNonce()); //response.getUserNonce();
+        String newCredentialSignature = userResult.credentialSignature;
 
-		String dbKey = (String) preCredential.getClaim().get(CredentialConstant.CREDENTIAL_META_KEY_ID);
-		ResponseData<Integer> dbResponse = 
-			dataDriver.saveOrUpdate(
-				DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE, 
-				dbKey, 
-				newCredentialSignature);
-		if (dbResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+        String dbKey = (String) preCredential.getClaim()
+            .get(CredentialConstant.CREDENTIAL_META_KEY_ID);
+        ResponseData<Integer> dbResponse =
+            dataDriver.saveOrUpdate(
+                DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
+                dbKey,
+                newCredentialSignature);
+        if (dbResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             throw new DatabaseException("database error!");
         }
-		//return new ResponseData<SignCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
-		//String newCredentialSignature = userResult.credentialSignature;
-		return resp;
-	}
+        //return new ResponseData<SignCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
+        //String newCredentialSignature = userResult.credentialSignature;
+        return resp;
+    }
 
 }

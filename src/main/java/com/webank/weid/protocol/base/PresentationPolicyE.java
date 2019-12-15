@@ -78,7 +78,7 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
     private Map<String, String> extra;
 
     /**
-     * 新增字段，标识是支持零知识证明的policy还是原来的
+     * 新增字段，标识是支持零知识证明的policy还是原来的.
      */
     private String policyType = "original";
 
