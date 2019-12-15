@@ -22,7 +22,6 @@ package com.webank.weid.service.impl.engine;
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.response.CptCredentialTemplate;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 
