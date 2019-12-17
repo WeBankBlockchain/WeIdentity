@@ -1,4 +1,23 @@
-package com.webank.weid.full;
+/*
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *
+ *       This file is part of weid-java-sdk.
+ *
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weid-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.webank.weid;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +36,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.persistence.sql.SqlDomain;
 import com.webank.weid.suite.persistence.sql.SqlExecutor;
 
-public interface MockMysqlDriver {
+public abstract class MockMysqlDriver {
 
     /**
      * mock DB for storage data.
@@ -29,7 +48,7 @@ public interface MockMysqlDriver {
     /**
      * the default method for mock mySqlDriver.
      */
-    public default void mockMysqlDriver() {
+    public static void mockMysqlDriver() {
 
         if (!mockTableSet.contains("default_data")) {
             mockTableSet.add("default_data");
@@ -47,7 +66,7 @@ public interface MockMysqlDriver {
             
             @Mock
             public ResponseData<Integer> execute(String sql, Object... data) {
-                String tableDomain = sqlDomain.getTableDomain();
+                String tableDomain = sqlDomain.getTableName();
                 if (sql.startsWith("insert")) {
                     if (mockDbMap.containsKey(data[0].toString())) {
                         return new ResponseData<Integer>(
@@ -77,13 +96,13 @@ public interface MockMysqlDriver {
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
-                    if (!mockDbMap.containsKey(data[2].toString())) {
+                    if (!mockDbMap.containsKey(data[3].toString())) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
                             ErrorCode.SUCCESS
                         );
                     }
-                    mockDbMap.put(data[2].toString(), data[1]);
+                    mockDbMap.put(data[3].toString(), data[1]);
                 } else if (sql.startsWith("CREATE")) {
                     if (mockTableSet.contains(tableDomain)) {
                         return new ResponseData<Integer>(
