@@ -56,7 +56,6 @@ public class TestJsonDeserialize extends TestBaseTransportation {
 
     @Override
     public synchronized void testInit() {
-        mockMysqlDriver();
         if (presentation == null) {
             super.testInit();
             presentation = this.getPresentationE();

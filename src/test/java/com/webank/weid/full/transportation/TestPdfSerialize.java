@@ -31,7 +31,6 @@ public class TestPdfSerialize extends TestBaseTransportation {
         super.testInit4MultiCpt();
         super.testInitSpecTplCpt();
 
-        mockMysqlDriver();
         presentation = getPresentationE();
         presentation4MlCpt = getPresentationE4MlCpt();
         presentation4MultiCpt = getPresentationE4MultiCpt();
