@@ -378,7 +378,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
-                dataDriver.save(
+                dataDriver.saveOrUpdate(
                     DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);
@@ -393,7 +393,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
                 DataToolUtils.stringToDynamicBytes(template.getCredentialKeyCorrectnessProof()))
                 .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            logger.error("[processTemplate] process credential template failed.");
+            logger.error("[processTemplate] process credential template failed.", e);
             return ErrorCode.CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR;
         }
         return ErrorCode.SUCCESS;
