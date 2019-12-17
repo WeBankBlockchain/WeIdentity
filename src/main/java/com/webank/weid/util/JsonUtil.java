@@ -101,7 +101,7 @@ public class JsonUtil {
         if (dc != null) {
             dc.fields().entrySet().forEach(entry -> buildFromDefinedClass(resultMap, entry));
             //补充元数据
-            Map<String, Object> result = replenishMeta(resultMap, null);
+            Map<String, Object> result = replenishMeta(resultMap, new CredentialPojo());
             //將map拍平成一级json
             String value = jsonToMonolayer(DataToolUtils.serialize(result), 10);
             //提取平级Json中key的集合
