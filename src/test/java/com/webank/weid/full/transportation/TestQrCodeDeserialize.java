@@ -55,7 +55,6 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
 
     @Override
     public synchronized void testInit() {
-        mockMysqlDriver();
         super.testInit();
         if (presentation == null) {
             presentation = this.getPresentationE();
