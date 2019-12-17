@@ -58,7 +58,6 @@ public class TestJsonSerialize extends TestBaseTransportation {
     @Override
     public synchronized void testInit() {
         super.testInit();
-        mockMysqlDriver();
         presentation = getPresentationE();
     }
 

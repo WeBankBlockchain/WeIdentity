@@ -36,6 +36,7 @@ domain.encryptKey.timeout=86400000
 domain.zkp=datasource1:zkp_data
 
 domain.templateSecret=datasource1:template_secret
+domain.templateSecret.timeout=31556908799941
 
 domain.masterKey=datasource1:master_secret
 
