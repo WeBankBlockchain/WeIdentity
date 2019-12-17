@@ -253,12 +253,11 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         List<String> attributeList;
         try {
             attributeList = JsonUtil.extractCptProperties(cptJsonSchemaNew);
-
             IssuerResult issuerResult = IssuerClient.makeCredentialTemplate(attributeList);
             CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
-                dataDriver.save(
+                dataDriver.saveOrUpdate(
                     DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);
@@ -276,7 +275,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 return ErrorCode.CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR;
             }
         } catch (Exception e) {
-            logger.error("[processTemplate] process credential template failed.");
+            logger.error("[processTemplate] process credential template failed.", e);
             return ErrorCode.CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR;
         }
         return ErrorCode.SUCCESS;
