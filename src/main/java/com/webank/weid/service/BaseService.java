@@ -61,6 +61,13 @@ public abstract class BaseService {
         if (StringUtils.isEmpty(fiscoConfig.getCurrentOrgId())) {
             logger.error("[BaseService] the blockchain orgId is blank.");
         }
+        //try {
+        //NativeUtils.loadLibraryFromJar( "/WeDPR_dynamic_lib/libeay32md.dll");
+        //NativeUtils.loadLibraryFromJar( "/WeDPR_dynamic_lib/ssleay32md.dll");
+        //} catch (IOException e) {
+        //// TODO Auto-generated catch block
+        //e.printStackTrace();
+        //}
     }
 
     /**
@@ -117,7 +124,7 @@ public abstract class BaseService {
         }
         return weServer.getBlockNumber();
     }
-    
+
     /**
      * get FISCO-BCOS version.
      *

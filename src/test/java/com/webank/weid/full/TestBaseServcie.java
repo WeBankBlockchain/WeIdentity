@@ -62,7 +62,7 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author v_wbgyang
  */
-public abstract class TestBaseServcie extends BaseTest implements MockMysqlDriver {
+public abstract class TestBaseServcie extends BaseTest {
 
     /**
      * log4j.

@@ -24,7 +24,6 @@ import java.util.List;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -35,7 +34,7 @@ import com.webank.weid.protocol.response.ResponseData;
 /**
  * Service inf for operations on Credentials.
  *
- * @author chaoxinhu 2018.12
+ * @author tonychen
  */
 public interface CredentialPojoService {
 
@@ -46,6 +45,20 @@ public interface CredentialPojoService {
      * @return CredentialPojo
      */
     ResponseData<CredentialPojo> createCredential(CreateCredentialPojoArgs args);
+
+    /**
+     * user make credential from issuer's pre-credential.
+     *
+     * @param preCredential issuer's pre-credential
+     * @param claimJson user claim
+     * @param weIdAuthentication auth
+     * @return credential based on CPT 111
+     */
+    ResponseData<CredentialPojo> prepareZkpCredential(
+        CredentialPojo preCredential,
+        String claimJson,
+        WeIdAuthentication weIdAuthentication
+    );
 
     /**
      * Generate a selective disclosure credential with specified claim policy.
