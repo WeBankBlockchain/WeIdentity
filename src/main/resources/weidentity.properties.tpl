@@ -33,6 +33,14 @@ domain.default.timeout=86400000
 domain.encryptKey=datasource1:encryptKey_data
 domain.encryptKey.timeout=86400000
 
+domain.zkp=datasource1:zkp_data
+
+domain.templateSecret=***REMOVED***
+domain.templateSecret.timeout=31556908799941
+
+domain.masterKey=***REMOVED***
+
+domain.credentialSignature=datasource1:credential_signature
 
 # Salt length for Proof creation.
 salt.length=5
