@@ -24,7 +24,7 @@ import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
-import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
+import com.webank.weid.protocol.amop.IssueCredentialArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
@@ -114,7 +114,7 @@ public class AmopCallback implements PushNotifyAllCallback {
      * @param args 获取PolicyAndChallenge需要的参数
      * @return 返回PolicyAndChallenge的响应体
      */
-    public RequestIssueCredentialResponse onPush(RequestIssueCredentialArgs args) {
+    public RequestIssueCredentialResponse onPush(IssueCredentialArgs args) {
 
         RequestIssueCredentialResponse result = new RequestIssueCredentialResponse();
         result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
