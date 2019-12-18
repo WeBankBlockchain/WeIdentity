@@ -33,7 +33,6 @@ public class TestPdfDeserialize extends TestBaseTransportation {
 
     @Override
     public synchronized void testInit() {
-        mockMysqlDriver();
         if (presentation == null) {
             super.testInit();
             super.testInit4MlCpt();

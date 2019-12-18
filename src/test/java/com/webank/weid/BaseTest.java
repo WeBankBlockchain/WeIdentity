@@ -56,6 +56,12 @@ public abstract class BaseTest extends BaseService {
      * the private key of sdk is a BigInteger,which needs to be used when registering authority.
      */
     protected String privateKey;
+    
+    static {
+        // mock DB
+        MockMysqlDriver.mockMysqlDriver();
+        MockIssuerClient.mockMakeCredentialTemplate();
+    }
 
     /**
      * initialization some for test.
