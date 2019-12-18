@@ -162,4 +162,12 @@ public class SqlDomain {
     public Date getExpire() {
         return new Date(System.currentTimeMillis() + this.timeout);
     }
+
+    /**
+     * get the currenttime.
+     * @return now
+     */
+    public Date getNow() {
+        return new Date();
+    }
 }
