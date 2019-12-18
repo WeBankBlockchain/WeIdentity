@@ -19,24 +19,49 @@
 
 package com.webank.weid.service.impl;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
+import com.webank.wedpr.selectivedisclosure.UserClient;
+import com.webank.wedpr.selectivedisclosure.UserResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
+import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
+import com.webank.weid.protocol.amop.IssueCredentialArgs;
+import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
+import com.webank.weid.protocol.base.PolicyAndPreCredential;
+import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
+import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
+import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
+import com.webank.weid.rpc.CptService;
+import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.JsonUtil;
 
 
 /**
@@ -45,6 +70,18 @@ import com.webank.weid.service.impl.base.AmopCommonArgs;
 public class AmopServiceImpl extends BaseService implements AmopService {
 
     private static final Logger logger = LoggerFactory.getLogger(AmopServiceImpl.class);
+
+    private static CptService cptService = new CptServiceImpl();
+
+    /**
+     * persistence service.
+     */
+    private static Persistence dataDriver = new MysqlDriver();
+
+    /**
+     * credentialpojo service.
+     */
+    private static CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
 
     @Override
     public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
@@ -116,7 +153,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     }
 
     /**
-     *  通过AMOP获取秘钥请求接口.
+     * 通过AMOP获取秘钥请求接口.
      */
     public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId,
         GetEncryptKeyArgs args) {
@@ -136,5 +173,192 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      */
     public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
         super.getPushCallback().registAmopCallback(directRouteMsgType, directRouteCallback);
+    }
+
+    /**
+     * request PolicyAndPreCredential.
+     *
+     * @param toOrgId toOrgId
+     * @param args args
+     * @return PolicyAndPreCredential
+     */
+    public ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
+        String toOrgId,
+        GetPolicyAndPreCredentialArgs args) {
+
+        return this.getImpl(
+            fiscoConfig.getCurrentOrgId(),
+            toOrgId,
+            args,
+            GetPolicyAndPreCredentialArgs.class,
+            PolicyAndPreCredentialResponse.class,
+            AmopMsgType.GET_POLICY_AND_PRE_CREDENTIAL,
+            WeServer.AMOP_REQUEST_TIMEOUT
+        );
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.AmopService#requestIssueCredential(java.lang.String,
+     * com.webank.weid.protocol.amop.RequestIssueCredentialArgs)
+     */
+    @Override
+    public ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
+        String toOrgId,
+        RequestIssueCredentialArgs args) {
+
+        //1. user genenerate credential based on CPT111
+        PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
+        String claimJson = policyAndPreCredential.getClaim();
+        CredentialPojo preCredential = policyAndPreCredential.getPreCredential();
+        ResponseData<CredentialPojo> userCredentialResp =
+            credentialPojoService.prepareZkpCredential(
+                preCredential,
+                claimJson,
+                args.getAuth());
+        int errCode = userCredentialResp.getErrorCode();
+        if (errCode != ErrorCode.SUCCESS.getCode()) {
+            logger.error("[requestIssueCredential] prepareZkpCredential failed. error code :{}",
+                errCode);
+            return new ResponseData<RequestIssueCredentialResponse>(null,
+                ErrorCode.getTypeByErrorCode(errCode));
+        }
+
+        //2. prepare presentation and send amop request to verify presentation and issue credential
+        CredentialPojo userCredential = userCredentialResp.getResult();
+        ResponseData<PresentationE> presentationResp = preparePresentation(args, userCredential);
+        int errorCode = presentationResp.getErrorCode();
+        if (errorCode != ErrorCode.SUCCESS.getCode()) {
+            logger.error("[requestIssueCredential] create presentation failed. error code :{}",
+                errorCode);
+            return new ResponseData<RequestIssueCredentialResponse>(null,
+                ErrorCode.getTypeByErrorCode(errorCode));
+        }
+
+        //3. send presentataion to issuer and request issue credential.
+        PresentationE presentation = presentationResp.getResult();
+        ResponseData<RequestIssueCredentialResponse> resp =
+            requestIssueCredential(
+                toOrgId,
+                args,
+                userCredential,
+                presentation);
+
+        //ResponseData<RequestIssueCredentialResponse> resp =
+        //Test.test( issueCredentialArgs,  policyAndChallenge);
+
+        //4. get credential response and blind signature.
+        RequestIssueCredentialResponse response = resp.getResult();
+        blindCredentialSignature(response, args.getAuth().getWeId());
+        return resp;
+    }
+
+    private ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
+        String toOrgId,
+        RequestIssueCredentialArgs args,
+        CredentialPojo userCredential,
+        PresentationE presentation) {
+
+        //prepare request args
+        String claimJson = args.getPolicyAndPreCredential().getClaim();
+        //Integer cptId = Integer.valueOf((String) (userCredential.getClaim()
+        //.get(CredentialConstant.CREDENTIAL_META_KEY_CPTID)));
+        IssueCredentialArgs issueCredentialArgs = new IssueCredentialArgs();
+        issueCredentialArgs.setClaim(claimJson);
+        //issueCredentialArgs.setCptId(cptId);
+        //issueCredentialArgs.setUserWeId(args.getAuth().getWeId());
+        issueCredentialArgs.setPolicyId(args.getPolicyId());
+        issueCredentialArgs.setPresentation(presentation);
+        //JsonTransportation transportation = TransportationFactory.newJsonTransportation();
+
+        // AMOP request (issuer to issue credential)
+        ResponseData<RequestIssueCredentialResponse> resp = this.getImpl(
+            fiscoConfig.getCurrentOrgId(),
+            toOrgId,
+            issueCredentialArgs,
+            IssueCredentialArgs.class,
+            RequestIssueCredentialResponse.class,
+            AmopMsgType.REQUEST_SIGN_CREDENTIAL,
+            WeServer.AMOP_REQUEST_TIMEOUT
+        );
+        return resp;
+    }
+
+    private ResponseData<PresentationE> preparePresentation(
+        RequestIssueCredentialArgs args,
+        CredentialPojo userCredential) {
+
+        PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
+        CredentialPojo preCredential = policyAndPreCredential.getPreCredential();
+        PolicyAndChallenge policyAndChallenge = policyAndPreCredential.getPolicyAndChallenge();
+
+        List<CredentialPojo> credentialList = new ArrayList<>();
+        credentialList.add(preCredential);
+        credentialList.add(userCredential);
+
+        //put pre-credential and user-credential(based on CPT 111)
+        ResponseData<PresentationE> presentationResp =
+            credentialPojoService.createPresentation(
+                credentialList,
+                policyAndChallenge.getPresentationPolicyE(),
+                policyAndChallenge.getChallenge(),
+                args.getAuth());
+
+        return presentationResp;
+    }
+
+    /**
+     * blind credential signature.
+     */
+    private void blindCredentialSignature(RequestIssueCredentialResponse response, String userId) {
+
+        CredentialPojo credentialPojo = response.getCredentialPojo();
+        Map<String, String> credentialInfoMap = new HashMap<>();
+        Map<String, String> newCredentialInfo = new HashMap<>();
+        try {
+            credentialInfoMap = JsonUtil.credentialToMonolayer(credentialPojo);
+            for (Map.Entry<String, String> entry : credentialInfoMap.entrySet()) {
+                newCredentialInfo.put(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+        } catch (IOException e) {
+            logger.error("[requestIssueCredential] generate credentialInfoMap failed.", e);
+            //return new ResponseData<RequestIssueCredentialResponse>(null, ErrorCode.UNKNOW_ERROR);
+        }
+
+        Integer cptId = credentialPojo.getCptId();
+        ResponseData<CredentialTemplateEntity> resp1 = cptService.queryCredentialTemplate(cptId);
+        CredentialTemplateEntity template = resp1.getResult();
+        String id = new StringBuffer().append(userId).append("_").append(cptId)
+            .toString();
+        ResponseData<String> dbResp = dataDriver
+            .get(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id);
+        if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            throw new DatabaseException("database error!");
+        }
+        String userInfo = dbResp.getResult();
+        Map<String, String> userInfoMap = DataToolUtils.deserialize(userInfo, HashMap.class);
+        String masterSecret = userInfoMap.get("masterSecret");
+        String credentialSecretsBlindingFactors = userInfoMap
+            .get("credentialSecretsBlindingFactors");
+        //有问题
+        UserResult userResult = UserClient.blindCredentialSignature(
+            response.getCredentialSignature(),
+            newCredentialInfo,
+            template,
+            masterSecret,
+            credentialSecretsBlindingFactors,
+            response.getIssuerNonce());
+        String newCredentialSignature = userResult.credentialSignature;
+
+        //String dbKey = (String) preCredential.getClaim()
+        //   .get(CredentialConstant.CREDENTIAL_META_KEY_ID);
+        String dbKey = credentialPojo.getId();
+        ResponseData<Integer> dbResponse =
+            dataDriver.saveOrUpdate(
+                DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
+                dbKey,
+                newCredentialSignature);
+        if (dbResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            throw new DatabaseException("database error!");
+        }
     }
 }
