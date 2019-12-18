@@ -73,6 +73,9 @@ public final class ParamKeyConstant {
     public static final String PROOF_SALT = "salt";
     public static final String PROOF_VERIFICATION_METHOD = "verificationMethod";
     public static final String PROOF_NONCE = "nonce";
+    public static final String PROOF_VERIFICATIONREQUEST = "verificationRequest";
+    public static final String PROOF_ENCODEDVERIFICATIONRULE = "encodedVerificationRule";
+    
 
     /**
      * 秘钥存储KEY.
@@ -80,6 +83,9 @@ public final class ParamKeyConstant {
     public static final String KEY_DATA = "keyData";
     public static final String KEY_VERIFIERS = "verifiers";
     public static final String KEY_EXPIRE = "expirationDate";
+    public static final String MASTER_SECRET = "masterSecret";
+    public static final String BLINDING_FACTORS = "credentialSecretsBlindingFactors";
 
 
+    public static final String TRNSACTION_RECEIPT_STATUS_SUCCESS = "0x0";
 }

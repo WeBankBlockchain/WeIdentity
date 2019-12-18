@@ -22,6 +22,7 @@ package com.webank.weid.service.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
@@ -81,6 +82,7 @@ public class CptServiceImpl extends BaseService implements CptService {
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
+
 
     /**
      * This is used to register a new CPT to the blockchain.
@@ -357,5 +359,14 @@ public class CptServiceImpl extends BaseService implements CptService {
         cptJsonSchemaNew.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
         cptJsonSchemaNew.putAll(cptJsonSchema);
         return DataToolUtils.serialize(cptJsonSchemaNew);
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.CptService#queryCredentialTemplate(java.lang.Integer)
+     */
+    @Override
+    public ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId) {
+
+        return cptServiceEngine.queryCredentialTemplate(cptId);
     }
 }
