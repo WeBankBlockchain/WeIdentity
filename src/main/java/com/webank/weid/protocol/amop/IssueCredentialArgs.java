@@ -27,20 +27,27 @@ import com.webank.weid.protocol.base.PresentationE;
 
 /**
  * args for requesting issuer to issue credential.
+ *
  * @author tonychen 2019年12月4日
  */
 @Getter
 @Setter
 public class IssueCredentialArgs extends AmopBaseMsgArgs {
 
+    /**
+     * user's presentation.
+     */
     private PresentationE presentation;
 
-    private Integer cptId;
-
+    /**
+     * user claim (decided by issuer in the first amop interface).
+     */
     private String claim;
+
+    //private Integer cptId;
 
     private String policyId;
 
-    private String userWeId;
+    //private String userWeId;
 
 }

@@ -21,23 +21,22 @@ package com.webank.weid;
 
 import java.util.List;
 
-import mockit.Mock;
-import mockit.MockUp;
-
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.IssuerClient;
 import com.webank.wedpr.selectivedisclosure.IssuerResult;
 import com.webank.wedpr.selectivedisclosure.proto.TemplatePublicKey;
+import mockit.Mock;
+import mockit.MockUp;
 
 public abstract class MockIssuerClient {
 
-    /** 
+    /**
      * mock the makeCredentialTemplate for CPT.
      */
     public static void mockMakeCredentialTemplate() {
-        
+
         new MockUp<IssuerClient>() {
-            
+
             @Mock
             public IssuerResult makeCredentialTemplate(List<String> list) {
                 IssuerResult restult = new IssuerResult();
