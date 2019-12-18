@@ -278,11 +278,14 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
             List<Address> issuerList = ((DynamicArray<Address>) rawResult.get(1)).getValue();
 
             EvidenceInfo evidenceInfoData = new EvidenceInfo();
-            evidenceInfoData.setCredentialHash(
-                WeIdConstant.HEX_PREFIX + DataToolUtils
-                    .bytes32ToString(credentialHashList.get(0))
-                    + DataToolUtils.bytes32ToString(credentialHashList.get(1)));
-
+            if (credentialHashList.size() < 1) {
+                evidenceInfoData.setCredentialHash(WeIdConstant.HEX_PREFIX);
+            } else {
+                evidenceInfoData.setCredentialHash(
+                    WeIdConstant.HEX_PREFIX + DataToolUtils
+                        .bytes32ToString(credentialHashList.get(0))
+                        + DataToolUtils.bytes32ToString(credentialHashList.get(1)));
+            }
             List<String> signerStringList = new ArrayList<>();
             for (Address addr : issuerList) {
                 signerStringList.add(WeIdUtils.convertAddressToWeId(addr.toString()));
