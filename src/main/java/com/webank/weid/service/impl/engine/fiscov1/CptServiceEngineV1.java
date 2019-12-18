@@ -19,17 +19,30 @@
 
 package com.webank.weid.service.impl.engine.fiscov1;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
+import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
+import com.webank.wedpr.selectivedisclosure.IssuerClient;
+import com.webank.wedpr.selectivedisclosure.IssuerResult;
+import com.webank.wedpr.selectivedisclosure.proto.TemplatePublicKey;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.abi.EventEncoder;
+import org.bcos.web3j.abi.TypeReference;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.abi.datatypes.DynamicArray;
+import org.bcos.web3j.abi.datatypes.DynamicBytes;
+import org.bcos.web3j.abi.datatypes.Event;
 import org.bcos.web3j.abi.datatypes.StaticArray;
 import org.bcos.web3j.abi.datatypes.Type;
 import org.bcos.web3j.abi.datatypes.generated.Bytes32;
@@ -37,15 +50,26 @@ import org.bcos.web3j.abi.datatypes.generated.Int256;
 import org.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.bcos.web3j.abi.datatypes.generated.Uint8;
 import org.bcos.web3j.crypto.Sign;
+import org.bcos.web3j.protocol.Web3j;
+import org.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
+import org.bcos.web3j.protocol.core.methods.response.EthBlock;
+import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.bcos.web3j.protocol.core.methods.response.Log;
+import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.CptController;
+import com.webank.weid.contract.v1.CptController.CredentialTemplateEventResponse;
 import com.webank.weid.contract.v1.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.contract.v1.CptController.UpdateCptRetLogEventResponse;
+import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.DatabaseException;
+import com.webank.weid.exception.ResolveAttributeException;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
@@ -53,7 +77,10 @@ import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -68,8 +95,22 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
     private static CptController cptController;
 
-    static {
+    private static String CREDENTIALTEMPLATETOPIC;
 
+    private static Persistence dataDriver = new MysqlDriver();
+
+    static {
+        Event event = new Event(
+            "CredentialTemplate",
+            Arrays.<TypeReference<?>>asList(),
+            Arrays.<TypeReference<?>>asList(
+                new TypeReference<Uint256>() {
+                },
+                new TypeReference<DynamicBytes>() {
+                },
+                new TypeReference<DynamicBytes>() {
+                }));
+        CREDENTIALTEMPLATETOPIC = EventEncoder.encode(event);
         cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
     }
 
@@ -209,7 +250,17 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getR(),
                 rsvSignature.getS()
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-            return resolveUpdateCptEvents(receipt);
+            ResponseData<CptBaseInfo> response = resolveUpdateCptEvents(receipt);
+            if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+                return response;
+            }
+            ErrorCode errorCode = processTemplate(cptId, cptJsonSchemaNew);
+            int code = errorCode.getCode();
+            if (code != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[updateCpt] save credential template failed. errorcode:{} ", code);
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
+            }
+            return response;
         } catch (TimeoutException e) {
             logger.error("[updateCpt] transaction execute with timeout exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
@@ -247,7 +298,17 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS()
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
-            return resolveRegisterCptEvents(receipt);
+            ResponseData<CptBaseInfo> response = resolveRegisterCptEvents(receipt);
+            if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+                return response;
+            }
+            ErrorCode errorCode = processTemplate(cptId, cptJsonSchemaNew);
+            int code = errorCode.getCode();
+            if (code != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[updateCpt] save credential template failed. errorcode:{} ", code);
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
+            }
+            return response;
         } catch (TimeoutException e) {
             logger.error("[updateCpt] transaction execute with timeout exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
@@ -256,6 +317,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
+
 
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.CptEngineController
@@ -285,7 +347,18 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
                 rsvSignature.getS()
             ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
-            return resolveRegisterCptEvents(receipt);
+            ResponseData<CptBaseInfo> response = resolveRegisterCptEvents(receipt);
+            if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+                return response;
+            }
+            int cptId = response.getResult().getCptId();
+            ErrorCode errorCode = processTemplate(cptId, cptJsonSchemaNew);
+            int code = errorCode.getCode();
+            if (code != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[updateCpt] save credential template failed. errorcode:{} ", code);
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
+            }
+            return response;
         } catch (TimeoutException e) {
             logger.error("[updateCpt] transaction execute with timeout exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
@@ -293,6 +366,37 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             logger.error("[updateCpt] transaction execute with exception. ", e);
             return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
+    }
+
+    private ErrorCode processTemplate(Integer cptId, String cptJsonSchemaNew) {
+
+        List<String> attributeList;
+        try {
+            attributeList = JsonUtil.extractCptProperties(cptJsonSchemaNew);
+
+            IssuerResult issuerResult = IssuerClient.makeCredentialTemplate(attributeList);
+            CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
+            String templateSecretKey = issuerResult.templateSecretKey;
+            ResponseData<Integer> resp =
+                dataDriver.saveOrUpdate(
+                    DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
+                    String.valueOf(cptId),
+                    templateSecretKey);
+            if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[processTemplate] save credential template to db failed.");
+                throw new DatabaseException("database error!");
+            }
+            TransactionReceipt receipt = cptController.putCredentialTemplate(
+                DataToolUtils.intToUint256(cptId),
+                DataToolUtils
+                    .stringToDynamicBytes(template.getPublicKey().getCredentialPublicKey()),
+                DataToolUtils.stringToDynamicBytes(template.getCredentialKeyCorrectnessProof()))
+                .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            logger.error("[processTemplate] process credential template failed.", e);
+            return ErrorCode.CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR;
+        }
+        return ErrorCode.SUCCESS;
     }
 
     /* (non-Javadoc)
@@ -355,5 +459,86 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
         } catch (TimeoutException e) {
             return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.CptServiceEngine#queryCredentialTemplate(
+     * java.lang.Integer)
+     */
+    @Override
+    public ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId) {
+
+        CredentialTemplateEntity credentialTemplateStorage = new CredentialTemplateEntity();
+        Future<Uint256> f = cptController
+            .getCredentialTemplateBlock(DataToolUtils.intToUint256(cptId));
+        EthBlock latestBlock = null;
+        int blockNum = 0;
+        try {
+            blockNum = f.get().getValue().intValue();
+            latestBlock =
+                ((Web3j) getWeb3j())
+                    .ethGetBlockByNumber(
+                        new DefaultBlockParameterNumber(blockNum),
+                        true
+                    )
+                    .send();
+        } catch (IOException | InterruptedException | ExecutionException e) {
+            logger.error(
+                "[queryCredentialTemplate]:get block by number :{} failed. Exception message:{}",
+                blockNum,
+                e
+            );
+        }
+        if (latestBlock == null) {
+            logger.info(
+                "[queryCredentialTemplate]:get block by number :{} . latestBlock is null",
+                blockNum
+            );
+            return new ResponseData<CredentialTemplateEntity>(null, ErrorCode.UNKNOW_ERROR);
+        }
+        List<Transaction> transList =
+            latestBlock
+                .getBlock()
+                .getTransactions()
+                .stream()
+                .map(transactionResult -> (Transaction) transactionResult.get())
+                .collect(Collectors.toList());
+
+        try {
+            for (Transaction transaction : transList) {
+                String transHash = transaction.getHash();
+
+                EthGetTransactionReceipt rec1 = ((Web3j) getWeb3j())
+                    .ethGetTransactionReceipt(transHash)
+                    .send();
+                TransactionReceipt receipt = rec1.getTransactionReceipt().get();
+                List<Log> logs = rec1.getResult().getLogs();
+                for (Log log : logs) {
+                    String topic = log.getTopics().get(0);
+                    if (StringUtils.equals(topic, CREDENTIALTEMPLATETOPIC)) {
+                        List<CredentialTemplateEventResponse> events = CptController
+                            .getCredentialTemplateEvents(receipt);
+                        CredentialTemplateEventResponse eventResp = events.get(0);
+                        String credentialProof = eventResp.credentialProof.getTypeAsString();
+                        String pubKey = eventResp.credentialPublicKey.getTypeAsString();
+                        credentialTemplateStorage.setCredentialKeyCorrectnessProof(credentialProof);
+                        TemplatePublicKey publicKey = TemplatePublicKey.newBuilder()
+                            .setCredentialPublicKey(pubKey).build();
+                        credentialTemplateStorage.setPublicKey(publicKey);
+                    }
+                }
+            }
+        } catch (IOException | DataTypeCastException e) {
+            logger.error(
+                "[queryCredentialTemplate]: get TransactionReceipt by cpt :{} failed.",
+                cptId,
+                e
+            );
+            throw new ResolveAttributeException(
+                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc());
+        }
+        return new ResponseData<CredentialTemplateEntity>(credentialTemplateStorage,
+            ErrorCode.SUCCESS);
     }
 }
