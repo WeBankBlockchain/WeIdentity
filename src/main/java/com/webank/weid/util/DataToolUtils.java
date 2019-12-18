@@ -1055,6 +1055,23 @@ public final class DataToolUtils {
     }
 
     /**
+     * convert byte array to string.
+     * @param bytearray byte[]
+     * @return String
+     */
+    public static String byteToString(byte[] bytearray) {
+        String result = "";
+        char temp;
+
+        int length = bytearray.length;
+        for (int i = 0; i < length; i++) {
+            temp = (char) bytearray[i];
+            result += temp;
+        }
+        return result;
+    }
+    
+    /**
      * string to byte.
      *
      * @param value stringData
