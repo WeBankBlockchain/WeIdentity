@@ -253,9 +253,13 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             List<String> issuerList = rawResult.getValue2();
 
             EvidenceInfo evidenceInfoData = new EvidenceInfo();
-            evidenceInfoData.setCredentialHash(
-                WeIdConstant.HEX_PREFIX + new String(credentialHashList.get(0)).trim()
-                    + new String(credentialHashList.get(1)).trim());
+            if (credentialHashList.size() < 1) {
+                evidenceInfoData.setCredentialHash(WeIdConstant.HEX_PREFIX);
+            } else {
+                evidenceInfoData.setCredentialHash(
+                    WeIdConstant.HEX_PREFIX + new String(credentialHashList.get(0)).trim()
+                        + new String(credentialHashList.get(1)).trim());
+            }
 
             List<String> signerStringList = new ArrayList<>();
             for (String addr : issuerList) {
