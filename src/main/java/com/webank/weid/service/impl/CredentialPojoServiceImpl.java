@@ -1525,7 +1525,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicy.getPolicy();
 
         String policyType = presentationPolicy.getPolicyType();
-        if (StringUtils.equals(policyType, "zkp")) {
+        if (StringUtils.equals(policyType, CredentialConstant.ZKP_CREDENTIAL_TYPE)) {
             newCredentialList = generateZkpCredentialList(credentialList, presentationPolicy,
                 userId);
         } else {
@@ -1694,6 +1694,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
     /**
      * generate credential based on cpt 111.
+     *
      * @param weIdAuthentication auth
      * @param cptId cpt id
      * @param credentialSignatureRequest credentialSignatureRequest
