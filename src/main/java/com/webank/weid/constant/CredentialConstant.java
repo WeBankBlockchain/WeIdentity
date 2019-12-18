@@ -131,6 +131,21 @@ public final class CredentialConstant {
     public static final Integer SERVICE_ENDPOINT_CPT = 105;
 
     /**
+     * metadata CPT ID.
+     */
+    public static final Integer METADATA_CPT = 110;
+
+    /**
+     * user credential info CPT ID.
+     */
+    public static final Integer USER_CREDENTIAL_INFO_CPT = 111;
+
+    /**
+     * CPT key words.
+     */
+    public static final String[] CPT_KEY_WORDS = {"GE", "LE", "GT", "LT", "EQ"};
+
+    /**
      * The Credential Proof Type Enumerate.
      */
     public static enum CredentialProofType {

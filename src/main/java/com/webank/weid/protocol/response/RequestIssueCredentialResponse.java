@@ -26,6 +26,7 @@ import com.webank.weid.protocol.base.CredentialPojo;
 
 /**
  * response for requesting issuer to issue credential.
+ *
  * @author tonychen 2019年12月4日
  */
 @Getter
