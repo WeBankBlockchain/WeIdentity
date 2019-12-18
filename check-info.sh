@@ -148,6 +148,7 @@ function check_user_config() {
 		else
 			echo "the client.keystore is exists and the MD5 is `md5sum $client_keystore  | cut -d " " -f1`"		
 		fi
+		JAVA_OPTS=''
 	elif [[ $bcos_version == 2* ]];
 	then
 		if [ ! -f "$node_crt" ];
@@ -257,7 +258,7 @@ function check_node_version() {
 			isSdk=0
 			echo "your project includes the weid-java-sdk, this is: "$file
 			get_the_version $file
-			if [ `echo "$sdk_version < $version_default" | bc` -eq 1 ]
+			if [[ $(echo "${sdk_version} < ${version_default}" | bc) -eq 1 ]]
 			then
 				echo "WARN: the current version of SDK does not support to check the node version, minimum version 1.4.0"
 			else
@@ -275,7 +276,7 @@ function check_node_version() {
 				if [[ $file == weid-java-sdk-*.jar ]];
 				then
 					get_the_version $file
-					if [ `echo "$sdk_version < $version_default" | bc` -eq 1 ]
+					if [[ $(echo "${sdk_version} < ${version_default}" | bc) -eq 1 ]]
 					then
 						echo "WARN: the current version of SDK does not support to check the node version, minimum version 1.4.0"
 					else
