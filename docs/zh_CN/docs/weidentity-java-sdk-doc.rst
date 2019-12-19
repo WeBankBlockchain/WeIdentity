@@ -11613,7 +11613,7 @@ com.webank.weid.protocol.base.Credential
 
 
 9. createTrustedTimestamp
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
