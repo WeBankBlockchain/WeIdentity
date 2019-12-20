@@ -133,6 +133,8 @@ WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestSer
 如何贡献
 --------
 
+* 我们所有的贡献者名单页面在 \ `这里 <./ALLCONTRIBUTOR.md>`_ 。感谢大家为WeIdentity付出的心血！
+
 *
    详见：\ `如何贡献 <https://github.com/WeBankFinTech/WeIdentity/blob/master/.github/CONTRIBUTING.md>`_
 
