@@ -20,7 +20,6 @@
 package com.webank.weid.service.impl;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +44,7 @@ import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.base.PolicyAndPreCredential;
 import com.webank.weid.protocol.base.PresentationE;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
@@ -62,6 +62,7 @@ import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
+import com.webank.weid.util.WeIdUtils;
 
 
 /**
@@ -206,6 +207,15 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String toOrgId,
         RequestIssueCredentialArgs args) {
 
+        int checkErrorCode = checkIssueCredentialArgs(args).getCode();
+        if (checkErrorCode != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[requestIssueCredential] prepareZkpCredential failed. error code :{}",
+                checkErrorCode);
+            return new ResponseData<RequestIssueCredentialResponse>(null,
+                ErrorCode.getTypeByErrorCode(checkErrorCode));
+        }
+
         //1. user genenerate credential based on CPT111
         PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
         String claimJson = policyAndPreCredential.getClaim();
@@ -217,7 +227,8 @@ public class AmopServiceImpl extends BaseService implements AmopService {
                 args.getAuth());
         int errCode = userCredentialResp.getErrorCode();
         if (errCode != ErrorCode.SUCCESS.getCode()) {
-            logger.error("[requestIssueCredential] prepareZkpCredential failed. error code :{}",
+            logger.error(
+                "[requestIssueCredential] prepareZkpCredential failed. error code :{}",
                 errCode);
             return new ResponseData<RequestIssueCredentialResponse>(null,
                 ErrorCode.getTypeByErrorCode(errCode));
@@ -228,7 +239,8 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         ResponseData<PresentationE> presentationResp = preparePresentation(args, userCredential);
         int errorCode = presentationResp.getErrorCode();
         if (errorCode != ErrorCode.SUCCESS.getCode()) {
-            logger.error("[requestIssueCredential] create presentation failed. error code :{}",
+            logger.error(
+                "[requestIssueCredential] create presentation failed. error code :{}",
                 errorCode);
             return new ResponseData<RequestIssueCredentialResponse>(null,
                 ErrorCode.getTypeByErrorCode(errorCode));
@@ -237,7 +249,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         //3. send presentataion to issuer and request issue credential.
         PresentationE presentation = presentationResp.getResult();
         ResponseData<RequestIssueCredentialResponse> resp =
-            requestIssueCredential(
+            requestIssueCredentialInner(
                 toOrgId,
                 args,
                 userCredential,
@@ -252,7 +264,36 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         return resp;
     }
 
-    private ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
+    private ErrorCode checkIssueCredentialArgs(RequestIssueCredentialArgs args) {
+
+        if (args == null
+            || args.getAuth() == null
+            || args.getPolicyAndPreCredential() == null
+            || args.getCredentialList() == null) {
+
+            return ErrorCode.ILLEGAL_INPUT;
+
+        }
+        PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
+        PolicyAndChallenge policyAndChallenge = policyAndPreCredential.getPolicyAndChallenge();
+        if (policyAndChallenge == null
+            || policyAndChallenge.getChallenge() == null
+            || policyAndChallenge.getPresentationPolicyE() == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        WeIdAuthentication auth = args.getAuth();
+        if (!WeIdUtils.isWeIdValid(auth.getWeId())) {
+            return ErrorCode.WEID_INVALID;
+        }
+        if (!WeIdUtils
+            .isKeypairMatch(auth.getWeIdPrivateKey().getPrivateKey(), auth.getWeIdPublicKeyId())) {
+            return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
+        }
+
+        return ErrorCode.SUCCESS;
+    }
+
+    private ResponseData<RequestIssueCredentialResponse> requestIssueCredentialInner(
         String toOrgId,
         RequestIssueCredentialArgs args,
         CredentialPojo userCredential,
@@ -260,15 +301,10 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 
         //prepare request args
         String claimJson = args.getPolicyAndPreCredential().getClaim();
-        //Integer cptId = Integer.valueOf((String) (userCredential.getClaim()
-        //.get(CredentialConstant.CREDENTIAL_META_KEY_CPTID)));
         IssueCredentialArgs issueCredentialArgs = new IssueCredentialArgs();
         issueCredentialArgs.setClaim(claimJson);
-        //issueCredentialArgs.setCptId(cptId);
-        //issueCredentialArgs.setUserWeId(args.getAuth().getWeId());
         issueCredentialArgs.setPolicyId(args.getPolicyId());
         issueCredentialArgs.setPresentation(presentation);
-        //JsonTransportation transportation = TransportationFactory.newJsonTransportation();
 
         // AMOP request (issuer to issue credential)
         ResponseData<RequestIssueCredentialResponse> resp = this.getImpl(
@@ -287,12 +323,10 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         RequestIssueCredentialArgs args,
         CredentialPojo userCredential) {
 
+        List<CredentialPojo> credentialList = args.getCredentialList();
         PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
-        CredentialPojo preCredential = policyAndPreCredential.getPreCredential();
         PolicyAndChallenge policyAndChallenge = policyAndPreCredential.getPolicyAndChallenge();
 
-        List<CredentialPojo> credentialList = new ArrayList<>();
-        credentialList.add(preCredential);
         credentialList.add(userCredential);
 
         //put pre-credential and user-credential(based on CPT 111)

@@ -45,6 +45,9 @@ domain.credentialSignature=datasource1:credential_signature
 # Salt length for Proof creation.
 salt.length=5
 
+# Default length of array value in CPT when creating credential based on ZKP.
+zkp.cpt.array.length=5
+
 # AMOP Config
 # Timeout for amop request, default: 5000ms
 amop.request.timeout=5000
