@@ -219,7 +219,7 @@ public class JsonUtil {
 
     private static int maxArraySize() {
 
-        return Integer.parseInt(PropertyUtils.getProperty("cpt.array.length", "-1"));
+        return Integer.parseInt(PropertyUtils.getProperty("zkp.cpt.array.length", "-1"));
     }
 
     private static Map<String, String> monolayerToMap(String json) throws IOException {
