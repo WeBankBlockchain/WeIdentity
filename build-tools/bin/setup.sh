@@ -133,6 +133,12 @@ function gradle_build_sdk()
 	    fi
       
     done
+    
+    if [[ $bcos_version == 1 ]];
+    then
+        JAVA_OPTS=''
+    fi
+    
 	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
 	export WEID_ADDRESS="0x0"
     export CPT_ADDRESS="0x0"
