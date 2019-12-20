@@ -126,6 +126,13 @@ Diving in
 Now, please feel free to dive in via \ `this page <https://weidentity.readthedocs.io/zh_CN/latest/docs/one-stop-experience.html>`_ for a one-stop experience of WeIdentity.
 
 
+
+Contributions
+---------------
+
+You can find all our contributors in \ `this page <./ALLCONTRIBUTOR.md>`_ . Thanks for everything these guys have done for WeIdentity!
+
+
 Contact Us
 ----------
 
