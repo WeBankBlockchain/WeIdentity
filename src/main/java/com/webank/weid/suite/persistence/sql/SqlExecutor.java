@@ -65,7 +65,8 @@ public class SqlExecutor {
     /**
      * sql for save.
      */
-    public static final String SQL_SAVE = "insert into $1(id, data, expire) values(?,?,?)";
+    public static final String SQL_SAVE = "insert into $1(id, data, expire, created, updated) "
+        + "values(?,?,?,?,?)";
 
     /**
      * sql for update.
