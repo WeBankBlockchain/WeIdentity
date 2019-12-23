@@ -7,7 +7,7 @@ weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties
 weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
 font=${java_source_code_dir}/src/main/resources/NotoSansCJKtc-Regular.ttf
 
-JAVA_OPTS='-Djdk.tls.namedGroups="secp256k1"'
+JAVA_OPTS='-Djdk.tls.namedGroups="secp256r1,secp256k1"'
 
 function modify_config()
 {
