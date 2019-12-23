@@ -85,7 +85,7 @@ public abstract class BaseEngine extends BaseService {
             logger.info(cls.getSimpleName() + " init succ");
         } catch (Exception e) {
             logger.error("load contract :{} failed. Error message is :{}",
-                cls.getSimpleName(), e);
+                cls.getSimpleName(), e.getMessage(), e);
             throw new LoadContractException();
         }
 
@@ -116,11 +116,11 @@ public abstract class BaseEngine extends BaseService {
 
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             logger.error("load contract :{} failed. Error message is :{}",
-                cls.getSimpleName(), e);
+                cls.getSimpleName(), e.getMessage(), e);
             throw new LoadContractException();
         } catch (Exception e) {
             logger.error("load contract Exception:{} failed. Error message is :{}",
-                cls.getSimpleName(), e);
+                cls.getSimpleName(), e.getMessage(), e);
             throw new LoadContractException();
         }
 
