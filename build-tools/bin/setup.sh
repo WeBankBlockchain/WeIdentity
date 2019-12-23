@@ -8,7 +8,7 @@ app_xml_config=${java_source_code_dir}/src/main/resources/fisco.properties
 weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties.tpl
 weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
 
-JAVA_OPTS='-Djdk.tls.namedGroups="secp256k1"'
+JAVA_OPTS='-Djdk.tls.namedGroups="secp256r1,secp256k1"'
 
 CLASSPATH=${java_source_code_dir}/dist/conf
 
@@ -133,11 +133,6 @@ function gradle_build_sdk()
 	    fi
       
     done
-    
-    if [[ $bcos_version == 1 ]];
-    then
-        JAVA_OPTS=''
-    fi
     
 	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
 	export WEID_ADDRESS="0x0"
