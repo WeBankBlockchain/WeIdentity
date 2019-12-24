@@ -145,7 +145,8 @@ public class MysqlDriver implements Persistence {
         String dataKey = DataToolUtils.getHash(id);
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
-            Object[] datas = {dataKey, data, sqlDomain.getExpire()};
+            Date now = sqlDomain.getNow();
+            Object[] datas = {dataKey, data, sqlDomain.getExpire(), now, now};
             return new SqlExecutor(sqlDomain).execute(SqlExecutor.SQL_SAVE, datas);
         } catch (WeIdBaseException e) {
             logger.error("[mysql->save] save the data error.", e);
