@@ -38,7 +38,7 @@ public class Cpt110 {
      * credential id.
      */
     @Attributes(required = true, description = "credential ID")
-    private String id;
+    private String credentialId;
 
     /**
      * Required: The context field.
