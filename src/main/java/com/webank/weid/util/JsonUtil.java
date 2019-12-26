@@ -39,9 +39,10 @@ import java.util.stream.IntStream;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.fge.jackson.JsonLoader;
 import com.google.common.collect.Lists;
 import com.sun.codemodel.ClassType;
@@ -373,7 +374,7 @@ public class JsonUtil {
             node.forEach(childNode -> arrayNode.add(cloneNodewithNullNode(childNode)));
             return arrayNode;
         } else {
-            return NullNode.instance;
+            return TextNode.valueOf(StringUtils.EMPTY);
         }
     }
 
@@ -388,7 +389,11 @@ public class JsonUtil {
             ArrayNode array = resultNode.putArray(key);
             value.forEach(childNode -> array.add(cloneNodewithNullNode(childNode)));
         } else {
-            resultNode.set(key, NullNode.instance);
+            if (value.isBigDecimal()) {
+                resultNode.set(key, IntNode.valueOf(0));
+            } else {
+                resultNode.set(key, TextNode.valueOf(StringUtils.EMPTY));
+            }
         }
     }
 
