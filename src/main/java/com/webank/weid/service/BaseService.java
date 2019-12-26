@@ -65,7 +65,7 @@ public abstract class BaseService {
         //NativeUtils.loadLibraryFromJar( "/WeDPR_dynamic_lib/libeay32md.dll");
         //NativeUtils.loadLibraryFromJar( "/WeDPR_dynamic_lib/ssleay32md.dll");
         //} catch (IOException e) {
-        //// TODO Auto-generated catch block
+        // TODO Auto-generated catch block
         //e.printStackTrace();
         //}
     }

@@ -28,7 +28,7 @@ import lombok.Data;
  * @author tonychen
  */
 @Data
-@Attributes(title = "test CPT", description = "Reserved CPT 111")
+@Attributes(title = "User CPT", description = "Reserved CPT 111")
 public class Cpt111 {
 
     @Attributes(required = true, description = "CPT ID")
