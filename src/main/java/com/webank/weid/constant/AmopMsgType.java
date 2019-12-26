@@ -21,11 +21,13 @@ import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
+import com.webank.weid.protocol.amop.IssueCredentialArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
 import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
+import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
@@ -125,6 +127,14 @@ public enum AmopMsgType {
                 GetPolicyAndPreCredentialArgs args =
                     DataToolUtils.deserialize(msgBodyStr, GetPolicyAndPreCredentialArgs.class);
                 PolicyAndPreCredentialResponse result = amopCallback.onPush(args);
+                resultBodyStr = DataToolUtils.serialize(result);
+                break;
+            }
+            case REQUEST_SIGN_CREDENTIAL: {
+                // GET POLICY AND CHALLENGE
+                IssueCredentialArgs args =
+                    DataToolUtils.deserialize(msgBodyStr, IssueCredentialArgs.class);
+                RequestIssueCredentialResponse result = amopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }

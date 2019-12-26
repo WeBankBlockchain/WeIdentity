@@ -49,9 +49,9 @@ public class RequestIssueCredentialArgs extends AmopBaseMsgArgs {
     private List<CredentialPojo> credentialList;
 
     /**
-     * policy id.
+     * user's claim.
      */
-    private String policyId;
+    private String claim;
 
     /**
      * user's authentication.
