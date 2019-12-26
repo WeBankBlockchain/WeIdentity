@@ -67,6 +67,7 @@ import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
 import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.TransactionUtils;
@@ -250,6 +251,10 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     private ErrorCode processTemplate(Integer cptId, String cptJsonSchemaNew) {
 
+        //if the cpt is not zkp type, no need to make template.
+        if (!CredentialPojoUtils.isZkpCpt(cptId)) {
+            return ErrorCode.SUCCESS;
+        }
         List<String> attributeList;
         try {
             attributeList = JsonUtil.extractCptProperties(cptJsonSchemaNew);
