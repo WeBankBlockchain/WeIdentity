@@ -624,8 +624,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static ResponseData<Boolean> verifyZkpCredential(CredentialPojo credential) {
 
         Map<String, Object> proof = credential.getProof();
-        String encodedVerificationRule = (String) proof.get("encodedVerificationRule");
-        String verificationRequest = (String) proof.get("verificationRequest");
+        String encodedVerificationRule = (String) proof
+            .get(ParamKeyConstant.PROOF_ENCODEDVERIFICATIONRULE);
+        String verificationRequest = (String) proof.get(ParamKeyConstant.PROOF_VERIFICATIONREQUEST);
         VerifierResult verifierResult =
             VerifierClient.verifyProof(encodedVerificationRule, verificationRequest);
         if (verifierResult.wedprErrorMessage == null) {
@@ -1382,28 +1383,28 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         String disclosure = claimPolicy.getFieldsToBeDisclosed();
         Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
-        //Object idValue = disclosureMap.get("id");
-        //if (idValue != null) {
-        //Object weid = credentialPojo.getClaim().get("id");
-        //if (StringUtils.equals(String.valueOf(idValue), DISCLOSED)) {
-        //if (!StringUtils.equals(String.valueOf(weid), presenterWeId)) {
-        //logger.error(
-        //"[verifyPolicy] the presenter weid->{} of presentation does not "
-        //+ "match the credential's ->{}. ",
-        //presenterWeId,
-        //weid);
-        //return ErrorCode.PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH;
-        //}
-        //} else if (StringUtils.equals(String.valueOf(idValue), EXISTED)
-        //&& !credentialPojo.getClaim().containsKey("id")) {
-        //logger.error(
-        //"[verifyPolicy] the presenter weid->{} of presentation does not "
-        //+ "match the credential's ->{}. ",
-        //presenterWeId,
-        //weid);
-        //return ErrorCode.PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST;
-        //}
-        //}
+        Object idValue = disclosureMap.get("id");
+        if (idValue != null) {
+            Object weid = credentialPojo.getClaim().get("id");
+            if (StringUtils.equals(String.valueOf(idValue), DISCLOSED)) {
+                if (!StringUtils.equals(String.valueOf(weid), presenterWeId)) {
+                    logger.error(
+                        "[verifyPolicy] the presenter weid->{} of presentation does not "
+                            + "match the credential's ->{}. ",
+                        presenterWeId,
+                        weid);
+                    return ErrorCode.PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH;
+                }
+            } else if (StringUtils.equals(String.valueOf(idValue), EXISTED)
+                && !credentialPojo.getClaim().containsKey("id")) {
+                logger.error(
+                    "[verifyPolicy] the presenter weid->{} of presentation does not "
+                        + "match the credential's ->{}. ",
+                    presenterWeId,
+                    weid);
+                return ErrorCode.PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST;
+            }
+        }
         return this.verifyDisclosureAndSalt(disclosureMap, saltMap);
     }
 
@@ -1713,7 +1714,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         CreateCredentialPojoArgs args = new CreateCredentialPojoArgs();
         args.setClaim(cpt111);
         args.setWeIdAuthentication(weIdAuthentication);
-        args.setCptId(111);
+        args.setCptId(CredentialConstant.ZKP_USER_NONCE_CPT);
         args.setIssuer(weIdAuthentication.getWeId());
         //args.setId(preCredential.getId());
         args.setIssuanceDate(System.currentTimeMillis());
@@ -1778,15 +1779,16 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     masterSecret); //from db
 
             String verificationRequest = userResult.verificationRequest;
-            credentialClone
+            CredentialPojo zkpCredential = new CredentialPojo();
+            zkpCredential
                 .putProofValue(ParamKeyConstant.PROOF_VERIFICATIONREQUEST, verificationRequest);
-            credentialClone.putProofValue(ParamKeyConstant.PROOF_ENCODEDVERIFICATIONRULE,
+            zkpCredential.putProofValue(ParamKeyConstant.PROOF_ENCODEDVERIFICATIONRULE,
                 encodedVerificationRule);
             List<String> zkpTyps = new ArrayList<>();
             zkpTyps.add(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
             zkpTyps.add(CredentialConstant.ZKP_CREDENTIAL_TYPE);
-            credentialClone.setType(zkpTyps);
-            return new ResponseData<CredentialPojo>(credentialClone, ErrorCode.SUCCESS);
+            zkpCredential.setType(zkpTyps);
+            return new ResponseData<CredentialPojo>(zkpCredential, ErrorCode.SUCCESS);
         } catch (DataTypeCastException e) {
             logger.error("Generate SelectiveCredential failed, "
                 + "credential disclosure data type illegal. ", e);
