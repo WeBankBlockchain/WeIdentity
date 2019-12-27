@@ -11612,6 +11612,7 @@ com.webank.weid.protocol.base.Credential
    CredentialPojoService-->>调用者: 返回凭证
 
 
+
 9. createTrustedTimestamp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -11620,7 +11621,7 @@ com.webank.weid.protocol.base.Credential
 .. code-block:: text
 
    接口名称:com.webank.weid.rpc.CredentialPojoService.createTrustedTimestamp
-   接口定义:ResponseData<Credential> createTrustedTimestamp(List<Credential> credentialList, WeIdAuthentication weIdAuthentication)
+   接口定义:ResponseData<CredentialPojo> createTrustedTimestamp(List<CredentialPojo> credentialList, WeIdAuthentication weIdAuthentication)
    接口描述: 使用第三方可信时间戳服务，创建一个可信时间戳凭证。
 
 .. note::
@@ -11833,29 +11834,24 @@ com.webank.weid.protocol.base.CredentialPojo
    * - TIMESTAMP_SERVICE_BASE_ERROR
      - 100433
      - 时间戳服务一般错误，请参照log检查具体错误
-     - TIMESTAMP_SERVICE_UNCONFIGURED
+   * - CREDENTIAL_SYSTEM_CPT_CLAIM_VERIFY_ERROR
+     - 100434
+     - 凭证签名验证通过，但是内部系统CPT内容验证失败
+   * - TIMESTAMP_SERVICE_UNCONFIGURED
      - 100435
      - 时间戳服务未配置
-     - TIMESTAMP_SERVICE_WESIGN_ERROR
+   * - TIMESTAMP_SERVICE_WESIGN_ERROR
      - 100436
      - 时间戳服务微鉴证侧出错，请参照log检查具体错误
+   * - TIMESTAMP_VERIFICATION_FAILED
+     - 100437
+     - 时间戳验证不通过（可能是hash值/时间/时间戳签名任一错误）
    * - TIMESTAMP_CREATION_FAILED_FOR_SELECTIVELY_DISCLOSED
      - 100438
      - 时间戳服务不支持对已经选择性披露的凭证进行创建时间戳
    * - ILLEGAL_INPUT
      - 160004
      - 参数为空
-
-    /**
-     * System CPT Claim verification failure.
-     */
-    CREDENTIAL_SYSTEM_CPT_CLAIM_VERIFY_ERROR(100434, "external credential verify"
-        + " succeeded, but inner content verify failed"),
-
-    /**
-     * Timestamp verification failed.
-     */
-    TIMESTAMP_VERIFICATION_FAILED(100437, "timestamp verification failed"),
 
 **调用示例**
 
@@ -11966,7 +11962,7 @@ com.webank.weid.protocol.base.CredentialPojo
         "claimHash": "0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13"
         },
         "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
-        "cptId": 107,
+        "cptId": 108,
         "expirationDate": 1567491842,
         "id": "ad5d5a54-4574-4b3b-b1df-9d0687b6a0ac",
         "issuanceDate": 1567405359,
