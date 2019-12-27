@@ -440,8 +440,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             .contains(TimestampUtils.WESIGN_AUTHORITY_NAME)) {
             String hashValue = (String) claim.get("claimHash");
             String authoritySignature = (String) claim.get("authoritySignature");
+            Long timestamp = (long) claim.get("timestamp");
             ResponseData<Boolean> resp =
-                TimestampUtils.verifyWeSignTimestamp(hashValue, authoritySignature);
+                TimestampUtils.verifyWeSignTimestamp(hashValue, authoritySignature, timestamp);
             if (!resp.getResult()) {
                 return ErrorCode.getTypeByErrorCode(resp.getErrorCode());
             }
