@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JAVA_OPTS='-Djdk.tls.namedGroups="secp256k1"'
+JAVA_OPTS='-Djdk.tls.namedGroups="secp256r1,secp256k1"'
 classpathDir="./dist/conf"
 libDir="./dist/lib"
 set -- `getopt c:l: "$@"`
@@ -148,7 +148,6 @@ function check_user_config() {
 		else
 			echo "the client.keystore is exists and the MD5 is `md5sum $client_keystore  | cut -d " " -f1`"		
 		fi
-		JAVA_OPTS=''
 	elif [[ $bcos_version == 2* ]];
 	then
 		if [ ! -f "$node_crt" ];
