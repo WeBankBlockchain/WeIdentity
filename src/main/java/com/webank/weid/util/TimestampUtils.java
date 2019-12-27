@@ -128,7 +128,8 @@ public class TimestampUtils {
      */
     public static ResponseData<Boolean> verifyWeSignTimestamp(
         String hashValue,
-        String authoritySignature) {
+        String authoritySignature,
+        Long timestamp) {
         if (StringUtils.isBlank(PropertyUtils.getProperty("wesign.accessTokenUrl"))) {
             logger.error("WeSign configuration not ready.");
             return new ResponseData<>(false, ErrorCode.TIMESTAMP_SERVICE_UNCONFIGURED);
@@ -142,6 +143,10 @@ public class TimestampUtils {
             VerifyTimestampResponse verifyResp = TimestampUtils
                 .verifyTimestamp(signParam, nonce, weSignHash, timestampValue);
             if (verifyResp.getCode() != 0) {
+                return new ResponseData<>(false, ErrorCode.TIMESTAMP_VERIFICATION_FAILED);
+            }
+            Long verifiedTimestamp = verifyResp.getResult().getData().getSignTime().getTime();
+            if (!verifiedTimestamp.equals(timestamp)) {
                 return new ResponseData<>(false, ErrorCode.TIMESTAMP_VERIFICATION_FAILED);
             }
             return new ResponseData<>(true, ErrorCode.SUCCESS);
