@@ -81,6 +81,7 @@ public class JsonUtil {
      *
      * @param cptJsonSchema Map类型的JsonSchema
      * @return 返回有效Key的集合
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static List<String> extractCptProperties(Map<String, Object> cptJsonSchema)
         throws IOException {
@@ -93,6 +94,7 @@ public class JsonUtil {
      *
      * @param cptJsonSchema Json类型的JsonSchema
      * @return 返回有效Key的集合
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static List<String> extractCptProperties(String cptJsonSchema) throws IOException {
 
@@ -209,6 +211,7 @@ public class JsonUtil {
      *
      * @param credential 凭证
      * @return 返回处理后的平级Json
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static Map<String, String> credentialToMonolayer(CredentialPojo credential)
         throws IOException {
@@ -237,6 +240,7 @@ public class JsonUtil {
      *
      * @param claimPolicy 披露策略
      * @return 返回处理后的平级Json
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static String claimPolicyToMonolayer(ClaimPolicy claimPolicy) throws IOException {
 
@@ -249,7 +253,9 @@ public class JsonUtil {
      * 将多级Json转换成平级Json，无补全处理.
      *
      * @param json 多级Json字符串
+     * @param radix 需要转换的进制
      * @return 返回平级Json
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static String jsonToMonolayer(String json, int radix) throws IOException {
 
@@ -260,6 +266,7 @@ public class JsonUtil {
      * 将多级Json转换成平级Json.
      *
      * @param jsonNode 多级的JsonNode
+     * @param radix 需要转换的进制
      * @return 返回平级Json
      */
     public static String jsonToMonolayer(JsonNode jsonNode, int radix) {
@@ -554,7 +561,10 @@ public class JsonUtil {
     }
 
     /**
-     * 带循环下标的循环.
+     *  带循环下标的循环.
+     * @param <T> 循环出来的泛型对象
+     * @param consumer 用户包装循环的Consumer
+     * @return  包装了循环出来的对象和下标的对象
      */
     public static <T> Consumer<T> consumerWithIndex(BiConsumer<T, Integer> consumer) {
 
@@ -574,7 +584,9 @@ public class JsonUtil {
      * 将平级Json转换成多级Json.
      *
      * @param json 平级Json字符串
+     * @param radix 需要转换的进制
      * @return 返回一个多级的Json字符串
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static String monolayerToJson(String json, int radix) throws IOException {
 
@@ -585,6 +597,7 @@ public class JsonUtil {
      * 将平级Json转换成多级Json.
      *
      * @param jsonNode 平级JsonNode对象
+     * @param radix 需要转换的进制
      * @return 返回一个多级的Json字符串
      */
     public static String monolayerToJson(JsonNode jsonNode, int radix) {
