@@ -119,6 +119,15 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
         Assert.assertFalse(respData.getResult());
         Assert.assertEquals(respData.getErrorCode().intValue(),
             ErrorCode.TIMESTAMP_VERIFICATION_FAILED.getCode());
+        modifiedTsCred = copyCredentialPojo(tscred);
+        claim = modifiedTsCred.getClaim();
+        Long stamptime = (long) claim.get("timestamp");
+        claim.put("timestamp", stamptime - 100);
+        modifiedTsCred.setClaim(claim);
+        respData = credentialPojoService.verify(modifiedTsCred.getIssuer(), modifiedTsCred);
+        Assert.assertFalse(respData.getResult());
+        Assert.assertEquals(respData.getErrorCode().intValue(),
+            ErrorCode.TIMESTAMP_VERIFICATION_FAILED.getCode());
 
         // SD credential should fail.
         credPojoList = new ArrayList<>();
@@ -235,8 +244,8 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
     }
 
     /**
-     * case：when issuer is register authentication issuer， cpt publisher is not auth issuer,
-     * createCredentialPojo success.
+     * case：when issuer is register authentication issuer,
+     * cpt publisher is not auth issuer, createCredentialPojo success.
      */
     @Test
     public void testCreateCredentialPojo_authenticationIssuerSuccess() {
