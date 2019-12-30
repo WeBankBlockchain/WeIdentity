@@ -23,7 +23,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
-import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 
 /**
@@ -41,19 +40,11 @@ public class IssueCredentialArgs extends AmopBaseMsgArgs {
     private PresentationE presentation;
 
     /**
-     * credential based on CPT 110 (metadata credential).
-     */
-    private CredentialPojo credentialPojo;
-
-    /**
-     * user claim (decided by issuer in the first amop interface).
+     * user claim (decided by user).
      */
     private String claim;
 
-    //private Integer cptId;
 
     private String policyId;
-
-    //private String userWeId;
 
 }

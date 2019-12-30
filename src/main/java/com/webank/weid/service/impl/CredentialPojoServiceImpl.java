@@ -338,7 +338,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static void addSelectSalt(
         Map<String, Object> disclosureMap,
         Map<String, Object> saltMap,
-        Map<String, Object> claim
+        Map<String, Object> claim,
+        boolean isZkp
     ) {
         for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
             String disclosureKey = entry.getKey();
@@ -347,16 +348,17 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             Object claimV = claim.get(disclosureKey);
             if (value == null) {
                 throw new WeIdBaseException(ErrorCode.CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL);
-            } else if (value instanceof Map) {
-                addSelectSalt((HashMap) value, (HashMap) saltV, (HashMap) claimV);
+            } else if ((value instanceof Map) && (claimV instanceof Map)) {
+                addSelectSalt((HashMap) value, (HashMap) saltV, (HashMap) claimV, isZkp);
             } else if (value instanceof List) {
                 addSaltForList(
                     (ArrayList<Object>) value,
                     (ArrayList<Object>) saltV,
-                    (ArrayList<Object>) claimV
+                    (ArrayList<Object>) claimV,
+                    isZkp
                 );
             } else {
-                addHashToClaim(saltMap, claim, disclosureKey, value, saltV, claimV);
+                addHashToClaim(saltMap, claim, disclosureKey, value, saltV, claimV, isZkp);
             }
         }
     }
@@ -367,33 +369,52 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         String disclosureKey,
         Object value,
         Object saltV,
-        Object claimV
+        Object claimV,
+        boolean isZkp
     ) {
-        if (((Integer) value).equals(Integer.parseInt(NOT_DISCLOSED))
-            && claim.containsKey(disclosureKey)) {
-            saltMap.put(disclosureKey, NOT_DISCLOSED);
-            String hash =
-                CredentialPojoUtils.getFieldSaltHash(
-                    String.valueOf(claimV),
-                    String.valueOf(saltV)
-                );
-            claim.put(disclosureKey, hash);
+
+        if (isZkp) {
+            if ((value instanceof Map) || !(((Integer) value).equals(Integer.parseInt(DISCLOSED))
+                && claim.containsKey(disclosureKey))) {
+                String hash =
+                    CredentialPojoUtils.getFieldSaltHash(
+                        String.valueOf(claimV),
+                        String.valueOf(saltV)
+                    );
+                claim.put(disclosureKey, hash);
+            }
+        } else {
+
+            if (((Integer) value).equals(Integer.parseInt(NOT_DISCLOSED))
+                && claim.containsKey(disclosureKey)) {
+                saltMap.put(disclosureKey, NOT_DISCLOSED);
+                String hash =
+                    CredentialPojoUtils.getFieldSaltHash(
+                        String.valueOf(claimV),
+                        String.valueOf(saltV)
+                    );
+                claim.put(disclosureKey, hash);
+            }
         }
     }
 
-    private static void addSaltForList(List<Object> disclosures, List<Object> salt,
-        List<Object> claim) {
+    private static void addSaltForList(
+        List<Object> disclosures,
+        List<Object> salt,
+        List<Object> claim,
+        boolean isZkp) {
         for (int i = 0; claim != null && i < disclosures.size(); i++) {
             Object disclosureObj = disclosures.get(i);
             Object claimObj = claim.get(i);
             Object saltObj = salt.get(i);
             if (disclosureObj instanceof Map) {
-                addSaltForList((HashMap) disclosureObj, salt, claim);
+                addSaltForList((HashMap) disclosureObj, salt, claim, isZkp);
             } else if (disclosureObj instanceof List) {
                 addSaltForList(
                     (ArrayList<Object>) disclosureObj,
                     (ArrayList<Object>) saltObj,
-                    (ArrayList<Object>) claimObj
+                    (ArrayList<Object>) claimObj,
+                    isZkp
                 );
             }
         }
@@ -402,12 +423,13 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static void addSaltForList(
         Map<String, Object> disclosures,
         List<Object> salt,
-        List<Object> claim
+        List<Object> claim,
+        boolean isZkp
     ) {
         for (int i = 0; claim != null && i < claim.size(); i++) {
             Object claimObj = claim.get(i);
             Object saltObj = salt.get(i);
-            addSelectSalt(disclosures, (HashMap) saltObj, (HashMap) claimObj);
+            addSelectSalt(disclosures, (HashMap) saltObj, (HashMap) claimObj, isZkp);
         }
     }
 
@@ -440,8 +462,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             .contains(TimestampUtils.WESIGN_AUTHORITY_NAME)) {
             String hashValue = (String) claim.get("claimHash");
             String authoritySignature = (String) claim.get("authoritySignature");
+            Long timestamp = (long) claim.get("timestamp");
             ResponseData<Boolean> resp =
-                TimestampUtils.verifyWeSignTimestamp(hashValue, authoritySignature);
+                TimestampUtils.verifyWeSignTimestamp(hashValue, authoritySignature, timestamp);
             if (!resp.getResult()) {
                 return ErrorCode.getTypeByErrorCode(resp.getErrorCode());
             }
@@ -624,8 +647,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static ResponseData<Boolean> verifyZkpCredential(CredentialPojo credential) {
 
         Map<String, Object> proof = credential.getProof();
-        String encodedVerificationRule = (String) proof.get("encodedVerificationRule");
-        String verificationRequest = (String) proof.get("verificationRequest");
+        String encodedVerificationRule = (String) proof
+            .get(ParamKeyConstant.PROOF_ENCODEDVERIFICATIONRULE);
+        String verificationRequest = (String) proof.get(ParamKeyConstant.PROOF_VERIFICATIONREQUEST);
         VerifierResult verifierResult =
             VerifierClient.verifyProof(encodedVerificationRule, verificationRequest);
         if (verifierResult.wedprErrorMessage == null) {
@@ -1048,7 +1072,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             // 补 policy
             addKeyToPolicy(disclosureMap, claim);
             // 加盐处理
-            addSelectSalt(disclosureMap, saltMap, claim);
+            addSelectSalt(disclosureMap, saltMap, claim, false);
             credentialClone.setSalt(saltMap);
 
             ResponseData<CredentialPojo> response = new ResponseData<CredentialPojo>();
@@ -1272,13 +1296,15 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (policyMap.size() > credentialList.size()) {
             return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
         } else {
-            List<Integer> cptIdList = credentialList.stream().map(
-                cpwl -> cpwl.getCptId()).collect(Collectors.toList());
-            if (cptIdList == null || cptIdList.isEmpty()) {
-                return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
-            }
-            if (!cptIdList.containsAll(policyMap.keySet())) {
-                return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
+            for (CredentialPojo credential : credentialList) {
+                if (isZkpCredential(credential)) {
+                    continue;
+                } else {
+                    Integer cptId = credential.getCptId();
+                    if (cptId == null || !policyMap.containsKey(cptId)) {
+                        return ErrorCode.CREDENTIAL_CPTID_NOTMATCH;
+                    }
+                }
             }
         }
         return ErrorCode.SUCCESS;
@@ -1382,28 +1408,28 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         String disclosure = claimPolicy.getFieldsToBeDisclosed();
         Map<String, Object> disclosureMap = DataToolUtils.deserialize(disclosure, HashMap.class);
 
-        //Object idValue = disclosureMap.get("id");
-        //if (idValue != null) {
-        //Object weid = credentialPojo.getClaim().get("id");
-        //if (StringUtils.equals(String.valueOf(idValue), DISCLOSED)) {
-        //if (!StringUtils.equals(String.valueOf(weid), presenterWeId)) {
-        //logger.error(
-        //"[verifyPolicy] the presenter weid->{} of presentation does not "
-        //+ "match the credential's ->{}. ",
-        //presenterWeId,
-        //weid);
-        //return ErrorCode.PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH;
-        //}
-        //} else if (StringUtils.equals(String.valueOf(idValue), EXISTED)
-        //&& !credentialPojo.getClaim().containsKey("id")) {
-        //logger.error(
-        //"[verifyPolicy] the presenter weid->{} of presentation does not "
-        //+ "match the credential's ->{}. ",
-        //presenterWeId,
-        //weid);
-        //return ErrorCode.PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST;
-        //}
-        //}
+        Object idValue = disclosureMap.get("id");
+        if (idValue != null) {
+            Object weid = credentialPojo.getClaim().get("id");
+            if (StringUtils.equals(String.valueOf(idValue), DISCLOSED)) {
+                if (!StringUtils.equals(String.valueOf(weid), presenterWeId)) {
+                    logger.error(
+                        "[verifyPolicy] the presenter weid->{} of presentation does not "
+                            + "match the credential's ->{}. ",
+                        presenterWeId,
+                        weid);
+                    return ErrorCode.PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH;
+                }
+            } else if (StringUtils.equals(String.valueOf(idValue), EXISTED)
+                && !credentialPojo.getClaim().containsKey("id")) {
+                logger.error(
+                    "[verifyPolicy] the presenter weid->{} of presentation does not "
+                        + "match the credential's ->{}. ",
+                    presenterWeId,
+                    weid);
+                return ErrorCode.PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST;
+            }
+        }
         return this.verifyDisclosureAndSalt(disclosureMap, saltMap);
     }
 
@@ -1713,7 +1739,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         CreateCredentialPojoArgs args = new CreateCredentialPojoArgs();
         args.setClaim(cpt111);
         args.setWeIdAuthentication(weIdAuthentication);
-        args.setCptId(111);
+        args.setCptId(CredentialConstant.ZKP_USER_NONCE_CPT);
         args.setIssuer(weIdAuthentication.getWeId());
         //args.setId(preCredential.getId());
         args.setIssuanceDate(System.currentTimeMillis());
@@ -1778,6 +1804,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     masterSecret); //from db
 
             String verificationRequest = userResult.verificationRequest;
+
+            porcessZkpDisclosedValue(credentialClone, claimPolicy);
+            //CredentialPojo zkpCredential = new CredentialPojo();
+            credentialClone.setProof(null);
             credentialClone
                 .putProofValue(ParamKeyConstant.PROOF_VERIFICATIONREQUEST, verificationRequest);
             credentialClone.putProofValue(ParamKeyConstant.PROOF_ENCODEDVERIFICATIONRULE,
@@ -1801,4 +1831,66 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
 
     }
+
+    private void porcessZkpDisclosedValue(CredentialPojo credential, ClaimPolicy claimPolicy) {
+
+        String disclosure = claimPolicy.getFieldsToBeDisclosed();
+        Map<String, Object> saltMap = credential.getSalt();
+        Map<String, Object> claim = credential.getClaim();
+
+        Map<String, Object> disclosureMap = DataToolUtils
+            .deserialize(disclosure, HashMap.class);
+
+        Map<String, Object> claimDisclosureMap = (Map<String, Object>) disclosureMap.get("claim");
+        if (claimDisclosureMap == null || !(claimDisclosureMap instanceof Map)) {
+            return;
+        }
+        // 补 policy
+        addKeyToPolicy(claimDisclosureMap, claim);
+        // 加盐处理
+        addSelectSalt(claimDisclosureMap, saltMap, claim, true);
+
+        disclosureMap.remove("claim");
+        processMetaDisclosedValue(credential, disclosureMap);
+
+    }
+
+    private void processMetaDisclosedValue(CredentialPojo credential,
+        Map<String, Object> disclosureMap) {
+
+        for (Map.Entry<String, Object> entry : disclosureMap.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            String salt = DataToolUtils.getRandomSalt();
+            if ((value instanceof Map) || !StringUtils.equals(String.valueOf(value), DISCLOSED)) {
+                switch (key) {
+                    case CredentialConstant.ID:
+                        credential
+                            .setId(CredentialPojoUtils.getFieldSaltHash(credential.getId(), salt));
+                        break;
+                    case CredentialConstant.CREDENTIAL_META_KEY_ISSUANCEDATE:
+                        credential.setIssuanceDate(0L);
+                        break;
+                    case CredentialConstant.CREDENTIAL_META_KEY_EXPIRATIONDATE:
+                        credential.setExpirationDate(0L);
+                        break;
+                    case CredentialConstant.CREDENTIAL_META_KEY_CPTID:
+                        credential.setCptId(0);
+                        break;
+                    case CredentialConstant.CREDENTIAL_META_KEY_ISSUER:
+                        credential.setIssuer(
+                            CredentialPojoUtils.getFieldSaltHash(credential.getIssuer(), salt));
+                        break;
+                    case CredentialConstant.CREDENTIAL_META_KEY_CONTEXT:
+                        credential.setIssuer(
+                            CredentialPojoUtils.getFieldSaltHash(credential.getContext(), salt));
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
+
 }

@@ -39,9 +39,10 @@ import java.util.stream.IntStream;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.NullNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.POJONode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.github.fge.jackson.JsonLoader;
 import com.google.common.collect.Lists;
 import com.sun.codemodel.ClassType;
@@ -80,6 +81,7 @@ public class JsonUtil {
      *
      * @param cptJsonSchema Map类型的JsonSchema
      * @return 返回有效Key的集合
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static List<String> extractCptProperties(Map<String, Object> cptJsonSchema)
         throws IOException {
@@ -92,6 +94,7 @@ public class JsonUtil {
      *
      * @param cptJsonSchema Json类型的JsonSchema
      * @return 返回有效Key的集合
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static List<String> extractCptProperties(String cptJsonSchema) throws IOException {
 
@@ -120,7 +123,7 @@ public class JsonUtil {
 
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         if (credential != null) {
-            result.put(CredentialConstant.CREDENTIAL_META_KEY_ID, credential.getId());
+            result.put(CredentialConstant.ID, credential.getId());
             result.put(CredentialConstant.CREDENTIAL_META_KEY_CPTID, credential.getCptId());
             result.put(CredentialConstant.CREDENTIAL_META_KEY_CONTEXT, credential.getContext());
             result.put(CredentialConstant.CREDENTIAL_META_KEY_ISSUER, credential.getIssuer());
@@ -208,6 +211,7 @@ public class JsonUtil {
      *
      * @param credential 凭证
      * @return 返回处理后的平级Json
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static Map<String, String> credentialToMonolayer(CredentialPojo credential)
         throws IOException {
@@ -236,6 +240,7 @@ public class JsonUtil {
      *
      * @param claimPolicy 披露策略
      * @return 返回处理后的平级Json
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static String claimPolicyToMonolayer(ClaimPolicy claimPolicy) throws IOException {
 
@@ -248,7 +253,9 @@ public class JsonUtil {
      * 将多级Json转换成平级Json，无补全处理.
      *
      * @param json 多级Json字符串
+     * @param radix 需要转换的进制
      * @return 返回平级Json
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static String jsonToMonolayer(String json, int radix) throws IOException {
 
@@ -259,6 +266,7 @@ public class JsonUtil {
      * 将多级Json转换成平级Json.
      *
      * @param jsonNode 多级的JsonNode
+     * @param radix 需要转换的进制
      * @return 返回平级Json
      */
     public static String jsonToMonolayer(JsonNode jsonNode, int radix) {
@@ -373,7 +381,7 @@ public class JsonUtil {
             node.forEach(childNode -> arrayNode.add(cloneNodewithNullNode(childNode)));
             return arrayNode;
         } else {
-            return NullNode.instance;
+            return TextNode.valueOf("null");
         }
     }
 
@@ -388,7 +396,11 @@ public class JsonUtil {
             ArrayNode array = resultNode.putArray(key);
             value.forEach(childNode -> array.add(cloneNodewithNullNode(childNode)));
         } else {
-            resultNode.set(key, NullNode.instance);
+            if (value.isBigDecimal()) {
+                resultNode.set(key, IntNode.valueOf(0));
+            } else {
+                resultNode.set(key, TextNode.valueOf("null"));
+            }
         }
     }
 
@@ -531,7 +543,7 @@ public class JsonUtil {
         if (radix == 0) {
             return value;
         }
-        return new BigInteger(value.getBytes(StandardCharsets.UTF_8)).toString(radix);
+        return new BigInteger(1, value.getBytes(StandardCharsets.UTF_8)).toString(radix);
     }
 
     /*
@@ -550,6 +562,10 @@ public class JsonUtil {
 
     /**
      * 带循环下标的循环.
+     *
+     * @param <T> 循环出来的泛型对象
+     * @param consumer 用户包装循环的Consumer
+     * @return 包装了循环出来的对象和下标的对象
      */
     public static <T> Consumer<T> consumerWithIndex(BiConsumer<T, Integer> consumer) {
 
@@ -569,7 +585,9 @@ public class JsonUtil {
      * 将平级Json转换成多级Json.
      *
      * @param json 平级Json字符串
+     * @param radix 需要转换的进制
      * @return 返回一个多级的Json字符串
+     * @throws IOException 可能出现的异常，如JSON序列化异常
      */
     public static String monolayerToJson(String json, int radix) throws IOException {
 
@@ -580,6 +598,7 @@ public class JsonUtil {
      * 将平级Json转换成多级Json.
      *
      * @param jsonNode 平级JsonNode对象
+     * @param radix 需要转换的进制
      * @return 返回一个多级的Json字符串
      */
     public static String monolayerToJson(JsonNode jsonNode, int radix) {
