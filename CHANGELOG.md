@@ -1,3 +1,13 @@
+### V1.5.0 (2019-12-30)
+- Features:
+1. CredentialPojo support Zero-Knowledge-Proof based disclosure.
+2. Trusted Timestamp creation based on any non-selectively-disclosed CredentialPojo.
+
+- Bugfixes:
+1. Fix multiple security risk issues from dependencies.
+2. Fix multiple JDK version incompatibility issues.
+
+
 ### V1.4.2 (2019-12-10)
 - Features:
 1. Allow WeID owners to remove unused public keys and authentications in WeID Document.

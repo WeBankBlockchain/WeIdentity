@@ -29,22 +29,35 @@ import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 
 /**
  * args for GetPolicyAndPreCredential.
+ *
  * @author tonychen 2019年12月3日
  */
 @Getter
 @Setter
 public class GetPolicyAndPreCredentialArgs extends AmopBaseMsgArgs {
 
+    /**
+     * the id of the policy.
+     */
     private String policyId;
 
+    /**
+     * the user whom the policy will send to.
+     */
     private String targetUserWeId;
 
+    /**
+     * the cpt id.
+     */
     private Integer cptId;
 
     /**
-     * 用户填入的claim数据.
+     * user's claim data.
      */
-    private String userInputForm;
+    private String claim;
 
+    /**
+     * extra data.
+     */
     private Map<String, String> extra;
 }
