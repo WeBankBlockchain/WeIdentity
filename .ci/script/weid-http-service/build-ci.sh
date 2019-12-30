@@ -40,7 +40,7 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
 
     # run repo ci scripts
     cd weid-http-service/
-    gradle build
+    #gradle build
 else
     echo "This is not a master branch PR (commit omitted). Http Service CI skipped."
 fi
