@@ -41,6 +41,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 
 /**
@@ -81,6 +82,61 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
         ResponseData<Boolean> verify = credentialPojoService.verify(
             createCredentialPojoArgs.getIssuer(), response.getResult());
         Assert.assertTrue(verify.getResult());
+    }
+
+    /**
+     * Test timestamp services.
+     */
+    // NOTE: TODO when doing any local tests, please make sure this is enabled.
+    // This test is prohibited in CI workflow to reduce WeSign costs.
+    // @Test
+    public void testCreateAndVerifyTimestamp() {
+        // Happy path
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
+            TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
+        createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
+        ResponseData<CredentialPojo> response =
+            credentialPojoService.createCredential(createCredentialPojoArgs);
+        List<CredentialPojo> credPojoList = new ArrayList<>();
+        credPojoList.add(response.getResult());
+        WeIdAuthentication callerAuth = TestBaseUtil
+            .buildWeIdAuthentication(createWeIdResultWithSetAttr);
+        ResponseData<CredentialPojo> resp = credentialPojoService
+            .createTrustedTimestamp(credPojoList, callerAuth);
+        CredentialPojo tscred = resp.getResult();
+        Assert.assertNotNull(tscred);
+        System.out.println(DataToolUtils.serialize(tscred));
+        ResponseData<Boolean> respData = credentialPojoService.verify(tscred.getIssuer(), tscred);
+        Assert.assertTrue(respData.getResult());
+
+        // Modify timestamp then..
+        CredentialPojo modifiedTsCred = copyCredentialPojo(tscred);
+        Map<String, Object> claim = modifiedTsCred.getClaim();
+        String tstamp = (String) claim.get("authoritySignature");
+        claim.put("authoritySignature", tstamp + "a");
+        modifiedTsCred.setClaim(claim);
+        respData = credentialPojoService.verify(modifiedTsCred.getIssuer(), modifiedTsCred);
+        Assert.assertFalse(respData.getResult());
+        Assert.assertEquals(respData.getErrorCode().intValue(),
+            ErrorCode.TIMESTAMP_VERIFICATION_FAILED.getCode());
+        modifiedTsCred = copyCredentialPojo(tscred);
+        claim = modifiedTsCred.getClaim();
+        Long stamptime = (long) claim.get("timestamp");
+        claim.put("timestamp", stamptime - 100);
+        modifiedTsCred.setClaim(claim);
+        respData = credentialPojoService.verify(modifiedTsCred.getIssuer(), modifiedTsCred);
+        Assert.assertFalse(respData.getResult());
+        Assert.assertEquals(respData.getErrorCode().intValue(),
+            ErrorCode.TIMESTAMP_VERIFICATION_FAILED.getCode());
+
+        // SD credential should fail.
+        credPojoList = new ArrayList<>();
+        credPojoList.add(credentialPojo);
+        credPojoList.add(selectiveCredentialPojo);
+        resp = credentialPojoService.createTrustedTimestamp(credPojoList, callerAuth);
+        Assert.assertNull(resp.getResult());
+        Assert.assertEquals(resp.getErrorCode().intValue(),
+            ErrorCode.TIMESTAMP_CREATION_FAILED_FOR_SELECTIVELY_DISCLOSED.getCode());
     }
 
     /**
@@ -188,8 +244,8 @@ public class TestCreateCredentialPojo extends TestBaseServcie {
     }
 
     /**
-     * case：when issuer is register authentication issuer， cpt publisher is not auth issuer,
-     * createCredentialPojo success.
+     * case：when issuer is register authentication issuer,
+     * cpt publisher is not auth issuer, createCredentialPojo success.
      */
     @Test
     public void testCreateCredentialPojo_authenticationIssuerSuccess() {

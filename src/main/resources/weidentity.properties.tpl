@@ -33,9 +33,20 @@ domain.default.timeout=86400000
 domain.encryptKey=datasource1:encryptKey_data
 domain.encryptKey.timeout=86400000
 
+domain.zkp=datasource1:zkp_data
+
+domain.templateSecret=datasource1:template_secret
+domain.templateSecret.timeout=31556908799941
+
+domain.masterKey=datasource1:master_secret
+
+domain.credentialSignature=datasource1:credential_signature
 
 # Salt length for Proof creation.
 salt.length=5
+
+# Default length of array value in CPT when creating credential based on ZKP.
+zkp.cpt.array.length=5
 
 # AMOP Config
 # Timeout for amop request, default: 5000ms
@@ -47,3 +58,10 @@ nodes=${BLOCKCHIAN_NODE_INFO}
 # Endpoint Service Integration-side parameters
 # Listener port required to be opened for RPC Server, default: 6010
 rpc.listener.port=6010
+
+# Timestamp Service Parameters
+wesign.accessTokenUrl=
+wesign.signTicketUrl=
+wesign.timestampUrl=
+wesign.appId=
+wesign.secret=

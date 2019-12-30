@@ -37,6 +37,7 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialPojoUtils;
@@ -79,6 +80,28 @@ public class TestCreateSelectiveCredential extends TestBaseServcie {
     public void testTwoCredentialPojoEqual() {
         CredentialPojo tmpCred = copyCredentialPojo(selectiveCredentialPojo);
         Assert.assertTrue(CredentialPojoUtils.isEqual(selectiveCredentialPojo, tmpCred));
+    }
+
+    @Test
+    public void testCreateFullyNonSdCredential() {
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
+            TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
+        createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
+        CredentialPojo credential =
+            credentialPojoService.createCredential(createCredentialPojoArgs).getResult();
+        Assert.assertFalse(CredentialPojoUtils.isSelectivelyDisclosed(credential.getSalt()));
+        logger.info(DataToolUtils.serialize(credential));
+        CredentialPojo nonSdCredential =
+            credentialPojoService.createSelectiveCredential(credential,
+                CredentialPojoUtils.generateNonDisclosedPolicy(credential)).getResult();
+        Assert.assertNotNull(nonSdCredential);
+        Assert.assertTrue(CredentialPojoUtils.isSelectivelyDisclosed(nonSdCredential.getSalt()));
+        logger.info(DataToolUtils.serialize(nonSdCredential));
+        Assert.assertTrue(CredentialPojoUtils
+            .getCredentialThumbprintWithoutSig(credential, credential.getSalt(), null)
+            .equalsIgnoreCase(CredentialPojoUtils
+                .getCredentialThumbprintWithoutSig(nonSdCredential, nonSdCredential.getSalt(),
+                    null)));
     }
 
     /**
