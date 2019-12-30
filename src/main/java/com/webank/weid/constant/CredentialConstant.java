@@ -60,6 +60,11 @@ public final class CredentialConstant {
     public static final String CLAIM_POLICY_FIELD = "policy";
 
     /**
+     * key id.
+     */
+    public static final String ID = "id";
+
+    /**
      * credential id.
      */
     public static final String CREDENTIAL_META_KEY_ID = "credentialId";
