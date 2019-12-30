@@ -381,7 +381,7 @@ public class JsonUtil {
             node.forEach(childNode -> arrayNode.add(cloneNodewithNullNode(childNode)));
             return arrayNode;
         } else {
-            return TextNode.valueOf(StringUtils.EMPTY);
+            return TextNode.valueOf("null");
         }
     }
 
@@ -399,7 +399,7 @@ public class JsonUtil {
             if (value.isBigDecimal()) {
                 resultNode.set(key, IntNode.valueOf(0));
             } else {
-                resultNode.set(key, TextNode.valueOf(StringUtils.EMPTY));
+                resultNode.set(key, TextNode.valueOf("null"));
             }
         }
     }
@@ -543,7 +543,7 @@ public class JsonUtil {
         if (radix == 0) {
             return value;
         }
-        return new BigInteger(value.getBytes(StandardCharsets.UTF_8)).toString(radix);
+        return new BigInteger(1, value.getBytes(StandardCharsets.UTF_8)).toString(radix);
     }
 
     /*
@@ -561,10 +561,11 @@ public class JsonUtil {
     }
 
     /**
-     *  带循环下标的循环.
+     * 带循环下标的循环.
+     *
      * @param <T> 循环出来的泛型对象
      * @param consumer 用户包装循环的Consumer
-     * @return  包装了循环出来的对象和下标的对象
+     * @return 包装了循环出来的对象和下标的对象
      */
     public static <T> Consumer<T> consumerWithIndex(BiConsumer<T, Integer> consumer) {
 
