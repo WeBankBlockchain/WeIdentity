@@ -163,8 +163,8 @@ public final class DataDriverConstant {
     public static final String POOL_MIN_IDLE_DEFAULT_VALUE = "5";
     public static final String POOL_MAX_IDLE_DEFAULT_VALUE = "5";
     public static final String POOL_MAX_WAIT_DEFAULT_VALUE = "10000";
-    public static final String POOL_TIME_BETWEEN_ERM_DEFAULT_VALUE = "600000";
     public static final String POOL_NUM_TEST_PER_ER_DEFAULT_VALUE = "5";
+    public static final String POOL_TIME_BETWEEN_ERM_DEFAULT_VALUE = "600000";
     public static final String POOL_MIN_EITM_DEFAULT_VALUE = "1800000";
 
     /**
@@ -177,4 +177,10 @@ public final class DataDriverConstant {
      * 系统domain之私钥存储domainKey.
      */
     public static final String DOMAIN_ENCRYPTKEY = "domain.encryptKey";
+
+    public static final String DOMAIN_ISSUER_TEMPLATE_SECRET = "domain.templateSecret";
+
+    public static final String DOMAIN_USER_MASTER_SECRET = "domain.masterKey";
+ 
+    public static final String DOMAIN_USER_CREDENTIAL_SIGNATURE = "domain.credentialSignature";
 }

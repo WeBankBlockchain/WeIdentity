@@ -24,7 +24,6 @@ import java.util.List;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -35,7 +34,7 @@ import com.webank.weid.protocol.response.ResponseData;
 /**
  * Service inf for operations on Credentials.
  *
- * @author chaoxinhu 2018.12
+ * @author tonychen
  */
 public interface CredentialPojoService {
 
@@ -46,6 +45,20 @@ public interface CredentialPojoService {
      * @return CredentialPojo
      */
     ResponseData<CredentialPojo> createCredential(CreateCredentialPojoArgs args);
+
+    /**
+     * user make credential from issuer's pre-credential.
+     *
+     * @param preCredential issuer's pre-credential
+     * @param claimJson user claim
+     * @param weIdAuthentication auth
+     * @return credential based on CPT 111
+     */
+    ResponseData<CredentialPojo> prepareZkpCredential(
+        CredentialPojo preCredential,
+        String claimJson,
+        WeIdAuthentication weIdAuthentication
+    );
 
     /**
      * Generate a selective disclosure credential with specified claim policy.
@@ -60,8 +73,8 @@ public interface CredentialPojoService {
     );
 
     /**
-     * Add an extra signer and signature to a Credential. Multiple signatures will be appended in
-     * an embedded manner.
+     * Add an extra signer and signature to a Credential. Multiple signatures will be appended in an
+     * embedded manner.
      *
      * @param credentialList original credential list
      * @param callerAuth the passed-in privateKey and WeID bundle to sign
@@ -132,4 +145,16 @@ public interface CredentialPojoService {
         WeIdAuthentication weIdAuthentication
     );
 
+    /**
+     * Create a trusted timestamp credential.
+     *
+     * @param credentialList the credentialPojo list to be signed
+     * @param weIdAuthentication caller authentication
+     * @return the embedded timestamp in credentialPojo
+     */
+    ResponseData<CredentialPojo> createTrustedTimestamp(
+        List<CredentialPojo> credentialList,
+        WeIdAuthentication weIdAuthentication
+    );
 }
+
