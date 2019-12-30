@@ -123,7 +123,7 @@ public class JsonUtil {
 
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         if (credential != null) {
-            result.put(CredentialConstant.CREDENTIAL_META_KEY_ID, credential.getId());
+            result.put(CredentialConstant.ID, credential.getId());
             result.put(CredentialConstant.CREDENTIAL_META_KEY_CPTID, credential.getCptId());
             result.put(CredentialConstant.CREDENTIAL_META_KEY_CONTEXT, credential.getContext());
             result.put(CredentialConstant.CREDENTIAL_META_KEY_ISSUER, credential.getIssuer());
