@@ -1,6 +1,6 @@
 #!/bin/bash
 
-JAVA_OPTS='-Djdk.tls.namedGroups="secp256k1"'
+JAVA_OPTS='-Djdk.tls.namedGroups="secp256r1,secp256k1"'
 classpathDir="./dist/conf"
 libDir="./dist/lib"
 set -- `getopt c:l: "$@"`
@@ -257,7 +257,7 @@ function check_node_version() {
 			isSdk=0
 			echo "your project includes the weid-java-sdk, this is: "$file
 			get_the_version $file
-			if [ `echo "$sdk_version < $version_default" | bc` -eq 1 ]
+			if [[ $(echo "${sdk_version} < ${version_default}" | bc) -eq 1 ]]
 			then
 				echo "WARN: the current version of SDK does not support to check the node version, minimum version 1.4.0"
 			else
@@ -275,7 +275,7 @@ function check_node_version() {
 				if [[ $file == weid-java-sdk-*.jar ]];
 				then
 					get_the_version $file
-					if [ `echo "$sdk_version < $version_default" | bc` -eq 1 ]
+					if [[ $(echo "${sdk_version} < ${version_default}" | bc) -eq 1 ]]
 					then
 						echo "WARN: the current version of SDK does not support to check the node version, minimum version 1.4.0"
 					else
