@@ -218,7 +218,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 
         //1. user genenerate credential based on CPT111
         PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
-        String claimJson = policyAndPreCredential.getClaim();
+        String claimJson = args.getClaim();
         CredentialPojo preCredential = policyAndPreCredential.getPreCredential();
         ResponseData<CredentialPojo> userCredentialResp =
             credentialPojoService.prepareZkpCredential(
@@ -300,10 +300,15 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         PresentationE presentation) {
 
         //prepare request args
-        String claimJson = args.getPolicyAndPreCredential().getClaim();
+        String claimJson = args.getClaim();
         IssueCredentialArgs issueCredentialArgs = new IssueCredentialArgs();
         issueCredentialArgs.setClaim(claimJson);
-        issueCredentialArgs.setPolicyId(args.getPolicyId());
+        String policyId = String.valueOf(
+            args.getPolicyAndPreCredential()
+                .getPolicyAndChallenge()
+                .getPresentationPolicyE()
+                .getId());
+        issueCredentialArgs.setPolicyId(policyId);
         issueCredentialArgs.setPresentation(presentation);
 
         // AMOP request (issuer to issue credential)

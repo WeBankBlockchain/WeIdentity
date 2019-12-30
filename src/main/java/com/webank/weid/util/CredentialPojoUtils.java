@@ -958,4 +958,20 @@ public final class CredentialPojoUtils {
         return false;
     }
 
+    /**
+     * check if the cpt can be used for zkp or not.
+     *
+     * @param cptId the id of the CPT
+     * @return true if can be used for zkp, otherwise fales
+     */
+    public static boolean isZkpCpt(Integer cptId) {
+
+        //currently, the system cpt 107, 110 and 111 can not be used for zkp
+        if (cptId == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT
+            || cptId == CredentialConstant.METADATA_CPT
+            || cptId == CredentialConstant.ZKP_USER_NONCE_CPT) {
+            return false;
+        }
+        return true;
+    }
 }

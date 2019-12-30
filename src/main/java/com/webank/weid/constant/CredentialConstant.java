@@ -60,9 +60,14 @@ public final class CredentialConstant {
     public static final String CLAIM_POLICY_FIELD = "policy";
 
     /**
+     * key id.
+     */
+    public static final String ID = "id";
+
+    /**
      * credential id.
      */
-    public static final String CREDENTIAL_META_KEY_ID = "id";
+    public static final String CREDENTIAL_META_KEY_ID = "credentialId";
 
     /**
      * The CPT type in standard integer format.
@@ -136,9 +141,9 @@ public final class CredentialConstant {
     public static final Integer METADATA_CPT = 110;
 
     /**
-     * user credential info CPT ID.
+     * metadata CPT ID.
      */
-    public static final Integer USER_CREDENTIAL_INFO_CPT = 111;
+    public static final Integer ZKP_USER_NONCE_CPT = 111;
 
     /**
      * CPT key words.
