@@ -62,4 +62,9 @@ public final class JsonSchemaConstant {
      **/
     public static final String REQUIRED_KEY = "required";
 
+    /**
+     * json schema: $schema key.
+     **/
+    public static final String ADDITIONAL_PROPERTIES = "additionalProperties";
+
 }
