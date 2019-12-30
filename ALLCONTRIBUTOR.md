@@ -1,5 +1,5 @@
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-22-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-23-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 ## Contributors ✨
@@ -39,6 +39,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
     <td align="center"><a href="https://sher.vip"><img src="https://avatars0.githubusercontent.com/u/17902244?v=4" width="100px;" alt=""/><br /><sub><b>Lin</b></sub></a><br /><a href="https://github.com/chaoxinhu/WeIdentity/commits?author=SherLzp" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/QibingLee"><img src="https://avatars2.githubusercontent.com/u/45893591?v=4" width="100px;" alt=""/><br /><sub><b>QibingLee</b></sub></a><br /><a href="https://github.com/chaoxinhu/WeIdentity/commits?author=QibingLee" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/lecire"><img src="https://avatars2.githubusercontent.com/u/971641?v=4" width="100px;" alt=""/><br /><sub><b>Eric Chan</b></sub></a><br /><a href="https://github.com/chaoxinhu/WeIdentity/commits?author=lecire" title="Code">💻</a></td>
+    <td align="center"><a href="http://roliu.work"><img src="https://avatars0.githubusercontent.com/u/41276823?v=4" width="100px;" alt=""/><br /><sub><b>Robin Liu</b></sub></a><br /><a href="https://github.com/chaoxinhu/WeIdentity/commits?author=RobinLG" title="Code">💻</a></td>
   </tr>
 </table>
 
