@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -22,6 +22,7 @@ package com.webank.weid.rpc;
 import java.util.List;
 
 import com.webank.weid.protocol.base.EvidenceInfo;
+import com.webank.weid.protocol.base.HashString;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
@@ -105,4 +106,13 @@ public interface EvidenceService {
      * @return true if succeeds, false otherwise
      */
     ResponseData<Boolean> verify(Hashable object, String evidenceAddress);
+
+    /**
+     * Generate hash value of any passed-in param.
+     *
+     * @param object param to be hashed
+     * @param <T> type of param
+     * @return the hash string
+     */
+    <T> ResponseData<HashString> generateHash(T object);
 }
