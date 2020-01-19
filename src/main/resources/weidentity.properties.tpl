@@ -42,6 +42,14 @@ domain.masterKey=datasource1:master_secret
 
 domain.credentialSignature=datasource1:credential_signature
 
+# You can configure the module name of Java local cache through `caffeineCache.names`, Note that CPT is the system cache name.
+# You can configure the timeout of the default cache module through caffeineCache.timeout.xxx, At the same time, 
+# it supports the timeout configuration of the system cache module
+# example:
+#caffeineCache.names=CPT,WEIDDOC
+#caffeineCache.timeout.CPT=1800000
+#caffeineCache.timeout.WEIDDOC=1800000
+
 # Salt length for Proof creation.
 salt.length=5
 
