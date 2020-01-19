@@ -52,6 +52,7 @@ import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.constant.WeIdCacheName;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
@@ -72,6 +73,8 @@ import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.cache.CacheManager;
+import com.webank.weid.suite.cache.CacheNode;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.CredentialUtils;
@@ -99,6 +102,10 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static WeIdService weIdService = new WeIdServiceImpl();
     private static CptService cptService = new CptServiceImpl();
     private static Persistence dataDriver = new MysqlDriver();
+    
+    //获取CPT缓存节点
+    private static CacheNode<Cpt> cptCahceNode = 
+        CacheManager.getCache(WeIdCacheName.CPT.getCacheName());
 
 
     /**
@@ -618,10 +625,16 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         try {
             String claimStr = DataToolUtils.serialize(claim);
-            Cpt cpt = cptService.queryCpt(cptId).getResult();
+            String cptIdStr = String.valueOf(cptId);
+            Cpt cpt = cptCahceNode.get(cptIdStr);
             if (cpt == null) {
-                logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
-                return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
+                cpt = cptService.queryCpt(cptId).getResult();
+                if (cpt == null) {
+                    logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
+                    return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
+                } else {
+                    cptCahceNode.put(cptIdStr, cpt);
+                }
             }
             //String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
             String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
