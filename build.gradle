@@ -113,6 +113,10 @@ List protobuf = [
         "com.google.protobuf:protobuf-java:3.9.1"
 ]
 
+List caffeine = [
+        "com.github.ben-manes.caffeine:caffeine:2.8.0"
+]
+
 configurations {
     localDeps
 }
@@ -122,12 +126,12 @@ dependencies {
     localDeps 'org.projectlombok:lombok:1.18.10'
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
-            compile logger, lombok, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf
+            compile logger, lombok, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf, caffeine
             compile("com.webank:weid-contract-java:1.2.12") {
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
             compile files("lib/WeDPR-Java-SDK.jar")
-            testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf
+            testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine
         } else {
             compile fileTree(dir: 'dist/lib', include: '*.jar')
         }
@@ -138,12 +142,12 @@ dependencies {
             annotationProcessor 'org.projectlombok:lombok:1.18.10'
             testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
             testCompileOnly 'org.projectlombok:lombok:1.18.10'
-            compile logger, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf
+            compile logger, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf, caffeine
             compile("com.webank:weid-contract-java:1.2.12") {
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
 			compile files("lib/WeDPR-Java-SDK.jar")
-            testCompile logger, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf
+            testCompile logger, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine
         } else {
             compileOnly files('dist/lib/lombok-1.18.10.jar')
             annotationProcessor files('dist/lib/lombok-1.18.10.jar')
