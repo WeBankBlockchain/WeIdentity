@@ -19,8 +19,6 @@
 
 package com.webank.weid.suite.cache;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -28,7 +26,6 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.apache.commons.lang3.StringUtils;
 
-import com.webank.weid.constant.WeIdCacheName;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.util.PropertyUtils;
 
@@ -43,57 +40,53 @@ public class CacheManager {
     //全局缓存上下文
     private static final ConcurrentHashMap<String, CacheNode<Object>> context = 
         new ConcurrentHashMap<String, CacheNode<Object>>();
-    //默认超时时间 默认为 30分钟
-    private static final long DEFAULT_TIMEOUT = 1000 * 60 * 30;
-    
-    private static final String KEY_SPLIT_CHAR = ",";
-    private static final String CACHE_NAMES_KEY = "caffeineCache.names";
-    private static final String CACHE_TIMEOUT_KEY = "caffeineCache.timeout.";
-    
-    static {
-        init();
-    }
-    
+
+    //默认缓存个数
+    private static final  Integer MAX_SIZE = 1000;
+    private static final String CACHE_MAXSIZE_KEY = "caffeineCache.maximumSize.";
+
     /**
-     * 初始化缓存管理器.
-     */
-    private static void init() {
-        Set<String> cacheNameSet = analyzeCacheName();
-        initSystemCacheName(cacheNameSet);
-        for (String cacheName : cacheNameSet) {
-            initCache(cacheName, getTimeout(cacheName));
-        }
-    }
-    
-    /**
-     * 根据缓存名获取超时时间，如果没有配置则检查是否为系统缓存模块，如果是并且配置了超时时间，
-     * 则使用配置超时时间，否则使用默认超时时间.
+     * 根据缓存名获取缓存节点最大缓存个数，如果没有配置则使用默认大小配置.
      * @param cacheKey 缓存名
      * @return
      */
-    private static long getTimeout(String cacheName) {
-        String timeout = PropertyUtils.getProperty(CACHE_TIMEOUT_KEY + cacheName);
-        if (StringUtils.isNotBlank(timeout)) {
-            return Long.parseLong(timeout);
+    private static Integer getMaxSize(String cacheName) {
+        String maximumSize = PropertyUtils.getProperty(CACHE_MAXSIZE_KEY + cacheName);
+        if (StringUtils.isNotBlank(maximumSize)) {
+            return Integer.parseInt(maximumSize);
         }
-        WeIdCacheName weIdCacheName = WeIdCacheName.getWeIdCacheName(cacheName);
-        if (weIdCacheName != null && weIdCacheName.getTimeout() != 0L) {
-            return weIdCacheName.getTimeout();
-        }
-        return DEFAULT_TIMEOUT;
+        return MAX_SIZE;
     }
     
     /**
-     * 获取缓存节点. 如果不存在改缓存节点，则抛异常.
-     * @param <T> 缓存节点存放的数据类型泛型
+     * 注册缓存节点,如果存在则直接返回,不存在则注册.
+     * @param <T> 需要存放的数据类型
      * @param cacheName 缓存名
+     * @param timeout 超时时间
      * @return 返回缓存节点
      */
-    public static <T> CacheNode<T> getCache(String cacheName) {
+    public static <T> CacheNode<T> registerCacheNode(String cacheName, Long timeout) {
+        return registerCacheNode(cacheName, timeout, getMaxSize(cacheName));
+    }
+    
+    /**
+     * 注册缓存节点,如果存在则直接返回,不存在则注册.
+     * @param <T> 需要存放的数据类型
+     * @param cacheName 缓存名
+     * @param timeout 超时时间
+     * @param maximumSize 最大缓存大小
+     * @return 返回缓存节点
+     */
+    public static <T> CacheNode<T> registerCacheNode(
+        String cacheName, 
+        Long timeout, 
+        Integer maximumSize) {
+        
         CacheNode<Object> cacheNode = context.get(cacheName);
-        if (cacheNode == null) {
-            throw new WeIdBaseException("can't find the cache, cacheName = " + cacheName);
+        if (cacheNode != null) {
+            throw new WeIdBaseException("the cacheName is registed, cacheName= " + cacheName);
         }
+        cacheNode = initCache(cacheName, timeout, maximumSize);
         @SuppressWarnings("unchecked")
         CacheNode<T> node = (CacheNode<T>)cacheNode;
         return node;
@@ -103,40 +96,20 @@ public class CacheManager {
      * 根据缓存名和超时时间初始化缓存模块.
      * @param cacheName 缓存名
      * @param timeout 超时时间
+     * @param maximumSize 缓存项大小
      * @return 返回缓存节点对象
      */
-    private static synchronized CacheNode<Object> initCache(String cacheName, long timeout) {
+    private static synchronized CacheNode<Object> initCache(
+        String cacheName, 
+        Long timeout, 
+        Integer maximumSize) {
+        
         Cache<String, Object> cache = Caffeine.newBuilder()
                 .expireAfterWrite(timeout, TimeUnit.MILLISECONDS)
+                .maximumSize(maximumSize)
                 .build();
         CacheNode<Object> node = new CacheNode<>(cacheName, cache);
         context.put(cacheName, node);
         return node;
-    }
-    
-    /**
-     * 解析配置的cacheName集合.
-     * @return 返回cacheName集合
-     */
-    private static Set<String> analyzeCacheName() {
-        String keyStr = PropertyUtils.getProperty(CACHE_NAMES_KEY);
-        Set<String> cacheNameSet = new HashSet<>();
-        if (StringUtils.isNotBlank(keyStr)) {
-            String[] keys = keyStr.split(KEY_SPLIT_CHAR);
-            for (String key : keys) {
-                cacheNameSet.add(key);
-            }  
-        }
-        return cacheNameSet;
-    }
-    
-    /**
-     * 初始系统默认的缓存模块.
-     * @param cacheNameSet 缓存模块名集合
-     */
-    private static void initSystemCacheName(Set<String> cacheNameSet) {
-        for (WeIdCacheName value : WeIdCacheName.values()) {
-            cacheNameSet.add(value.getCacheName());
-        }
     }
 }
