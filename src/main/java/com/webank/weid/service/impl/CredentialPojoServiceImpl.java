@@ -52,7 +52,6 @@ import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.constant.WeIdCacheName;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
@@ -105,7 +104,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     
     //获取CPT缓存节点
     private static CacheNode<Cpt> cptCahceNode = 
-        CacheManager.getCache(WeIdCacheName.CPT.getCacheName());
+        CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
 
 
     /**
