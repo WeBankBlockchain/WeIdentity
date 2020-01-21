@@ -100,7 +100,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static CptService cptService = new CptServiceImpl();
     private static Persistence dataDriver = new MysqlDriver();
 
-
     /**
      * Salt generator. Automatically fillin the map structure in a recursive manner.
      *
@@ -622,7 +621,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             if (cpt == null) {
                 logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
-            }
+            } 
             //String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
             String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
 
