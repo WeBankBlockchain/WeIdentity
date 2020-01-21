@@ -69,7 +69,7 @@ public abstract class BaseService {
                 NativeUtils.loadLibraryFromJar("/WeDPR_dynamic_lib/libeay32md.dll");
                 NativeUtils.loadLibraryFromJar("/WeDPR_dynamic_lib/ssleay32md.dll");
             } catch (IOException e) {
-                logger.error("[BaseService] the blockchain orgId is blank.");
+                logger.error("[BaseService] Cannot find SSL libraries (in Windows).");
             }
         }
     }
