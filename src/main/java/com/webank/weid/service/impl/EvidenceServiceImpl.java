@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,6 +19,7 @@
 
 package com.webank.weid.service.impl;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,6 +28,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.ECKeyPair;
@@ -40,6 +43,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.EvidenceInfo;
+import com.webank.weid.protocol.base.HashString;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.inf.Hashable;
@@ -197,6 +201,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
      * @param weIdPrivateKey the signer WeID's private key
      * @return true if succeed, false otherwise
      */
+    @Override
     public ResponseData<Boolean> setHashValue(String hashValue, String evidenceAddress,
         WeIdPrivateKey weIdPrivateKey) {
         if (!verifyHashValueFormat(hashValue)) {
@@ -249,6 +254,53 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.generateHash
+     * #generateHash(T object)
+     */
+    @Override
+    public <T> ResponseData<HashString> generateHash(T object) {
+        if (object == null) {
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (object instanceof Hashable) {
+            ResponseData<String> hashResp = getHashValue((Hashable) object);
+            if (StringUtils.isEmpty(hashResp.getResult())) {
+                return new ResponseData<>(null, hashResp.getErrorCode(),
+                    hashResp.getErrorMessage());
+            }
+            return new ResponseData<>(new HashString(hashResp.getResult()), ErrorCode.SUCCESS);
+        }
+        if (object instanceof File) {
+            // This will convert all types of file into String stream
+            String rawData = convertFileToString((File) object);
+            if (StringUtils.isEmpty(rawData)) {
+                logger.error("Failed to convert file into String: {}", ((File) object).getName());
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+            return new ResponseData<>(new HashString(DataToolUtils.sha3(rawData)),
+                ErrorCode.SUCCESS);
+        }
+        if (object instanceof String) {
+            if (StringUtils.isEmpty((String) object)) {
+                logger.error("Input String is blank, ignored..");
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+            }
+            return new ResponseData<>(new HashString(DataToolUtils.sha3((String) object)),
+                ErrorCode.SUCCESS);
+        }
+        logger.error("Unsupported input object type: {}", object.getClass().getCanonicalName());
+        return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+    }
+
+    private String convertFileToString(File file) {
+        try {
+            return Files.asByteSource(file).asCharSource(Charsets.UTF_8).read();
+        } catch (Exception e) {
+            logger.error("Failed to load file as String.");
+            return StringUtils.EMPTY;
+        }
+    }
 
     /**
      * Obtain the hash value of a given object - supports Credential, Wrapper and Pojo, and also
@@ -363,8 +415,6 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         return verifyHashToEvidenceSignature(hashValue, evidenceInfo);
     }
 
-    ;
-
     /**
      * Verify a Credential based on the provided Evidence info.
      *
@@ -475,10 +525,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
     }
 
     private boolean verifyHashValueFormat(String hashValue) {
-        if (StringUtils.isEmpty(hashValue)
-            || !Pattern.compile(WeIdConstant.HASH_VALUE_PATTERN).matcher(hashValue).matches()) {
-            return false;
-        }
-        return true;
+        return !StringUtils.isEmpty(hashValue)
+            && Pattern.compile(WeIdConstant.HASH_VALUE_PATTERN).matcher(hashValue).matches();
     }
 }
