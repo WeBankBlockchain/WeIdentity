@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -44,6 +44,10 @@ public class CacheNode<T> {
     
     public T get(String key) {
         return cache.getIfPresent(key);
+    }
+    
+    public void remove(String key) {
+        cache.invalidate(key);
     }
     
     public String getCacheName() {
