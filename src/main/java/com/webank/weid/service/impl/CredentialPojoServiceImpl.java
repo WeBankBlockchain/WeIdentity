@@ -1550,26 +1550,26 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         // 获取ClaimPolicyMap
         Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicy.getPolicy();
 
-        String policyType = presentationPolicy.getPolicyType();
-        if (StringUtils.equals(policyType, CredentialConstant.ZKP_CREDENTIAL_TYPE)) {
-            newCredentialList = generateZkpCredentialList(credentialList, presentationPolicy,
-                userId);
-        } else {
-            // 遍历所有原始证书
-            for (CredentialPojo credential : credentialList) {
-                // 根据原始证书获取对应的 claimPolicy
-                ClaimPolicy claimPolicy = claimPolicyMap.get(credential.getCptId());
-                if (claimPolicy == null) {
-                    continue;
-                }
-                // 根据原始证书和claimPolicy去创建选择性披露凭证
-                ResponseData<CredentialPojo> res =
-                    this.createSelectiveCredential(credential, claimPolicy);
-                if (res.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                    return ErrorCode.getTypeByErrorCode(res.getErrorCode().intValue());
-                }
-                newCredentialList.add(res.getResult());
+        // 遍历所有原始证书
+        for (CredentialPojo credential : credentialList) {
+            // 根据原始证书获取对应的 claimPolicy
+            ClaimPolicy claimPolicy = claimPolicyMap.get(credential.getCptId());
+            if (claimPolicy == null) {
+                continue;
             }
+            ResponseData<CredentialPojo> res = null;
+            if (StringUtils.equals(claimPolicy.getPolicyType(), "zkp")) {
+                // 根据原始证书和claimPolicy去创建选择性披露凭证
+                res = this.createZkpCredential(credential, claimPolicy, userId);
+            } else {
+
+                // 根据原始证书和claimPolicy去创建选择性披露凭证
+                res = this.createSelectiveCredential(credential, claimPolicy);
+            }
+            if (res.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+                return ErrorCode.getTypeByErrorCode(res.getErrorCode().intValue());
+            }
+            newCredentialList.add(res.getResult());
         }
 
         presentation.setVerifiableCredential(newCredentialList);

@@ -60,6 +60,7 @@ public interface CredentialPojoService {
         WeIdAuthentication weIdAuthentication
     );
 
+
     /**
      * Generate a selective disclosure credential with specified claim policy.
      *

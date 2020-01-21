@@ -146,6 +146,11 @@ public final class CredentialConstant {
     public static final Integer ZKP_USER_NONCE_CPT = 111;
 
     /**
+     * metadata CPT ID.
+     */
+    public static final String CPT_TYPE_KEY = "cptType";
+
+    /**
      * CPT key words.
      */
     public static final String[] CPT_KEY_WORDS = {"GE", "LE", "GT", "LT", "EQ"};

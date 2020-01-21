@@ -252,7 +252,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     private ErrorCode processTemplate(Integer cptId, String cptJsonSchemaNew) {
 
         //if the cpt is not zkp type, no need to make template.
-        if (!CredentialPojoUtils.isZkpCpt(cptId)) {
+        if (!CredentialPojoUtils.isZkpCpt(cptJsonSchemaNew)) {
             return ErrorCode.SUCCESS;
         }
         List<String> attributeList;

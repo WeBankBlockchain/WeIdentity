@@ -23,6 +23,7 @@ import java.util.Map;
 
 import lombok.Data;
 
+import com.webank.weid.constant.CptTypeConstant;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 
 /**
@@ -37,8 +38,15 @@ public class CptMapArgs {
      * Required: weId authority  for this CPT.
      */
     private WeIdAuthentication weIdAuthentication;
+
     /**
      * Required: The json schema content defined for this CPT.
      */
     private Map<String, Object> cptJsonSchema;
+
+    /**
+     * Required: The type of CPT, if credential based on this CPT used for zkp-disclosure, fill this
+     * field with "zkp", otherwise, "original", which is also the default value.
+     */
+    private CptTypeConstant cptType = CptTypeConstant.ORIGINAL;
 }

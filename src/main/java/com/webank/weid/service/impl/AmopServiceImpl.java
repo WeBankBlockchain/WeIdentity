@@ -21,7 +21,6 @@ package com.webank.weid.service.impl;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
@@ -38,12 +37,11 @@ import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
-import com.webank.weid.protocol.amop.IssueCredentialArgs;
+import com.webank.weid.protocol.amop.IssueZkpCredentialArgs;
 import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.base.PolicyAndPreCredential;
-import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
@@ -53,7 +51,6 @@ import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.CptService;
-import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.fisco.WeServer;
@@ -78,11 +75,6 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      * persistence service.
      */
     private static Persistence dataDriver = new MysqlDriver();
-
-    /**
-     * credentialpojo service.
-     */
-    private static CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
 
     @Override
     public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
@@ -203,60 +195,20 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      * com.webank.weid.protocol.amop.RequestIssueCredentialArgs)
      */
     @Override
-    public ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
+    public ResponseData<RequestIssueCredentialResponse> requestZkpIssueCredential(
         String toOrgId,
-        RequestIssueCredentialArgs args) {
+        IssueZkpCredentialArgs args) {
 
-        int checkErrorCode = checkIssueCredentialArgs(args).getCode();
-        if (checkErrorCode != ErrorCode.SUCCESS.getCode()) {
-            logger.error(
-                "[requestIssueCredential] prepareZkpCredential failed. error code :{}",
-                checkErrorCode);
-            return new ResponseData<RequestIssueCredentialResponse>(null,
-                ErrorCode.getTypeByErrorCode(checkErrorCode));
-        }
-
-        //1. user genenerate credential based on CPT111
-        PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
-        String claimJson = args.getClaim();
-        CredentialPojo preCredential = policyAndPreCredential.getPreCredential();
-        ResponseData<CredentialPojo> userCredentialResp =
-            credentialPojoService.prepareZkpCredential(
-                preCredential,
-                claimJson,
-                args.getAuth());
-        int errCode = userCredentialResp.getErrorCode();
-        if (errCode != ErrorCode.SUCCESS.getCode()) {
-            logger.error(
-                "[requestIssueCredential] prepareZkpCredential failed. error code :{}",
-                errCode);
-            return new ResponseData<RequestIssueCredentialResponse>(null,
-                ErrorCode.getTypeByErrorCode(errCode));
-        }
-
-        //2. prepare presentation and send amop request to verify presentation and issue credential
-        CredentialPojo userCredential = userCredentialResp.getResult();
-        ResponseData<PresentationE> presentationResp = preparePresentation(args, userCredential);
-        int errorCode = presentationResp.getErrorCode();
-        if (errorCode != ErrorCode.SUCCESS.getCode()) {
-            logger.error(
-                "[requestIssueCredential] create presentation failed. error code :{}",
-                errorCode);
-            return new ResponseData<RequestIssueCredentialResponse>(null,
-                ErrorCode.getTypeByErrorCode(errorCode));
-        }
-
-        //3. send presentataion to issuer and request issue credential.
-        PresentationE presentation = presentationResp.getResult();
-        ResponseData<RequestIssueCredentialResponse> resp =
-            requestIssueCredentialInner(
-                toOrgId,
-                args,
-                userCredential,
-                presentation);
-
-        //ResponseData<RequestIssueCredentialResponse> resp =
-        //Test.test( issueCredentialArgs,  policyAndChallenge);
+        // AMOP request (issuer to issue credential)
+        ResponseData<RequestIssueCredentialResponse> resp = this.getImpl(
+            fiscoConfig.getCurrentOrgId(),
+            toOrgId,
+            args,
+            IssueZkpCredentialArgs.class,
+            RequestIssueCredentialResponse.class,
+            AmopMsgType.REQUEST_SIGN_CREDENTIAL,
+            WeServer.AMOP_REQUEST_TIMEOUT
+        );
 
         //4. get credential response and blind signature.
         RequestIssueCredentialResponse response = resp.getResult();
@@ -293,57 +245,6 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         return ErrorCode.SUCCESS;
     }
 
-    private ResponseData<RequestIssueCredentialResponse> requestIssueCredentialInner(
-        String toOrgId,
-        RequestIssueCredentialArgs args,
-        CredentialPojo userCredential,
-        PresentationE presentation) {
-
-        //prepare request args
-        String claimJson = args.getClaim();
-        IssueCredentialArgs issueCredentialArgs = new IssueCredentialArgs();
-        issueCredentialArgs.setClaim(claimJson);
-        String policyId = String.valueOf(
-            args.getPolicyAndPreCredential()
-                .getPolicyAndChallenge()
-                .getPresentationPolicyE()
-                .getId());
-        issueCredentialArgs.setPolicyId(policyId);
-        issueCredentialArgs.setPresentation(presentation);
-
-        // AMOP request (issuer to issue credential)
-        ResponseData<RequestIssueCredentialResponse> resp = this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
-            issueCredentialArgs,
-            IssueCredentialArgs.class,
-            RequestIssueCredentialResponse.class,
-            AmopMsgType.REQUEST_SIGN_CREDENTIAL,
-            WeServer.AMOP_REQUEST_TIMEOUT
-        );
-        return resp;
-    }
-
-    private ResponseData<PresentationE> preparePresentation(
-        RequestIssueCredentialArgs args,
-        CredentialPojo userCredential) {
-
-        List<CredentialPojo> credentialList = args.getCredentialList();
-        PolicyAndPreCredential policyAndPreCredential = args.getPolicyAndPreCredential();
-        PolicyAndChallenge policyAndChallenge = policyAndPreCredential.getPolicyAndChallenge();
-
-        credentialList.add(userCredential);
-
-        //put pre-credential and user-credential(based on CPT 111)
-        ResponseData<PresentationE> presentationResp =
-            credentialPojoService.createPresentation(
-                credentialList,
-                policyAndChallenge.getPresentationPolicyE(),
-                policyAndChallenge.getChallenge(),
-                args.getAuth());
-
-        return presentationResp;
-    }
 
     /**
      * blind credential signature.

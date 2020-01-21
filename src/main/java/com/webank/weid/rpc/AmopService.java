@@ -21,7 +21,7 @@ package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
-import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
+import com.webank.weid.protocol.amop.IssueZkpCredentialArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
@@ -56,9 +56,9 @@ public interface AmopService {
         GetPolicyAndPreCredentialArgs args
     );
 
-    ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
+    ResponseData<RequestIssueCredentialResponse> requestZkpIssueCredential(
         String toOrgId,
-        RequestIssueCredentialArgs args
+        IssueZkpCredentialArgs args
     );
 
 }

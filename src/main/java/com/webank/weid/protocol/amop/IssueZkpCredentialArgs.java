@@ -24,6 +24,7 @@ import lombok.Setter;
 
 import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 import com.webank.weid.protocol.base.PresentationE;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 
 /**
  * args for requesting issuer to issue credential.
@@ -32,7 +33,7 @@ import com.webank.weid.protocol.base.PresentationE;
  */
 @Getter
 @Setter
-public class IssueCredentialArgs extends AmopBaseMsgArgs {
+public class IssueZkpCredentialArgs extends AmopBaseMsgArgs {
 
     /**
      * user's credential list,including KYC credential and credential based on CPT111.
@@ -44,7 +45,9 @@ public class IssueCredentialArgs extends AmopBaseMsgArgs {
      */
     private String claim;
 
-
-    private String policyId;
+    /**
+     * user's private key, public key and address.
+     */
+    private WeIdAuthentication auth;
 
 }

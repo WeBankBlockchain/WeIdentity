@@ -29,5 +29,13 @@ import lombok.Data;
 @Data
 public class ClaimPolicy {
 
+    /**
+     * "zkp",if used for zkp-disclosure, "original", otherwise.
+     */
+    private String policyType;
+
+    /**
+     * K-V values of fields and its policy.
+     */
     private String fieldsToBeDisclosed;
 }

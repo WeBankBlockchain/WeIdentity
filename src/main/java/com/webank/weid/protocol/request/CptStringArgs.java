@@ -21,6 +21,7 @@ package com.webank.weid.protocol.request;
 
 import lombok.Data;
 
+import com.webank.weid.constant.CptTypeConstant;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 
 /**
@@ -40,5 +41,12 @@ public class CptStringArgs {
      * Required: The json schema content defined for this CPT.
      */
     private String cptJsonSchema;
+
+    /**
+     * Required: The type of CPT, if credential based on this CPT used for zkp-disclosure, fill this
+     * field with "CptTypeConstant.ZKP", otherwise, "CptTypeConstant.ORIGINAL", which is also the
+     * default value.
+     */
+    private CptTypeConstant cptType = CptTypeConstant.ORIGINAL;
 
 }
