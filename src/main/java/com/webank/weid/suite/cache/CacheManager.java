@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -42,7 +42,7 @@ public class CacheManager {
         new ConcurrentHashMap<String, CacheNode<Object>>();
 
     //默认缓存个数
-    private static final  Integer MAX_SIZE = 1000;
+    private static final Integer MAX_SIZE = 1000;
     private static final String CACHE_MAXSIZE_KEY = "caffeineCache.maximumSize.";
 
     /**
@@ -87,7 +87,6 @@ public class CacheManager {
             throw new WeIdBaseException("the cacheName is registed, cacheName= " + cacheName);
         }
         cacheNode = initCache(cacheName, timeout, maximumSize);
-        @SuppressWarnings("unchecked")
         CacheNode<T> node = (CacheNode<T>)cacheNode;
         return node;
     }
