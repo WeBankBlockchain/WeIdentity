@@ -43,6 +43,8 @@ import com.webank.weid.rpc.CptService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
 import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.suite.cache.CacheManager;
+import com.webank.weid.suite.cache.CacheNode;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -56,6 +58,10 @@ public class CptServiceImpl extends BaseService implements CptService {
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
 
     private CptServiceEngine cptServiceEngine = EngineFactory.createCptServiceEngine();
+
+    //获取CPT缓存节点
+    private static CacheNode<ResponseData<Cpt>> cptCahceNode = 
+        CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
 
     /**
      * Register a new CPT with a pre-set CPT ID, to the blockchain.
@@ -200,8 +206,15 @@ public class CptServiceImpl extends BaseService implements CptService {
             if (cptId == null || cptId < 0) {
                 return new ResponseData<>(null, ErrorCode.CPT_ID_ILLEGAL);
             }
-
-            return cptServiceEngine.queryCpt(cptId);
+            String cptIdStr = String.valueOf(cptId);
+            ResponseData<Cpt> result = cptCahceNode.get(cptIdStr);
+            if (result == null) {
+                result = cptServiceEngine.queryCpt(cptId);
+                if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
+                    cptCahceNode.put(cptIdStr, result);
+                }
+            }
+            return result;
         } catch (Exception e) {
             logger.error("[updateCpt] query cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -268,8 +281,12 @@ public class CptServiceImpl extends BaseService implements CptService {
                 cptJsonSchemaNew,
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return cptServiceEngine.updateCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey());
+            ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(cptId, address, 
+                cptJsonSchemaNew, rsvSignature, weIdPrivateKey.getPrivateKey());
+            if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
+                cptCahceNode.remove(String.valueOf(cptId));
+            }
+            return result;
         } catch (Exception e) {
             logger.error("[updateCpt] update cpt failed due to unkown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
