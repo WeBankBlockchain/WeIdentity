@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,6 +19,7 @@
 
 package com.webank.weid.full.evidence;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
 import static com.webank.weid.full.TestBaseUtil.createEcKeyPair;
 import static com.webank.weid.util.CredentialUtils.copyCredential;
@@ -648,5 +650,37 @@ public class TestCreateEvidence extends TestBaseServcie {
         Assert.assertTrue(evidenceService.verify(new HashString(hashValue), eviAddr).getResult());
         // Any second attempt will fail
         Assert.assertFalse(evidenceService.setHashValue(hashValue, eviAddr, privKey).getResult());
+    }
+
+    /**
+     * Case: generate hash value.
+     */
+    @Test
+    public void testGenerateHash() throws Exception {
+        // Credential and CredentialPojo
+        Assert.assertTrue(evidenceService.generateHash(credential).getResult().getHash()
+            .equalsIgnoreCase(credential.getHash()));
+        Assert.assertTrue(evidenceService.generateHash(credentialPojo).getResult().getHash()
+            .equalsIgnoreCase(credentialPojo.getHash()));
+        Assert.assertTrue(evidenceService.generateHash(selectiveCredentialPojo).getResult()
+            .getHash().equalsIgnoreCase(selectiveCredentialPojo.getHash()));
+        // Test file
+        File file = new ClassPathResource("test-template.pdf").getFile();
+        String fileHash = evidenceService.generateHash(file).getResult().getHash();
+        Assert.assertFalse(StringUtils.isEmpty(fileHash));
+        // Support GBK and UTF-8 encoding here - they will yield different hash values, though
+        file = new ClassPathResource("org1.txt").getFile();
+        fileHash = evidenceService.generateHash(file).getResult().getHash();
+        Assert.assertFalse(StringUtils.isEmpty(fileHash));
+        file = new ClassPathResource("test-hash-pic.png").getFile();
+        fileHash = evidenceService.generateHash(file).getResult().getHash();
+        Assert.assertFalse(StringUtils.isEmpty(fileHash));
+        // Non-existent file - uncreated with createNewFile()
+        file = new File("non-existent.tmp");
+        Assert.assertNull(evidenceService.generateHash(file).getResult());
+        Assert.assertNull(evidenceService.generateHash(StringUtils.EMPTY).getResult());
+        Assert.assertFalse(StringUtils.isEmpty(
+            evidenceService.generateHash("10000").getResult().getHash()));
+        Assert.assertNull(evidenceService.generateHash(createCredentialArgs).getResult());
     }
 }

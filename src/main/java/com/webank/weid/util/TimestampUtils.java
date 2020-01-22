@@ -124,6 +124,7 @@ public class TimestampUtils {
      *
      * @param hashValue the hash value
      * @param authoritySignature the authoritySignature with nonce and SIGN
+     * @param timestamp the timestamp value
      * @return true if passed the check, false otherwise
      */
     public static ResponseData<Boolean> verifyWeSignTimestamp(
