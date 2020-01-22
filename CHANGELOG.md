@@ -1,3 +1,11 @@
+### V1.5.1 (2020-01-22)
+- Features:
+1. Queried CPT can be cached to local machine (require MySQL setup).
+2. New interface generateHash(), accepting File, Credential and String as hashable input.
+
+- Bugfixes:
+1. Multiple miscellaneous bugfixes and development experience enhancements.
+
 ### V1.5.0 (2019-12-30)
 - Features:
 1. CredentialPojo support Zero-Knowledge-Proof based disclosure.
