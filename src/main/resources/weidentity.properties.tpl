@@ -42,6 +42,9 @@ domain.masterKey=datasource1:master_secret
 
 domain.credentialSignature=datasource1:credential_signature
 
+# You can configure the maximumSize of the default cache module through caffeineCache.maximumSize.xxx.
+caffeineCache.maximumSize.SYS_CPT=100
+
 # Salt length for Proof creation.
 salt.length=5
 
