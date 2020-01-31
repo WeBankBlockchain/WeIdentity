@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -64,6 +64,7 @@ import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.cpt.Cpt101;
 import com.webank.weid.protocol.cpt.Cpt111;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -85,7 +86,7 @@ import com.webank.weid.util.WeIdUtils;
 
 
 /**
- * Service implementations for operations on Credential.
+ * Service implementations for operations on CredentialPojo.
  *
  * @author tonychen 2019年4月17日
  */
@@ -462,6 +463,31 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (credential.getCptId().intValue() == CredentialConstant.EMBEDDED_TIMESTAMP_CPT) {
             return verifyTimestampClaim(credential);
         }
+        if (credential.getCptId().intValue() == CredentialConstant.AUTHORIZATION_CPT) {
+            return verifyAuthClaim(credential);
+        }
+        return ErrorCode.SUCCESS;
+    }
+
+    private static ErrorCode verifyAuthClaim(CredentialPojo credential) {
+        Cpt101 authInfo;
+        try {
+            authInfo = DataToolUtils.mapToObj(credential.getClaim(), Cpt101.class);
+        } catch (Exception e) {
+            logger.error("Failed to deserialize authorization information.");
+            return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
+        }
+        ErrorCode errorCode = verifyAuthInfo(authInfo);
+        if (errorCode != ErrorCode.SUCCESS) {
+            return errorCode;
+        }
+        // Extra check 1: cannot authorize other WeID's resources
+        String issuerWeId = credential.getIssuer();
+        if (!issuerWeId.equalsIgnoreCase(authInfo.getFromWeId())) {
+            return ErrorCode.AUTHORIZATION_CANNOT_AUTHORIZE_OTHER_WEID_RESOURCE;
+        }
+        // TODO Extra check 2: check service url endpoint exposed or not?
+        // Need getWeIdDocument() check
         return ErrorCode.SUCCESS;
     }
 
@@ -1684,6 +1710,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
      * @param weIdAuthentication the caller authentication
      * @return the embedded timestamp in credentialPojo
      */
+    @Override
     public ResponseData<CredentialPojo> createTrustedTimestamp(
         List<CredentialPojo> credentialList,
         WeIdAuthentication weIdAuthentication) {
@@ -1775,7 +1802,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
      *
      * @param weIdAuthentication auth
      * @param cptId cpt id
-     * @param userResult   user result
+     * @param userResult userResult made by user
      * @return credential signed by user.
      */
     private ResponseData<CredentialPojo> generateCpt111Credential(
@@ -1943,5 +1970,82 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.CredentialPojoService#createDataAuthToken()
+     */
+    @Override
+    public ResponseData<CredentialPojo> createDataAuthToken(
+        Cpt101 authInfo,
+        WeIdAuthentication weIdAuthentication) {
+        ErrorCode innerErrorCode = verifyAuthInfo(authInfo);
+        if (innerErrorCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(null, innerErrorCode);
+        }
+        innerErrorCode = CredentialPojoUtils.isWeIdAuthenticationValid(weIdAuthentication);
+        if (innerErrorCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(null, innerErrorCode);
+        }
+
+        CreateCredentialPojoArgs args = new CreateCredentialPojoArgs();
+        args.setClaim(authInfo);
+        args.setWeIdAuthentication(weIdAuthentication);
+        args.setId(UUID.randomUUID().toString());
+        args.setContext(CredentialUtils.getDefaultCredentialContext());
+        args.setCptId(CredentialConstant.AUTHORIZATION_CPT);
+        String privateKey = weIdAuthentication.getWeIdPrivateKey().getPrivateKey();
+        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils
+            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+        args.setIssuer(keyWeId);
+        args.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
+        args.setExpirationDate(args.getIssuanceDate() + authInfo.getDuration());
+        return this.createCredential(args);
+    }
+
+    /**
+     * Verify the authorization info in an authorization token credential.
+     *
+     * @param authInfo the auth info in CPT101 format
+     * @return success if valid, specific error codes otherwise
+     */
+    public static ErrorCode verifyAuthInfo(Cpt101 authInfo) {
+        if (authInfo == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+
+        String serviceUrl = authInfo.getServiceUrl();
+        String resourceId = authInfo.getResourceId();
+        Long duration = authInfo.getDuration();
+        if (!CredentialUtils.isValidUuid(resourceId)) {
+            logger.error("Resource ID illegal: is not a valid UUID.");
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        if (!DataToolUtils.isValidEndpointUrl(serviceUrl)) {
+            logger.error("Service URL illegal.");
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        if (duration < 0) {
+            logger.error("Auth token duration of validity illegal: already expired.");
+            return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
+        }
+
+        String fromWeId = authInfo.getFromWeId();
+        String toWeId = authInfo.getToWeId();
+        if (fromWeId.equalsIgnoreCase(toWeId)) {
+            logger.error("FromWeId and ToWeId must be different.");
+            return ErrorCode.AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT;
+        }
+        ResponseData<Boolean> existResp = weIdService.isWeIdExist(fromWeId);
+        if (!existResp.getResult()) {
+            logger.error("From WeID illegal: {}", existResp.getErrorMessage());
+            return ErrorCode.getTypeByErrorCode(existResp.getErrorCode());
+        }
+        existResp = weIdService.isWeIdExist(toWeId);
+        if (!existResp.getResult()) {
+            logger.error("To WeID illegal: {}", existResp.getErrorMessage());
+            return ErrorCode.getTypeByErrorCode(existResp.getErrorCode());
+        }
+        return ErrorCode.SUCCESS;
+    }
 
 }

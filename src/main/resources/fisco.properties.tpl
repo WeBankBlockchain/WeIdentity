@@ -1,8 +1,19 @@
 # Fisco-bcos blockchain node related properties
 
+#######################################################################################################
+#                                                                                                     #
+#         fisco bcos version config                                                                   #
+#                                                                                                     #
+#######################################################################################################
 # Version
 bcos.version=${FISCO_BCOS_VERSION}
 
+
+#######################################################################################################
+#                                                                                                     #
+#         contract address config                                                                     #
+#                                                                                                     #
+#######################################################################################################
 # contract address
 weId.contractaddress=${WEID_ADDRESS}
 cpt.contractaddress=${CPT_ADDRESS}
@@ -10,6 +21,11 @@ issuer.contractaddress=${ISSUER_ADDRESS}
 evidence.contractaddress=${EVIDENCE_ADDRESS}
 specificissuer.contractaddress=${SPECIFICISSUER_ADDRESS}
 
+#######################################################################################################
+#                                                                                                     #
+#         web3sdk connection config                                                                   #
+#                                                                                                     #
+#######################################################################################################
 # blockchain connection params
 chain.id=101
 web3sdk.timeout=30
@@ -18,10 +34,22 @@ web3sdk.max-pool-size=200
 web3sdk.queue-capacity=1000
 web3sdk.keep-alive-seconds=60
 
+
+#######################################################################################################
+#                                                                                                     #
+#         fisco bcos 2.0 related config                                                               #
+#                                                                                                     #
+#######################################################################################################
 # Fisco-Bcos 2.x params, including Group ID and Encrypt Type
 group.id=1
 encrypt.type=0
 
+
+#######################################################################################################
+#                                                                                                     #
+#         fisco bcos node cert related config                                                         #
+#                                                                                                     #
+#######################################################################################################
 # config files params
 v1.ca-crt-path=ca.crt
 v1.client-crt-password=123456
