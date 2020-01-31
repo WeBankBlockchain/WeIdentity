@@ -9065,6 +9065,132 @@ com.webank.weid.protocol.response.TransactionInfo
    
 ----
 
+7. generateHash
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.rpc.EvidenceService.generateHash
+   接口定义: ResponseData<HashString> generateHash(T object)
+   接口描述: 将传入的任意Object计算Hash值，不需网络。可以接受**任意Hashable对象**（如凭证）、**File**（Java里的文件实例）、**String**（字符串）。对于不符合类型的入参，将返回类型不支持错误。返回值为HashString，可以直接传入CreateEvidence接口用于存证创建。
+
+**接口入参**\ :
+
+T java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - T object
+     - N
+     - 任意Object
+     - 当前支持Hashable，File, String
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<HashString>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - HashString
+     - 创建的符合Hashable接口的存证值对象
+     - 存证值，可以直接传入createEvidence用于存证上链
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - ILLEGAL_INPUT
+     - 160004
+     - 入参非法
+
+
+**调用示例**
+
+.. code-block:: java
+
+   CredentialService credentialService = new CredentialServiceImpl();
+   EvidenceService evidenceService = new EvidenceServiceImpl();
+
+   HashMap<String, Object> claim = new HashMap<String, Object>(3);
+   claim.put("name", "zhang san");
+   claim.put("gender", "F");
+   claim.put("age", 18);
+
+   CreateCredentialArgs createCredentialArgs = new CreateCredentialArgs();
+   createCredentialArgs.setClaim(claim);
+   createCredentialArgs.setCptId(1017);
+   createCredentialArgs.setExpirationDate(1561448312461L);
+   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+   createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+
+   // 创建Credential
+   ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
+
+   // 直接将凭证传入generateHash
+   HashString hashString = evidenceService.generateHash(response.getResult().getCredential()).getResult();
+   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(hashString, weIdPrivateKey);
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: 0xa3203e054bb7a7f0dec134c7510299869e343e8d
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30014
+      transactionHash: 0x1f9e62fa152eb5fce859dcf81c7c0eddcbcab63c40629d1c745058c227693dae
+      transactionIndex: 0
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant EvidenceService
+   participant 区块链节点
+   调用者->>EvidenceService: 调用generateHash()
+   EvidenceService->>EvidenceService: 入参非空、格式及合法性检查（Hashable, File, String）
+   opt 入参校验失败
+   EvidenceService-->>调用者: 报错，提示参数不合法并退出
+   end
+   EvidenceService-->>调用者: 返回HashString及成功
+
 
 CredentialPojoService
 ^^^^^^^^^^^^^^^^^
