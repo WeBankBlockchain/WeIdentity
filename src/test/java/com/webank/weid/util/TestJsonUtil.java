@@ -91,16 +91,6 @@ public class TestJsonUtil {
     public void testCptGenerator() throws Exception {
         String cptSchema = DataToolUtils.generateDefaultCptJsonSchema(11);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
-        cptSchema = DataToolUtils.generateDefaultCptJsonSchema(101);
-        Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
-        Cpt101 cpt101 = new Cpt101();
-        cpt101.setId("did:weid:101:0x11111");
-        cpt101.setReceiver("bbb");
-        List<String> stringList = new ArrayList<>();
-        stringList.add("ccc");
-        cpt101.setSubjects(stringList);
-        Assert.assertTrue(DataToolUtils
-            .isValidateJsonVersusSchema(DataToolUtils.objToJsonStrWithNoPretty(cpt101), cptSchema));
 
         cptSchema = DataToolUtils.generateDefaultCptJsonSchema(103);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));

@@ -38,6 +38,7 @@ import java.io.Serializable;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -1822,6 +1823,40 @@ public final class DataToolUtils {
             return json;
         }
         return jsonObject.toString();
+    }
+
+    /**
+     * Check whether a URL String is a valid endpoint.
+     *
+     * @param url the endpoint url
+     * @return true if yes, false otherwise
+     */
+    public static boolean isValidEndpointUrl(String url) {
+        if (StringUtils.isEmpty(url)) {
+            return false;
+        }
+        String hostname;
+        Integer port;
+        String endpointName;
+        try {
+            URI uri = new URI(url);
+            hostname = uri.getHost();
+            port = uri.getPort();
+            String path = uri.getPath();
+            if (StringUtils.isEmpty(hostname) || StringUtils.isEmpty(path) || port < 0) {
+                logger.error("Service URL illegal: {}", url);
+                return false;
+            }
+            // Truncate the first slash
+            endpointName = path.substring(1);
+            if (StringUtils.isEmpty(endpointName)) {
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Service URL format check failed: {}", url);
+            return false;
+        }
+        return true;
     }
 }
 
