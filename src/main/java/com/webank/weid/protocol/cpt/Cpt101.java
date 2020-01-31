@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2019) WeBank Co., Ltd.
+ *       Copyright© (2019-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,24 +19,27 @@
 
 package com.webank.weid.protocol.cpt;
 
-import java.util.List;
-
 import com.github.reinert.jjschema.Attributes;
 import lombok.Data;
 
 /**
- * CPT for authorization.
+ * CPT for data authorization.
  *
- * @author chaoxinhu 2019.5
+ * @author chaoxinhu 2020.2
  */
 @Data
-@Attributes(title = "Authorization token", description = "Basic Authorization Token Template")
+@Attributes(title = "Data Authorization Token",
+    description = "Authorize data between WeIDs via the exposed Service Endpoint")
 public class Cpt101 {
 
-    @Attributes(required = true, description = "The one granting authorization")
-    private String id;
-    @Attributes(required = true, description = "The one receiving authorization")
-    private String receiver;
-    @Attributes(required = true, description = "Subjects to be authorized", minItems = 1)
-    private List<String> subjects;
+    @Attributes(required = true, description = "Authorize from this WeID")
+    private String fromWeId;
+    @Attributes(required = true, description = "Authorize to this WeID")
+    private String toWeId;
+    @Attributes(required = true, description = "Service Endpoint URL")
+    private String serviceUrl;
+    @Attributes(required = true, description = "Authorized Resource ID")
+    private String resourceId;
+    @Attributes(required = true, description = "Duration of Validity in seconds")
+    private Long duration;
 }

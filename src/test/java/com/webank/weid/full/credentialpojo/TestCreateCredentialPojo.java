@@ -19,11 +19,16 @@
 
 package com.webank.weid.full.credentialpojo;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.Keys;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -38,11 +43,15 @@ import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.cpt.Cpt101;
+import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
+import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.WeIdUtils;
 
 /**
  * createCredential method for testing CredentialService.
@@ -244,8 +253,8 @@ public class TestCreateCredentialPojo extends TestBaseService {
     }
 
     /**
-     * case：when issuer is register authentication issuer,
-     * cpt publisher is not auth issuer, createCredentialPojo success.
+     * case：when issuer is register authentication issuer, cpt publisher is not auth issuer,
+     * createCredentialPojo success.
      */
     @Test
     public void testCreateCredentialPojo_authenticationIssuerSuccess() {
@@ -861,5 +870,58 @@ public class TestCreateCredentialPojo extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
             response.getErrorCode().intValue());
+    }
+
+    @Test
+    public void testCreateAuthTokenAll() throws Exception {
+
+        // Enforce a Register/Update system CPT first
+        WeIdAuthentication sdkAuthen = new WeIdAuthentication();
+        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils
+            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+        sdkAuthen.setWeId(keyWeId);
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey(privateKey);
+        sdkAuthen.setWeIdPrivateKey(weIdPrivateKey);
+        if (!weIdService.isWeIdExist(keyWeId).getResult()) {
+            CreateWeIdArgs wargs = new CreateWeIdArgs();
+            wargs.setWeIdPrivateKey(weIdPrivateKey);
+            wargs.setPublicKey(keyPair.getPublicKey().toString(10));
+            weIdService.createWeId(wargs);
+        }
+        String cptJsonSchema = DataToolUtils
+            .generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));
+        CptStringArgs args = new CptStringArgs();
+        args.setCptJsonSchema(cptJsonSchema);
+        args.setWeIdAuthentication(sdkAuthen);
+        if (cptService.queryCpt(CredentialConstant.AUTHORIZATION_CPT).getResult() == null) {
+            cptService.registerCpt(args, CredentialConstant.AUTHORIZATION_CPT);
+        } else {
+            cptService.updateCpt(args, CredentialConstant.AUTHORIZATION_CPT);
+        }
+
+        // Init params
+        Cpt101 authInfo = new Cpt101();
+        authInfo.setFromWeId(createWeIdResultWithSetAttr.getWeId());
+        String toWeId = this.createWeIdWithSetAttr().getWeId();
+        authInfo.setToWeId(toWeId);
+        authInfo.setDuration(360000L);
+        authInfo.setResourceId(UUID.randomUUID().toString());
+        authInfo.setServiceUrl("http://127.0.0.1:6011/fetch-data");
+        WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+        weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
+        weIdAuthentication.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        weIdAuthentication.setWeIdPublicKeyId(createWeIdResultWithSetAttr.getWeId() + "#keys-0");
+
+        // Create and check
+        ResponseData<CredentialPojo> authTokenCredResp = credentialPojoService
+            .createDataAuthToken(authInfo, weIdAuthentication);
+        Assert.assertEquals(authTokenCredResp.getErrorCode().intValue(),
+            ErrorCode.SUCCESS.getCode());
+        CredentialPojo authToken = authTokenCredResp.getResult();
+        ResponseData<Boolean> verifyResp = credentialPojoService
+            .verify(authToken.getIssuer(), authToken);
+        Assert.assertTrue(verifyResp.getResult());
     }
 }
