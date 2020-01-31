@@ -156,14 +156,21 @@ public class RpcServer {
      *
      * @param requestName request name
      * @param functorImpl the implemented fuctor
+     * @param inAddrList the in-Addr list (can be empty)
      * @throws Exception save to files exception
      */
-    public static void registerEndpoint(String requestName, EndpointFunctor functorImpl)
-        throws Exception {
+    public static void registerEndpoint(
+        String requestName,
+        EndpointFunctor functorImpl,
+        List<String> inAddrList
+    ) throws Exception {
         implMap.put(requestName, functorImpl);
         EndpointInfo endpointInfo = new EndpointInfo();
         endpointInfo.setRequestName(requestName);
         endpointInfo.setDescription(functorImpl.getDescription());
+        if (inAddrList != null && inAddrList.size() > 0) {
+            endpointInfo.setInAddr(inAddrList);
+        }
         EndpointDataUtil.mergeToCentral(endpointInfo);
         EndpointDataUtil.saveEndpointsToFile();
     }

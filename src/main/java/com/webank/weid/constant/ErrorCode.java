@@ -281,6 +281,20 @@ public enum ErrorCode {
 
 
     /**
+     * Authorization WeIDs: from and to must be different.
+     */
+    AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT(100450,
+        "authorization's fromWeId and toWeId must be different"
+    ),
+
+    /**
+     * Authorization: cannot authorize other WeID's resource.
+     */
+    AUTHORIZATION_CANNOT_AUTHORIZE_OTHER_WEID_RESOURCE(100451,
+        "cannot authorize other WeID's resource"
+    ),
+
+    /**
      * The credential evidence contract failure: illegal input.
      */
     CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT(
