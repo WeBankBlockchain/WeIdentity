@@ -11761,6 +11761,327 @@ com.webank.weid.protocol.base.CredentialPojo
    CredentialPojoService-->>调用者: 返回凭证
 
 
+----
+
+10. createDataAuthToken
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService.createDataAuthToken
+   接口定义:ResponseData<CredentialPojo> createCredential(Cpt101 authInfo, WeIdAuthentication weIdAuthentication)
+   接口描述: 根据传入的授权要求信息，生成符合CPT101格式规范的数据授权凭证。该凭证需要被verify之后和Endpoint Service结合使用。
+
+..note::
+
+   注意：使用这个接口的前提是首先需要将CPT 101注册到链上。如果您是新搭了一条WeIdentity 1.6.0+的链，那么搭链过程中这一步已经自动完成了。否则（如您是升级SDK），您需要使用部署WeIdentity合约的私钥（ecdsa_key）去将CPT 101注册到链上。下文的代码范例中我们给出了详细的流程
+
+**接口入参**\ :
+
+com.webank.weid.protocol.cpt.Cpt101
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - fromWeId
+     - String
+     - Y
+     - 发起授权的WeIdentity DID（必须同时是Issuer）
+     - 必须在链上存在，且需要传入私钥作为Issuer
+   * - toWeId
+     - String
+     - Y
+     - 接受授权的WeIdentity DID
+     - 必须在链上存在且和fromWeId不同
+   * - serviceUrl
+     - String
+     - Y
+     - 所授权内容在Endpoint Service上注册的service URL
+     - 必须是一个包含主机名，端口号，以及端点地址的标准URL
+   * - resourceId
+     - String
+     - Y
+     - UUID
+     - 用于标识资源的符合UUID格式字符串
+   * - duration
+     - Long
+     - Y
+     - 授权有效时间
+     - 同时决定了凭证的expirationDate
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - WeIdentity DID
+     - 必须和fromWeId一致
+   * - weIdPublicKeyId
+     - String
+     - N
+     - 公钥Id
+     -
+   * - weIdPrivateKey
+     - WeIdPrivateKey
+     - Y
+     -
+     - 交易私钥，必须和fromWeId在链上所公开的某个公钥一致
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - Y
+     - 私钥
+     - 使用十进制数字表示
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<CredentialPojo>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - CredentialPojo
+     - 凭证对象
+     - 业务数据
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+com.webank.weid.protocol.base.CredentialPojo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - context
+     - String
+     -
+     -
+   * - type
+     - List<String>
+     -
+     -
+   * - id
+     - String
+     - 证书ID
+     -
+   * - cptId
+     - Integer
+     - cptId
+     -
+   * - issuer
+     - String
+     - issuer 的 WeIdentity DID
+     -
+   * - issuanceDate
+     - Long
+     - 创建日期
+     -
+   * - expirationDate
+     - Long
+     - 到期日期
+     -
+   * - claim
+     - Map<String, Object>
+     - Claim数据
+     -
+   * - proof
+     - Map<String, Object>
+     - 签名数据结构体
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥和weid不匹配
+   * - CREDENTIAL_ERROR
+     - 100400
+     - credential处理未知异常
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_EXPIRE_DATE_ILLEGAL
+     - 100409
+     - 到期日期无效
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim非法
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT
+     - 100450
+     - fromWeId和toWeId必须不同
+   * - AUTHORIZATION_CANNOT_AUTHORIZE_OTHER_WEID_RESOURCE
+     - 100451
+     - fromWeId必须和Issuer相同
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+
+**调用示例**
+
+.. code-block:: java
+
+   // Enforce a Register/Update system CPT first
+   WeIdAuthentication sdkAuthen = new WeIdAuthentication();
+   ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+   String keyWeId = WeIdUtils
+       .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+   sdkAuthen.setWeId(keyWeId);
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey(privateKey);
+   sdkAuthen.setWeIdPrivateKey(weIdPrivateKey);
+   if (!weIdService.isWeIdExist(keyWeId).getResult()) {
+       CreateWeIdArgs wargs = new CreateWeIdArgs();
+       wargs.setWeIdPrivateKey(weIdPrivateKey);
+       wargs.setPublicKey(keyPair.getPublicKey().toString(10));
+       weIdService.createWeId(wargs);
+   }
+   String cptJsonSchema = DataToolUtils
+       .generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));
+   CptStringArgs args = new CptStringArgs();
+   args.setCptJsonSchema(cptJsonSchema);
+   args.setWeIdAuthentication(sdkAuthen);
+   if (cptService.queryCpt(CredentialConstant.AUTHORIZATION_CPT).getResult() == null) {
+       cptService.registerCpt(args, CredentialConstant.AUTHORIZATION_CPT);
+   } else {
+       cptService.updateCpt(args, CredentialConstant.AUTHORIZATION_CPT);
+   }
+
+   // Init params
+   Cpt101 authInfo = new Cpt101();
+   authInfo.setFromWeId(createWeIdResultWithSetAttr.getWeId());
+   String toWeId = this.createWeIdWithSetAttr().getWeId();
+   authInfo.setToWeId(toWeId);
+   authInfo.setDuration(360000L);
+   authInfo.setResourceId(UUID.randomUUID().toString());
+   authInfo.setServiceUrl("http://127.0.0.1:6011/fetch-data");
+   WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+   weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
+   weIdAuthentication.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+   weIdAuthentication.setWeIdPublicKeyId(createWeIdResultWithSetAttr.getWeId() + "#keys-0");
+
+   // Create and check
+   ResponseData<CredentialPojo> authTokenCredResp = credentialPojoService
+       .createDataAuthToken(authInfo, weIdAuthentication);
+   System.out.println(DataToolUtils.deserialize(authTokenCredResp.getResult()));
+
+.. code-block:: text
+
+   返回结果如：
+   result:(com.webank.weid.protocol.base.CredentialPojo)
+      {
+          "claim": {
+              "duration": 360000,
+              "fromWeId": "did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168",
+              "resourceId": "4b077c17-9612-42ee-9e36-3a3d46b27e81",
+              "serviceUrl": "http://10.35.25.183:6010/fetch-data",
+              "toWeId": "did:weid:101:0x68bedb2cbe55b4c8e3473faa63f121c278f6dba9"
+          },
+          "context": "https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1",
+          "cptId": 101,
+          "expirationDate": 1581347039,
+          "id": "48b75424-9411-4d22-b925-4e730b445a31",
+          "issuanceDate": 1580987039,
+          "issuer": "did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168",
+          "proof": {
+              "created": 1580987039,
+              "creator": "did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168#keys-0",
+              "salt": {
+                  "duration": "fmk5A",
+                  "fromWeId": "DEvFy",
+                  "resourceId": "ugVeN",
+                  "serviceUrl": "nVdeE",
+                  "toWeId": "93Z1E"
+              },
+              "signatureValue": "HCZwyTzGst87cjCDaUEzPrO8QRlsPvCYXvRTUVBUTDKRSoGDgu4h4HLrMZ+emDacRnmQ/yke38u1jBnilNnCh6c=",
+              "type": "Secp256k1"
+          },
+          "type": ["VerifiableCredential", "hashTree"]
+      }
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+
+
+**时序图**
+
+.. mermaid::
+
+   sequenceDiagram
+   participant 调用者
+   participant CredentialPojoService
+   调用者->>CredentialPojoService: 调用createDataAuthToken()
+   CredentialPojoService->>CredentialPojoService: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   CredentialPojoService-->>调用者: 报错，提示参数不合法并退出
+   end
+   CredentialPojoService->>CredentialPojoService: 组装符合格式的CPT101的Claim
+   CredentialPojoService->>CredentialPojoService: 生成签发日期、生成数字签名
+   CredentialPojoService-->>调用者: 返回数据授权凭证
+
+----
+
+
 AmopService
 ^^^^^^^^^^^^^^^^^
 
