@@ -129,7 +129,7 @@ public class EndpointDataUtil {
                 }
             }
         } catch (Exception e) {
-            logger.error("load endpoint info error");
+            logger.error("load endpoint info error", e);
         }
         for (Map.Entry<Integer, EndpointInfo> pair : endpointMap.entrySet()) {
             EndpointInfo endpointInfo = pair.getValue();
@@ -226,7 +226,7 @@ public class EndpointDataUtil {
             saveEndpointsToFile();
             return true;
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
             return false;
         }
     }

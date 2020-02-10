@@ -19,10 +19,20 @@
 
 package com.webank.weid.config;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
+import net.sf.oval.ConstraintViolation;
+import net.sf.oval.Validator;
+import net.sf.oval.constraint.MatchPattern;
+import net.sf.oval.constraint.Min;
+import net.sf.oval.constraint.NotEmpty;
+import net.sf.oval.constraint.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.util.PropertyUtils;
 
 /**
@@ -35,31 +45,109 @@ import com.webank.weid.util.PropertyUtils;
 public class FiscoConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(FiscoConfig.class);
-
+    private static final Validator validator = new Validator();
     // Note that all keys are appended with a colon ":" to support regex auto-loading
 
+    @NotNull(message = "the bcos.version is undefined")
+    @NotEmpty(message = "the value of bcos.version is null")
+    @MatchPattern(pattern = "[0-9]+(\\.\\w*)?", message = "the value of bcos.version is invalid")
     private String version;
+    
+    @NotNull(message = "the nodes is undefined")
+    @NotEmpty(message = "the value of nodes is null")
     private String nodes;
+    
+    @NotNull(message = "the weId.contractaddress is undefined")
+    @NotEmpty(message = "the value of weId.contractaddress is null")
     private String weIdAddress;
+    
+    @NotNull(message = "the cpt.contractaddress is undefined")
+    @NotEmpty(message = "the value of cpt.contractaddress is null")
     private String cptAddress;
+    
+    @NotNull(message = "the issuer.contractaddress is undefined")
+    @NotEmpty(message = "the value of issuer.contractaddress is null")
     private String issuerAddress;
+    
+    @NotNull(message = "the evidence.contractaddress is undefined")
+    @NotEmpty(message = "the value of evidence.contractaddress is null")
     private String evidenceAddress;
+    
+    @NotNull(message = "the specificissuer.contractaddress is undefined")
+    @NotEmpty(message = "the value of specificissuer.contractaddress is null")
     private String specificIssuerAddress;
+    
+    @NotNull(message = "the chain.id is undefined")
+    @NotEmpty(message = "the value of chain.id is null")
+    @MatchPattern(pattern = "\\d+", message = "the value of chain.id is invalid")
     private String chainId;
+    
+    @NotNull(message = "the web3sdk.timeout is undefined")
+    @NotEmpty(message = "the value of web3sdk.timeout is null")
+    @MatchPattern(pattern = "\\d+", message = "the value of web3sdk.timeout is invalid")
+    @Min(value = 5, message = "the the minimum value of web3sdk.timeout is 5")
     private String web3sdkTimeout;
+    
+    @NotNull(message = "the web3sdk.core-pool-size is undefined")
+    @NotEmpty(message = "the value of web3sdk.core-pool-size is null")
+    @MatchPattern(pattern = "\\d+", message = "the value of web3sdk.core-pool-size is invalid")
     private String web3sdkCorePoolSize;
+    
+    @NotNull(message = "the web3sdk.max-pool-size is undefined")
+    @NotEmpty(message = "the value of web3sdk.max-pool-size is null")
+    @MatchPattern(pattern = "\\d+", message = "the value of web3sdk.max-pool-size is invalid")
     private String web3sdkMaxPoolSize;
+    
+    @NotNull(message = "the web3sdk.queue-capacity is undefined")
+    @NotEmpty(message = "the value of web3sdk.queue-capacity is null")
+    @MatchPattern(pattern = "\\d+", message = "the value of web3sdk.queue-capacity is invalid")
     private String web3sdkQueueSize;
+    
+    @NotNull(message = "the web3sdk.keep-alive-seconds is undefined")
+    @NotEmpty(message = "the value of web3sdk.keep-alive-seconds is null")
+    @MatchPattern(pattern = "\\d+", message = "the value of web3sdk.keep-alive-seconds is invalid")
     private String web3sdkKeepAliveSeconds;
+    
+    @NotNull(message = "the group.id is undefined")
+    @NotEmpty(message = "the value of group.id is null")
+    @MatchPattern(pattern = "\\d+", message = "the value of group.id is invalid")
     private String groupId;
+    
+    @NotNull(message = "the encrypt.type is undefined")
+    @NotEmpty(message = "the value of encrypt.type is null")
+    @MatchPattern(pattern = "[0,1]", message = "the value of encrypt.type should be in [0,1]")
     private String encryptType;
+    
+    @NotNull(message = "the v1.ca-crt-path is undefined")
+    @NotEmpty(message = "the value of v1.ca-crt-path is null")
     private String v1CaCrtPath;
+    
+    @NotNull(message = "the v1.client-crt-password is undefined")
+    @NotEmpty(message = "the value of v1.client-crt-password is null")
     private String v1ClientCrtPassword;
+    
+    @NotNull(message = "the v1.client-key-store-path is undefined")
+    @NotEmpty(message = "the value of v1.client-key-store-path is null")
     private String v1ClientKeyStorePath;
+    
+    @NotNull(message = "the v1.key-store-password is undefined")
+    @NotEmpty(message = "the value of v1.key-store-password is null")
     private String v1KeyStorePassword;
+    
+    @NotNull(message = "the v2.ca-crt-path is undefined")
+    @NotEmpty(message = "the value of v2.ca-crt-path is null")
     private String v2CaCrtPath;
+    
+    @NotNull(message = "the v2.node-crt-path is undefined")
+    @NotEmpty(message = "the value of v2.node-crt-path is null")
     private String v2NodeCrtPath;
+    
+    @NotNull(message = "the v2.node-key-path is undefined")
+    @NotEmpty(message = "the value of v2.node-key-path is null")
     private String v2NodeKeyPath;
+    
+    @NotNull(message = "the blockchain.orgid is undefined")
+    @NotEmpty(message = "the value of blockchain.orgid is null")
     private String currentOrgId;
 
     /**
@@ -98,6 +186,21 @@ public class FiscoConfig {
         } catch (Exception e) {
             logger.error("Error occurred during loading Fisco-Bcos properties: " + e.getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * check the attribute value for FiscoConfig.
+     */
+    public void check() {
+        List<ConstraintViolation> constraintViolationSet = validator.validate(this);
+        List<String> messageList = new ArrayList<String>();
+        constraintViolationSet.forEach(violationInfo -> {
+            messageList.add(violationInfo.getMessage());
+        });
+        if (messageList.size() > 0) {
+            logger.error("[FiscoConfig.check] message: {}", messageList.get(0));
+            throw new WeIdBaseException(messageList.get(0));
         }
     }
 }
