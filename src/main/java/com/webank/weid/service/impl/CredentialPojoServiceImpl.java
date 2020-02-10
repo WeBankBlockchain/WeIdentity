@@ -509,6 +509,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     innerCredentialList = (ArrayList) credential.getClaim().get("credentialList");
                 }
             } catch (Exception e) {
+                logger.error("the credential claim data illegal.", e);
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
             }
             for (Object innerCredentialObject : innerCredentialList) {
@@ -527,7 +528,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                         return errorCode;
                     }
                 } catch (Exception e) {
-                    logger.error("Failed to convert credentialPojo to object: " + e.getMessage());
+                    logger.error("Failed to convert credentialPojo to object.", e);
                     return ErrorCode.ILLEGAL_INPUT;
                 }
             }
@@ -563,7 +564,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     }
                 }
             } catch (Exception e) {
-                logger.error("Failed to convert credentialPojo: " + e.getMessage());
+                logger.error("Failed to convert credentialPojo: " + e.getMessage(), e);
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
             }
             rawData = CredentialPojoUtils.getEmbeddedCredentialThumbprintWithoutSig(credentialList);
@@ -648,7 +649,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             return ErrorCode.SUCCESS;
         } catch (Exception e) {
             logger.error(
-                "Generic error occurred during verify cpt format when verifyCredential: " + e);
+                "Generic error occurred during verify cpt format when verifyCredential: ", e);
             return ErrorCode.CREDENTIAL_ERROR;
         }
     }
@@ -1029,7 +1030,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             try {
                 trimmedCredentialMapList.add(DataToolUtils.objToMap(credAlive));
             } catch (Exception e) {
-                logger.error("Failed to convert Credential to map structure.");
+                logger.error("Failed to convert Credential to map structure.", e);
                 return null;
             }
         }
