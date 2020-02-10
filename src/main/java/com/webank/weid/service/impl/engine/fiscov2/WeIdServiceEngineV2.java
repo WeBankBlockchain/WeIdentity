@@ -398,6 +398,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             logger.error("Set weId service failed. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
+            logger.error("Set weId service timeout. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         } catch (ResolveAttributeException e) {
             logger.error("[getWeIdDocument]: resolveTransaction failed. "
@@ -450,7 +451,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             }
             return new ResponseData(true, ErrorCode.SUCCESS, info);
         } catch (Exception e) {
-
+            logger.error("[createWeId] create weid has error, Error Message：{}", e);
             return new ResponseData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
     }
@@ -485,6 +486,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
                     info);
             }
         } catch (Exception e) {
+            logger.error("[setAttribute] set Attribute has error, Error Message：{}", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
