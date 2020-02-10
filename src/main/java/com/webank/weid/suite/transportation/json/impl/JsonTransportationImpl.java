@@ -64,6 +64,7 @@ public class JsonTransportationImpl
             "[serialize] begin to execute JsonTransportation serialization, property:{}.",
             property
         );
+        logger.info("[serialize] the object is:{}", object);
         // 检查协议配置完整性
         ErrorCode errorCode = checkEncodeProperty(property);
         if (errorCode != ErrorCode.SUCCESS) {
@@ -120,6 +121,7 @@ public class JsonTransportationImpl
         Class<T> clazz) {
 
         logger.info("[deserialize] begin to execute JsonTransportation deserialize.");
+        logger.info("[deserialize] the transString:{}", transString);
         try {
             if (StringUtils.isBlank(transString)) {
                 logger.error("[deserialize] the transString is blank.");
