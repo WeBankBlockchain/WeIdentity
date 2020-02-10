@@ -59,8 +59,16 @@ public abstract class BaseService {
         if (!fiscoConfig.load()) {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
         }
-        if (StringUtils.isEmpty(fiscoConfig.getCurrentOrgId())) {
-            logger.error("[BaseService] the blockchain orgId is blank.");
+        fiscoConfig.check();
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("windows")) {
+
+            try {
+                NativeUtils.loadLibraryFromJar("/WeDPR_dynamic_lib/libeay32md.dll");
+                NativeUtils.loadLibraryFromJar("/WeDPR_dynamic_lib/ssleay32md.dll");
+            } catch (IOException e) {
+                logger.error("[BaseService] Cannot find SSL libraries (in Windows).", e);
+            }
         }
     }
 
