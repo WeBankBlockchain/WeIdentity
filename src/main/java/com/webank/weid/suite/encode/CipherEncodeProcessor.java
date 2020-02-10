@@ -141,6 +141,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
     private String getEntryptKey(EncodeData encodeData) {
         //说明是当前机构，这个时候不适用于AMOP获取key，而是从本地数据库中获取key
         if (fiscoConfig.getCurrentOrgId().equals(encodeData.getOrgId())) {
+            logger.info("get Encrypt Key from DB.");
             //保存秘钥
             ResponseData<String> response = 
                 this.getDataDriver().get(DataDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId());
@@ -151,6 +152,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             }
             return this.getEncryptKey(encodeData, response.getResult());
         } else {
+            logger.info("get Encrypt Key By AMOP.");
             //获取秘钥，
             return this.requestEncryptKeyByAmop(encodeData);  
         }

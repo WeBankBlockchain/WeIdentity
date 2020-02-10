@@ -759,7 +759,7 @@ public class PdfTransportationImpl
 
         logger.info(
             "begin to execute PdfTransportationImpl serialization, property:{}.", property);
-
+        logger.info("the object:{}", object);
         ResponseData<byte[]> errorCode1 = checkPara(object, property);
         if (errorCode1 != null) {
             return errorCode1;
@@ -827,7 +827,7 @@ public class PdfTransportationImpl
 
         logger.info(
             "begin to execute PdfTransportationImpl serialization, property:{}.", property);
-
+        logger.info("the object:{}", object);
         ResponseData<byte[]> errorCode1 = checkPara(object, property);
         if (errorCode1 != null) {
             return errorCode1;
@@ -841,7 +841,7 @@ public class PdfTransportationImpl
                 try {
                     document = PDDocument.load(file);
                 } catch (IOException e) {
-                    logger.error("pdf template load error:{}.", ErrorCode.BASE_ERROR);
+                    logger.error("pdf template load error:{}.", ErrorCode.BASE_ERROR, e);
                     return new ResponseData<>(null,  ErrorCode.BASE_ERROR);
                 }
             } else {

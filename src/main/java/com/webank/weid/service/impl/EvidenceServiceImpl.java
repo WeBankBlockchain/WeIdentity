@@ -154,7 +154,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
         try {
             return Files.asByteSource(file).asCharSource(Charsets.UTF_8).read();
         } catch (Exception e) {
-            logger.error("Failed to load file as String.");
+            logger.error("Failed to load file as String.", e);
             return StringUtils.EMPTY;
         }
     }
@@ -178,7 +178,7 @@ public class EvidenceServiceImpl extends BaseService implements EvidenceService 
             }
             return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
         } catch (Exception e) {
-            logger.error("Input Object type unsupported: " + object.getClass().getName());
+            logger.error("Input Object type unsupported: {}", object.getClass().getName(), e);
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
     }

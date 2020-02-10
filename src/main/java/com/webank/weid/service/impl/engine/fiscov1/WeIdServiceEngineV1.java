@@ -433,6 +433,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             logger.error("Set weId service failed. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
+            logger.error("Set weId service timeout. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         } catch (ResolveAttributeException e) {
             logger.error("[getWeIdDocument]: resolveTransaction failed. "
@@ -498,6 +499,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             logger.error("Set public key failed. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
+            logger.error("Set public key timeout. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
@@ -542,6 +544,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             logger.error("Set public key failed. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
+            logger.error("Set public key timeout. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
