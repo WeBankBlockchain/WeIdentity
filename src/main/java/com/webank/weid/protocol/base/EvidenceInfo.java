@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,7 +19,10 @@
 
 package com.webank.weid.protocol.base;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 
@@ -32,19 +35,38 @@ import lombok.Data;
 public class EvidenceInfo {
 
     /**
-     * Required: The full Credential hash.
+     * Required: full Credential hash.
      */
     private String credentialHash;
 
     /**
-     * Required: The signers of this Credential.
+     * Required: sign info mapping (key: signer WeID, value: evidenceSignInfo).
      */
-    private List<String> signers;
+    private Map<String, EvidenceSignInfo> signInfo = new HashMap<>();
 
     /**
-     * Required: The signatures of each signers with the same order. In JavaBean object, the
-     * signatures will be encoded in Base64. On the blockchain, the signatures will be stored in its
-     * r, s, v.
+     * Get all signers info.
+     *
+     * @return signers list
      */
-    private List<String> signatures;
+    public List<String> getSigners() {
+        List<String> signers = new ArrayList<>();
+        for (Map.Entry<String, EvidenceSignInfo> entry : signInfo.entrySet()) {
+            signers.add(entry.getKey());
+        }
+        return signers;
+    }
+
+    /**
+     * Get all signatures info.
+     *
+     * @return signatures list
+     */
+    public List<String> getSignatures() {
+        List<String> signatures = new ArrayList<>();
+        for (Map.Entry<String, EvidenceSignInfo> entry : signInfo.entrySet()) {
+            signatures.add(entry.getValue().getSignature());
+        }
+        return signatures;
+    }
 }
