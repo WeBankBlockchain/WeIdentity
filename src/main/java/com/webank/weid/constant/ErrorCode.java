@@ -295,7 +295,12 @@ public enum ErrorCode {
     /**
      * The credential evidence hash mismatch.
      */
-    CREDENTIAL_EVIDENCE_HASH_MISMATCH(100501, "credential evidence hash mismatch"),
+    CREDENTIAL_EVIDENCE_HASH_MISMATCH(100501, "evidence hash mismatch"),
+
+    /**
+     * The credential evidence hash mismatch.
+     */
+    CREDENTIAL_EVIDENCE_NOT_EXIST(100502, "evidence does not exist on chain"),
 
     /**
      * The challenge is invalid.
