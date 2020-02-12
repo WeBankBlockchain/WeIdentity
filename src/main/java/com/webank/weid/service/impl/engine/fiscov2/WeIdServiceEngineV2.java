@@ -126,7 +126,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             }
             String weAddress = WeIdUtils.convertWeIdToAddress(weId);
             if (!StringUtils.equals(weAddress, identity)) {
-                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_WEID_NOT_MATCH);
+                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_KEY_NOT_MATCH);
                 return response;
             }
 
