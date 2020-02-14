@@ -61,7 +61,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
    └─ util：工具类实现
 
 基本数据结构
---------
+------------
 
 WeIdDocument
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -195,6 +195,7 @@ com.webank.weid.protocol.base.ServiceProperty
 **调用示例**
 
 .. code-block:: java
+
    WeIdService weIdService = new WeIdServiceImpl();
    WeIdDocument weIdDocument = weIdService.getWeIdDocument("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a").getResult();
    String weIdDocumentJson = weIdDocument.toJson();
@@ -227,6 +228,7 @@ com.webank.weid.protocol.base.ServiceProperty
 **调用示例**
 
 .. code-block:: java
+
    WeIdService weIdService = new WeIdServiceImpl();
    WeIdDocument weIdDocument = weIdService.getWeIdDocument("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a").getResult();
    String weIdDocumentJson = weIdDocument.toJson();
@@ -294,6 +296,7 @@ com.webank.weid.protocol.base.Challenge
 **调用示例**
 
 .. code-block:: java
+
    Challenge challenge = Challenge.create("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a", "1234");
    String challengeJson = challenge.toJson();
 
@@ -325,6 +328,7 @@ com.webank.weid.protocol.base.Challenge
 **调用示例**
 
 .. code-block:: java
+
    Challenge challenge = Challenge.create("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a", "1234");
    String challengeJson = challenge.toJson();
    
@@ -411,6 +415,7 @@ com.webank.weid.protocol.base.CredentialPojo
 **调用示例**
 
 .. code-block:: java
+
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
@@ -467,6 +472,7 @@ com.webank.weid.protocol.base.CredentialPojo
 **调用示例**
 
 .. code-block:: java
+
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
@@ -573,6 +579,7 @@ com.webank.weid.protocol.base.PresentationPolicyE
 **调用示例**
 
 .. code-block:: java
+
    PresentationPolicyE presentationPolicyE = PresentationPolicyE.create("policy.json");
    
    String presentationPolicyEJson = presentationPolicyE.toJson();
@@ -605,6 +612,7 @@ com.webank.weid.protocol.base.PresentationPolicyE
 **调用示例**
 
 .. code-block:: java
+
    PresentationPolicyE presentationPolicyE = PresentationPolicyE.create("policy.json");
    
    String presentationPolicyEJson = presentationPolicyE.toJson();
@@ -677,6 +685,7 @@ com.webank.weid.protocol.base.PresentationE
 **调用示例**
 
 .. code-block:: java
+
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1101);
@@ -745,6 +754,7 @@ com.webank.weid.protocol.base.PresentationE
 **调用示例**
 
 .. code-block:: java
+
       CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1101);
@@ -803,6 +813,7 @@ com.webank.weid.protocol.base.PresentationE
 **调用示例**
 
 .. code-block:: java
+
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1101);
@@ -859,6 +870,7 @@ com.webank.weid.protocol.base.PresentationE
 **调用示例**
 
 .. code-block:: java
+
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1101);
@@ -3207,7 +3219,7 @@ com.webank.weid.protocol.base.AuthorityIssuer
 
 
 5. getAllAuthorityIssuerList
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
@@ -3781,7 +3793,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 
 8. removeIssuerFromIssuerType
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
@@ -4139,7 +4151,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 
 10. getAllSpecificTypeIssuerList
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
@@ -9193,7 +9205,7 @@ T java.lang.Object
 
 
 CredentialPojoService
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 1. createCredential
 ~~~~~~~~~~~~~~~~~~~
@@ -9501,7 +9513,7 @@ com.webank.weid.protocol.base.CredentialPojo
 ----
 
 2. createSelectiveCredential
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
@@ -9964,10 +9976,10 @@ com.webank.weid.protocol.response.TransactionInfo
      - cpt不存在
    * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
      - 100417
+     -
    * - CREDENTIAL_ISSUER_INVALID
      - 100418
      - WeIdentity DID无效
-     - 获取weIdDocument异常
    * - CREDENTIAL_SIGNATURE_BROKEN
      - 100405
      - 签名验证不通过
@@ -10577,6 +10589,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - 签名验证异常
    * - CREDENTIAL_SIGNATURE_NOT_EXISTS
      - 100422
+     -
    * - CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL
      - 100423
      - policy披露信息非法
@@ -10586,7 +10599,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_CPTID_NOTMATCH
      - 100425
      - CPT不匹配
-     - 签名不存在
    * - CREDENTIAL_PRESENTERWEID_NOTMATCH
      - 100426
      - presenterWeId跟challenge不匹配
@@ -10703,7 +10715,7 @@ com.webank.weid.protocol.response.TransactionInfo
 ----
 
 6. createPresentation
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
@@ -12319,7 +12331,7 @@ com.webank.weid.protocol.response.AmopResponse
 ----
 
 3. getPolicyAndChallenge
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
@@ -12510,6 +12522,7 @@ com.webank.weid.protocol.base.Challenge
    * - DIRECT_ROUTE_MSG_BASE_ERROR
      - 160010
      - AMOP异常
+
 ----
 
 
@@ -12660,11 +12673,12 @@ com.webank.weid.protocol.response.GetEncryptKeyResponse
    * - SQL_GET_CONNECTION_ERROR
      - 160013
      - 获取数据源连接异常
+
 ----
 
 
 JsonTransportation
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 1. specify
 ~~~~~~~~~~~~~~~~~~~
@@ -13071,7 +13085,7 @@ java.util.List<java.lang.String>
 
 
 QrCodeTransportation
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^
 
 1. specify
 ~~~~~~~~~~~~~~~~~~~
@@ -13825,7 +13839,7 @@ java.util.List<java.lang.String>
 ----
 
 4. serializeWithTemplate
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
@@ -13995,7 +14009,7 @@ java.util.List<java.lang.String>
 ----
 
 5. serializeWithTemplate
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
@@ -14326,4 +14340,3 @@ java.util.List<java.lang.String>
            .deserialize(response1.getResult(),PresentationE.class,weIdAuthentication);
 
 
-----
