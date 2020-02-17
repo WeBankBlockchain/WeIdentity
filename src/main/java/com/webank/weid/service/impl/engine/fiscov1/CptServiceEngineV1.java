@@ -98,7 +98,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
     private static String CREDENTIALTEMPLATETOPIC;
 
-    private static Persistence dataDriver = new MysqlDriver();
+    private static Persistence dataDriver;
 
     static {
         Event event = new Event(
@@ -222,6 +222,13 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
         result.setCptVersion(DataToolUtils.int256ToInt(cptVersion));
 
         return new ResponseData<>(result, ErrorCode.SUCCESS, info);
+    }
+
+    private Persistence getDataDriver() {
+        if (dataDriver == null) {
+            dataDriver = new MysqlDriver();
+        }
+        return dataDriver;
     }
 
     /* (non-Javadoc)
@@ -371,7 +378,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
 
     private ErrorCode processTemplate(Integer cptId, String cptJsonSchemaNew) {
 
-        if (!CredentialPojoUtils.isZkpCpt(cptId)) {
+        if (!CredentialPojoUtils.isZkpCpt(cptJsonSchemaNew)) {
             return ErrorCode.SUCCESS;
         }
         List<String> attributeList;
@@ -382,7 +389,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
-                dataDriver.saveOrUpdate(
+                this.getDataDriver().saveOrUpdate(
                     DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);
