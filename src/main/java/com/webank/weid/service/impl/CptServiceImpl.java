@@ -28,6 +28,7 @@ import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
@@ -56,12 +57,10 @@ import com.webank.weid.util.WeIdUtils;
 public class CptServiceImpl extends BaseService implements CptService {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
-
-    private CptServiceEngine cptServiceEngine = EngineFactory.createCptServiceEngine();
-
     //获取CPT缓存节点
-    private static CacheNode<ResponseData<Cpt>> cptCahceNode = 
+    private static CacheNode<ResponseData<Cpt>> cptCahceNode =
         CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
+    private CptServiceEngine cptServiceEngine = EngineFactory.createCptServiceEngine();
 
     /**
      * Register a new CPT with a pre-set CPT ID, to the blockchain.
@@ -141,7 +140,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
-            String cptJsonSchemaNew = this.cptSchemaToString(args.getCptJsonSchema());
+            String cptJsonSchemaNew = this.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
                 weId,
                 cptJsonSchemaNew,
@@ -180,7 +179,7 @@ public class CptServiceImpl extends BaseService implements CptService {
 
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
-            String cptJsonSchemaNew = this.cptSchemaToString(args.getCptJsonSchema());
+            String cptJsonSchemaNew = this.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
                 weId,
                 cptJsonSchemaNew,
@@ -275,14 +274,18 @@ public class CptServiceImpl extends BaseService implements CptService {
 
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
-            String cptJsonSchemaNew = this.cptSchemaToString(args.getCptJsonSchema());
+            String cptJsonSchemaNew = this.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
                 weId,
                 cptJsonSchemaNew,
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(cptId, address, 
-                cptJsonSchemaNew, rsvSignature, weIdPrivateKey.getPrivateKey());
+            ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(
+                cptId,
+                address,
+                cptJsonSchemaNew,
+                rsvSignature,
+                weIdPrivateKey.getPrivateKey());
             if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                 cptCahceNode.remove(String.valueOf(cptId));
             }
@@ -369,12 +372,15 @@ public class CptServiceImpl extends BaseService implements CptService {
      * @param cptJsonSchema Map
      * @return String
      */
-    private String cptSchemaToString(Map<String, Object> cptJsonSchema) throws Exception {
+    private String cptSchemaToString(CptMapArgs args) throws Exception {
 
+        Map<String, Object> cptJsonSchema = args.getCptJsonSchema();
         Map<String, Object> cptJsonSchemaNew = new HashMap<String, Object>();
         cptJsonSchemaNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
         cptJsonSchemaNew.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
         cptJsonSchemaNew.putAll(cptJsonSchema);
+        String cptType = args.getCptType().getName();
+        cptJsonSchemaNew.put(CredentialConstant.CPT_TYPE_KEY, cptType);
         return DataToolUtils.serialize(cptJsonSchemaNew);
     }
 
