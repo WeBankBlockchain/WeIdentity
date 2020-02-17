@@ -43,6 +43,10 @@ public final class CredentialConstant {
      */
     public static final String DEFAULT_CREDENTIAL_TYPE = "VerifiableCredential";
 
+    /**
+     * cpt type.
+     */
+    public static final String CPT_TYPE_KEY = "cptType";
 
     /**
      * The Constant zkp Credential type.
