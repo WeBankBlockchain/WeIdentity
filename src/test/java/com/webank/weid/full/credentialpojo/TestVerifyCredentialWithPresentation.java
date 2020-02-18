@@ -5,22 +5,27 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseServcie;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.api.transportation.TransportationFactory;
+import com.webank.weid.suite.api.transportation.params.EncodeType;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
+import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
 
-public class TestVerifyCredentialWithPresentation extends TestBaseServcie {
+public class TestVerifyCredentialWithPresentation extends TestBaseTransportation {
 
     private static final Logger logger =
         LoggerFactory.getLogger(TestCreatePresentation.class);
@@ -36,8 +41,21 @@ public class TestVerifyCredentialWithPresentation extends TestBaseServcie {
 
     private static PresentationE presentationE = null;
 
+    //test for pdf presentation verify
+    private static CredentialPojo credentialPojoNew1 = null;
+
+    private static List<CredentialPojo> credentialList1 = new ArrayList<>();
+
+    private static PresentationPolicyE presentationPolicyE1
+            = PresentationPolicyE.create("test-spectpl-policy.json");
+
+    private static Challenge challenge1 = null;
+
+    private static PresentationE presentationE1 = null;
+
     @Override
     public synchronized void testInit() {
+
         super.testInit();
 
         if (credentialPojoNew == null) {
@@ -72,12 +90,47 @@ public class TestVerifyCredentialWithPresentation extends TestBaseServcie {
             presentationE = response.getResult();
         }
 
+        //init for pdf presentation verify
+        super.testInitSpecTplCpt();
+
+        if (credentialPojoNew1 == null) {
+            credentialPojoNew1 = super.createCredentialPojo(createCredentialPojoArgs4);
+        }
+        if (presentationPolicyE1 != null) {
+            presentationPolicyE1 = PresentationPolicyE.create("test-spectpl-policy.json");
+            presentationPolicyE1.setPolicyPublisherWeId(createWeIdResultWithSetAttr.getWeId());
+            Map<Integer, ClaimPolicy> policyMap1 = presentationPolicyE1.getPolicy();
+            ClaimPolicy cliamPolicy1 = policyMap1.get(1005);
+            policyMap1.remove(1005);
+            policyMap1.put(createCredentialPojoArgs4.getCptId(), cliamPolicy1);
+        }
+        if (challenge1 == null) {
+            challenge1 = Challenge.create(
+                createWeIdResultWithSetAttr.getWeId(),
+                String.valueOf(System.currentTimeMillis()));
+        }
+
+        if (credentialList1 == null || credentialList1.size() == 0) {
+            credentialList1.add(credentialPojoNew1);
+        }
+        if (presentationE1 == null) {
+            ResponseData<PresentationE> response1 = credentialPojoService.createPresentation(
+                credentialList1,
+                presentationPolicyE1,
+                challenge1,
+                TestBaseUtil.buildWeIdAuthentication(createWeIdResultWithSetAttr)
+            );
+
+            Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
+            presentationE1 = response1.getResult();
+        }
+
+
     }
 
     /**
      * verify credential pojo with presention successs.
      */
-
     @Test
     public void testVerfiyCredential_suceess() {
 
@@ -90,5 +143,69 @@ public class TestVerifyCredentialWithPresentation extends TestBaseServcie {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
     }
 
+    /**
+     * verify presentation from pdf transportation.
+     */
+    @Test
+    @Ignore
+    public void testVerifyPdfPresentation_fail() {
 
+        //序列化PDF，生成包含PDF信息的byte[]
+        ResponseData<byte[]> retSerialize = TransportationFactory.newPdfTransportation()
+            .serializeWithTemplate(
+                presentationE1,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                "src/test/resources/test-template.pdf");
+        LogUtil.info(logger, "serialize", retSerialize);
+
+        //反序列化PDF数组为PresentationE
+        ResponseData<PresentationE> retDeserialize = TransportationFactory.newPdfTransportation()
+            .deserialize(retSerialize.getResult(), PresentationE.class, weIdAuthentication);
+        LogUtil.info(logger, "deserialize", retDeserialize);
+
+        ResponseData<Boolean> response = credentialPojoService.verify(
+            credentialPojoNew1.getIssuer(),
+            presentationPolicyE1,
+            challenge1,
+            retDeserialize.getResult());
+        LogUtil.info(logger, "testVerfiyCredentialWithPresention", response);
+        Assert.assertEquals(
+            ErrorCode.CREDENTIAL_USE_VERIFY_FUNCTION_ERROR.getCode(),
+            response.getErrorCode().intValue());
+    }
+
+    /**
+     * verify presentation from pdf transportation.
+     */
+    @Test
+    @Ignore
+    public void testVerifyPdfPresentation_success() {
+        PdfTransportationImpl pdfTransportation = new PdfTransportationImpl();
+
+        //序列化PDF，生成包含PDF信息的byte[]
+        ResponseData<byte[]> retSerialize = TransportationFactory.newPdfTransportation()
+            .serializeWithTemplate(
+                presentationE1,
+                new ProtocolProperty(EncodeType.ORIGINAL),
+                "src/test/resources/test-template.pdf");
+        LogUtil.info(logger, "serialize", retSerialize);
+
+        //反序列化PDF数组为PresentationE
+        ResponseData<PresentationE> retDeserialize = TransportationFactory.newPdfTransportation()
+            .deserialize(
+                retSerialize.getResult(),
+                PresentationE.class,
+                weIdAuthentication);
+        LogUtil.info(logger, "deserialize", retDeserialize);
+
+        ResponseData<Boolean> response = credentialPojoService.verifyPresentationFromPdf(
+            "src/test/resources/test-template.pdf",
+            retSerialize.getResult(),
+            credentialPojoNew1.getIssuer(),
+            presentationPolicyE1,
+            challenge1,
+            retDeserialize.getResult());
+        LogUtil.info(logger, "testVerfiyCredentialWithPresention", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+    }
 }
