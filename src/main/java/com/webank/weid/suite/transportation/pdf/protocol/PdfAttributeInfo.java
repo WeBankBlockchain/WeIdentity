@@ -27,10 +27,12 @@ import com.webank.weid.suite.transportation.json.protocol.JsonBaseData;
 
 @Getter
 @Setter
-public class PdfBaseData extends JsonBaseData {
+public class PdfAttributeInfo extends JsonBaseData {
 
     /**
-     * 存证地址.
+     * PDF模板id.
      */
-    private String address;
+    private String templateId;
+
+
 }
