@@ -19,13 +19,13 @@
 
 package com.webank.weid.suite.api.transportation.inf;
 
-import java.io.OutputStream;
 import java.util.List;
 
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
+import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 
 /**
  * PDF序列化工具，支持明文和加密两种方式.
@@ -49,13 +49,11 @@ public interface PdfTransportation {
      * @param object 协议存储的实体数据对象
      * @param <T> the type of the element
      * @param property 协议类型，支持加密和非加密两种
-     * @param weIdAuthentication WeID公私钥信息
      * @return 序列化以后生成PDF文件的byte[]
      */
     <T extends JsonSerializer> ResponseData<byte[]> serialize(
-            T object,
-            ProtocolProperty property,
-            WeIdAuthentication weIdAuthentication
+        T object,
+        ProtocolProperty property
     );
 
     /**
@@ -64,18 +62,15 @@ public interface PdfTransportation {
      *
      * @param object 协议存储的实体数据对象
      * @param property 协议类型，支持加密和非加密两种
-     * @param weIdAuthentication WeID公私钥信息
      * @param outputPdfFilePath 输出PDF文件的路径
      * @param <T> the type of the element
      * @return 序列化结果
      */
     <T extends JsonSerializer> ResponseData<Boolean> serialize(
-            T object,
-            ProtocolProperty property,
-            WeIdAuthentication weIdAuthentication,
-            String outputPdfFilePath
+        T object,
+        ProtocolProperty property,
+        String outputPdfFilePath
     );
-
 
     /**
      * 协议传输序列化接口. 此方法会将presentation按PDF模板的样式数据序列化为PDF文件，PDF文件的内容为claim表单，
@@ -84,15 +79,13 @@ public interface PdfTransportation {
      * @param object 协议存储的实体数据对象
      * @param <T> the type of the element
      * @param property 协议类型，支持加密和非加密两种
-     * @param weIdAuthentication WeID公私钥信息
      * @param inputPdfTemplatePath presentation的PDF模板
      * @return byte[] 序列化以后生成PDF文件的byte[]
      */
     <T extends JsonSerializer> ResponseData<byte[]> serializeWithTemplate(
-            T object,
-            ProtocolProperty property,
-            WeIdAuthentication weIdAuthentication,
-            String inputPdfTemplatePath
+        T object,
+        ProtocolProperty property,
+        String inputPdfTemplatePath
     );
 
     /**
@@ -101,18 +94,16 @@ public interface PdfTransportation {
      *
      * @param object 协议存储的实体数据对象
      * @param property 协议类型，支持加密和非加密两种
-     * @param weIdAuthentication WeID公私钥信息
      * @param inputPdfTemplatePath presentation的PDF模板
      * @param outputPdfFilePath 输出PDF文件的路径
      * @param <T> the type of the element
      * @return 序列化结果
      */
     <T extends JsonSerializer> ResponseData<Boolean> serializeWithTemplate(
-            T object,
-            ProtocolProperty property,
-            WeIdAuthentication weIdAuthentication,
-            String inputPdfTemplatePath,
-            String outputPdfFilePath
+        T object,
+        ProtocolProperty property,
+        String inputPdfTemplatePath,
+        String outputPdfFilePath
     );
 
     /**
@@ -126,8 +117,33 @@ public interface PdfTransportation {
      * @return 返回PresentationE对象数据
      */
     <T extends JsonSerializer> ResponseData<T> deserialize(
-            byte[] pdfTransportation,
-            Class<T> clazz,
-            WeIdAuthentication weIdAuthentication
+        byte[] pdfTransportation,
+        Class<T> clazz,
+        WeIdAuthentication weIdAuthentication
     );
+
+    /**
+     * 验证两个pdf的信息是否一致.
+     *
+     * @param object presentation
+     * @param pdfTemplatePath pdf模板路径
+     * @param pdfAttributeInfo pdf基本信息
+     * @param serializePdf 序列化生成包含pdf信息的byte数组
+     * @param <T> JsonSerializer
+     * @return 返回两个结果是否一致
+     */
+    <T extends JsonSerializer> Boolean verifyPdf(
+        T object,
+        String pdfTemplatePath,
+        PdfAttributeInfo pdfAttributeInfo,
+        byte[] serializePdf
+    );
+
+    /**
+     * 通过pdf的byte数组获取PdfBaseData.
+     *
+     * @param pdfTransportation 包含pdf信息的byte数组
+     * @return pdf基本信息
+     */
+    PdfAttributeInfo getBaseData(byte[] pdfTransportation);
 }
