@@ -128,6 +128,24 @@ public interface CredentialPojoService {
         PresentationE presentationE
     );
 
+    /**
+     * verify the presentation and pdf information.
+     * @param pdfTemplatePath path of pdf template
+     * @param serializePdf byte[] of serialize by pdf transportation
+     * @param presenterWeId the presenter's weid
+     * @param presentationPolicyE policy of the presentation
+     * @param challenge challenge
+     * @param presentationE the presentation
+     * @return the verification result. True if yes, false otherwise with exact verify error codes
+     */
+    ResponseData<Boolean> verifyPresentationFromPdf(
+        String pdfTemplatePath,
+        byte[] serializePdf,
+        String presenterWeId,
+        PresentationPolicyE presentationPolicyE,
+        Challenge challenge,
+        PresentationE presentationE
+    );
 
     /**
      * packing according to original vouchers and disclosure strategies.
