@@ -73,6 +73,8 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
+import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
@@ -98,7 +100,15 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         CredentialFieldDisclosureValue.EXISTED.getStatus().toString();
     private static WeIdService weIdService = new WeIdServiceImpl();
     private static CptService cptService = new CptServiceImpl();
-    private static Persistence dataDriver = new MysqlDriver();
+    private static Persistence dataDriver;
+    PdfTransportationImpl pdfTransportation = new PdfTransportationImpl();
+
+    private static Persistence getDataDriver() {
+        if (dataDriver == null) {
+            dataDriver = new MysqlDriver();
+        }
+        return dataDriver;
+    }
 
     /**
      * Salt generator. Automatically fillin the map structure in a recursive manner.
@@ -621,7 +631,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             if (cpt == null) {
                 logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
-            } 
+            }
             //String cptJsonSchema = JsonUtil.objToJsonStr(cpt.getCptJsonSchema());
             String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
 
@@ -654,6 +664,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (verifierResult.wedprErrorMessage == null) {
             return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
         }
+
         return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ERROR);
     }
 
@@ -697,7 +708,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         //String id=(String)preCredential.getClaim().get(CredentialConstant.CREDENTIAL_META_KEY_ID);
 
         //save masterSecret and credentialSecretsBlindingFactors to persistence.
-        ResponseData<Integer> dbResp = dataDriver
+        ResponseData<Integer> dbResp = getDataDriver()
             .saveOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
         if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
@@ -1179,6 +1190,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Challenge challenge,
         PresentationE presentationE) {
 
+        List<String> typeList = presentationE.getType();
+        if (typeList.contains(CredentialConstant.PRESENTATION_PDF)) {
+            logger.error("[verify] please use verifyPresentationFromPDF function.");
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_USE_VERIFY_FUNCTION_ERROR);
+        }
+
         ErrorCode errorCode =
             checkInputArgs(presenterWeId, presentationPolicyE, challenge, presentationE);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
@@ -1226,6 +1243,41 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 "[verify] verify credential error.", e);
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
+    }
+
+    @Override
+    public ResponseData<Boolean> verifyPresentationFromPdf(
+        String pdfTemplatePath,
+        byte[] serializePdf,
+        String presenterWeId,
+        PresentationPolicyE presentationPolicyE,
+        Challenge challenge,
+        PresentationE presentationE) {
+
+        //verify pdf
+        PdfAttributeInfo pdfAttributeInfo = pdfTransportation.getBaseData(serializePdf);
+        if (pdfAttributeInfo == null) {
+            logger.error("[verifyPresentationFromPDF] get pdf base data error.");
+        }
+        Boolean retVerifyPdf = pdfTransportation.verifyPdf(
+            presentationE,
+            pdfTemplatePath,
+            pdfAttributeInfo,
+            serializePdf
+        );
+
+        if (!retVerifyPdf) {
+            logger.error("[verifyPresentationFromPDF] verify pdf error.");
+            return new ResponseData<>(false, ErrorCode.TRANSPORTATION_PDF_VERIFY_ERROR);
+        }
+
+        List<String> typeList = presentationE.getType();
+        if (typeList.contains(CredentialConstant.PRESENTATION_PDF)) {
+            typeList.remove(CredentialConstant.PRESENTATION_PDF);
+        }
+        presentationE.setType(typeList);
+
+        return this.verify(presenterWeId, presentationPolicyE, challenge, presentationE);
     }
 
     private ErrorCode checkInputArgs(
@@ -1722,8 +1774,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
      *
      * @param weIdAuthentication auth
      * @param cptId cpt id
-     * @param credentialSignatureRequest credentialSignatureRequest
-     * @param userNonce userNoce made by user
+     * @param userResult   user result
      * @return credential signed by user.
      */
     private ResponseData<CredentialPojo> generateCpt111Credential(
@@ -1776,14 +1827,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                     .build();
             String encodedVerificationRule = Utils.protoToEncodedString(verificationRule);
             ResponseData<String> dbResp =
-                dataDriver.get(
+                getDataDriver().get(
                     DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                     credential.getId());
             Integer cptId = credentialClone.getCptId();
             String id = new StringBuffer().append(userId).append("_").append(cptId).toString();
             String newCredentialSignature = dbResp.getResult();
             ResponseData<String> masterKeyResp =
-                dataDriver.get(
+                getDataDriver().get(
                     DataDriverConstant.DOMAIN_USER_MASTER_SECRET,
                     id);
             HashMap<String, String> userCredentialInfo = DataToolUtils

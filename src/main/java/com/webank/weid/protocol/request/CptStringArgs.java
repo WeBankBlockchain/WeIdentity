@@ -21,6 +21,7 @@ package com.webank.weid.protocol.request;
 
 import lombok.Data;
 
+import com.webank.weid.constant.CptType;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 
 /**
@@ -41,4 +42,8 @@ public class CptStringArgs {
      */
     private String cptJsonSchema;
 
+    /**
+     * cpt type, "ORIGINAL" or "ZKP". default:"ORIGINAL".
+     */
+    private CptType cptType = CptType.ORIGINAL;
 }
