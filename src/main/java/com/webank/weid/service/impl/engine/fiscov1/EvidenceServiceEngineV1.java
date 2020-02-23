@@ -19,37 +19,38 @@
 
 package com.webank.weid.service.impl.engine.fiscov1;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.crypto.Sign;
-import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.bcos.web3j.abi.datatypes.Utf8String;
+import org.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.bcos.web3j.protocol.Web3j;
+import org.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
+import org.bcos.web3j.protocol.core.methods.response.EthBlock;
+import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
+import org.bcos.web3j.protocol.core.methods.response.Log;
+import org.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.v1.Evidence;
-import com.webank.weid.contract.v1.Evidence.AddHashLogEventResponse;
-import com.webank.weid.contract.v1.Evidence.AddSignatureLogEventResponse;
-import com.webank.weid.contract.v1.EvidenceFactory;
-import com.webank.weid.contract.v1.EvidenceFactory.CreateEvidenceLogEventResponse;
+import com.webank.weid.contract.v1.EvidenceContract;
+import com.webank.weid.contract.v1.EvidenceContract.EvidenceAttributeChangedEventResponse;
 import com.webank.weid.protocol.base.EvidenceInfo;
+import com.webank.weid.protocol.base.EvidenceSignInfo;
+import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
@@ -66,265 +67,234 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV1.class);
 
-    /**
-     * Create evidence in 1.x FISCO-BCOS.
-     *
-     * @param sigData signature Data
-     * @param hashAttributes hash value
-     * @param extraValueList extra value
-     * @param privateKey private key
-     * @param signerList declared signers
-     * @return evidence address
-     */
+    private static EvidenceContract evidenceContract = getContractService(
+        fiscoConfig.getEvidenceAddress(),
+        EvidenceContract.class);
+
     @Override
     public ResponseData<String> createEvidence(
-        Sign.SignatureData sigData,
-        List<String> hashAttributes,
-        List<String> extraValueList,
-        String privateKey,
-        List<String> signerList
+        String hashValue,
+        String signature,
+        String extra,
+        Long timestamp,
+        String privateKey
     ) {
-
         try {
-            Bytes32 r = DataToolUtils.bytesArrayToBytes32(sigData.getR());
-            Bytes32 s = DataToolUtils.bytesArrayToBytes32(sigData.getS());
-            Uint8 v = DataToolUtils.intToUnt8(Integer.valueOf(sigData.getV()));
-            List<Address> signer = new ArrayList<>();
-            if (signerList == null || signerList.size() == 0) {
-                // Evidence has only one signer - default to be the WeID behind the private key
-                ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-                signer.add(new Address(Keys.getAddress(keyPair)));
-            } else {
-                // Evidence has a pre-defined signer list
-                for (String signerWeId : signerList) {
-                    signer.add(new Address(WeIdUtils.convertWeIdToAddress(signerWeId)));
-                }
-            }
-            EvidenceFactory evidenceFactory =
+            EvidenceContract evidenceContractWriter =
                 reloadContract(
                     fiscoConfig.getEvidenceAddress(),
                     privateKey,
-                    EvidenceFactory.class
+                    EvidenceContract.class
                 );
-            Future<TransactionReceipt> future = evidenceFactory.createEvidence(
-                new DynamicArray<Bytes32>(generateBytes32List(hashAttributes)),
-                new DynamicArray<Address>(signer),
-                r,
-                s,
-                v,
-                new DynamicArray<Bytes32>(generateBytes32List(extraValueList))
-            );
+            TransactionReceipt receipt =
+                evidenceContractWriter.createEvidence(
+                    new Utf8String(hashValue),
+                    new Utf8String(signature),
+                    new Utf8String(extra),
+                    new Uint256(new BigInteger(String.valueOf(timestamp), 10))
+                ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
-            TransactionReceipt receipt = future.get(
-                WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
-                TimeUnit.SECONDS);
             TransactionInfo info = new TransactionInfo(receipt);
-            List<CreateEvidenceLogEventResponse> eventResponseList =
-                EvidenceFactory.getCreateEvidenceLogEvents(receipt);
-            CreateEvidenceLogEventResponse event = eventResponseList.get(0);
-
-            if (event != null) {
-                ErrorCode innerResponse =
-                    verifyCreateEvidenceEvent(
-                        event.retCode.getValue().intValue(),
-                        event.addr.toString()
-                    );
-                if (ErrorCode.SUCCESS.getCode() != innerResponse.getCode()) {
-                    return new ResponseData<>(StringUtils.EMPTY, innerResponse, info);
-                }
-                return new ResponseData<>(event.addr.toString(), ErrorCode.SUCCESS, info);
-            } else {
-                logger.error(
-                    "create evidence failed due to transcation event decoding failure."
-                );
+            List<EvidenceAttributeChangedEventResponse> eventList =
+                EvidenceContract.getEvidenceAttributeChangedEvents(receipt);
+            if (eventList == null || eventList.isEmpty()) {
                 return new ResponseData<>(StringUtils.EMPTY,
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
-            }
-        } catch (TimeoutException e) {
-            logger.error("create evidence failed due to system timeout. ", e);
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("create evidence failed due to transaction error. ", e);
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-    }
-
-    /**
-     * Add signature to an evidence.
-     *
-     * @param sigData signature data
-     * @param privateKey private key
-     * @return true if succeeded, false otherwise
-     */
-    @Override
-    public ResponseData<Boolean> addSignature(Sign.SignatureData sigData, String privateKey,
-        String evidenceAddress) {
-        Evidence evidence =
-            reloadContract(
-                evidenceAddress,
-                privateKey,
-                Evidence.class
-            );
-        Bytes32 r = DataToolUtils.bytesArrayToBytes32(sigData.getR());
-        Bytes32 s = DataToolUtils.bytesArrayToBytes32(sigData.getS());
-        Uint8 v = DataToolUtils.intToUnt8(Integer.valueOf(sigData.getV()));
-        Future<TransactionReceipt> future = evidence.addSignature(r, s, v);
-        try {
-            TransactionReceipt receipt = future.get(
-                WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
-                TimeUnit.SECONDS);
-            TransactionInfo info = new TransactionInfo(receipt);
-            List<AddSignatureLogEventResponse> eventResponseList =
-                Evidence.getAddSignatureLogEvents(receipt);
-            AddSignatureLogEventResponse event = eventResponseList.get(0);
-            if (event != null) {
-                if (event.retCode.getValue().intValue()
-                    == ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode()) {
-                    return new ResponseData<>(false,
-                        ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT, info);
-                }
-                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
             } else {
-                logger.error(
-                    "add signature failed due to transcation event decoding failure."
-                );
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
-            }
-        } catch (TimeoutException e) {
-            logger.error("add signature failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("add signature failed due to transaction error. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        }
-    }
-
-    /**
-     * Set hash value an evidence.
-     *
-     * @param hashAttributes hash value
-     * @param privateKey private key
-     * @param evidenceAddress evidence address
-     * @return true if succeeded, false otherwise
-     */
-    @Override
-    public ResponseData<Boolean> setHashValue(List<String> hashAttributes, String privateKey,
-        String evidenceAddress) {
-        Evidence evidence =
-            reloadContract(
-                evidenceAddress,
-                privateKey,
-                Evidence.class
-            );
-        Future<TransactionReceipt> future = evidence
-            .setHash(new DynamicArray<Bytes32>(generateBytes32List(hashAttributes)));
-        try {
-            TransactionReceipt receipt = future.get(
-                WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT,
-                TimeUnit.SECONDS);
-            TransactionInfo info = new TransactionInfo(receipt);
-            List<AddHashLogEventResponse> eventResponseList = Evidence.getAddHashLogEvents(receipt);
-            AddHashLogEventResponse event = eventResponseList.get(0);
-            if (event != null) {
-                if (event.retCode.getValue().intValue()
-                    == ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode()) {
-                    return new ResponseData<>(false,
-                        ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT, info);
+                String address = WeIdUtils
+                    .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+                for (EvidenceAttributeChangedEventResponse event : eventList) {
+                    if (isSignEvent(event) && event.value.getValue().equalsIgnoreCase(signature)
+                        && event.signer.toString().equalsIgnoreCase(address)) {
+                        return new ResponseData<>(hashValue, ErrorCode.SUCCESS, info);
+                    }
                 }
-                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
-            } else {
-                logger.error(
-                    "set hash value failed due to transaction event decoding failure."
-                );
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
             }
-        } catch (TimeoutException e) {
-            logger.error("add signature failed due to system timeout. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("add signature failed due to transaction error. ", e);
-            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+            return new ResponseData<>(StringUtils.EMPTY,
+                ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT);
+        } catch (Exception e) {
+            logger.error("create evidence failed due to system error. ", e);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
     }
 
-    private List<Bytes32> generateBytes32List(List<String> bytes32List) {
-        int desiredLength = bytes32List.size();
-        List<Bytes32> finalList = new ArrayList<>();
-        for (int i = 0; i < desiredLength; i++) {
-            finalList.add(DataToolUtils.stringToBytes32(bytes32List.get(i)));
-        }
-        return finalList;
+    private static boolean isSignEvent(EvidenceAttributeChangedEventResponse event) {
+        return event.key.getValue().equalsIgnoreCase("info");
+    }
+
+    private static boolean isExtraEvent(EvidenceAttributeChangedEventResponse event) {
+        return event.key.getValue().equalsIgnoreCase("extra");
     }
 
     /**
-     * Get an evidence info.
+     * Get an evidence full info.
      *
-     * @param evidenceAddress evidence addr
+     * @param hash evidence hash
      * @return evidence info
      */
     @Override
-    public ResponseData<EvidenceInfo> getInfo(String evidenceAddress) {
+    public ResponseData<EvidenceInfo> getInfo(String hash) {
+        EvidenceInfo evidenceInfo = new EvidenceInfo();
+        evidenceInfo.setCredentialHash(hash);
+        int latestBlockNumber = 0;
         try {
-            Evidence evidence = (Evidence) getContractService(evidenceAddress, Evidence.class);
-            List<Type> rawResult =
-                evidence.getInfo()
-                    .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-
-            if (rawResult == null) {
-                return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+            latestBlockNumber = DataToolUtils
+                .uint256ToInt(evidenceContract.getLatestRelatedBlock(new Utf8String(hash))
+                    .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS));
+            if (latestBlockNumber == 0) {
+                return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST);
             }
-            List<Bytes32> credentialHashList = ((DynamicArray<Bytes32>) rawResult.get(0))
-                .getValue();
-            List<Address> issuerList = ((DynamicArray<Address>) rawResult.get(1)).getValue();
-
-            EvidenceInfo evidenceInfoData = new EvidenceInfo();
-            if (credentialHashList.size() < 1) {
-                evidenceInfoData.setCredentialHash(WeIdConstant.HEX_PREFIX);
-            } else {
-                evidenceInfoData.setCredentialHash(
-                    WeIdConstant.HEX_PREFIX + DataToolUtils
-                        .bytes32ToString(credentialHashList.get(0))
-                        + DataToolUtils.bytes32ToString(credentialHashList.get(1)));
-            }
-            List<String> signerStringList = new ArrayList<>();
-            for (Address addr : issuerList) {
-                signerStringList.add(WeIdUtils.convertAddressToWeId(addr.toString()));
-            }
-            evidenceInfoData.setSigners(signerStringList);
-
-            List<String> signaturesList = new ArrayList<>();
-            List<Bytes32> rlist = ((DynamicArray<Bytes32>) rawResult.get(2)).getValue();
-            List<Bytes32> slist = ((DynamicArray<Bytes32>) rawResult.get(3)).getValue();
-            List<Uint8> vlist = ((DynamicArray<Uint8>) rawResult.get(4)).getValue();
-            byte v;
-            byte[] r;
-            byte[] s;
-            for (int index = 0; index < rlist.size(); index++) {
-                v = (byte) (vlist.get(index).getValue().intValue());
-                r = rlist.get(index).getValue();
-                s = slist.get(index).getValue();
-                if ((int) v == 0) {
-                    // skip empty signatures
-                    continue;
-                }
-                SignatureData sigData = new SignatureData(v, r, s);
-                signaturesList.add(
-                    new String(
-                        DataToolUtils.base64Encode(
-                            DataToolUtils.simpleSignatureSerialization(sigData)
-                        ),
-                        StandardCharsets.UTF_8
-                    )
-                );
-            }
-            evidenceInfoData.setSignatures(signaturesList);
-            return new ResponseData<>(evidenceInfoData, ErrorCode.SUCCESS);
-        } catch (TimeoutException e) {
-            logger.error("create evidence failed due to system timeout. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
-        } catch (InterruptedException | ExecutionException e) {
-            logger.error("create evidence failed due to transaction error. ", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+            resolveTransaction(hash, latestBlockNumber, evidenceInfo);
+            return new ResponseData<>(evidenceInfo, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("get evidence failed.", e);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
+    }
+
+    private static void resolveTransaction(
+        String hash,
+        int startBlockNumber,
+        EvidenceInfo evidenceInfo) {
+
+        int previousBlock = startBlockNumber;
+        while (previousBlock != 0) {
+            int currentBlockNumber = previousBlock;
+            EthBlock latestBlock = null;
+            try {
+                latestBlock = ((Web3j) getWeb3j()).ethGetBlockByNumber(
+                    new DefaultBlockParameterNumber(currentBlockNumber), true).send();
+            } catch (IOException e) {
+                logger.error(
+                    "Get block by number:{} failed. Exception message:{}", currentBlockNumber, e);
+            }
+            if (latestBlock == null) {
+                logger.info("Get block by number:{}. latestBlock is null", currentBlockNumber);
+                return;
+            }
+            List<Transaction> transList = latestBlock
+                .getBlock()
+                .getTransactions()
+                .stream()
+                .map(transactionResult -> (Transaction) transactionResult.get())
+                .collect(Collectors.toList());
+            previousBlock = 0;
+            try {
+                for (Transaction transaction : transList) {
+                    String transHash = transaction.getHash();
+
+                    EthGetTransactionReceipt rec1 = ((Web3j) getWeb3j())
+                        .ethGetTransactionReceipt(transHash)
+                        .send();
+                    TransactionReceipt receipt = rec1.getTransactionReceipt().get();
+                    List<Log> logs = rec1.getResult().getLogs();
+                    for (Log log : logs) {
+                        ResolveEventLogResult returnValue =
+                            resolveEventLog(hash, log, receipt, evidenceInfo);
+                        if (returnValue.getResultStatus().equals(
+                            ResolveEventLogStatus.STATUS_SUCCESS)) {
+                            if (returnValue.getPreviousBlock() == currentBlockNumber) {
+                                continue;
+                            }
+                            previousBlock = returnValue.getPreviousBlock();
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                logger.error("Get TransactionReceipt by key :{} failed.", hash, e);
+            }
+        }
+    }
+
+    private static ResolveEventLogResult resolveEventLog(
+        String hash,
+        Log log,
+        TransactionReceipt receipt,
+        EvidenceInfo evidenceInfo) {
+        String topic = log.getTopics().get(0);
+        if (!StringUtils.isBlank(topic)) {
+            return resolveAttributeEvent(hash, receipt, evidenceInfo);
+        }
+        ResolveEventLogResult response = new ResolveEventLogResult();
+        response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENT_NULL);
+        return response;
+    }
+
+    private static ResolveEventLogResult resolveAttributeEvent(
+        String hash,
+        TransactionReceipt receipt,
+        EvidenceInfo evidenceInfo) {
+        List<EvidenceAttributeChangedEventResponse> eventList =
+            EvidenceContract.getEvidenceAttributeChangedEvents(receipt);
+        ResolveEventLogResult response = new ResolveEventLogResult();
+
+        if (CollectionUtils.isEmpty(eventList)) {
+            response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENTLOG_NULL);
+            return response;
+        }
+
+        int previousBlock = 0;
+        // Actual construction code
+        for (EvidenceAttributeChangedEventResponse event : eventList) {
+            if (event.signer == null || event.key == null || event.previousBlock == null) {
+                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_RES_NULL);
+                return response;
+            }
+            if (!hash.equalsIgnoreCase(event.hash.getValue())) {
+                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_KEY_NOT_MATCH);
+                return response;
+            }
+            String signerWeId = WeIdUtils.convertAddressToWeId(event.signer.toString());
+            if (isSignEvent(event)) {
+                // higher block sig will be overwritten anyway - any new one will be accepted
+                EvidenceSignInfo signInfo = new EvidenceSignInfo();
+                signInfo.setSignature(event.value.getValue());
+                signInfo.setTimestamp(String.valueOf(DataToolUtils.uint256ToInt(event.updated)));
+                if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
+                    signInfo.setExtraValue(
+                        evidenceInfo.getSignInfo().get(signerWeId).getExtraValue());
+                }
+                evidenceInfo.getSignInfo().put(signerWeId, signInfo);
+            }
+            if (isExtraEvent(event)) {
+                // higher block blob will overwrite existing one - any new one will be abandoned
+                EvidenceSignInfo signInfo = new EvidenceSignInfo();
+                if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
+                    signInfo.setSignature(
+                        evidenceInfo.getSignInfo().get(signerWeId).getSignature());
+                    signInfo.setTimestamp(
+                        evidenceInfo.getSignInfo().get(signerWeId).getTimestamp());
+                } else {
+                    signInfo.setSignature(StringUtils.EMPTY);
+                    signInfo.setTimestamp(StringUtils.EMPTY);
+                }
+                Map<String, String> newBlob;
+                try {
+                    newBlob = DataToolUtils.deserialize(URLDecoder.decode(event.value.getValue(),
+                        StandardCharsets.UTF_8.name()), HashMap.class);
+                } catch (Exception e) {
+                    logger.error("Failed to decode and deserialize extra value: {}", event.value);
+                    response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_KEY_NOT_MATCH);
+                    return response;
+                }
+                Map<String, String> oldBlob = evidenceInfo.getSignInfo().get(signerWeId)
+                    .getExtraValue();
+                if (oldBlob == null || oldBlob.isEmpty()) {
+                    oldBlob = new HashMap<>();
+                }
+                // Iterate each key in the new blob. If it is already in the old one, abandon.
+                for (Map.Entry<String, String> entry : newBlob.entrySet()) {
+                    if (!oldBlob.containsKey(entry.getKey())) {
+                        oldBlob.put(entry.getKey(), entry.getValue());
+                    }
+                }
+                signInfo.setExtraValue(oldBlob);
+                evidenceInfo.getSignInfo().put(signerWeId, signInfo);
+            }
+            previousBlock = DataToolUtils.uint256ToInt(event.previousBlock);
+        }
+        response.setPreviousBlock(previousBlock);
+        response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_SUCCESS);
+        return response;
     }
 }

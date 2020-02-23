@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,35 +17,35 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.request;
+package com.webank.weid.protocol.base;
 
+import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
 
-import com.webank.weid.constant.CptType;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-
 /**
- * The Arguments for the SDK API register CPT. The cptJsonSchema is Map.
+ * The sign information of evidence's each signer's sign attempt. Used as a mapped info against
+ * each individual signer.
  *
- * @author lingfenghe
+ * @author chaoxinhu 2020.2
+ * @since v1.6.0
  */
 @Data
-public class CptMapArgs {
+public class EvidenceSignInfo {
 
     /**
-     * Required: weId authority  for this CPT.
+     * The signature of the signer onto this evidence.
      */
-    private WeIdAuthentication weIdAuthentication;
-    
+    private String signature;
+
     /**
-     * Required: The json schema content defined for this CPT.
+     * The timestamp at which this evidence is signed.
      */
-    private Map<String, Object> cptJsonSchema;
-    
+    private String timestamp;
+
     /**
-     * cpt type, "ORIGINAL" or "ZKP". default:"ORIGINAL".
+     * The extra value this signer records on chain.
      */
-    private CptType cptType = CptType.ORIGINAL;
+    private Map<String, String> extraValue;
 }
