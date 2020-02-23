@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
@@ -37,7 +37,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author v_wbgyang
  */
-public class TestIsAuthorityIssuer extends TestBaseServcie {
+public class TestIsAuthorityIssuer extends TestBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestIsAuthorityIssuer.class);
 

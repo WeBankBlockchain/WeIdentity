@@ -35,7 +35,7 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.CredentialPojo;
@@ -50,7 +50,7 @@ import com.webank.weid.util.DataToolUtils;
  *
  * @author v_wbgyang
  */
-public class TestVerifyCredentialByPublicKey extends TestBaseServcie {
+public class TestVerifyCredentialByPublicKey extends TestBaseService {
 
     private static final Logger logger =
         LoggerFactory.getLogger(TestVerifyCredentialByPublicKey.class);
