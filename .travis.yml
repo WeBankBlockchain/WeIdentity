@@ -34,10 +34,10 @@ jobs:
       script:
         - chmod u+x .ci/script/build-ci.sh
         - .ci/script/build-ci.sh
-        - travis_wait 45 ./gradlew check
-        - ./gradlew jacocoTestReport
-      after_success:
-        - bash <(curl -s https://codecov.io/bash)
+        #- travis_wait 45 ./gradlew check
+        #- ./gradlew jacocoTestReport
+      #after_success:
+        #- bash <(curl -s https://codecov.io/bash)
     - stage: "dependency pipeline"
       script:
         - chmod u+x .ci/script/weid-http-service/build-ci.sh

@@ -84,13 +84,20 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     private static final String CREDENTIAL_TEMPLATE_EVENT = EventEncoder
         .encode(CptController.CREDENTIALTEMPLATE_EVENT);
     private static CptController cptController;
-    private static Persistence dataDriver = new MysqlDriver();
+    private static Persistence dataDriver;
 
     static {
 
         if (cptController == null) {
             cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
         }
+    }
+
+    private static Persistence getDataDriver() {
+        if (dataDriver == null) {
+            dataDriver = new MysqlDriver();
+        }
+        return dataDriver;
     }
 
     /* (non-Javadoc)
@@ -252,7 +259,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     private ErrorCode processTemplate(Integer cptId, String cptJsonSchemaNew) {
 
         //if the cpt is not zkp type, no need to make template.
-        if (!CredentialPojoUtils.isZkpCpt(cptId)) {
+        if (!CredentialPojoUtils.isZkpCpt(cptJsonSchemaNew)) {
             return ErrorCode.SUCCESS;
         }
         List<String> attributeList;
@@ -262,7 +269,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
-                dataDriver.saveOrUpdate(
+                getDataDriver().saveOrUpdate(
                     DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);
