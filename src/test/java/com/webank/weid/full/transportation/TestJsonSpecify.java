@@ -6,11 +6,11 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.suite.api.transportation.TransportationFactory;
 import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 
-public class TestJsonSpecify extends TestBaseServcie {
+public class TestJsonSpecify extends TestBaseService {
 
     /**
      * case: weid exist.
