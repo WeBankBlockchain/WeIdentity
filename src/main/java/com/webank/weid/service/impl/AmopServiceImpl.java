@@ -77,12 +77,18 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     /**
      * persistence service.
      */
-    private static Persistence dataDriver = new MysqlDriver();
-
+    private static Persistence dataDriver;
     /**
      * credentialpojo service.
      */
     private static CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+
+    private static Persistence getDataDriver() {
+        if (dataDriver == null) {
+            dataDriver = new MysqlDriver();
+        }
+        return dataDriver;
+    }
 
     @Override
     public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
@@ -368,7 +374,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         CredentialTemplateEntity template = resp1.getResult();
         String id = new StringBuffer().append(userId).append("_").append(cptId)
             .toString();
-        ResponseData<String> dbResp = dataDriver
+        ResponseData<String> dbResp = getDataDriver()
             .get(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id);
         if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             throw new DatabaseException("database error!");
@@ -392,7 +398,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         //   .get(CredentialConstant.CREDENTIAL_META_KEY_ID);
         String dbKey = credentialPojo.getId();
         ResponseData<Integer> dbResponse =
-            dataDriver.saveOrUpdate(
+            getDataDriver().saveOrUpdate(
                 DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                 dbKey,
                 newCredentialSignature);
