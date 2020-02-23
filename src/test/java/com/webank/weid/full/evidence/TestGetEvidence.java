@@ -75,7 +75,7 @@ public class TestGetEvidence extends TestBaseServcie {
      * case2: address is null.
      */
     @Test
-    public void testGetEvidence_addressNull() {
+    public void testGetEvidence_HashNull() {
 
         ResponseData<EvidenceInfo> responseData = evidenceService.getEvidence(null);
         logger.info("testGetEvidenceCase2 result :" + responseData);
@@ -89,21 +89,8 @@ public class TestGetEvidence extends TestBaseServcie {
      * case3: address is "".
      */
     @Test
-    public void testGetEvidence_addressBlank() {
-        String evidenceAddress = "";
-        ResponseData<EvidenceInfo> responseData = evidenceService.getEvidence(evidenceAddress);
-        logger.info("testGetEvidenceCase3 result :" + responseData);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
-            responseData.getErrorCode().intValue());
-        Assert.assertNull(responseData.getResult());
-    }
-
-    /**
-     * case3: address Contain SpecialChar.
-     */
-    @Test
-    public void testGetEvidence_addressContainSpecialChar() {
-        String evidenceAddress = "";
+    public void testGetEvidence_HashIllegal() {
+        String evidenceAddress = "sdasfdcscwwewecas";
         ResponseData<EvidenceInfo> responseData = evidenceService.getEvidence(evidenceAddress);
         logger.info("testGetEvidenceCase3 result :" + responseData);
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
