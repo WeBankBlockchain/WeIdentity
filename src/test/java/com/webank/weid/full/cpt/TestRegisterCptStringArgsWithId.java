@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -17,7 +17,7 @@ import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
-public class TestRegisterCptStringArgsWithId extends TestBaseServcie {
+public class TestRegisterCptStringArgsWithId extends TestBaseService {
 
     private static final Logger logger = LoggerFactory
         .getLogger(TestRegisterCptStringArgsWithId.class);
