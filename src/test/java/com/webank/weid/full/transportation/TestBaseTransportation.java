@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
@@ -36,7 +36,7 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
 
-public abstract class TestBaseTransportation extends TestBaseServcie {
+public abstract class TestBaseTransportation extends TestBaseService {
 
     protected static PresentationE presentationE;
     protected static PresentationPolicyE presentationPolicyE;
