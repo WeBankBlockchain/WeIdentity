@@ -1,3 +1,10 @@
+### V1.5.2 (2020-02-24)
+- Features:
+1. PDF Transportation now forbids content tampering during transportation.
+2. Evidence now returns evidence hash instead of address (see API doc for details).
+3. Evidence creation and query efficiency is greatly improved.
+
+
 ### V1.5.1 (2020-01-22)
 - Features:
 1. Queried CPT can be cached to local machine (require MySQL setup).
