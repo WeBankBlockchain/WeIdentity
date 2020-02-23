@@ -43,6 +43,7 @@ import com.webank.weid.contract.v1.CommitteeMemberController;
 import com.webank.weid.contract.v1.CommitteeMemberData;
 import com.webank.weid.contract.v1.CptController;
 import com.webank.weid.contract.v1.CptData;
+import com.webank.weid.contract.v1.EvidenceContract;
 import com.webank.weid.contract.v1.EvidenceFactory;
 import com.webank.weid.contract.v1.RoleController;
 import com.webank.weid.contract.v1.SpecificIssuerController;
@@ -98,11 +99,10 @@ public class DeployContractV1 extends DeployContract {
 
     /**
      * Inits the web3j.
-     *
      */
     protected static void initWeb3j() {
         if (web3j == null) {
-            web3j = (Web3j)BaseService.getWeb3j();
+            web3j = (Web3j) BaseService.getWeb3j();
         }
     }
 
@@ -123,7 +123,7 @@ public class DeployContractV1 extends DeployContract {
                 roleControllerAddress
             );
         }
-        deployEvidenceContracts();
+        deployEvidenceContractsNew();
     }
 
     private static String deployWeIdContract() {
@@ -369,6 +369,7 @@ public class DeployContractV1 extends DeployContract {
         return issuerAddressList;
     }
 
+    @Deprecated
     private static String deployEvidenceContracts() {
         if (web3j == null) {
             initWeb3j();
@@ -389,6 +390,30 @@ public class DeployContractV1 extends DeployContract {
             writeAddressToFile(evidenceFactoryAddress, "evidenceController.address");
             return evidenceFactoryAddress;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            logger.error("EvidenceFactory deploy exception", e);
+        }
+        return StringUtils.EMPTY;
+    }
+
+    private static String deployEvidenceContractsNew() {
+        if (web3j == null) {
+            initWeb3j();
+        }
+        try {
+            Future<EvidenceContract> f =
+                EvidenceContract.deploy(
+                    web3j,
+                    credentials,
+                    WeIdConstant.GAS_PRICE,
+                    WeIdConstant.GAS_LIMIT,
+                    WeIdConstant.INILITIAL_VALUE
+                );
+            EvidenceContract evidenceContract = f
+                .get(DEFAULT_DEPLOY_CONTRACTS_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
+            String evidenceContractAddress = evidenceContract.getContractAddress();
+            writeAddressToFile(evidenceContractAddress, "evidenceController.address");
+            return evidenceContractAddress;
+        } catch (Exception e) {
             logger.error("EvidenceFactory deploy exception", e);
         }
         return StringUtils.EMPTY;
