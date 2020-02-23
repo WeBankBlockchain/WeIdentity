@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CredentialPojo;
@@ -48,7 +48,7 @@ import com.webank.weid.util.DataToolUtils;
  *
  * @author v_wbgyang
  */
-public class TestCreateSelectiveCredential extends TestBaseServcie {
+public class TestCreateSelectiveCredential extends TestBaseService {
 
     private static final Logger logger = LoggerFactory
         .getLogger(TestCreateSelectiveCredential.class);
