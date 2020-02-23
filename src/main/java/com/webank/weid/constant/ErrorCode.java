@@ -276,6 +276,10 @@ public enum ErrorCode {
     TIMESTAMP_CREATION_FAILED_FOR_SELECTIVELY_DISCLOSED(100438,
         "timestamp creation does not support selectively disclosed credential"),
 
+    CREDENTIAL_USE_VERIFY_FUNCTION_ERROR(100439,
+        "presentation from pdf transportation, please use verifyPresentationFromPDF function"),
+
+
     /**
      * The credential evidence contract failure: illegal input.
      */
@@ -448,6 +452,11 @@ public enum ErrorCode {
      * pdf transfer error.
      */
     TRANSPORTATION_PDF_TRANSFER_ERROR(100808, "pdf transfer error, please check the error log."),
+
+    /**
+     * pdf transfer error.
+     */
+    TRANSPORTATION_PDF_VERIFY_ERROR(100809, "pdf verify error, please check the error log."),
 
     /**
      * Authority issuer main error code.
