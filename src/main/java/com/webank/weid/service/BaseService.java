@@ -62,16 +62,6 @@ public abstract class BaseService {
         if (StringUtils.isEmpty(fiscoConfig.getCurrentOrgId())) {
             logger.error("[BaseService] the blockchain orgId is blank.");
         }
-        String osName = System.getProperty("os.name").toLowerCase();
-        if (osName.contains("windows")) {
-
-            try {
-                NativeUtils.loadLibraryFromJar("/WeDPR_dynamic_lib/libeay32md.dll");
-                NativeUtils.loadLibraryFromJar("/WeDPR_dynamic_lib/ssleay32md.dll");
-            } catch (IOException e) {
-                logger.error("[BaseService] Cannot find SSL libraries (in Windows).");
-            }
-        }
     }
 
     /**
