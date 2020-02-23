@@ -31,7 +31,7 @@ import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -40,7 +40,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author chaoxinhu
  */
-public class TestGetCredentialJson extends TestBaseServcie {
+public class TestGetCredentialJson extends TestBaseService {
 
     @Test
     public void testGetCredentialJsonCase1() {

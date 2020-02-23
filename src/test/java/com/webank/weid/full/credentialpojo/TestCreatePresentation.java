@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
@@ -42,7 +42,7 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.DataToolUtils;
 
-public class TestCreatePresentation extends TestBaseServcie {
+public class TestCreatePresentation extends TestBaseService {
 
     private static final Logger logger =
         LoggerFactory.getLogger(TestCreatePresentation.class);

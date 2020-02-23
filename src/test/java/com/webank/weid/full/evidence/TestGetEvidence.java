@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.response.ResponseData;
@@ -33,7 +33,7 @@ import com.webank.weid.protocol.response.ResponseData;
 /**
  * TestGetEvidence v_wbpenghu.
  */
-public class TestGetEvidence extends TestBaseServcie {
+public class TestGetEvidence extends TestBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestGetEvidence.class);
     private static Credential evidenceCredential = null;
