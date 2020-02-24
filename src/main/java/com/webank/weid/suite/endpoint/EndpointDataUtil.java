@@ -226,7 +226,7 @@ public class EndpointDataUtil {
             saveEndpointsToFile();
             return true;
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            logger.error("remove Endpoint has error.", e);
             return false;
         }
     }
