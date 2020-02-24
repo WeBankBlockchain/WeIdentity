@@ -88,9 +88,6 @@ function clean_config()
     if [ -d output/ ];then
     	rm -rf output/
     fi
-    if [ -f ${app_xml_config} ];then
-	rm -f ${app_xml_config}
-    fi
     
     cd ${java_source_code_dir}
     if [ -f weIdContract.address ];then
@@ -165,7 +162,7 @@ function deploy_contract()
 	CLASSPATH=${CLASSPATH}:${jar_file}
 	done
 
-    java ${JAVA_OPTS} -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract
+    java ${JAVA_OPTS} -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract $1
     echo "contract deployment done."
 }
 
@@ -174,9 +171,9 @@ function main()
     # compile_contract ${1} ${2} ../output/
     # replace_java_contract
     gradle_build_sdk
-    deploy_contract
+    deploy_contract $3
     modify_config	
     clean_config
 }
 
-main
+main $@
