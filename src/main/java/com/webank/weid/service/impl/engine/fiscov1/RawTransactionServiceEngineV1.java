@@ -57,9 +57,16 @@ import com.webank.weid.util.TransactionUtils;
 public class RawTransactionServiceEngineV1 extends BaseEngine implements
     RawTransactionServiceEngine {
 
-
     private static final Logger logger = LoggerFactory.getLogger(RawTransactionServiceImpl.class);
 
+    /**
+     * 此方法不需要加载合约对象.
+     */
+    public void reload() {
+        logger.info("[reload] nothing to do for reload.");
+    }
+    
+    
     /**
      * Verify Authority Issuer related events.
      *

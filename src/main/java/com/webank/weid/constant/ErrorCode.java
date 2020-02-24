@@ -722,6 +722,31 @@ public enum ErrorCode {
      * the data is expire.
      */
     SQL_DATA_EXPIRE(160015, "the data is expire."),
+    
+    /**
+     * no premission.
+     */
+    CNS_NO_PERMISSION(160016, "no premission for this cns."),
+    
+    /**
+     * the cns does not exist.
+     */
+    CNS_DOES_NOT_EXIST(160017, "the cns does not exist."),
+    
+    /**
+     * the cns is used.
+     */
+    CNS_IS_USED(160018, "the cns is used."),
+    
+    /**
+     * the cns is not used.
+     */
+    CNS_IS_NOT_USED(160019, "the cns is not used."),
+    
+    /**
+     * the code is undefined.
+     */
+    CNS_CODE_UNDEFINED(160020, "the code is undefined."),
 
     /**
      * other uncatched exceptions or error.

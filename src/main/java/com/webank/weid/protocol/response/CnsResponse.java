@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
+ *       Copyright© (2019) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,44 +17,18 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.cache;
+package com.webank.weid.protocol.response;
 
-import com.github.benmanes.caffeine.cache.Cache;
+import lombok.Data;
 
 /**
- * 缓存节点.
+ *CNS注册返回数据基类.
  * @author v_wbgyang
  *
- * @param <T> 节点存放的对象泛型
  */
-public class CacheNode<T> {
+@Data
+public class CnsResponse {
     
-    private Cache<String, T> cache;
-    
-    private String cacheName;
-    
-    CacheNode(String cacheName, Cache<String, T> cache) {
-        this.cacheName = cacheName;
-        this.cache = cache;
-    }
-    
-    public void put(String key, T t) {
-        cache.put(key, t);
-    }
-    
-    public T get(String key) {
-        return cache.getIfPresent(key);
-    }
-    
-    public void remove(String key) {
-        cache.invalidate(key);
-    }
-    
-    public void removeAll() {
-        cache.invalidateAll();
-    }
-    
-    public String getCacheName() {
-        return cacheName;
-    }
+    private int code;
+    private String msg;
 }
