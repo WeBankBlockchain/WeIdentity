@@ -19,12 +19,6 @@
 
 package com.webank.weid.contract.deploy;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,47 +63,15 @@ public abstract class DeployContract {
         if (args != null && args.length > 0) {
             privateKey = args[0];
         }
-        
+        deployContract(privateKey);
+        System.exit(0);
+    }
+    
+    public static void deployContract(String privateKey) {
         if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             DeployContractV1.deployContract(privateKey);
         } else {
             DeployContractV2.deployContract(privateKey);
-        }
-        System.exit(0);
-    }
-    
-    protected static void writeAddressToFile(
-        String contractAddress,
-        String fileName) {
-
-        OutputStreamWriter ow = null;
-        try {
-            boolean flag = true;
-            File file = new File(fileName);
-            if (file.exists()) {
-                flag = file.delete();
-            }
-            if (!flag) {
-                logger.error("writeAddressToFile() delete file is fail.");
-                return;
-            }
-            ow = new OutputStreamWriter(
-                new FileOutputStream(fileName, true),
-                StandardCharsets.UTF_8
-            );
-            String content = new StringBuffer().append(contractAddress).toString();
-            ow.write(content);
-            ow.close();
-        } catch (IOException e) {
-            logger.error("writer file exception", e);
-        } finally {
-            if (ow != null) {
-                try {
-                    ow.close();
-                } catch (IOException e) {
-                    logger.error("io close exception", e);
-                }
-            }
-        }
+        } 
     }
 }

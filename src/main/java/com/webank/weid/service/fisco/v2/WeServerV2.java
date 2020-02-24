@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.dto.ChannelRequest;
@@ -34,6 +36,8 @@ import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
+import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
@@ -42,8 +46,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.webank.weid.config.FiscoConfig;
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.rpc.callback.OnNotifyCallbackV2;
 import com.webank.weid.service.fisco.WeServer;
@@ -56,6 +62,7 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
     private static Web3j web3j;
     private static Service service;
     private static Credentials credentials;
+    private static CnsService cnsService;
 
     public WeServerV2(FiscoConfig fiscoConfig) {
         super(fiscoConfig, new OnNotifyCallbackV2());
@@ -122,6 +129,7 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             logger.error("[WeServiceImplV2] credentials init failed. ");
             throw new InitWeb3jException();
         }
+        cnsService = new CnsService(web3j, credentials);
         logger.info("[WeServiceImplV2] init web3j instance success..");
     }
 
@@ -182,5 +190,20 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
     @Override
     public String getVersion() throws IOException {
         return this.getWeb3j().getNodeVersion().send().getNodeVersion().getVersion();
+    }
+    
+    protected String queryBucketFromCns() throws WeIdBaseException {
+        try {
+            List<CnsInfo>  cnsInfoList = cnsService.queryCnsByNameAndVersion(CNS_NAME, CNS_VERSION);
+            if (cnsInfoList.size() == 0) {
+                logger.warn("[queryBucketFromCns] can not find data from CNS.");
+                return StringUtils.EMPTY;
+            }
+            logger.info("[queryBucketFromCns] query address form CNS successfully.");
+            return cnsInfoList.get(0).getAddress();
+        } catch (Exception e) {
+            logger.error("[queryBucketFromCns] query address has error.", e);
+            throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
+        }
     }
 }

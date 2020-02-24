@@ -4,7 +4,7 @@
 #                                                                                                     #
 #######################################################################################################
 # The organization ID for AMOP communication.
-blockchain.orgid=organizationName
+blockchain.orgid=${ORG_ID}
 
 # AMOP Config
 # Timeout for amop request, default: 5000ms
@@ -25,9 +25,9 @@ nodes=${BLOCKCHIAN_NODE_INFO}
 datasource.name=datasource1
 
 # The configuration of each data source is prefixed by the name of the data source.
-datasource1.jdbc.url=jdbc:mysql://0.0.0.0:3306/mysql?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
-datasource1.jdbc.username=user
-datasource1.jdbc.password=password
+datasource1.jdbc.url=jdbc:mysql://${MYSQL_ADDRESS}/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+datasource1.jdbc.username=${MYSQL_USERNAME}
+datasource1.jdbc.password=${MYSQL_PASSWORD}
 datasource1.jdbc.maxActive=50
 datasource1.jdbc.minIdle=5
 datasource1.jdbc.maxIdle=5

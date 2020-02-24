@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,44 +17,17 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.cache;
-
-import com.github.benmanes.caffeine.cache.Cache;
+package com.webank.weid.service.impl.engine;
 
 /**
- * 缓存节点.
+ * 重新加载静态合约对象接口.
  * @author v_wbgyang
  *
- * @param <T> 节点存放的对象泛型
  */
-public class CacheNode<T> {
+public interface ReloadStaticContract {
     
-    private Cache<String, T> cache;
-    
-    private String cacheName;
-    
-    CacheNode(String cacheName, Cache<String, T> cache) {
-        this.cacheName = cacheName;
-        this.cache = cache;
-    }
-    
-    public void put(String key, T t) {
-        cache.put(key, t);
-    }
-    
-    public T get(String key) {
-        return cache.getIfPresent(key);
-    }
-    
-    public void remove(String key) {
-        cache.invalidate(key);
-    }
-    
-    public void removeAll() {
-        cache.invalidateAll();
-    }
-    
-    public String getCacheName() {
-        return cacheName;
-    }
+    /**
+     * reload the static Contract.
+     */
+    void reload();
 }

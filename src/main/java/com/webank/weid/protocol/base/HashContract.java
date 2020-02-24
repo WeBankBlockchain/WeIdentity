@@ -17,39 +17,25 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.service.impl.engine;
+package com.webank.weid.protocol.base;
 
-import com.webank.weid.protocol.response.ResponseData;
+import lombok.Data;
 
-/**
- * for rest service.
- *
- * @author tonychen 2019年6月26日
- */
-public interface RawTransactionServiceEngine extends ReloadStaticContract {
-
+@Data
+public class HashContract {
+    
     /**
-     * create a weid.
-     *
-     * @param transactionHex transactionHex
-     * @return result
+     *  the hash value.
      */
-    ResponseData<String> createWeId(String transactionHex);
-
+    private String hash;
+    
     /**
-     * register authority issuer.
-     *
-     * @param transactionHex transactionHex
-     * @return result
+     * the owner of hash.
      */
-    ResponseData<String> registerAuthorityIssuer(String transactionHex);
-
+    private String owner;
+    
     /**
-     * register cpt.
-     *
-     * @param transactionHex transactionHex
-     * @return result
+     * the create time.
      */
-    ResponseData<String> registerCpt(String transactionHex);
-
+    private long time;
 }
