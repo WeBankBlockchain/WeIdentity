@@ -21,6 +21,7 @@ package com.webank.weid.service.fisco;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -28,6 +29,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.v1.WeServerV1;
@@ -44,7 +46,24 @@ public abstract class WeServer<W, C, S> {
     public static final int MAX_AMOP_REQUEST_TIMEOUT = 50000;
     public static final int AMOP_REQUEST_TIMEOUT = Integer
         .valueOf(PropertyUtils.getProperty("amop.request.timeout", "5000"));
-
+    
+    //默认的全局cns名称
+    public static final String CNS_NAME;
+    private static final String DEFAULT_CNS_NAME = "allOrg";
+    //默认的全局cns版本
+    public static final String CNS_VERSION = "v1.1";
+    //全局唯一bucket地址
+    protected static String bucketAddress;
+    
+    static {
+        String profile = PropertyUtils.getProperty("cns.profile.active");
+        if (StringUtils.isNotBlank(profile)) {
+            CNS_NAME = profile + "/" + DEFAULT_CNS_NAME;
+        } else {
+            CNS_NAME = DEFAULT_CNS_NAME;
+        }
+    }
+    
     /**
      * log4j.
      */
@@ -219,4 +238,24 @@ public abstract class WeServer<W, C, S> {
      * @throws IOException 可能出现的异常.
      */
     public abstract String getVersion() throws IOException;
+    
+    /**
+     * 查询bucketAddress.
+     * @return 返回bucket合约地址
+     * @throws WeIdBaseException 查询合约地址异常
+     */
+    protected abstract String queryBucketFromCns() throws WeIdBaseException;
+    
+    /**
+     * 获取Bucket地址.
+     * 
+     * @return 返回bucket地址
+     */
+    public String getBucketAddress() {
+        if (StringUtils.isEmpty(bucketAddress)) {
+            bucketAddress = this.queryBucketFromCns();
+        }
+        logger.info("the bucket address is {}", bucketAddress);
+        return bucketAddress;
+    }
 }
