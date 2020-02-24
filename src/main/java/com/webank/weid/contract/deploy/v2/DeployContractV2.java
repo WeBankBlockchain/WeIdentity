@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.deploy.DeployContract;
+import com.webank.weid.contract.deploy.AddressProcess;
 import com.webank.weid.contract.v2.AuthorityIssuerController;
 import com.webank.weid.contract.v2.AuthorityIssuerData;
 import com.webank.weid.contract.v2.CommitteeMemberController;
@@ -49,6 +49,7 @@ import com.webank.weid.contract.v2.RoleController;
 import com.webank.weid.contract.v2.SpecificIssuerController;
 import com.webank.weid.contract.v2.SpecificIssuerData;
 import com.webank.weid.contract.v2.WeIdContract;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.WeIdUtils;
 
@@ -57,7 +58,7 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author tonychen
  */
-public class DeployContractV2 extends DeployContract {
+public class DeployContractV2 extends AddressProcess {
 
     /**
      * log4j.
@@ -127,7 +128,16 @@ public class DeployContractV2 extends DeployContract {
             );
         }
         deployEvidenceContractsNew();
+        registerToCns();
     }
+    
+    private static void registerToCns() {
+        String privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
+        WeIdPrivateKey weIdPrivate = new WeIdPrivateKey();
+        weIdPrivate.setPrivateKey(privateKey);
+        RegisterAddressV2.registerAddress(weIdPrivate);
+    }
+    
 
     private static String deployRoleControllerContracts() {
         if (web3j == null) {

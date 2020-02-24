@@ -12,27 +12,33 @@ JAVA_OPTS='-Djdk.tls.namedGroups="secp256r1,secp256k1"'
 function modify_config()
 {
     echo "begin to modify sdk config..."
-    weid_address=$(cat weIdContract.address)
-    cpt_address=$(cat cptController.address)
-    issuer_address=$(cat authorityIssuer.address)
-    evidence_address=$(cat evidenceController.address)
-    specificissuer_address=$(cat specificIssuer.address)
-    export WEID_ADDRESS=${weid_address}
-    export CPT_ADDRESS=${cpt_address}
-    export ISSUER_ADDRESS=${issuer_address}
-    export EVIDENCE_ADDRESS=${evidence_address}
-    export SPECIFICISSUER_ADDRESS=${specificissuer_address}
-    export FISCO_BCOS_VERSION="2"
-    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}:${FISCO_BCOS_VERSION}'
+
+    hash=$(cat hash)
+    export FISCO_BCOS_VERSION=${FISCO_BCOS_VERSION}
+    export CNS_PROFILE_ACTIVE=${CNS_PROFILE_ACTIVE}
+    export CNS_CONTRACT_FOLLOW=${hash}
+    export CHAIN_ID=${CHAIN_ID}
+    
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${CNS_CONTRACT_FOLLOW}:${CHAIN_ID}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${java_source_code_dir}/src/test/resources/
-    NODEVAR='${BLOCKCHIAN_NODE_INFO}'
+    # cat $app_xml_config
+    
+    export ORG_ID=${ORG_ID}
+    export MYSQL_ADDRESS=${MYSQL_ADDRESS}
+    export MYSQL_DATABASE=${MYSQL_DATABASE}
+    export MYSQL_USERNAME=${MYSQL_USERNAME}
+    export MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    export BLOCKCHIAN_NODE_INFO=${BLOCKCHIAN_NODE_INFO}
+    
+    NODEVAR='${ORG_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
     cp ${weid_config} ${java_source_code_dir}/src/test/resources/
+    # cat ${weid_config}
+    
     if [ -e ${java_source_code_dir}/ecdsa_key ];then
         cp ${java_source_code_dir}/ecdsa_key ${java_source_code_dir}/src/test/resources/
     fi
-    #cat $app_xml_config
     cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/test/resources
     cp ${java_source_code_dir}/.ci/node.crt ${java_source_code_dir}/src/test/resources
     cp ${java_source_code_dir}/.ci/node.key ${java_source_code_dir}/src/test/resources
@@ -46,17 +52,25 @@ function gradle_build_sdk()
     cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/main/resources
     cp ${java_source_code_dir}/.ci/node.crt ${java_source_code_dir}/src/main/resources
     cp ${java_source_code_dir}/.ci/node.key ${java_source_code_dir}/src/main/resources
-    content="$NODE_IP"
-    export BLOCKCHIAN_NODE_INFO=${content}
-    export WEID_ADDRESS="0x0"
-    export CPT_ADDRESS="0x0"
-    export ISSUER_ADDRESS="0x0"
-    export EVIDENCE_ADDRESS="0x0"
-    export SPECIFICISSUER_ADDRESS="0x0"
+    
     export FISCO_BCOS_VERSION="2"
-    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}:${FISCO_BCOS_VERSION}'
+    export CNS_CONTRACT_FOLLOW=
+    export CNS_PROFILE_ACTIVE="ci"
+    export CHAIN_ID=101
+    
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${CNS_CONTRACT_FOLLOW}:${CHAIN_ID}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
-    NODEVAR='${BLOCKCHIAN_NODE_INFO}'
+    
+    
+    content="$NODE_IP"
+    #content="0.0.0.0:8900"
+    export BLOCKCHIAN_NODE_INFO=${content}
+    export ORG_ID="webank-ci"
+    export MYSQL_ADDRESS=0.0.0.0:3306
+    export MYSQL_DATABASE=database
+    export MYSQL_USERNAME=username
+    export MYSQL_PASSWORD=password
+    NODEVAR='${ORG_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
 
     echo "Begin to compile java code......"

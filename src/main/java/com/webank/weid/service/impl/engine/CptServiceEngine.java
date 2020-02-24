@@ -31,8 +31,8 @@ import com.webank.weid.protocol.response.RsvSignature;
  *
  * @author tonychen 2019年6月25日
  */
-public interface CptServiceEngine {
-
+public interface CptServiceEngine extends ReloadStaticContract {
+    
     /**
      * call cpt contract to update cpt based on cptid.
      *

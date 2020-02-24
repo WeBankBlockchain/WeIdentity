@@ -86,11 +86,20 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     private static CptController cptController;
     private static Persistence dataDriver;
 
-    static {
-
+    /**
+     * 构造函数.
+     */
+    public CptServiceEngineV2() {
         if (cptController == null) {
-            cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+            reload();
         }
+    }
+    
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
+        cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
     }
 
     private static Persistence getDataDriver() {
