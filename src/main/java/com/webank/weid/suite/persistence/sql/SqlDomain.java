@@ -120,14 +120,18 @@ public class SqlDomain {
             this.tableDomain = domains[1];
             if (!ConnectionPool.checkDataSourceName(this.baseDomain)) {
                 logger.error(
-                    "[resolveDomain] the domain {{}:{}} is invalid.",
+                    "[resolveDomain] the domain {{}:{}} is invalid, {} is not exists.",
                     this.key, 
-                    this.value
+                    this.value,
+                    this.baseDomain
                 );
                 throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
             }
         } else {
-            logger.error("[resolveDomain] the domain {{}} is illegal", this.key);
+            logger.error("[resolveDomain] the domain {{}:{}} is illegal.", 
+                this.key, 
+                this.value
+            );
             throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL);
         }
         resolveDomainTimeout();
