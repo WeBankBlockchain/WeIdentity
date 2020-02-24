@@ -128,7 +128,7 @@ public class SqlDomain {
                 throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
             }
         } else {
-            logger.error("[resolveDomain] the domain {{}:{}} is illegal,", 
+            logger.error("[resolveDomain] the domain {{}:{}} is illegal.", 
                 this.key, 
                 this.value
             );
