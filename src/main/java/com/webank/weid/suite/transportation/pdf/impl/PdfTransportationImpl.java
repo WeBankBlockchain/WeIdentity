@@ -758,8 +758,9 @@ public class PdfTransportationImpl
         ProtocolProperty property) {
 
         logger.info(
-            "begin to execute PdfTransportationImpl serialization, property:{}.", property);
-
+            "begin to execute PdfTransportation serialization, property:{}.", property);
+        logger.info(
+            "input the object for PdfTransportation serialization, object:{}.", object);
         ResponseData<byte[]> errorCode1 = checkPara(object, property);
         if (errorCode1 != null) {
             return errorCode1;
@@ -826,8 +827,9 @@ public class PdfTransportationImpl
         String inputPdfTemplatePath) {
 
         logger.info(
-            "begin to execute PdfTransportationImpl serialization, property:{}.", property);
-
+            "[serialize] begin to execute PdfTransportation serialization, property:{}.", property);
+        logger.info(
+            "[serialize] input the object for PdfTransportation serialization, object:{}.", object);
         ResponseData<byte[]> errorCode1 = checkPara(object, property);
         if (errorCode1 != null) {
             return errorCode1;
@@ -841,7 +843,7 @@ public class PdfTransportationImpl
                 try {
                     document = PDDocument.load(file);
                 } catch (IOException e) {
-                    logger.error("pdf template load error:{}.", ErrorCode.BASE_ERROR);
+                    logger.error("pdf template load error:{}.", ErrorCode.BASE_ERROR, e);
                     return new ResponseData<>(null,  ErrorCode.BASE_ERROR);
                 }
             } else {
@@ -888,7 +890,9 @@ public class PdfTransportationImpl
                     "[serialize] PdfTransportation serialization due to File Path illegal error.");
                 return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
             }
-
+            logger.info(
+                "[serialize] input the object for PdfTransportation serialization with template,"
+                + " object:{}", object);
             File file = createFileByPath(outputPdfFilePath);
 
             ResponseData<byte[]> res = serializeWithTemplate(
