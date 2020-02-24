@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.deploy.DeployContract;
+import com.webank.weid.contract.deploy.AddressProcess;
 import com.webank.weid.contract.v1.AuthorityIssuerController;
 import com.webank.weid.contract.v1.AuthorityIssuerData;
 import com.webank.weid.contract.v1.CommitteeMemberController;
@@ -58,7 +58,7 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author tonychen
  */
-public class DeployContractV1 extends DeployContract {
+public class DeployContractV1 extends AddressProcess {
 
     /**
      * log4j.
