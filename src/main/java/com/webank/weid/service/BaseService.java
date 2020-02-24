@@ -59,9 +59,7 @@ public abstract class BaseService {
         if (!fiscoConfig.load()) {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
         }
-        if (StringUtils.isEmpty(fiscoConfig.getCurrentOrgId())) {
-            logger.error("[BaseService] the blockchain orgId is blank.");
-        }
+        fiscoConfig.check();
     }
 
     /**

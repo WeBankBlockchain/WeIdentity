@@ -73,6 +73,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         try {
             return engine.addAuthorityIssuer(args);
         } catch (Exception e) {
+            logger.error("register has error, Error Message:{}", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
     }
@@ -133,7 +134,6 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
         }
         try {
             return engine.getAuthorityIssuerInfoNonAccValue(weId);
-
         } catch (Exception e) {
             logger.error("query authority issuer failed.", e);
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -430,6 +430,7 @@ public class AuthorityIssuerServiceImpl extends BaseService implements Authority
                 return ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL;
             }
         } catch (Exception e) {
+            logger.error("accValue is invalid.", e);
             return ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL;
         }
 
