@@ -758,8 +758,9 @@ public class PdfTransportationImpl
         ProtocolProperty property) {
 
         logger.info(
-            "begin to execute PdfTransportationImpl serialization, property:{}.", property);
-        logger.info("the object:{}", object);
+            "begin to execute PdfTransportation serialization, property:{}.", property);
+        logger.info(
+            "input the object for PdfTransportation serialization, object:{}.", object);
         ResponseData<byte[]> errorCode1 = checkPara(object, property);
         if (errorCode1 != null) {
             return errorCode1;
@@ -826,8 +827,9 @@ public class PdfTransportationImpl
         String inputPdfTemplatePath) {
 
         logger.info(
-            "begin to execute PdfTransportationImpl serialization, property:{}.", property);
-        logger.info("the object:{}", object);
+            "[serialize] begin to execute PdfTransportation serialization, property:{}.", property);
+        logger.info(
+            "[serialize] input the object for PdfTransportation serialization, object:{}.", object);
         ResponseData<byte[]> errorCode1 = checkPara(object, property);
         if (errorCode1 != null) {
             return errorCode1;
@@ -888,7 +890,9 @@ public class PdfTransportationImpl
                     "[serialize] PdfTransportation serialization due to File Path illegal error.");
                 return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
             }
-
+            logger.info(
+                "[serialize] input the object for PdfTransportation serialization with template,"
+                + " object:{}", object);
             File file = createFileByPath(outputPdfFilePath);
 
             ResponseData<byte[]> res = serializeWithTemplate(

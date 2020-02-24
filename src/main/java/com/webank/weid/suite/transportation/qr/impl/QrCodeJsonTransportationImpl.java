@@ -72,10 +72,12 @@ public class QrCodeJsonTransportationImpl
         ProtocolProperty property) {
         
         logger.info(
-            "[serialize] begin to execute QrCodeTransportation serialization, property:{}",
+            "[serialize] begin to execute QrCodeTransportation serialization, property:{}.",
             property
         );
-        logger.info("[serialize] the object:{}", object);
+        logger.info(
+            "[serialize] begin to execute QrCodeTransportation serialization, object:{}.", object);
+
         // 验证协议配置
         ErrorCode errorCode = checkEncodeProperty(property);
         if (errorCode != ErrorCode.SUCCESS) {
@@ -133,7 +135,7 @@ public class QrCodeJsonTransportationImpl
         Class<T> clazz) {
         
         logger.info("[deserialize] begin to execute QrCodeTransportation deserialize.");
-        logger.info("[deserialize] the transString:{}", transString);
+        logger.info("[deserialize] the transString:{}.", transString);
         try {
             //解析协议版本
             QrCodeVersion version = QrCodeBaseData.getQrCodeVersion(transString);
