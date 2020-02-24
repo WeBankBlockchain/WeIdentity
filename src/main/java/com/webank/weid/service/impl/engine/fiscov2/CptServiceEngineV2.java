@@ -145,7 +145,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             }
             return response;
         } catch (Exception e) {
-            logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId);
+            logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId, e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
@@ -421,8 +421,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 .intValue();
         } catch (Exception e1) {
             logger.error(
-                "[queryCredentialTemplate] get block number for cpt : {} failed.",
-                cptId);
+                "[queryCredentialTemplate] get block number for cpt : {} failed. Error message:{}",
+                cptId,
+                e1);
             return new ResponseData<CredentialTemplateEntity>(null, ErrorCode.UNKNOW_ERROR);
         }
         if (blockNum == 0) {
@@ -437,7 +438,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 .getBlockByNumber(new DefaultBlockParameterNumber(blockNum), true).send();
         } catch (IOException e) {
             logger.error(
-                "[queryCredentialTemplate]get block by number :{} failed. Error message:{}",
+                "[queryCredentialTemplate] get block by number :{} failed. Error message:{}",
                 blockNum,
                 e);
         }
@@ -493,6 +494,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
             credentialTemplateStorage.setCredentialSchema(attributes);
         } catch (Exception e) {
+            logger.error("[queryCredentialTemplate] query credential template has error.", e);
             return new ResponseData<CredentialTemplateEntity>(null, ErrorCode.UNKNOW_ERROR);
         }
 
