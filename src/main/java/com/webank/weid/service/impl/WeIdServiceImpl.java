@@ -227,6 +227,7 @@ public class WeIdServiceImpl extends BaseService implements WeIdService {
         try {
             weIdDocument = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(result);
         } catch (Exception e) {
+            logger.error("write object to String fail.", e);
             return new ResponseData<>(
                 StringUtils.EMPTY,
                 ErrorCode.getTypeByErrorCode(responseData.getErrorCode())
