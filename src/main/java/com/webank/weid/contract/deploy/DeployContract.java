@@ -64,10 +64,16 @@ public abstract class DeployContract {
      * @param args the arguments
      */
     public static void main(String[] args) {
+        
+        String privateKey = null;
+        if (args != null && args.length > 0) {
+            privateKey = args[0];
+        }
+        
         if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            DeployContractV1.deployContract();
+            DeployContractV1.deployContract(privateKey);
         } else {
-            DeployContractV2.deployContract();
+            DeployContractV2.deployContract(privateKey);
         }
         System.exit(0);
     }

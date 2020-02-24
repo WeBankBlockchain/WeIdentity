@@ -19,6 +19,7 @@
 
 package com.webank.weid.contract.deploy.v1;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -84,15 +85,22 @@ public class DeployContractV1 extends DeployContract {
      *
      * @return true, if successful
      */
-    private static boolean initCredentials() {
-        logger.info("[DeployContractV1] begin to init credentials..");
-        credentials = GenCredential.create();
+    private static boolean initCredentials(String inputPrivateKey) {
+        if (StringUtils.isNotBlank(inputPrivateKey)) {
+            logger.info("[DeployContractV1] begin to init credentials by privateKey..");
+            credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));
+        } else {
+            logger.info("[DeployContractV1] begin to init credentials..");
+            credentials = GenCredential.create();
+        }
 
         if (credentials == null) {
             logger.error("[DeployContractV1] credentials init failed. ");
             return false;
         }
+        String publicKey = credentials.getEcKeyPair().getPublicKey().toString();
         String privateKey = credentials.getEcKeyPair().getPrivateKey().toString();
+        writeAddressToFile(publicKey, "ecdsa_key.pub");
         writeAddressToFile(privateKey, "ecdsa_key");
         return true;
     }
@@ -108,10 +116,11 @@ public class DeployContractV1 extends DeployContract {
 
     /**
      * depoly contract on FISCO BCOS 1.3.x.
+     * @param privateKey the private key
      */
-    public static void deployContract() {
+    public static void deployContract(String privateKey) {
         initWeb3j();
-        initCredentials();
+        initCredentials(privateKey);
         String weIdContractAddress = deployWeIdContract();
         String roleControllerAddress = deployRoleControllerContracts();
         Map<String, String> addrList = deployIssuerContracts(roleControllerAddress);
