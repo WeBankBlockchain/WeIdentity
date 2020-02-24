@@ -139,7 +139,7 @@ function check_user_config() {
 		echo "the ca.crt is exists and the MD5 is `md5sum $ca_crt  | cut -d " " -f1`"		
 	fi
 	
-	bcos_version=$(grep "bcos.version" $fisco_properties |awk -F"=" '{print $2}')
+	bcos_version=$(grep "bcos\.version" $fisco_properties |awk -F"=" '{print $2}')
 	if [[ $bcos_version == 1* ]];
 	then
 		if [ ! -f "$client_keystore" ];
@@ -166,7 +166,7 @@ function check_user_config() {
 		echo "ERROR: the bcos.version value is invalid."
 	fi
 	
-	blockchain_orgid=$(grep "blockchain.orgid=" $weidentity_properties |awk -F"=" '{print $2}')
+	blockchain_orgid=$(grep "blockchain\.orgid=" $weidentity_properties |awk -F"=" '{print $2}')
 	echo "the current orgid: $blockchain_orgid"
 	nodes=$(grep "nodes=" $weidentity_properties |awk -F"=" '{print $2}')
 	echo "the current nodes: $nodes"
@@ -195,7 +195,7 @@ function  check_jar_version() {
 	echo "----------------------------"
 	echo "6. Dependencies Jar Version"
 	echo "----------------------------" 
-	bcos_version=$(grep "bcos.version" $fisco_properties |awk -F"=" '{print $2}')
+	bcos_version=$(grep "bcos\.version" $fisco_properties |awk -F"=" '{print $2}')
 	echo "the bcos version: $bcos_version"
 	isSdk=1
 	for file in $libDir/*

@@ -93,10 +93,23 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
-
+    }
+    
+    /**
+     * 构造函数.
+     */
+    public WeIdServiceEngineV2() {
+        if (weIdContract == null) {
+            reload();
+        }
+    }
+    
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
         weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
     }
-
 
     private static ResolveEventLogResult resolveAttributeEvent(
         String weId,
