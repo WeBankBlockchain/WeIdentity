@@ -41,9 +41,6 @@ import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.rpc.CptService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.engine.CptServiceEngine;
-import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.suite.cache.CacheManager;
 import com.webank.weid.suite.cache.CacheNode;
 import com.webank.weid.util.DataToolUtils;
@@ -54,13 +51,12 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author lingfenghe
  */
-public class CptServiceImpl extends BaseService implements CptService {
+public class CptServiceImpl extends AbstractService implements CptService {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
     //获取CPT缓存节点
     private static CacheNode<ResponseData<Cpt>> cptCahceNode =
         CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
-    private CptServiceEngine cptServiceEngine = EngineFactory.createCptServiceEngine();
 
     /**
      * Register a new CPT with a pre-set CPT ID, to the blockchain.

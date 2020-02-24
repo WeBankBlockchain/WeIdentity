@@ -74,20 +74,24 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
      * WeIdentity DID contract object, for calling weIdentity DID contract.
      */
     private static CptController cptController;
-
+    
     /**
-     * constructor.
+     * 构造函数.
      */
-    static {
-        weIdContract = getContractService(
-            fiscoConfig.getWeIdAddress(),
-            WeIdContract.class);
-        authorityIssuerController = getContractService(
-            fiscoConfig.getIssuerAddress(),
-            AuthorityIssuerController.class);
-        cptController = (CptController) getContractService(
-            fiscoConfig.getCptAddress(),
-            CptController.class);
+    public RawTransactionServiceEngineV2() {
+        if (weIdContract == null || authorityIssuerController == null || cptController == null) {
+            reload(); 
+        }
+    }
+    
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
+        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
+        authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(), 
+            AuthorityIssuerController.class); 
+        cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class); 
     }
 
     /**

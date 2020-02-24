@@ -112,9 +112,24 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
                 new TypeReference<DynamicBytes>() {
                 }));
         CREDENTIALTEMPLATETOPIC = EventEncoder.encode(event);
-        cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+    }
+    
+    /**
+     * 构造函数.
+     */
+    public CptServiceEngineV1() {
+        if (cptController == null) {
+            reload();
+        }
     }
 
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
+        cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+    }
+    
     /**
      * Verify Register CPT related events.
      *

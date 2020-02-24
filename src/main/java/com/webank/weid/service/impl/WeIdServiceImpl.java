@@ -46,9 +46,6 @@ import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.engine.EngineFactory;
-import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -56,15 +53,12 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author tonychen 2018.10
  */
-public class WeIdServiceImpl extends BaseService implements WeIdService {
+public class WeIdServiceImpl extends AbstractService implements WeIdService {
 
     /**
      * log4j object, for recording log.
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceImpl.class);
-
-
-    private static WeIdServiceEngine weIdServiceEngine = EngineFactory.createWeIdServiceEngine();
 
     /**
      * Create a WeIdentity DID with null input param.
