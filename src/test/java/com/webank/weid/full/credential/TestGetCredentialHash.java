@@ -30,11 +30,11 @@ import org.junit.Test;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.response.ResponseData;
 
-public class TestGetCredentialHash extends TestBaseServcie {
+public class TestGetCredentialHash extends TestBaseService {
 
     @Test
     public void testGetCredentialHash_success() {
