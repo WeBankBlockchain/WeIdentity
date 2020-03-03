@@ -111,6 +111,8 @@ public class PdfTransportationImpl
     private static final String PDF_ATTRIBUTE_VERSION = "version";
     private static final String PDF_ATTRIBUTE_TEMPLATE_ID = "pdfTemplateId";
 
+    private static final int FONT_SIZE = 18288912;
+
     private static CptService cptService = new CptServiceImpl();
 
     /**
@@ -651,6 +653,10 @@ public class PdfTransportationImpl
                 .getClass()
                 .getClassLoader()
                 .getResourceAsStream("NotoSansCJKtc-Regular.ttf");
+            if (is.available() != FONT_SIZE) {
+                logger.error("buildPdf4SpecTpl due to font file is corrupted error.");
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+            }
             TTFParser parser = new TTFParser();
             if (is == null) {
                 logger.error(
@@ -1224,6 +1230,10 @@ public class PdfTransportationImpl
             InputStream is = this.getClass()
                 .getClassLoader()
                 .getResourceAsStream("NotoSansCJKtc-Regular.ttf");
+            if (is.available() != FONT_SIZE) {
+                logger.error("buildPdf4SpecTpl due to font file is corrupted error.");
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PDF_TRANSFER_ERROR);
+            }
             logger.error("InputStream:" + is.available());
             PDType0Font fontChinese = PDType0Font.load(document, is);
 
