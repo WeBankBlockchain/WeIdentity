@@ -36,7 +36,7 @@ if (!gradle.startParameter.isOffline()) {
 
 group 'com.webank'
 
-version = "1.5.2"
+version = "1.6.0"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
