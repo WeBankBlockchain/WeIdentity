@@ -23,7 +23,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.response.ResponseData;
 
-public interface EvidenceServiceEngine {
+public interface EvidenceServiceEngine extends ReloadStaticContract {
 
     ResponseData<String> createEvidence(
         String hashValue,

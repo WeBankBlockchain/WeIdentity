@@ -15,11 +15,20 @@ bcos.version=${FISCO_BCOS_VERSION}
 #                                                                                                     #
 #######################################################################################################
 # contract address
-weId.contractaddress=${WEID_ADDRESS}
-cpt.contractaddress=${CPT_ADDRESS}
-issuer.contractaddress=${ISSUER_ADDRESS}
-evidence.contractaddress=${EVIDENCE_ADDRESS}
-specificissuer.contractaddress=${SPECIFICISSUER_ADDRESS}
+weId.contractaddress=
+cpt.contractaddress=
+issuer.contractaddress=
+evidence.contractaddress=
+specificissuer.contractaddress=
+
+# This variable is used to distinguish the environment. You can use "dev" to set the development environment, 
+# "stg" to set the test environment, "prd" to set the production environment,
+# If you do not set it, the system will use allOrg as the environment by default. 
+# It is not recommended. Production use default configuration
+cns.profile.active=${CNS_PROFILE_ACTIVE}
+
+# Set up the contract you use with this configuration.
+cns.contract.follow=${CNS_CONTRACT_FOLLOW}
 
 #######################################################################################################
 #                                                                                                     #
@@ -27,7 +36,7 @@ specificissuer.contractaddress=${SPECIFICISSUER_ADDRESS}
 #                                                                                                     #
 #######################################################################################################
 # blockchain connection params
-chain.id=101
+chain.id=${CHAIN_ID}
 web3sdk.timeout=30
 web3sdk.core-pool-size=100
 web3sdk.max-pool-size=200
