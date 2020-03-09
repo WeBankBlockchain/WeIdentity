@@ -19,6 +19,8 @@
 
 package com.webank.weid.suite.cache;
 
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -89,6 +91,16 @@ public class CacheManager {
         cacheNode = initCache(cacheName, timeout, maximumSize);
         CacheNode<T> node = (CacheNode<T>)cacheNode;
         return node;
+    }
+    
+    /**
+     * 失效缓存数据.
+     */
+    public static void clearAll() {
+        Set<Entry<String, CacheNode<Object>>> entrySet = context.entrySet();
+        for (Entry<String, CacheNode<Object>> entry : entrySet) {
+            entry.getValue().removeAll();
+        }
     }
     
     /**
