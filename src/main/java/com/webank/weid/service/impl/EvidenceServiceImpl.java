@@ -313,12 +313,12 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.EvidenceService#createEvidenceWithExtraKey(
+     * @see com.webank.weid.rpc.EvidenceService#createEvidenceWithCustomKey(
      * com.webank.weid.protocol.inf.Hashable, com.webank.weid.protocol.base.WeIdPrivateKey,
      * java.util.Map, java.lang.String)
      */
     @Override
-    public ResponseData<String> createEvidenceWithExtraKey(
+    public ResponseData<String> createEvidenceWithCustomKey(
         Hashable object,
         WeIdPrivateKey weIdPrivateKey,
         Map<String, String> extra,
@@ -352,7 +352,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
-            return evidenceServiceEngine.createEvidenceWithExtraKey(
+            return evidenceServiceEngine.createEvidenceWithCustomKey(
                 hashValue,
                 signature,
                 extraValue,
