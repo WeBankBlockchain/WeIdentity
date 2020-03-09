@@ -23,19 +23,11 @@ import java.io.File;
 import java.math.BigInteger;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
@@ -43,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
 import com.webank.weid.protocol.base.HashString;
@@ -53,9 +44,6 @@ import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.engine.EngineFactory;
-import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -65,14 +53,11 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author chaoxinhu 2019.1
  */
-public class EvidenceServiceImpl extends BaseService implements EvidenceService {
+public class EvidenceServiceImpl extends AbstractService implements EvidenceService {
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
 
     private WeIdService weIdService = new WeIdServiceImpl();
-
-    private EvidenceServiceEngine evidenceServiceEngine =
-        EngineFactory.createEvidenceServiceEngine();
 
     /**
      * Create a new evidence to the blockchain and get the evidence address.

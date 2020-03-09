@@ -63,10 +63,26 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV2.class);
 
-    private static EvidenceContract evidenceContract = getContractService(
-        fiscoConfig.getEvidenceAddress(),
-        EvidenceContract.class);
+    private static EvidenceContract evidenceContract;
 
+    /**
+     * 构造函数.
+     */
+    public EvidenceServiceEngineV2() {
+        if (evidenceContract == null) {
+            reload();
+        }
+    }
+
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
+        evidenceContract = getContractService(
+            fiscoConfig.getEvidenceAddress(), 
+            EvidenceContract.class);
+    }
+    
     @Override
     public ResponseData<String> createEvidence(
         String hashValue,
