@@ -307,4 +307,84 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_SUCCESS);
         return response;
     }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#createEvidence(
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.lang.String,
+     * java.lang.String)
+     */
+    @Override
+    public ResponseData<String> createEvidenceWithExtraKey(
+        String hashValue,
+        String signature,
+        String extra,
+        Long timestamp,
+        String extraKey,
+        String privateKey) {
+
+        try {
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    fiscoConfig.getEvidenceAddress(),
+                    privateKey,
+                    EvidenceContract.class
+                );
+            TransactionReceipt receipt =
+                evidenceContractWriter.createEvidenceWithExtraKey(
+                    hashValue,
+                    signature,
+                    extra,
+                    new BigInteger(String.valueOf(timestamp), 10),
+                    extraKey
+                ).send();
+
+            TransactionInfo info = new TransactionInfo(receipt);
+            List<EvidenceAttributeChangedEventResponse> eventList =
+                evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
+            if (eventList == null || eventList.isEmpty()) {
+                return new ResponseData<>(StringUtils.EMPTY,
+                    ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else {
+                String address = WeIdUtils
+                    .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+                for (EvidenceAttributeChangedEventResponse event : eventList) {
+                    if (isSignEvent(event) && event.value.equalsIgnoreCase(signature)
+                        && event.signer.equalsIgnoreCase(address)) {
+                        return new ResponseData<>(hashValue, ErrorCode.SUCCESS, info);
+                    }
+                }
+            }
+            return new ResponseData<>(StringUtils.EMPTY,
+                ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT);
+        } catch (Exception e) {
+            logger.error("create evidence failed due to system error. ", e);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
+
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#getInfoByExtraKey(
+     * java.lang.String)
+     */
+    @Override
+    public ResponseData<EvidenceInfo> getInfoByExtraKey(String extraKey) {
+
+        if (StringUtils.isBlank(extraKey)) {
+            logger.error("[getInfoByExtraKey] extraKey is empty. ");
+            return new ResponseData<EvidenceInfo>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        try {
+            String hash = evidenceContract.getHashByExtraKey(extraKey).send();
+            if (StringUtils.isBlank(hash)) {
+                logger.error("[getInfoByExtraKey] extraKey dose not match any hash. ");
+                return new ResponseData<EvidenceInfo>(null,
+                    ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST);
+            }
+            return this.getInfo(hash);
+        } catch (Exception e) {
+            logger.error("[getInfoByExtraKey] get evidence info failed. ", e);
+            return new ResponseData<EvidenceInfo>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
+    }
 }

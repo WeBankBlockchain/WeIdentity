@@ -61,12 +61,36 @@ public interface EvidenceService {
     );
 
     /**
+     * Create a new evidence together with uploaded extra values.
+     *
+     * @param object the given Java object
+     * @param weIdPrivateKey the signer WeID's private key
+     * @param extra the extra value blob
+     * @param extraKey extra key
+     * @return evidence hash value
+     */
+    ResponseData<String> createEvidenceWithExtraKey(
+        Hashable object,
+        WeIdPrivateKey weIdPrivateKey,
+        Map<String, String> extra,
+        String extraKey
+    );
+
+    /**
      * Get the evidence info from blockchain.
      *
      * @param evidenceKey the hash, on chain
      * @return The EvidenceInfo
      */
     ResponseData<EvidenceInfo> getEvidence(String evidenceKey);
+
+    /**
+     * Get the evidence info from blockchain.
+     *
+     * @param extraKey the hash, on chain
+     * @return The EvidenceInfo
+     */
+    ResponseData<EvidenceInfo> getEvidenceByExtraKey(String extraKey);
 
     /**
      * Generate hash value of any passed-in param.
