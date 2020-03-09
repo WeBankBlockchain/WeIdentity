@@ -314,7 +314,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
      * java.lang.String)
      */
     @Override
-    public ResponseData<String> createEvidenceWithExtraKey(
+    public ResponseData<String> createEvidenceWithCustomKey(
         String hashValue,
         String signature,
         String extra,
@@ -330,7 +330,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                     EvidenceContract.class
                 );
             TransactionReceipt receipt =
-                evidenceContractWriter.createEvidenceWithExtraKey(
+                evidenceContractWriter.createEvidenceWithCustomKey(
                     hashValue,
                     signature,
                     extra,
