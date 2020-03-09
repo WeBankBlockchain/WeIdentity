@@ -39,6 +39,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         txDecodeSampleDecoder = TransactionDecoderFactory.buildTransactionDecoder(
                 DataBucket.ABI, DataBucket.BINARY);
     }
+
     /**
      * 构造函数.
      */

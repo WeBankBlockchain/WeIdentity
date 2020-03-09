@@ -312,4 +312,71 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
     }
 
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.EvidenceService#createEvidenceWithExtraKey(
+     * com.webank.weid.protocol.inf.Hashable, com.webank.weid.protocol.base.WeIdPrivateKey,
+     * java.util.Map, java.lang.String)
+     */
+    @Override
+    public ResponseData<String> createEvidenceWithExtraKey(
+        Hashable object,
+        WeIdPrivateKey weIdPrivateKey,
+        Map<String, String> extra,
+        String extraKey) {
+
+        ResponseData<String> hashResp = getHashValue(object);
+        String hashValue = hashResp.getResult();
+        if (StringUtils.isEmpty(hashResp.getResult())) {
+            return new ResponseData<>(StringUtils.EMPTY, hashResp.getErrorCode(),
+                hashResp.getErrorMessage());
+        }
+        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
+            return new ResponseData<>(StringUtils.EMPTY,
+                ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
+        }
+        String privateKey = weIdPrivateKey.getPrivateKey();
+        String extraValue = StringUtils.EMPTY;
+        if (extra != null && !extra.isEmpty()) {
+            try {
+                extraValue = URLEncoder.encode(DataToolUtils.stringMapToCompactJson(extra),
+                    StandardCharsets.UTF_8.name());
+            } catch (Exception e) {
+                logger.error("extra value illegal: {}", extra.toString());
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+            }
+        }
+        try {
+            Sign.SignatureData sigData =
+                DataToolUtils.signMessage(hashValue, privateKey);
+            String signature = new String(
+                DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
+                StandardCharsets.UTF_8);
+            Long timestamp = DateUtils.getNoMillisecondTimeStamp();
+            return evidenceServiceEngine.createEvidenceWithExtraKey(
+                hashValue,
+                signature,
+                extraValue,
+                timestamp,
+                extraKey,
+                privateKey
+            );
+        } catch (Exception e) {
+            logger.error("create evidence failed due to system error. ", e);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.EvidenceService#getEvidenceByExtraKey(java.lang.String)
+     */
+    @Override
+    public ResponseData<EvidenceInfo> getEvidenceByExtraKey(String extraKey) {
+
+        try {
+            return evidenceServiceEngine.getInfoByExtraKey(extraKey);
+        } catch (Exception e) {
+            logger.error("get evidence failed.", e);
+            return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
+    }
 }
