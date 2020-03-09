@@ -316,12 +316,12 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#createEvidenceWithExtraKey(
+     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#createEvidenceWithCustomKey(
      * java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.lang.String,
      * java.lang.String)
      */
     @Override
-    public ResponseData<String> createEvidenceWithExtraKey(
+    public ResponseData<String> createEvidenceWithCustomKey(
         String hashValue,
         String signature,
         String extra,
