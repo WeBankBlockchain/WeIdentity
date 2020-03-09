@@ -33,7 +33,18 @@ public interface EvidenceServiceEngine extends ReloadStaticContract {
         String privateKey
     );
 
+    ResponseData<String> createEvidenceWithExtraKey(
+        String hashValue,
+        String signature,
+        String extra,
+        Long timestamp,
+        String extraKey,
+        String privateKey
+    );
+
     ResponseData<EvidenceInfo> getInfo(String evidenceAddress);
+
+    ResponseData<EvidenceInfo> getInfoByExtraKey(String extraKey);
 
     /**
      * verify create evidence event.
