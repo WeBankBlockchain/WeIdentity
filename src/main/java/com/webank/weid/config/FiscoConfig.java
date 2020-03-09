@@ -29,6 +29,8 @@ import net.sf.oval.constraint.MatchPattern;
 import net.sf.oval.constraint.Min;
 import net.sf.oval.constraint.NotEmpty;
 import net.sf.oval.constraint.NotNull;
+
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,24 +59,10 @@ public class FiscoConfig {
     @NotEmpty(message = "the value of nodes is null")
     private String nodes;
     
-    @NotNull(message = "the weId.contractaddress is undefined")
-    @NotEmpty(message = "the value of weId.contractaddress is null")
     private String weIdAddress;
-    
-    @NotNull(message = "the cpt.contractaddress is undefined")
-    @NotEmpty(message = "the value of cpt.contractaddress is null")
     private String cptAddress;
-    
-    @NotNull(message = "the issuer.contractaddress is undefined")
-    @NotEmpty(message = "the value of issuer.contractaddress is null")
     private String issuerAddress;
-    
-    @NotNull(message = "the evidence.contractaddress is undefined")
-    @NotEmpty(message = "the value of evidence.contractaddress is null")
     private String evidenceAddress;
-    
-    @NotNull(message = "the specificissuer.contractaddress is undefined")
-    @NotEmpty(message = "the value of specificissuer.contractaddress is null")
     private String specificIssuerAddress;
     
     @NotNull(message = "the chain.id is undefined")
@@ -149,6 +137,9 @@ public class FiscoConfig {
     @NotNull(message = "the blockchain.orgid is undefined")
     @NotEmpty(message = "the value of blockchain.orgid is null")
     private String currentOrgId;
+    
+    @NotNull(message = "the cns.contract.follow is undefined")
+    private String cnsContractFollow;
 
     /**
      * load configuration without Spring context required.
@@ -182,6 +173,7 @@ public class FiscoConfig {
             v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
             v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
             currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
+            cnsContractFollow = PropertyUtils.getProperty("cns.contract.follow");
             return true;
         } catch (Exception e) {
             logger.error("Error occurred during loading Fisco-Bcos properties: " + e.getMessage());
@@ -202,5 +194,17 @@ public class FiscoConfig {
             logger.error("[FiscoConfig.check] message: {}", messageList.get(0));
             throw new WeIdBaseException(messageList.get(0));
         }
+    }
+    
+    /**
+     * check the contract address.
+     * @return 返回地址是否存在
+     */
+    public boolean checkAddress() {
+        return StringUtils.isNotBlank(this.getWeIdAddress()) 
+            && StringUtils.isNotBlank(this.getIssuerAddress())
+            && StringUtils.isNotBlank(this.getSpecificIssuerAddress()) 
+            && StringUtils.isNotBlank(this.getEvidenceAddress()) 
+            && StringUtils.isNotBlank(this.getCptAddress());
     }
 }
