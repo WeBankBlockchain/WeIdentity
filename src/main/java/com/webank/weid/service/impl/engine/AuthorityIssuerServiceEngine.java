@@ -32,8 +32,8 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author tonychen 2019年6月25日
  */
-public interface AuthorityIssuerServiceEngine {
-
+public interface AuthorityIssuerServiceEngine extends ReloadStaticContract {
+    
     /**
      * call authority issuer contract method to add an authority issuer.
      *
