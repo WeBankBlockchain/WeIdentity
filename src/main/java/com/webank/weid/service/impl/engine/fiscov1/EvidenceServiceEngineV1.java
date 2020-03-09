@@ -313,4 +313,32 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
         response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_SUCCESS);
         return response;
     }
+
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#createEvidenceWithExtraKey(
+     * java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.lang.String,
+     * java.lang.String)
+     */
+    @Override
+    public ResponseData<String> createEvidenceWithExtraKey(
+        String hashValue,
+        String signature,
+        String extra,
+        Long timestamp,
+        String extraKey,
+        String privateKey) {
+
+        return new ResponseData<String>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_SUPPORTED);
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#getInfoByExtraKey(
+     * java.lang.String)
+     */
+    @Override
+    public ResponseData<EvidenceInfo> getInfoByExtraKey(String extraKey) {
+
+        return new ResponseData<EvidenceInfo>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_SUPPORTED);
+    }
 }
