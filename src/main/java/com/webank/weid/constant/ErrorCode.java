@@ -321,6 +321,11 @@ public enum ErrorCode {
     CREDENTIAL_EVIDENCE_NOT_EXIST(100502, "evidence does not exist on chain"),
 
     /**
+     * The credential evidence interface does not support fisco bcos 1.3.
+     */
+    CREDENTIAL_EVIDENCE_NOT_SUPPORTED(100503, "evidence interface does not support fisco bcos 1.3"),
+
+    /**
      * The challenge is invalid.
      */
     PRESENTATION_CHALLENGE_INVALID(100600, "the challenge is invalid."),
