@@ -26,20 +26,15 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.RawTransactionService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.engine.EngineFactory;
-import com.webank.weid.service.impl.engine.RawTransactionServiceEngine;
 
 /**
  * Service interface for operations on direct transactions on blockchain.
  *
  * @author chaoxinhu 2019.4
  */
-public class RawTransactionServiceImpl extends BaseService implements RawTransactionService {
+public class RawTransactionServiceImpl extends AbstractService implements RawTransactionService {
 
     private static final Logger logger = LoggerFactory.getLogger(RawTransactionServiceImpl.class);
-
-    private RawTransactionServiceEngine engine = EngineFactory.createRawTransactionServiceEngine();
 
     /**
      * Create a WeIdentity DID from the provided public key, with preset transaction hex value.
@@ -54,7 +49,7 @@ public class RawTransactionServiceImpl extends BaseService implements RawTransac
             logger.error("WeID transaction error");
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return engine.createWeId(transactionHex);
+        return rawEngine.createWeId(transactionHex);
     }
 
     /**
@@ -71,7 +66,7 @@ public class RawTransactionServiceImpl extends BaseService implements RawTransac
             logger.error("AuthorityIssuer transaction error");
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return engine.registerAuthorityIssuer(transactionHex);
+        return rawEngine.registerAuthorityIssuer(transactionHex);
     }
 
 
@@ -86,6 +81,6 @@ public class RawTransactionServiceImpl extends BaseService implements RawTransac
             logger.error("CptService transaction error");
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return engine.registerCpt(transactionHex);
+        return rawEngine.registerCpt(transactionHex);
     }
 }
