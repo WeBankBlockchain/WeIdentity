@@ -229,4 +229,13 @@ public final class WeIdConstant {
      * Removed WeID authentication specified tag.
      */
     public static final String REMOVED_AUTHENTICATION_TAG = "OBSOLETEAUTH";
+    
+    /**
+     * the address key in bucket.
+     */
+    public static final String CNS_WEID_ADDRESS = "WeIdContract";
+    public static final String CNS_AUTH_ADDRESS = "AuthorityIssuerController";
+    public static final String CNS_SPECIFIC_ADDRESS = "SpecificIssuerController";
+    public static final String CNS_EVIDENCE_ADDRESS = "EvidenceFactory";
+    public static final String CNS_CPT_ADDRESS = "CptController";
 }
