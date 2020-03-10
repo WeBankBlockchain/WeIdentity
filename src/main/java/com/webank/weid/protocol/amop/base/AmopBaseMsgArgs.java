@@ -54,4 +54,14 @@ public class AmopBaseMsgArgs implements IArgs {
      * 目的机构id.
      */
     protected String toOrgId;
+    
+    /**
+     * 业务类型.
+     */
+    protected String serviceType;
+    
+    /**
+     * 通道编号.
+     */
+    protected String channelId;
 }

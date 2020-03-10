@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,35 +17,39 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.api.transportation.params;
+package com.webank.weid.suite.entity;
 
 /**
- * 编解码配置.
+ * JSON传输协议枚举.
  * @author v_wbgyang
  *
  */
-public class ProtocolProperty {
+public enum BarCodeVersion {
+
+    V1(1);
+    
+    private int code;
+
+    BarCodeVersion(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
     
     /**
-     * 协议编解码类型.
+     * get JsonVersion By code.
+     *
+     * @param code the JsonVersion
+     * @return JsonVersion
      */
-    private EncodeType encodeType;
-    
-    private TransmissionType transmissionType;
-
-    public EncodeType getEncodeType() {
-        return encodeType;
-    }
-    
-    public ProtocolProperty(EncodeType encodeType) {
-        this.encodeType = encodeType;
-    }
-
-    public TransmissionType getTransmissionType() {
-        return transmissionType;
-    }
-
-    public void setTransmissionType(TransmissionType transmissionType) {
-        this.transmissionType = transmissionType;
+    public static BarCodeVersion getJsonVersion(int code) {
+        for (BarCodeVersion version : BarCodeVersion.values()) {
+            if (version.getCode() == code) {
+                return version;
+            }
+        }
+        return null;
     }
 }

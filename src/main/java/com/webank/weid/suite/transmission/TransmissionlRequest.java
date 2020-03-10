@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,35 +17,18 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.api.transportation.params;
+package com.webank.weid.suite.transmission;
 
-/**
- * 编解码配置.
- * @author v_wbgyang
- *
- */
-public class ProtocolProperty {
-    
-    /**
-     * 协议编解码类型.
-     */
-    private EncodeType encodeType;
-    
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.suite.api.transportation.params.TransmissionType;
+
+import lombok.Data;
+
+@Data
+public class TransmissionlRequest<T> {
+    private String orgId;
+    private T args;
+    private String serviceType;
     private TransmissionType transmissionType;
-
-    public EncodeType getEncodeType() {
-        return encodeType;
-    }
-    
-    public ProtocolProperty(EncodeType encodeType) {
-        this.encodeType = encodeType;
-    }
-
-    public TransmissionType getTransmissionType() {
-        return transmissionType;
-    }
-
-    public void setTransmissionType(TransmissionType transmissionType) {
-        this.transmissionType = transmissionType;
-    }
+    private WeIdAuthentication weIdAuthentication;
 }
