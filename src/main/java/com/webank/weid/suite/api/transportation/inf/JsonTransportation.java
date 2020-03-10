@@ -36,9 +36,9 @@ public interface JsonTransportation {
     JsonTransportation specify(List<String> verifierWeIdList);
 
     /**
-     * 协议传输序列化接口.
+     * 协议传输序列化接口。
      * @param object 协议存储的实体数据对象
-     * @param <T> the type of the element
+     * @param <T> 需要转换成元素的类型泛型定义
      * @param property 协议的配置对象
      * @return 返回协议字符串数据
      */
@@ -48,10 +48,10 @@ public interface JsonTransportation {
     );
 
     /**
-     * 协议反序列化接口.
+     * 协议反序列化接口。
      * @param transString JSON格式的协议数据字符串
      * @param clazz 需要转换成的Class类型
-     * @param <T> the type of the element
+     * @param <T> 需要转换成元素的类型泛型定义
      * @return 返回PresentationE对象数据
      */
     @Deprecated
@@ -61,11 +61,11 @@ public interface JsonTransportation {
     );
     
     /**
-     * 协议反序列化接口，支持权限控制.
-     * @param weIdAuthentication 验证方当前authentication信息 
+     * 协议反序列化接口，支持权限控制。
+     * @param weIdAuthentication 验证方当前authentication信息
      * @param transString JSON格式的协议数据字符串
      * @param clazz 需要转换成的Class类型
-     * @param <T> the type of the element
+     * @param <T> 需要转换成元素的类型泛型定义
      * @return 返回PresentationE对象数据
      */
     <T extends JsonSerializer> ResponseData<T> deserialize(
