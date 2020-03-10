@@ -453,4 +453,19 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 
         return resp;
     }
+    
+    /**
+     * 发送通用消息的AMOP请求接口.
+     */
+    public ResponseData<AmopResponse> send(String toOrgId, AmopCommonArgs args) {
+        return this.getImpl(
+            fiscoConfig.getCurrentOrgId(),
+            toOrgId,
+            args,
+            AmopCommonArgs.class,
+            AmopResponse.class,
+            AmopMsgType.COMMON_REQUEST,
+            WeServer.AMOP_REQUEST_TIMEOUT
+        );
+    }
 }

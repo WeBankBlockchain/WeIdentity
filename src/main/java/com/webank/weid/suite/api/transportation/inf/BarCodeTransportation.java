@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,11 +19,47 @@
 
 package com.webank.weid.suite.api.transportation.inf;
 
+import java.io.OutputStream;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
 /**
  * 协议的传输接口.
  * @author v_wbgyang
  *
  */
 public interface BarCodeTransportation extends JsonTransportation {
+    
+    /**
+     * 生成不带文字的条形码并保存到指定文件中。
+     *
+     * @param content 条形码字符串
+     * @param format 条形码编码格式
+     * @param correctionLevel 容错级别
+     * @param destPath 条形码图片保存文件路径
+     * @return code of ErrorCode
+     */
+    Integer generateBarCode(
+        String content, 
+        BarcodeFormat format, 
+        ErrorCorrectionLevel correctionLevel, 
+        String destPath
+    );
 
+    /**
+     * 生成不带文字的条形码并将条形码的字节输入到字节输出流中。
+     *
+     * @param content 条形码字符串
+     * @param format 条形码编码格式
+     * @param correctionLevel 容错级别
+     * @param stream 字节输出流
+     * @return code of ErrorCode
+     */
+    Integer generateBarCode(
+        String content, 
+        BarcodeFormat format, 
+        ErrorCorrectionLevel correctionLevel, 
+        OutputStream stream
+    );
 }

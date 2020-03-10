@@ -64,6 +64,8 @@ public interface AmopService {
         String toOrgId,
         RequestIssueCredentialArgs args
     );
+    
+    ResponseData<AmopResponse> send(String toOrgId, AmopCommonArgs args);
 
     /**
      * get weIdAuth object.

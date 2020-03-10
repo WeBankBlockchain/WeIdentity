@@ -46,23 +46,39 @@ public abstract class AbstractTransportation extends BaseService {
     private static WeIdService weidService = new WeIdServiceImpl();
     private List<String> verifierWeIdList;
     private WeIdAuthentication weIdAuthentication;
-
+    
     /**
      * 验证协议配置.
      *
-     * @param encodeProperty 协议配置实体
+     * @param property 协议配置实体
      * @return Error Code and Message
      */
-    protected ErrorCode checkEncodeProperty(ProtocolProperty encodeProperty) {
-        if (encodeProperty == null) {
+    protected ErrorCode checkEncodeProperty(ProtocolProperty property) {
+        if (property == null) {
             return ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR;
         }
-        if (encodeProperty.getEncodeType() == null) {
+        if (property.getEncodeType() == null) {
             return ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR;
         }
         return ErrorCode.SUCCESS;
     }
 
+    /**
+     * 验证请求传输类型.
+     *
+     * @param property 协议配置实体
+     * @return Error Code and Message
+     */
+    protected ErrorCode checkTransmissionTypeProperty(ProtocolProperty property) {
+        if (property == null) {
+            return ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR;
+        }
+        if (property.getTransmissionType() == null) {
+            return ErrorCode.TRANSPORTATION_TRANSMISSION_TYPE_INVALID;
+        }
+        return ErrorCode.SUCCESS;
+    }
+    
     /**
      * 验证WeIdAuthentication有效性.
      *
