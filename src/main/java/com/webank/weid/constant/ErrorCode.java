@@ -326,6 +326,11 @@ public enum ErrorCode {
     CREDENTIAL_EVIDENCE_NOT_SUPPORTED(100503, "evidence interface does not support fisco bcos 1.3"),
 
     /**
+     * On-chain string length exceeded acceptable max.
+     */
+    ON_CHAIN_STRING_TOO_LONG(100504, "on-chain String length exceeds limit"),
+
+    /**
      * The challenge is invalid.
      */
     PRESENTATION_CHALLENGE_INVALID(100600, "the challenge is invalid."),
