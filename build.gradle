@@ -99,7 +99,8 @@ List mysql_driver = [
 ]
 
 List zxing = [
-        "com.google.zxing:core:3.3.0"
+        "com.google.zxing:core:3.3.3",
+        "com.google.zxing:javase:3.3.3"
 ]
 
 List rpc = [
