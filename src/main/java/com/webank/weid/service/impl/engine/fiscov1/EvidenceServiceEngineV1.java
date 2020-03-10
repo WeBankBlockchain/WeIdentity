@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -21,11 +21,10 @@ package com.webank.weid.service.impl.engine.fiscov1;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -83,7 +82,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
      */
     public void reload() {
         evidenceContract = getContractService(
-            fiscoConfig.getEvidenceAddress(), 
+            fiscoConfig.getEvidenceAddress(),
             EvidenceContract.class);
     }
 
@@ -134,6 +133,56 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
         }
     }
 
+    @Override
+    public ResponseData<Boolean> addLog(
+        String hashValue,
+        String log,
+        Long timestamp,
+        String privateKey
+    ) {
+        try {
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    fiscoConfig.getEvidenceAddress(),
+                    privateKey,
+                    EvidenceContract.class
+                );
+            TransactionReceipt receipt =
+                evidenceContractWriter.setAttribute(
+                    new Utf8String(hashValue),
+                    new Utf8String("extra"),
+                    new Utf8String(log),
+                    new Uint256(new BigInteger(String.valueOf(timestamp), 10))
+                ).get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+            TransactionInfo info = new TransactionInfo(receipt);
+            List<EvidenceAttributeChangedEventResponse> eventList =
+                EvidenceContract.getEvidenceAttributeChangedEvents(receipt);
+            if (eventList == null || eventList.isEmpty()) {
+                return new ResponseData<>(false,
+                    ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else {
+                String address = WeIdUtils
+                    .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+                for (EvidenceAttributeChangedEventResponse event : eventList) {
+                    if (isExtraEvent(event) && event.value.getValue().equalsIgnoreCase(log)
+                        && event.signer.toString().equalsIgnoreCase(address)) {
+                        return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+                    }
+                }
+            }
+            return new ResponseData<>(false,
+                ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT);
+        } catch (Exception e) {
+            logger.error("add log failed due to system error. ", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<String> getHashByCustomKey(String customKey) {
+        return new ResponseData<String>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_SUPPORTED);
+    }
+
     private static boolean isSignEvent(EvidenceAttributeChangedEventResponse event) {
         return event.key.getValue().equalsIgnoreCase("info");
     }
@@ -161,6 +210,10 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
                 return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST);
             }
             resolveTransaction(hash, latestBlockNumber, evidenceInfo);
+            // Reverse the order of the list
+            for (String signer : evidenceInfo.getSigners()) {
+                Collections.reverse(evidenceInfo.getSignInfo().get(signer).getLogs());
+            }
             return new ResponseData<>(evidenceInfo, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("get evidence failed.", e);
@@ -204,7 +257,13 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
                         .send();
                     TransactionReceipt receipt = rec1.getTransactionReceipt().get();
                     List<Log> logs = rec1.getResult().getLogs();
+                    Set<String> topicSet = new HashSet<>();
                     for (Log log : logs) {
+                        if (topicSet.contains(log.getTopics().get(0))) {
+                            continue;
+                        } else {
+                            topicSet.add(log.getTopics().get(0));
+                        }
                         ResolveEventLogResult returnValue =
                             resolveEventLog(hash, log, receipt, evidenceInfo);
                         if (returnValue.getResultStatus().equals(
@@ -267,12 +326,12 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
                 signInfo.setSignature(event.value.getValue());
                 signInfo.setTimestamp(String.valueOf(DataToolUtils.uint256ToInt(event.updated)));
                 if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
-                    signInfo.setExtraValue(
-                        evidenceInfo.getSignInfo().get(signerWeId).getExtraValue());
+                    signInfo.setLogs(
+                        evidenceInfo.getSignInfo().get(signerWeId).getLogs());
                 }
                 evidenceInfo.getSignInfo().put(signerWeId, signInfo);
             }
-            if (isExtraEvent(event)) {
+            if (isExtraEvent(event) && !StringUtils.isEmpty(event.value.getValue())) {
                 // higher block blob will overwrite existing one - any new one will be abandoned
                 EvidenceSignInfo signInfo = new EvidenceSignInfo();
                 if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
@@ -284,27 +343,10 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
                     signInfo.setSignature(StringUtils.EMPTY);
                     signInfo.setTimestamp(StringUtils.EMPTY);
                 }
-                Map<String, String> newBlob;
-                try {
-                    newBlob = DataToolUtils.deserialize(URLDecoder.decode(event.value.getValue(),
-                        StandardCharsets.UTF_8.name()), HashMap.class);
-                } catch (Exception e) {
-                    logger.error("Failed to decode and deserialize extra value: {}", event.value);
-                    response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_KEY_NOT_MATCH);
-                    return response;
-                }
-                Map<String, String> oldBlob = evidenceInfo.getSignInfo().get(signerWeId)
-                    .getExtraValue();
-                if (oldBlob == null || oldBlob.isEmpty()) {
-                    oldBlob = new HashMap<>();
-                }
-                // Iterate each key in the new blob. If it is already in the old one, abandon.
-                for (Map.Entry<String, String> entry : newBlob.entrySet()) {
-                    if (!oldBlob.containsKey(entry.getKey())) {
-                        oldBlob.put(entry.getKey(), entry.getValue());
-                    }
-                }
-                signInfo.setExtraValue(oldBlob);
+                List<String> extraList =
+                    evidenceInfo.getSignInfo().get(signerWeId).getLogs();
+                extraList.add(event.value.getValue());
+                signInfo.setLogs(extraList);
                 evidenceInfo.getSignInfo().put(signerWeId, signInfo);
             }
             previousBlock = DataToolUtils.uint256ToInt(event.previousBlock);
@@ -316,7 +358,8 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#createEvidenceWithCustomKey(
+     * @see com.webank.weid.service.impl.engine
+     * .EvidenceServiceEngine#createEvidenceWithLogAndCustomKey(
      * java.lang.String, java.lang.String, java.lang.String, java.lang.Long, java.lang.String,
      * java.lang.String)
      */
@@ -333,11 +376,11 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#getInfoByExtraKey(
+     * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#getInfoByCustomKey(
      * java.lang.String)
      */
     @Override
-    public ResponseData<EvidenceInfo> getInfoByExtraKey(String extraKey) {
+    public ResponseData<EvidenceInfo> getInfoByCustomKey(String extraKey) {
 
         return new ResponseData<EvidenceInfo>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_SUPPORTED);
     }
