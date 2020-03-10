@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,35 +17,43 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.api.transportation.params;
+
+package com.webank.weid.protocol.amop;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Map;
+
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 
 /**
- * 编解码配置.
- * @author v_wbgyang
+ * the request body for get EncryptKey.
+ * 
+ * @author tonychen 2019年5月7日.
  *
  */
-public class ProtocolProperty {
+@Getter
+@Setter
+public class GetBarCodeDataArgs extends AmopBaseMsgArgs {
+
+    /**
+     * the resource Id.
+     */
+    private String resourceId;
     
     /**
-     * 协议编解码类型.
+     * weId信息.
      */
-    private EncodeType encodeType;
+    private String weId;
     
-    private TransmissionType transmissionType;
-
-    public EncodeType getEncodeType() {
-        return encodeType;
-    }
+    /**
+     * 签名信息.
+     */
+    private String signValue;
     
-    public ProtocolProperty(EncodeType encodeType) {
-        this.encodeType = encodeType;
-    }
-
-    public TransmissionType getTransmissionType() {
-        return transmissionType;
-    }
-
-    public void setTransmissionType(TransmissionType transmissionType) {
-        this.transmissionType = transmissionType;
-    }
+    /**
+     * 扩展字符串字段.
+     */
+    private Map<String, String> extra;
 }

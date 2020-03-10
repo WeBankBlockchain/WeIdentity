@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,35 +17,23 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.api.transportation.params;
+package com.webank.weid.suite.transmission;
+
+import com.webank.weid.protocol.response.ResponseData;
 
 /**
- * 编解码配置.
- * @author v_wbgyang
+ * 传输处理器公共接口.
+ * 
+ * @author yanggang
  *
  */
-public class ProtocolProperty {
+public interface Transmission {
     
     /**
-     * 协议编解码类型.
+     * 传输处理器公共请求接口.
+     * 
+     * @param request 请求数据
+     * @return 返回处理结果
      */
-    private EncodeType encodeType;
-    
-    private TransmissionType transmissionType;
-
-    public EncodeType getEncodeType() {
-        return encodeType;
-    }
-    
-    public ProtocolProperty(EncodeType encodeType) {
-        this.encodeType = encodeType;
-    }
-
-    public TransmissionType getTransmissionType() {
-        return transmissionType;
-    }
-
-    public void setTransmissionType(TransmissionType transmissionType) {
-        this.transmissionType = transmissionType;
-    }
+    public ResponseData<String> send(TransmissionlRequest<?> request);
 }
