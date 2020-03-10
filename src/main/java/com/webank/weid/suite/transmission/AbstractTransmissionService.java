@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,35 +17,22 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.api.transportation.params;
+package com.webank.weid.suite.transmission;
 
 /**
- * 编解码配置.
- * @author v_wbgyang
+ * 请求处理服务, 用于机构间的数据传输服务处理.
+ * 
+ * @author yanggang
  *
  */
-public class ProtocolProperty {
+public abstract class AbstractTransmissionService<T> implements TransmissionService<T> {
     
     /**
-     * 协议编解码类型.
+     * 自动注册服务构造器.
+     * 
+     * @param serviceType 服务名称
      */
-    private EncodeType encodeType;
-    
-    private TransmissionType transmissionType;
-
-    public EncodeType getEncodeType() {
-        return encodeType;
-    }
-    
-    public ProtocolProperty(EncodeType encodeType) {
-        this.encodeType = encodeType;
-    }
-
-    public TransmissionType getTransmissionType() {
-        return transmissionType;
-    }
-
-    public void setTransmissionType(TransmissionType transmissionType) {
-        this.transmissionType = transmissionType;
+    public AbstractTransmissionService(String serviceType) {
+        TransmissionServcieCenter.registerService(serviceType, this);
     }
 }

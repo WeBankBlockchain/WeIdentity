@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,35 +17,36 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.api.transportation.params;
+package com.webank.weid.suite.transmission;
+
+import com.webank.weid.util.DataToolUtils;
 
 /**
- * 编解码配置.
- * @author v_wbgyang
+ * 传输公共处理类.
+ * 
+ * @author yanggang
  *
  */
-public class ProtocolProperty {
+public abstract class AbstractTransmission implements Transmission {
+
+    /**
+     * 认证处理.
+     * 
+     * @param <T> 请求实例中具体数据类型
+     * @param request 用于做weAuth验证的用户身份信息
+     */
+    protected <T> void auth(TransmissionlRequest<T> request) {
+       
+    }
     
     /**
-     * 协议编解码类型.
+     * 获取传递数据.
+     * 
+     * @param <T> 请求实例类型
+     * @param request 请求实例
+     * @return 返回处理后的数据
      */
-    private EncodeType encodeType;
-    
-    private TransmissionType transmissionType;
-
-    public EncodeType getEncodeType() {
-        return encodeType;
-    }
-    
-    public ProtocolProperty(EncodeType encodeType) {
-        this.encodeType = encodeType;
-    }
-
-    public TransmissionType getTransmissionType() {
-        return transmissionType;
-    }
-
-    public void setTransmissionType(TransmissionType transmissionType) {
-        this.transmissionType = transmissionType;
+    protected <T> String getData(TransmissionlRequest<T> request) {
+        return DataToolUtils.serialize(request.getArgs());
     }
 }
