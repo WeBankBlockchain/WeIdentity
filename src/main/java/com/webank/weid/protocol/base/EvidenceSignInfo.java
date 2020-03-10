@@ -19,14 +19,14 @@
 
 package com.webank.weid.protocol.base;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import lombok.Data;
 
 /**
- * The sign information of evidence's each signer's sign attempt. Used as a mapped info against
- * each individual signer.
+ * The sign information of evidence's each signer's sign attempt. Used as a mapped info against each
+ * individual signer.
  *
  * @author chaoxinhu 2020.2
  * @since v1.6.0
@@ -47,5 +47,5 @@ public class EvidenceSignInfo {
     /**
      * The extra value this signer records on chain.
      */
-    private Map<String, String> extraValue;
+    private List<String> logs = new ArrayList<>();
 }
