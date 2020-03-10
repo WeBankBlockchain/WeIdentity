@@ -35,7 +35,7 @@ import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 public interface PdfTransportation {
 
     /**
-     * 指定获取秘钥的weid，在PDF加密的情况下，需要校验哪些weid有权限来获取秘钥.
+     * 指定获取秘钥的weid，在PDF加密的情况下，需要校验哪些weid有权限来获取秘钥。
      *
      * @param verifierWeIdList 指定的weid列表
      * @return PdfTransportation
@@ -47,7 +47,7 @@ public interface PdfTransportation {
      * presentation和协议头会放到自定义属性里。
      *
      * @param object 协议存储的实体数据对象
-     * @param <T> the type of the element
+     * @param <T> 需要转换成元素的类型泛型定义
      * @param property 协议类型，支持加密和非加密两种
      * @return 序列化以后生成PDF文件的byte[]
      */
@@ -63,7 +63,7 @@ public interface PdfTransportation {
      * @param object 协议存储的实体数据对象
      * @param property 协议类型，支持加密和非加密两种
      * @param outputPdfFilePath 输出PDF文件的路径
-     * @param <T> the type of the element
+     * @param <T> 需要转换成元素的类型泛型定义
      * @return 序列化结果
      */
     <T extends JsonSerializer> ResponseData<Boolean> serialize(
@@ -77,7 +77,7 @@ public interface PdfTransportation {
      * presentation和协议头会放到自定义属性里。
      *
      * @param object 协议存储的实体数据对象
-     * @param <T> the type of the element
+     * @param <T> 需要转换成元素的类型泛型定义
      * @param property 协议类型，支持加密和非加密两种
      * @param inputPdfTemplatePath presentation的PDF模板
      * @return byte[] 序列化以后生成PDF文件的byte[]
@@ -96,7 +96,7 @@ public interface PdfTransportation {
      * @param property 协议类型，支持加密和非加密两种
      * @param inputPdfTemplatePath presentation的PDF模板
      * @param outputPdfFilePath 输出PDF文件的路径
-     * @param <T> the type of the element
+     * @param <T> 需要转换成元素的类型泛型定义
      * @return 序列化结果
      */
     <T extends JsonSerializer> ResponseData<Boolean> serializeWithTemplate(
@@ -112,7 +112,7 @@ public interface PdfTransportation {
      *
      * @param pdfTransportation 指定反序列化的PDF文档路径
      * @param clazz 如果是presentation，这里就是PresentationE.class
-     * @param <T> the type of the element
+     * @param <T> 需要转换成元素的类型泛型定义
      * @param weIdAuthentication WeID公私钥信息
      * @return 返回PresentationE对象数据
      */
