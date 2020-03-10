@@ -21,9 +21,7 @@ package com.webank.weid.service.impl;
 
 import java.io.File;
 import java.math.BigInteger;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -68,12 +66,6 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
      */
     @Override
     public ResponseData<String> createEvidence(Hashable object, WeIdPrivateKey weIdPrivateKey) {
-        return createEvidence(object, weIdPrivateKey, null);
-    }
-
-    @Override
-    public ResponseData<String> createEvidence(Hashable object, WeIdPrivateKey weIdPrivateKey,
-        Map<String, String> extra) {
         ResponseData<String> hashResp = getHashValue(object);
         if (StringUtils.isEmpty(hashResp.getResult())) {
             return new ResponseData<>(StringUtils.EMPTY, hashResp.getErrorCode(),
@@ -83,17 +75,49 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return new ResponseData<>(StringUtils.EMPTY,
                 ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
         }
-        String extraValue = StringUtils.EMPTY;
-        if (extra != null && !extra.isEmpty()) {
-            try {
-                extraValue = URLEncoder.encode(DataToolUtils.stringMapToCompactJson(extra),
-                    StandardCharsets.UTF_8.name());
-            } catch (Exception e) {
-                logger.error("extra value illegal: {}", extra.toString());
-                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-            }
+        return hashToNewEvidence(hashResp.getResult(), weIdPrivateKey.getPrivateKey(),
+            StringUtils.EMPTY);
+    }
+
+    @Override
+    public ResponseData<Boolean> addLogByHash(String hashValue, String log,
+        WeIdPrivateKey weIdPrivateKey) {
+        if (!DataToolUtils.isValidHash(hashValue) || StringUtils.isEmpty(log)
+            || !DataToolUtils.isUtf8String(log)) {
+            logger.error("Evidence argument illegal input: hash or log.");
+            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }
-        return hashToNewEvidence(hashResp.getResult(), weIdPrivateKey.getPrivateKey(), extraValue);
+        if (!isChainStringLengthValid(log)) {
+            return new ResponseData<>(false, ErrorCode.ON_CHAIN_STRING_TOO_LONG);
+        }
+        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
+        }
+        Long timestamp = DateUtils.getNoMillisecondTimeStamp();
+        return evidenceServiceEngine.addLog(
+            hashValue,
+            log,
+            timestamp,
+            weIdPrivateKey.getPrivateKey()
+        );
+    }
+
+    @Override
+    public ResponseData<Boolean> addLogByCustomKey(String customKey, String log,
+        WeIdPrivateKey weIdPrivateKey) {
+        if (StringUtils.isEmpty(customKey) || !DataToolUtils.isUtf8String(customKey)) {
+            logger.error("Evidence argument illegal input. ");
+            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (!isChainStringLengthValid(log)) {
+            return new ResponseData<>(false, ErrorCode.ON_CHAIN_STRING_TOO_LONG);
+        }
+        ResponseData<String> hashResp = evidenceServiceEngine.getHashByCustomKey(customKey);
+        if (StringUtils.isEmpty(hashResp.getResult())) {
+            return new ResponseData<>(false, hashResp.getErrorCode(),
+                hashResp.getErrorMessage());
+        }
+        return this.addLogByHash(hashResp.getResult(), log, weIdPrivateKey);
     }
 
     /* (non-Javadoc)
@@ -313,17 +337,30 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.EvidenceService#createEvidenceWithCustomKey(
+     * @see com.webank.weid.rpc.EvidenceService#createEvidenceWithLogAndCustomKey(
      * com.webank.weid.protocol.inf.Hashable, com.webank.weid.protocol.base.WeIdPrivateKey,
-     * java.util.Map, java.lang.String)
+     * java.lang.String)
      */
     @Override
-    public ResponseData<String> createEvidenceWithCustomKey(
+    public ResponseData<String> createEvidenceWithLogAndCustomKey(
         Hashable object,
         WeIdPrivateKey weIdPrivateKey,
-        Map<String, String> extra,
-        String extraKey) {
-
+        String log,
+        String customKey) {
+        if (StringUtils.isEmpty(customKey) || DataToolUtils.isValidHash(customKey)) {
+            logger.error("Custom key must be non-empty and must not be of hash format.");
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (!DataToolUtils.isUtf8String(log)) {
+            logger.error("Log format illegal.");
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (StringUtils.isEmpty(log)) {
+            log = StringUtils.EMPTY;
+        }
+        if (!isChainStringLengthValid(log) || !isChainStringLengthValid(customKey)) {
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ON_CHAIN_STRING_TOO_LONG);
+        }
         ResponseData<String> hashResp = getHashValue(object);
         String hashValue = hashResp.getResult();
         if (StringUtils.isEmpty(hashResp.getResult())) {
@@ -335,16 +372,6 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS);
         }
         String privateKey = weIdPrivateKey.getPrivateKey();
-        String extraValue = StringUtils.EMPTY;
-        if (extra != null && !extra.isEmpty()) {
-            try {
-                extraValue = URLEncoder.encode(DataToolUtils.stringMapToCompactJson(extra),
-                    StandardCharsets.UTF_8.name());
-            } catch (Exception e) {
-                logger.error("extra value illegal: {}", extra.toString());
-                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-            }
-        }
         try {
             Sign.SignatureData sigData =
                 DataToolUtils.signMessage(hashValue, privateKey);
@@ -355,9 +382,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return evidenceServiceEngine.createEvidenceWithCustomKey(
                 hashValue,
                 signature,
-                extraValue,
+                log,
                 timestamp,
-                extraKey,
+                customKey,
                 privateKey
             );
         } catch (Exception e) {
@@ -367,16 +394,22 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.EvidenceService#getEvidenceByExtraKey(java.lang.String)
+     * @see com.webank.weid.rpc.EvidenceService#getEvidenceByCustomKey(java.lang.String)
      */
     @Override
-    public ResponseData<EvidenceInfo> getEvidenceByExtraKey(String extraKey) {
-
+    public ResponseData<EvidenceInfo> getEvidenceByCustomKey(String customKey) {
+        if (!isChainStringLengthValid(customKey)) {
+            return new ResponseData<>(null, ErrorCode.ON_CHAIN_STRING_TOO_LONG);
+        }
         try {
-            return evidenceServiceEngine.getInfoByExtraKey(extraKey);
+            return evidenceServiceEngine.getInfoByCustomKey(customKey);
         } catch (Exception e) {
             logger.error("get evidence failed.", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
+    }
+
+    private boolean isChainStringLengthValid(String string) {
+        return string.length() < WeIdConstant.ON_CHAIN_STRING_LENGTH;
     }
 }
