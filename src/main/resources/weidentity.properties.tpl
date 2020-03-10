@@ -46,26 +46,35 @@ datasource1.jdbc.minEvictableIdleTimeMillis=1800000
 # the second segment is the name of the table, and if not, the default is the first data source and the default table `sdk_all_data`,
 # Multiple domains can be configured at the same time.
 # example:
-# domain.credential=datasource1:credential_data
+# domain.credential=datasource1:credential_info
 # domain.credential.timeout=86400000
-# domain.weidDocument=datasource1:weid_document_data
+# domain.weIdDocument=datasource1:weid_document_info
 # domain.credential.timeout=86400000
 
-domain.default=datasource1:default_data
-domain.default.timeout=86400000
+# the default domain
+domain.defaultInfo=datasource1:default_info
+domain.defaultInfo.timeout=86400000
 
-domain.encryptKey=datasource1:encryptKey_data
-domain.encryptKey.timeout=86400000
+# the domain for save encrypt Key
+domain.encryptKey=datasource1:encrypt_key_info
+domain.encryptKey.timeout=31556908799941
 
+# 
 domain.zkp=datasource1:zkp_data
 
+# 
 domain.templateSecret=datasource1:template_secret
 domain.templateSecret.timeout=31556908799941
 
+# 
 domain.masterKey=datasource1:master_secret
 
+# 
 domain.credentialSignature=datasource1:credential_signature
 
+# the domain for save resource
+domain.resourceInfo=datasource1:resource_info
+domain.resourceInfo.timeout=31556908799941
 
 #######################################################################################################
 #                                                                                                     #

@@ -496,6 +496,11 @@ public enum ErrorCode {
      * pdf transfer error.
      */
     TRANSPORTATION_PDF_VERIFY_ERROR(100809, "pdf verify error, please check the error log."),
+    
+    /**
+     * the transmission type is invalid.
+     */
+    TRANSPORTATION_TRANSMISSION_TYPE_INVALID(100810, "the transmission type is invalid."),
 
     /**
      * Authority issuer main error code.
@@ -783,6 +788,16 @@ public enum ErrorCode {
      * the code is undefined.
      */
     CNS_CODE_UNDEFINED(160020, "the code is undefined."),
+
+    /**
+     * the data does not exist.
+     */
+    SQL_DATA_DOES_NOT_EXIST(160021, "the data does not exist."),
+    
+    /**
+     * this is be deprecated.
+     */
+    THIS_IS_DEPRECATED(160022, "this is be deprecated."),
 
     /**
      * other uncatched exceptions or error.

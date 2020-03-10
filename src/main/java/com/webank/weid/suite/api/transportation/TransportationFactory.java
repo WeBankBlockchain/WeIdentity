@@ -19,9 +19,11 @@
 
 package com.webank.weid.suite.api.transportation;
 
+import com.webank.weid.suite.api.transportation.inf.BarCodeTransportation;
 import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
 import com.webank.weid.suite.api.transportation.inf.QrCodeTransportation;
+import com.webank.weid.suite.transportation.bar.impl.BarCodeTransportationImpl;
 import com.webank.weid.suite.transportation.json.impl.JsonTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
 import com.webank.weid.suite.transportation.qr.impl.QrCodeJsonTransportationImpl;
@@ -41,5 +43,9 @@ public class TransportationFactory {
 
     public static PdfTransportation newPdfTransportation() {
         return new PdfTransportationImpl();
+    }
+    
+    public static BarCodeTransportation newBarCodeTransportation() {
+        return new BarCodeTransportationImpl();
     }
 }
