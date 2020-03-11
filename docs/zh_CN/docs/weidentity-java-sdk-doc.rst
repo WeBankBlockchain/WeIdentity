@@ -10534,9 +10534,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - transactionIndex
      - BigInteger
      - 交易索引
-     - 
-     
-     
+     -
+
+
 **此方法返回code**
 
 .. list-table::
@@ -10605,6 +10605,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - CREDENTIAL_SALT_ILLEGAL
      - 100430
      - 盐值非法
+   * - CREDENTIAL_USE_VERIFY_FUNCTION_ERROR
+     - 100439
+     - 使用了错误的verify方法
    * - ILLEGAL_INPUT
      - 160004
      - 参数非法
@@ -10711,7 +10714,340 @@ com.webank.weid.protocol.response.TransactionInfo
 
 ----
 
-7. createPresentation
+7. verifyPresentationFromPdf
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.CredentialPojoService.verifyPresentationFromPdf
+   接口定义: ResponseData<Boolean> verifyPresentationFromPdf(String pdfTemplatePath, byte[] serializePdf, String presenterWeId, PresentationPolicyE presentationPolicyE, Challenge challenge, PresentationE presentationE)
+   接口描述: 验证由PDF Transportation传输的Presentation。
+
+**接口入参**\ :
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - pdfTemplatePath
+     - String
+     - Y
+     - PDF模板路径
+     - 用于PDF序列化的PDF模板路径
+
+java.lang.byte
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - serializePdf
+     - byte[]
+     - Y
+     - 包含PDF数据的byte数组
+     - 序列化生成包含PDF数据的byte数组
+
+java.lang.String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - presenterWeId
+     - String
+     - Y
+     - WeIdentity DID
+     - 用户的WeIdentity DID
+
+
+com.webank.weid.protocol.base.PresentationPolicyE
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - id
+     - Integer
+     - Y
+     - polcyId
+     - 策略编号
+   * - orgId
+     - String
+     - Y
+     - 机构编号
+     -
+   * - version
+     - Integer
+     - Y
+     - 版本
+     -
+   * - policyPublisherWeId
+     - String
+     - Y
+     - WeIdentity DID
+     - 创建policy机构的WeIdentity DID
+   * - policy
+     - Map<Integer, ClaimPolicy>
+     - Y
+     - 策略配置
+     - key: CPTID, value: 披露策略对象
+   * - extra
+     - Map<String, String>
+     - N
+     - 扩展字段
+     -
+
+
+com.webank.weid.protocol.base.Challenge
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - N
+     - WeIdentity DID
+     - policy提供给指定的WeIdentity DID
+   * - version
+     - Integer
+     - Y
+     - 版本
+     -
+   * - nonce
+     - String
+     - Y
+     - 随机字符串
+     -
+
+
+com.webank.weid.protocol.base.PresentationE
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - context
+     - List<String>
+     - Y
+     - 上下文
+     -
+   * - type
+     - List<String>
+     - Y
+     - Presentation Type
+     -
+   * - credentialList
+     - List<CredentialPojo>
+     - Y
+     - 凭证列表
+     -
+   * - proof
+     - Map<String, Object>
+     - Y
+     - Presentation的签名信息
+     -
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 验证结果
+     - 业务数据
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CPT_ID_ILLEGAL
+     - 100303
+     - cptId无效
+   * - CREDENTIAL_ISSUER_MISMATCH
+     - 100403
+     - issuerWeId跟Credential中的issuer不匹配
+   * - CREDENTIAL_SIGNATURE_BROKEN
+     - 100405
+     - 签名验证不通过
+   * - CREDENTIAL_CREATE_DATE_ILLEGAL
+     - 100408
+     - 创建日期格式非法
+   * - CREDENTIAL_CLAIM_NOT_EXISTS
+     - 100410
+     - Claim数据不能为空
+   * - CREDENTIAL_CLAIM_DATA_ILLEGAL
+     - 100411
+     - Claim数据无效
+   * - CREDENTIAL_ID_NOT_EXISTS
+     - 100412
+     - ID为空
+   * - CREDENTIAL_CONTEXT_NOT_EXISTS
+     - 100413
+     - context为空
+   * - CREDENTIAL_CPT_NOT_EXISTS
+     - 100416
+     - cpt不存在
+   * - CREDENTIAL_WEID_DOCUMENT_ILLEGAL
+     - 100417
+     - 获取weIdDocument异常
+   * - CREDENTIAL_ISSUER_INVALID
+     - 100418
+     - WeIdentity DID无效
+   * - CREDENTIAL_EXCEPTION_VERIFYSIGNATURE
+     - 100419
+     - 签名验证异常
+   * - CREDENTIAL_SIGNATURE_NOT_EXISTS
+     - 100422
+   * - CREDENTIAL_POLICY_DISCLOSUREVALUE_ILLEGAL
+     - 100423
+     - policy披露信息非法
+   * - CREDENTIAL_DISCLOSUREVALUE_NOTMATCH_SALTVALUE
+     - 100424
+     - Credential披露信息跟盐信息不一致
+   * - CREDENTIAL_CPTID_NOTMATCH
+     - 100425
+     - CPT不匹配
+     - 签名不存在
+   * - CREDENTIAL_PRESENTERWEID_NOTMATCH
+     - 100426
+     - presenterWeId跟challenge不匹配
+   * - CREDENTIAL_SIGNATURE_TYPE_ILLEGAL
+     - 100429
+     - 验证签名类型异常
+   * - CREDENTIAL_SALT_ILLEGAL
+     - 100430
+     - 盐值非法
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数非法
+   * - PRESENTATION_CHALLENGE_NONCE_MISMATCH
+     - 100605
+     - challenge随机数不匹配
+   * - PRESENTATION_SIGNATURE_MISMATCH
+     - 100606
+     - presentation验签失败
+   * - TRANSPORTATION_PDF_VERIFY_ERROR
+     - 100809
+     - PDF验证失败
+
+
+**调用示例**
+
+.. code-block:: java
+
+   //序列化presentation，生成包含PDF信息的byte数组
+   ResponseData<byte[]> retSerialize = TransportationFactory.newPdfTransportation()
+       .serializeWithTemplate(
+           presentationE1,
+           new ProtocolProperty(EncodeType.ORIGINAL),
+           "src/test/resources/test-template.pdf");
+
+   //反序列化包含PDF信息的byte数组为Presentation
+   ResponseData<PresentationE> retDeserialize = TransportationFactory.newPdfTransportation()
+       .deserialize(
+           retSerialize.getResult(),
+           PresentationE.class,
+           weIdAuthentication);
+
+   //验证presentation
+   ResponseData<Boolean> response = credentialPojoService.verifyPresentationFromPdf(
+       "src/test/resources/test-template.pdf",
+       retSerialize.getResult(),
+       credentialPojoNew1.getIssuer(),
+       presentationPolicyE1,
+       challenge1,
+       retDeserialize.getResult());
+
+
+.. code-block:: text
+
+   返回结果如：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+----
+
+8. createPresentation
 ~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
@@ -11154,7 +11490,7 @@ com.webank.weid.protocol.base.PresentationE
 ----
 
 
-8. getCredentialPojoHash
+9. getCredentialPojoHash
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
@@ -11377,7 +11713,7 @@ com.webank.weid.protocol.response.TransactionInfo
    CredentialPojoService-->>调用者: 返回凭证Hash
 
 
-9. addSignature
+10. addSignature
 ~~~~~~~~~~~~~~~~~
 
 **基本信息**
@@ -11748,7 +12084,7 @@ com.webank.weid.protocol.base.Credential
 
 
 
-10. createTrustedTimestamp
+11. createTrustedTimestamp
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
@@ -12141,7 +12477,7 @@ com.webank.weid.protocol.base.CredentialPojo
 
 ----
 
-11. createDataAuthToken
+12. createDataAuthToken
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
