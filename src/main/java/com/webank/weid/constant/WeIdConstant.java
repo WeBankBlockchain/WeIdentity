@@ -238,4 +238,6 @@ public final class WeIdConstant {
     public static final String CNS_SPECIFIC_ADDRESS = "SpecificIssuerController";
     public static final String CNS_EVIDENCE_ADDRESS = "EvidenceFactory";
     public static final String CNS_CPT_ADDRESS = "CptController";
+
+    public static final Integer ON_CHAIN_STRING_LENGTH = 2097152;
 }

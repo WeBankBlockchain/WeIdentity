@@ -36,6 +36,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.math.BigInteger;
 import java.net.URI;
@@ -269,6 +270,7 @@ public final class DataToolUtils {
 
     /**
      * Check whether the String is a valid hash.
+     *
      * @param hashValue hash in String
      * @return true if yes, false otherwise
      */
@@ -1094,6 +1096,7 @@ public final class DataToolUtils {
 
     /**
      * convert byte array to string.
+     *
      * @param bytearray byte[]
      * @return String
      */
@@ -1108,7 +1111,7 @@ public final class DataToolUtils {
         }
         return result;
     }
-    
+
     /**
      * string to byte.
      *
@@ -1639,7 +1642,7 @@ public final class DataToolUtils {
                 loadJsonObject(jsonString),
                 CONVERT_UTC_LONG_KEYLIST,
                 FROM_JSON
-            ).toString();  
+            ).toString();
         } catch (IOException e) {
             logger.error("replaceJsonObj exception.", e);
             throw new DataTypeCastException(e);
@@ -1652,14 +1655,14 @@ public final class DataToolUtils {
         List<String> list,
         String type) {
         if (jsonObj.isObject()) {
-            return dealObjectOfConvertUtcAndLong((ObjectNode)jsonObj, list, type);
+            return dealObjectOfConvertUtcAndLong((ObjectNode) jsonObj, list, type);
         } else if (jsonObj.isArray()) {
-            return dealArrayOfConvertUtcAndLong((ArrayNode)jsonObj, list, type);
+            return dealArrayOfConvertUtcAndLong((ArrayNode) jsonObj, list, type);
         } else {
             return jsonObj;
         }
     }
-    
+
     private static JsonNode dealObjectOfConvertUtcAndLong(
         ObjectNode jsonObj,
         List<String> list,
@@ -1673,11 +1676,11 @@ public final class DataToolUtils {
                 if (key.equals(KEY_CLAIM)) {
                     resJson.set(key, obj);
                 } else {
-                    resJson.set(key, dealObjectOfConvertUtcAndLong((ObjectNode)obj, list, type));
+                    resJson.set(key, dealObjectOfConvertUtcAndLong((ObjectNode) obj, list, type));
                 }
             } else if (obj.isArray()) {
                 //JSONArray 
-                resJson.set(key, dealArrayOfConvertUtcAndLong((ArrayNode)obj, list, type));
+                resJson.set(key, dealArrayOfConvertUtcAndLong((ArrayNode) obj, list, type));
             } else {
                 if (list.contains(key)) {
                     if (TO_JSON.equals(type)) {
@@ -1714,9 +1717,9 @@ public final class DataToolUtils {
         for (int i = 0; i < jsonArr.size(); i++) {
             JsonNode jsonObj = jsonArr.get(i);
             if (jsonObj.isObject()) {
-                resJson.add(dealObjectOfConvertUtcAndLong((ObjectNode)jsonObj, list, type));
+                resJson.add(dealObjectOfConvertUtcAndLong((ObjectNode) jsonObj, list, type));
             } else if (jsonObj.isArray()) {
-                resJson.add(dealArrayOfConvertUtcAndLong((ArrayNode)jsonObj, list, type));
+                resJson.add(dealArrayOfConvertUtcAndLong((ArrayNode) jsonObj, list, type));
             } else {
                 resJson.add(jsonObj);
             }
@@ -1743,7 +1746,7 @@ public final class DataToolUtils {
         int digit;
 
         char firstChar = str.charAt(0);
-        if (firstChar <= '0') {
+        if (firstChar <= '0' ) {
             return false;
         }
         multmin = limit / radix;
@@ -1796,7 +1799,7 @@ public final class DataToolUtils {
         try {
             jsonObject = loadJsonObject(json);
             if (!jsonObject.has(KEY_FROM_TOJSON)) {
-                ((ObjectNode)jsonObject).put(KEY_FROM_TOJSON, TO_JSON);
+                ((ObjectNode) jsonObject).put(KEY_FROM_TOJSON, TO_JSON);
             }
         } catch (IOException e) {
             logger.error("addTagFromToJson fail." + e);
@@ -1816,7 +1819,7 @@ public final class DataToolUtils {
         try {
             jsonObject = loadJsonObject(json);
             if (jsonObject.has(KEY_FROM_TOJSON)) {
-                ((ObjectNode)jsonObject).remove(KEY_FROM_TOJSON);
+                ((ObjectNode) jsonObject).remove(KEY_FROM_TOJSON);
             }
         } catch (IOException e) {
             logger.error("removeTag fail." + e);
@@ -1857,6 +1860,16 @@ public final class DataToolUtils {
             return false;
         }
         return true;
+    }
+
+    public static boolean isUtf8String(String string) {
+        try {
+            string.getBytes("UTF-8");
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Passed-in String is not a valid UTF-8 String.");
+        }
+        return false;
     }
 }
 
