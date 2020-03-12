@@ -47,50 +47,66 @@ public interface EvidenceService {
     ResponseData<String> createEvidence(Hashable object, WeIdPrivateKey weIdPrivateKey);
 
     /**
-     * Create a new evidence together with uploaded extra values.
+     * Create a new evidence together with log and custom key. Other guys can use this custom key,
+     * OR its hash value, to lookup the detailed information of this evidence. Multiple calls of
+     * this method will yield multiple log entries as the same of addLog().
      *
      * @param object the given Java object
      * @param weIdPrivateKey the signer WeID's private key
-     * @param extra the extra value blob
+     * @param log log entry
+     * @param customKey custom key determined by creator - it cannot be a hash value though
      * @return evidence hash value
      */
-    ResponseData<String> createEvidence(
+    ResponseData<String> createEvidenceWithLogAndCustomKey(
         Hashable object,
         WeIdPrivateKey weIdPrivateKey,
-        Map<String, String> extra
+        String log,
+        String customKey
     );
 
     /**
-     * Create a new evidence together with uploaded extra values.
+     * Add log entry for an existing evidence. This log will be recorded on blockchain permanently,
+     * and finally it will be fetched as a list when trying to get evidence.
      *
-     * @param object the given Java object
+     * @param hashValue hash value
+     * @param log log entry - can be null or empty
      * @param weIdPrivateKey the signer WeID's private key
-     * @param extra the extra value blob
-     * @param extraKey extra key
-     * @return evidence hash value
+     * @return true if succeeded, false otherwise
      */
-    ResponseData<String> createEvidenceWithExtraKey(
-        Hashable object,
-        WeIdPrivateKey weIdPrivateKey,
-        Map<String, String> extra,
-        String extraKey
-    );
+    ResponseData<Boolean> addLogByHash(
+        String hashValue,
+        String log,
+        WeIdPrivateKey weIdPrivateKey);
 
     /**
-     * Get the evidence info from blockchain.
+     * Add log entry for an existing evidence. This log will be recorded on blockchain permanently,
+     * and finally it will be fetched as a list when trying to get evidence.
      *
-     * @param evidenceKey the hash, on chain
-     * @return The EvidenceInfo
+     * @param customKey custom key
+     * @param log log entry - can be null or empty
+     * @param weIdPrivateKey the signer WeID's private key
+     * @return true if succeeded, false otherwise
      */
-    ResponseData<EvidenceInfo> getEvidence(String evidenceKey);
+    ResponseData<Boolean> addLogByCustomKey(
+        String customKey,
+        String log,
+        WeIdPrivateKey weIdPrivateKey);
 
     /**
-     * Get the evidence info from blockchain.
+     * Get the evidence info from blockchain using hash as key.
      *
-     * @param extraKey the hash, on chain
+     * @param hashValue the hash, on chain
      * @return The EvidenceInfo
      */
-    ResponseData<EvidenceInfo> getEvidenceByExtraKey(String extraKey);
+    ResponseData<EvidenceInfo> getEvidence(String hashValue);
+
+    /**
+     * Get the evidence info from blockchain using custom key.
+     *
+     * @param customKey the custom key, on chain
+     * @return The EvidenceInfo
+     */
+    ResponseData<EvidenceInfo> getEvidenceByCustomKey(String customKey);
 
     /**
      * Generate hash value of any passed-in param.
