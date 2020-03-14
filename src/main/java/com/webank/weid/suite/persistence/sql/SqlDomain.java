@@ -110,7 +110,8 @@ public class SqlDomain {
             this.key = DataDriverConstant.DOMAIN_DEFAULT_INFO;
         }
         this.value = PropertyUtils.getProperty(this.key);
-        if (StringUtils.isBlank(this.value) && DataDriverConstant.DOMAIN_DEFAULT_INFO.equals(this.key)) {
+        if (StringUtils.isBlank(this.value) 
+            && DataDriverConstant.DOMAIN_DEFAULT_INFO.equals(this.key)) {
             this.baseDomain = ConnectionPool.getFirstDataSourceName();
             this.tableDomain = DEFAULT_TABLE;
         } else if (StringUtils.isNotBlank(this.value) 
