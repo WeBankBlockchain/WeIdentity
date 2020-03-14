@@ -61,10 +61,4 @@ public class JsonBaseData {
      */
     @Deprecated
     private String type = "AMOP";
-    
-    /**
-     * 协议通讯类型.
-     */
-    private int transmission;
-    
 }

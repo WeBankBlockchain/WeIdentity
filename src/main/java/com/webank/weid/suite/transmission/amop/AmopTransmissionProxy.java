@@ -26,6 +26,8 @@ import com.webank.weid.rpc.AmopService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
+import com.webank.weid.service.impl.callback.CommonCallback;
+import com.webank.weid.suite.transmission.TransmissionServiceCenter;
 
 /**
  * AMOP处理器代理类.
@@ -33,7 +35,7 @@ import com.webank.weid.service.impl.base.AmopCommonArgs;
  * @author yanggang
  *
  */
-public class AmopTransmissionPoxy extends BaseService {
+public class AmopTransmissionProxy extends BaseService {
 
     private static AmopService amopService;
     
@@ -66,9 +68,10 @@ public class AmopTransmissionPoxy extends BaseService {
      * @return 返回处理结果
      */
     public AmopResponse sendLocal(AmopCommonArgs amopCommonArgs) {
-        return super.getPushCallback()
-            .getAmopCallback(AmopMsgType.COMMON_REQUEST.getValue())
-            .onPush(amopCommonArgs);
+        ResponseData<?> response = TransmissionServiceCenter.getService(
+            amopCommonArgs.getServiceType()).service(amopCommonArgs.getMessage());
+        return ((CommonCallback)super.getPushCallback().getAmopCallback(
+            AmopMsgType.COMMON_REQUEST.getValue())).buildAmopResponse(response, amopCommonArgs);
     }
     
     /**

@@ -623,6 +623,7 @@ public final class DataToolUtils {
      * @param data the data to encrypt
      * @param publicKey public key
      * @return decrypt data
+     * @throws Exception encrypt exception
      */
     public static byte[] encrypt(String data, String publicKey)
         throws Exception {
@@ -638,6 +639,7 @@ public final class DataToolUtils {
      * @param data the data to decrypt
      * @param privateKey private key
      * @return original data
+     * @throws Exception decrypt exception
      */
     public static byte[] decrypt(byte[] data, String privateKey) throws Exception {
 

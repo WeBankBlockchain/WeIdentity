@@ -19,6 +19,7 @@
 
 package com.webank.weid.full.transportation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,13 +43,13 @@ import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
 
 /**
- * 二维码协议反序列化测试.
+ * 条码协议反序列化测试.
  *
  * @author v_wbgyang
  */
-public class TestJsonDeserialize extends TestBaseTransportation {
+public class TestBarCodeDeserialize extends TestBaseTransportation {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestJsonDeserialize.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestBarCodeDeserialize.class);
 
     private static PresentationE presentation;
 
@@ -60,7 +61,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
             super.testInit();
             presentation = this.getPresentationE();
             original_transString =
-                TransportationFactory.newJsonTransportation().serialize(
+                TransportationFactory.newBarCodeTransportation().serialize(
                     presentation,
                     new ProtocolProperty(EncodeType.ORIGINAL)
                 ).getResult();
@@ -73,12 +74,12 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserialize_EncodeTypeOriginal() {
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
+            TransportationFactory.newBarCodeTransportation().serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.ORIGINAL)
             );
-        ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
-            .deserialize(response.getResult(), PresentationE.class);
+        ResponseData<PresentationE> wrapperRes = TransportationFactory.newBarCodeTransportation()
+            .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
         Assert.assertEquals(presentation.toJson(), wrapperRes.getResult().toJson());
@@ -90,11 +91,11 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserialize_EncodeTypeCipher() {
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
+            TransportationFactory.newBarCodeTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
-        ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
+        ResponseData<PresentationE> wrapperRes = TransportationFactory.newBarCodeTransportation()
             .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), wrapperRes.getErrorCode().intValue());
@@ -112,13 +113,15 @@ public class TestJsonDeserialize extends TestBaseTransportation {
             credentialPojo = credentialPojoList.get(0);
         }
 
+        List<String> verifier = new ArrayList<String>();
+        verifier.add(createWeIdNew.getWeId());
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
+            TransportationFactory.newBarCodeTransportation().specify(verifier).serialize(
                 credentialPojo,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
-        ResponseData<CredentialPojo> wrapperRes = TransportationFactory.newJsonTransportation()
-            .deserialize(response.getResult(), CredentialPojo.class);
+        ResponseData<CredentialPojo> wrapperRes = TransportationFactory.newBarCodeTransportation()
+            .deserialize(weIdAuthentication, response.getResult(), CredentialPojo.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCode(),
             wrapperRes.getErrorCode().intValue());  
@@ -136,14 +139,14 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         }
 
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
+            TransportationFactory.newBarCodeTransportation().specify(verifier).serialize(
                 credentialPojo,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
-        ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
-            .deserialize(response.getResult(), PresentationE.class);
+        ResponseData<PresentationE> wrapperRes = TransportationFactory.newBarCodeTransportation()
+            .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
-        Assert.assertEquals(ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCode(),
+        Assert.assertEquals(ErrorCode.TRANSPORTATION_BASE_ERROR.getCode(),
                 wrapperRes.getErrorCode().intValue());        
     }
 
@@ -153,8 +156,8 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserialize_dataNull() {
         String transString = null;
-        ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
-            .deserialize(transString, PresentationE.class);
+        ResponseData<PresentationE> wrapperRes = TransportationFactory.newBarCodeTransportation()
+            .deserialize(weIdAuthentication, transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID.getCode(),
@@ -169,11 +172,11 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserialize_transStrig() {
         String transString = "abcd";
-        ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
-            .deserialize(transString, PresentationE.class);
+        ResponseData<PresentationE> wrapperRes = TransportationFactory.newBarCodeTransportation()
+            .deserialize(weIdAuthentication, transString, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.DATA_TYPE_CASE_ERROR.getCode(),
+            ErrorCode.TRANSPORTATION_BASE_ERROR.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -185,7 +188,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserializeCase5() {
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
+            TransportationFactory.newBarCodeTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
@@ -198,12 +201,11 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         };
 
         ResponseData<PresentationE> wrapperRes =
-            TransportationFactory.newJsonTransportation()
+            TransportationFactory.newBarCodeTransportation()
                 .deserialize(weIdAuthentication, response.getResult(), PresentationE.class);
-
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
+            ErrorCode.UNKNOW_ERROR.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -220,12 +222,12 @@ public class TestJsonDeserialize extends TestBaseTransportation {
                 return null;
             }
         };
-        ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
-            .deserialize(original_transString, PresentationE.class);
+        ResponseData<PresentationE> wrapperRes = TransportationFactory.newBarCodeTransportation()
+            .deserialize(weIdAuthentication, original_transString, PresentationE.class);
 
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
+            ErrorCode.UNKNOW_ERROR.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -244,14 +246,15 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         };
 
         ResponseData<PresentationE> response =
-            TransportationFactory.newJsonTransportation().deserialize(
+            TransportationFactory.newBarCodeTransportation().deserialize(
+                weIdAuthentication, 
                 original_transString,
                 PresentationE.class
             );
 
         LogUtil.info(logger, "deserialize", response);
         Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
+            ErrorCode.UNKNOW_ERROR.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertEquals(null, response.getResult());

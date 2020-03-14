@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+89 *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -21,6 +21,7 @@ package com.webank.weid.suite.transportation;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -36,9 +37,6 @@ import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.util.WeIdUtils;
 
-
-
-
 public abstract class AbstractTransportation extends BaseService {
 
     private static final Logger logger =
@@ -46,6 +44,9 @@ public abstract class AbstractTransportation extends BaseService {
     private static WeIdService weidService = new WeIdServiceImpl();
     private List<String> verifierWeIdList;
     private WeIdAuthentication weIdAuthentication;
+    private static long lasttime = System.currentTimeMillis();
+    private static AtomicInteger atomicInt = new AtomicInteger(0);
+    private static final int maxSize = 1000;
     
     /**
      * 验证协议配置.
@@ -60,21 +61,11 @@ public abstract class AbstractTransportation extends BaseService {
         if (property.getEncodeType() == null) {
             return ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR;
         }
-        return ErrorCode.SUCCESS;
-    }
-
-    /**
-     * 验证请求传输类型.
-     *
-     * @param property 协议配置实体
-     * @return Error Code and Message
-     */
-    protected ErrorCode checkTransmissionTypeProperty(ProtocolProperty property) {
-        if (property == null) {
-            return ErrorCode.TRANSPORTATION_PROTOCOL_PROPERTY_ERROR;
-        }
         if (property.getTransmissionType() == null) {
-            return ErrorCode.TRANSPORTATION_TRANSMISSION_TYPE_INVALID;
+            return  ErrorCode.TRANSPORTATION_TRANSMISSION_TYPE_INVALID;
+        }
+        if (property.getUriType() == null) {
+            return  ErrorCode.TRANSPORTATION_URI_TYPE_INVALID;
         }
         return ErrorCode.SUCCESS;
     }
@@ -103,7 +94,6 @@ public abstract class AbstractTransportation extends BaseService {
         return ErrorCode.SUCCESS;
     }
 
-
     /**
      * 验证wrapper数据.
      *
@@ -118,6 +108,9 @@ public abstract class AbstractTransportation extends BaseService {
     }
 
     protected List<String> getVerifiers() {
+        if (verifierWeIdList == null) {
+            throw new WeIdBaseException(ErrorCode.TRANSPORTATION_NO_SPECIFYER_TO_SET); 
+        }
         return verifierWeIdList;
     }
 
@@ -159,5 +152,24 @@ public abstract class AbstractTransportation extends BaseService {
 
     protected void setWeIdAuthentication(WeIdAuthentication weIdAuthentication) {
         this.weIdAuthentication = weIdAuthentication;
+    }
+
+    /**
+     * 产生资源Id.
+     * @return 返回资源Id
+     */
+    public static synchronized long nextId() {
+        long time = System.currentTimeMillis();
+        if (time == lasttime && atomicInt.get() == maxSize) {
+            atomicInt = new AtomicInteger(0);
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                logger.error("[nextId] sleep error.");
+            }
+            lasttime = System.currentTimeMillis();
+            return nextId();
+        }
+        return time * maxSize + atomicInt.getAndIncrement();
     }
 }

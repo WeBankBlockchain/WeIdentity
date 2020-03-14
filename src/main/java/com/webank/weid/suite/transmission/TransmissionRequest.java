@@ -19,13 +19,13 @@
 
 package com.webank.weid.suite.transmission;
 
+import lombok.Data;
+
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.suite.api.transportation.params.TransmissionType;
 
-import lombok.Data;
-
 @Data
-public class TransmissionlRequest<T> {
+public class TransmissionRequest<T> {
     private String orgId;
     private T args;
     private String serviceType;
