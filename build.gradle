@@ -47,6 +47,7 @@ targetCompatibility = 1.8
 repositories {
     if (!gradle.startParameter.isOffline()) {
         mavenLocal()
+        maven { url "https://oss.sonatype.org/content/groups/public/" }
         mavenCentral()
         maven { url "https://dl.bintray.com/ethereum/maven/" }
     } else {
@@ -133,6 +134,11 @@ dependencies {
         if (!gradle.startParameter.isOffline()) {
             compile logger, lombok, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf, caffeine, oval
             compile("com.webank:weid-contract-java:1.2.16") {
+                exclude group: "org.fisco-bcos", module: "web3sdk"
+                exclude group: "org.slf4j", module: "slf4j-log4j12"
+            }
+            compile("org.fisco-bcos:web3sdk:2.1.2-0312-SNAPSHOT"){
+                exclude group:"io.netty"
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
             compile files("lib/WeDPR-Java-SDK.jar")
@@ -149,6 +155,11 @@ dependencies {
             testCompileOnly 'org.projectlombok:lombok:1.18.10'
             compile logger, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf, caffeine, oval
             compile("com.webank:weid-contract-java:1.2.16") {
+                exclude group: "org.fisco-bcos", module: "web3sdk"
+                exclude group: "org.slf4j", module: "slf4j-log4j12"
+            }
+            compile("org.fisco-bcos:web3sdk:2.1.2-0312-SNAPSHOT"){
+                exclude group:"io.netty"
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
 			compile files("lib/WeDPR-Java-SDK.jar")
