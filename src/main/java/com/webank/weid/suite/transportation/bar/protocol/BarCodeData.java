@@ -19,12 +19,12 @@
 
 package com.webank.weid.suite.transportation.bar.protocol;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.suite.transportation.json.protocol.JsonBaseData;
-
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 条码协议数据体.
@@ -34,7 +34,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class BarCodeData extends JsonBaseData{
+public class BarCodeData extends JsonBaseData {
 
     private static final String SPLIT_CHAR = "/";
     
@@ -43,16 +43,28 @@ public class BarCodeData extends JsonBaseData{
     private static final int RESOURCE_ID_INDEX = 1;
     
     /**
+     * 协议通讯类型.
+     */
+    private int transmissionTypeCode;
+    
+    /**
+     * 控制URI类型:(机构/长URI/短URI ).
+     */
+    private int uriTypeCode;
+
+    /**
      * 获取协议数据.
      * 
      * @return 返回协议字符串
      */
     public String getBarCodeString() {
-        StringBuffer buffer = new StringBuffer(String.valueOf(super.getTransmission()));
-        buffer.append(super.getOrgId()).append(SPLIT_CHAR)
+        StringBuffer buffer = new StringBuffer(String.valueOf(getTransmissionTypeCode()));
+        buffer.append(getUriTypeCode())
+            .append(super.getOrgId()).append(SPLIT_CHAR)
             .append(super.getId());
         return buffer.toString();
     }
+    
     /**
      * 通过协议数据解析基本的协议对象.
      * 
@@ -61,11 +73,12 @@ public class BarCodeData extends JsonBaseData{
      */
     public static BarCodeData buildByBarCodeString(String barCodeString) {
         BarCodeData barCodeData = new BarCodeData();
-        //解析第一个字符
+        // 解析第一个字符，第二个字符预留
         String transmissionTypeStr = barCodeString.substring(0, 1);
         Integer transmissionTypeCode = Integer.parseInt(transmissionTypeStr);
-        barCodeData.setTransmission(transmissionTypeCode);
-        barCodeString = barCodeString.substring(1);
+        barCodeData.setTransmissionTypeCode(transmissionTypeCode);
+        // 从第三个字符开始
+        barCodeString = barCodeString.substring(2);
         String[] array = barCodeString.split(SPLIT_CHAR);
         if (array.length != 2) {
             throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID);

@@ -501,6 +501,16 @@ public enum ErrorCode {
      * the transmission type is invalid.
      */
     TRANSPORTATION_TRANSMISSION_TYPE_INVALID(100810, "the transmission type is invalid."),
+    
+    /**
+     * the URI type is invalid.
+     */
+    TRANSPORTATION_URI_TYPE_INVALID(100811, "the URI type is invalid."),
+
+    /**
+     * no spcifyer to set.
+     */
+    TRANSPORTATION_NO_SPECIFYER_TO_SET(100812, "no spcifyer to set."),
 
     /**
      * Authority issuer main error code.
@@ -693,6 +703,22 @@ public enum ErrorCode {
     WEID_AUTH_NO_CALLBACK(
         100113,
         "weIdAuth callback is not registered."
+    ),
+    
+    /**
+     * the channelId is null.
+     */
+    WEID_AUTH_CHANNELID_IS_NULL(
+        100114,
+        "the channelId is null."
+    ),
+    
+    /**
+     * the channelId is invalid.
+     */
+    WEID_AUTH_CHANNELID_INVALID(
+        100115,
+        "the channelId is invalid."
     ),
 
     /**

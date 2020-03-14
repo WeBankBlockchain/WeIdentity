@@ -84,9 +84,9 @@ public enum AmopMsgType {
     GET_WEID_AUTH(8),
 
     /**
-     * 新版本amop请求
+     * 新版本amop请求.
      */
-    COMMON_REQUEST(7);
+    COMMON_REQUEST(9);
 
     private Integer value;
 

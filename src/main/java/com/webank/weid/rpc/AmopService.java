@@ -71,17 +71,18 @@ public interface AmopService {
      * get weIdAuth object.
      * @param toOrgId target organization id
      * @param args random number
+     * @return return the GetWeIdAuthResponse
      */
     ResponseData<GetWeIdAuthResponse> getWeIdAuth(
         String toOrgId,
         GetWeIdAuthArgs args
     );
 
-
     /**
      * verify challenge signature.
      * @param toOrgId target organization id
      * @param args verify args
+     * @return return the RequestVerifyChallengeResponse
      */
     ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(
         String toOrgId,

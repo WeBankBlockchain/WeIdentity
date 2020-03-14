@@ -54,7 +54,7 @@ public class TransmissionFactory {
      * @param transmissionType 传输类型
      * @return 返回传输处理器
      */
-    public static Transmission getChannel(TransmissionType transmissionType) {
+    public static Transmission getTransmisson(TransmissionType transmissionType) {
         Transmission transmission = transmission_map.get(transmissionType.name());
         if (transmission == null) {
             throw new WeIdBaseException("the channel is null.");
