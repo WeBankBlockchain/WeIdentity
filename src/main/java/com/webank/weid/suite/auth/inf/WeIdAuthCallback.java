@@ -23,20 +23,23 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
 
 /**
+ * callback interface for weIdAuth.
  * @author tonychen 2020年3月13日
  */
 public interface WeIdAuthCallback {
 
     /**
      * you need to implements this method to return your WeIdAuthentication object.
+     *
      * @param counterpartyWeId weId of the counterparty
      * @return WeIdAuthentication object
      */
     public WeIdAuthentication onChannelConnecting(String counterpartyWeId);
 
     /**
-     * you need to implements this method, this method will be called after the connection
-     * is established..
+     * you need to implements this method, this method will be called after the connection is
+     * established..
+     *
      * @param arg WeIdAuthObj
      * @return flag
      */

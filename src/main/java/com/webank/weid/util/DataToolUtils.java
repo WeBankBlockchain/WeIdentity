@@ -42,15 +42,9 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,11 +58,6 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.NullCipher;
 import javax.imageio.ImageIO;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -629,31 +618,31 @@ public final class DataToolUtils {
     }
 
     /**
-     * 加密
-     * @param data
-     * @param publicKey
-     * @return
-     * @throws Exception
+     * eecrypt the data.
+     *
+     * @param data the data to encrypt
+     * @param publicKey public key
+     * @return decrypt data
      */
     public static byte[] encrypt(String data, String publicKey)
-    		throws Exception {
-    	
-    	 ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
-    	 return encrypt.encrypt(data.getBytes());
+        throws Exception {
+
+        ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
+        return encrypt.encrypt(data.getBytes());
     }
- 
- 
+
+
     /**
-     * 解密
-     * @param data
-     * @param privateKey
-     * @return
-     * @throws Exception
+     * decrypt the data.
+     *
+     * @param data the data to decrypt
+     * @param privateKey private key
+     * @return original data
      */
     public static byte[] decrypt(byte[] data, String privateKey) throws Exception {
-    	
-    	ECCDecrypt decrypt= new ECCDecrypt(new BigInteger(privateKey));
-    	return decrypt.decrypt(data);
+
+        ECCDecrypt decrypt = new ECCDecrypt(new BigInteger(privateKey));
+        return decrypt.decrypt(data);
     }
 
     /**
@@ -1787,7 +1776,7 @@ public final class DataToolUtils {
         int digit;
 
         char firstChar = str.charAt(0);
-        if (firstChar <= '0' ) {
+        if (firstChar <= '0') {
             return false;
         }
         multmin = limit / radix;
@@ -1903,6 +1892,11 @@ public final class DataToolUtils {
         return true;
     }
 
+    /**
+     * check if the input string is Uft-8.
+     * @param string input
+     * @return true, otherwise false
+     */
     public static boolean isUtf8String(String string) {
         try {
             string.getBytes("UTF-8");

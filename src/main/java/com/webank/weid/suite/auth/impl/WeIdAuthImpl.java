@@ -52,6 +52,7 @@ import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
 import com.webank.weid.util.DataToolUtils;
 
 /**
+ * weIdAuth service.
  * @author tonychen 2020年3月10日
  */
 @Setter
@@ -67,7 +68,8 @@ public class WeIdAuthImpl implements WeIdAuth {
     private static Map<String, WeIdAuthObj> weIdAuthCache = new HashMap<>();
     private static WeIdAuthCallback weIdAuthCallback;
     private static WeIdAuthAmopCallback weIdAuthAmopCallback = new WeIdAuthAmopCallback();
-    private static RequestVerifyChallengeCallback VerifyChallengeCallback = new RequestVerifyChallengeCallback();
+    private static RequestVerifyChallengeCallback VerifyChallengeCallback =
+        new RequestVerifyChallengeCallback();
     /**
      * specify who has right to get weid auth.
      */
@@ -85,7 +87,8 @@ public class WeIdAuthImpl implements WeIdAuth {
     private WeIdService weIdService = new WeIdServiceImpl();
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.auth.inf.WeIdAuth#createAuthenticatedChannel(java.lang.String, com.webank.weid.protocol.base.WeIdAuthentication)
+     * @see com.webank.weid.suite.auth.inf.WeIdAuth#createAuthenticatedChannel(java.lang.String,
+     * com.webank.weid.protocol.base.WeIdAuthentication)
      */
     @Override
     public ResponseData<WeIdAuthObj> createAuthenticatedChannel(
@@ -111,7 +114,8 @@ public class WeIdAuthImpl implements WeIdAuth {
         String errMsg = weIdAuthObjResp.getErrorMessage();
         if (errCode.intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
-                "[createAuthenticatedChannel] get weid auth object failed. error code: {}, error message is:{}",
+                "[createAuthenticatedChannel] get weid auth object failed. error code: {}, "
+                    + "error message is:{}",
                 errCode, errMsg);
             return new ResponseData<WeIdAuthObj>(null, ErrorCode.getTypeByErrorCode(errCode));
         }
@@ -125,7 +129,8 @@ public class WeIdAuthImpl implements WeIdAuth {
                 .decrypt(encryptData, weIdAuthentication.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error(
-                "[createAuthenticatedChannel] decrypt weid auth object failed.  error message is:{}",
+                "[createAuthenticatedChannel] decrypt weid auth object failed.  "
+                    + "error message is:{}",
                 e);
             return new ResponseData<WeIdAuthObj>(null, ErrorCode.DECRYPT_DATA_FAILED);
         }
@@ -139,7 +144,8 @@ public class WeIdAuthImpl implements WeIdAuth {
         Integer weidDocErrorCode = weIdDoc.getErrorCode();
         if (weidDocErrorCode != ErrorCode.SUCCESS.getCode()) {
             logger
-                .error("[createMutualAuthenticatedChannel] get weid document failed, Error code:{}",
+                .error("[createMutualAuthenticatedChannel] get weid document failed,"
+                        + " Error code:{}",
                     weidDocErrorCode);
             return new ResponseData<WeIdAuthObj>(null,
                 ErrorCode.getTypeByErrorCode(weidDocErrorCode));
@@ -149,7 +155,8 @@ public class WeIdAuthImpl implements WeIdAuth {
             .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
-                "[createMutualAuthenticatedChannel] verify challenge signature failed, Error code:{}",
+                "[createMutualAuthenticatedChannel] verify challenge signature failed,"
+                    + " Error code:{}",
                 verifyErrorCode.getCode());
             return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
@@ -157,7 +164,8 @@ public class WeIdAuthImpl implements WeIdAuth {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.auth.inf.WeIdAuth#createMutualAuthenticatedChannel(java.lang.String, com.webank.weid.protocol.base.WeIdAuthentication)
+     * @see com.webank.weid.suite.auth.inf.WeIdAuth#createMutualAuthenticatedChannel(
+     * java.lang.String, com.webank.weid.protocol.base.WeIdAuthentication)
      */
     @Override
     public ResponseData<WeIdAuthObj> createMutualAuthenticatedChannel(
@@ -185,7 +193,8 @@ public class WeIdAuthImpl implements WeIdAuth {
         String errMsg = weIdAuthObjResp.getErrorMessage();
         if (errCode.intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
-                "[createMutualAuthenticatedChannel] get weid auth object failed. error code: {}, error message is:{}",
+                "[createMutualAuthenticatedChannel] get weid auth object failed. "
+                    + "error code: {}, error message is:{}",
                 errCode, errMsg);
             return new ResponseData<WeIdAuthObj>(null, ErrorCode.getTypeByErrorCode(errCode));
         }
@@ -200,7 +209,8 @@ public class WeIdAuthImpl implements WeIdAuth {
             originalData = DataToolUtils
                 .decrypt(encryptData, weIdAuthentication.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
-            logger.error("[createMutualAuthenticatedChannel] decrypt data failed, message:{}", e);
+            logger.error("[createMutualAuthenticatedChannel] decrypt data failed, "
+                + "message:{}", e);
             return new ResponseData<WeIdAuthObj>(null, ErrorCode.DECRYPT_DATA_FAILED);
         }
         String dataStr = DataToolUtils.byteToString(originalData);
@@ -214,7 +224,8 @@ public class WeIdAuthImpl implements WeIdAuth {
         Integer weidDocErrorCode = weIdDoc.getErrorCode();
         if (weidDocErrorCode != ErrorCode.SUCCESS.getCode()) {
             logger
-                .error("[createMutualAuthenticatedChannel] get weid document failed, Error code:{}",
+                .error("[createMutualAuthenticatedChannel] get weid document failed, "
+                        + "Error code:{}",
                     weidDocErrorCode);
             return new ResponseData<WeIdAuthObj>(null,
                 ErrorCode.getTypeByErrorCode(weidDocErrorCode));
@@ -226,7 +237,8 @@ public class WeIdAuthImpl implements WeIdAuth {
             .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
-                "[createMutualAuthenticatedChannel] verify challenge signature failed, Error code:{}",
+                "[createMutualAuthenticatedChannel] verify challenge signature failed, "
+                    + "Error code:{}",
                 verifyErrorCode.getCode());
             return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
@@ -244,7 +256,8 @@ public class WeIdAuthImpl implements WeIdAuth {
         int code = verifyResult.getErrorCode();
         if (code != ErrorCode.SUCCESS.getCode()) {
             logger.error(
-                "[createMutualAuthenticatedChannel] request verify challenge signature failed, Error code:{}",
+                "[createMutualAuthenticatedChannel] request verify challenge signature "
+                    + "failed, Error code:{}",
                 code);
             return new ResponseData<WeIdAuthObj>(null, ErrorCode.getTypeByErrorCode(code));
         }
@@ -268,7 +281,8 @@ public class WeIdAuthImpl implements WeIdAuth {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.auth.inf.WeIdAuth#addWeIdAuthObj(com.webank.weid.suite.auth.protocol.WeIdAuthObj)
+     * @see com.webank.weid.suite.auth.inf.WeIdAuth#addWeIdAuthObj(
+     * com.webank.weid.suite.auth.protocol.WeIdAuthObj)
      */
     @Override
     public Integer addWeIdAuthObj(WeIdAuthObj weIdAuthObj) {
@@ -287,7 +301,8 @@ public class WeIdAuthImpl implements WeIdAuth {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.auth.inf.WeIdAuth#registerCallBack(com.webank.weid.suite.auth.inf.WeIdAuthCallback)
+     * @see com.webank.weid.suite.auth.inf.WeIdAuth#registerCallBack(
+     * com.webank.weid.suite.auth.inf.WeIdAuthCallback)
      */
     @Override
     public Integer registerCallBack(WeIdAuthCallback callback) {
