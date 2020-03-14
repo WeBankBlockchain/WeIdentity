@@ -17,23 +17,45 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.transmission;
+package com.webank.weid.suite.api.transportation.params;
 
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
 
 /**
- * 传输处理器公共接口.
+ * 协议URI类型.
  * 
  * @author yanggang
  *
  */
-public interface Transmission {
-    
+public enum UriType {
     /**
-     * 传输处理器公共请求接口.
-     * 
-     * @param request 请求数据
-     * @return 返回处理结果
+     * 通过AMOP请求数据.
      */
-    public ResponseData<String> send(TransmissionRequest<?> request);
+    AMOP(0);
+    
+    private Integer code;
+
+    UriType(Integer code) {
+        this.code = code;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    /**
+     * get UriType By code.
+     *
+     * @param code the Uri type code
+     * @return UriType 返回类型
+     */
+    public static UriType getUriByCode(Integer code) {
+        for (UriType type : UriType.values()) {
+            if (type.getCode() == code) {
+                return type;
+            }
+        }
+        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_URI_TYPE_INVALID);
+    }
 }

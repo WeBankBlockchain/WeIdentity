@@ -19,6 +19,19 @@
 
 package com.webank.weid.suite.transmission;
 
+import lombok.Data;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.auth.impl.WeIdAuthImpl;
+import com.webank.weid.suite.auth.inf.WeIdAuth;
+import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
+import com.webank.weid.suite.crypto.CryptServiceFactory;
+import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -29,24 +42,90 @@ import com.webank.weid.util.DataToolUtils;
  */
 public abstract class AbstractTransmission implements Transmission {
 
+    private static final Logger logger = LoggerFactory.getLogger(AbstractTransmission.class);
+
+    private static WeIdAuth weIdAuthService;
+
+    private WeIdAuth getWeIdAuthService() {
+        if (weIdAuthService == null) {
+            weIdAuthService = new WeIdAuthImpl();
+        }
+        return weIdAuthService;
+    }
+
     /**
      * 认证处理.
      * 
      * @param <T> 请求实例中具体数据类型
      * @param request 用于做weAuth验证的用户身份信息
+     * @return 返回加密后的数据对象
      */
-    protected <T> void auth(TransmissionlRequest<T> request) {
-       
+    protected <T> TransmissionlRequestWarp<T> authTransmission(TransmissionRequest<T> request) {
+        logger.info("[AbstractTransmission.auth] begin auth the transmission.");
+        ResponseData<WeIdAuthObj> authResponse = getWeIdAuthService().createAuthenticatedChannel(
+            request.getOrgId(), request.getWeIdAuthentication());
+        if (authResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+            //认证失败
+            logger.error("[AbstractTransmission.auth] auth fail:{}-{}.",
+                authResponse.getErrorCode(),
+                authResponse.getErrorMessage());
+            throw new WeIdBaseException(ErrorCode.getTypeByErrorCode(authResponse.getErrorCode()));
+        }
+        logger.info("[AbstractTransmission.auth] auth the transmission successfully.");
+        WeIdAuthObj weIdAuth = authResponse.getResult();
+        TransmissionlRequestWarp<T> reqeustWarp = new TransmissionlRequestWarp<T>(
+            request, weIdAuth);
+        String encodeData = encryptData(getOriginalData(request.getArgs()), weIdAuth);
+        reqeustWarp.setEncodeData(encodeData);
+        return reqeustWarp;
     }
-    
+
     /**
-     * 获取传递数据.
+     * 解密数据.
      * 
-     * @param <T> 请求实例类型
-     * @param request 请求实例
-     * @return 返回处理后的数据
+     * @param encodeData 密文数据
+     * @param weIdAuth 通道协议对象
+     * @return 返回明文数据
      */
-    protected <T> String getData(TransmissionlRequest<T> request) {
-        return DataToolUtils.serialize(request.getArgs());
+    protected String decryptData(String encodeData, WeIdAuthObj weIdAuth) {
+        return CryptServiceFactory
+            .getCryptService(CryptType.AES)
+            .decrypt(encodeData, weIdAuth.getSymmetricKey());
+    }
+
+    /**
+     * 加密传输数据.
+     * 
+     * @param originalData 原文
+     * @param weIdAuth 通道协议对象
+     * @return 返回加密后的数据
+     */
+    protected String encryptData(String originalData, WeIdAuthObj weIdAuth) {
+        return CryptServiceFactory
+            .getCryptService(CryptType.AES)
+            .encrypt(originalData, weIdAuth.getSymmetricKey());
+    }
+
+    protected <T> String getOriginalData(T args) {
+        String originalData = null;
+        if (args instanceof String) {
+            originalData = (String)args;
+        } else {
+            originalData = DataToolUtils.serialize(args);
+        }
+        return originalData;
+    }
+
+    @Data
+    protected class TransmissionlRequestWarp<T> {
+        
+        TransmissionRequest<T> request;
+        WeIdAuthObj weIdAuthObj;
+        String encodeData;
+        
+        TransmissionlRequestWarp(TransmissionRequest<T> request, WeIdAuthObj weIdAuthObj) {
+            this.request = request;
+            this.weIdAuthObj = weIdAuthObj;
+        }
     }
 }

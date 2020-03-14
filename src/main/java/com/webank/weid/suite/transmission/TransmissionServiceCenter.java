@@ -22,7 +22,13 @@ package com.webank.weid.suite.transmission;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.suite.auth.impl.WeIdAuthImpl;
+import com.webank.weid.suite.auth.inf.WeIdAuth;
+import com.webank.weid.suite.auth.inf.WeIdAuthCallback;
 
 /**
  * 传输处理服务中心.
@@ -30,12 +36,23 @@ import com.webank.weid.exception.WeIdBaseException;
  * @author yanggang
  *
  */
-public class TransmissionServcieCenter {
+public class TransmissionServiceCenter {
+    
+    private static final Logger logger = LoggerFactory.getLogger(TransmissionServiceCenter.class);
     
     /**
      * 传输服务.
      */
     private static Map<String, TransmissionService<?>> transmissionServiceContext = new HashMap<>();
+   
+    private static WeIdAuth weIdAuthService;
+
+    private static WeIdAuth getWeIdAuthService() {
+        if (weIdAuthService == null) {
+            weIdAuthService = new WeIdAuthImpl();
+        }
+        return weIdAuthService;
+    }
     
     /**
      * 注册传输处理服务.
@@ -45,8 +62,10 @@ public class TransmissionServcieCenter {
      */
     public static void registerService(String serviceType, TransmissionService<?> service) {
         if (transmissionServiceContext.containsKey(serviceType)) {
-            throw new WeIdBaseException("the servvice type is exist.");
+            logger.error("[registerService] the service register fail because it is exists.");
+            throw new WeIdBaseException("the service type is exist.");
         }
+        logger.info("[registerService] the service register successfully.");
         transmissionServiceContext.put(serviceType, service);
     }
     
@@ -58,5 +77,21 @@ public class TransmissionServcieCenter {
      */
     public static TransmissionService<?> getService(String serviceType) {
         return transmissionServiceContext.get(serviceType);
+    }
+    
+    /**
+     * 注册服务,用于拿到用户的WeIdAuthentication回调处理与机构连接回调处理.
+     * 
+     * @param weIdAuthCallback 服务名称
+     * @return 返回注册结果, true表示成功, false表示失败
+     */
+    public static boolean registerWeIdAuthCallBack(WeIdAuthCallback weIdAuthCallback) {
+        WeIdAuthCallback callBack = getWeIdAuthService().getCallBack();
+        if (callBack != null) {
+            logger.error("[registerWeIdAuthCallBack] register fail because it is exists.");
+            return false;
+        }
+        logger.info("[registerWeIdAuthCallBack] the callback register successfully.");
+        return getWeIdAuthService().registerCallBack(weIdAuthCallback) == 0;
     }
 }

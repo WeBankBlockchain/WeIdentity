@@ -33,6 +33,6 @@ public abstract class AbstractTransmissionService<T> implements TransmissionServ
      * @param serviceType 服务名称
      */
     public AbstractTransmissionService(String serviceType) {
-        TransmissionServcieCenter.registerService(serviceType, this);
+        TransmissionServiceCenter.registerService(serviceType, this);
     }
 }
