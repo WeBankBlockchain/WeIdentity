@@ -21,13 +21,17 @@ import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
+import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
 import com.webank.weid.protocol.amop.IssueCredentialArgs;
+import com.webank.weid.protocol.amop.RequestVerifyChallengeArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
+import com.webank.weid.protocol.response.GetWeIdAuthResponse;
 import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
+import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
@@ -67,7 +71,17 @@ public enum AmopMsgType {
     /**
      * 请求issuer签credential.
      */
-    REQUEST_SIGN_CREDENTIAL(6);
+    REQUEST_SIGN_CREDENTIAL(6),
+
+    /**
+     * 请求验证challenge的签名.
+     */
+    REQUEST_VERIFY_CHALLENGE(7),
+
+    /**
+     * 请求weIdAuth.
+     */
+    GET_WEID_AUTH(8);
 
     private Integer value;
 
@@ -123,7 +137,6 @@ public enum AmopMsgType {
                 break;
             }
             case GET_POLICY_AND_PRE_CREDENTIAL: {
-                // GET POLICY AND CHALLENGE
                 GetPolicyAndPreCredentialArgs args =
                     DataToolUtils.deserialize(msgBodyStr, GetPolicyAndPreCredentialArgs.class);
                 PolicyAndPreCredentialResponse result = amopCallback.onPush(args);
@@ -131,10 +144,24 @@ public enum AmopMsgType {
                 break;
             }
             case REQUEST_SIGN_CREDENTIAL: {
-                // GET POLICY AND CHALLENGE
                 IssueCredentialArgs args =
                     DataToolUtils.deserialize(msgBodyStr, IssueCredentialArgs.class);
                 RequestIssueCredentialResponse result = amopCallback.onPush(args);
+                resultBodyStr = DataToolUtils.serialize(result);
+                break;
+            }
+            case GET_WEID_AUTH: {
+                GetWeIdAuthArgs args =
+                    DataToolUtils.deserialize(msgBodyStr, GetWeIdAuthArgs.class);
+                GetWeIdAuthResponse result = amopCallback.onPush(args);
+                resultBodyStr = DataToolUtils.serialize(result);
+                break;
+            }
+
+            case REQUEST_VERIFY_CHALLENGE: {
+                RequestVerifyChallengeArgs args =
+                    DataToolUtils.deserialize(msgBodyStr, RequestVerifyChallengeArgs.class);
+                RequestVerifyChallengeResponse result = amopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }

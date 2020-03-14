@@ -42,9 +42,15 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -58,6 +64,11 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.NullCipher;
 import javax.imageio.ImageIO;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -105,6 +116,8 @@ import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.utils.Numeric;
 import org.bouncycastle.util.encoders.Base64;
+import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
+import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -613,6 +626,34 @@ public final class DataToolUtils {
         Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
+    }
+
+    /**
+     * 加密
+     * @param data
+     * @param publicKey
+     * @return
+     * @throws Exception
+     */
+    public static byte[] encrypt(String data, String publicKey)
+    		throws Exception {
+    	
+    	 ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
+    	 return encrypt.encrypt(data.getBytes());
+    }
+ 
+ 
+    /**
+     * 解密
+     * @param data
+     * @param privateKey
+     * @return
+     * @throws Exception
+     */
+    public static byte[] decrypt(byte[] data, String privateKey) throws Exception {
+    	
+    	ECCDecrypt decrypt= new ECCDecrypt(new BigInteger(privateKey));
+    	return decrypt.decrypt(data);
     }
 
     /**
