@@ -66,9 +66,9 @@ public interface AmopService {
     );
 
     /**
+     * get weIdAuth object.
      * @param toOrgId target organization id
-     * @param weId self weId
-     * @param challenge random number
+     * @param args random number
      */
     ResponseData<GetWeIdAuthResponse> getWeIdAuth(
         String toOrgId,
@@ -77,9 +77,9 @@ public interface AmopService {
 
 
     /**
+     * verify challenge signature.
      * @param toOrgId target organization id
-     * @param weId self weId
-     * @param challenge random number
+     * @param args verify args
      */
     ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(
         String toOrgId,
