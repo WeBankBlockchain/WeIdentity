@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
+ * response for verifying challenge signature.
  * @author tonychen 2020年3月12日
  *
  */

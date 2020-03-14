@@ -412,7 +412,8 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.AmopService#getWeIdAuth(java.lang.String, java.lang.String, com.webank.weid.protocol.base.Challenge)
+     * @see com.webank.weid.rpc.AmopService#getWeIdAuth(java.lang.String, java.lang.String,
+     * com.webank.weid.protocol.base.Challenge)
      */
     @Override
     public ResponseData<GetWeIdAuthResponse> getWeIdAuth(
@@ -433,7 +434,8 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.AmopService#requestVerifyChallenge(java.lang.String, com.webank.weid.protocol.amop.RequestVerifyChallengeArgs)
+     * @see com.webank.weid.rpc.AmopService#requestVerifyChallenge(java.lang.String,
+     * com.webank.weid.protocol.amop.RequestVerifyChallengeArgs)
      */
     @Override
     public ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(String toOrgId,

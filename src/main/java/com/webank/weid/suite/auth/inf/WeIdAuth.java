@@ -31,28 +31,59 @@ import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
 public interface WeIdAuth {
 
     /**
-     * 每次调用都是覆盖rule
+     * set white list.
+     * @param whitelistWeId weId list
+     * @return flag
      */
+     
     public Integer setWhiteList(List<String> whitelistWeId);
 
+    /**
+     * register call back.
+     * @param callback callback object.
+     * @return flag
+     */
     public Integer registerCallBack(WeIdAuthCallback callback);
 
+    /**
+     * get callback.
+     * @return callback
+     */
     public WeIdAuthCallback getCallBack();
 
+    /**
+     * add weIdaAuth object to cache.
+     * @param weIdAuthObj weIdaAuth object
+     * @return flag
+     */
     public Integer addWeIdAuthObj(WeIdAuthObj weIdAuthObj);
 
+    /**
+     * get weIdaAuth object by channel Id.
+     * @param channelId channel Id
+     * @return weIdaAuth object
+     */
     public WeIdAuthObj getWeIdAuthObjByChannelId(String channelId);
 
     /**
-     * 如果使用amop需要传入orgId; 如果使用https，则传入url
+     * create authenticate channel.
+     * @param toOrgId organization id
+     * @param weIdAuthentication user's authentication info
+     * @return WeIdAuthObj
      */
+  
     public ResponseData<WeIdAuthObj> createAuthenticatedChannel(
         String toOrgId,
         WeIdAuthentication weIdAuthentication);
 
+    /**
+     * create authenticate channel.
+     * @param toOrgId organization id
+     * @param weIdAuthentication user's authentication info
+     * @return weIdaAuth object
+     */
     public ResponseData<WeIdAuthObj> createMutualAuthenticatedChannel(
         String toOrgId,
         WeIdAuthentication weIdAuthentication);
 
-//    void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback);
 }
