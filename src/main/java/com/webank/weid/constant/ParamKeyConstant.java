@@ -75,7 +75,7 @@ public final class ParamKeyConstant {
     public static final String PROOF_NONCE = "nonce";
     public static final String PROOF_VERIFICATIONREQUEST = "verificationRequest";
     public static final String PROOF_ENCODEDVERIFICATIONRULE = "encodedVerificationRule";
-    
+
 
     /**
      * 秘钥存储KEY.
@@ -86,6 +86,9 @@ public final class ParamKeyConstant {
     public static final String MASTER_SECRET = "masterSecret";
     public static final String BLINDING_FACTORS = "credentialSecretsBlindingFactors";
 
+    public static final String WEID_AUTH_OBJ = "weIdAuthObj";
+    public static final String WEID_AUTH_SIGN_DATA = "signData";
+    public static final String WEID_AUTH_CHALLENGE = "challenge";
 
     public static final String TRNSACTION_RECEIPT_STATUS_SUCCESS = "0x0";
 }

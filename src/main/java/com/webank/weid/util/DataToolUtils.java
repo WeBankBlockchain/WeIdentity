@@ -105,6 +105,8 @@ import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.utils.Numeric;
 import org.bouncycastle.util.encoders.Base64;
+import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
+import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -613,6 +615,34 @@ public final class DataToolUtils {
         Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
+    }
+
+    /**
+     * eecrypt the data.
+     *
+     * @param data the data to encrypt
+     * @param publicKey public key
+     * @return decrypt data
+     */
+    public static byte[] encrypt(String data, String publicKey)
+        throws Exception {
+
+        ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
+        return encrypt.encrypt(data.getBytes());
+    }
+
+
+    /**
+     * decrypt the data.
+     *
+     * @param data the data to decrypt
+     * @param privateKey private key
+     * @return original data
+     */
+    public static byte[] decrypt(byte[] data, String privateKey) throws Exception {
+
+        ECCDecrypt decrypt = new ECCDecrypt(new BigInteger(privateKey));
+        return decrypt.decrypt(data);
     }
 
     /**
@@ -1746,7 +1776,7 @@ public final class DataToolUtils {
         int digit;
 
         char firstChar = str.charAt(0);
-        if (firstChar <= '0' ) {
+        if (firstChar <= '0') {
             return false;
         }
         multmin = limit / radix;
@@ -1862,6 +1892,11 @@ public final class DataToolUtils {
         return true;
     }
 
+    /**
+     * check if the input string is Uft-8.
+     * @param string input
+     * @return true, otherwise false
+     */
     public static boolean isUtf8String(String string) {
         try {
             string.getBytes("UTF-8");
