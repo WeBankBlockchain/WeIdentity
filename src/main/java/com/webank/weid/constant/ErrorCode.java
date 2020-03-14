@@ -435,6 +435,16 @@ public enum ErrorCode {
     ENCRYPT_KEY_INVALID(100704, "the key is invalid."),
 
     /**
+     * encrypt data failed.
+     */
+    ENCRYPT_DATA_FAILED(100705, "encrypt data failed."),
+
+    /**
+     * decrypt data failed.
+     */
+    DECRYPT_DATA_FAILED(100706, "decrypt data failed."),
+
+    /**
      * transportation base error.
      */
     TRANSPORTATION_BASE_ERROR(100800, "suite baes exception error, please check the error log."),
@@ -662,6 +672,22 @@ public enum ErrorCode {
     WEID_CANNOT_REMOVE_ITS_OWN_PUB_KEY_WITHOUT_BACKUP(
         100111,
         "cannot remove this WeID's owner or last public key without an available backup."
+    ),
+
+    /**
+     * no permission of weIdAuth.
+     */
+    WEID_AUTH_NO_PERMISSION(
+        100112,
+        "no permission of weIdAuth."
+    ),
+
+    /**
+     * no permission of weIdAuth.
+     */
+    WEID_AUTH_NO_CALLBACK(
+        100113,
+        "weIdAuth callback is not registered."
     ),
 
     /**

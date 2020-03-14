@@ -38,8 +38,10 @@ import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
+import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
 import com.webank.weid.protocol.amop.IssueCredentialArgs;
 import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
+import com.webank.weid.protocol.amop.RequestVerifyChallengeArgs;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.base.PolicyAndPreCredential;
@@ -48,8 +50,10 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
+import com.webank.weid.protocol.response.GetWeIdAuthResponse;
 import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
+import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.CptService;
@@ -405,5 +409,48 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         if (dbResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             throw new DatabaseException("database error!");
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.AmopService#getWeIdAuth(java.lang.String, java.lang.String,
+     * com.webank.weid.protocol.base.Challenge)
+     */
+    @Override
+    public ResponseData<GetWeIdAuthResponse> getWeIdAuth(
+        String toOrgId,
+        GetWeIdAuthArgs args) {
+
+        ResponseData<GetWeIdAuthResponse> resp = this.getImpl(
+            fiscoConfig.getCurrentOrgId(),
+            toOrgId,
+            args,
+            GetWeIdAuthArgs.class,
+            GetWeIdAuthResponse.class,
+            AmopMsgType.GET_WEID_AUTH,
+            WeServer.AMOP_REQUEST_TIMEOUT
+        );
+
+        return resp;
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.AmopService#requestVerifyChallenge(java.lang.String,
+     * com.webank.weid.protocol.amop.RequestVerifyChallengeArgs)
+     */
+    @Override
+    public ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(String toOrgId,
+        RequestVerifyChallengeArgs args) {
+
+        ResponseData<RequestVerifyChallengeResponse> resp = this.getImpl(
+            fiscoConfig.getCurrentOrgId(),
+            toOrgId,
+            args,
+            RequestVerifyChallengeArgs.class,
+            RequestVerifyChallengeResponse.class,
+            AmopMsgType.GET_WEID_AUTH,
+            WeServer.AMOP_REQUEST_TIMEOUT
+        );
+
+        return resp;
     }
 }
