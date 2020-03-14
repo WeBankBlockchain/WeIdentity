@@ -127,9 +127,11 @@ public class DownBarCodeDataService implements TransmissionService<String> {
         } else if (encodeType == EncodeType.CIPHER) { //密文类型
             // 获取密钥
             GetEncryptKeyResponse encryptKey = getEncryptKey(arg);
-            if (encryptKey.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            if (encryptKey.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("[getBarCodeData] query the key has error.");
-                barCodeRes.setErrorCode(ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
+                barCodeRes.setErrorCode(
+                    ErrorCode.getTypeByErrorCode(encryptKey.getErrorCode().intValue()));
+                return barCodeRes;
             }
             logger.info("[getBarCodeData] begin decrypt the data");
             String data = String.valueOf(barCodeData.getData());

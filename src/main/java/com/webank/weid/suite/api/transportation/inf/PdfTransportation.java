@@ -35,7 +35,7 @@ import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 public interface PdfTransportation {
 
     /**
-     * 指定获取秘钥的weid，在PDF加密的情况下，需要校验哪些weid有权限来获取秘钥。
+     * 指定获取秘钥的weid，在PDF加密的情况下，需要校验哪些weid有权限来获取秘钥.
      *
      * @param verifierWeIdList 指定的weid列表
      * @return PdfTransportation

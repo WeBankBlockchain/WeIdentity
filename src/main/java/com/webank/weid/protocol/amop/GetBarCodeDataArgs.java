@@ -17,13 +17,13 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 package com.webank.weid.protocol.amop;
+
+import java.util.Map;
 
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Map;
+import lombok.ToString;
 
 import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 
@@ -35,6 +35,7 @@ import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
  */
 @Getter
 @Setter
+@ToString
 public class GetBarCodeDataArgs extends AmopBaseMsgArgs {
 
     /**
