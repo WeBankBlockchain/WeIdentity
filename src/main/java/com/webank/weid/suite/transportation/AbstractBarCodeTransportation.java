@@ -29,9 +29,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -39,6 +36,9 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.suite.api.transportation.inf.BarCodeTransportation;
 
@@ -55,13 +55,13 @@ public abstract class AbstractBarCodeTransportation
     private static final Logger logger =
         LoggerFactory.getLogger(AbstractBarCodeTransportation.class);
     
-    /** 条形码最小宽度 */
+    /** 条形码最小宽度. */
     private static final int WIDTH = 300;
 
-    /** 条形码高度 */
+    /** 条形码高度. */
     private static final int HEIGHT = 50;
     
-    /** 条码左右上下填充*/
+    /** 条码左右上下填充. */
     private static final int PADDING = 5;
     
     protected static final String IMG_FORMATE = "jpg";
@@ -97,7 +97,7 @@ public abstract class AbstractBarCodeTransportation
             setColorWhite(g2d);
             // 画条形码到新的面板
             g2d.drawImage(image, 0, PADDING, image.getWidth(), image.getHeight(), null);
-            Color color=new Color(0, 0, 0);
+            Color color = new Color(0, 0, 0);
             g2d.setColor(color);
             g2d.dispose();
             outImage.flush();
@@ -115,7 +115,7 @@ public abstract class AbstractBarCodeTransportation
      * 
      * @param g2d  Graphics2D提供对几何形状、坐标转换、颜色管理和文本布局更为复杂的控制
      */
-    private void setGraphics2D(Graphics2D g2d){
+    private void setGraphics2D(Graphics2D g2d) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, 
             RenderingHints.VALUE_STROKE_DEFAULT);
@@ -128,10 +128,10 @@ public abstract class AbstractBarCodeTransportation
      * 
      * @param g2d Graphics2D提供对几何形状、坐标转换、颜色管理和文本布局更为复杂的控制
      */
-    private void setColorWhite(Graphics2D g2d){
+    private void setColorWhite(Graphics2D g2d) {
         g2d.setColor(Color.WHITE);
         //填充整个屏幕
-        g2d.fillRect(0,0,600,600);
+        g2d.fillRect(0, 0, 600, 600);
         //设置笔刷
         g2d.setColor(Color.BLACK);
     }

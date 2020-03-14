@@ -31,7 +31,9 @@ public class ProtocolProperty {
      */
     private EncodeType encodeType;
     
-    private TransmissionType transmissionType;
+    private TransmissionType transmissionType = TransmissionType.AMOP;
+    
+    private UriType uriType = UriType.AMOP;
 
     public EncodeType getEncodeType() {
         return encodeType;
@@ -45,7 +47,13 @@ public class ProtocolProperty {
         return transmissionType;
     }
 
-    public void setTransmissionType(TransmissionType transmissionType) {
+    public ProtocolProperty setTransmissionType(TransmissionType transmissionType) {
         this.transmissionType = transmissionType;
+        return this;
     }
+
+    public UriType getUriType() {
+        return uriType;
+    }
+    
 }
