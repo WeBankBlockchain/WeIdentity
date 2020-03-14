@@ -21,12 +21,16 @@ package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
+import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
 import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
+import com.webank.weid.protocol.amop.RequestVerifyChallengeArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
+import com.webank.weid.protocol.response.GetWeIdAuthResponse;
 import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
+import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
@@ -59,6 +63,27 @@ public interface AmopService {
     ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
         String toOrgId,
         RequestIssueCredentialArgs args
+    );
+
+    /**
+     * @param toOrgId target organization id
+     * @param weId self weId
+     * @param challenge random number
+     */
+    ResponseData<GetWeIdAuthResponse> getWeIdAuth(
+        String toOrgId,
+        GetWeIdAuthArgs args
+    );
+
+
+    /**
+     * @param toOrgId target organization id
+     * @param weId self weId
+     * @param challenge random number
+     */
+    ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(
+        String toOrgId,
+        RequestVerifyChallengeArgs args
     );
 
 }
