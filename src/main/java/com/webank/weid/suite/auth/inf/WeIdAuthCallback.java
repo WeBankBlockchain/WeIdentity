@@ -19,40 +19,26 @@
 
 package com.webank.weid.suite.auth.inf;
 
-import java.util.List;
-
 import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
 
 /**
- * Created by Junqi Zhang on 2020/3/8.
+ * @author tonychen 2020年3月13日
  */
-public interface WeIdAuth {
+public interface WeIdAuthCallback {
 
     /**
-     * 每次调用都是覆盖rule
+     * you need to implements this method to return your WeIdAuthentication object.
+     * @param counterpartyWeId weId of the counterparty
+     * @return WeIdAuthentication object
      */
-    public Integer setWhiteList(List<String> whitelistWeId);
-
-    public Integer registerCallBack(WeIdAuthCallback callback);
-
-    public WeIdAuthCallback getCallBack();
-
-    public Integer addWeIdAuthObj(WeIdAuthObj weIdAuthObj);
-
-    public WeIdAuthObj getWeIdAuthObjByChannelId(String channelId);
+    public WeIdAuthentication onChannelConnecting(String counterpartyWeId);
 
     /**
-     * 如果使用amop需要传入orgId; 如果使用https，则传入url
+     * you need to implements this method, this method will be called after the connection
+     * is established..
+     * @param arg WeIdAuthObj
+     * @return flag
      */
-    public ResponseData<WeIdAuthObj> createAuthenticatedChannel(
-        String toOrgId,
-        WeIdAuthentication weIdAuthentication);
-
-    public ResponseData<WeIdAuthObj> createMutualAuthenticatedChannel(
-        String toOrgId,
-        WeIdAuthentication weIdAuthentication);
-
-//    void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback);
+    public Integer onChannelConnected(WeIdAuthObj arg);
 }
