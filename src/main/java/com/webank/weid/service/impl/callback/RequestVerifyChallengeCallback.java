@@ -39,6 +39,7 @@ import com.webank.weid.util.DataToolUtils;
 
 
 /**
+ * amop callback for verifying challenge.
  * @author tonychen 2020年3月10日
  */
 public class RequestVerifyChallengeCallback extends AmopCallback {
