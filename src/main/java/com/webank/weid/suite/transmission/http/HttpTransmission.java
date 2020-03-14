@@ -32,7 +32,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.params.TransmissionType;
 import com.webank.weid.suite.transmission.AbstractTransmission;
 import com.webank.weid.suite.transmission.Transmission;
-import com.webank.weid.suite.transmission.TransmissionlRequest;
+import com.webank.weid.suite.transmission.TransmissionRequest;
 import com.webank.weid.util.HttpClient;
 
 /**
@@ -49,19 +49,19 @@ public class HttpTransmission extends AbstractTransmission implements Transmissi
     private static final String REQUEST_CHANNEL_ID = "channelId";
 
     @Override
-    public ResponseData<String> send(TransmissionlRequest<?> request) {
+    public ResponseData<String> send(TransmissionRequest<?> request) {
         try {
             logger.info(
                 "[HttpTransmission.send] this is http transmission and the service type is: {}", 
                 request.getServiceType());
             if (request.getTransmissionType() != TransmissionType.HTTP
-                &&request.getTransmissionType() != TransmissionType.HTTPS) {
+                && request.getTransmissionType() != TransmissionType.HTTPS) {
                 throw new WeIdBaseException("the transmission type error.");
             }
-            super.auth(request);
+            TransmissionlRequestWarp<?> requestWarp = super.authTransmission(request);
             Map<String, String> params = new HashMap<String, String>();
-            params.put(REQUEST_DATA, super.getData(request));
-            params.put(REQUEST_CHANNEL_ID, "");
+            params.put(REQUEST_DATA, requestWarp.getEncodeData());
+            params.put(REQUEST_CHANNEL_ID, requestWarp.getWeIdAuthObj().getChannelId());
             String result = null;
             if (request.getTransmissionType() == TransmissionType.HTTP) {
                 result = HttpClient.doPost("", params, false);
@@ -70,8 +70,10 @@ public class HttpTransmission extends AbstractTransmission implements Transmissi
             }
             return new ResponseData<String>(result, ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
+            logger.error("[HttpTransmission.send] send http fail.", e);
             return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
         } catch (Exception e) {
+            logger.error("[HttpTransmission.send] send http due to unknown error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.UNKNOW_ERROR);
         }
     }

@@ -253,7 +253,7 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertTrue(evi.getSignInfo().get(signer).getLogs().contains(log));
         int length = 50; // Up to 2M can still work
         StringBuffer outputBuffer = new StringBuffer(length);
-        for (int i = 0; i < length; i++){
+        for (int i = 0; i < length; i++) {
             outputBuffer.append("a");
         }
         log = outputBuffer.toString();
