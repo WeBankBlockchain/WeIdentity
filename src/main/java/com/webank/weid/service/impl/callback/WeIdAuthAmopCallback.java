@@ -46,6 +46,7 @@ import com.webank.weid.util.DataToolUtils;
 
 
 /**
+ * amop callback for weIdAuth.
  * @author tonychen 2020年3月10日
  */
 public class WeIdAuthAmopCallback extends AmopCallback {
@@ -71,11 +72,12 @@ public class WeIdAuthAmopCallback extends AmopCallback {
         GetWeIdAuthResponse result = new GetWeIdAuthResponse();
 
         //1. sign the data(challenge) with self private key to finish this challenge.
+        Map<String, Object> dataMap = new HashMap<String, Object>();
         Challenge challenge = args.getChallenge();
         String rawData = challenge.toJson();
         String privateKey = weIdAuth.getWeIdPrivateKey().getPrivateKey();
         String challengeSign = DataToolUtils.sign(rawData, privateKey);
-        //result.setSignData(challengeSign);
+        dataMap.put(ParamKeyConstant.WEID_AUTH_SIGN_DATA, challengeSign);
 
         ResponseData<WeIdDocument> weIdDocResp = weIdService.getWeIdDocument(fromWeId);
         if (weIdDocResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
@@ -97,7 +99,7 @@ public class WeIdAuthAmopCallback extends AmopCallback {
         weIdAuthObj.setCounterpartyWeId(fromWeId);
         weIdAuthObj.setSelfWeId(weIdAuth.getWeId());
         weIdAuthObj.setChannelId(channelId);
-        Map<String, Object> dataMap = new HashMap<String, Object>();
+
         Integer type = args.getType();
         //mutual
         if (type == 1) {
@@ -107,9 +109,7 @@ public class WeIdAuthAmopCallback extends AmopCallback {
 
         //将weidAuth对象缓存
         weIdAuthService.addWeIdAuthObj(weIdAuthObj);
-        dataMap.put(ParamKeyConstant.WEID_AUTH_SIGN_DATA, challengeSign);
         dataMap.put(ParamKeyConstant.WEID_AUTH_OBJ, DataToolUtils.serialize(weIdAuthObj));
-        //result.setWeIdAuthObj(weIdAuthObj);
 
         //3. use fromWeId's public key to encrypt data
         String data = DataToolUtils.serialize(dataMap);
