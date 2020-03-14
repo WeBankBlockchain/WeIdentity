@@ -32,7 +32,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 public interface BarCodeTransportation extends JsonTransportation {
     
     /**
-     * 生成不带文字的条形码并保存到指定文件中。
+     * 生成不带文字的条形码并保存到指定文件中.
      *
      * @param content 条形码字符串
      * @param format 条形码编码格式
@@ -48,7 +48,7 @@ public interface BarCodeTransportation extends JsonTransportation {
     );
 
     /**
-     * 生成不带文字的条形码并将条形码的字节输入到字节输出流中。
+     * 生成不带文字的条形码并将条形码的字节输入到字节输出流中.
      *
      * @param content 条形码字符串
      * @param format 条形码编码格式
