@@ -98,7 +98,7 @@ zkp.cpt.array.length=5
 #######################################################################################################
 # Endpoint Service Integration-side parameters
 # Listener port required to be opened for RPC Server, default: 6010
-rpc.listener.port=6010
+endpoint.listener.port=6010
 
 
 #######################################################################################################
