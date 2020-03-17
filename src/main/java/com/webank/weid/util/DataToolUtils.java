@@ -31,7 +31,11 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -1749,6 +1753,33 @@ public final class DataToolUtils {
             logger.error("Passed-in String is not a valid UTF-8 String.");
         }
         return false;
+    }
+
+    /**
+     * Check whether the address is local address.
+     *
+     * @param host host string
+     * @return true if yes, false otherwise
+     */
+    public static boolean isLocalAddress(String host) {
+        InetAddress addr;
+        try {
+            addr = InetAddress.getByName(host);
+        } catch (UnknownHostException e) {
+            logger.error("Unkown host: " + host);
+            return false;
+        }
+        // Check if the address is a valid special local or loop back
+        if (addr.isSiteLocalAddress() || addr.isAnyLocalAddress() || addr.isLoopbackAddress()
+            || addr.isLinkLocalAddress()) {
+            return true;
+        }
+        // Check if the address is defined on any interface
+        try {
+            return NetworkInterface.getByInetAddress(addr) != null;
+        } catch (SocketException e) {
+            return false;
+        }
     }
 }
 
