@@ -54,7 +54,7 @@ public class SqlDomain {
     /**
      * default table name.
      */
-    private static final String DEFAULT_TABLE = "default_data";
+    private static final String DEFAULT_TABLE = "default_info";
     
     /**
      * 表的默认前缀.
@@ -107,10 +107,11 @@ public class SqlDomain {
     
     private void resolveDomain() {
         if (StringUtils.isBlank(this.key)) {
-            this.key = DataDriverConstant.DOMAIN_DEFAULT;
+            this.key = DataDriverConstant.DOMAIN_DEFAULT_INFO;
         }
         this.value = PropertyUtils.getProperty(this.key);
-        if (StringUtils.isBlank(this.value) && DataDriverConstant.DOMAIN_DEFAULT.equals(this.key)) {
+        if (StringUtils.isBlank(this.value) 
+            && DataDriverConstant.DOMAIN_DEFAULT_INFO.equals(this.key)) {
             this.baseDomain = ConnectionPool.getFirstDataSourceName();
             this.tableDomain = DEFAULT_TABLE;
         } else if (StringUtils.isNotBlank(this.value) 
@@ -140,7 +141,7 @@ public class SqlDomain {
     private void resolveDomainTimeout() {
         String timeout = PropertyUtils.getProperty(this.key + ".timeout");
         if (StringUtils.isBlank(timeout)) {
-            timeout =  PropertyUtils.getProperty(DataDriverConstant.DOMAIN_DEFAULT_TIMEOUT);
+            timeout =  PropertyUtils.getProperty(DataDriverConstant.DOMAIN_DEFAULT_INFO_TIMEOUT);
         }
         if (StringUtils.isNotBlank(timeout)) {
             this.timeout = Long.parseLong(timeout);

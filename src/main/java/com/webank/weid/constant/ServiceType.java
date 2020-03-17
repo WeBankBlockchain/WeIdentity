@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,11 +17,8 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc.callback;
+package com.webank.weid.constant;
 
-public interface RegistCallBack {
-    
-    public void registAmopCallback(Integer msgType, AmopCallback routeCallBack);
-    
-    public AmopCallback getAmopCallback(Integer msgType);
+public enum ServiceType {
+    SYS_GET_BARCODE_DATA
 }

@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,11 +17,22 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc.callback;
+package com.webank.weid.suite.transmission;
 
-public interface RegistCallBack {
+/**
+ * 请求处理服务, 用于机构间的数据传输服务处理.
+ * 
+ * @author yanggang
+ *
+ */
+public abstract class AbstractTransmissionService<T> implements TransmissionService<T> {
     
-    public void registAmopCallback(Integer msgType, AmopCallback routeCallBack);
-    
-    public AmopCallback getAmopCallback(Integer msgType);
+    /**
+     * 自动注册服务构造器.
+     * 
+     * @param serviceType 服务名称
+     */
+    public AbstractTransmissionService(String serviceType) {
+        TransmissionServiceCenter.registerService(serviceType, this);
+    }
 }
