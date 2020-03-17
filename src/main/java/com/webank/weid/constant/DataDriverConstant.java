@@ -170,8 +170,8 @@ public final class DataDriverConstant {
     /**
      * 系统默认的domain.
      */
-    public static final String DOMAIN_DEFAULT = "domain.default";
-    public static final String DOMAIN_DEFAULT_TIMEOUT = "domain.default.timeout";
+    public static final String DOMAIN_DEFAULT_INFO = "domain.defaultInfo";
+    public static final String DOMAIN_DEFAULT_INFO_TIMEOUT = "domain.defaultInfo.timeout";
     
     /**
      * 系统domain之私钥存储domainKey.
@@ -183,4 +183,6 @@ public final class DataDriverConstant {
     public static final String DOMAIN_USER_MASTER_SECRET = "domain.masterKey";
  
     public static final String DOMAIN_USER_CREDENTIAL_SIGNATURE = "domain.credentialSignature";
+    
+    public static final String DOMAIN_RESOURCE_INFO = "domain.resourceInfo";
 }

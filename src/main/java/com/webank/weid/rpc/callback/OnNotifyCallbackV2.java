@@ -46,7 +46,11 @@ public class OnNotifyCallbackV2 extends ChannelPushCallback implements RegistCal
     public void registAmopCallback(Integer msgType, AmopCallback routeCallBack) {
         amopCallBackMap.put(msgType, routeCallBack);
     }
-
+    
+    public AmopCallback getAmopCallback(Integer msgType) {
+        return amopCallBackMap.get(msgType);
+    }
+    
     @Override
     public void onPush(ChannelPush push) {
 
