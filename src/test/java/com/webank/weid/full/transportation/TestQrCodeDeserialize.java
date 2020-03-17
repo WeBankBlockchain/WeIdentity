@@ -59,7 +59,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         if (presentation == null) {
             presentation = this.getPresentationE();
             original_transString =
-                TransportationFactory.newQrCodeTransportation().serialize(
+                TransportationFactory.newQrCodeTransportation().specify(verifier).serialize(
                     presentation,
                     new ProtocolProperty(EncodeType.ORIGINAL)
                 ).getResult();
@@ -72,7 +72,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
     @Test
     public void testDeserializeCase1() {
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().serialize(
+            TransportationFactory.newQrCodeTransportation().specify(verifier).serialize(
                 presentation,
                 new ProtocolProperty(EncodeType.ORIGINAL)
             );
