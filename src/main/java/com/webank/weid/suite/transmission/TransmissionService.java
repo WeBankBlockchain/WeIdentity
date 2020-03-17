@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,11 +17,24 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc.callback;
+package com.webank.weid.suite.transmission;
 
-public interface RegistCallBack {
-    
-    public void registAmopCallback(Integer msgType, AmopCallback routeCallBack);
-    
-    public AmopCallback getAmopCallback(Integer msgType);
+import com.webank.weid.protocol.response.ResponseData;
+
+/**
+ * 传输处理服务接口.
+ * 
+ * @author yanggang
+ *
+ * @param <T> 服务响应数据类型
+ */
+public interface TransmissionService<T> {
+
+    /**
+     * 服务请求接口.
+     * 
+     * @param message 请求参数
+     * @return 返回响应结果
+     */
+    ResponseData<T> service(String message);
 }

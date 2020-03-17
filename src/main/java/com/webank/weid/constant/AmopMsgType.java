@@ -81,7 +81,12 @@ public enum AmopMsgType {
     /**
      * 请求weIdAuth.
      */
-    GET_WEID_AUTH(8);
+    GET_WEID_AUTH(8),
+
+    /**
+     * 新版本amop请求.
+     */
+    COMMON_REQUEST(9);
 
     private Integer value;
 
@@ -157,11 +162,16 @@ public enum AmopMsgType {
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
-
             case REQUEST_VERIFY_CHALLENGE: {
                 RequestVerifyChallengeArgs args =
                     DataToolUtils.deserialize(msgBodyStr, RequestVerifyChallengeArgs.class);
                 RequestVerifyChallengeResponse result = amopCallback.onPush(args);
+                resultBodyStr = DataToolUtils.serialize(result);
+                break;
+            }
+            case COMMON_REQUEST: {
+                AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
+                AmopResponse result = amopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }

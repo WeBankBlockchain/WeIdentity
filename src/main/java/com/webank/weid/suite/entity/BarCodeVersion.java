@@ -17,11 +17,39 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc.callback;
+package com.webank.weid.suite.entity;
 
-public interface RegistCallBack {
+/**
+ * JSON传输协议枚举.
+ * @author v_wbgyang
+ *
+ */
+public enum BarCodeVersion {
+
+    V1(1);
     
-    public void registAmopCallback(Integer msgType, AmopCallback routeCallBack);
+    private int code;
+
+    BarCodeVersion(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
     
-    public AmopCallback getAmopCallback(Integer msgType);
+    /**
+     * get JsonVersion By code.
+     *
+     * @param code the JsonVersion
+     * @return JsonVersion
+     */
+    public static BarCodeVersion getJsonVersion(int code) {
+        for (BarCodeVersion version : BarCodeVersion.values()) {
+            if (version.getCode() == code) {
+                return version;
+            }
+        }
+        return null;
+    }
 }
