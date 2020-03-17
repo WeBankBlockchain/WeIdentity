@@ -17,11 +17,44 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc.callback;
+package com.webank.weid.protocol.amop;
 
-public interface RegistCallBack {
+import java.util.Map;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
+
+/**
+ * the request body for get EncryptKey.
+ * 
+ * @author tonychen 2019年5月7日.
+ *
+ */
+@Getter
+@Setter
+@ToString
+public class GetBarCodeDataArgs extends AmopBaseMsgArgs {
+
+    /**
+     * the resource Id.
+     */
+    private String resourceId;
     
-    public void registAmopCallback(Integer msgType, AmopCallback routeCallBack);
+    /**
+     * weId信息.
+     */
+    private String weId;
     
-    public AmopCallback getAmopCallback(Integer msgType);
+    /**
+     * 签名信息.
+     */
+    private String signValue;
+    
+    /**
+     * 扩展字符串字段.
+     */
+    private Map<String, String> extra;
 }
