@@ -20,10 +20,8 @@
 package com.webank.weid;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import mockit.Invocation;
 import mockit.Mock;
@@ -41,18 +39,14 @@ public abstract class MockMysqlDriver {
     /**
      * mock DB for storage data.
      */
-    public static final Map<String, Object> mockDbMap = new HashMap<String, Object>();
+    public static final Map<String, Map<String, Object>> mockDbMap = 
+        new HashMap<String, Map<String, Object>>();
     
-    public static final Set<String> mockTableSet = new HashSet<String>();
-
     /**
      * the default method for mock mySqlDriver.
      */
     public static void mockMysqlDriver() {
 
-        if (!mockTableSet.contains("default_data")) {
-            mockTableSet.add("default_data");
-        }
         new MockUp<SqlExecutor>() {
             
             //SqlExecutor executor;
@@ -67,50 +61,59 @@ public abstract class MockMysqlDriver {
             @Mock
             public ResponseData<Integer> execute(String sql, Object... data) {
                 String tableDomain = sqlDomain.getTableName();
+                Map<String, Object> dbMap = mockDbMap.get(tableDomain);
                 if (sql.startsWith("insert")) {
-                    if (mockDbMap.containsKey(data[0].toString())) {
+                    if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
-                    mockDbMap.put(data[0].toString(), data[1]);
+                    if (dbMap.containsKey(data[0].toString())) {
+                        return new ResponseData<Integer>(
+                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            ErrorCode.SQL_EXECUTE_FAILED
+                        );
+                    }
+                    dbMap.put(data[0].toString(), data[1]);
                 } else if (sql.startsWith("delete")) {
-                    if (!mockTableSet.contains(tableDomain)) {
+                    if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
-                    if (!mockDbMap.containsKey(data[0].toString())) {
+                    if (!dbMap.containsKey(data[0].toString())) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
                             ErrorCode.SUCCESS
                         );
                     }
-                    mockDbMap.remove(data[0].toString());
+                    dbMap.remove(data[0].toString());
                 } else if (sql.startsWith("update")) {
-                    if (!mockTableSet.contains(tableDomain)) {
+                    if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
-                    if (!mockDbMap.containsKey(data[3].toString())) {
+                    if (!dbMap.containsKey(data[3].toString())) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
                             ErrorCode.SUCCESS
                         );
                     }
-                    mockDbMap.put(data[3].toString(), data[1]);
+                    dbMap.put(data[3].toString(), data[1]);
                 } else if (sql.startsWith("CREATE")) {
-                    if (mockTableSet.contains(tableDomain)) {
+                    if (mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
-                    mockTableSet.add(tableDomain);
+                    if (!mockDbMap.containsKey(tableDomain)) {
+                        mockDbMap.put(tableDomain, new HashMap<String, Object>());
+                    }
                 }
                 return new ResponseData<Integer>(1, ErrorCode.SUCCESS);
             }
@@ -119,9 +122,10 @@ public abstract class MockMysqlDriver {
             public ResponseData<Map<String, String>> executeQuery(String sql, Object... data) {
                 String tableName = sqlDomain.getTableName();
                 Map<String, String> map = new HashMap<String, String>();
-                if (mockTableSet.contains(tableName)) {
+                if (mockDbMap.containsKey(tableName)) {
                     if (data != null && data.length > 0) {
-                        map.put(DataDriverConstant.SQL_COLUMN_DATA, (String)mockDbMap.get(data[0]));
+                        map.put(DataDriverConstant.SQL_COLUMN_DATA, 
+                            (String)mockDbMap.get(tableName).get(data[0]));
                         return new ResponseData<Map<String, String>>(map, ErrorCode.SUCCESS);
                     }
                     map.put(DataDriverConstant.SQL_COLUMN_DATA, tableName);
@@ -132,6 +136,7 @@ public abstract class MockMysqlDriver {
             
             @Mock
             public ResponseData<Integer> batchSave(String sql, List<List<Object>> dataList) {
+                String tableName = sqlDomain.getTableName();
                 List<Object> values = dataList.get(dataList.size() - 1);
                 for (List<Object> list : dataList) {
                     if (CollectionUtils.isEmpty(list) || list.size() != values.size()) {
@@ -145,13 +150,14 @@ public abstract class MockMysqlDriver {
                 List<Object> idList = dataList.get(0);
                 int saveCount = 0;
                 for (int i = 0; i < idList.size(); i++) {
-                    if (mockDbMap.containsKey(idList.get(i))) {
+                    if (mockDbMap.get(tableName).containsKey(idList.get(i))) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     } else {
-                        mockDbMap.put(idList.get(i).toString(), dataList.get(1).get(i).toString()); 
+                        mockDbMap.get(tableName)
+                            .put(idList.get(i).toString(), dataList.get(1).get(i).toString()); 
                         saveCount++;
                     }
                 }
@@ -160,7 +166,9 @@ public abstract class MockMysqlDriver {
             
             @Mock
             public void resolveTableDomain(String checkTableSql, String createTableSql) {
-                mockTableSet.add(sqlDomain.getTableName());
+                if (!mockDbMap.containsKey(sqlDomain.getTableName())) {
+                    mockDbMap.put(sqlDomain.getTableName(), new HashMap<String, Object>());
+                }
             }
         };
     }

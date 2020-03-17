@@ -496,6 +496,21 @@ public enum ErrorCode {
      * pdf transfer error.
      */
     TRANSPORTATION_PDF_VERIFY_ERROR(100809, "pdf verify error, please check the error log."),
+    
+    /**
+     * the transmission type is invalid.
+     */
+    TRANSPORTATION_TRANSMISSION_TYPE_INVALID(100810, "the transmission type is invalid."),
+    
+    /**
+     * the URI type is invalid.
+     */
+    TRANSPORTATION_URI_TYPE_INVALID(100811, "the URI type is invalid."),
+
+    /**
+     * no spcifyer to set.
+     */
+    TRANSPORTATION_NO_SPECIFYER_TO_SET(100812, "no spcifyer to set."),
 
     /**
      * Authority issuer main error code.
@@ -689,6 +704,22 @@ public enum ErrorCode {
         100113,
         "weIdAuth callback is not registered."
     ),
+    
+    /**
+     * the channelId is null.
+     */
+    WEID_AUTH_CHANNELID_IS_NULL(
+        100114,
+        "the channelId is null."
+    ),
+    
+    /**
+     * the channelId is invalid.
+     */
+    WEID_AUTH_CHANNELID_INVALID(
+        100115,
+        "the channelId is invalid."
+    ),
 
     /**
      * transaction timeout.
@@ -783,6 +814,16 @@ public enum ErrorCode {
      * the code is undefined.
      */
     CNS_CODE_UNDEFINED(160020, "the code is undefined."),
+
+    /**
+     * the data does not exist.
+     */
+    SQL_DATA_DOES_NOT_EXIST(160021, "the data does not exist."),
+    
+    /**
+     * this is be deprecated.
+     */
+    THIS_IS_DEPRECATED(160022, "this is be deprecated."),
 
     /**
      * other uncatched exceptions or error.
