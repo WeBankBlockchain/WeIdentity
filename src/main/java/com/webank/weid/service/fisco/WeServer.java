@@ -35,6 +35,7 @@ import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.v1.WeServerV1;
 import com.webank.weid.service.fisco.v2.WeServerV2;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
+import com.webank.weid.service.impl.callback.CommonCallback;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.PropertyUtils;
 
@@ -129,6 +130,10 @@ public abstract class WeServer<W, C, S> {
         pushCallBack.registAmopCallback(
             AmopMsgType.GET_ENCRYPT_KEY.getValue(),
             new KeyManagerCallback()
+        );
+        pushCallBack.registAmopCallback(
+            AmopMsgType.COMMON_REQUEST.getValue(),
+            new CommonCallback()
         );
     }
 

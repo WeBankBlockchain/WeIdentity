@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,41 +19,43 @@
 
 package com.webank.weid.suite.api.transportation.params;
 
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
+
 /**
- * 编解码配置.
- * @author v_wbgyang
+ * 协议URI类型.
+ * 
+ * @author yanggang
  *
  */
-public class ProtocolProperty {
-    
+public enum UriType {
     /**
-     * 协议编解码类型.
+     * 通过AMOP请求数据.
      */
-    private EncodeType encodeType;
+    AMOP(0);
     
-    private TransmissionType transmissionType = TransmissionType.AMOP;
-    
-    private UriType uriType = UriType.AMOP;
+    private Integer code;
 
-    public EncodeType getEncodeType() {
-        return encodeType;
-    }
-    
-    public ProtocolProperty(EncodeType encodeType) {
-        this.encodeType = encodeType;
+    UriType(Integer code) {
+        this.code = code;
     }
 
-    public TransmissionType getTransmissionType() {
-        return transmissionType;
+    public Integer getCode() {
+        return code;
     }
 
-    public ProtocolProperty setTransmissionType(TransmissionType transmissionType) {
-        this.transmissionType = transmissionType;
-        return this;
+    /**
+     * get UriType By code.
+     *
+     * @param code the Uri type code
+     * @return UriType 返回类型
+     */
+    public static UriType getUriByCode(Integer code) {
+        for (UriType type : UriType.values()) {
+            if (type.getCode() == code) {
+                return type;
+            }
+        }
+        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_URI_TYPE_INVALID);
     }
-
-    public UriType getUriType() {
-        return uriType;
-    }
-    
 }

@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,11 +17,18 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.rpc.callback;
+package com.webank.weid.suite.transmission;
 
-public interface RegistCallBack {
-    
-    public void registAmopCallback(Integer msgType, AmopCallback routeCallBack);
-    
-    public AmopCallback getAmopCallback(Integer msgType);
+import lombok.Data;
+
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.suite.api.transportation.params.TransmissionType;
+
+@Data
+public class TransmissionRequest<T> {
+    private String orgId;
+    private T args;
+    private String serviceType;
+    private TransmissionType transmissionType;
+    private WeIdAuthentication weIdAuthentication;
 }
