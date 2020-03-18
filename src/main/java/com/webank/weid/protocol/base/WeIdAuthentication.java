@@ -43,4 +43,14 @@ public class WeIdAuthentication {
      * Required: The private key or The weIdentity DID.
      */
     private WeIdPrivateKey weIdPrivateKey;
+    
+    public WeIdAuthentication() {
+        super();
+    }
+    
+    public WeIdAuthentication(String weId, String privateKey) {
+        this.weId = weId;
+        this.weIdPrivateKey = new WeIdPrivateKey();
+        this.weIdPrivateKey.setPrivateKey(privateKey);
+    }
 }
