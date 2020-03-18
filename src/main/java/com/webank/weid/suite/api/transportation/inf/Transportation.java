@@ -27,7 +27,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 
 /**
- * Transportation base
+ * Transportation base.
  * @author yanggang
  *
  */
