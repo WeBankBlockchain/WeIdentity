@@ -19,16 +19,8 @@
 
 package com.webank.weid.util;
 
-import java.awt.BasicStroke;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Shape;
-import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -48,7 +40,6 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -57,8 +48,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import javax.imageio.ImageIO;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -82,12 +71,6 @@ import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.reinert.jjschema.v1.JsonSchemaV4Factory;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
@@ -131,23 +114,10 @@ public final class DataToolUtils {
     private static final String SEPARATOR_CHAR = "-";
     //private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String CHARSET = StandardCharsets.UTF_8.toString();
-
-    private static final String FORMAT_NAME = "JPG";
-
     /**
      * default salt length.
      */
     private static final String DEFAULT_SALT_LENGTH = "5";
-
-    // 二维码尺寸
-    private static final int QRCODE_SIZE = 300;
-
-    // LOGO宽度
-    private static final int LOGO_WIDTH = 60;
-
-    // LOGO高度
-    private static final int LOGO_HEIGHT = 60;
 
     private static final int SERIALIZED_SIGNATUREDATA_LENGTH = 65;
 
@@ -939,134 +909,6 @@ public final class DataToolUtils {
             }
         }
     }
-
-    private static BufferedImage createImage(
-        String content,
-        String imgPath,
-        ErrorCorrectionLevel errorCorrectionLevel,
-        boolean needCompress)
-        throws WriterException, IOException {
-
-        Hashtable<EncodeHintType, Object> hints = new Hashtable<EncodeHintType, Object>();
-        hints.put(EncodeHintType.ERROR_CORRECTION, errorCorrectionLevel);
-        hints.put(EncodeHintType.CHARACTER_SET, CHARSET);
-        hints.put(EncodeHintType.MARGIN, 1);
-        BitMatrix bitMatrix =
-            new MultiFormatWriter()
-                .encode(content, BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE, hints);
-        int width = bitMatrix.getWidth();
-        int height = bitMatrix.getHeight();
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                image.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
-            }
-        }
-        if (StringUtils.isBlank(imgPath)) {
-            return image;
-        }
-        // 插入图片
-        insertImage(image, imgPath, needCompress);
-        return image;
-    }
-
-    private static void insertImage(BufferedImage source, String imgPath, boolean needCompress)
-        throws IOException {
-
-        File file = new File(imgPath);
-        if (!file.exists()) {
-            logger.error("imgPath:[{}] is not exists.", imgPath);
-            return;
-        }
-        Image src = ImageIO.read(new File(imgPath));
-        int width = src.getWidth(null);
-        int height = src.getHeight(null);
-        if (needCompress) { // 压缩LOGO
-            if (width > LOGO_WIDTH) {
-                width = LOGO_WIDTH;
-            }
-            if (height > LOGO_HEIGHT) {
-                height = LOGO_HEIGHT;
-            }
-            Image image = src.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            BufferedImage tag = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Graphics g = tag.getGraphics();
-            g.drawImage(image, 0, 0, null); // 绘制缩小后的图
-            g.dispose();
-            src = image;
-        }
-        // 插入LOGO
-        Graphics2D graph = source.createGraphics();
-        int x = (QRCODE_SIZE - width) / 2;
-        int y = (QRCODE_SIZE - height) / 2;
-        graph.drawImage(src, x, y, width, height, null);
-        Shape shape = new RoundRectangle2D.Float(x, y, width, width, 6, 6);
-        graph.setStroke(new BasicStroke(3f));
-        graph.draw(shape);
-        graph.dispose();
-    }
-
-    private static void qrCodeEncode(
-        String content,
-        String imgPath,
-        String destPath,
-        ErrorCorrectionLevel errorCorrectionLevel,
-        boolean needCompress)
-        throws WriterException, IOException {
-
-        BufferedImage image = createImage(content, imgPath, errorCorrectionLevel, needCompress);
-        ImageIO.write(image, FORMAT_NAME, new File(destPath));
-    }
-
-    /**
-     * 生成不带LOGO的二维码并保存到指定文件中.
-     *
-     * @param content 二维码字符串
-     * @param destPath 二维码图片保存文件路径
-     * @param errorCorrectionLevel 容错级别
-     * @return code of ErrorCode
-     */
-    public static Integer generateQrCode(
-        String content,
-        ErrorCorrectionLevel errorCorrectionLevel,
-        String destPath) {
-
-        try {
-            qrCodeEncode(content, null, destPath, errorCorrectionLevel, false);
-            return ErrorCode.SUCCESS.getCode();
-        } catch (WriterException e) {
-            logger.error("generateQrCode into file WriterException.", e);
-        } catch (IOException e) {
-            logger.error("generateQrCode into file IOException.", e);
-        }
-        return ErrorCode.UNKNOW_ERROR.getCode();
-    }
-
-    /**
-     * 生成不带LOGO的二维码并将二维码的字节输入到字节输出流中.
-     *
-     * @param content 二维码字符串
-     * @param errorCorrectionLevel 容错级别
-     * @param stream 字节输出流
-     * @return code of ErrorCode
-     */
-    public static Integer generateQrCode(
-        String content,
-        ErrorCorrectionLevel errorCorrectionLevel,
-        OutputStream stream) {
-
-        try {
-            BufferedImage image = createImage(content, null, errorCorrectionLevel, false);
-            ImageIO.write(image, FORMAT_NAME, stream);
-            return ErrorCode.SUCCESS.getCode();
-        } catch (WriterException e) {
-            logger.error("generateQrCode into OutputStream WriterException.", e);
-        } catch (IOException e) {
-            logger.error("generateQrCode into OutputStream IOException.", e);
-        }
-        return ErrorCode.UNKNOW_ERROR.getCode();
-    }
-
 
     /**
      * Bytes array to bytes 32.

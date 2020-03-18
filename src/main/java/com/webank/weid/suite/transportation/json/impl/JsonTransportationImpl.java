@@ -58,8 +58,8 @@ public class JsonTransportationImpl
     @Override
     public <T extends JsonSerializer> ResponseData<String> serialize(
         T object,
-        ProtocolProperty property) {
-
+        ProtocolProperty property
+    ) {
         logger.info("[serialize] begin to execute JsonTransportation serialization, property:{}.",
             property);
         logger.info("[serialize] begin to execute JsonTransportation serialization, object:{}.",
@@ -113,26 +113,43 @@ public class JsonTransportationImpl
             return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
     }
-
+    
     @Override
     public <T extends JsonSerializer> ResponseData<T> deserialize(
         String transString,
-        Class<T> clazz) {
+        Class<T> clazz
+    ) {
+         return deserialize(null, transString, clazz);
+    }
 
-        logger.info("[deserialize] begin to execute JsonTransportation deserialize.");
-        logger.info("[deserialize] the transString:{}.", transString);
+    @Override
+    public <T extends JsonSerializer> ResponseData<T> deserialize(
+        WeIdAuthentication weIdAuthentication,
+        String transString, 
+        Class<T> clazz
+    ) {
         try {
+            logger.info("[deserialize] begin to execute JsonTransportation deserialize.");
+            logger.info("[deserialize] the transString:{}.", transString);
             if (StringUtils.isBlank(transString)) {
                 logger.error("[deserialize] the transString is blank.");
                 return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID);
             }
+           //检查WeIdAuthentication合法性
+            ErrorCode errorCode = checkWeIdAuthentication(weIdAuthentication);
+            if (errorCode != ErrorCode.SUCCESS) {
+                logger.error(
+                    "[deserialize] checkWeIdAuthentication fail, errorCode:{}.", 
+                    errorCode
+                );
+                return new ResponseData<T>(null, errorCode);
+            }
             //将JSON字符串解析成JsonBaseData对象
-            //JsonBaseData jsonBaseData = JsonUtil.jsonStrToObj(JsonBaseData.class, transString);
             JsonBaseData jsonBaseData = DataToolUtils.deserialize(
                 transString, 
                 JsonBaseData.class);
             //检查JsonBaseData合法性
-            ErrorCode errorCode = checkJsonBaseData(jsonBaseData);
+            errorCode = checkJsonBaseData(jsonBaseData);
             if (errorCode != ErrorCode.SUCCESS) {
                 logger.error("[deserialize] checkJsonBaseData fail, errorCode:{}.", errorCode);
                 return new ResponseData<T>(null, errorCode);
@@ -150,7 +167,7 @@ public class JsonTransportationImpl
                     jsonBaseData.getId(),
                     jsonBaseData.getOrgId(),
                     jsonBaseData.getData().toString(),
-                    super.getWeIdAuthentication()
+                    weIdAuthentication
                 );
             //根据编解码类型获取编解码枚举对象
             EncodeType encodeType =
@@ -188,22 +205,6 @@ public class JsonTransportationImpl
             logger.error("[deserialize] JsonTransportation deserialize due to unknown error.", e);
             return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
-    }
-
-    @Override
-    public <T extends JsonSerializer> ResponseData<T> deserialize(
-        WeIdAuthentication weIdAuthentication,
-        String transString, 
-        Class<T> clazz
-    ) {
-        //检查WeIdAuthentication合法性
-        ErrorCode errorCode = checkWeIdAuthentication(weIdAuthentication);
-        if (errorCode != ErrorCode.SUCCESS) {
-            logger.error("[deserialize] checkWeIdAuthentication fail, errorCode:{}.", errorCode);
-            return new ResponseData<T>(null, errorCode);
-        }
-        super.setWeIdAuthentication(weIdAuthentication);
-        return deserialize(transString, clazz);
     }
     
     /**
