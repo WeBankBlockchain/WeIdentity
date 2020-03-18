@@ -77,9 +77,9 @@ public abstract class AbstractTransportation extends BaseService {
     protected void registerWeIdAuthentication(WeIdAuthentication weIdAuthentication) {
         this.getWeIdAuthService().registerCallBack(new WeIdAuthCallback() {
             
-            private WeIdAuthentication weIdAuthentication;
+            private WeIdAuthentication authentication;
             {
-                weIdAuthentication = new WeIdAuthentication(
+                authentication = new WeIdAuthentication(
                     weIdAuthentication.getWeId(), 
                     weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
                 );
@@ -87,7 +87,7 @@ public abstract class AbstractTransportation extends BaseService {
             
             @Override
             public WeIdAuthentication onChannelConnecting(String counterpartyWeId) {
-                return weIdAuthentication;
+                return authentication;
             }
             
             @Override
