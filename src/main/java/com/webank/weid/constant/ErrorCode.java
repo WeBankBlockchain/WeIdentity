@@ -500,7 +500,7 @@ public enum ErrorCode {
     /**
      * the transmission type is invalid.
      */
-    TRANSPORTATION_TRANSMISSION_TYPE_INVALID(100810, "the transmission type is invalid."),
+    TRANSPORTATION_TRANSMISSION_TYPE_INVALID(100810, "the trans type is invalid."),
     
     /**
      * the URI type is invalid.
@@ -821,9 +821,14 @@ public enum ErrorCode {
     SQL_DATA_DOES_NOT_EXIST(160021, "the data does not exist."),
     
     /**
-     * this is be deprecated.
+     * this is unsupported.
      */
-    THIS_IS_DEPRECATED(160022, "this is be deprecated."),
+    THIS_IS_UNSUPPORTED(160022, "this is unsupported."),
+    
+    /**
+     * this is repeated call.
+     */
+    THIS_IS_REPEATED_CALL(160023, "this is repeated call."),
 
     /**
      * other uncatched exceptions or error.
