@@ -19,16 +19,8 @@
 
 package com.webank.weid.suite.transportation.bar.impl;
 
-import java.awt.image.BufferedImage;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
 
-import javax.imageio.ImageIO;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,18 +33,16 @@ import com.webank.weid.protocol.amop.GetBarCodeDataArgs;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.api.transportation.inf.BarCodeTransportation;
+import com.webank.weid.suite.api.transportation.inf.Transportation;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.api.transportation.params.TransmissionType;
+import com.webank.weid.suite.api.transportation.params.TransType;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.BarCodeVersion;
 import com.webank.weid.suite.entity.EncodeData;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.suite.transmission.TransmissionFactory;
 import com.webank.weid.suite.transmission.TransmissionRequest;
-import com.webank.weid.suite.transportation.AbstractBarCodeTransportation;
+import com.webank.weid.suite.transportation.AbstractJsonTransportation;
 import com.webank.weid.suite.transportation.bar.protocol.BarCodeData;
 import com.webank.weid.util.DataToolUtils;
 
@@ -63,28 +53,19 @@ import com.webank.weid.util.DataToolUtils;
  *
  */
 public class BarCodeTransportationImpl 
-    extends AbstractBarCodeTransportation 
-    implements BarCodeTransportation {
+    extends AbstractJsonTransportation 
+    implements Transportation {
 
     private static final Logger logger =
         LoggerFactory.getLogger(BarCodeTransportationImpl.class);
     
     private static final BarCodeVersion version = BarCodeVersion.V1;
-    
-    private Persistence dataDriver;
-        
-    private Persistence getDataDriver() {
-        if (dataDriver == null) {
-            dataDriver = new MysqlDriver();
-        }
-        return dataDriver;
-    }
-    
+
     @Override
     public <T extends JsonSerializer> ResponseData<String> serialize(
         T object, 
-        ProtocolProperty property) {
-        
+        ProtocolProperty property
+    ) {
         logger.info(
             "[serialize] begin to execute BarCodeTransportation serialization, property:{}.",
             property);
@@ -140,33 +121,34 @@ public class BarCodeTransportationImpl
             return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
     }
-
+    
     private BarCodeData buildBarCodeData(
-        ProtocolProperty property) {
-        
+        ProtocolProperty property
+    ) { 
         BarCodeData barCodeData = new BarCodeData();
         barCodeData.setEncodeType(property.getEncodeType().getCode());
         barCodeData.setId(String.valueOf(nextId()));
         barCodeData.setOrgId(fiscoConfig.getCurrentOrgId());
         barCodeData.setVersion(version.getCode());
-        barCodeData.setTransmissionTypeCode(property.getTransmissionType().getCode());
+        barCodeData.setTransTypeCode(property.getTransType().getCode());
         barCodeData.setUriTypeCode(property.getUriType().getCode());
         return barCodeData;
     }
 
     @Override
     public <T extends JsonSerializer> ResponseData<T> deserialize(
-        String transString, Class<T> clazz) {
-
-        throw new WeIdBaseException(ErrorCode.THIS_IS_DEPRECATED);
+        String transString, 
+        Class<T> clazz
+    ) {
+        throw new WeIdBaseException(ErrorCode.THIS_IS_UNSUPPORTED);
     }
 
     @Override
     public <T extends JsonSerializer> ResponseData<T> deserialize(
         WeIdAuthentication weIdAuthentication,
         String transString, 
-        Class<T> clazz) {
-        
+        Class<T> clazz
+    ) {
         try {
             logger.info("[deserialize] begin to execute JsonTransportation deserialize.");
             logger.info("[deserialize] the transString:{}.", transString);
@@ -178,8 +160,8 @@ public class BarCodeTransportationImpl
             // 解析协议
             BarCodeData barCodeData = BarCodeData.buildByBarCodeString(transString);
             // 获取协议请求下载通过类型
-            TransmissionType type = TransmissionType.getTransmissionByCode(
-                barCodeData.getTransmissionTypeCode());
+            TransType type = TransType.getTransmissionByCode(
+                barCodeData.getTransTypeCode());
             // 获取原始数据，两种协议获取方式，目前只实现一种amop，支持https扩展
             ResponseData<String> result = TransmissionFactory.getTransmisson(type)
                 .send(buildRequest(type, barCodeData, weIdAuthentication));
@@ -220,22 +202,23 @@ public class BarCodeTransportationImpl
     }
 
     private TransmissionRequest<GetBarCodeDataArgs> buildRequest(
-        TransmissionType type, 
+        TransType type, 
         BarCodeData barCodeData,
-        WeIdAuthentication weIdAuthentication) {
-        
+        WeIdAuthentication weIdAuthentication
+    ) {
         TransmissionRequest<GetBarCodeDataArgs> request = new TransmissionRequest<>();
         request.setOrgId(barCodeData.getOrgId());
         request.setServiceType(ServiceType.SYS_GET_BARCODE_DATA.name());
         request.setWeIdAuthentication(weIdAuthentication);
         request.setArgs(getBarCodeArgs(barCodeData, weIdAuthentication));
-        request.setTransmissionType(type);
+        request.setTransType(type);
         return request;
     }
     
     private GetBarCodeDataArgs getBarCodeArgs(
         BarCodeData barCodeData, 
-        WeIdAuthentication weIdAuthentication) {
+        WeIdAuthentication weIdAuthentication
+    ) {
         GetBarCodeDataArgs args = new GetBarCodeDataArgs();
         args.setResourceId(barCodeData.getId());
         args.setToOrgId(barCodeData.getOrgId());
@@ -251,7 +234,8 @@ public class BarCodeTransportationImpl
     
     private ErrorCode checkInputForDeserialize(
         WeIdAuthentication weIdAuthentication,
-        String transString) {
+        String transString
+    ) {
         // 检查WeIdAuthentication合法性
         ErrorCode errorCode = checkWeIdAuthentication(weIdAuthentication);
         if (errorCode != ErrorCode.SUCCESS) {
@@ -267,8 +251,8 @@ public class BarCodeTransportationImpl
     
     private ErrorCode checkInputForserialize(
         ProtocolProperty property,
-        Object object) {
-        
+        Object object
+    ) {
         ErrorCode errorCode = checkEncodeProperty(property);
         if (errorCode != ErrorCode.SUCCESS) {
             logger.error("[serialize] checkEncodeProperty fail, errorCode:{}.", errorCode);
@@ -281,39 +265,5 @@ public class BarCodeTransportationImpl
             return  errorCode;
         }
         return ErrorCode.SUCCESS;
-    }
-
-    @Override
-    public Integer generateBarCode(
-        String content, 
-        BarcodeFormat format, 
-        ErrorCorrectionLevel correctionLevel,
-        String destPath) {
-        try {
-            FileOutputStream outputStream = new FileOutputStream(destPath);
-            generateBarCode(content, format, correctionLevel, outputStream);
-            outputStream.flush();
-            outputStream.close();
-            return ErrorCode.SUCCESS.getCode();
-        } catch (IOException e) {
-            logger.error("[generateBarCode] generate barCode error.", e);
-            return ErrorCode.UNKNOW_ERROR.getCode();
-        }
-    }
-
-    @Override
-    public Integer generateBarCode(
-        String content, 
-        BarcodeFormat format, 
-        ErrorCorrectionLevel correctionLevel,
-        OutputStream stream) {
-        try {
-            BufferedImage generateBarCode = super.generateBarCode(content, format, correctionLevel);
-            ImageIO.write(generateBarCode, IMG_FORMATE, stream);
-            return ErrorCode.SUCCESS.getCode();
-        } catch (IOException e) {
-            logger.error("[generateBarCode] generate barCode error.", e);
-            return ErrorCode.UNKNOW_ERROR.getCode();
-        }
     }
 }
