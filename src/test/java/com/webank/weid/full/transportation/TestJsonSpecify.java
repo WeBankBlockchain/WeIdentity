@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.suite.api.transportation.TransportationFactory;
-import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
+import com.webank.weid.suite.api.transportation.inf.Transportation;
 
 public class TestJsonSpecify extends TestBaseService {
 
@@ -17,12 +17,12 @@ public class TestJsonSpecify extends TestBaseService {
      */
     @Test
     public void testJsonSpecify() {
-        JsonTransportation jsonTransportation = TransportationFactory.newJsonTransportation();
+        Transportation transportation = TransportationFactory.newJsonTransportation();
         List<String> weIdList = new ArrayList<>();
         weIdList.add(createWeIdResult.getWeId());
         weIdList.add(createWeIdNew.getWeId());
-        jsonTransportation = jsonTransportation.specify(weIdList);
-        Assert.assertNotNull(jsonTransportation);
+        transportation = transportation.specify(weIdList);
+        Assert.assertNotNull(transportation);
         
     }
 }
