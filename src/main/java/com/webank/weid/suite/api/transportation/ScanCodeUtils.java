@@ -20,10 +20,6 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -31,6 +27,11 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 
@@ -103,7 +104,11 @@ public class ScanCodeUtils {
         OutputStream stream
     ) {
         try {
-            BufferedImage generateBarCode = generateBarCode(content, format, errorCorrectionLevel);
+            BufferedImage generateBarCode = createBarCodeImage(
+                content, 
+                format,
+                errorCorrectionLevel
+            );
             ImageIO.write(generateBarCode, FORMAT_NAME, stream);
             return ErrorCode.SUCCESS.getCode();
         } catch (IOException e) {
@@ -250,7 +255,7 @@ public class ScanCodeUtils {
      * @param correctionLevel 容错级别
      * @return 返回BufferedImage
      */
-    private static BufferedImage generateBarCode(
+    private static BufferedImage createBarCodeImage(
         String content, 
         BarcodeFormat format, 
         ErrorCorrectionLevel correctionLevel

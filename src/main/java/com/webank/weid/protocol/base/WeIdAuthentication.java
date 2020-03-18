@@ -48,6 +48,11 @@ public class WeIdAuthentication {
         super();
     }
     
+    /**
+     * Constructor with weId and privateKey. 
+     * @param weId the weId
+     * @param privateKey the privateKey
+     */
     public WeIdAuthentication(String weId, String privateKey) {
         this.weId = weId;
         this.weIdPrivateKey = new WeIdPrivateKey();
