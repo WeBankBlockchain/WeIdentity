@@ -19,10 +19,16 @@
 
 package com.webank.weid.suite.api.transportation;
 
-import com.webank.weid.suite.api.transportation.inf.BarCodeTransportation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
 import com.webank.weid.suite.api.transportation.inf.QrCodeTransportation;
+import com.webank.weid.suite.api.transportation.inf.Transportation;
+import com.webank.weid.suite.api.transportation.params.TransportationType;
 import com.webank.weid.suite.transportation.bar.impl.BarCodeTransportationImpl;
 import com.webank.weid.suite.transportation.json.impl.JsonTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
@@ -32,6 +38,8 @@ import com.webank.weid.suite.transportation.qr.impl.QrCodeJsonTransportationImpl
  * Created by Junqi Zhang on 2019/5/13.
  */
 public class TransportationFactory {
+
+    private static final Logger logger = LoggerFactory.getLogger(TransportationFactory.class);
 
     public static JsonTransportation newJsonTransportation() {
         return new JsonTransportationImpl();
@@ -44,8 +52,24 @@ public class TransportationFactory {
     public static PdfTransportation newPdfTransportation() {
         return new PdfTransportationImpl();
     }
-    
-    public static BarCodeTransportation newBarCodeTransportation() {
-        return new BarCodeTransportationImpl();
+
+    /**
+     * 根据封装类型实例化对应的实例对象, 此方法目前支持JSON, BAR_CODE, QR_CODE.
+     * 如果使用PDF类型, 请使用 newPdfTransportation方法.
+     * @param transportationType 封装类型枚举
+     * @return 返回具体处理类型
+     */
+    public static Transportation newTransportation(TransportationType transportationType) {
+        switch (transportationType) {
+            case JSON:
+                return new JsonTransportationImpl();
+            case BAR_CODE:
+                return new BarCodeTransportationImpl();
+            case QR_CODE:
+                return new QrCodeJsonTransportationImpl();
+            default:
+                logger.error("the type = {} unsupported.", transportationType.name());
+                throw new WeIdBaseException(ErrorCode.THIS_IS_UNSUPPORTED);
+        }
     }
 }

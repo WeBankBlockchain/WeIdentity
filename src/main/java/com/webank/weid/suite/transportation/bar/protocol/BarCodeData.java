@@ -45,7 +45,7 @@ public class BarCodeData extends JsonBaseData {
     /**
      * 协议通讯类型.
      */
-    private int transmissionTypeCode;
+    private int transTypeCode;
     
     /**
      * 控制URI类型:(机构/长URI/短URI ).
@@ -58,7 +58,7 @@ public class BarCodeData extends JsonBaseData {
      * @return 返回协议字符串
      */
     public String getBarCodeString() {
-        StringBuffer buffer = new StringBuffer(String.valueOf(getTransmissionTypeCode()));
+        StringBuffer buffer = new StringBuffer(String.valueOf(getTransTypeCode()));
         buffer.append(getUriTypeCode())
             .append(super.getOrgId()).append(SPLIT_CHAR)
             .append(super.getId());
@@ -74,9 +74,9 @@ public class BarCodeData extends JsonBaseData {
     public static BarCodeData buildByBarCodeString(String barCodeString) {
         BarCodeData barCodeData = new BarCodeData();
         // 解析第一个字符，第二个字符预留
-        String transmissionTypeStr = barCodeString.substring(0, 1);
-        Integer transmissionTypeCode = Integer.parseInt(transmissionTypeStr);
-        barCodeData.setTransmissionTypeCode(transmissionTypeCode);
+        String transnTypeStr = barCodeString.substring(0, 1);
+        Integer transTypeCode = Integer.parseInt(transnTypeStr);
+        barCodeData.setTransTypeCode(transTypeCode);
         // 从第三个字符开始
         barCodeString = barCodeString.substring(2);
         String[] array = barCodeString.split(SPLIT_CHAR);
