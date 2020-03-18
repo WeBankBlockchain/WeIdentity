@@ -119,11 +119,28 @@ public class JsonTransportationImpl
         String transString,
         Class<T> clazz
     ) {
-         return deserialize(null, transString, clazz);
+        return deserializeInner(null, transString, clazz);
     }
 
     @Override
     public <T extends JsonSerializer> ResponseData<T> deserialize(
+        WeIdAuthentication weIdAuthentication,
+        String transString, 
+        Class<T> clazz
+    ) {
+        // 检查WeIdAuthentication合法性
+        ErrorCode errorCode = checkWeIdAuthentication(weIdAuthentication);
+        if (errorCode != ErrorCode.SUCCESS) {
+            logger.error(
+                "[deserialize] checkWeIdAuthentication fail, errorCode:{}.", 
+                errorCode
+            );
+            return new ResponseData<T>(null, errorCode);
+        }
+        return deserializeInner(weIdAuthentication, transString, clazz);
+    }
+    
+    private <T extends JsonSerializer> ResponseData<T> deserializeInner(
         WeIdAuthentication weIdAuthentication,
         String transString, 
         Class<T> clazz
@@ -135,21 +152,13 @@ public class JsonTransportationImpl
                 logger.error("[deserialize] the transString is blank.");
                 return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID);
             }
-           //检查WeIdAuthentication合法性
-            ErrorCode errorCode = checkWeIdAuthentication(weIdAuthentication);
-            if (errorCode != ErrorCode.SUCCESS) {
-                logger.error(
-                    "[deserialize] checkWeIdAuthentication fail, errorCode:{}.", 
-                    errorCode
-                );
-                return new ResponseData<T>(null, errorCode);
-            }
+           
             //将JSON字符串解析成JsonBaseData对象
             JsonBaseData jsonBaseData = DataToolUtils.deserialize(
                 transString, 
                 JsonBaseData.class);
             //检查JsonBaseData合法性
-            errorCode = checkJsonBaseData(jsonBaseData);
+            ErrorCode errorCode = checkJsonBaseData(jsonBaseData);
             if (errorCode != ErrorCode.SUCCESS) {
                 logger.error("[deserialize] checkJsonBaseData fail, errorCode:{}.", errorCode);
                 return new ResponseData<T>(null, errorCode);
