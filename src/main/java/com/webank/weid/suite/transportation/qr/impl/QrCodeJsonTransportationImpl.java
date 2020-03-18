@@ -134,7 +134,7 @@ public class QrCodeJsonTransportationImpl
         String transString,
         Class<T> clazz
     ) {
-        return deserialize(null, transString, clazz);
+        return deserializeInner(null, transString, clazz);
     }
     
     @Override
@@ -143,13 +143,24 @@ public class QrCodeJsonTransportationImpl
         String transString, 
         Class<T> clazz
     ) {
+        // 检查WeIdAuthentication合法性
+        ErrorCode errorCode = checkWeIdAuthentication(weIdAuthentication);
+        if (errorCode != ErrorCode.SUCCESS) {
+            logger.error(
+                "[deserialize] checkWeIdAuthentication fail, errorCode:{}.", 
+                errorCode
+            );
+            return new ResponseData<T>(null, errorCode);
+        }
+        return deserializeInner(weIdAuthentication, transString, clazz);
+    }
+    
+    private <T extends JsonSerializer> ResponseData<T> deserializeInner(
+        WeIdAuthentication weIdAuthentication,
+        String transString, 
+        Class<T> clazz
+    ) {
         try {
-          //检查WeIdAuthentication合法性
-            ErrorCode errorCode = checkWeIdAuthentication(weIdAuthentication);
-            if (errorCode != ErrorCode.SUCCESS) {
-                logger.error("[deserialize] checkWeIdAuthentication fail, errorCode:{}.", errorCode);
-                return new ResponseData<T>(null, errorCode);
-            }
             logger.info("[deserialize] begin to execute QrCodeTransportation deserialize.");
             logger.info("[deserialize] the transString:{}.", transString);
             //解析协议版本
