@@ -59,7 +59,7 @@ public class TransportationFactory {
      * @param transportationType 封装类型枚举
      * @return 返回具体处理类型
      */
-    public static Transportation newTransportation(TransportationType transportationType) {
+    public static Transportation build(TransportationType transportationType) {
         switch (transportationType) {
             case JSON:
                 return new JsonTransportationImpl();

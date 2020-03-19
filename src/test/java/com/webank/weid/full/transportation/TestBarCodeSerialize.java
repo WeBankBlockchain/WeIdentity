@@ -65,7 +65,7 @@ public class TestBarCodeSerialize extends TestBaseTransportation {
         presentation = getPresentationE();
         if (transportation == null) {
             transportation = 
-                TransportationFactory.newTransportation(TransportationType.BAR_CODE)
+                TransportationFactory.build(TransportationType.BAR_CODE)
                     .specify(verifier);
         }
     }
