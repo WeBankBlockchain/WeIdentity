@@ -295,10 +295,6 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         if (!WeIdUtils.isWeIdValid(auth.getWeId())) {
             return ErrorCode.WEID_INVALID;
         }
-        if (!WeIdUtils
-            .isKeypairMatch(auth.getWeIdPrivateKey().getPrivateKey(), auth.getWeIdPublicKeyId())) {
-            return ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH;
-        }
 
         return ErrorCode.SUCCESS;
     }
