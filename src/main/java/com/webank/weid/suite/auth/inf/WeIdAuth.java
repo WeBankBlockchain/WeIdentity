@@ -31,59 +31,61 @@ import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
 public interface WeIdAuth {
 
     /**
-     * set white list.
-     * @param whitelistWeId weId list
-     * @return flag
+     * 设置白名单，指定哪些机构可以创建连接.
+     * @param whitelistWeId 白名单列表
+     * @return 成功或失败的状态
      */
      
     public Integer setWhiteList(List<String> whitelistWeId);
 
     /**
-     * register call back.
-     * @param callback callback object.
-     * @return flag
+     * 服务端注册callback，实现WeIdAuthCallback接口，然后调用该接口进行callback的注册.
+     * @param callback callback 实例.
+     * @return 成功或失败的状态
      */
     public Integer registerCallBack(WeIdAuthCallback callback);
 
     /**
-     * get callback.
-     * @return callback
+     * 获取callback实例.
+     * @return callback实例
      */
     public WeIdAuthCallback getCallBack();
 
     /**
-     * add weIdaAuth object to cache.
-     * @param weIdAuthObj weIdaAuth object
-     * @return flag
+     * 将weIdAuth对象放入缓存.
+     * @param weIdAuthObj 生成的WeIdAuthObj对象
+     * @return 成功或失败的状态
      */
     public Integer addWeIdAuthObj(WeIdAuthObj weIdAuthObj);
 
     /**
-     * get weIdaAuth object by channel Id.
+     * 根据channelId取weIdAuth对象.
      * @param channelId channel Id
-     * @return weIdaAuth object
+     * @return 跟channelId对应的weIdAuth 对象
      */
     public WeIdAuthObj getWeIdAuthObjByChannelId(String channelId);
 
     /**
-     * create authenticate channel.
-     * @param toOrgId organization id
-     * @param weIdAuthentication user's authentication info
+     * 创建单向的认证通道，channelId由服务端生成.
+     * @param toOrgId 服务端的机构ID
+     * @param weIdAuthentication 客户端的私钥信息
      * @return WeIdAuthObj
      */
   
     public ResponseData<WeIdAuthObj> createAuthenticatedChannel(
         String toOrgId,
-        WeIdAuthentication weIdAuthentication);
+        WeIdAuthentication weIdAuthentication
+    );
 
     /**
-     * create authenticate channel.
-     * @param toOrgId organization id
-     * @param weIdAuthentication user's authentication info
-     * @return weIdaAuth object
+     * 创建双向的认证通道（客户端向服务端发起challenge，同时服务端也会向客户端发起challenge，channelId由服务端生成）.
+     * @param toOrgId 服务度的机构ID
+     * @param weIdAuthentication 用户的私钥认证信息
+     * @return weIdAuth 对象
      */
     public ResponseData<WeIdAuthObj> createMutualAuthenticatedChannel(
         String toOrgId,
-        WeIdAuthentication weIdAuthentication);
+        WeIdAuthentication weIdAuthentication
+    );
 
 }

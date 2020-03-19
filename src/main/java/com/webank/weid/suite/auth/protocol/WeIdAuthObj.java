@@ -32,22 +32,22 @@ import lombok.Setter;
 public class WeIdAuthObj {
 
     /**
-     * 'channelId' is the ID for that channel.
+     * 建立weIdAuth的通道ID.
      */
     private String channelId;
 
     /**
-     * 'symmetricKey' is the symmetric key of that channel.
+     * 对称秘钥，由服务端生成.
      */
     private String symmetricKey;
 
     /**
-     * WeID of the youself.
+     * 您自己的weId.
      */
     private String selfWeId;
 
     /**
-     * WeID of the counterparty.
+     * 对手方的weId.
      */
     private String counterpartyWeId;
 }
