@@ -165,13 +165,13 @@ public abstract class AbstractTransportation extends BaseService {
 
     protected void setVerifier(List<String> verifierWeIdList) {
         if (this.verifierWeIdList != null) {
-            String errorMessage = ErrorCode.THIS_IS_REPEATED_CALL.getCode() + "-"
+            String errorMessage = ErrorCode.THIS_IS_REPEATED_CALL.getCode() + " - "
                     + ErrorCode.THIS_IS_REPEATED_CALL.getCodeDesc();
             logger.error("[specify] {}.", errorMessage);
             throw new WeIdBaseException(errorMessage);
         }
         if (CollectionUtils.isEmpty(verifierWeIdList)) {
-            String errorMessage = ErrorCode.ILLEGAL_INPUT.getCode() + "-"
+            String errorMessage = ErrorCode.ILLEGAL_INPUT.getCode() + " - "
                     + ErrorCode.ILLEGAL_INPUT.getCodeDesc();
             logger.error("[specify] {}, the verifiers is null.", errorMessage);
             throw new WeIdBaseException(errorMessage);
@@ -179,7 +179,7 @@ public abstract class AbstractTransportation extends BaseService {
         for (String weid : verifierWeIdList) {
             ResponseData<Boolean> isExists = weidService.isWeIdExist(weid);
             if (!isExists.getResult()) {
-                String errorMessage = ErrorCode.WEID_DOES_NOT_EXIST.getCode() + "-"
+                String errorMessage = ErrorCode.WEID_DOES_NOT_EXIST.getCode() + " - "
                         + ErrorCode.WEID_DOES_NOT_EXIST.getCodeDesc();
                 logger.error("[specify] {} , weid = {} .", errorMessage, weid);
                 throw new WeIdBaseException(errorMessage);
