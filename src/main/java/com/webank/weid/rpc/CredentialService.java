@@ -55,7 +55,8 @@ public interface CredentialService {
     @Deprecated
     ResponseData<Credential> addSignature(
         List<Credential> credentialList,
-        WeIdPrivateKey weIdPrivateKey);
+        WeIdPrivateKey weIdPrivateKey
+    );
 
     /**
      * Generate a credential with selected data. Embedded multi-signed Credential are not allowed.
