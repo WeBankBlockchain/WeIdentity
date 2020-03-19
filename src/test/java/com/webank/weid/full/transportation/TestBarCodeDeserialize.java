@@ -64,7 +64,7 @@ public class TestBarCodeDeserialize extends TestBaseTransportation {
             super.testInit();
             presentation = this.getPresentationE();
             transportation = 
-                TransportationFactory.newTransportation(TransportationType.BAR_CODE)
+                TransportationFactory.build(TransportationType.BAR_CODE)
                     .specify(verifier);
             original_transString = transportation.serialize(
                 presentation,
@@ -125,7 +125,7 @@ public class TestBarCodeDeserialize extends TestBaseTransportation {
         List<String> verifier = new ArrayList<String>();
         verifier.add(createWeIdNew.getWeId());
         ResponseData<String> response =
-            TransportationFactory.newTransportation(TransportationType.BAR_CODE)
+            TransportationFactory.build(TransportationType.BAR_CODE)
                 .specify(verifier)
                 .serialize(
                     credentialPojo, 
