@@ -1,4 +1,4 @@
-package com.webank.weid.suite.api.transportation;
+package com.webank.weid.util;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
