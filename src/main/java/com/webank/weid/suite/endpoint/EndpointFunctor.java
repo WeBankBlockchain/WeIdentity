@@ -27,14 +27,14 @@ package com.webank.weid.suite.endpoint;
 public interface EndpointFunctor {
 
     /**
-     * Execute the function via its String-typed responseBody (argument). First, use ``` to separate
-     * the arguments, and convert them to your ideal POJO type. Then, call the functions. Lastly,
-     * use any serialization function to return.
+     * Execute the callback function via its String-typed responseBody (argument). First, use ```
+     * to separate arguments and convert them to your ideal POJO type. Then, call the functions.
+     * Lastly, use any serialization function to return.
      *
      * @param arg argument String, separated by ```
      * @return any serialized object String
      */
-    String execute(String arg);
+    String callback(String arg);
 
     /**
      * Return the basic description of this endpoint.
