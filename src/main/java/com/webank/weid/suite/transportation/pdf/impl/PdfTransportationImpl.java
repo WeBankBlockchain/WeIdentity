@@ -73,7 +73,11 @@ import com.webank.weid.suite.transportation.AbstractPdfTransportation;
 import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 import com.webank.weid.util.DataToolUtils;
 
-
+/**
+ * pdf模式序列化接口实现.
+ * @author yanggang
+ *
+ */
 public class PdfTransportationImpl
     extends AbstractPdfTransportation
     implements PdfTransportation {
@@ -935,8 +939,7 @@ public class PdfTransportationImpl
             logger.error("[deserialize] checkWeIdAuthentication fail, errorCode:{}.", errorCode);
             return new ResponseData<>(null, errorCode);
         }
-        super.setWeIdAuthentication(weIdAuthentication);
-
+        
         //开始反序列化
         logger.info("begin to execute PdfTransportationImpl deserialization from InputStream.");
         try {
@@ -948,7 +951,7 @@ public class PdfTransportationImpl
                 pdfAttributeInfo.getId(),
                 pdfAttributeInfo.getOrgId(),
                 String.valueOf(pdfAttributeInfo.getData()),
-                super.getWeIdAuthentication()
+                weIdAuthentication
             );
 
             //根据编解码类型获取编解码枚举对象
