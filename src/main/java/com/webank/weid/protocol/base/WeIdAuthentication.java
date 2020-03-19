@@ -58,4 +58,15 @@ public class WeIdAuthentication {
         this.weIdPrivateKey = new WeIdPrivateKey();
         this.weIdPrivateKey.setPrivateKey(privateKey);
     }
+    
+    /**
+     * Constructor with weId, privateKey and weIdPublicKeyId. 
+     * @param weId the weId
+     * @param privateKey the privateKey
+     * @param weIdPublicKeyId the weIdPublicKeyId
+     */
+    public WeIdAuthentication(String weId, String privateKey, String weIdPublicKeyId) {
+        this(weId, privateKey);
+        this.weIdPublicKeyId = weIdPublicKeyId;
+    }
 }
