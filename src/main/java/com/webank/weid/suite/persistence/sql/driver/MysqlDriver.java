@@ -55,7 +55,9 @@ public class MysqlDriver implements Persistence {
     private static final String CHECK_TABLE_SQL =
         "SELECT table_name "
             + DataDriverConstant.SQL_COLUMN_DATA
-            + " FROM information_schema.TABLES WHERE table_name ='$1'";
+            + " FROM information_schema.TABLES "
+            + " WHERE upper(table_name) = upper('$1')"
+            + " and upper(table_schema) = upper('$2')";
 
     private static final String CREATE_TABLE_SQL =
         "CREATE TABLE `$1` ("
