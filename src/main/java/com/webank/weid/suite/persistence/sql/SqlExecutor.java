@@ -58,6 +58,11 @@ public class SqlExecutor {
     public static final String TABLE_CHAR = "$1";
     
     /**
+     * 库占位符.
+     */
+    public static final String DATABASE_CHAR = "$2";
+    
+    /**
      * sql for query.
      */
     public static final String SQL_QUERY = "select id,data,created,expire from $1 where id =?";
@@ -128,7 +133,8 @@ public class SqlExecutor {
                         ErrorCode.SQL_GET_CONNECTION_ERROR
                     );
             }
-            ps = conn.prepareStatement(buildExecuteSql(sql));
+            
+            ps = conn.prepareStatement(buildExecuteSql(sql, conn));
             for (int i = 0; i < data.length; i++) {
                 ps.setObject(i + 1, data[i]);
             }
@@ -185,7 +191,7 @@ public class SqlExecutor {
                         ErrorCode.SQL_GET_CONNECTION_ERROR
                     );  
             }
-            ps = conn.prepareStatement(buildExecuteSql(sql));
+            ps = conn.prepareStatement(buildExecuteSql(sql, conn));
             for (int i = 0; data != null && i < data.length; i++) {
                 if (data[i] instanceof Date) {
                     Date date = (Date)data[i];
@@ -238,7 +244,7 @@ public class SqlExecutor {
                     );                
             }
             conn.setAutoCommit(false);
-            psts = conn.prepareStatement(buildExecuteSql(sql));
+            psts = conn.prepareStatement(buildExecuteSql(sql, conn));
             int count = 0;
             for (int i = 0; i < values.size(); i++) {
                 for (int j = 0; j < dataList.size(); j++) {
@@ -343,7 +349,9 @@ public class SqlExecutor {
         }
     }   
     
-    private String buildExecuteSql(String sql) {
-        return new StringBuffer(sql).toString().replace(TABLE_CHAR, sqlDomain.getTableName());
+    private String buildExecuteSql(String exeSql, Connection conn) throws SQLException {
+        exeSql = exeSql.replace(TABLE_CHAR, sqlDomain.getTableName());
+        exeSql = exeSql.replace(DATABASE_CHAR, conn.getCatalog());
+        return exeSql;
     }
 }
