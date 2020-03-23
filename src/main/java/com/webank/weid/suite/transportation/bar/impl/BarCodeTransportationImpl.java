@@ -19,31 +19,27 @@
 
 package com.webank.weid.suite.transportation.bar.impl;
 
-import java.lang.reflect.Method;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ServiceType;
+import com.webank.weid.exception.ProtocolSuiteException;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.amop.GetBarCodeDataArgs;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.Transportation;
-import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.params.TransModel;
 import com.webank.weid.suite.api.transportation.params.TransType;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.BarCodeVersion;
 import com.webank.weid.suite.entity.EncodeData;
+import com.webank.weid.suite.entity.TransCodeBaseData;
 import com.webank.weid.suite.transmission.TransmissionFactory;
-import com.webank.weid.suite.transmission.TransmissionRequest;
-import com.webank.weid.suite.transportation.AbstractJsonTransportation;
-import com.webank.weid.suite.transportation.bar.protocol.BarCodeData;
+import com.webank.weid.suite.transportation.AbstractCodeTransportation;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -53,7 +49,7 @@ import com.webank.weid.util.DataToolUtils;
  *
  */
 public class BarCodeTransportationImpl 
-    extends AbstractJsonTransportation 
+    extends AbstractCodeTransportation 
     implements Transportation {
 
     private static final Logger logger =
@@ -63,6 +59,33 @@ public class BarCodeTransportationImpl
 
     @Override
     public <T extends JsonSerializer> ResponseData<String> serialize(
+        T object, 
+        ProtocolProperty property
+    ) {
+        if (property != null && property.getTransModel() == TransModel.DOWN_MODEL) {
+            logger.error(
+                "[serialize] should to call serialize(WeIdAuthentication weIdAuthentication, "
+                + "T object, ProtocolProperty property).");
+            return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.THIS_IS_UNSUPPORTED); 
+        }
+        return serializeInner(object, property);
+    }
+    
+    @Override
+    public <T extends JsonSerializer> ResponseData<String> serialize(
+        WeIdAuthentication weIdAuthentication, 
+        T object,
+        ProtocolProperty property
+    ) {
+        ResponseData<String> response = serializeInner(object, property);
+        if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
+            super.registerWeIdAuthentication(weIdAuthentication);
+        }
+        return response;
+    }
+    
+    @Override
+    protected <T extends JsonSerializer> ResponseData<String> serializeInner(
         T object, 
         ProtocolProperty property
     ) {
@@ -78,40 +101,42 @@ public class BarCodeTransportationImpl
             return new ResponseData<String>(StringUtils.EMPTY, errorCode);
         }
         try {
-            // 构建BarCode协议数据
-            BarCodeData barBaseData = buildBarCodeData(property);
+            TransCodeBaseData codeData = TransCodeBaseData.newInstance(version.getClz());
+            // 构建协议基础数据
+            codeData.buildCodeData(
+                property,
+                fiscoConfig.getCurrentOrgId(),
+                String.valueOf(nextId())
+            );
             logger.info("[serialize] encode by {}.", property.getEncodeType().name());
             // 如果是原文方式，则直接放对象,data为对象类型
-            if (property.getEncodeType() == EncodeType.ORIGINAL) {
-                barBaseData.setData(object.toJson());
-            } else {
-                // 非原文格式，根据data进行编解码，data为字符串类型
-                // 创建编解码实体对象，对此实体中的data编码操作
-                EncodeData encodeData =
-                    new EncodeData(
-                        barBaseData.getId(),
-                        barBaseData.getOrgId(),
-                        object.toJson(),
-                        super.getVerifiers()
-                    );
+            EncodeData encodeData =
+                new EncodeData(
+                    codeData.getId(),
+                    codeData.getOrgId(),
+                    object.toJson(),
+                    super.getVerifiers()
+                );
 
-                String data =
-                    EncodeProcessorFactory
-                        .getEncodeProcessor(property.getEncodeType())
-                        .encode(encodeData);
-                barBaseData.setData(data);
+            String data =
+                EncodeProcessorFactory
+                    .getEncodeProcessor(property.getEncodeType())
+                    .encode(encodeData);
+            codeData.setData(data);
+            if (!codeData.check()) {
+                throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID);
             }
-            
             //save BarCodeData
             ResponseData<Integer> save = getDataDriver().save(
                 DataDriverConstant.DOMAIN_RESOURCE_INFO, 
-                barBaseData.getId(), 
-                DataToolUtils.serialize(barBaseData));
+                codeData.getId(), 
+                DataToolUtils.serialize(codeData)
+            );
             if (save.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new WeIdBaseException(ErrorCode.getTypeByErrorCode(save.getErrorCode()));
             }
             logger.info("[serialize] BarCodeTransportation serialization finished.");
-            return new ResponseData<String>(barBaseData.getBarCodeString(), ErrorCode.SUCCESS);
+            return new ResponseData<String>(codeData.buildCodeString(), ErrorCode.SUCCESS);
         } catch (WeIdBaseException e) {
             logger.error("[serialize] BarCodeTransportation serialization due to base error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
@@ -120,19 +145,6 @@ public class BarCodeTransportationImpl
                 "[serialize] BarCodeTransportation serialization due to unknown error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
-    }
-    
-    private BarCodeData buildBarCodeData(
-        ProtocolProperty property
-    ) { 
-        BarCodeData barCodeData = new BarCodeData();
-        barCodeData.setEncodeType(property.getEncodeType().getCode());
-        barCodeData.setId(String.valueOf(nextId()));
-        barCodeData.setOrgId(fiscoConfig.getCurrentOrgId());
-        barCodeData.setVersion(version.getCode());
-        barCodeData.setTransTypeCode(property.getTransType().getCode());
-        barCodeData.setUriTypeCode(property.getUriType().getCode());
-        return barCodeData;
     }
 
     @Override
@@ -157,14 +169,16 @@ public class BarCodeTransportationImpl
                 logger.error("[deserialize] checkEncodeProperty fail, errorCode:{}.", errorCode);
                 return new ResponseData<T>(null, errorCode);
             }
+            int versionCode = TransCodeBaseData.getVersion(transString);
+            BarCodeVersion version = BarCodeVersion.getVersion(versionCode);
+            TransCodeBaseData codeData = TransCodeBaseData.newInstance(version.getClz());
             // 解析协议
-            BarCodeData barCodeData = BarCodeData.buildByBarCodeString(transString);
+            codeData.buildCodeData(transString);
             // 获取协议请求下载通过类型
-            TransType type = TransType.getTransmissionByCode(
-                barCodeData.getTransTypeCode());
+            TransType type = TransType.getTransmissionByCode(codeData.getTransTypeCode());
             // 获取原始数据，两种协议获取方式，目前只实现一种amop，支持https扩展
             ResponseData<String> result = TransmissionFactory.getTransmisson(type)
-                .send(buildRequest(type, barCodeData, weIdAuthentication));
+                .send(buildRequest(type, codeData, weIdAuthentication));
             if (result.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[deserialize] channel request fail:{}-{}.",
@@ -174,23 +188,11 @@ public class BarCodeTransportationImpl
                 return new ResponseData<T>(null, 
                     ErrorCode.getTypeByErrorCode(result.getErrorCode().intValue()));
             }
-            barCodeData = DataToolUtils.deserialize(result.getResult(), BarCodeData.class);
-            String jsonData = DataToolUtils.convertUtcToTimestamp(
-                String.valueOf(barCodeData.getData()));
-            String jsonDataNew = jsonData;
-            if (DataToolUtils.isValidFromToJson(jsonData)) {
-                jsonDataNew = DataToolUtils.removeTagFromToJson(jsonData);
-            }
-            T object = null;
-            Method method = getFromJsonMethod(clazz);
-            if (method == null) {
-                //调用工具的反序列化 
-                object = (T) DataToolUtils.deserialize(jsonDataNew, clazz);
-            } else  {
-                object = (T) method.invoke(null, jsonDataNew);
-            }
-            logger.info("[deserialize] BarCodeTransportation deserialize finished.");
-            return new ResponseData<T>(object, ErrorCode.SUCCESS);
+            codeData = (TransCodeBaseData)DataToolUtils.deserialize(
+                result.getResult(), 
+                version.getClz()
+            );
+            return super.buildObject(String.valueOf(codeData.getData()), clazz);
         } catch (WeIdBaseException e) {
             logger.error("[deserialize] BarCodeTransportation deserialize due to base error.", e);
             return new ResponseData<T>(null, e.getErrorCode());
@@ -199,37 +201,6 @@ public class BarCodeTransportationImpl
                 "[deserialize] BarCodeTransportation deserialize due to unknown error.", e);
             return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
-    }
-
-    private TransmissionRequest<GetBarCodeDataArgs> buildRequest(
-        TransType type, 
-        BarCodeData barCodeData,
-        WeIdAuthentication weIdAuthentication
-    ) {
-        TransmissionRequest<GetBarCodeDataArgs> request = new TransmissionRequest<>();
-        request.setOrgId(barCodeData.getOrgId());
-        request.setServiceType(ServiceType.SYS_GET_BARCODE_DATA.name());
-        request.setWeIdAuthentication(weIdAuthentication);
-        request.setArgs(getBarCodeArgs(barCodeData, weIdAuthentication));
-        request.setTransType(type);
-        return request;
-    }
-    
-    private GetBarCodeDataArgs getBarCodeArgs(
-        BarCodeData barCodeData, 
-        WeIdAuthentication weIdAuthentication
-    ) {
-        GetBarCodeDataArgs args = new GetBarCodeDataArgs();
-        args.setResourceId(barCodeData.getId());
-        args.setToOrgId(barCodeData.getOrgId());
-        args.setFromOrgId(fiscoConfig.getCurrentOrgId());
-        args.setWeId(weIdAuthentication.getWeId());
-        String signValue = DataToolUtils.sign(
-            barCodeData.getId(), 
-            weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
-        );
-        args.setSignValue(signValue);
-        return args;
     }
     
     private ErrorCode checkInputForDeserialize(
@@ -262,7 +233,7 @@ public class BarCodeTransportationImpl
         errorCode = checkProtocolData(object);
         if (errorCode != ErrorCode.SUCCESS) {
             logger.error("[serialize] checkProtocolData fail, errorCode:{}.", errorCode);
-            return  errorCode;
+            return errorCode;
         }
         return ErrorCode.SUCCESS;
     }
