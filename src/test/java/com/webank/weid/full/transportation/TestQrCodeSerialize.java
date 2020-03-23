@@ -40,7 +40,6 @@ import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.crypto.CryptService;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
-import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
 
 /**
  * 二维码协议序列化测试.
@@ -124,7 +123,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     public void testSerialize_encodeError() {
         ResponseData<String> response =
             TransportationFactory.newQrCodeTransportation()
-                .serialize(presentation, new ProtocolProperty(EncodeType.getObject("GBK")));
+                .serialize(presentation, new ProtocolProperty(null));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR.getCode(),
@@ -225,28 +224,6 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
             ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
             response.getErrorCode().intValue()
         );
-        Assert.assertEquals(StringUtils.EMPTY, response.getResult());
-    }
-
-    /**
-     * mock异常情况.
-     */
-    @Test
-    public void testSerializeCase8() {
-
-        new MockUp<QrCodeBaseData>() {
-            @Mock
-            public QrCodeBaseData newInstance(Class<?> cls) throws ReflectiveOperationException {
-                return new HashMap<String, QrCodeBaseData>().get("key");
-            }
-        };
-
-        ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation().specify(verifier)
-                .serialize(presentation, new ProtocolProperty(EncodeType.CIPHER));
-
-        LogUtil.info(logger, "serialize", response);
-        Assert.assertEquals(ErrorCode.UNKNOW_ERROR.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
     }
 }

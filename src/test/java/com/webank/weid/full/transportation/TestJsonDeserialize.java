@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.ResponseData;
@@ -216,8 +217,8 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     public void testDeserializeCase6() {
         new MockUp<EncodeType>() {
             @Mock
-            public EncodeType getObject(String value) {
-                return null;
+            public EncodeType getEncodeType(int code) {
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
             }
         };
         ResponseData<PresentationE> wrapperRes = TransportationFactory.newJsonTransportation()
@@ -238,8 +239,8 @@ public class TestJsonDeserialize extends TestBaseTransportation {
     public void testDeserializeCase7() {
         new MockUp<EncodeType>() {
             @Mock
-            public EncodeType getObject(String value) {
-                return null;
+            public EncodeType getEncodeType(int code) {
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
             }
         };
 
