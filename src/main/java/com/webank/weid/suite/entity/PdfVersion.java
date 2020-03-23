@@ -1,5 +1,8 @@
 package com.webank.weid.suite.entity;
 
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
+
 public enum PdfVersion {
     V1(1);
 
@@ -23,12 +26,12 @@ public enum PdfVersion {
      * @param code the PdfVersion
      * @return PdfVersion
      */
-    public static PdfVersion getPdfVersion(int code) {
+    public static PdfVersion getVersion(int code) {
         for (PdfVersion version : PdfVersion.values()) {
             if (version.getCode() == code) {
                 return version;
             }
         }
-        return null;
+        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_VERSION_ERROR);
     }
 }

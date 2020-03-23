@@ -41,6 +41,11 @@ public class ProtocolProperty {
      * 目前默认为ORG,表示协议第三段为机构名如: 00org/resourceId
      */
     private UriType uriType = UriType.ORG;
+    
+    /**
+     * 二维码的数据模式: 默认为纯数据模式.
+     */
+    private TransModel transModel = TransModel.DATA_MODEL;
 
     public EncodeType getEncodeType() {
         return encodeType;
@@ -50,12 +55,21 @@ public class ProtocolProperty {
         this.encodeType = encodeType;
     }
 
+    public ProtocolProperty(EncodeType encodeType, TransModel transModel) {
+        this(encodeType);
+        this.transModel = transModel;
+    }
+    
     public TransType getTransType() {
         return transType;
     }
 
     public UriType getUriType() {
         return uriType;
+    }
+
+    public TransModel getTransModel() {
+        return transModel;
     }
     
 }

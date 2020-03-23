@@ -65,6 +65,12 @@ public class ConnectionPool {
     private static Properties initProperties(String dsNamePrefix) {
         // 连接URL
         String dbUrl = PropertyUtils.getProperty(dsNamePrefix + DataDriverConstant.JDBC_URL);
+        // 驱动名称
+        String driverNameKey = dsNamePrefix + DataDriverConstant.JDBC_DRIVER;
+        String driverClass = PropertyUtils.getProperty(
+            driverNameKey,
+            DataDriverConstant.POOL_DRIVER_NAME_DEFAULT_VALUE
+        );
         // 用户名
         String userNameKey = dsNamePrefix + DataDriverConstant.JDBC_USER_NAME;
         String userName = PropertyUtils.getProperty(userNameKey);
@@ -116,6 +122,7 @@ public class ConnectionPool {
 
         Properties p = new Properties();
         p.setProperty(DataDriverConstant.POOL_URL, dbUrl);
+        p.setProperty(DataDriverConstant.POOL_DRIVER_CLASS_NAME, driverClass);
         p.setProperty(DataDriverConstant.POOL_USERNAME, userName);
         p.setProperty(DataDriverConstant.POOL_PASSWORD, passWord);
         p.setProperty(DataDriverConstant.POOL_MAX_ACTIVE, maxActive);
