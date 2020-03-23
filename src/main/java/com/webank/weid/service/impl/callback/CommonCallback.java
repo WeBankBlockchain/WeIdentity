@@ -30,7 +30,7 @@ import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
-import com.webank.weid.service.impl.inner.DownBarCodeDataService;
+import com.webank.weid.service.impl.inner.DownTransDataService;
 import com.webank.weid.suite.auth.impl.WeIdAuthImpl;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
 import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
@@ -64,7 +64,7 @@ public class CommonCallback extends AmopCallback {
     }
 
     private static void initDefaultService() {
-        register(ServiceType.SYS_GET_BARCODE_DATA.name(), new DownBarCodeDataService());
+        register(ServiceType.SYS_GET_TRANS_DATA.name(), new DownTransDataService());
     }
 
     private static void register(String serviceType, TransmissionService<?> service) {
