@@ -35,6 +35,11 @@ public final class DataDriverConstant {
      * jdbc url properties.
      */
     public static final String JDBC_URL = "jdbc.url";
+    
+    /**
+     * jdbc driver properties.
+     */
+    public static final String JDBC_DRIVER = "jdbc.driver";
 
     /**
      * jdbc username properties.
@@ -159,6 +164,7 @@ public final class DataDriverConstant {
     /**
      *  the default value for pool.
      */
+    public static final String POOL_DRIVER_NAME_DEFAULT_VALUE = "com.mysql.jdbc.Driver";
     public static final String POOL_MAX_ACTIVE_DEFAULT_VALUE = "50";
     public static final String POOL_MIN_IDLE_DEFAULT_VALUE = "5";
     public static final String POOL_MAX_IDLE_DEFAULT_VALUE = "5";
