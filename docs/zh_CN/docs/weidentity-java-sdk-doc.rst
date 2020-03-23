@@ -954,7 +954,7 @@ AMOP通讯相关接口。
 接口列表
 --------
 
-WeIDService
+WeIdService
 ^^^^^^^^^^^
 
 1. createWeId
@@ -12706,17 +12706,17 @@ com.webank.weid.protocol.amop.AmopCommonArgs
      - 备注
    * - messageId
      - String
-     - Y
+     - N
      - 消息编号
      - 
    * - fromOrgId
      - String
-     - Y
+     - N
      - 消息来源机构编号
      - 
    * - toOrgId
      - String
-     - Y
+     - N
      - 消息目标机构编号
      - 
    * - message
