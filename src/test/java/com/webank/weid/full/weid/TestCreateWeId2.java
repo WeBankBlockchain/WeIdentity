@@ -31,7 +31,7 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.PrivateKeyIllegalException;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
@@ -45,7 +45,7 @@ import com.webank.weid.service.impl.engine.BaseEngine;
  *
  * @author v_wbgyang
  */
-public class TestCreateWeId2 extends TestBaseServcie {
+public class TestCreateWeId2 extends TestBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestCreateWeId2.class);
 

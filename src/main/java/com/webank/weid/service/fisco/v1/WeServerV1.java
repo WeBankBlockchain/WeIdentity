@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.rpc.callback.OnNotifyCallbackV1;
 import com.webank.weid.service.fisco.WeServer;
@@ -194,5 +195,10 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     @Override
     public String getVersion() throws IOException {
         return this.getWeb3j().web3ClientVersion().send().getResult();
+    }
+
+    @Override
+    protected String queryBucketFromCns() throws WeIdBaseException {
+        return null;
     }
 }

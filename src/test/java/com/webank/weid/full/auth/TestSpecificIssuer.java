@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -38,7 +38,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author chaoxinhu
  */
-public class TestSpecificIssuer extends TestBaseServcie {
+public class TestSpecificIssuer extends TestBaseService {
 
     private static String defaultType = "testCollege";
 

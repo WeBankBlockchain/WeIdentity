@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source run.config
+
 java_source_code_dir=$2
 config_file=${java_source_code_dir}/dist/bin/run.config
 app_xml_config_dir=${java_source_code_dir}/dist/conf/
@@ -55,21 +57,24 @@ function replace_java_contract()
 function modify_config()
 {
     echo "begin to modify sdk config..."
-    weid_address=$(cat weIdContract.address)
-    cpt_address=$(cat cptController.address)
-    issuer_address=$(cat authorityIssuer.address)
-    evidence_address=$(cat evidenceController.address)
-    specificissuer_address=$(cat specificIssuer.address)
-    export WEID_ADDRESS=${weid_address}
-    export CPT_ADDRESS=${cpt_address}
-    export ISSUER_ADDRESS=${issuer_address}
-    export EVIDENCE_ADDRESS=${evidence_address}
-    export SPECIFICISSUER_ADDRESS=${specificissuer_address}
-    export FISCO_BCOS_VERSION=${bcos_version}
-    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}:${FISCO_BCOS_VERSION}'
+    hash=$(cat hash)
+    export FISCO_BCOS_VERSION=${FISCO_BCOS_VERSION}
+    export CNS_PROFILE_ACTIVE=${CNS_PROFILE_ACTIVE}
+    export CNS_CONTRACT_FOLLOW=${hash}
+    export CHAIN_ID=${CHAIN_ID}
+    
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${CNS_CONTRACT_FOLLOW}:${CHAIN_ID}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${app_xml_config_dir}
-    NODEVAR='${BLOCKCHIAN_NODE_INFO}'
+    
+    export ORG_ID=${ORG_ID}
+    export MYSQL_ADDRESS=${MYSQL_ADDRESS}
+    export MYSQL_DATABASE=${MYSQL_DATABASE}
+    export MYSQL_USERNAME=${MYSQL_USERNAME}
+    export MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    export BLOCKCHIAN_NODE_INFO=${BLOCKCHIAN_NODE_INFO}
+    
+    NODEVAR='${ORG_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
     cp ${weid_config} ${app_xml_config_dir}
     echo "modify sdk config finished..."
@@ -78,20 +83,6 @@ function modify_config()
 function clean_config()
 {
     echo "begin to clean config..."
-    cd ${java_source_code_dir}/dist
-    if [ -d bin/ ];then
-    	rm -rf bin/
-    fi
-    if [ -d contracts/ ];then
-    	rm -rf contracts/
-    fi
-    if [ -d output/ ];then
-    	rm -rf output/
-    fi
-    if [ -f ${app_xml_config} ];then
-	rm -f ${app_xml_config}
-    fi
-    
     cd ${java_source_code_dir}
     if [ -f weIdContract.address ];then
         rm -f weIdContract.address
@@ -107,6 +98,9 @@ function clean_config()
     fi
     if [ -f specificIssuer.address ];then
         rm -f specificIssuer.address
+    fi
+    if [ -f hash ];then
+        rm -f hash
     fi
     echo "clean finished..."
 }
@@ -133,17 +127,22 @@ function gradle_build_sdk()
 	    fi
       
     done
-    
+
 	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
-	export WEID_ADDRESS="0x0"
-    export CPT_ADDRESS="0x0"
-    export ISSUER_ADDRESS="0x0"
-    export EVIDENCE_ADDRESS="0x0"
-    export SPECIFICISSUER_ADDRESS="0x0"
     export FISCO_BCOS_VERSION=${bcos_version}
-    MYVARS='${WEID_ADDRESS}:${CPT_ADDRESS}:${ISSUER_ADDRESS}:${EVIDENCE_ADDRESS}:${SPECIFICISSUER_ADDRESS}:${FISCO_BCOS_VERSION}'
+    export CNS_CONTRACT_FOLLOW=
+    export CNS_PROFILE_ACTIVE=${cns_profile_active}
+    export CHAIN_ID=${chain_id}
+    
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${CNS_CONTRACT_FOLLOW}:${CHAIN_ID}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
-    NODEVAR='${BLOCKCHIAN_NODE_INFO}'
+    
+    export ORG_ID=${org_id}
+    export MYSQL_ADDRESS=${mysql_address}
+    export MYSQL_DATABASE=${mysql_database}
+    export MYSQL_USERNAME=${mysql_username}
+    export MYSQL_PASSWORD=${mysql_password}
+    NODEVAR='${ORG_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
 	
     cd ${java_source_code_dir}/
@@ -165,7 +164,7 @@ function deploy_contract()
 	CLASSPATH=${CLASSPATH}:${jar_file}
 	done
 
-    java ${JAVA_OPTS} -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract
+    java ${JAVA_OPTS} -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract $1
     echo "contract deployment done."
 }
 
@@ -174,9 +173,9 @@ function main()
     # compile_contract ${1} ${2} ../output/
     # replace_java_contract
     gradle_build_sdk
-    deploy_contract
+    deploy_contract $3
     modify_config	
     clean_config
 }
 
-main
+main $@
