@@ -29,7 +29,7 @@
 
 #### 代码规范
 
-建议先浏览 [WeIdentity 代码规范](https://github.com/WeBankFinTech/weid-doc/blob/master/docs/zh_CN/docs/styleguides/styleguides.md)。
+建议先浏览 [WeIdentity 代码规范](https://weidentity.readthedocs.io/zh_CN/latest/docs/styleguides/styleguides.html)。
 
 #### 测试
 
