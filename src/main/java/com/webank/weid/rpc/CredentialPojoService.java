@@ -28,6 +28,7 @@ import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.cpt.Cpt101;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -82,7 +83,8 @@ public interface CredentialPojoService {
      */
     ResponseData<CredentialPojo> addSignature(
         List<CredentialPojo> credentialList,
-        WeIdAuthentication callerAuth);
+        WeIdAuthentication callerAuth
+    );
 
     /**
      * Get the full hash value of a CredentialPojo. All fields in the CredentialPojo will be
@@ -172,6 +174,18 @@ public interface CredentialPojoService {
      */
     ResponseData<CredentialPojo> createTrustedTimestamp(
         List<CredentialPojo> credentialList,
+        WeIdAuthentication weIdAuthentication
+    );
+
+    /**
+     * Create a data authorization token.
+     *
+     * @param authInfo the authorization info in CPT101 format
+     * @param weIdAuthentication the caller (authorization issuer) authentication
+     * @return the data authorization token in credentialPojo
+     */
+    ResponseData<CredentialPojo> createDataAuthToken(
+        Cpt101 authInfo,
         WeIdAuthentication weIdAuthentication
     );
 }

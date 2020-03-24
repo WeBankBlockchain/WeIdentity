@@ -54,7 +54,7 @@ public class SqlDomain {
     /**
      * default table name.
      */
-    private static final String DEFAULT_TABLE = "default_data";
+    private static final String DEFAULT_TABLE = "default_info";
     
     /**
      * 表的默认前缀.
@@ -107,10 +107,11 @@ public class SqlDomain {
     
     private void resolveDomain() {
         if (StringUtils.isBlank(this.key)) {
-            this.key = DataDriverConstant.DOMAIN_DEFAULT;
+            this.key = DataDriverConstant.DOMAIN_DEFAULT_INFO;
         }
         this.value = PropertyUtils.getProperty(this.key);
-        if (StringUtils.isBlank(this.value) && DataDriverConstant.DOMAIN_DEFAULT.equals(this.key)) {
+        if (StringUtils.isBlank(this.value) 
+            && DataDriverConstant.DOMAIN_DEFAULT_INFO.equals(this.key)) {
             this.baseDomain = ConnectionPool.getFirstDataSourceName();
             this.tableDomain = DEFAULT_TABLE;
         } else if (StringUtils.isNotBlank(this.value) 
@@ -120,14 +121,18 @@ public class SqlDomain {
             this.tableDomain = domains[1];
             if (!ConnectionPool.checkDataSourceName(this.baseDomain)) {
                 logger.error(
-                    "[resolveDomain] the domain {{}:{}} is invalid.",
+                    "[resolveDomain] the domain {{}:{}} is invalid, {} is not exists.",
                     this.key, 
-                    this.value
+                    this.value,
+                    this.baseDomain
                 );
                 throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
             }
         } else {
-            logger.error("[resolveDomain] the domain {{}} is illegal", this.key);
+            logger.error("[resolveDomain] the domain {{}:{}} is illegal.", 
+                this.key, 
+                this.value
+            );
             throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL);
         }
         resolveDomainTimeout();
@@ -136,7 +141,7 @@ public class SqlDomain {
     private void resolveDomainTimeout() {
         String timeout = PropertyUtils.getProperty(this.key + ".timeout");
         if (StringUtils.isBlank(timeout)) {
-            timeout =  PropertyUtils.getProperty(DataDriverConstant.DOMAIN_DEFAULT_TIMEOUT);
+            timeout =  PropertyUtils.getProperty(DataDriverConstant.DOMAIN_DEFAULT_INFO_TIMEOUT);
         }
         if (StringUtils.isNotBlank(timeout)) {
             this.timeout = Long.parseLong(timeout);

@@ -62,12 +62,12 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author v_wbgyang
  */
-public abstract class TestBaseServcie extends BaseTest {
+public abstract class TestBaseService extends BaseTest {
 
     /**
      * log4j.
      */
-    private static final Logger logger = LoggerFactory.getLogger(TestBaseServcie.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestBaseService.class);
 
     /**
      * private key of authority membership list.

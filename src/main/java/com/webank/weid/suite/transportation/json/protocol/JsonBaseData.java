@@ -59,6 +59,6 @@ public class JsonBaseData {
     /**
      * 协议通讯类型.
      */
+    @Deprecated
     private String type = "AMOP";
-    
 }

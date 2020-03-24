@@ -20,14 +20,18 @@
 package com.webank.weid.suite.endpoint;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +57,6 @@ public class RpcServer {
     private static final Integer DEFAULT_BOSS_THREAD_NUM = 10;
     private static final Integer DEFAULT_WORKER_THREAD_NUM = 20;
     private static final Integer UUID_LENGTH = 36;
-    private static Integer LISTENER_PORT =
-        Integer.valueOf(PropertyUtils.getProperty("rpc.listener.port"));
 
     /**
      * Map structure to store requestName and its registered EndpointFunctor Impl.
@@ -64,33 +66,55 @@ public class RpcServer {
     /**
      * The main entrance for RPC server process.
      *
-     * @param args String args
      * @throws Exception any exception
      */
-    public static void main(String[] args) throws Exception {
+    public static void run() throws Exception {
         if (implMap.size() == 0) {
             logger.error("Initialization failed, exiting..");
             System.exit(1);
         }
         EndpointDataUtil.loadAllEndpointInfoFromProps();
-        System.out.println("Trying to receive incoming traffic at Port: " + LISTENER_PORT);
-        logger.info("Trying to receive incoming traffic at Port: " + LISTENER_PORT);
-        ExecutorService pool = Executors.newCachedThreadPool();
-        AioQuickServer<String> server = new AioQuickServer<String>(LISTENER_PORT,
+        Integer listenerPort;
+        listenerPort =
+            Integer.valueOf(PropertyUtils.getProperty("endpoint.listener.port"));
+        System.out.println("Trying to receive incoming traffic at Port: " + listenerPort);
+        logger.info("Trying to receive incoming traffic at Port: " + listenerPort);
+        ExecutorService pool = new ThreadPoolExecutor(10, 200, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>(1024), new ThreadPoolExecutor.AbortPolicy());
+        AioQuickServer<String> server = new AioQuickServer<String>(listenerPort,
             new FixedLengthProtocol(),
             new MessageProcessor<String>() {
+                @Override
                 public void process(AioSession<String> session, String msg) {
                     pool.execute(() -> {
                         String uuid = msg.substring(msg.length() - UUID_LENGTH);
-                        logger.debug("RpcServer thread: " + Thread.currentThread().getId() + Thread
-                            .currentThread().getName() + ", received msg: " + msg
-                            + ", extracted UUID: "
-                            + uuid + ", session ID: " + session.getSessionID());
-                        System.out.println(
-                            "RpcServer thread: " + Thread.currentThread().getId() + Thread
-                                .currentThread().getName() + ", received msg: " + msg
-                                + ", extracted UUID: " + uuid + ", session ID: " + session
-                                .getSessionID());
+                        try {
+                            InetSocketAddress remoteAddress = session.getRemoteAddress();
+                            logger.debug("Remote request: " + remoteAddress.getHostString()
+                                + ", received msg: " + msg + ", extracted UUID: " + uuid
+                                + ", session ID: " + session.getSessionID());
+                            System.out.println("Remote request: " + remoteAddress.getHostString()
+                                + ", received msg: " + msg + ", extracted UUID: " + uuid
+                                + ", session ID: " + session.getSessionID());
+                            String whitelistedServerStr = PropertyUtils
+                                .getProperty("endpoint.whitelisted.server");
+                            List<String> whitelistedServers;
+                            if (StringUtils.isEmpty(whitelistedServerStr)) {
+                                whitelistedServers = new ArrayList<>();
+                            } else {
+                                whitelistedServers = Arrays.asList(whitelistedServerStr
+                                    .split(","));
+                            }
+                            if (!DataToolUtils.isLocalAddress(remoteAddress.getHostName())
+                                && !whitelistedServers.contains(remoteAddress.getHostName())) {
+                                logger.error("Request from invalid host, ignored.");
+                                System.out.println("Request from invalid host, ignored.");
+                                return;
+                            }
+                        } catch (IOException e) {
+                            logger.error("Failed to track remote address for session ID: "
+                                + session.getSessionID());
+                        }
                         String bizResult = StringUtils.EMPTY;
                         try {
                             bizResult = processClientMessage(msg);
@@ -114,6 +138,7 @@ public class RpcServer {
                     });
                 }
 
+                @Override
                 public void stateEvent(AioSession<String> session,
                     StateMachineEnum stateMachineEnum, Throwable throwable) {
                 }
@@ -156,14 +181,21 @@ public class RpcServer {
      *
      * @param requestName request name
      * @param functorImpl the implemented fuctor
+     * @param inAddrList the in-Addr list (can be empty)
      * @throws Exception save to files exception
      */
-    public static void registerEndpoint(String requestName, EndpointFunctor functorImpl)
-        throws Exception {
+    public static void registerEndpoint(
+        String requestName,
+        EndpointFunctor functorImpl,
+        List<String> inAddrList
+    ) throws Exception {
         implMap.put(requestName, functorImpl);
         EndpointInfo endpointInfo = new EndpointInfo();
         endpointInfo.setRequestName(requestName);
         endpointInfo.setDescription(functorImpl.getDescription());
+        if (inAddrList != null && inAddrList.size() > 0) {
+            endpointInfo.setInAddr(inAddrList);
+        }
         EndpointDataUtil.mergeToCentral(endpointInfo);
         EndpointDataUtil.saveEndpointsToFile();
     }
@@ -192,6 +224,6 @@ public class RpcServer {
         if (functorImpl == null) {
             return StringUtils.EMPTY;
         }
-        return functorImpl.execute(requestBody);
+        return functorImpl.callback(requestBody);
     }
 }
