@@ -1977,11 +1977,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     public ResponseData<CredentialPojo> createDataAuthToken(
         Cpt101 authInfo,
         WeIdAuthentication weIdAuthentication) {
-        ErrorCode innerErrorCode = verifyAuthInfo(authInfo);
-        if (innerErrorCode != ErrorCode.SUCCESS) {
-            return new ResponseData<>(null, innerErrorCode);
-        }
-        innerErrorCode = CredentialPojoUtils.isWeIdAuthenticationValid(weIdAuthentication);
+        ErrorCode innerErrorCode =
+            CredentialPojoUtils.isWeIdAuthenticationValid(weIdAuthentication);
         if (innerErrorCode != ErrorCode.SUCCESS) {
             return new ResponseData<>(null, innerErrorCode);
         }
@@ -1999,7 +1996,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         args.setIssuer(keyWeId);
         args.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
         args.setExpirationDate(args.getIssuanceDate() + authInfo.getDuration());
-        return this.createCredential(args);
+        ResponseData<CredentialPojo> resp = this.createCredential(args);
+        innerErrorCode = verifyAuthClaim(resp.getResult());
+        if (innerErrorCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(null, innerErrorCode);
+        }
+        return resp;
     }
 
     /**
