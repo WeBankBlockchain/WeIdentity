@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,11 +19,10 @@
 
 package com.webank.weid.service.impl.engine;
 
-import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.response.ResponseData;
 
-public interface EvidenceServiceEngine {
+public interface EvidenceServiceEngine extends ReloadStaticContract {
 
     ResponseData<String> createEvidence(
         String hashValue,
@@ -33,23 +32,26 @@ public interface EvidenceServiceEngine {
         String privateKey
     );
 
+    ResponseData<Boolean> addLog(
+        String hashValue,
+        String log,
+        Long timestamp,
+        String privateKey
+    );
+
+    ResponseData<String> getHashByCustomKey(String customKey);
+
+    ResponseData<String> createEvidenceWithCustomKey(
+        String hashValue,
+        String signature,
+        String extra,
+        Long timestamp,
+        String extraKey,
+        String privateKey
+    );
+
     ResponseData<EvidenceInfo> getInfo(String evidenceAddress);
 
-    /**
-     * verify create evidence event.
-     *
-     * @param eventRetCode eventRetCode
-     * @param address evidence contract address
-     * @return ErrorCode
-     */
-    default ErrorCode verifyCreateEvidenceEvent(Integer eventRetCode, String address) {
-        if (eventRetCode == null || address == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (eventRetCode
-            .equals(ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT.getCode())) {
-            return ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT;
-        }
-        return ErrorCode.SUCCESS;
-    }
+    ResponseData<EvidenceInfo> getInfoByCustomKey(String extraKey);
+
 }

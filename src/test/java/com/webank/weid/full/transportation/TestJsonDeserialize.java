@@ -113,7 +113,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         }
 
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
+            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
                 credentialPojo,
                 new ProtocolProperty(EncodeType.CIPHER)
             );
@@ -136,7 +136,7 @@ public class TestJsonDeserialize extends TestBaseTransportation {
         }
 
         ResponseData<String> response =
-            TransportationFactory.newJsonTransportation().serialize(
+            TransportationFactory.newJsonTransportation().specify(verifier).serialize(
                 credentialPojo,
                 new ProtocolProperty(EncodeType.CIPHER)
             );

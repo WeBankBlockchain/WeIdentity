@@ -19,16 +19,8 @@
 
 package com.webank.weid.util;
 
-import java.awt.BasicStroke;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Shape;
-import java.awt.geom.RoundRectangle2D;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -36,8 +28,14 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.NoSuchAlgorithmException;
@@ -46,7 +44,6 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -55,8 +52,6 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import javax.imageio.ImageIO;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -80,12 +75,6 @@ import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.reinert.jjschema.v1.JsonSchemaV4Factory;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.WriterException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
@@ -103,6 +92,8 @@ import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.utils.Numeric;
 import org.bouncycastle.util.encoders.Base64;
+import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
+import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,23 +118,10 @@ public final class DataToolUtils {
     private static final String SEPARATOR_CHAR = "-";
     //private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String CHARSET = StandardCharsets.UTF_8.toString();
-
-    private static final String FORMAT_NAME = "JPG";
-
     /**
      * default salt length.
      */
     private static final String DEFAULT_SALT_LENGTH = "5";
-
-    // 二维码尺寸
-    private static final int QRCODE_SIZE = 300;
-
-    // LOGO宽度
-    private static final int LOGO_WIDTH = 60;
-
-    // LOGO高度
-    private static final int LOGO_HEIGHT = 60;
 
     private static final int SERIALIZED_SIGNATUREDATA_LENGTH = 65;
 
@@ -268,6 +246,7 @@ public final class DataToolUtils {
 
     /**
      * Check whether the String is a valid hash.
+     *
      * @param hashValue hash in String
      * @return true if yes, false otherwise
      */
@@ -613,6 +592,36 @@ public final class DataToolUtils {
     }
 
     /**
+     * eecrypt the data.
+     *
+     * @param data the data to encrypt
+     * @param publicKey public key
+     * @return decrypt data
+     * @throws Exception encrypt exception
+     */
+    public static byte[] encrypt(String data, String publicKey)
+        throws Exception {
+
+        ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
+        return encrypt.encrypt(data.getBytes());
+    }
+
+
+    /**
+     * decrypt the data.
+     *
+     * @param data the data to decrypt
+     * @param privateKey private key
+     * @return original data
+     * @throws Exception decrypt exception
+     */
+    public static byte[] decrypt(byte[] data, String privateKey) throws Exception {
+
+        ECCDecrypt decrypt = new ECCDecrypt(new BigInteger(privateKey));
+        return decrypt.decrypt(data);
+    }
+
+    /**
      * Obtain the PublicKey from given PrivateKey.
      *
      * @param privateKey the private key
@@ -905,134 +914,6 @@ public final class DataToolUtils {
         }
     }
 
-    private static BufferedImage createImage(
-        String content,
-        String imgPath,
-        ErrorCorrectionLevel errorCorrectionLevel,
-        boolean needCompress)
-        throws WriterException, IOException {
-
-        Hashtable<EncodeHintType, Object> hints = new Hashtable<EncodeHintType, Object>();
-        hints.put(EncodeHintType.ERROR_CORRECTION, errorCorrectionLevel);
-        hints.put(EncodeHintType.CHARACTER_SET, CHARSET);
-        hints.put(EncodeHintType.MARGIN, 1);
-        BitMatrix bitMatrix =
-            new MultiFormatWriter()
-                .encode(content, BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE, hints);
-        int width = bitMatrix.getWidth();
-        int height = bitMatrix.getHeight();
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                image.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
-            }
-        }
-        if (StringUtils.isBlank(imgPath)) {
-            return image;
-        }
-        // 插入图片
-        insertImage(image, imgPath, needCompress);
-        return image;
-    }
-
-    private static void insertImage(BufferedImage source, String imgPath, boolean needCompress)
-        throws IOException {
-
-        File file = new File(imgPath);
-        if (!file.exists()) {
-            logger.error("imgPath:[{}] is not exists.", imgPath);
-            return;
-        }
-        Image src = ImageIO.read(new File(imgPath));
-        int width = src.getWidth(null);
-        int height = src.getHeight(null);
-        if (needCompress) { // 压缩LOGO
-            if (width > LOGO_WIDTH) {
-                width = LOGO_WIDTH;
-            }
-            if (height > LOGO_HEIGHT) {
-                height = LOGO_HEIGHT;
-            }
-            Image image = src.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-            BufferedImage tag = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-            Graphics g = tag.getGraphics();
-            g.drawImage(image, 0, 0, null); // 绘制缩小后的图
-            g.dispose();
-            src = image;
-        }
-        // 插入LOGO
-        Graphics2D graph = source.createGraphics();
-        int x = (QRCODE_SIZE - width) / 2;
-        int y = (QRCODE_SIZE - height) / 2;
-        graph.drawImage(src, x, y, width, height, null);
-        Shape shape = new RoundRectangle2D.Float(x, y, width, width, 6, 6);
-        graph.setStroke(new BasicStroke(3f));
-        graph.draw(shape);
-        graph.dispose();
-    }
-
-    private static void qrCodeEncode(
-        String content,
-        String imgPath,
-        String destPath,
-        ErrorCorrectionLevel errorCorrectionLevel,
-        boolean needCompress)
-        throws WriterException, IOException {
-
-        BufferedImage image = createImage(content, imgPath, errorCorrectionLevel, needCompress);
-        ImageIO.write(image, FORMAT_NAME, new File(destPath));
-    }
-
-    /**
-     * 生成不带LOGO的二维码并保存到指定文件中.
-     *
-     * @param content 二维码字符串
-     * @param destPath 二维码图片保存文件路径
-     * @param errorCorrectionLevel 容错级别
-     * @return code of ErrorCode
-     */
-    public static Integer generateQrCode(
-        String content,
-        ErrorCorrectionLevel errorCorrectionLevel,
-        String destPath) {
-
-        try {
-            qrCodeEncode(content, null, destPath, errorCorrectionLevel, false);
-            return ErrorCode.SUCCESS.getCode();
-        } catch (WriterException e) {
-            logger.error("generateQrCode into file WriterException.", e);
-        } catch (IOException e) {
-            logger.error("generateQrCode into file IOException.", e);
-        }
-        return ErrorCode.UNKNOW_ERROR.getCode();
-    }
-
-    /**
-     * 生成不带LOGO的二维码并将二维码的字节输入到字节输出流中.
-     *
-     * @param content 二维码字符串
-     * @param errorCorrectionLevel 容错级别
-     * @param stream 字节输出流
-     * @return code of ErrorCode
-     */
-    public static Integer generateQrCode(
-        String content,
-        ErrorCorrectionLevel errorCorrectionLevel,
-        OutputStream stream) {
-
-        try {
-            BufferedImage image = createImage(content, null, errorCorrectionLevel, false);
-            ImageIO.write(image, FORMAT_NAME, stream);
-            return ErrorCode.SUCCESS.getCode();
-        } catch (WriterException e) {
-            logger.error("generateQrCode into OutputStream WriterException.", e);
-        } catch (IOException e) {
-            logger.error("generateQrCode into OutputStream IOException.", e);
-        }
-        return ErrorCode.UNKNOW_ERROR.getCode();
-    }
-
-
     /**
      * Bytes array to bytes 32.
      *
@@ -1093,6 +974,7 @@ public final class DataToolUtils {
 
     /**
      * convert byte array to string.
+     *
      * @param bytearray byte[]
      * @return String
      */
@@ -1107,7 +989,7 @@ public final class DataToolUtils {
         }
         return result;
     }
-    
+
     /**
      * string to byte.
      *
@@ -1638,7 +1520,7 @@ public final class DataToolUtils {
                 loadJsonObject(jsonString),
                 CONVERT_UTC_LONG_KEYLIST,
                 FROM_JSON
-            ).toString();  
+            ).toString();
         } catch (IOException e) {
             logger.error("replaceJsonObj exception.", e);
             throw new DataTypeCastException(e);
@@ -1651,14 +1533,14 @@ public final class DataToolUtils {
         List<String> list,
         String type) {
         if (jsonObj.isObject()) {
-            return dealObjectOfConvertUtcAndLong((ObjectNode)jsonObj, list, type);
+            return dealObjectOfConvertUtcAndLong((ObjectNode) jsonObj, list, type);
         } else if (jsonObj.isArray()) {
-            return dealArrayOfConvertUtcAndLong((ArrayNode)jsonObj, list, type);
+            return dealArrayOfConvertUtcAndLong((ArrayNode) jsonObj, list, type);
         } else {
             return jsonObj;
         }
     }
-    
+
     private static JsonNode dealObjectOfConvertUtcAndLong(
         ObjectNode jsonObj,
         List<String> list,
@@ -1672,11 +1554,11 @@ public final class DataToolUtils {
                 if (key.equals(KEY_CLAIM)) {
                     resJson.set(key, obj);
                 } else {
-                    resJson.set(key, dealObjectOfConvertUtcAndLong((ObjectNode)obj, list, type));
+                    resJson.set(key, dealObjectOfConvertUtcAndLong((ObjectNode) obj, list, type));
                 }
             } else if (obj.isArray()) {
                 //JSONArray 
-                resJson.set(key, dealArrayOfConvertUtcAndLong((ArrayNode)obj, list, type));
+                resJson.set(key, dealArrayOfConvertUtcAndLong((ArrayNode) obj, list, type));
             } else {
                 if (list.contains(key)) {
                     if (TO_JSON.equals(type)) {
@@ -1713,9 +1595,9 @@ public final class DataToolUtils {
         for (int i = 0; i < jsonArr.size(); i++) {
             JsonNode jsonObj = jsonArr.get(i);
             if (jsonObj.isObject()) {
-                resJson.add(dealObjectOfConvertUtcAndLong((ObjectNode)jsonObj, list, type));
+                resJson.add(dealObjectOfConvertUtcAndLong((ObjectNode) jsonObj, list, type));
             } else if (jsonObj.isArray()) {
-                resJson.add(dealArrayOfConvertUtcAndLong((ArrayNode)jsonObj, list, type));
+                resJson.add(dealArrayOfConvertUtcAndLong((ArrayNode) jsonObj, list, type));
             } else {
                 resJson.add(jsonObj);
             }
@@ -1795,7 +1677,7 @@ public final class DataToolUtils {
         try {
             jsonObject = loadJsonObject(json);
             if (!jsonObject.has(KEY_FROM_TOJSON)) {
-                ((ObjectNode)jsonObject).put(KEY_FROM_TOJSON, TO_JSON);
+                ((ObjectNode) jsonObject).put(KEY_FROM_TOJSON, TO_JSON);
             }
         } catch (IOException e) {
             logger.error("addTagFromToJson fail." + e);
@@ -1815,13 +1697,89 @@ public final class DataToolUtils {
         try {
             jsonObject = loadJsonObject(json);
             if (jsonObject.has(KEY_FROM_TOJSON)) {
-                ((ObjectNode)jsonObject).remove(KEY_FROM_TOJSON);
+                ((ObjectNode) jsonObject).remove(KEY_FROM_TOJSON);
             }
         } catch (IOException e) {
             logger.error("removeTag fail." + e);
             return json;
         }
         return jsonObject.toString();
+    }
+
+    /**
+     * Check whether a URL String is a valid endpoint.
+     *
+     * @param url the endpoint url
+     * @return true if yes, false otherwise
+     */
+    public static boolean isValidEndpointUrl(String url) {
+        if (StringUtils.isEmpty(url)) {
+            return false;
+        }
+        String hostname;
+        Integer port;
+        String endpointName;
+        try {
+            URI uri = new URI(url);
+            hostname = uri.getHost();
+            port = uri.getPort();
+            String path = uri.getPath();
+            if (StringUtils.isEmpty(hostname) || StringUtils.isEmpty(path) || port < 0) {
+                logger.error("Service URL illegal: {}", url);
+                return false;
+            }
+            // Truncate the first slash
+            endpointName = path.substring(1);
+            if (StringUtils.isEmpty(endpointName)) {
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Service URL format check failed: {}", url);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * check if the input string is Uft-8.
+     * @param string input
+     * @return true, otherwise false
+     */
+    public static boolean isUtf8String(String string) {
+        try {
+            string.getBytes("UTF-8");
+            return true;
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Passed-in String is not a valid UTF-8 String.");
+        }
+        return false;
+    }
+
+    /**
+     * Check whether the address is local address.
+     *
+     * @param host host string
+     * @return true if yes, false otherwise
+     */
+    public static boolean isLocalAddress(String host) {
+        InetAddress addr;
+        try {
+            addr = InetAddress.getByName(host);
+        } catch (UnknownHostException e) {
+            logger.error("Unkown host: " + host);
+            return false;
+        }
+        // Check if the address is a valid special local or loop back
+        if (addr.isSiteLocalAddress() || addr.isAnyLocalAddress() || addr.isLoopbackAddress()
+            || addr.isLinkLocalAddress()) {
+            return true;
+        }
+        // Check if the address is defined on any interface
+        try {
+            return NetworkInterface.getByInetAddress(addr) != null;
+        } catch (SocketException e) {
+            return false;
+        }
     }
 }
 

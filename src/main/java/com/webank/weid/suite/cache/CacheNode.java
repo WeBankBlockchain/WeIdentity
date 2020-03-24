@@ -50,6 +50,10 @@ public class CacheNode<T> {
         cache.invalidate(key);
     }
     
+    public void removeAll() {
+        cache.invalidateAll();
+    }
+    
     public String getCacheName() {
         return cacheName;
     }

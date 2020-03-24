@@ -72,15 +72,24 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
     private static SpecificIssuerController specificIssuerController;
 
     /**
-     * constructor.
+     * 构造函数.
      */
-    static {
+    public AuthorityIssuerEngineV1() {
+        if (authorityIssuerController == null || specificIssuerController == null) {
+            reload();
+        }
+    }
+
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
         authorityIssuerController = getContractService(
             fiscoConfig.getIssuerAddress(),
             AuthorityIssuerController.class);
         specificIssuerController = getContractService(
             fiscoConfig.getSpecificIssuerAddress(),
-            SpecificIssuerController.class);
+            SpecificIssuerController.class); 
     }
 
     /**
