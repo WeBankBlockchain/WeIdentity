@@ -21,7 +21,12 @@ package com.webank.weid.suite.transportation;
 
 import java.util.List;
 
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.inf.JsonSerializer;
+import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
+import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 
 /**
  * 二维码传输协议抽象类定义.
@@ -36,5 +41,18 @@ public abstract class AbstractJsonTransportation
     public JsonTransportation specify(List<String> verifierWeIdList) {
         this.setVerifier(verifierWeIdList);
         return this;
+    }
+    
+    @Override
+    public <T extends JsonSerializer> ResponseData<String> serialize(
+        WeIdAuthentication weIdAuthentication, 
+        T object,
+        ProtocolProperty property
+    ) {
+        ResponseData<String> response = serialize(object, property);
+        if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
+            super.registerWeIdAuthentication(weIdAuthentication);
+        }
+        return response;
     }
 }

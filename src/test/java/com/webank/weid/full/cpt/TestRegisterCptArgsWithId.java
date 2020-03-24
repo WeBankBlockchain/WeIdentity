@@ -34,7 +34,7 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -51,7 +51,7 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author v_wbgyang.
  */
-public class TestRegisterCptArgsWithId extends TestBaseServcie {
+public class TestRegisterCptArgsWithId extends TestBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestRegisterCptArgsWithId.class);
 

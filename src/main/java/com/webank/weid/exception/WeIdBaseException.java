@@ -75,7 +75,7 @@ public class WeIdBaseException extends RuntimeException {
         StringBuilder builder = new StringBuilder();
         builder
             .append(s)
-            .append(". Error code =")
+            .append(". Error code = ")
             .append(getErrorCode().getCode())
             .append(", Error message : ")
             .append(getMessage());

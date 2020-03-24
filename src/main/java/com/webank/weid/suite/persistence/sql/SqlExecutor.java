@@ -157,7 +157,6 @@ public class SqlExecutor {
             result.setErrorCode(ErrorCode.SUCCESS);
             result.setResult(dataMap);
         } catch (SQLException e) {
-            e.printStackTrace();
             logger.error("Query data from {{}} with exception", sqlDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
         } finally {
