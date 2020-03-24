@@ -36,7 +36,7 @@ if (!gradle.startParameter.isOffline()) {
 
 group 'com.webank'
 
-version = "1.5.2"
+version = "1.6.0"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -47,7 +47,6 @@ targetCompatibility = 1.8
 repositories {
     if (!gradle.startParameter.isOffline()) {
         mavenLocal()
-        maven { url "https://oss.sonatype.org/content/groups/public/" }
         mavenCentral()
         maven { url "https://dl.bintray.com/ethereum/maven/" }
     } else {
@@ -138,7 +137,7 @@ dependencies {
                 exclude group: "org.fisco-bcos", module: "web3sdk"
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
-            compile("org.fisco-bcos:web3sdk:2.1.2-0312-SNAPSHOT"){
+            compile("org.fisco-bcos:web3sdk:2.1.3"){
                 exclude group:"io.netty"
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
@@ -159,7 +158,7 @@ dependencies {
                 exclude group: "org.fisco-bcos", module: "web3sdk"
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
-            compile("org.fisco-bcos:web3sdk:2.1.2-0312-SNAPSHOT"){
+            compile("org.fisco-bcos:web3sdk:2.1.3"){
                 exclude group:"io.netty"
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
