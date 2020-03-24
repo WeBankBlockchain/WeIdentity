@@ -83,7 +83,8 @@ public interface CredentialPojoService {
      */
     ResponseData<CredentialPojo> addSignature(
         List<CredentialPojo> credentialList,
-        WeIdAuthentication callerAuth);
+        WeIdAuthentication callerAuth
+    );
 
     /**
      * Get the full hash value of a CredentialPojo. All fields in the CredentialPojo will be

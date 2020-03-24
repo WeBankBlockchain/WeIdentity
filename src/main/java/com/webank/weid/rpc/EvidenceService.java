@@ -76,7 +76,8 @@ public interface EvidenceService {
     ResponseData<Boolean> addLogByHash(
         String hashValue,
         String log,
-        WeIdPrivateKey weIdPrivateKey);
+        WeIdPrivateKey weIdPrivateKey
+    );
 
     /**
      * Add log entry for an existing evidence. This log will be recorded on blockchain permanently,
@@ -90,7 +91,8 @@ public interface EvidenceService {
     ResponseData<Boolean> addLogByCustomKey(
         String customKey,
         String log,
-        WeIdPrivateKey weIdPrivateKey);
+        WeIdPrivateKey weIdPrivateKey
+    );
 
     /**
      * Get the evidence info from blockchain using hash as key.
