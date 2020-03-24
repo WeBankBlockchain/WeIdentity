@@ -281,6 +281,20 @@ public enum ErrorCode {
 
 
     /**
+     * Authorization WeIDs: from and to must be different.
+     */
+    AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT(100450,
+        "authorization's fromWeId and toWeId must be different"
+    ),
+
+    /**
+     * Authorization: cannot authorize other WeID's resource.
+     */
+    AUTHORIZATION_CANNOT_AUTHORIZE_OTHER_WEID_RESOURCE(100451,
+        "cannot authorize other WeID's resource"
+    ),
+
+    /**
      * The credential evidence contract failure: illegal input.
      */
     CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT(
@@ -305,6 +319,16 @@ public enum ErrorCode {
      * The credential evidence hash mismatch.
      */
     CREDENTIAL_EVIDENCE_NOT_EXIST(100502, "evidence does not exist on chain"),
+
+    /**
+     * The credential evidence interface does not support fisco bcos 1.3.
+     */
+    CREDENTIAL_EVIDENCE_NOT_SUPPORTED(100503, "evidence interface does not support fisco bcos 1.3"),
+
+    /**
+     * On-chain string length exceeded acceptable max.
+     */
+    ON_CHAIN_STRING_TOO_LONG(100504, "on-chain String length exceeds limit"),
 
     /**
      * The challenge is invalid.
@@ -411,6 +435,16 @@ public enum ErrorCode {
     ENCRYPT_KEY_INVALID(100704, "the key is invalid."),
 
     /**
+     * encrypt data failed.
+     */
+    ENCRYPT_DATA_FAILED(100705, "encrypt data failed."),
+
+    /**
+     * decrypt data failed.
+     */
+    DECRYPT_DATA_FAILED(100706, "decrypt data failed."),
+
+    /**
      * transportation base error.
      */
     TRANSPORTATION_BASE_ERROR(100800, "suite baes exception error, please check the error log."),
@@ -462,6 +496,21 @@ public enum ErrorCode {
      * pdf transfer error.
      */
     TRANSPORTATION_PDF_VERIFY_ERROR(100809, "pdf verify error, please check the error log."),
+    
+    /**
+     * the transmission type is invalid.
+     */
+    TRANSPORTATION_TRANSMISSION_TYPE_INVALID(100810, "the trans type is invalid."),
+    
+    /**
+     * the URI type is invalid.
+     */
+    TRANSPORTATION_URI_TYPE_INVALID(100811, "the URI type is invalid."),
+
+    /**
+     * no spcifyer to set.
+     */
+    TRANSPORTATION_NO_SPECIFYER_TO_SET(100812, "no spcifyer to set."),
 
     /**
      * Authority issuer main error code.
@@ -641,6 +690,38 @@ public enum ErrorCode {
     ),
 
     /**
+     * no permission of weIdAuth.
+     */
+    WEID_AUTH_NO_PERMISSION(
+        100112,
+        "no permission of weIdAuth."
+    ),
+
+    /**
+     * no permission of weIdAuth.
+     */
+    WEID_AUTH_NO_CALLBACK(
+        100113,
+        "weIdAuth callback is not registered."
+    ),
+    
+    /**
+     * the channelId is null.
+     */
+    WEID_AUTH_CHANNELID_IS_NULL(
+        100114,
+        "the channelId is null."
+    ),
+    
+    /**
+     * the channelId is invalid.
+     */
+    WEID_AUTH_CHANNELID_INVALID(
+        100115,
+        "the channelId is invalid."
+    ),
+
+    /**
      * transaction timeout.
      */
     TRANSACTION_TIMEOUT(160001, "the transaction is timeout."),
@@ -708,6 +789,46 @@ public enum ErrorCode {
      * the data is expire.
      */
     SQL_DATA_EXPIRE(160015, "the data is expire."),
+    
+    /**
+     * no premission.
+     */
+    CNS_NO_PERMISSION(160016, "no premission for this cns."),
+    
+    /**
+     * the cns does not exist.
+     */
+    CNS_DOES_NOT_EXIST(160017, "the cns does not exist."),
+    
+    /**
+     * the cns is used.
+     */
+    CNS_IS_USED(160018, "the cns is used."),
+    
+    /**
+     * the cns is not used.
+     */
+    CNS_IS_NOT_USED(160019, "the cns is not used."),
+    
+    /**
+     * the code is undefined.
+     */
+    CNS_CODE_UNDEFINED(160020, "the code is undefined."),
+
+    /**
+     * the data does not exist.
+     */
+    SQL_DATA_DOES_NOT_EXIST(160021, "the data does not exist."),
+    
+    /**
+     * this is unsupported.
+     */
+    THIS_IS_UNSUPPORTED(160022, "this is unsupported."),
+    
+    /**
+     * this is repeated call.
+     */
+    THIS_IS_REPEATED_CALL(160023, "this is repeated call."),
 
     /**
      * other uncatched exceptions or error.

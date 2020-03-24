@@ -24,13 +24,17 @@ import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
+import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
 import com.webank.weid.protocol.amop.IssueCredentialArgs;
+import com.webank.weid.protocol.amop.RequestVerifyChallengeArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
+import com.webank.weid.protocol.response.GetWeIdAuthResponse;
 import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
+import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 
 /**
@@ -122,4 +126,31 @@ public class AmopCallback implements PushNotifyAllCallback {
         return result;
     }
 
+    /**
+     * 默认获取weIdAuthObj回调.
+     *
+     * @param args 获取weIdAuthObj需要的参数
+     * @return 返回weIdAuthObj的响应体
+     */
+    public GetWeIdAuthResponse onPush(GetWeIdAuthArgs args) {
+
+        GetWeIdAuthResponse result = new GetWeIdAuthResponse();
+        result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+        result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+        return result;
+    }
+
+    /**
+     * 默认获取weIdAuthObj回调.
+     *
+     * @param args 获取weIdAuthObj需要的参数
+     * @return 返回weIdAuthObj的响应体
+     */
+    public RequestVerifyChallengeResponse onPush(RequestVerifyChallengeArgs args) {
+
+        RequestVerifyChallengeResponse result = new RequestVerifyChallengeResponse();
+        result.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+        result.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+        return result;
+    }
 }

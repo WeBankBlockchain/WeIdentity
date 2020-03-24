@@ -65,7 +65,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     @Test
     public void testSerialize_EncodeTypeOriginal() {
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation()
+            TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(presentation, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -157,7 +157,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     public void testSerialize_serializeCredentialPojo() {
 
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation()
+            TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(credentialPojo, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
@@ -175,7 +175,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
 
         CredentialPojo credentialPojo1 = new CredentialPojo();
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation()
+            TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(credentialPojo1, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(
@@ -193,7 +193,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
         PresentationE presentation = this.getPresentationE();
         presentation.getContext().add("value|v");
         ResponseData<String> response =
-            TransportationFactory.newQrCodeTransportation()
+            TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(presentation, new ProtocolProperty(EncodeType.ORIGINAL));
         LogUtil.info(logger, "serialize", response);
         Assert.assertEquals(

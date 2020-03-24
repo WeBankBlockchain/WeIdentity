@@ -73,7 +73,11 @@ import com.webank.weid.suite.transportation.AbstractPdfTransportation;
 import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 import com.webank.weid.util.DataToolUtils;
 
-
+/**
+ * pdf模式序列化接口实现.
+ * @author yanggang
+ *
+ */
 public class PdfTransportationImpl
     extends AbstractPdfTransportation
     implements PdfTransportation {
@@ -758,8 +762,9 @@ public class PdfTransportationImpl
         ProtocolProperty property) {
 
         logger.info(
-            "begin to execute PdfTransportationImpl serialization, property:{}.", property);
-
+            "begin to execute PdfTransportation serialization, property:{}.", property);
+        logger.info(
+            "input the object for PdfTransportation serialization, object:{}.", object);
         ResponseData<byte[]> errorCode1 = checkPara(object, property);
         if (errorCode1 != null) {
             return errorCode1;
@@ -826,8 +831,9 @@ public class PdfTransportationImpl
         String inputPdfTemplatePath) {
 
         logger.info(
-            "begin to execute PdfTransportationImpl serialization, property:{}.", property);
-
+            "[serialize] begin to execute PdfTransportation serialization, property:{}.", property);
+        logger.info(
+            "[serialize] input the object for PdfTransportation serialization, object:{}.", object);
         ResponseData<byte[]> errorCode1 = checkPara(object, property);
         if (errorCode1 != null) {
             return errorCode1;
@@ -841,7 +847,7 @@ public class PdfTransportationImpl
                 try {
                     document = PDDocument.load(file);
                 } catch (IOException e) {
-                    logger.error("pdf template load error:{}.", ErrorCode.BASE_ERROR);
+                    logger.error("pdf template load error:{}.", ErrorCode.BASE_ERROR, e);
                     return new ResponseData<>(null,  ErrorCode.BASE_ERROR);
                 }
             } else {
@@ -888,7 +894,9 @@ public class PdfTransportationImpl
                     "[serialize] PdfTransportation serialization due to File Path illegal error.");
                 return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
             }
-
+            logger.info(
+                "[serialize] input the object for PdfTransportation serialization with template,"
+                + " object:{}", object);
             File file = createFileByPath(outputPdfFilePath);
 
             ResponseData<byte[]> res = serializeWithTemplate(
@@ -931,8 +939,7 @@ public class PdfTransportationImpl
             logger.error("[deserialize] checkWeIdAuthentication fail, errorCode:{}.", errorCode);
             return new ResponseData<>(null, errorCode);
         }
-        super.setWeIdAuthentication(weIdAuthentication);
-
+        
         //开始反序列化
         logger.info("begin to execute PdfTransportationImpl deserialization from InputStream.");
         try {
@@ -944,7 +951,7 @@ public class PdfTransportationImpl
                 pdfAttributeInfo.getId(),
                 pdfAttributeInfo.getOrgId(),
                 String.valueOf(pdfAttributeInfo.getData()),
-                super.getWeIdAuthentication()
+                weIdAuthentication
             );
 
             //根据编解码类型获取编解码枚举对象

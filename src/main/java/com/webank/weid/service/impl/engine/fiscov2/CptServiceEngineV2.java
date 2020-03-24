@@ -86,11 +86,20 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     private static CptController cptController;
     private static Persistence dataDriver;
 
-    static {
-
+    /**
+     * 构造函数.
+     */
+    public CptServiceEngineV2() {
         if (cptController == null) {
-            cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
+            reload();
         }
+    }
+    
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
+        cptController = getContractService(fiscoConfig.getCptAddress(), CptController.class);
     }
 
     private static Persistence getDataDriver() {
@@ -145,7 +154,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             }
             return response;
         } catch (Exception e) {
-            logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId);
+            logger.error("[updateCpt] cptId limited max value. cptId:{}", cptId, e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
@@ -421,8 +430,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 .intValue();
         } catch (Exception e1) {
             logger.error(
-                "[queryCredentialTemplate] get block number for cpt : {} failed.",
-                cptId);
+                "[queryCredentialTemplate] get block number for cpt : {} failed. Error message:{}",
+                cptId,
+                e1);
             return new ResponseData<CredentialTemplateEntity>(null, ErrorCode.UNKNOW_ERROR);
         }
         if (blockNum == 0) {
@@ -437,7 +447,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 .getBlockByNumber(new DefaultBlockParameterNumber(blockNum), true).send();
         } catch (IOException e) {
             logger.error(
-                "[queryCredentialTemplate]get block by number :{} failed. Error message:{}",
+                "[queryCredentialTemplate] get block by number :{} failed. Error message:{}",
                 blockNum,
                 e);
         }
@@ -493,6 +503,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
             credentialTemplateStorage.setCredentialSchema(attributes);
         } catch (Exception e) {
+            logger.error("[queryCredentialTemplate] query credential template has error.", e);
             return new ResponseData<CredentialTemplateEntity>(null, ErrorCode.UNKNOW_ERROR);
         }
 
