@@ -1,3 +1,13 @@
+### V1.6.0 (2020-03-24)
+- Features:
+1. Endpoint service now supports reentrance and whitelist for remote servers.
+2. Extra values in Evidence is now as log append-only style. The R/W efficiency of Evidence is also improved.
+3. Data authorization scheme based on Endpoint service.
+4. A new WeIdAuth module to support build of authenticated trusted channel between communicating parties.
+5. Transportation module now supports Bar Codes and is refactored.
+6. WeIdentity smart contracts deployment now supports CNS management.
+7. A new Transmission module to support Cross-process Remote Method Invocation.
+
 ### V1.5.2 (2020-02-24)
 - Features:
 1. PDF Transportation now forbids content tampering during transportation.
