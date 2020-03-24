@@ -47,26 +47,68 @@ public interface EvidenceService {
     ResponseData<String> createEvidence(Hashable object, WeIdPrivateKey weIdPrivateKey);
 
     /**
-     * Create a new evidence together with uploaded extra values.
+     * Create a new evidence together with log and custom key. Other guys can use this custom key,
+     * OR its hash value, to lookup the detailed information of this evidence. Multiple calls of
+     * this method will yield multiple log entries as the same of addLog().
      *
      * @param object the given Java object
      * @param weIdPrivateKey the signer WeID's private key
-     * @param extra the extra value blob
+     * @param log log entry
+     * @param customKey custom key determined by creator - it cannot be a hash value though
      * @return evidence hash value
      */
-    ResponseData<String> createEvidence(
+    ResponseData<String> createEvidenceWithLogAndCustomKey(
         Hashable object,
         WeIdPrivateKey weIdPrivateKey,
-        Map<String, String> extra
+        String log,
+        String customKey
     );
 
     /**
-     * Get the evidence info from blockchain.
+     * Add log entry for an existing evidence. This log will be recorded on blockchain permanently,
+     * and finally it will be fetched as a list when trying to get evidence.
      *
-     * @param evidenceKey the hash, on chain
+     * @param hashValue hash value
+     * @param log log entry - can be null or empty
+     * @param weIdPrivateKey the signer WeID's private key
+     * @return true if succeeded, false otherwise
+     */
+    ResponseData<Boolean> addLogByHash(
+        String hashValue,
+        String log,
+        WeIdPrivateKey weIdPrivateKey
+    );
+
+    /**
+     * Add log entry for an existing evidence. This log will be recorded on blockchain permanently,
+     * and finally it will be fetched as a list when trying to get evidence.
+     *
+     * @param customKey custom key
+     * @param log log entry - can be null or empty
+     * @param weIdPrivateKey the signer WeID's private key
+     * @return true if succeeded, false otherwise
+     */
+    ResponseData<Boolean> addLogByCustomKey(
+        String customKey,
+        String log,
+        WeIdPrivateKey weIdPrivateKey
+    );
+
+    /**
+     * Get the evidence info from blockchain using hash as key.
+     *
+     * @param hashValue the hash, on chain
      * @return The EvidenceInfo
      */
-    ResponseData<EvidenceInfo> getEvidence(String evidenceKey);
+    ResponseData<EvidenceInfo> getEvidence(String hashValue);
+
+    /**
+     * Get the evidence info from blockchain using custom key.
+     *
+     * @param customKey the custom key, on chain
+     * @return The EvidenceInfo
+     */
+    ResponseData<EvidenceInfo> getEvidenceByCustomKey(String customKey);
 
     /**
      * Generate hash value of any passed-in param.

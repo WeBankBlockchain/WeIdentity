@@ -33,7 +33,7 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.full.TestBaseServcie;
+import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -50,7 +50,7 @@ import com.webank.weid.util.WeIdUtils;
  * registerCpt(CptMapArgs args) method for testing CptService.
  * @author v_wbgyang.
  */
-public class TestRegisterCptArgs extends TestBaseServcie {
+public class TestRegisterCptArgs extends TestBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestRegisterCptArgs.class);
 
