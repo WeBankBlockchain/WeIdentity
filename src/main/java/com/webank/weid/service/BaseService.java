@@ -21,7 +21,6 @@ package com.webank.weid.service;
 
 import java.io.IOException;
 
-import com.webank.wedpr.common.NativeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +29,8 @@ import com.webank.weid.config.ContractConfig;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.amop.AmopRequestBody;
 import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
@@ -39,6 +40,8 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
+import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
+import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -49,6 +52,8 @@ import com.webank.weid.util.DataToolUtils;
 public abstract class BaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
+    
+    private static DataBucketServiceEngine bucket;
 
     protected static FiscoConfig fiscoConfig;
 
@@ -59,9 +64,7 @@ public abstract class BaseService {
         if (!fiscoConfig.load()) {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
         }
-        if (StringUtils.isEmpty(fiscoConfig.getCurrentOrgId())) {
-            logger.error("[BaseService] the blockchain orgId is blank.");
-        }
+        fiscoConfig.check();
     }
 
     /**
@@ -82,6 +85,13 @@ public abstract class BaseService {
         }
     }
 
+    protected static DataBucketServiceEngine getBucket() {
+        if (bucket == null) {
+            bucket = EngineFactory.createDataBucketServiceEngine();
+        }
+        return bucket;
+    }
+    
     /**
      * Gets the web3j.
      *
@@ -131,7 +141,18 @@ public abstract class BaseService {
         }
         return weServer.getVersion();
     }
-
+    
+    /**
+     * 查询bucket地址信息.
+     * @return 返回bucket地址
+     */
+    public static String getBucketAddress() {
+        if (weServer == null) {
+            init();
+        }
+        return weServer.getBucketAddress();
+    }
+    
     /**
      * Get the Sequence parameter.
      *
@@ -238,5 +259,32 @@ public abstract class BaseService {
         responseStruct.setResult(msgBodyObj);
         return responseStruct;
     }
-
+    
+    /**
+     * 重新拉取合约地址 并且重新加载相关合约.
+     */
+    protected static void reloadAddress() {
+        fiscoConfig.load();
+        String hash = fiscoConfig.getCnsContractFollow();
+        if (StringUtils.isBlank(hash)) {
+            throw new WeIdBaseException("the value of cns.contract.follow is null.");
+        }
+        String  weIdAddress = getAddress(hash, WeIdConstant.CNS_WEID_ADDRESS);
+        String  issuerAddress = getAddress(hash, WeIdConstant.CNS_AUTH_ADDRESS);
+        String  specificIssuerAddress = getAddress(hash, WeIdConstant.CNS_SPECIFIC_ADDRESS);
+        String  evidenceAddress = getAddress(hash, WeIdConstant.CNS_EVIDENCE_ADDRESS); 
+        String  cptAddress = getAddress(hash, WeIdConstant.CNS_CPT_ADDRESS);
+        fiscoConfig.setWeIdAddress(weIdAddress);
+        fiscoConfig.setCptAddress(cptAddress);
+        fiscoConfig.setIssuerAddress(issuerAddress);
+        fiscoConfig.setSpecificIssuerAddress(specificIssuerAddress);
+        fiscoConfig.setEvidenceAddress(evidenceAddress); 
+        if (!fiscoConfig.checkAddress()) {
+            throw new WeIdBaseException("can not found the contract address by hash: " + hash);
+        }
+    }
+    
+    private static String getAddress(String hash, String key) {
+        return getBucket().get(hash, key).getResult();
+    }
 }

@@ -42,12 +42,7 @@ public final class PropertyUtils {
     private static Properties prop = new Properties();
 
     static {
-        try {
-            loadProperties(WEIDENTITY_PROP_NAME);
-            loadProperties(FISCO_PROP_NAME);
-        } catch (IOException e) {
-            logger.error("[PropertyUtils] Load weidentity.properties file failed.", e);
-        }
+        load();
     }
 
     /**
@@ -93,5 +88,26 @@ public final class PropertyUtils {
      */
     public static Set<Object> getAllPropertyKey() {
         return prop.keySet();
+    }
+    
+    /**
+     * load the properties.
+     */
+    private static void load() {
+        
+        try {
+            loadProperties(WEIDENTITY_PROP_NAME);
+            loadProperties(FISCO_PROP_NAME);
+        } catch (IOException e) {
+            logger.error("[PropertyUtils] Load weidentity.properties file failed.", e);
+        }
+    }
+    
+    /**
+     * reload the properties.
+     * 
+     */
+    public static void reload() {
+        load();
     }
 }

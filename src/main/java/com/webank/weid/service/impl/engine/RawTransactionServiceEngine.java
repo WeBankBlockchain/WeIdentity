@@ -26,7 +26,7 @@ import com.webank.weid.protocol.response.ResponseData;
  *
  * @author tonychen 2019年6月26日
  */
-public interface RawTransactionServiceEngine {
+public interface RawTransactionServiceEngine extends ReloadStaticContract {
 
     /**
      * create a weid.

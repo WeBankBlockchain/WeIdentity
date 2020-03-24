@@ -77,7 +77,6 @@ import com.webank.weid.util.WeIdUtils;
  */
 public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine {
 
-
     /**
      * Block number for stopping parsing.
      */
@@ -118,12 +117,24 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             EventEncoder.encode(event),
             WeIdConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
-
-        //load contract
-        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
     }
 
-
+    /**
+     * 构造函数.
+     */
+    public WeIdServiceEngineV1() {
+        if (weIdContract == null) {
+            reload();
+        }
+    }
+    
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
+        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
+    }
+    
     private static ResolveEventLogResult resolveAttributeEvent(
         String weId,
         TransactionReceipt receipt,
@@ -433,6 +444,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             logger.error("Set weId service failed. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
+            logger.error("Set weId service timeout. Error message :{}", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);
         } catch (ResolveAttributeException e) {
             logger.error("[getWeIdDocument]: resolveTransaction failed. "
@@ -498,6 +510,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             logger.error("Set public key failed. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
+            logger.error("Set public key timeout. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
@@ -542,6 +555,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             logger.error("Set public key failed. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (TimeoutException e) {
+            logger.error("Set public key timeout. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
