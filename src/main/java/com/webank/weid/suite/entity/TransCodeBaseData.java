@@ -58,20 +58,7 @@ public abstract class TransCodeBaseData extends TransBaseData {
      * @param codeString 协议字符串
      */
     public abstract void buildCodeData(String codeString);
-    
-    /**
-     * 检查协议对象是否正确.
-     * 
-     * @return true表示正确，false表示错误
-     */
-    public boolean check() {
-        if (super.getOrgId().indexOf(PROTOCOL_PARTITION) != -1) {
-            logger.error("[check] the value of orgId error, orgId: {}", super.getOrgId());
-            return false;
-        }
-        return true;
-    }
-    
+
     /**
      *  根据协议配置, 机构编码和资源编号构建协议对象.
      *  
@@ -85,6 +72,19 @@ public abstract class TransCodeBaseData extends TransBaseData {
         this.setOrgId(orgId);
         this.setTransTypeCode(property.getTransType().getCode());
         this.setUriTypeCode(property.getUriType().getCode());
+    }
+    
+    /**
+     * 检查协议对象是否正确.
+     * 
+     * @return true表示正确，false表示错误
+     */
+    public boolean check() {
+        if (super.getOrgId().indexOf(PROTOCOL_PARTITION) != -1) {
+            logger.error("[check] the value of orgId error, orgId: {}", super.getOrgId());
+            return false;
+        }
+        return true;
     }
     
     /**
