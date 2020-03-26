@@ -196,7 +196,7 @@ com.webank.weid.protocol.base.ServiceProperty
 
 .. code-block:: java
    WeIdService weIdService = new WeIdServiceImpl();
-   WeIdDocument weIdDocument = weIdService.getWeIdDocument("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a").getResult();
+   WeIdDocument weIdDocument = weIdService.getWeIdDocument("did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a").getResult();
    String weIdDocumentJson = weIdDocument.toJson();
 
 
@@ -228,7 +228,7 @@ com.webank.weid.protocol.base.ServiceProperty
 
 .. code-block:: java
    WeIdService weIdService = new WeIdServiceImpl();
-   WeIdDocument weIdDocument = weIdService.getWeIdDocument("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a").getResult();
+   WeIdDocument weIdDocument = weIdService.getWeIdDocument("did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a").getResult();
    String weIdDocumentJson = weIdDocument.toJson();
    
    WeIdDocument weIdDocumentFromJson = WeIdDocument.fromJson(weIdDocumentJson);
@@ -294,7 +294,7 @@ com.webank.weid.protocol.base.Challenge
 **调用示例**
 
 .. code-block:: java
-   Challenge challenge = Challenge.create("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a", "1234");
+   Challenge challenge = Challenge.create("did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a", "1234");
    String challengeJson = challenge.toJson();
 
 
@@ -325,7 +325,7 @@ com.webank.weid.protocol.base.Challenge
 **调用示例**
 
 .. code-block:: java
-   Challenge challenge = Challenge.create("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a", "1234");
+   Challenge challenge = Challenge.create("did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a", "1234");
    String challengeJson = challenge.toJson();
    
    Challenge challengeFromJson = Challenge.fromJson(challengeJson);
@@ -414,17 +414,17 @@ com.webank.weid.protocol.base.CredentialPojo
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
    
    ResponseData<CredentialPojo> credentialResult =
@@ -470,17 +470,17 @@ com.webank.weid.protocol.base.CredentialPojo
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
    
    ResponseData<CredentialPojo> credentialResult =
@@ -680,17 +680,17 @@ com.webank.weid.protocol.base.PresentationE
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1101);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
     
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
    
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
     
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -706,10 +706,10 @@ com.webank.weid.protocol.base.PresentationE
    credentialList.add(response.getResult());
     
    //创建Challenge
-   Challenge challenge = Challenge.create("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
+   Challenge challenge = Challenge.create("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
     
    //创建PresentationPolicyE
-   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
+   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:1000:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
    PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromJson(policyJson);
     
    //创建Presentation
@@ -748,17 +748,17 @@ com.webank.weid.protocol.base.PresentationE
       CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1101);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
     
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
    
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
     
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -774,10 +774,10 @@ com.webank.weid.protocol.base.PresentationE
    credentialList.add(response.getResult());
     
    //创建Challenge
-   Challenge challenge = Challenge.create("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
+   Challenge challenge = Challenge.create("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
     
    //创建PresentationPolicyE
-   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
+   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:1000:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
    PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromJson(policyJson);
     
    //创建Presentation
@@ -806,17 +806,17 @@ com.webank.weid.protocol.base.PresentationE
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1101);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
     
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
    
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
     
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -832,10 +832,10 @@ com.webank.weid.protocol.base.PresentationE
    credentialList.add(response.getResult());
     
    //创建Challenge
-   Challenge challenge = Challenge.create("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
+   Challenge challenge = Challenge.create("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
     
    //创建PresentationPolicyE
-   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
+   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:1000:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
    PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromJson(policyJson);
     
    //创建Presentation
@@ -862,17 +862,17 @@ com.webank.weid.protocol.base.PresentationE
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1101);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
     
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
    
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
     
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -888,10 +888,10 @@ com.webank.weid.protocol.base.PresentationE
    credentialList.add(response.getResult());
     
    //创建Challenge
-   Challenge challenge = Challenge.create("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
+   Challenge challenge = Challenge.create("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
     
    //创建PresentationPolicyE
-   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
+   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:1000:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
    PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromJson(policyJson);
     
    //创建Presentation
@@ -1032,7 +1032,7 @@ com.webank.weid.protocol.response.CreateWeIdDataResult
    * - weId
      - String
      - 公钥WeIdentity DID格式字符串
-     - 格式: did:weid:0x………………….
+     - 格式: did:weid:1000:0x………………….
    * - userWeIdPublicKey
      - WeIdPublicKey
      - 
@@ -1113,7 +1113,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
 
    输出结果如下：
    result:(com.webank.weid.protocol.response.CreateWeIdDataResult)
-      weId: did:weid:101:0xf4e5f96de0627960c8b91c1cc126f7b5cdeacbd0
+      weId: did:weid:1000:101:0xf4e5f96de0627960c8b91c1cc126f7b5cdeacbd0
       userWeIdPublicKey:(com.webank.weid.protocol.base.WeIdPublicKey)
       publicKey: 3140516665390655972698269231665028730625296545812754612198268107926656717368563044260511639762256438305037318801307432426840176526241566631412406151716674
       userWeIdPrivateKey:(com.webank.weid.protocol.base.WeIdPrivateKey)
@@ -1210,7 +1210,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
    * - result
      - String
      - 公钥WeIdentity DID格式字符串
-     - 如：did:weid:0x………………….
+     - 如：did:weid:1000:0x………………….
    * - transactionInfo
      - TransactionInfo
      - 交易信息
@@ -1301,7 +1301,7 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: text
 
    输出结果如下：
-   result: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
+   result: did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
    errorCode: 0
    errorMessage: success
    transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
@@ -1415,25 +1415,25 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
    WeIdService weIdService = new WeIdServiceImpl();
-   ResponseData<String> response = weIdService.getWeIdDocumentJson("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a");
+   ResponseData<String> response = weIdService.getWeIdDocumentJson("did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a");
 
 
 .. code-block:: text
 
    返回结果如下：
    result: {"@context" : "https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1",
-      "id" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a",
+      "id" : "did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a",
       "created" : 1560419409898,
       "updated" : 1560419409898,
       "publicKey" : [ {
-         "id" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0",
+         "id" : "did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0",
          "type" : "Secp256k1",
-         "owner" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a",
+         "owner" : "did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a",
          "publicKey" : "2905679808560626772263712571437125497429146398815877180317365034921958007199576809718056336050058032599743534507469742764670961100255274766148096681073592"
       } ],
       "authentication" : [ {
          "type" : "Secp256k1",
-         "publicKey" : "did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0"
+         "publicKey" : "did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0"
       } ],
       "service" : [ {
          "type" : "drivingCardService",
@@ -1682,26 +1682,26 @@ com.webank.weid.protocol.base.ServiceProperty
 .. code-block:: java
 
    WeIdService weIdService = new WeIdServiceImpl();
-   ResponseData<WeIdDocument> response = weIdService.getWeIdDocument("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a");
+   ResponseData<WeIdDocument> response = weIdService.getWeIdDocument("did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a");
 
 
 .. code-block:: text
 
    返回结果如下：
    result:(com.webank.weid.protocol.base.WeIdDocument)
-      id: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
+      id: did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
       created: 1560419409898
       updated: 1560419409898
       publicKey:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.PublicKeyProperty
-            id: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
+            id: did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
             type: Secp256k18
-            owner: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
+            owner: did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
             publicKey: 2905679808560626772263712571437125497429146398815877180317365034921958007199576809718056336050058032599743534507469742764670961100255274766148096681073592
       authentication:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.AuthenticationProperty
             type: Secp256k1
-            publicKey: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
+            publicKey: did:weid:1000:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
       service:(java.util.ArrayList)
          [0]:com.webank.weid.protocol.base.ServiceProperty
             type: drivingCardService
@@ -1738,7 +1738,7 @@ com.webank.weid.protocol.base.ServiceProperty
      - String
      - Y
      - WeIdentity DID格式字符串
-     - 如：did:weid:1:0x....
+     - 如：did:weid:1000:1:0x....
    * - owner
      - String
      - N
@@ -1862,7 +1862,7 @@ com.webank.weid.protocol.response.TransactionInfo
    WeIdService weIdService = new WeIdServiceImpl();
 
    SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
-   setPublicKeyArgs.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   setPublicKeyArgs.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    setPublicKeyArgs.setPublicKey(
       "13161444623157635919577071263152435729269604287924587017945158373362984739390835280704888860812486081963832887336483721952914804189509503053687001123007342");
 
@@ -1934,7 +1934,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - String
      - Y
      - WeIdentity DID格式字符串
-     - 如：did:weid:101:0x.....
+     - 如：did:weid:1000:101:0x.....
    * - type
      - String
      - Y
@@ -2061,7 +2061,7 @@ com.webank.weid.protocol.response.TransactionInfo
    WeIdService weIdService = new WeIdServiceImpl();
 
    SetServiceArgs setServiceArgs = new SetServiceArgs();
-   setServiceArgs.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   setServiceArgs.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    setServiceArgs.setType("drivingCardService");
    setServiceArgs.setServiceEndpoint("https://weidentity.webank.com/endpoint/8377464");
 
@@ -2132,7 +2132,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - String
      - Y
      - WeIdentity DID格式字符串
-     - 如：did:weid:101:0x....
+     - 如：did:weid:1000:101:0x....
    * - owner
      - String
      - N
@@ -2256,7 +2256,7 @@ com.webank.weid.protocol.response.TransactionInfo
    WeIdService weIdService = new WeIdServiceImpl();
 
    SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
-   setAuthenticationArgs.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   setAuthenticationArgs.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    setAuthenticationArgs.setPublicKey(
       "13161444623157635919577071263152435729269604287924587017945158373362984739390835280704888860812486081963832887336483721952914804189509503053687001123007342");
 
@@ -2328,7 +2328,7 @@ com.webank.weid.protocol.response.TransactionInfo
      - String
      - Y
      - WeIdentity DID格式字符串
-     - 如：did:weid:101:0x....
+     - 如：did:weid:1000:101:0x....
 
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
@@ -2411,7 +2411,7 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
    WeIdService weIdService = new WeIdServiceImpl();
-   ResponseData<Boolean> response = weIdService.isWeIdExist("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   ResponseData<Boolean> response = weIdService.isWeIdExist("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
 
 .. code-block:: text
@@ -2626,7 +2626,7 @@ com.webank.weid.protocol.response.TransactionInfo
    AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
 
    AuthorityIssuer authorityIssuer = new AuthorityIssuer();
-   authorityIssuer.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   authorityIssuer.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    authorityIssuer.setName("webank1");
    authorityIssuer.setAccValue("0");
 
@@ -2834,7 +2834,7 @@ com.webank.weid.protocol.response.TransactionInfo
    weIdPrivateKey.setPrivateKey("36162289879206412028682370838615850457668262092955617990245744195910144330785");
 
    RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs = new RemoveAuthorityIssuerArgs();
-   removeAuthorityIssuerArgs.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   removeAuthorityIssuerArgs.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    removeAuthorityIssuerArgs.setWeIdPrivateKey(weIdPrivateKey);
 
    ResponseData<Boolean> response = authorityIssuerService.removeAuthorityIssuer(removeAuthorityIssuerArgs);
@@ -2847,7 +2847,7 @@ com.webank.weid.protocol.response.TransactionInfo
    errorCode: 0
    errorMessage: success
    transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
-  	  blockNumber: 29951
+      blockNumber: 29951
       transactionHash: 0xb9a2ef2a6045e0804b711e0ce39f7187de08e329160d5a5a00a1815e067f15e5
       transactionIndex: 0
 
@@ -2988,7 +2988,7 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
    AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
-   String weId = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7";
+   String weId = "did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7";
    ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer(weId);
 
 
@@ -3167,15 +3167,15 @@ com.webank.weid.protocol.base.AuthorityIssuer
 .. code-block:: java
 
    AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
-   String weId = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7";
+   String weId = "did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7";
    ResponseData<AuthorityIssuer> response = authorityIssuerService.queryAuthorityIssuerInfo(weId);
 
-	
+    
 .. code-block:: text
 
    返回数据如：
    result:(com.webank.weid.protocol.base.AuthorityIssuer)
-      weId: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+      weId: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
       name: webank1
       created: 1560412556901
       accValue: 
@@ -3348,18 +3348,18 @@ com.webank.weid.protocol.base.AuthorityIssuer
    AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
    ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.getAllAuthorityIssuerList(0, 2);
 
-	
+    
 .. code-block:: text
 
    返回数据如：
    result: (java.util.ArrayList)
       [0]: com.webank.weid.protocol.base.AuthorityIssuer
-         weId: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+         weId: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
          name: webank1
          created: 1560412556901
          accValue:
       [1]: com.webank.weid.protocol.base.AuthorityIssuer
-         weId: did:weid:101:0x48f56f6b8cd77409447014ceb060243b914cb2a9
+         weId: did:weid:1000:101:0x48f56f6b8cd77409447014ceb060243b914cb2a9
          name: webank2
          created: 1560632118000
          accValue:
@@ -3535,14 +3535,14 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
-	 AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+     AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
    ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.registerIssuerType(weIdAuthentication, "College");
 
 .. code-block:: text
@@ -3552,9 +3552,9 @@ com.webank.weid.protocol.response.TransactionInfo
    errorCode: 0
    errorMessage: success
    transactionInfo: (com.webank.weid.protocol.response.TransactionInfo)
-	  blockNumber: 29950
-	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
-	  transactionIndex: 0
+      blockNumber: 29950
+      transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+      transactionIndex: 0
 
 **时序图**
 
@@ -3738,15 +3738,15 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
-	 AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
-   ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.addIssuerIntoIssuerType(weIdAuthentication, "College", "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+     AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
+   ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.addIssuerIntoIssuerType(weIdAuthentication, "College", "did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
 .. code-block:: text
 
@@ -3755,9 +3755,9 @@ com.webank.weid.protocol.response.TransactionInfo
    errorCode: 0
    errorMessage: success
    transactionInfo: (com.webank.weid.protocol.response.TransactionInfo)
-	  blockNumber: 29950
-	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
-	  transactionIndex: 0
+      blockNumber: 29950
+      transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+      transactionIndex: 0
 
 **时序图**
 
@@ -3939,15 +3939,15 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
-	 AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
-   ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.removeIssuerFromIssuerType(weIdAuthentication, "College", "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+     AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
+   ResponseData<List<AuthorityIssuer>> response = authorityIssuerService.removeIssuerFromIssuerType(weIdAuthentication, "College", "did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
 .. code-block:: text
 
@@ -3956,9 +3956,9 @@ com.webank.weid.protocol.response.TransactionInfo
    errorCode: 0
    errorMessage: success
    transactionInfo: (com.webank.weid.protocol.response.TransactionInfo)
-	  blockNumber: 29950
-	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
-	  transactionIndex: 0
+      blockNumber: 29950
+      transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+      transactionIndex: 0
 
 **时序图**
 
@@ -4103,7 +4103,7 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
    AuthorityIssuerService authorityIssuerService = new AuthorityIssuerServiceImpl();
-   String weId = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7";
+   String weId = "did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7";
    ResponseData<Boolean> response = authorityIssuerService.isAuthorityIssuer(weId);
 
 
@@ -4262,7 +4262,7 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
 
-	
+    
 .. code-block:: text
 
    返回数据如：
@@ -4505,7 +4505,7 @@ com.webank.weid.protocol.base.CptBaseInfo
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
    CptMapArgs cptMapArgs = new CptMapArgs();
@@ -4524,9 +4524,9 @@ com.webank.weid.protocol.base.CptBaseInfo
    errorCode: 0
    errorMessage: success
    transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
-	  blockNumber: 29950
-	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
-	  transactionIndex: 0
+      blockNumber: 29950
+      transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+      transactionIndex: 0
 
 
 **时序图**
@@ -4821,7 +4821,7 @@ com.webank.weid.protocol.base.CptBaseInfo
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
    CptMapArgs cptMapArgs = new CptMapArgs();
@@ -4840,9 +4840,9 @@ com.webank.weid.protocol.base.CptBaseInfo
    errorCode: 0
    errorMessage: success
    transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
-	  blockNumber: 29950
-	  transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
-	  transactionIndex: 0
+      blockNumber: 29950
+      transactionHash: 0xe3f48648beee61d17de609d32af36ac0bf4d68a9352890b04d53841c4949bd13
+      transactionIndex: 0
 
 
 ----
@@ -5062,7 +5062,7 @@ com.webank.weid.protocol.base.CptBaseInfo
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
    CptStringArgs cptStringArgs = new CptStringArgs();
@@ -5325,7 +5325,7 @@ com.webank.weid.protocol.base.CptBaseInfo
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
    CptStringArgs cptStringArgs = new CptStringArgs();
@@ -5563,7 +5563,7 @@ com.webank.weid.protocol.base.Cpt.MetaData
             [0]:name
             [1]:age
       metaData:(com.webank.weid.protocol.base.Cpt$MetaData)
-         cptPublisher: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+         cptPublisher: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
          cptSignature: G/YGY8Ftj9jPRdtr4ym+19M4/K6x9RbmRiV9JkryXeQGFr8eukDCBAcbinnNpF2N3Eo72bvxNqJOKx4ohWIus0Y=
          created: 1560415607673
          updated: 0
@@ -5855,7 +5855,7 @@ com.webank.weid.protocol.base.CptBaseInfo
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
    CptMapArgs cptMapArgs = new CptMapArgs();
@@ -6144,7 +6144,7 @@ com.webank.weid.protocol.base.CptBaseInfo
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
    CptStringArgs cptStringArgs = new CptStringArgs();
@@ -6422,7 +6422,7 @@ com.webank.weid.protocol.base.Credential
    createCredentialArgs.setClaim(claim);
    createCredentialArgs.setCptId(1017);
    createCredentialArgs.setExpirationDate(1551448312461L);
-   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
@@ -6440,7 +6440,7 @@ com.webank.weid.protocol.base.Credential
          context: https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1
          id: f931b882-00ab-4cb0-9e83-d9bb57212e81
          cptId: 1017
-         issuer: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+         issuer: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
          issuanceDate: 1560416978296
          expirationDate: 1551448312461
          claim:(java.util.HashMap)
@@ -6448,7 +6448,7 @@ com.webank.weid.protocol.base.Credential
             gender: F
             age: 18
          proof:(java.util.HashMap)
-            creator: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+            creator: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
             signature: HHQwJ9eEpyv/BgwtWDveFYAPsKOPtEEWt6ieb28PS76pDwlpFKtbh9Ygog8SUPIXUaWNYS2pLkk4E91hpP8IdbU=
             created: 1560416978296
             type: Secp256k1
@@ -6671,7 +6671,7 @@ com.webank.weid.protocol.response.TransactionInfo
    createCredentialArgs.setClaim(claim);
    createCredentialArgs.setCptId(1017);
    createCredentialArgs.setExpirationDate(1561448312461L);
-   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
@@ -6995,7 +6995,7 @@ com.webank.weid.protocol.response.TransactionInfo
    createCredentialArgs.setClaim(claim);
    createCredentialArgs.setCptId(1017);
    createCredentialArgs.setExpirationDate(1561448312461L);
-   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
@@ -7199,15 +7199,15 @@ com.webank.weid.protocol.response.TransactionInfo
    createCredentialArgs.setClaim(claim);
    createCredentialArgs.setCptId(1017);
    createCredentialArgs.setExpirationDate(1561448312461L);
-   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
-	createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+    createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
    //创建Credentia
    ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
-	
+    
    //获取Credentia的Hash
    ResponseData<String> responseHash = credentialService.getCredentialHash(response.getResult().getCredential());
 
@@ -7435,12 +7435,12 @@ com.webank.weid.protocol.response.TransactionInfo
    createCredentialArgs.setClaim(claim);
    createCredentialArgs.setCptId(1017);
    createCredentialArgs.setExpirationDate(1561448312461L);
-   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
-	 createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
+     createCredentialArgs.setWeIdPrivateKey(weIdPrivateKey);
    //创建CredentialWrapper
    ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
 
@@ -7716,7 +7716,7 @@ com.webank.weid.protocol.base.Credential
    createCredentialArgs.setClaim(claim);
    createCredentialArgs.setCptId(1017);
    createCredentialArgs.setExpirationDate(1551448312461L);
-   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
@@ -7746,7 +7746,7 @@ com.webank.weid.protocol.base.Credential
               "claim": {
                 "age": 18,
                 "gender": "F",
-                "id": "did:weid:101:0xe4bee5a07f282ffd3109699e21663cde0210fb64",
+                "id": "did:weid:1000:101:0xe4bee5a07f282ffd3109699e21663cde0210fb64",
                 "name": "zhang san"
               },
               "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
@@ -7754,10 +7754,10 @@ com.webank.weid.protocol.base.Credential
               "expirationDate": 1567488114,
               "id": "a8b1c030-231d-49de-9618-b5ed7f3e6d2e",
               "issuanceDate": 1567401714,
-              "issuer": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+              "issuer": "did:weid:1000:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
               "proof": {
                 "created": "1567401714",
-                "creator": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+                "creator": "did:weid:1000:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
                 "signature": "GwKcDoEseYdJxI7M\/R4RAdGcV5SJoFVvg8Z53BVa76LMV8eqbX3F4rb1dWjhqI286AvPECx6uuuo9cTAKuNHRXM=",
                 "type": "Secp256k1"
               }
@@ -7766,7 +7766,7 @@ com.webank.weid.protocol.base.Credential
               "claim": {
                 "age": 18,
                 "gender": "F",
-                "id": "did:weid:101:0xe4bee5a07f282ffd3109699e21663cde0210fb64",
+                "id": "did:weid:1000:101:0xe4bee5a07f282ffd3109699e21663cde0210fb64",
                 "name": "zhang san"
               },
               "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
@@ -7774,10 +7774,10 @@ com.webank.weid.protocol.base.Credential
               "expirationDate": 1567488201,
               "id": "2130908d-fb2a-4675-8bf1-727f354ca8e4",
               "issuanceDate": 1567401715,
-              "issuer": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+              "issuer": "did:weid:1000:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
               "proof": {
                 "created": "1567401715",
-                "creator": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+                "creator": "did:weid:1000:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
                 "signature": "HJXDuvg2l8jRbL5ymmBSAo\/6DMKbCv3P1XoP67S+OVzSbRVDNFXY1CsqpTqT5MAkSY4+UwPLwCfXrLtHsZQ6GOo=",
                 "type": "Secp256k1"
               }
@@ -7789,10 +7789,10 @@ com.webank.weid.protocol.base.Credential
         "expirationDate": 1567488201,
         "id": "d8642623-703f-447a-8765-dab1dab4df0a",
         "issuanceDate": 1567401717,
-        "issuer": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+        "issuer": "did:weid:1000:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
         "proof": {
           "created": "1567401717",
-          "creator": "did:weid:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
+          "creator": "did:weid:1000:1:0x92d5472954c38375371f8bdd2bcce2e64aab1f99",
           "signature": "HKXEwzDEwqte4aAUBLvQjiI3C0cw5V\/iWeKWmBs7HIG0IRzgbXnMj8kYw37y5yJE4KdsWCuehBUGuW7WdihL560=",
           "type": "Secp256k1"
         }
@@ -8821,7 +8821,7 @@ T java.lang.Object
    createCredentialArgs.setClaim(claim);
    createCredentialArgs.setCptId(1017);
    createCredentialArgs.setExpirationDate(1561448312461L);
-   createCredentialArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
@@ -9211,17 +9211,17 @@ com.webank.weid.protocol.base.CredentialPojo
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
-	
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+    
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
-	
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+    
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -9231,8 +9231,8 @@ com.webank.weid.protocol.base.CredentialPojo
    createCredentialPojoArgs.setClaim(claim);
 
    ResponseData<CredentialPojo> response = credentialPojoService.createCredential(createCredentialPojoArgs);
-	
-	
+    
+    
 .. code-block:: text
 
    返回结果如：
@@ -9240,7 +9240,7 @@ com.webank.weid.protocol.base.CredentialPojo
       context: https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1
       id: 04a3e89d-825a-49fe-b8f5-8ccb9f487a52
       cptId: 1017
-      issuer: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+      issuer: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
       issuanceDate: 1560420878712
       expirationDate: 1560470944120
       claim:(java.util.HashMap)
@@ -9248,7 +9248,7 @@ com.webank.weid.protocol.base.CredentialPojo
          name: zhangsan
          age: 22
       proof:(java.util.HashMap)
-         creator: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
+         creator: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
          salt:(java.util.HashMap)
             gender: ibu7f
             name: el1w8
@@ -9261,7 +9261,7 @@ com.webank.weid.protocol.base.CredentialPojo
    errorCode: 0
    errorMessage: success
    transactionInfo:null
-	
+    
 
 
 **时序图**
@@ -9571,29 +9571,29 @@ com.webank.weid.protocol.base.CredentialPojo
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(110);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
-	
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+    
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
-	
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+    
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
    Map<String, Object> claim = new HashMap<String, Object>();
    claim.put("id", "d5e68eb5-0417-47b0-b678-5eb86c50bf22");
-   claim.put("issuer", "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   claim.put("issuer", "did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    claim.put("expirationDate", System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
    claim.put("cptId", 2000003);
    claim.put(issuanceDate, System.currentTimeMillis());
    createCredentialPojoArgs.setClaim(claim);
 
    ResponseData<CredentialPojo> response = credentialPojoService.createCredential(createCredentialPojoArgs);
-	 CredentialPojo credential = response.getResult;
+     CredentialPojo credential = response.getResult;
    Map<String, Object> userClaim = new HashMap<String, Object>();
    userClaim.put("name", "zhangsan");
    userClaim.put("age", 18);
@@ -9601,16 +9601,16 @@ com.webank.weid.protocol.base.CredentialPojo
    String claimJson = DataToolUtils.serialize(userClaim);
 
    WeIdAuthentication userAuth = new WeIdAuthentication();
-   userAuth.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
-	
+   userAuth.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+    
    WeIdPrivateKey userPrivateKey = new WeIdPrivateKey();
    userPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    userAuth.setWeIdPrivateKey(userPrivateKey);
-	
-   userAuth.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+    
+   userAuth.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    ResponseData<CredentialPojo> prepareZkpResponse = credentialPojoService.prepareZkpCredential(credential, claimJson, userAuth);
 
-	
+    
 .. code-block:: text
 
    返回结果如：
@@ -9618,7 +9618,7 @@ com.webank.weid.protocol.base.CredentialPojo
       context: https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1
       id: 04a3e89d-825a-49fe-b8f5-8ccb9f487a52
       cptId: 1017
-      issuer: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+      issuer: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
       issuanceDate: 1560420878712
       expirationDate: 1560470944120
       claim:(java.util.HashMap)
@@ -9626,7 +9626,7 @@ com.webank.weid.protocol.base.CredentialPojo
          credentialSignatureRequest: YWjF2cFZnPT0SKAomEiRkNWU2OGViNS0wNDE3LTQ3YjAtYjY3OC01ZWI4NmM1MGJmMj
          userNonce: mNXpIM2lJaUh2STNtc3hvTHgxMHQxZz09Egg1ZTU2MjBmMhpICixsS2NSNWx
       proof:(java.util.HashMap)
-         creator: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
+         creator: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
          salt:(java.util.HashMap)
             cptId: ibu7f
             credentialSignatureRequest: el1w8
@@ -9639,7 +9639,7 @@ com.webank.weid.protocol.base.CredentialPojo
    errorCode: 0
    errorMessage: success
    transactionInfo:null
-	
+    
 
 
 **时序图**
@@ -9868,12 +9868,12 @@ com.webank.weid.protocol.response.TransactionInfo
         new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
    createCredentialPojoArgs
-        .setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+        .setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs
         .setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey(
@@ -9881,7 +9881,7 @@ com.webank.weid.protocol.response.TransactionInfo
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
    weIdAuthentication
-        .setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+        .setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -9907,7 +9907,7 @@ com.webank.weid.protocol.response.TransactionInfo
       context: https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1
       id: c4f8ca00-7c1b-4ba0-993f-008106075d9c
       cptId: 1017
-      issuer: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+      issuer: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
       issuanceDate: 1560420975268
       expirationDate: 1560471040676
       claim:(java.util.HashMap)
@@ -9915,7 +9915,7 @@ com.webank.weid.protocol.response.TransactionInfo
          name: zhangsan
          age: 22
       proof:(java.util.HashMap)
-         creator: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
+         creator: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
          salt:(java.util.HashMap)
             gender: 0
             name: rr3g0
@@ -10152,17 +10152,17 @@ com.webank.weid.protocol.response.TransactionInfo
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
     
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -10173,7 +10173,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
    ResponseData<CredentialPojo> response = credentialPojoService.createCredential(createCredentialPojoArgs);
    
-   ResponseData<Boolean> responseVerify = credentialPojoService.verify("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", response.getResult());
+   ResponseData<Boolean> responseVerify = credentialPojoService.verify("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7", response.getResult());
 
 
 .. code-block:: text
@@ -10437,17 +10437,17 @@ com.webank.weid.protocol.response.TransactionInfo
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
     
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -10774,17 +10774,17 @@ com.webank.weid.protocol.response.TransactionInfo
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
     
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -10800,17 +10800,17 @@ com.webank.weid.protocol.response.TransactionInfo
    credentialList.add(response.getResult());
     
    //创建Challenge
-   Challenge challenge = Challenge.create("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
+   Challenge challenge = Challenge.create("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
    
    //创建PresentationPolicyE
-   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
+   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:1000:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
    PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromJson(policyJson);
     
    //创建Presentation
    ResponseData<PresentationE>  presentationERes = credentialPojoService.createPresentation(credentialList, presentationPolicyE, challenge, weIdAuthentication);
     
    //验证Presentation
-   ResponseData<Boolean> verifyRes = credentialPojoService.verify("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", presentationPolicyE, challenge, presentationERes.getResult());
+   ResponseData<Boolean> verifyRes = credentialPojoService.verify("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7", presentationPolicyE, challenge, presentationERes.getResult());
         
 
 .. code-block:: text
@@ -11197,17 +11197,17 @@ com.webank.weid.protocol.base.PresentationE
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
     
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
     
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -11223,10 +11223,10 @@ com.webank.weid.protocol.base.PresentationE
    credentialList.add(response.getResult());
     
    //创建Challenge
-   Challenge challenge = Challenge.create("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
+   Challenge challenge = Challenge.create("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7", String.valueOf(System.currentTimeMillis()));
    
    //创建PresentationPolicyE
-   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
+   String policyJson = "{\"extra\" : {\"extra1\" : \"\",\"extra2\" : \"\"},\"id\" : 123456,\"version\" : 1,\"orgId\" : \"webank\",\"weId\" : \"did:weid:1000:0x0231765e19955fc65133ec8591d73e9136306cd0\",\"policy\" : {\"1017\" : {\"fieldsToBeDisclosed\" : {\"gender\" : 0,\"name\" : 1,\"age\" : 0}}}}";
    PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromJson(policyJson);
     
    //创建Presentation
@@ -11246,7 +11246,7 @@ com.webank.weid.protocol.base.PresentationE
             context: https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1
             id: 67598cc5-a922-4e9f-ae0a-90c6285a8236
             cptId: 1017
-            issuer: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7
+            issuer: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7
             issuanceDate: 1560425696276
             expirationDate: 1560475761684
             claim:(java.util.HashMap)
@@ -11254,7 +11254,7 @@ com.webank.weid.protocol.base.PresentationE
                name: zhangsan
                age: 0xdeb5a47d7ab03d9fefe2169cc59db146cec6f24005bcf0b2e2a0c95bfe7adde5
             proof:(java.util.HashMap)
-               creator: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
+               creator: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
                salt:(java.util.HashMap)
                   gender: 0
                   name: yjckg
@@ -11267,7 +11267,7 @@ com.webank.weid.protocol.base.PresentationE
       proof:(java.util.HashMap)
          created: 1560425696412
          type: Secp256k1
-         verificationMethod: did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
+         verificationMethod: did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0
          nonce: DJulONVxD2TFidB8vaYH
          signatureValue: G8ivS1e625NT8qSzLEugbqkRW6HDJNA4Lfcl7uCXV+uEffPMVF6Bwnk0pyCOd+4bbw90pMaj+EVxeL79acYPzM4=
    errorCode: 0
@@ -11479,17 +11479,17 @@ com.webank.weid.protocol.response.TransactionInfo
    CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
    CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs = new CreateCredentialPojoArgs<Map<String, Object>>();
    createCredentialPojoArgs.setCptId(1017);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
    createCredentialPojoArgs.setExpirationDate(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 100);
 
    WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
-   weIdAuthentication.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   weIdAuthentication.setWeId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
    weIdAuthentication.setWeIdPrivateKey(weIdPrivateKey);
 
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   weIdAuthentication.setWeIdPublicKeyId("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
    createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
    Map<String, Object> claim = new HashMap<String, Object>();
@@ -11771,7 +11771,7 @@ com.webank.weid.protocol.base.Credential
    createCredentialPojoArgs.setClaim(claim);
    createCredentialPojoArgs.setCptId(1017);
    createCredentialPojoArgs.setExpirationDate(1551448312461L);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
@@ -11802,7 +11802,7 @@ com.webank.weid.protocol.base.Credential
               "claim": {
                 "age": 1,
                 "gender": "F",
-                "id": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
+                "id": "did:weid:1000:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
                 "name": "1"
               },
               "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
@@ -11810,10 +11810,10 @@ com.webank.weid.protocol.base.Credential
               "expirationDate": 1567491752,
               "id": "6ea6e209-10e9-4a93-b6be-12af1a32655b",
               "issuanceDate": 1567405352,
-              "issuer": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
+              "issuer": "did:weid:1000:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
               "proof": {
                 "created": 1567405352,
-                "creator": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33#keys-0",
+                "creator": "did:weid:1000:1:0xa4c2666560499868baf1906941f806b6d1c26e33#keys-0",
                 "salt": {
                   "age": "yOwN7",
                   "gender": "jjB85",
@@ -11831,7 +11831,7 @@ com.webank.weid.protocol.base.Credential
               "claim": {
                 "age": 1,
                 "gender": "F",
-                "id": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
+                "id": "did:weid:1000:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
                 "name": "1"
               },
               "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
@@ -11839,10 +11839,10 @@ com.webank.weid.protocol.base.Credential
               "expirationDate": 1567491842,
               "id": "a3544a9c-6cb6-4688-9622-bb935fb0d93f",
               "issuanceDate": 1567405355,
-              "issuer": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
+              "issuer": "did:weid:1000:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
               "proof": {
                 "created": 1567405355,
-                "creator": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53#keys-0",
+                "creator": "did:weid:1000:1:0x309320a01f215a380c6950e80a89181ad8a8cd53#keys-0",
                 "salt": {
                   "age": "5nImi",
                   "gender": "Me224",
@@ -11863,10 +11863,10 @@ com.webank.weid.protocol.base.Credential
         "expirationDate": 1567491842,
         "id": "ad5d5a54-4574-4b3b-b1df-9d0687b6a0ac",
         "issuanceDate": 1567405359,
-        "issuer": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6",
+        "issuer": "did:weid:1000:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6",
         "proof": {
           "created": 1567405359,
-          "creator": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6#keys-0",
+          "creator": "did:weid:1000:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6#keys-0",
           "salt": {
             "credentialList": ""
           },
@@ -12154,7 +12154,7 @@ com.webank.weid.protocol.base.CredentialPojo
    createCredentialPojoArgs.setClaim(claim);
    createCredentialPojoArgs.setCptId(1017);
    createCredentialPojoArgs.setExpirationDate(1551448312461L);
-   createCredentialPojoArgs.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+   createCredentialPojoArgs.setIssuer("did:weid:1000:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
 
    WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
    weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
@@ -12187,7 +12187,7 @@ com.webank.weid.protocol.base.CredentialPojo
               "claim": {
                 "age": 1,
                 "gender": "F",
-                "id": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
+                "id": "did:weid:1000:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
                 "name": "1"
               },
               "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
@@ -12195,10 +12195,10 @@ com.webank.weid.protocol.base.CredentialPojo
               "expirationDate": 1567491752,
               "id": "6ea6e209-10e9-4a93-b6be-12af1a32655b",
               "issuanceDate": 1567405352,
-              "issuer": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
+              "issuer": "did:weid:1000:1:0xa4c2666560499868baf1906941f806b6d1c26e33",
               "proof": {
                 "created": 1567405352,
-                "creator": "did:weid:1:0xa4c2666560499868baf1906941f806b6d1c26e33#keys-0",
+                "creator": "did:weid:1000:1:0xa4c2666560499868baf1906941f806b6d1c26e33#keys-0",
                 "salt": {
                   "age": "yOwN7",
                   "gender": "jjB85",
@@ -12216,7 +12216,7 @@ com.webank.weid.protocol.base.CredentialPojo
               "claim": {
                 "age": 1,
                 "gender": "F",
-                "id": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
+                "id": "did:weid:1000:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
                 "name": "1"
               },
               "context": "https:\/\/github.com\/WeBankFinTech\/WeIdentity\/blob\/master\/context\/v1",
@@ -12224,10 +12224,10 @@ com.webank.weid.protocol.base.CredentialPojo
               "expirationDate": 1567491842,
               "id": "a3544a9c-6cb6-4688-9622-bb935fb0d93f",
               "issuanceDate": 1567405355,
-              "issuer": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
+              "issuer": "did:weid:1000:1:0x309320a01f215a380c6950e80a89181ad8a8cd53",
               "proof": {
                 "created": 1567405355,
-                "creator": "did:weid:1:0x309320a01f215a380c6950e80a89181ad8a8cd53#keys-0",
+                "creator": "did:weid:1000:1:0x309320a01f215a380c6950e80a89181ad8a8cd53#keys-0",
                 "salt": {
                   "age": "5nImi",
                   "gender": "Me224",
@@ -12252,10 +12252,10 @@ com.webank.weid.protocol.base.CredentialPojo
         "expirationDate": 1567491842,
         "id": "ad5d5a54-4574-4b3b-b1df-9d0687b6a0ac",
         "issuanceDate": 1567405359,
-        "issuer": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6",
+        "issuer": "did:weid:1000:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6",
         "proof": {
           "created": 1567405359,
-          "creator": "did:weid:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6#keys-0",
+          "creator": "did:weid:1000:1:0x4e9a111867ed6370e1e23f7a79426f6649eb78c6#keys-0",
           "salt": {
             "credentialList": ""
           },
@@ -12560,20 +12560,20 @@ com.webank.weid.protocol.base.CredentialPojo
       {
           "claim": {
               "duration": 360000,
-              "fromWeId": "did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168",
+              "fromWeId": "did:weid:1000:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168",
               "resourceId": "4b077c17-9612-42ee-9e36-3a3d46b27e81",
               "serviceUrl": "http://127.0.0.1:6010/fetch-data",
-              "toWeId": "did:weid:101:0x68bedb2cbe55b4c8e3473faa63f121c278f6dba9"
+              "toWeId": "did:weid:1000:101:0x68bedb2cbe55b4c8e3473faa63f121c278f6dba9"
           },
           "context": "https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1",
           "cptId": 101,
           "expirationDate": 1581347039,
           "id": "48b75424-9411-4d22-b925-4e730b445a31",
           "issuanceDate": 1580987039,
-          "issuer": "did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168",
+          "issuer": "did:weid:1000:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168",
           "proof": {
               "created": 1580987039,
-              "creator": "did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168#keys-0",
+              "creator": "did:weid:1000:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168#keys-0",
               "salt": {
                   "duration": "fmk5A",
                   "fromWeId": "DEvFy",
@@ -13607,9 +13607,9 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   JsonTransportation jsonTransportation =TransportationFactory.newJsonTransportation();
+   JsonTransportation jsonTransportation =TransportationFactory.build(TransportationType.JSON);
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
    jsonTransportation = jsonTransportation.specify(verifierWeIdList);
@@ -13750,7 +13750,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
    
@@ -13759,14 +13759,14 @@ java.util.List<java.lang.String>
    //原文方式调用
    ResponseData<String> result1 = 
        TransportationFactory
-           .newJsonTransportation()
+           .build(TransportationType.JSON)
            .specify(verifierWeIdList)
            .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL));
    
    //密文方式调用
    ResponseData<String> result2 = 
       TransportationFactory
-           .newJsonTransportation()
+           .build(TransportationType.JSON)
            .specify(verifierWeIdList)
            .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
 
@@ -13814,7 +13814,7 @@ java.util.List<java.lang.String>
 .. code-block:: text
 
    接口名称: com.webank.weid.suite.api.transportation.inf.JsonTransportation.deserialize
-   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(String transString,Class<T> clazz)
+   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(WeIdAuthentication weIdAuthentication, String transString,Class<T> clazz)
    接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
 
 **接口入参**\ : 
@@ -13827,7 +13827,12 @@ java.util.List<java.lang.String>
      - 非空
      - 说明
      - 备注
-   * - transString
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - 调用者身份信息
+     - 
+  * - transString
      - String
      - Y
      - 待序列化对象
@@ -13919,25 +13924,17 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
    
    String transString="";
-   
+   WeIdAuthentication weIdAuthentication;
    //原文方式调用反序列化
    ResponseData<PresentationE> result1 = 
        TransportationFactory
-           .newJsonTransportation()
-           .specify(verifierWeIdList)
-           .deserialize(transString,PresentationE.class);
-   
-   //密文方式调用反序列化
-   ResponseData<PresentationE> result2 = 
-      TransportationFactory
-           .newJsonTransportation()
-           .specify(verifierWeIdList)
-           .deserialize(transString,PresentationE.class);
+           .build(TransportationType.JSON)
+           .deserialize(weIdAuthentication,transString,PresentationE.class);
 
 
 **时序图**
@@ -14014,12 +14011,12 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   QrCodeTransportation qrCodeTransportation =TransportationFactory.newQrCodeTransportation();
+   Transportation transportation =TransportationFactory.build(TransportationType.QR_CODE);
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
-   JsonTransportation jsonTransportation = qrCodeTransportation.specify(verifierWeIdList);
+   transportation = transportation.specify(verifierWeIdList);
    
 
 **时序图**
@@ -14060,7 +14057,7 @@ java.util.List<java.lang.String>
 
    接口名称: com.webank.weid.suite.api.transportation.inf.QrCodeTransportation.serialize
    接口定义: <T extends JsonSerializer> ResponseData<String> serialize(T object,ProtocolProperty property)
-   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口。
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口，此接口仅支持数据模式
 
 **接口入参**\ : 
 
@@ -14150,25 +14147,197 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
    
    PresentationE presentation;
    
+   //数据模式
    //原文方式调用
    ResponseData<String> result1 = 
        TransportationFactory
-           .newQrCodeTransportation()
+           .build(TransportationType.QR_CODE)
            .specify(verifierWeIdList)
            .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINAL));
    
    //密文方式调用
    ResponseData<String> result2 = 
       TransportationFactory
-           .newQrCodeTransportation()
+           .build(TransportationType.QR_CODE)
            .specify(verifierWeIdList)
            .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
+           
+
+**时序图**
+
+.. mermaid::
+
+
+  sequenceDiagram
+  participant 调用者
+  participant QrCodeTransportation
+  调用者->>QrCodeTransportation: 调用serialize()
+  QrCodeTransportation->>QrCodeTransportation: 入参非空、格式及合法性检查
+  opt 入参校验失败
+  QrCodeTransportation-->>调用者: 报错，提示参数不合法并退出
+  end
+  QrCodeTransportation->>QrCodeTransportation: 拼装协议头数据
+  QrCodeTransportation->>QrCodeTransportation: 判断是采用加密方式还是非加密方式
+  opt 非加密方式
+  QrCodeTransportation->>QrCodeTransportation: 将presentation原文放入协议里
+  end
+  opt 加密方式
+  QrCodeTransportation->>EncodeProcessor: 调用encode方法
+  EncodeProcessor->>EncodeProcessor: 采用AES算法，生成对称加密秘钥
+  EncodeProcessor->>persistence: 保存至存储库里
+  persistence-->>EncodeProcessor: 返回
+  EncodeProcessor-->>QrCodeTransportation: 返回加密之后的presentation数据
+  QrCodeTransportation->>QrCodeTransportation: 将presentation密文放入协议里
+  end
+  QrCodeTransportation-->>调用者: 返回QRCode协议数据
+
+----
+
+3. serialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.QrCodeTransportation.serialize
+   接口定义: <T extends JsonSerializer> ResponseData<String> serialize(WeIdAuthentication weIdAuthentication, T object,ProtocolProperty property)
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口，此接口支持将纯数据编入二维码协议，也支持将资源Id编入二维码协议进行远程下载
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - 调用者身份信息
+     - 
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     - 
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     - 
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - String
+     - 序列化后的字符串数据
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
+     - 100805
+     - 协议数据无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   
+   PresentationE presentation;
+   WeIdAuthentication weIdAuthentication;
+   //数据模式
+   //原文方式调用
+   ResponseData<String> result1 = 
+       TransportationFactory
+           .build(TransportationType.QR_CODE)
+           .specify(verifierWeIdList)
+           .serialize(weIdAuthentication, presentation,new ProtocolProperty(EncodeType.ORIGINAL));
+   
+   //密文方式调用
+   ResponseData<String> result2 = 
+      TransportationFactory
+           .build(TransportationType.QR_CODE)
+           .specify(verifierWeIdList)
+           .serialize(weIdAuthentication, presentation,new ProtocolProperty(EncodeType.CIPHER));
+           
+   //下载模式
+   //原文方式调用
+   ResponseData<String> result3 = 
+       TransportationFactory
+           .build(TransportationType.QR_CODE)
+           .specify(verifierWeIdList)
+           .serialize(weIdAuthentication, presentation,new ProtocolProperty(EncodeType.ORIGINAL, TransModel.DOWN_MODEL));
+   
+   //密文方式调用
+   ResponseData<String> result4 = 
+      TransportationFactory
+           .build(TransportationType.QR_CODE)
+           .specify(verifierWeIdList)
+           .serialize(weIdAuthentication, presentation,new ProtocolProperty(EncodeType.CIPHER, TransModel.DOWN_MODEL));
 
 
 **时序图**
@@ -14209,7 +14378,7 @@ java.util.List<java.lang.String>
 .. code-block:: text
 
    接口名称: com.webank.weid.suite.api.transportation.inf.QrCodeTransportation.deserialize
-   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(String transString,Class<T> clazz)
+   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(WeIdAuthentication weIdAuthentication, String transString,Class<T> clazz)
    接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
 
 **接口入参**\ : 
@@ -14222,6 +14391,11 @@ java.util.List<java.lang.String>
      - 非空
      - 说明
      - 备注
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - 调用者身份信息
+     - 
    * - transString
      - String
      - Y
@@ -14308,26 +14482,17 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
    
    String transString="";
-   
-   //原文方式调用反序列化
+   WeIdAuthentication weIdAuthentication;
+   //调用反序列化
    ResponseData<PresentationE> result1 = 
        TransportationFactory
-           .newQrCodeTransportation()
-           .specify(verifierWeIdList)
-           .deserialize(transString,PresentationE.class);
-   
-   //密文方式调用反序列化
-   ResponseData<PresentationE> result2 = 
-      TransportationFactory
-           .newQrCodeTransportation()
-           .specify(verifierWeIdList)
-           .deserialize(transString,PresentationE.class);
-
+           .build(TransportationType.QR_CODE)
+           .deserialize(weIdAuthentication, transString, PresentationE.class);
 
 **时序图**
 
@@ -14359,6 +14524,364 @@ java.util.List<java.lang.String>
 
  QrCodeTransportation-->>调用者: 返回成功
 
+
+----
+
+BarCodeTransportation
+^^^^^^^^^^^^^^^^^
+
+1. specify
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.Transportation.specify
+   接口定义: Transportation specify(List<String> verifierWeIdList)
+   接口描述: 指定transportation的认证者,用于权限控制。
+
+**接口入参**\ : 
+
+java.util.List<java.lang.String>
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - verifierWeIdList
+     - List<String> 
+     - N
+     - verifierWeId列表
+     - 
+     
+     
+**接口返回**\ :   com.webank.weid.suite.api.transportation.inf.JsonTransportation;
+
+**调用示例**
+
+.. code-block:: java
+
+   Transportation transportation =TransportationFactory.build(TransportationType.QR_CODE);
+
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   transportation = transportation.specify(verifierWeIdList);
+   
+
+**时序图**
+
+.. mermaid::
+
+
+   sequenceDiagram
+   participant 调用者
+   participant Transportation
+   participant WeIdService
+   participant 区块链
+   调用者->>Transportation: 调用specify()
+   Transportation->>Transportation: 入参非空、格式及合法性检查
+   opt 入参校验失败
+   Transportation-->>调用者: 报错，提示参数不合法并退出
+   end
+   loop 遍历每个WeID
+   Transportation->>WeIdService: 判断WeID的合法性，以及存在性，调用isWeIdExist()方法
+   WeIdService->>区块链: 查询该WeID是否存在
+   区块链-->>WeIdService: 返回查询结果
+   WeIdService-->>Transportation: 返回查询结果
+   opt WeID不存在
+   Transportation-->>调用者: 报错，提示WeID不存在
+   end
+   Transportation->>Transportation: 放入verifier list里
+   end
+   Transportation-->>调用者: 返回成功
+
+----
+
+2. serialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.Transportation.serialize
+   接口定义: <T extends JsonSerializer> ResponseData<String> serialize(WeIdAuthentication weIdAuthentication, T object,ProtocolProperty property)
+   接口描述: 用于序列化对象,要求对象实现JsonSerializer接口，接口将资源数据存入数据库，然后通过资源Id来进行关联，并将资源Id编入协议字符串中
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - 调用者身份信息
+     - 
+   * - object
+     - <T extends JsonSerializer>
+     - Y
+     - 待序列化对象
+     - 
+   * - property
+     - ProtocolProperty
+     - Y
+     - 协议配置
+     - 
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - String
+     - 序列化后的字符串数据
+     - 业务数据
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - TRANSPORTATION_PROTOCOL_PROPERTY_ERROR
+     - 100801
+     - 协议配置异常
+   * - TRANSPORTATION_PROTOCOL_ENCODE_ERROR
+     - 100803
+     - 协议配置Encode异常
+   * - TRANSPORTATION_PROTOCOL_DATA_INVALID
+     - 100805
+     - 协议数据无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   
+   PresentationE presentation;
+   
+   //下载模式
+   //原文方式调用
+   ResponseData<String> result3 = 
+       TransportationFactory
+           .build(TransportationType.QR_CODE)
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.ORIGINA));
+   
+   //密文方式调用
+   ResponseData<String> result4 = 
+      TransportationFactory
+           .build(TransportationType.QR_CODE)
+           .specify(verifierWeIdList)
+           .serialize(presentation,new ProtocolProperty(EncodeType.CIPHER));
+
+
+**时序图**
+
+.. mermaid::
+
+
+  sequenceDiagram
+  participant 调用者
+  participant Transportation
+  调用者->>Transportation: 调用serialize()
+  Transportation->>Transportation: 入参非空、格式及合法性检查
+  opt 入参校验失败
+  Transportation-->>调用者: 报错，提示参数不合法并退出
+  end
+  Transportation->>Transportation: 拼装协议头数据
+  Transportation->>Transportation: 判断是采用加密方式还是非加密方式
+  opt 非加密方式
+  Transportation->>Transportation: 将presentation原文放入协议里
+  end
+  opt 加密方式
+  Transportation->>EncodeProcessor: 调用encode方法
+  EncodeProcessor->>EncodeProcessor: 采用AES算法，生成对称加密秘钥
+  EncodeProcessor->>persistence: 保存至存储库里
+  persistence-->>EncodeProcessor: 返回
+  EncodeProcessor-->>Transportation: 返回加密之后的presentation数据
+  Transportation->>Transportation: 将presentation密文放入协议里
+  end
+  Transportation-->>调用者: 返回QRCode协议数据
+
+----
+
+3. deserialize
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.transportation.inf.Transportation.deserialize
+   接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(WeIdAuthentication weIdAuthentication, String transString,Class<T> clazz)
+   接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
+
+**接口入参**\ : 
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weIdAuthentication
+     - WeIdAuthentication
+     - Y
+     - 调用者身份信息
+     - 
+   * - transString
+     - String
+     - Y
+     - 待序列化对象
+     - 
+   * - clazz
+     - Class<T>
+     - Y
+     - 目标类型
+     - 
+
+**接口返回**\ :  <T extends JsonSerializer> com.webank.weid.protocol.response.ResponseData\<T>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     - 
+   * - errorMessage
+     - String
+     - 返回结果描述
+     - 
+   * - result
+     - <T extends JsonSerializer>
+     - 反序列化后的对象
+     - 业务数据
+     
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - ENCRYPT_KEY_NOT_EXISTS
+     - 100700
+     - 无法获取秘钥
+   * - TRANSPORTATION_PROTOCOL_VERSION_ERROR
+     - 100802
+     - 协议版本错误
+   * - TRANSPORTATION_PROTOCOL_STRING_INVALID
+     - 100804
+     - 协议字符串无效
+   * - TRANSPORTATION_ENCODE_BASE_ERROR
+     - 100807
+     - Encode基本未知异常
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - id无效
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+   * - BASE_ERROR
+     - 160007
+     - weId基础未知异常
+   * - DATA_TYPE_CASE_ERROR
+     - 160008
+     - 数据转换异常
+   * - DIRECT_ROUTE_REQUEST_TIMEOUT
+     - 160009
+     - AMOP超时
+   * - DIRECT_ROUTE_MSG_BASE_ERROR
+     - 160010
+     - AMOP异常
+   * - SQL_EXECUTE_FAILED
+     - 160011
+     - SQL执行异常
+   * - SQL_GET_CONNECTION_ERROR
+     - 160013
+     - 获取数据源连接异常
+
+
+**调用示例**
+
+.. code-block:: java
+
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   List<String> verifierWeIdList = new ArrayList<String>();
+   verifierWeIdList.add(weId);
+   
+   String transString="";
+   WeIdAuthentication weIdAuthentication;
+   //调用反序列化
+   ResponseData<PresentationE> result1 = 
+       TransportationFactory
+           .build(TransportationType.BAR_CODE)
+           .deserialize(weIdAuthentication, transString, PresentationE.class);
 
 ----
 
@@ -14403,7 +14926,7 @@ java.util.List<java.lang.String>
 
    PPdfTransportation pdfTransportation = TransportationFactory.newPdfTransportation();
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
    pdfTransportation = PdfTransportation.specify(verifierWeIdList);
@@ -14541,7 +15064,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
 
@@ -14704,7 +15227,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
 
@@ -14866,7 +15389,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
 
@@ -15042,7 +15565,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
 
@@ -15195,7 +15718,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: java
 
-   String weId = "did:weid:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
+   String weId = "did:weid:1000:0x0106595955ce4713fd169bfa68e599eb99ca2e9f";
    List<String> verifierWeIdList = new ArrayList<String>();
    verifierWeIdList.add(weId);
 
@@ -15220,15 +15743,120 @@ java.util.List<java.lang.String>
    ResponseData<PresentationE> resDeserialize =
        TransportationFactory
            .newPdfTransportation()
-           .specify(verifierWeIdList)
            .deserialize(response.getResult(),PresentationE.class,weIdAuthentication);
 
    //密文方式调用反序列化
    ResponseData<PresentationE> resDeserialize1 =
       TransportationFactory
            .newJsonTransportation()
-           .specify(verifierWeIdList)
            .deserialize(response1.getResult(),PresentationE.class,weIdAuthentication);
 
 
+----
+
+CacheManager
+^^^^^^^^^^^^^^^^^
+
+1. registerCacheNode
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.cache.CacheManager.registerCacheNode
+   接口定义: <T> CacheNode<T> registerCacheNode(String cacheName, Long timeout)
+   接口描述: 根据缓存名和超时时间来注册缓存节点，用于按模块来缓存数据。
+
+.. note::
+     注意：此接口生成的缓存节点，存储的数据最大个数为系统默认，默认值为1000, 同时可以通过weidentity.properties文件来修改某一个缓存模块的最大数据个数，例：caffeineCache.maximumSize.XXXX=100。XXX为缓存名。
+
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - cacheName
+     - String
+     - Y
+     - 缓存模块名
+     -
+   * - timeout
+     - Long
+     - Y
+     - 缓存超时时间,单位:毫秒
+     -
+
+
+**接口返回**\ :   com.webank.weid.suite.cache.CacheNode<T>;
+
+**调用示例**
+
+.. code-block:: java
+   CacheNode<String> cptCahceNode = 
+        CacheManager.registerCacheNode("USER_CPT", 1000 * 3600 * 24L);
+   //存入缓存数据
+   cptCahceNode.put("cptKey", "cptValue");
+   //获取缓存数据
+   String cptValue = cptCahceNode.get("cptKey");
+   //移除缓存数据
+   cptCahceNode.remove("cptKey")
+----
+
+2. registerCacheNode
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.cache.CacheManager.registerCacheNode
+   接口定义: <T> CacheNode<T> registerCacheNode(String cacheName, Long timeout, Integer maximumSize)
+   接口描述: 根据缓存名和超时时间来注册缓存节点，用于按模块来缓存数据。
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - cacheName
+     - String
+     - Y
+     - 缓存模块名
+     -
+   * - timeout
+     - Long
+     - Y
+     - 缓存超时时间,单位:毫秒
+     -
+   * - maximumSize
+     - Integer
+     - Y
+     - 缓存数据最大个数
+     -
+
+**接口返回**\ :   com.webank.weid.suite.cache.CacheNode<T>;
+
+**调用示例**
+
+.. code-block:: java
+   CacheNode<String> cptCahceNode = 
+        CacheManager.registerCacheNode("USER_CPT", 1000 * 3600 * 24L, 1000);
+   //存入缓存数据
+   cptCahceNode.put("cptKey", "cptValue");
+   //获取缓存数据
+   String cptValue = cptCahceNode.get("cptKey");
+   //移除缓存数据
+   cptCahceNode.remove("cptKey")
 ----
