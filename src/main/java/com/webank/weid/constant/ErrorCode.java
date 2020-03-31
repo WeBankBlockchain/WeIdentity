@@ -513,9 +513,9 @@ public enum ErrorCode {
     TRANSPORTATION_NO_SPECIFYER_TO_SET(100812, "no spcifyer to set."),
 
     /**
-     * the trans model is invalid.
+     * the trans mode is invalid.
      */
-    TRANSPORTATION_TRANSMODEL_TYPE_INVALID(100813, "the trans model is invalid."),
+    TRANSPORTATION_TRANSMODE_TYPE_INVALID(100813, "the trans mode is invalid."),
     
     /**
      * Authority issuer main error code.
