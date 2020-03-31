@@ -14330,14 +14330,14 @@ java.util.List<java.lang.String>
        TransportationFactory
            .build(TransportationType.QR_CODE)
            .specify(verifierWeIdList)
-           .serialize(weIdAuthentication, presentation,new ProtocolProperty(EncodeType.ORIGINAL, TransModel.DOWN_MODEL));
+           .serialize(weIdAuthentication, presentation,new ProtocolProperty(EncodeType.ORIGINAL, TransMode.DOWNLOAD_MODE));
    
    //密文方式调用
    ResponseData<String> result4 = 
       TransportationFactory
            .build(TransportationType.QR_CODE)
            .specify(verifierWeIdList)
-           .serialize(weIdAuthentication, presentation,new ProtocolProperty(EncodeType.CIPHER, TransModel.DOWN_MODEL));
+           .serialize(weIdAuthentication, presentation,new ProtocolProperty(EncodeType.CIPHER, TransMode.DOWNLOAD_MODE));
 
 
 **时序图**
