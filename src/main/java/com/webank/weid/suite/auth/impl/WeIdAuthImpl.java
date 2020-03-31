@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
@@ -46,13 +47,16 @@ import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.service.impl.callback.RequestVerifyChallengeCallback;
 import com.webank.weid.service.impl.callback.WeIdAuthAmopCallback;
+import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
 import com.webank.weid.suite.auth.inf.WeIdAuthCallback;
 import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 
 /**
  * weIdAuth service.
+ *
  * @author tonychen 2020年3月10日
  */
 @Setter
@@ -70,6 +74,8 @@ public class WeIdAuthImpl implements WeIdAuth {
     private static WeIdAuthAmopCallback weIdAuthAmopCallback = new WeIdAuthAmopCallback();
     private static RequestVerifyChallengeCallback VerifyChallengeCallback =
         new RequestVerifyChallengeCallback();
+
+    private static Persistence dataDriver;
     /**
      * specify who has right to get weid auth.
      */
@@ -85,6 +91,13 @@ public class WeIdAuthImpl implements WeIdAuth {
     }
 
     private WeIdService weIdService = new WeIdServiceImpl();
+
+    private static Persistence getDataDriver() {
+        if (dataDriver == null) {
+            dataDriver = new MysqlDriver();
+        }
+        return dataDriver;
+    }
 
     /* (non-Javadoc)
      * @see com.webank.weid.suite.auth.inf.WeIdAuth#createAuthenticatedChannel(java.lang.String,
@@ -287,8 +300,21 @@ public class WeIdAuthImpl implements WeIdAuth {
     @Override
     public Integer addWeIdAuthObj(WeIdAuthObj weIdAuthObj) {
 
-        weIdAuthCache.put(weIdAuthObj.getChannelId(), weIdAuthObj);
-        return 0;
+        String weIdAuthData = DataToolUtils.serialize(weIdAuthObj);
+        String channelId = weIdAuthObj.getChannelId();
+        ResponseData<Integer> dbResp = getDataDriver().saveOrUpdate(
+            DataDriverConstant.DOMAIN_WEID_AUTH,
+            channelId,
+            weIdAuthData);
+        Integer errorCode = dbResp.getErrorCode();
+        if (errorCode != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[addWeIdAuthObj] save weIdAuthObj to db failed, channel id:{}, error code is {}",
+                channelId,
+                errorCode);
+            return errorCode;
+        }
+        return ErrorCode.SUCCESS.getCode();
     }
 
     /* (non-Javadoc)
@@ -297,7 +323,20 @@ public class WeIdAuthImpl implements WeIdAuth {
     @Override
     public WeIdAuthObj getWeIdAuthObjByChannelId(String channelId) {
 
-        return weIdAuthCache.get(channelId);
+        ResponseData<String> dbResp = getDataDriver().get(
+            DataDriverConstant.DOMAIN_WEID_AUTH,
+            channelId);
+        Integer errorCode = dbResp.getErrorCode();
+        if (errorCode != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "[addWeIdAuthObj] get weIdAuthObj from db failed, channel id:{}, error code is {}",
+                channelId,
+                errorCode);
+            return null;
+        }
+        String weIdAuthJson = dbResp.getResult();
+        WeIdAuthObj weIdAuthObj = DataToolUtils.deserialize(weIdAuthJson, WeIdAuthObj.class);
+        return weIdAuthObj;
     }
 
     /* (non-Javadoc)
