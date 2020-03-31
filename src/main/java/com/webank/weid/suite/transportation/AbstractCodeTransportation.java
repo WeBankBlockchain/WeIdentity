@@ -26,7 +26,7 @@ import com.webank.weid.constant.ServiceType;
 import com.webank.weid.exception.ProtocolSuiteException;
 import com.webank.weid.protocol.amop.GetTransDataArgs;
 import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.suite.api.transportation.params.TransModel;
+import com.webank.weid.suite.api.transportation.params.TransMode;
 import com.webank.weid.suite.api.transportation.params.TransType;
 import com.webank.weid.suite.entity.TransBaseData;
 import com.webank.weid.suite.entity.TransCodeBaseData;
@@ -76,16 +76,16 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
      * 根据协议字符串判断协议为下载模式协议还是纯数据模式协议.
      * 
      * @param transString 协议字符串
-     * @return 返回TransModel
+     * @return 返回TransMode
      */
-    protected TransModel getTransModel(String transString) {
+    protected TransMode getTransMode(String transString) {
         if (StringUtils.isBlank(transString)) {
             throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID);
         }
         String[] trans = transString.split(TransBaseData.PARTITION_FOR_SPLIT);
         if (trans.length == 3) {
-            return TransModel.DOWN_MODEL;
+            return TransMode.DOWNLOAD_MODE;
         }
-        return TransModel.DATA_MODEL;
+        return TransMode.DATA_MODE;
     } 
 }
