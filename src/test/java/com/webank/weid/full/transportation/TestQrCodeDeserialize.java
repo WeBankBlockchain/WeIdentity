@@ -38,7 +38,6 @@ import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
 import com.webank.weid.suite.crypto.CryptService;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
-import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
 
 /**
  * 二维码协议反序列化测试.
@@ -216,7 +215,7 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
                 .deserialize(trans, PresentationE.class);
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -248,30 +247,6 @@ public class TestQrCodeDeserialize extends TestBaseTransportation {
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
             ErrorCode.TRANSPORTATION_ENCODE_BASE_ERROR.getCode(),
-            wrapperRes.getErrorCode().intValue()
-        );
-        Assert.assertNull(wrapperRes.getResult());
-    }
-
-    /**
-     * mock异常情况.
-     */
-    @Test
-    public void testDeserializeCase11() {
-        new MockUp<QrCodeBaseData>() {
-            @Mock
-            public QrCodeBaseData newInstance(Class<?> cls) throws ReflectiveOperationException {
-                return new HashMap<String, QrCodeBaseData>().get("key");
-            }
-        };
-
-        ResponseData<PresentationE> wrapperRes =
-            TransportationFactory.newQrCodeTransportation()
-                .deserialize(original_transString, PresentationE.class);
-
-        LogUtil.info(logger, "deserialize", wrapperRes);
-        Assert.assertEquals(
-            ErrorCode.UNKNOW_ERROR.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());

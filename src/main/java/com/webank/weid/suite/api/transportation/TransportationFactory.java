@@ -32,7 +32,7 @@ import com.webank.weid.suite.api.transportation.params.TransportationType;
 import com.webank.weid.suite.transportation.bar.impl.BarCodeTransportationImpl;
 import com.webank.weid.suite.transportation.json.impl.JsonTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
-import com.webank.weid.suite.transportation.qr.impl.QrCodeJsonTransportationImpl;
+import com.webank.weid.suite.transportation.qr.impl.QrCodeTransportationImpl;
 
 /**
  * Created by Junqi Zhang on 2019/5/13.
@@ -46,7 +46,7 @@ public class TransportationFactory {
     }
 
     public static QrCodeTransportation newQrCodeTransportation() {
-        return new QrCodeJsonTransportationImpl();
+        return new QrCodeTransportationImpl();
     }
 
     public static PdfTransportation newPdfTransportation() {
@@ -66,7 +66,7 @@ public class TransportationFactory {
             case BAR_CODE:
                 return new BarCodeTransportationImpl();
             case QR_CODE:
-                return new QrCodeJsonTransportationImpl();
+                return new QrCodeTransportationImpl();
             default:
                 logger.error("the type = {} unsupported.", transportationType.name());
                 throw new WeIdBaseException(ErrorCode.THIS_IS_UNSUPPORTED);

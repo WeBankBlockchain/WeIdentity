@@ -20,5 +20,6 @@
 package com.webank.weid.constant;
 
 public enum ServiceType {
-    SYS_GET_BARCODE_DATA
+    //获取Transportation数据
+    SYS_GET_TRANS_DATA
 }

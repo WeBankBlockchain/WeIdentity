@@ -955,9 +955,7 @@ public class PdfTransportationImpl
             );
 
             //根据编解码类型获取编解码枚举对象
-            EncodeType encodeType = EncodeType.getObject(
-                String.valueOf(pdfAttributeInfo.getEncodeType()));
-
+            EncodeType encodeType = EncodeType.getEncodeType(pdfAttributeInfo.getEncodeType());
             if (encodeType == null) {
                 return new ResponseData<>(null, ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
             }
