@@ -33,7 +33,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.api.transportation.params.TransModel;
+import com.webank.weid.suite.api.transportation.params.TransMode;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
 import com.webank.weid.suite.entity.JsonVersion;
@@ -60,7 +60,7 @@ public class JsonTransportationImpl
         T object,
         ProtocolProperty property
     ) {
-        if (property != null && property.getTransModel() == TransModel.DOWN_MODEL) {
+        if (property != null && property.getTransMode() == TransMode.DOWNLOAD_MODE) {
             logger.error(
                 "[serialize] should to call serialize(WeIdAuthentication weIdAuthentication, "
                 + "T object, ProtocolProperty property).");

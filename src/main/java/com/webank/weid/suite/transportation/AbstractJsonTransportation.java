@@ -33,7 +33,7 @@ import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.api.transportation.params.TransModel;
+import com.webank.weid.suite.api.transportation.params.TransMode;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -62,7 +62,7 @@ public abstract class AbstractJsonTransportation
     ) {
         ResponseData<String> response = serializeInner(object, property);
         if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
-            && property.getTransModel() == TransModel.DOWN_MODEL) {
+            && property.getTransMode() == TransMode.DOWNLOAD_MODE) {
             super.registerWeIdAuthentication(weIdAuthentication);
         }
         return response;
