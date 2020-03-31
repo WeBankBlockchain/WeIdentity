@@ -32,7 +32,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.QrCodeTransportation;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.api.transportation.params.TransModel;
+import com.webank.weid.suite.api.transportation.params.TransMode;
 import com.webank.weid.suite.api.transportation.params.TransType;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
@@ -59,7 +59,7 @@ public class QrCodeTransportationImpl
         T object, 
         ProtocolProperty property
     ) {
-        if (property != null && property.getTransModel() == TransModel.DOWN_MODEL) {
+        if (property != null && property.getTransMode() == TransMode.DOWNLOAD_MODE) {
             logger.error(
                 "[serialize] should to call serialize(WeIdAuthentication weIdAuthentication, "
                 + "T object, ProtocolProperty property).");
@@ -94,7 +94,7 @@ public class QrCodeTransportationImpl
         try {
             // 根据协议版本生成协议实体对象
             QrCodeVersion version = QrCodeVersion.V1;
-            if (property.getTransModel() == TransModel.DOWN_MODEL) {
+            if (property.getTransMode() == TransMode.DOWNLOAD_MODE) {
                 // 下载模式
                 version = QrCodeVersion.V2;
             }
@@ -122,7 +122,7 @@ public class QrCodeTransportationImpl
                 throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID);
             }
             
-            logger.info("[serialize] the transMode is {}", property.getTransModel());
+            logger.info("[serialize] the transMode is {}", property.getTransMode());
             if (version == QrCodeVersion.V2) {
                 // 下载模式
                 //save BarCodeData
@@ -162,8 +162,8 @@ public class QrCodeTransportationImpl
             );
             return new ResponseData<T>(null, errorCode);
         }
-        TransModel transModel = super.getTransModel(transString);
-        if (transModel == TransModel.DATA_MODEL) {
+        TransMode transMode = super.getTransMode(transString);
+        if (transMode == TransMode.DATA_MODE) {
             return deserializeInner(weIdAuthentication, transString, clazz);
         }
         return deserializeInnerForDown(weIdAuthentication, transString, clazz);

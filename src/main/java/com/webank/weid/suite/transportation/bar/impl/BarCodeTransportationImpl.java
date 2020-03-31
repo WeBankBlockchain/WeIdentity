@@ -32,7 +32,7 @@ import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.Transportation;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.api.transportation.params.TransModel;
+import com.webank.weid.suite.api.transportation.params.TransMode;
 import com.webank.weid.suite.api.transportation.params.TransType;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.BarCodeVersion;
@@ -62,7 +62,7 @@ public class BarCodeTransportationImpl
         T object, 
         ProtocolProperty property
     ) {
-        if (property != null && property.getTransModel() == TransModel.DOWN_MODEL) {
+        if (property != null && property.getTransMode() == TransMode.DOWNLOAD_MODE) {
             logger.error(
                 "[serialize] should to call serialize(WeIdAuthentication weIdAuthentication, "
                 + "T object, ProtocolProperty property).");
