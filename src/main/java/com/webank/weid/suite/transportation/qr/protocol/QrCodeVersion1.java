@@ -19,47 +19,103 @@
 
 package com.webank.weid.suite.transportation.qr.protocol;
 
-import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.ProtocolSuiteException;
 import com.webank.weid.suite.entity.QrCodeVersion;
-import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.suite.entity.TransCodeBaseData;
 
 /**
  * 协议版本V1.
  * @author v_wbgyang
  *
  */
-public class QrCodeVersion1 extends QrCodeBaseData {
-
-    private static final String protocol = 
-        PROTOCOL_VERSION + "encodeType|orgId|id|data|extendData";
+public class QrCodeVersion1 extends TransCodeBaseData {
     
-    private static final String[] protocols;
+    private static final Logger logger = LoggerFactory.getLogger(QrCodeVersion1.class);
     
-    static {
-        //得到协议模板配置的协议字段
-        protocols = protocol.split(PROTOCOL_PARTITION_DIVISION);
+    private static final QrCodeVersion version = QrCodeVersion.V1;
+    
+    // 协议数据位置定义
+    private static final int VERSION_INDEX = 0;
+    private static final int ENCODE_INDEX = 1;
+    private static final int ORGID_INDEX = 2;
+    private static final int RESOURCEID_INDEX = 3;
+    private static final int DATA_INDEX = 4;
+    private static final int EXTENDDATA_INDEX = 5;
+    
+    public QrCodeVersion1() {
+        this.setVersion(version.getCode());
     }
-
-    public QrCodeBaseData buildBuffer() {
-        super.buildBuffer(protocols);
-        return this;
-    }
-
-    public QrCodeBaseData buildData(String transString) {
-        super.buildData(protocols, transString);
-        return this;
+    
+    /**
+     * 获取协议数据.
+     * 协议模板: version|encodeType|orgId|id|data|extendData
+     * @return 返回协议字符串
+     */
+    @Override
+    public String buildCodeString() {
+        StringBuffer buffer = new StringBuffer();
+        // 第一段 控制协议版本
+        buffer.append(version.getCode()).append(PROTOCOL_PARTITION);
+        // 第二段 控制协议编解码相关
+        buffer.append(super.getEncodeType()).append(PROTOCOL_PARTITION);
+        // 第三段 控制机构id
+        buffer.append(super.getOrgId()).append(PROTOCOL_PARTITION);
+        // 第四段 控制资源Id
+        buffer.append(super.getId()).append(PROTOCOL_PARTITION);
+        // 第五段 控制资源数据
+        buffer.append(super.getData()).append(PROTOCOL_PARTITION);
+        // 第六段 扩展字符串 结尾如果为空进行占位
+        buffer.append(StringUtils.isBlank(super.getExtendData()) ? "?" : super.getExtendData());
+        return buffer.toString();
     }
 
     @Override
-    public void buildQrCodeData(
-        ProtocolProperty protocol,
-        String orgId
-    ) {
-        super.buildHead(
-            protocol.getEncodeType(),
-            QrCodeVersion.V1
-        );
-        super.setOrgId(orgId);
-        super.setId(DataToolUtils.getUuId32());
+    public void buildCodeData(String codeString) {
+        String[] codeStrings = codeString.split(PARTITION_FOR_SPLIT);
+        if (codeStrings.length != 6) {
+            logger.error("[buildCodeData] the field of protocol invalid.");
+            throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID);
+        }
+        try {
+            // 第一段 控制协议版本
+            String versionString = codeStrings[VERSION_INDEX];
+            this.setVersion(Integer.parseInt(versionString));
+            // 第二段 控制协议编解码相关
+            String enCodeString = codeStrings[ENCODE_INDEX];
+            this.setEncodeType(Integer.parseInt(enCodeString));
+            // 第三段 控制机构id
+            String orgIdString = codeStrings[ORGID_INDEX];
+            this.setOrgId(orgIdString);
+            // 第四段 控制资源Id
+            String resourceIdString = codeStrings[RESOURCEID_INDEX];
+            this.setId(resourceIdString);
+            // 第五段 控制资源数据
+            String dataString = codeStrings[DATA_INDEX];
+            this.setData(dataString);
+            // 第六段 扩展字符串
+            String extendDataString = codeStrings[EXTENDDATA_INDEX];
+            this.setExtendData(extendDataString);
+        } catch (Exception e) {
+            logger.error("[buildCodeData] the protocol string invalid.", e);
+            throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID);
+        }
+    }
+    
+    @Override
+    public boolean check() {
+        if (!super.check()) {
+            return false;
+        }
+        boolean checkData = String.valueOf(super.getData()).indexOf(PROTOCOL_PARTITION) == -1;
+        if (!checkData) {
+            logger.error("[check] the value of data error, please check the data.");
+            return false;
+        }
+        return true;
     }
 }
