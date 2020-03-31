@@ -25,28 +25,28 @@ import com.webank.weid.exception.WeIdBaseException;
 /**
  * Transportation的数据模式, 目前支持二维码的纯数据模式和下载模式
  * 在使用transportation序列化二维码的时候可以通过这个指定二维码包含的是纯数据，还是下载模式.
- * 纯数据模式(DATA_MODEL):表示序列化出来的数据为实际数据，此模式下的内容会过大,可能无法编码到二维码中.
- *下载模式(DOWN_MODEL):将协议数据存储在数据库中，通过短编码进行映射. 
+ * 纯数据模式(DATA_MODE):表示序列化出来的数据为实际数据，此模式下的内容会过大,可能无法编码到二维码中.
+ *下载模式(DOWNLOAD_MODE):将协议数据存储在数据库中，通过短编码进行映射. 
  * 
  * @author yanggang
  *
  */
-public enum TransModel {
+public enum TransMode {
     
     /**
      * 纯数据模式.
      */
-    DATA_MODEL(0),
+    DATA_MODE(0),
     
     /**
      * 下载模式.
      */
-    DOWN_MODEL(1),
+    DOWNLOAD_MODE(1),
     ;
 
     private Integer code;
 
-    TransModel(Integer code) {
+    TransMode(Integer code) {
         this.code = code;
     }
 
@@ -55,18 +55,18 @@ public enum TransModel {
     }
 
     /**
-     * get TransModel By code.
+     * get TransMode By code.
      *
-     * @param code the TransModel code
-     * @return TransModel
+     * @param code the TransMode code
+     * @return TransMode
      */
-    public static TransModel getTransModelByCode(Integer code) {
-        for (TransModel type : TransModel.values()) {
+    public static TransMode getTransModeByCode(Integer code) {
+        for (TransMode type : TransMode.values()) {
             if (type.getCode() == code) {
                 return type;
             }
         }
-        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_TRANSMODEL_TYPE_INVALID);
+        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_TRANSMODE_TYPE_INVALID);
     }
     
 }

@@ -45,7 +45,7 @@ public class ProtocolProperty {
     /**
      * 二维码的数据模式: 默认为纯数据模式.
      */
-    private TransModel transModel = TransModel.DATA_MODEL;
+    private TransMode transMode = TransMode.DATA_MODE;
 
     public EncodeType getEncodeType() {
         return encodeType;
@@ -55,9 +55,9 @@ public class ProtocolProperty {
         this.encodeType = encodeType;
     }
 
-    public ProtocolProperty(EncodeType encodeType, TransModel transModel) {
+    public ProtocolProperty(EncodeType encodeType, TransMode transMode) {
         this(encodeType);
-        this.transModel = transModel;
+        this.transMode = transMode;
     }
     
     public TransType getTransType() {
@@ -68,8 +68,8 @@ public class ProtocolProperty {
         return uriType;
     }
 
-    public TransModel getTransModel() {
-        return transModel;
+    public TransMode getTransMode() {
+        return transMode;
     }
     
 }
