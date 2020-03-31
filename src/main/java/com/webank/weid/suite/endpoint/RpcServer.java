@@ -112,8 +112,10 @@ public class RpcServer {
                                 return;
                             }
                         } catch (IOException e) {
-                            logger.error("Failed to track remote address for session ID: "
-                                + session.getSessionID());
+                            logger.error(
+                                "Failed to track remote address for session ID: {}",
+                                session.getSessionID()
+                            );
                         }
                         String bizResult = StringUtils.EMPTY;
                         try {

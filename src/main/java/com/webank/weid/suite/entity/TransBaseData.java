@@ -17,44 +17,51 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.amop;
-
-import java.util.Map;
+package com.webank.weid.suite.entity;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
-import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
-
-/**
- * the request body for get EncryptKey.
- * 
- * @author tonychen 2019年5月7日.
- *
- */
 @Getter
 @Setter
-@ToString
-public class GetBarCodeDataArgs extends AmopBaseMsgArgs {
-
+public class TransBaseData {
     /**
-     * the resource Id.
+     * 协议分隔符.
      */
-    private String resourceId;
+    public static final String PROTOCOL_PARTITION = "|";
     
     /**
-     * weId信息.
+     * 协议分隔符.
      */
-    private String weId;
+    public static final String PARTITION_FOR_SPLIT = "\\" + PROTOCOL_PARTITION;
     
     /**
-     * 签名信息.
+     * 协议版本.
      */
-    private String signValue;
+    private int version;
     
     /**
-     * 扩展字符串字段.
+     * JSON协议编解码方式.
      */
-    private Map<String, String> extra;
+    private int encodeType;
+    
+    /**
+     * user agent的机构ID.
+     */
+    private String orgId;
+    
+    /**
+     * 协议数据Id.
+     */
+    private String id;
+    
+    /**
+     * 协议数据体.
+     */
+    private Object data;
+    
+    /**
+     * 协议扩展字段.
+     */
+    private String extendData;
 }
