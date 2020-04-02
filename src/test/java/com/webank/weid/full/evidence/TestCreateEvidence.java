@@ -20,6 +20,7 @@
 package com.webank.weid.full.evidence;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,8 +47,12 @@ import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.service.impl.EvidenceServiceImpl;
+import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 
@@ -262,6 +267,42 @@ public class TestCreateEvidence extends TestBaseService {
         evi = evidenceService.getEvidenceByCustomKey(credId).getResult();
         Assert.assertNotNull(evi);
         Assert.assertTrue(evi.getSignInfo().get(signer).getLogs().contains(log));
+    }
+
+    @Test
+    public void testBatchCreate() throws Exception {
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
+            super.copyCreateWeId(createWeIdResultWithSetAttr);
+        List<String> hashValues = new ArrayList<>();
+        List<String> signatures = new ArrayList<>();
+        List<Long> timestamps = new ArrayList<>();
+        List<String> signers = new ArrayList<>();
+        List<String> logs = new ArrayList<>();
+        for (int i = 0; i < 100; i++) {
+            CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+            credential.setId(UUID.randomUUID().toString());
+            String hash = credential.getHash();
+            hashValues.add(credential.getHash());
+            signatures.add(new String(DataToolUtils.base64Encode(DataToolUtils
+                .simpleSignatureSerialization(DataToolUtils.signMessage(hash, privateKey))),
+                StandardCharsets.UTF_8));
+            timestamps.add(System.currentTimeMillis());
+            signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            logs.add("test log" + i);
+        }
+        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine();
+        Long start = System.currentTimeMillis();
+        ResponseData<List<Boolean>> resp = engine
+            .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey);
+        Long end = System.currentTimeMillis();
+        System.out.println(end - start);
+        List<Boolean> booleans = resp.getResult();
+        Assert.assertEquals(booleans.size(), hashValues.size());
+        Boolean result = true;
+        for (int i = 0; i < booleans.size(); i++) {
+            result &= booleans.get(i);
+        }
+        Assert.assertTrue(result);
     }
 
     /**

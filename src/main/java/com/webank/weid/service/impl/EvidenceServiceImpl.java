@@ -22,6 +22,8 @@ package com.webank.weid.service.impl;
 import java.io.File;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
