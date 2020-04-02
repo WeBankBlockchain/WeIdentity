@@ -100,7 +100,8 @@ public enum ErrorCode {
     /**
      * The credential issuer mismatch.
      */
-    CREDENTIAL_ISSUER_MISMATCH(100403, "issuer weId does not match the weId of credential"),
+    CREDENTIAL_ISSUER_MISMATCH(100403,
+        "issuer weId does not match the weId of credential"),
 
     /**
      * The credential signature broken.
@@ -323,7 +324,8 @@ public enum ErrorCode {
     /**
      * The credential evidence interface does not support fisco bcos 1.3.
      */
-    FISCO_BCOS_VERSION_NOT_SUPPORTED(170000, "this function does not support current fisco bcos version"),
+    FISCO_BCOS_VERSION_NOT_SUPPORTED(170000,
+        "this function does not support current fisco bcos version"),
 
     /**
      * On-chain string length exceeded acceptable max.
