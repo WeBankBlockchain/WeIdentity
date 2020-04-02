@@ -236,7 +236,7 @@ public class TestDataTypetUtils {
         Assert.assertEquals(hash, convertedBackStr);
         Assert.assertEquals(hash.length(), WeIdConstant.BYTES32_FIXED_LENGTH * 2 + 2);
         List<String> listX = new ArrayList(
-            Arrays.asList("a","b", "c", "d", "f", "f", "g"));
+            Arrays.asList("a", "b", "c", "d", "f", "f", "g"));
         List<String> listY = new ArrayList(Arrays.asList("a", "c", "f", "f", "g"));
         List<Boolean> result = DataToolUtils.strictCheckExistence(listX, listY);
         Assert.assertTrue(result.get(0) && result.get(2));
