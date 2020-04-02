@@ -19,6 +19,7 @@
 
 package com.webank.weid.rpc;
 
+import java.util.List;
 import java.util.Map;
 
 import com.webank.weid.protocol.base.EvidenceInfo;
@@ -137,4 +138,5 @@ public interface EvidenceService {
      * @return true if yes, false otherwise
      */
     ResponseData<Boolean> verifySigner(EvidenceInfo evidenceInfo, String weId, String publicKey);
+
 }
