@@ -1783,6 +1783,13 @@ public final class DataToolUtils {
         }
     }
 
+    /**
+     * Convert a hash string (0x[64Bytes]) into a byte array with 32 bytes length by compressing
+     * each two nearby characters into one.
+     *
+     * @param hash hash String
+     * @return byte array
+     */
     public static byte[] convertHashStrIntoHashByte32Array(String hash) {
         if (!isValidHash(hash)) {
             return null;
@@ -1798,8 +1805,15 @@ public final class DataToolUtils {
         return result;
     }
 
+    /**
+     * Convert a byte array with 32 bytes into a hash String by stretching the two halfs of a hex
+     * byte into two separate hex string. Padding with zeros must be kept in mind.
+     *
+     * @param hash hash byte array
+     * @return hash String
+     */
     public static String convertHashByte32ArrayIntoHashStr(byte[] hash) {
-        StringBuffer convertedBackStr = new StringBuffer().append(WeIdConstant.HEX_PREFIX);
+        StringBuilder convertedBackStr = new StringBuilder().append(WeIdConstant.HEX_PREFIX);
         for (int i = 0; i < WeIdConstant.BYTES32_FIXED_LENGTH; i++) {
             String hex = Integer
                 .toHexString(((int) hash[i]) >= 0 ? ((int) hash[i]) : ((int) hash[i]) + 256);
@@ -1811,23 +1825,37 @@ public final class DataToolUtils {
         return convertedBackStr.toString();
     }
 
+    /**
+     * An intermediate fix to convert Bytes32 Object List from web3sdk 2.x into a real String list.
+     *
+     * @param byteList Bytes32 Object list
+     * @return hash String list
+     */
     public static List<String> convertBytes32ObjectListToStringHashList(
-        List<org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32> bList) {
-        List<String> sList = new ArrayList<>();
-        for (int i = 0; i < bList.size(); i++) {
-            sList.add(DataToolUtils.convertHashByte32ArrayIntoHashStr(
-                ((org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32) (bList.toArray()[i])).getValue()));
+        List<org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32> byteList) {
+        List<String> strList = new ArrayList<>();
+        for (int i = 0; i < byteList.size(); i++) {
+            strList.add(DataToolUtils.convertHashByte32ArrayIntoHashStr(
+                ((org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32) (byteList.toArray()[i]))
+                    .getValue()));
         }
-        return sList;
+        return strList;
     }
 
+    /**
+     * Strictly check two lists' elements existence whether items in src exists in dst list or not.
+     *
+     * @param src source list
+     * @param dst dest list
+     * @return boolean list, each true / false indicating existing or not.
+     */
     public static List<Boolean> strictCheckExistence(List<String> src, List<String> dst) {
         List<Boolean> result = new ArrayList<>();
         int index = 0;
         for (int i = 0; i < src.size(); i++) {
             if (src.get(i).equalsIgnoreCase(dst.get(index))) {
                 result.add(true);
-                index ++;
+                index++;
             } else {
                 result.add(false);
             }

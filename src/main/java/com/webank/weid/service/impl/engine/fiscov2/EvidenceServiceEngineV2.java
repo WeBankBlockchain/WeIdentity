@@ -95,12 +95,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String privateKey
     ) {
         try {
-            EvidenceContract evidenceContractWriter =
-                reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
-                    privateKey,
-                    EvidenceContract.class
-                );
             List<byte[]> hashByteList = new ArrayList<>();
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
             String address = WeIdUtils
@@ -113,6 +107,12 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             logList.add(extra);
             List<BigInteger> timestampList = new ArrayList<>();
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    fiscoConfig.getEvidenceAddress(),
+                    privateKey,
+                    EvidenceContract.class
+                );
             TransactionReceipt receipt =
                 evidenceContractWriter.createEvidence(
                     hashByteList,
@@ -158,12 +158,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             result.add(false);
         }
         try {
-            EvidenceContract evidenceContractWriter =
-                reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
-                    privateKey,
-                    EvidenceContract.class
-                );
             List<byte[]> hashByteList = new ArrayList<>();
             List<String> signerList = new ArrayList<>();
             List<BigInteger> timestampList = new ArrayList<>();
@@ -173,6 +167,12 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 signerList.add(WeIdUtils.convertWeIdToAddress(signers.get(i)));
                 timestampList.add(new BigInteger(String.valueOf(timestamp.get(i)), 10));
             }
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    fiscoConfig.getEvidenceAddress(),
+                    privateKey,
+                    EvidenceContract.class
+                );
             TransactionReceipt receipt =
                 evidenceContractWriter.createEvidence(
                     hashByteList,
@@ -198,7 +198,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                                 .getValue()));
                     }
                 }
-                return new ResponseData<>(DataToolUtils.strictCheckExistence(hashValues, returnedHashs),
+                return new ResponseData<>(
+                    DataToolUtils.strictCheckExistence(hashValues, returnedHashs),
                     ErrorCode.SUCCESS, info);
             }
         } catch (Exception e) {
@@ -222,12 +223,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             result.add(false);
         }
         try {
-            EvidenceContract evidenceContractWriter =
-                reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
-                    privateKey,
-                    EvidenceContract.class
-                );
             List<byte[]> hashByteList = new ArrayList<>();
             List<String> signerList = new ArrayList<>();
             List<BigInteger> timestampList = new ArrayList<>();
@@ -237,6 +232,12 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 signerList.add(WeIdUtils.convertWeIdToAddress(signers.get(i)));
                 timestampList.add(new BigInteger(String.valueOf(timestamp.get(i)), 10));
             }
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    fiscoConfig.getEvidenceAddress(),
+                    privateKey,
+                    EvidenceContract.class
+                );
             TransactionReceipt receipt =
                 evidenceContractWriter.createEvidenceWithExtraKey(
                     hashByteList,
@@ -263,7 +264,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                                 .getValue()));
                     }
                 }
-                return new ResponseData<>(DataToolUtils.strictCheckExistence(hashValues, returnedHashs),
+                return new ResponseData<>(
+                    DataToolUtils.strictCheckExistence(hashValues, returnedHashs),
                     ErrorCode.SUCCESS, info);
             }
         } catch (Exception e) {
@@ -280,12 +282,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String privateKey
     ) {
         try {
-            EvidenceContract evidenceContractWriter =
-                reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
-                    privateKey,
-                    EvidenceContract.class
-                );
             List<byte[]> hashByteList = new ArrayList<>();
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
             List<String> sigList = new ArrayList<>();
@@ -297,6 +293,13 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             String address = WeIdUtils
                 .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
             List<String> signerList = new ArrayList<>();
+            signerList.add(address);
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    fiscoConfig.getEvidenceAddress(),
+                    privateKey,
+                    EvidenceContract.class
+                );
             signerList.add(address);
             TransactionReceipt receipt =
                 evidenceContractWriter.createEvidence(
@@ -562,12 +565,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String extraKey,
         String privateKey) {
         try {
-            EvidenceContract evidenceContractWriter =
-                reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
-                    privateKey,
-                    EvidenceContract.class
-                );
             List<byte[]> hashByteList = new ArrayList<>();
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
             String address = WeIdUtils
@@ -582,6 +579,12 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
             List<String> extraKeyList = new ArrayList<>();
             extraKeyList.add(extraKey);
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    fiscoConfig.getEvidenceAddress(),
+                    privateKey,
+                    EvidenceContract.class
+                );
             TransactionReceipt receipt =
                 evidenceContractWriter.createEvidenceWithExtraKey(
                     hashByteList,
