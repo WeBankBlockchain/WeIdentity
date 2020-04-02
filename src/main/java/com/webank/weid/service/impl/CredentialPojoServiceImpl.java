@@ -110,28 +110,28 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         }
         return dataDriver;
     }
-    
+
     private static WeIdService getWeIdService() {
         if (weIdService == null) {
             weIdService = new WeIdServiceImpl();
         }
         return weIdService;
     }
-    
+
     private static CptService getCptService() {
         if (cptService == null) {
             cptService = new CptServiceImpl();
         }
         return cptService;
     }
-    
+
     private static PdfTransportation getPdfTransportation() {
         if (pdfTransportation == null) {
             pdfTransportation = new PdfTransportationImpl();
         }
         return pdfTransportation;
     }
-    
+
     /**
      * Salt generator. Automatically fillin the map structure in a recursive manner.
      *
@@ -738,7 +738,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 
         Map<String, String> credentialInfoMap = buildCredentialInfo(preCredential, claimJson);
 
-        ResponseData<CredentialTemplateEntity> resp = getCptService().queryCredentialTemplate(cptId);
+        ResponseData<CredentialTemplateEntity> resp = getCptService()
+            .queryCredentialTemplate(cptId);
         CredentialTemplateEntity credentialTemplate = resp.getResult();
 
         UserResult userResult = UserClient.makeCredential(credentialInfoMap, credentialTemplate);
