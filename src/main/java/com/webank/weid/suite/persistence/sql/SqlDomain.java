@@ -104,7 +104,7 @@ public class SqlDomain {
         this.key = domainKey;
         resolveDomain();
     }
-    
+
     private void resolveDomain() {
         if (StringUtils.isBlank(this.key)) {
             this.key = DataDriverConstant.DOMAIN_DEFAULT_INFO;
@@ -174,5 +174,13 @@ public class SqlDomain {
      */
     public Date getNow() {
         return new Date();
+    }
+    
+    /**
+     * 设置数据源名称, 目前接口暂时不开放.
+     * @param baseDomain 数据源名称
+     */
+    void setBaseDomain(String baseDomain) {
+        this.baseDomain = baseDomain;
     }
 }

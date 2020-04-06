@@ -37,14 +37,10 @@ import com.webank.weid.protocol.amop.GetTransDataArgs;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.TransCodeBaseData;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.suite.transmission.TransmissionService;
 import com.webank.weid.util.DataToolUtils;
 
@@ -53,28 +49,10 @@ import com.webank.weid.util.DataToolUtils;
  * @author yanggang
  *
  */
-public class DownTransDataService implements TransmissionService<String> {
+public class DownTransDataService extends InnerService implements TransmissionService<String> {
     
     private static final Logger logger =  LoggerFactory.getLogger(DownTransDataService.class);
 
-    private Persistence dataDriver;
-    
-    private WeIdService weidService;
-    
-    private WeIdService getWeIdService() {
-        if (weidService == null) {
-            weidService = new WeIdServiceImpl();
-        }
-        return weidService;
-    }
-    
-    private Persistence getDataDriver() {
-        if (dataDriver == null) {
-            dataDriver = new MysqlDriver();
-        }
-        return dataDriver;
-    }
-    
     @Override
     public ResponseData<String> service(String message) {
         try {
