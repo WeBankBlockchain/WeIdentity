@@ -40,17 +40,12 @@ public class ConnectionPool {
     
     private static final Logger logger = LoggerFactory.getLogger(ConnectionPool.class);
 
-    private static  Map<String, BasicDataSource> connectionPoolMap = null;
+    private static  Map<String, BasicDataSource> connectionPoolMap = new ConcurrentHashMap<>();
     
     private static final LinkedList<String> SOURCE_NAME_LIST = new LinkedList<String>();
     
     static {
-        String dataSourceNameStr = 
-            PropertyUtils.getProperty(DataDriverConstant.JDBC_DATASOURCE_NAME);
-        String[] dataSourceNames = dataSourceNameStr.split(",");
-        for (String string : dataSourceNames) {
-            SOURCE_NAME_LIST.add(string);
-        }
+        init();
     }
     
     private ConnectionPool() {
@@ -119,7 +114,12 @@ public class ConnectionPool {
             minEitmKey,
             DataDriverConstant.POOL_MIN_EITM_DEFAULT_VALUE
         );
-
+        // 初始化大小
+        String initSizeKey = dsNamePrefix + DataDriverConstant.JDBC_MIN_EITM;
+        String initSize = PropertyUtils.getProperty(
+            initSizeKey,
+            DataDriverConstant.POOL_INIT_DEFAULT_VALUE
+        );
         Properties p = new Properties();
         p.setProperty(DataDriverConstant.POOL_URL, dbUrl);
         p.setProperty(DataDriverConstant.POOL_DRIVER_CLASS_NAME, driverClass);
@@ -129,9 +129,14 @@ public class ConnectionPool {
         p.setProperty(DataDriverConstant.POOL_MIN_IDLE, minIdle);
         p.setProperty(DataDriverConstant.POOL_MAX_IDLE, maxIdle);
         p.setProperty(DataDriverConstant.POOL_MAX_WAIT, maxWait);
+        p.setProperty(DataDriverConstant.POOL_INITIAL_SIZE, initSize);
         // 是否自动回收超时连接
         p.setProperty(
             DataDriverConstant.POOL_MAX_REMOVE_ABANDONED,
+            DataDriverConstant.JDBC_REMOVE_ABANDONED
+        );
+        p.setProperty(
+            DataDriverConstant.POOL_MAX_REMOVE_MAINTENANCE,
             DataDriverConstant.JDBC_REMOVE_ABANDONED
         );
         // 是否自动回收超时连接的超时时间
@@ -162,22 +167,21 @@ public class ConnectionPool {
     
     /**
      * 初始化连接池.
-     * 
-     * @throws Exception 初始化异常
      */
-    private static void init() throws Exception {
-        if (connectionPoolMap == null) {
-            synchronized (ConnectionPool.class) {
-                if (connectionPoolMap == null) {
-                    connectionPoolMap = new ConcurrentHashMap<>();
-                    for (int i = 0; i < SOURCE_NAME_LIST.size(); i++) {
-                        Properties properties = initProperties(SOURCE_NAME_LIST.get(i) + ".");
-                        BasicDataSource connectionPool = 
-                            (BasicDataSource) BasicDataSourceFactory.createDataSource(properties);
-                        connectionPoolMap.put(SOURCE_NAME_LIST.get(i), connectionPool);
-                    }  
-                }
+    private static void init() {
+        try {
+            String dataSourceNameStr = 
+                PropertyUtils.getProperty(DataDriverConstant.JDBC_DATASOURCE_NAME);
+            String[] dataSourceNames = dataSourceNameStr.split(",");
+            for (String string : dataSourceNames) {
+                SOURCE_NAME_LIST.add(string);
+                Properties properties = initProperties(string + ".");
+                BasicDataSource connectionPool = 
+                    (BasicDataSource) BasicDataSourceFactory.createDataSource(properties);
+                connectionPoolMap.put(string, connectionPool);
             }
+        } catch (Exception e) {
+            logger.error("init ConnectionPool error, please check the log.", e);
         }
     }
     
@@ -190,13 +194,8 @@ public class ConnectionPool {
     public static Connection getConnection(String dsName) {
         Connection conn = null;
         try {
-            if (connectionPoolMap == null) {
-                init();
-            }
-            if (connectionPoolMap != null) {
-                conn = connectionPoolMap.get(dsName).getConnection();
-                conn.setAutoCommit(true);
-            }
+            conn = connectionPoolMap.get(dsName).getConnection();
+            conn.setAutoCommit(true);
         } catch (Exception e) {
             logger.error("get connection error, please check the log.", e);
         }
