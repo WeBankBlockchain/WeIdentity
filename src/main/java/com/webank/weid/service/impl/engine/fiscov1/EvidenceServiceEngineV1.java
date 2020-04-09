@@ -21,6 +21,7 @@ package com.webank.weid.service.impl.engine.fiscov1;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -80,10 +81,24 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
     /**
      * 重新加载静态合约对象.
      */
+    @Override
     public void reload() {
         evidenceContract = getContractService(
             fiscoConfig.getEvidenceAddress(),
             EvidenceContract.class);
+    }
+
+
+    @Override
+    public ResponseData<List<Boolean>> batchCreateEvidence(
+        List<String> hashValues,
+        List<String> signatures,
+        List<String> logs,
+        List<Long> timestamp,
+        List<String> signers,
+        String privateKey
+    ) {
+        return new ResponseData<>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
 
     @Override
@@ -180,7 +195,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
 
     @Override
     public ResponseData<String> getHashByCustomKey(String customKey) {
-        return new ResponseData<String>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_SUPPORTED);
+        return new ResponseData<String>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
 
     private static boolean isSignEvent(EvidenceAttributeChangedEventResponse event) {
@@ -372,8 +387,22 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
         String extraKey,
         String privateKey) {
 
-        return new ResponseData<String>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_SUPPORTED);
+        return new ResponseData<String>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
+
+    @Override
+    public ResponseData<List<Boolean>> batchCreateEvidenceWithCustomKey(
+        List<String> hashValues,
+        List<String> signatures,
+        List<String> logs,
+        List<Long> timestamps,
+        List<String> signers,
+        List<String> customKeys,
+        String privateKey
+    ) {
+        return new ResponseData<>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+    }
+
 
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.EvidenceServiceEngine#getInfoByCustomKey(
@@ -382,6 +411,6 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
     @Override
     public ResponseData<EvidenceInfo> getInfoByCustomKey(String extraKey) {
 
-        return new ResponseData<EvidenceInfo>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_SUPPORTED);
+        return new ResponseData<EvidenceInfo>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
 }
