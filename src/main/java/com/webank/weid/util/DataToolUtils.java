@@ -1742,6 +1742,7 @@ public final class DataToolUtils {
 
     /**
      * check if the input string is Uft-8.
+     *
      * @param string input
      * @return true, otherwise false
      */
@@ -1780,6 +1781,58 @@ public final class DataToolUtils {
         } catch (SocketException e) {
             return false;
         }
+    }
+
+    public static byte[] convertHashStrIntoHashByte32Array(String hash) {
+        if (!isValidHash(hash)) {
+            return null;
+        }
+        byte[] originHashByte = hash.getBytes(StandardCharsets.UTF_8);
+        byte[] result = new byte[WeIdConstant.BYTES32_FIXED_LENGTH];
+        for (int i = 0; i < WeIdConstant.BYTES32_FIXED_LENGTH; i++) {
+            String hex = new String(
+                new byte[]{originHashByte[2 + i * 2], originHashByte[3 + i * 2]});
+            int val = Integer.parseInt(hex, 16);
+            result[i] = (byte) val;
+        }
+        return result;
+    }
+
+    public static String convertHashByte32ArrayIntoHashStr(byte[] hash) {
+        StringBuffer convertedBackStr = new StringBuffer().append(WeIdConstant.HEX_PREFIX);
+        for (int i = 0; i < WeIdConstant.BYTES32_FIXED_LENGTH; i++) {
+            String hex = Integer
+                .toHexString(((int) hash[i]) >= 0 ? ((int) hash[i]) : ((int) hash[i]) + 256);
+            if (hex.length() == 1) {
+                hex = "0" + hex;
+            }
+            convertedBackStr.append(hex);
+        }
+        return convertedBackStr.toString();
+    }
+
+    public static List<String> convertBytes32ObjectListToStringHashList(
+        List<org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32> bList) {
+        List<String> sList = new ArrayList<>();
+        for (int i = 0; i < bList.size(); i++) {
+            sList.add(DataToolUtils.convertHashByte32ArrayIntoHashStr(
+                ((org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32) (bList.toArray()[i])).getValue()));
+        }
+        return sList;
+    }
+
+    public static List<Boolean> strictCheckExistence(List<String> src, List<String> dst) {
+        List<Boolean> result = new ArrayList<>();
+        int index = 0;
+        for (int i = 0; i < src.size(); i++) {
+            if (src.get(i).equalsIgnoreCase(dst.get(index))) {
+                result.add(true);
+                index ++;
+            } else {
+                result.add(false);
+            }
+        }
+        return result;
     }
 }
 
