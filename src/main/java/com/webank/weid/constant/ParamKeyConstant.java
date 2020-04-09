@@ -42,6 +42,11 @@ public final class ParamKeyConstant {
     public static final String AUTHORITY_ISSUER_NAME = "name";
 
     /**
+     * UTF-8.
+     */
+    public static final String UTF_8 = "UTF-8";
+
+    /**
      * CptService related param names.
      */
     public static final String CPT_JSON_SCHEMA = "cptJsonSchema";
