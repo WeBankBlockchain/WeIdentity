@@ -240,4 +240,6 @@ public final class WeIdConstant {
     public static final String CNS_CPT_ADDRESS = "CptController";
 
     public static final Integer ON_CHAIN_STRING_LENGTH = 2097152;
+
+    public static final String EVIDENCE_ATTRIBUTE_DELIMETER = "|";
 }
