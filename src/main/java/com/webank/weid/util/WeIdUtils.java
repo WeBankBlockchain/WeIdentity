@@ -47,7 +47,7 @@ public final class WeIdUtils {
      * log4j object, for recording log.
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
-    
+
     /**
      * read the chainId from properties.
      */
@@ -69,7 +69,7 @@ public final class WeIdUtils {
 
     /**
      * Convert an account address to WeIdentity DID.
-     * 
+     *
      * @param address the address
      * @return a related WeIdentity DID, or empty string if the input is illegal.
      */
@@ -108,7 +108,7 @@ public final class WeIdUtils {
             return StringUtils.EMPTY;
         }
     }
-    
+
     private static String buildWeIdByAddress(String address) {
         if (StringUtils.isEmpty(CHAIN_ID)) {
             throw new WeIdBaseException("the chain Id is illegal.");
@@ -169,7 +169,7 @@ public final class WeIdUtils {
             return false;
         }
     }
-    
+
     /**
      * check if the chainId.
      *
@@ -181,7 +181,7 @@ public final class WeIdUtils {
         if (weIdFields.length == 4) {
             return weIdFields[2].equals(CHAIN_ID);
         }
-        return true;  
+        return true;
     }
 
     /**
@@ -196,7 +196,7 @@ public final class WeIdUtils {
         }
         return addr.getValue().equals(BigInteger.ZERO);
     }
-    
+
     /**
      * check if the given Address is empty.
      *
@@ -216,7 +216,7 @@ public final class WeIdUtils {
     public static boolean isEmptyStringAddress(String addr) {
         return Numeric.toBigInt(addr).equals(BigInteger.ZERO);
     }
-    
+
     /**
      * check the weId is match the private key.
      *
@@ -241,5 +241,18 @@ public final class WeIdUtils {
         }
 
         return isMatch;
+    }
+
+    /**
+     * get address from private key.
+     *
+     * @param privateKey private key
+     * @return address
+     */
+    public static String getWeIdFromPrivateKey(String privateKey) {
+
+        BigInteger publicKey = DataToolUtils
+            .publicKeyFromPrivate(new BigInteger(privateKey));
+        return convertPublicKeyToWeId(String.valueOf(publicKey));
     }
 }
