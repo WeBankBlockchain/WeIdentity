@@ -363,6 +363,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (!isChainStringLengthValid(log) || !isChainStringLengthValid(customKey)) {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ON_CHAIN_STRING_TOO_LONG);
         }
+        if (StringUtils.isEmpty(customKey)) {
+            customKey = StringUtils.EMPTY;
+        }
         ResponseData<String> hashResp = getHashValue(object);
         String hashValue = hashResp.getResult();
         if (StringUtils.isEmpty(hashResp.getResult())) {

@@ -55,6 +55,7 @@ import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DateUtils;
 
 /**
  * Test CreateEvidence.
@@ -278,7 +279,9 @@ public class TestCreateEvidence extends TestBaseService {
         List<Long> timestamps = new ArrayList<>();
         List<String> signers = new ArrayList<>();
         List<String> logs = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        List<String> customKeys = new ArrayList<>();
+        int batchSize = 100;
+        for (int i = 0; i < batchSize; i++) {
             CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
             credential.setId(UUID.randomUUID().toString());
             String hash = credential.getHash();
@@ -289,13 +292,21 @@ public class TestCreateEvidence extends TestBaseService {
             timestamps.add(System.currentTimeMillis());
             signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
             logs.add("test log" + i);
+            if (i % 2 == 1) {
+                customKeys.add(String.valueOf(System.currentTimeMillis()));
+            } else {
+                customKeys.add(StringUtils.EMPTY);
+            }
         }
         EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine();
+
+        // raw creation
         Long start = System.currentTimeMillis();
         ResponseData<List<Boolean>> resp = engine
             .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey);
         Long end = System.currentTimeMillis();
-        System.out.println(end - start);
+        System.out.println("Batch creation w/ size: " + batchSize + " takes time (ms): " + (String
+            .valueOf(end - start)));
         List<Boolean> booleans = resp.getResult();
         Assert.assertEquals(booleans.size(), hashValues.size());
         Boolean result = true;
@@ -303,6 +314,39 @@ public class TestCreateEvidence extends TestBaseService {
             result &= booleans.get(i);
         }
         Assert.assertTrue(result);
+
+        // custom keys (semi filled)
+        start = System.currentTimeMillis();
+        resp = engine
+            .batchCreateEvidenceWithCustomKey(hashValues, signatures, logs, timestamps, signers,
+                customKeys, privateKey);
+        end = System.currentTimeMillis();
+        System.out.println(
+            "Batch creation w/ custom keys and size: " + batchSize + " takes time (ms): " + (String
+                .valueOf(end - start)));
+        booleans = resp.getResult();
+        Assert.assertEquals(booleans.size(), hashValues.size());
+        result = true;
+        for (int i = 0; i < booleans.size(); i++) {
+            result &= booleans.get(i);
+        }
+        Assert.assertTrue(result);
+
+        // Check get
+        String hash0 = hashValues.get(0);
+        String hash1 = hashValues.get(1);
+        String key1 = customKeys.get(1);
+        EvidenceInfo evidenceInfo0 = evidenceService.getEvidence(hash0).getResult();
+        EvidenceInfo evidenceInfo1 = evidenceService.getEvidence(hash1).getResult();
+        EvidenceInfo evidenceInfo1k = evidenceService.getEvidenceByCustomKey(key1).getResult();
+        Assert.assertNotNull(evidenceInfo0);
+        Assert.assertNotNull(evidenceInfo1);
+        Assert.assertNotNull(evidenceInfo1k);
+        Assert.assertEquals(evidenceInfo0.getSignInfo()
+            .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 2);
+        Assert.assertEquals(evidenceInfo1.getSignInfo()
+            .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 2);
+        Assert.assertEquals(evidenceInfo1.getCredentialHash(), evidenceInfo1k.getCredentialHash());
     }
 
     /**
