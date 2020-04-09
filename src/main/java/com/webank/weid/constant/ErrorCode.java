@@ -323,7 +323,7 @@ public enum ErrorCode {
     /**
      * The credential evidence interface does not support fisco bcos 1.3.
      */
-    CREDENTIAL_EVIDENCE_NOT_SUPPORTED(100503, "evidence interface does not support fisco bcos 1.3"),
+    FISCO_BCOS_VERSION_NOT_SUPPORTED(170000, "this function does not support current fisco bcos version"),
 
     /**
      * On-chain string length exceeded acceptable max.
