@@ -15,9 +15,14 @@ public class TransactionArgs {
 
     private String method;
 
-    private String[] args;
+    private String args;
 
     private String extra;
 
     private Long timeStamp;
+
+    /**
+     * 批次，目前是按天.
+     */
+    private String batch;
 }

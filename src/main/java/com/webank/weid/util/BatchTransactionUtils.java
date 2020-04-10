@@ -17,10 +17,9 @@ import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 
 /**
@@ -31,13 +30,15 @@ import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 public class BatchTransactionUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(BatchTransactionUtils.class);
-    private static final Integer THRESHOLD = 10000;
+    private static final Integer THRESHOLD = 3;
     private static OutputStreamWriter ow = null;
     private static String secretKey;
     private static String currentFilePath;
     private static String ipAddr;
     private static Integer count;
     private static String currentDir = System.getProperty("user.dir");
+    private static boolean isSaveToDb = true;
+
     /**
      * persistence.
      */
@@ -69,12 +70,6 @@ public class BatchTransactionUtils {
         }
         ipAddr = address.getHostAddress();
         return ipAddr;
-    }
-
-    public static void main(String[] args) {
-
-        String filePath = getFilePath();
-        System.out.println(filePath);
     }
 
     private static Persistence getDataDriver() {
@@ -117,7 +112,7 @@ public class BatchTransactionUtils {
      * @param args 交易参数
      * @param extra 额外信息
      */
-    public static void writeTransaction(
+    public static boolean writeTransaction(
         String requestId,
         String method,
         String[] args,
@@ -128,9 +123,20 @@ public class BatchTransactionUtils {
             logger.error("[writeTransaction] parameters is illegal. requestId:{},method:{}",
                 requestId,
                 method);
-            return;
+            return false;
         }
         long timeStamp = System.currentTimeMillis();
+        if (isSaveToDb) {
+            TransactionArgs transactionArgs = new TransactionArgs();
+            transactionArgs.setArgs(parameters);
+            transactionArgs.setBatch(getCurrentDay());
+            transactionArgs.setExtra(extra);
+            transactionArgs.setMethod(method);
+            transactionArgs.setRequestId(requestId);
+            transactionArgs.setTimeStamp(timeStamp);
+            return saveToDb(transactionArgs);
+        }
+
         String content = new StringBuffer()
             .append(requestId)
             .append(WeIdConstant.PIPELINE)
@@ -143,18 +149,40 @@ public class BatchTransactionUtils {
             .append(timeStamp).toString();
 
         String filePath = getFilePath();
-        writeToLogFile(content, filePath);
+        return saveToLogFile(content, filePath);
+    }
+
+    private static String getCurrentDay() {
+
+        Date date = new Date();
+        String currentDate = new SimpleDateFormat("yyyyMMdd").format(date);
+        return currentDate;
+    }
+
+    /**
+     * 交易保存至数据库.
+     *
+     * @return 状态
+     */
+    private static boolean saveToDb(TransactionArgs transaction) {
+
+        ResponseData<Integer> dbResp = getDataDriver().saveTransaction(transaction);
+        if (dbResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return false;
+        }
+        return true;
     }
 
     private static String getFilePath() {
 
-        Date date = new Date();
-        String currentDate = new SimpleDateFormat("yyyyMMdd").format(date);
+        String currentDate = getCurrentDay();
         if (!StringUtils.equals(currentDay, currentDate)) {
             index = 0;
             count = 0;
         }
-        String filePath = currentDir + "/" + currentDate + "/" + getIp() + "_binlog_" + index;
+        String filePath =
+            currentDir + File.separator + currentDate + File.separator + getIp() + "_binlog_"
+                + index;
         if (StringUtils.equals(currentFilePath, filePath)) {
             count++;
             //如果记录条数超过阈值，要换文件
@@ -164,7 +192,6 @@ public class BatchTransactionUtils {
         } else {
             currentFilePath = filePath;
             count = 1;
-            index = 0;
         }
         return filePath;
     }
@@ -186,16 +213,16 @@ public class BatchTransactionUtils {
         String weId = WeIdUtils.getWeIdFromPrivateKey(privateKey);
 
         //将私钥进行对称加密后存到数据库里
-        String encryptKey = CryptServiceFactory.getCryptService(CryptType.AES)
-            .encrypt(privateKey, getKey());
-        ResponseData<Integer> dbResp = getDataDriver()
-            .saveOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
-        Integer errorCode = dbResp.getErrorCode();
-        if (errorCode != ErrorCode.SUCCESS.getCode()) {
-            logger.error("[writeTransaction] save encrypt private key to db failed.errorcode:{}",
-                errorCode);
-            return null;
-        }
+        //String encryptKey = CryptServiceFactory.getCryptService(CryptType.AES)
+        //    .encrypt(privateKey, getKey());
+        //ResponseData<Integer> dbResp = getDataDriver()
+        //    .saveOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
+        //Integer errorCode = dbResp.getErrorCode();
+        //if (errorCode != ErrorCode.SUCCESS.getCode()) {
+        //    logger.error("[writeTransaction] save encrypt private key to db failed.errorcode:{}",
+        //        errorCode);
+        //    return null;
+        //}
 
         content.append(weId);
         return content.toString();
@@ -207,18 +234,22 @@ public class BatchTransactionUtils {
      * @param content 要写入的内容
      * @param fileName 文件名
      */
-    private static void writeToLogFile(
+    private static boolean saveToLogFile(
         String content,
         String fileName) {
 
         File f = new File(fileName);
+        File parent = f.getParentFile();
+        if (!parent.exists()) {
+            parent.mkdirs();
+        }
         if (!f.exists()) {
             try {
                 f.createNewFile();
             } catch (IOException e) {
                 logger.error("[writeToLogFile] create file failed. filePath:{}, error:{}", fileName,
                     e);
-                return;
+                return false;
             }
         }
         try {
@@ -226,6 +257,7 @@ public class BatchTransactionUtils {
                 ParamKeyConstant.UTF_8);
             ow.write(content);
             ow.close();
+            return true;
         } catch (IOException e) {
             logger.error("writer file exception.", e);
         } finally {
@@ -234,8 +266,10 @@ public class BatchTransactionUtils {
                     ow.close();
                 } catch (IOException e) {
                     logger.error("io close exception.", e);
+                    return false;
                 }
             }
         }
+        return true;
     }
 }
