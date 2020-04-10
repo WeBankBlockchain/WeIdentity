@@ -22,8 +22,6 @@ package com.webank.weid.service.impl;
 import java.io.File;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -44,6 +42,7 @@ import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.util.BatchTransactionUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -210,6 +209,33 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
+
+            //如果
+            boolean flag = true;
+            if (flag) {
+                String rawData = new StringBuffer()
+                    .append(hashValue)
+                    .append(signature)
+                    .append(extra)
+                    .append(timestamp)
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                String hash = DataToolUtils.sha3(rawData);
+                String requestId = new BigInteger(hash.substring(2), 16).toString();
+                String[] args = new String[5];
+                args[0] = hashValue;
+                args[1] = signature;
+                args[2] = extra;
+                args[3] = String.valueOf(timestamp);
+                args[4] = privateKey;
+                boolean isSuccess = BatchTransactionUtils
+                    .writeTransaction(requestId, "createEvidence", args, StringUtils.EMPTY);
+                if (isSuccess) {
+                    return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                } else {
+                    return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
+                }
+            }
+
             return evidenceServiceEngine.createEvidence(
                 hashValue,
                 signature,
@@ -384,6 +410,35 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
+            //如果
+            boolean flag = true;
+            if (flag) {
+                String rawData = new StringBuffer()
+                    .append(hashValue)
+                    .append(signature)
+                    .append(log)
+                    .append(timestamp)
+                    .append(customKey)
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                String hash = DataToolUtils.sha3(rawData);
+                String requestId = new BigInteger(hash.substring(2), 16).toString();
+                String[] args = new String[6];
+                args[0] = hashValue;
+                args[1] = signature;
+                args[2] = log;
+                args[3] = String.valueOf(timestamp);
+                args[4] = customKey;
+                args[5] = privateKey;
+
+                boolean isSuccess = BatchTransactionUtils
+                    .writeTransaction(requestId, "createEvidenceWithCustomKey", args,
+                        StringUtils.EMPTY);
+                if (isSuccess) {
+                    return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                } else {
+                    return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
+                }
+            }
             return evidenceServiceEngine.createEvidenceWithCustomKey(
                 hashValue,
                 signature,
