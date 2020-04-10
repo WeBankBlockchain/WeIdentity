@@ -22,7 +22,6 @@ package com.webank.weid.service.impl;
 import java.io.File;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.util.UUID;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -214,15 +213,27 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             //如果
             boolean flag = true;
             if (flag) {
-                String requestId = UUID.randomUUID().toString();
+                String rawData = new StringBuffer()
+                    .append(hashValue)
+                    .append(signature)
+                    .append(extra)
+                    .append(timestamp)
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                String hash = DataToolUtils.sha3(rawData);
+                String requestId = new BigInteger(hash.substring(2), 16).toString();
                 String[] args = new String[5];
                 args[0] = hashValue;
                 args[1] = signature;
                 args[2] = extra;
                 args[3] = String.valueOf(timestamp);
                 args[4] = privateKey;
-                BatchTransactionUtils.writeTransaction(requestId, "createEvidence", args, extra);
-                return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                boolean isSuccess = BatchTransactionUtils
+                    .writeTransaction(requestId, "createEvidence", args, StringUtils.EMPTY);
+                if (isSuccess) {
+                    return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                } else {
+                    return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
+                }
             }
 
             return evidenceServiceEngine.createEvidence(
@@ -402,17 +413,31 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             //如果
             boolean flag = true;
             if (flag) {
-                String requestId = UUID.randomUUID().toString();
+                String rawData = new StringBuffer()
+                    .append(hashValue)
+                    .append(signature)
+                    .append(log)
+                    .append(timestamp)
+                    .append(customKey)
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                String hash = DataToolUtils.sha3(rawData);
+                String requestId = new BigInteger(hash.substring(2), 16).toString();
                 String[] args = new String[6];
                 args[0] = hashValue;
                 args[1] = signature;
                 args[2] = log;
                 args[3] = String.valueOf(timestamp);
                 args[4] = customKey;
-                args[4] = privateKey;
-                BatchTransactionUtils
-                    .writeTransaction(requestId, "createEvidenceWithCustomKey", args, "");
-                return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                args[5] = privateKey;
+
+                boolean isSuccess = BatchTransactionUtils
+                    .writeTransaction(requestId, "createEvidenceWithCustomKey", args,
+                        StringUtils.EMPTY);
+                if (isSuccess) {
+                    return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                } else {
+                    return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
+                }
             }
             return evidenceServiceEngine.createEvidenceWithCustomKey(
                 hashValue,
