@@ -15,8 +15,7 @@ import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
-import com.webank.weid.service.impl.engine.fiscov2.EvidenceServiceEngineV2;
+import com.webank.weid.service.impl.AbstractService;
 import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
@@ -28,17 +27,18 @@ import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
  * @author tonychen 2020年4月4日
  */
 
-public class OffLineBatchTask {
+public class OffLineBatchTask extends AbstractService {
 
     private static final Logger logger = LoggerFactory.getLogger(OffLineBatchTask.class);
 
-    private static EvidenceServiceEngine engine = new EvidenceServiceEngineV2();
+    //private static EvidenceServiceEngine engine;
 
     private static Map<String, String> userKey = new HashMap<>();
 
     private static String secretKey;
 
     private static String privateKey;
+
     /**
      * persistence.
      */
@@ -55,6 +55,7 @@ public class OffLineBatchTask {
     }
 
     private static Persistence getDataDriver() {
+
         if (dataDriver == null) {
             dataDriver = new MysqlDriver();
         }
@@ -80,80 +81,56 @@ public class OffLineBatchTask {
         }
     }
 
+
     /**
      * 批量上链接口
      */
-    public static void sendBatchTransaction(List<TransactionArgs> transactionArgs) {
+    public static ResponseData<List<Boolean>> sendBatchTransaction(
+        List<TransactionArgs> transactionArgs) {
 
-        Map<String, List<TransactionArgs>> batchMap = new HashMap<>();
+        List<String> hashValues = new ArrayList<>();
+        List<String> signatures = new ArrayList<>();
+        List<String> logs = new ArrayList<>();
+        List<Long> timestamp = new ArrayList<>();
+        List<String> signers = new ArrayList<>();
+        List<String> customKeys = new ArrayList<>();
+
         for (TransactionArgs transaction : transactionArgs) {
+
+            String args = transaction.getArgs();
+            String[] argArray = StringUtils.splitByWholeSeparatorPreserveAllTokens(args, ",");
+            hashValues.add(argArray[0]);
+            signatures.add(argArray[1]);
+            logs.add(argArray[2]);
+            timestamp.add(Long.valueOf(argArray[3]));
+
             String method = transaction.getMethod();
-            if (batchMap.get(method) == null) {
-                List<TransactionArgs> transactionList = new ArrayList<TransactionArgs>();
-                transactionList.add(transaction);
-                batchMap.put(method, transactionList);
-            } else {
-                List<TransactionArgs> transactionList = batchMap.get(method);
-                transactionList.add(transaction);
-            }
-        }
-
-        for (Map.Entry<String, List<TransactionArgs>> entry : batchMap.entrySet()) {
-
-            String transactionMethod = entry.getKey();
-            List<TransactionArgs> args = entry.getValue();
-            switch (transactionMethod) {
+            switch (method) {
 
                 case "createEvidence":
                     //批量接口
-                    //engine.createEvidence(params[0], params[1], params[2], params[3], privateKey);
+                    customKeys.add(StringUtils.EMPTY);
+                    signers.add(argArray[4]);
                     break;
                 case "createEvidenceWithCustomKey":
                     //批量接口
-                    //engine.createEvidence(params[0], params[1], params[2], params[3], privateKey);
+                    customKeys.add(argArray[4]);
+                    signers.add(argArray[5]);
                     break;
                 default:
                     break;
             }
         }
-    }
 
-
-    private static void processCreatingEvidence(List<TransactionArgs> transactionList) {
-
-        List<String> hashValues = new ArrayList<>();
-        List<String> signatures = new ArrayList<>();
-        List<String> logs = new ArrayList<>();
-        List<Long> timestamp = new ArrayList<>();
-        List<String> signers = new ArrayList<>();
-
-        for (TransactionArgs transactionArgs : transactionList) {
-            String[] args = transactionArgs.getArgs();
-            hashValues.add(args[0]);
-            signatures.add(args[1]);
-            logs.add(args[2]);
-            timestamp.add(Long.valueOf(args[3]));
-            signers.add(args[4]);
-        }
-    }
-
-    private static void processEvidenceWithCustomKey(List<TransactionArgs> transactionList) {
-
-        List<String> hashValues = new ArrayList<>();
-        List<String> signatures = new ArrayList<>();
-        List<String> logs = new ArrayList<>();
-        List<Long> timestamp = new ArrayList<>();
-        List<String> signers = new ArrayList<>();
-
-        for (TransactionArgs transactionArgs : transactionList) {
-            String[] args = transactionArgs.getArgs();
-            hashValues.add(args[0]);
-            signatures.add(args[1]);
-            logs.add(args[2]);
-            timestamp.add(Long.valueOf(args[3]));
-            signers.add(args[4]);
-        }
-
+        return evidenceServiceEngine
+            .batchCreateEvidenceWithCustomKey(
+                hashValues,
+                signatures,
+                logs,
+                timestamp,
+                signers,
+                customKeys,
+                privateKey);
     }
 
     private static String getPrivateKeyByWeId(String weId) {
