@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.persistence.sql.DefaultTable;
@@ -61,19 +62,19 @@ public class MysqlDriver implements Persistence {
 
     private static final String CREATE_TABLE_SQL =
         "CREATE TABLE `$1` ("
-        + "`id` varchar(128) NOT NULL COMMENT 'primary key',"
-        + "`data` blob DEFAULT NULL COMMENT 'the save data', "
-        + "`created` datetime DEFAULT NULL COMMENT 'created', "
-        + "`updated` datetime DEFAULT NULL COMMENT 'updated', "
-        + "`protocol` varchar(32) DEFAULT NULL COMMENT 'protocol', "
-        + "`expire` datetime DEFAULT NULL COMMENT 'the expire time', "
-        + "`version` varchar(10) DEFAULT NULL COMMENT 'the data version', "
-        + "`ext1` int DEFAULT NULL COMMENT 'extend field1', "
-        + "`ext2` int DEFAULT NULL COMMENT 'extend field2', "
-        + "`ext3` varchar(500) DEFAULT NULL COMMENT 'extend field3', "
-        + "`ext4` varchar(500) DEFAULT NULL COMMENT 'extend field4', "
-        + "PRIMARY KEY (`id`) "
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='the data table'";
+            + "`id` varchar(128) NOT NULL COMMENT 'primary key',"
+            + "`data` blob DEFAULT NULL COMMENT 'the save data', "
+            + "`created` datetime DEFAULT NULL COMMENT 'created', "
+            + "`updated` datetime DEFAULT NULL COMMENT 'updated', "
+            + "`protocol` varchar(32) DEFAULT NULL COMMENT 'protocol', "
+            + "`expire` datetime DEFAULT NULL COMMENT 'the expire time', "
+            + "`version` varchar(10) DEFAULT NULL COMMENT 'the data version', "
+            + "`ext1` int DEFAULT NULL COMMENT 'extend field1', "
+            + "`ext2` int DEFAULT NULL COMMENT 'extend field2', "
+            + "`ext3` varchar(500) DEFAULT NULL COMMENT 'extend field3', "
+            + "`ext4` varchar(500) DEFAULT NULL COMMENT 'extend field4', "
+            + "PRIMARY KEY (`id`) "
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='the data table'";
 
     private static final Integer FAILED_STATUS = DataDriverConstant.SQL_EXECUTE_FAILED_STATUS;
 
@@ -175,7 +176,7 @@ public class MysqlDriver implements Persistence {
             dataLists.add(idHashList);
             dataLists.add(Arrays.asList(dataList.toArray()));
             dataLists.add(fixedListWithDefault(ids.size(), sqlDomain.getExpire()));
-            
+
             //处理创建时间和更新时间
             List<Object> nowList = fixedListWithDefault(ids.size(), sqlDomain.getNow());
             dataLists.add(nowList);
@@ -186,7 +187,7 @@ public class MysqlDriver implements Persistence {
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
-    
+
     private List<Object> fixedListWithDefault(int size, Object obj) {
         Object[] dates = new Object[size];
         Arrays.fill(dates, obj);
@@ -280,5 +281,33 @@ public class MysqlDriver implements Persistence {
             return this.update(domain, id, data);
         }
         return this.save(domain, id, data);
+    }
+
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.suite.api.persistence.Persistence#saveTransaction(com.webank.weid.protocol.request.TransactionArgs)
+     */
+    @Override
+    public ResponseData<Integer> saveTransaction(TransactionArgs transactionArgs) {
+
+        if (StringUtils.isEmpty(transactionArgs.getRequestId())) {
+            logger.error("[mysql->save] the id of the data is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+        }
+        try {
+            SqlDomain sqlDomain = new SqlDomain(DataDriverConstant.DOMAIN_DEFAULT_INFO);
+            Object[] datas = {
+                transactionArgs.getRequestId(),
+                transactionArgs.getMethod(),
+                transactionArgs.getArgs(),
+                transactionArgs.getTimeStamp(),
+                transactionArgs.getExtra(),
+                transactionArgs.getBatch()
+            };
+            return new SqlExecutor(sqlDomain).execute(SqlExecutor.SQL_SAVE_TRANSACTION, datas);
+        } catch (WeIdBaseException e) {
+            logger.error("[mysql->save] save the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+        }
     }
 }
