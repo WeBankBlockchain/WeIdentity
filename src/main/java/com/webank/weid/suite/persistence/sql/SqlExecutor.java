@@ -44,64 +44,61 @@ import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * 数据库操作辅助类.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class SqlExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(SqlExecutor.class);
-    
     /**
      * 表占位符.
      */
     public static final String TABLE_CHAR = "$1";
-    
     /**
      * 库占位符.
      */
     public static final String DATABASE_CHAR = "$2";
-    
     /**
      * sql for query.
      */
     public static final String SQL_QUERY = "select id,data,created,expire from $1 where id =?";
-
     /**
      * sql for save.
      */
     public static final String SQL_SAVE = "insert into $1(id, data, expire, created, updated) "
         + "values(?,?,?,?,?)";
-
     /**
      * sql for update.
      */
     public static final String SQL_UPDATE = "update $1 set updated = ?, data = ?, expire = ? "
         + "where id = ?";
-
     /**
      * sql for delete.
      */
     public static final String SQL_DELETE = "delete from $1 where id = ?";
-
+    /**
+     * sql for save.
+     */
+    public static final String SQL_SAVE_TRANSACTION =
+        "insert into weidentity_offline_transaction_info"
+            + "(request_id, transaction_method, transaction_args, transaction_timestamp, extra, batch) "
+            + "values(?,?,?,?,?,?)";
+    private static final Logger logger = LoggerFactory.getLogger(SqlExecutor.class);
     /**
      * 批次提交个数.
      */
     private static final int BATCH_COMMIT_COUNT = 200;
-    
-    /**
-     * the sql domain.
-     */
-    private SqlDomain sqlDomain;
-    
     /**
      * tableDomain 与 tableName的映射.
      */
     private static final Map<String, String> TABLE_CACHE = new ConcurrentHashMap<String, String>();
-    
+    /**
+     * the sql domain.
+     */
+    private SqlDomain sqlDomain;
+
     /**
      * 根据domain创建SQL执行器.
-     * 
+     *
      * @param sqlDomain the Sqldomain
      */
     public SqlExecutor(SqlDomain sqlDomain) {
@@ -109,12 +106,12 @@ public class SqlExecutor {
             this.sqlDomain = sqlDomain;
         } else {
             this.sqlDomain = new SqlDomain();
-        } 
+        }
     }
-    
+
     /**
      * 查询操作.
-     * 
+     *
      * @param sql 需要被执行的SQL语句
      * @param data 占位符所需要的数据
      * @return 返回查询出来的单个数据
@@ -127,18 +124,18 @@ public class SqlExecutor {
         try {
             conn = ConnectionPool.getConnection(sqlDomain.getBaseDomain());
             if (conn == null) {
-                return 
+                return
                     new ResponseData<Map<String, String>>(
-                        null, 
+                        null,
                         ErrorCode.SQL_GET_CONNECTION_ERROR
                     );
             }
-            
+
             ps = conn.prepareStatement(buildExecuteSql(sql, conn));
             for (int i = 0; i < data.length; i++) {
                 ps.setObject(i + 1, data[i]);
             }
-            
+
             rs = ps.executeQuery();
             Map<String, String> dataMap = null;
             if (rs.next()) {
@@ -154,7 +151,7 @@ public class SqlExecutor {
                             dataMap.put(columnLabel, String.valueOf(timestamp.getTime()));
                         }
                     } else {
-                        dataMap.put(columnLabel, rs.getString(columnLabel)); 
+                        dataMap.put(columnLabel, rs.getString(columnLabel));
                     }
                 }
             }
@@ -166,14 +163,14 @@ public class SqlExecutor {
             logger.error("Query data from {{}} with exception", sqlDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
         } finally {
-            ConnectionPool.close(conn, ps, rs); 
+            ConnectionPool.close(conn, ps, rs);
         }
         return result;
     }
-    
+
     /**
      * 增删改的通用执行方法.
-     * 
+     *
      * @param sql 需要被执行的SQL语句
      * @param data 占位符所需要的数据
      * @return 返回执行受影响的行数
@@ -185,16 +182,16 @@ public class SqlExecutor {
         try {
             conn = ConnectionPool.getConnection(sqlDomain.getBaseDomain());
             if (conn == null) {
-                return 
+                return
                     new ResponseData<Integer>(
-                        DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                        DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                         ErrorCode.SQL_GET_CONNECTION_ERROR
-                    );  
+                    );
             }
             ps = conn.prepareStatement(buildExecuteSql(sql, conn));
             for (int i = 0; data != null && i < data.length; i++) {
                 if (data[i] instanceof Date) {
-                    Date date = (Date)data[i];
+                    Date date = (Date) data[i];
                     ps.setTimestamp(i + 1, new Timestamp(date.getTime()));
                     continue;
                 }
@@ -208,14 +205,14 @@ public class SqlExecutor {
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
             result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
-            ConnectionPool.close(conn, ps); 
+            ConnectionPool.close(conn, ps);
         }
         return result;
     }
-    
+
     /**
      * 批量新增的通用语句.
-     * 
+     *
      * @param sql 需要被执行的数据
      * @param dataList 占位符所需要的数据
      * @return 返回受影响的行数
@@ -228,20 +225,20 @@ public class SqlExecutor {
             List<Object> values = dataList.get(dataList.size() - 1);
             for (List<Object> list : dataList) {
                 if (CollectionUtils.isEmpty(list) || list.size() != values.size()) {
-                    return 
+                    return
                         new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
-                        );  
+                        );
                 }
             }
             conn = ConnectionPool.getConnection(sqlDomain.getBaseDomain());
             if (conn == null) {
-                return 
+                return
                     new ResponseData<Integer>(
-                        DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                        DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                         ErrorCode.SQL_GET_CONNECTION_ERROR
-                    );                
+                    );
             }
             conn.setAutoCommit(false);
             psts = conn.prepareStatement(buildExecuteSql(sql, conn));
@@ -273,14 +270,14 @@ public class SqlExecutor {
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
             result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
-            ConnectionPool.close(conn, psts); 
+            ConnectionPool.close(conn, psts);
         }
         return result;
     }
 
     /**
      * 检查表是否存在，如果不存在则创建表.
-     * 
+     *
      * @param checkTableSql 检查表是存在的sql语句
      * @param createTableSql 创建表的sql语句
      */
@@ -290,7 +287,7 @@ public class SqlExecutor {
             //说明本地没有此tableDomain
             if (StringUtils.isBlank(tableName)) {
                 if (this.initLocalTable(checkTableSql)) {
-                    return; 
+                    return;
                 }
                 this.createTable(createTableSql);
                 if (!this.initLocalTable(checkTableSql)) {
@@ -304,15 +301,15 @@ public class SqlExecutor {
             }
         }
     }
-    
+
     private boolean initLocalTable(String checkTableSql) {
         //检查数据库中是否存在此表
-        ResponseData<Map<String, String>>  resultRes =  this.executeQuery(checkTableSql);
+        ResponseData<Map<String, String>> resultRes = this.executeQuery(checkTableSql);
         if (resultRes.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[initLocalTable] execute query table name fail, code:{}, message:{}.",
                 resultRes.getErrorCode(),
-                resultRes.getErrorMessage() 
+                resultRes.getErrorMessage()
             );
             throw new WeIdBaseException(
                 ErrorCode.getTypeByErrorCode(resultRes.getErrorCode()));
@@ -320,7 +317,7 @@ public class SqlExecutor {
         String tableName = sqlDomain.getTableName();
         Map<String, String> result = resultRes.getResult();
         //如果数据库中存在此表
-        if (result != null 
+        if (result != null
             && tableName.equalsIgnoreCase(result.get(DataDriverConstant.SQL_COLUMN_DATA))) {
             //本地缓存记录此表
             TABLE_CACHE.put(sqlDomain.getKey(), tableName);
@@ -333,7 +330,7 @@ public class SqlExecutor {
         }
         return false;
     }
-    
+
     private void createTable(String createTableSql) {
         //动态创建此表
         ResponseData<Integer> createRes = this.execute(createTableSql);
@@ -342,13 +339,13 @@ public class SqlExecutor {
             logger.error(
                 "[createTable] execute create table fail, code:{}, message:{}.",
                 createRes.getErrorCode(),
-                createRes.getErrorMessage() 
+                createRes.getErrorMessage()
             );
             throw new WeIdBaseException(
                 ErrorCode.getTypeByErrorCode(createRes.getErrorCode()));
         }
-    }   
-    
+    }
+
     private String buildExecuteSql(String exeSql, Connection conn) throws SQLException {
         exeSql = exeSql.replace(TABLE_CHAR, sqlDomain.getTableName());
         exeSql = exeSql.replace(DATABASE_CHAR, conn.getCatalog());
