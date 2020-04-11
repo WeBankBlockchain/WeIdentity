@@ -178,8 +178,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
      */
     private ResponseData<String> getHashValue(Hashable object) {
         if (object == null) {
-            // Support empty hash value
-            return new ResponseData<>(WeIdConstant.HEX_PREFIX, ErrorCode.SUCCESS);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
         try {
             String hashValue = object.getHash();
