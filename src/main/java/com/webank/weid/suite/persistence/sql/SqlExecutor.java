@@ -80,8 +80,9 @@ public class SqlExecutor {
      */
     public static final String SQL_SAVE_TRANSACTION =
         "insert into weidentity_offline_transaction_info"
-            + "(request_id, transaction_method, transaction_args, transaction_timestamp, extra, batch) "
-            + "values(?,?,?,?,?,?)";
+        + "(request_id, transaction_method, transaction_args, transaction_timestamp, extra, batch)"
+        + " values(?,?,?,?,?,?)";
+
     private static final Logger logger = LoggerFactory.getLogger(SqlExecutor.class);
     /**
      * 批次提交个数.
@@ -109,6 +110,16 @@ public class SqlExecutor {
         }
     }
 
+    /**
+     * 根据数据源名称构建SQL执行器.
+     * 
+     * @param dataSourceName 数据源名称
+     */
+    public SqlExecutor(String dataSourceName) {
+        this.sqlDomain = new SqlDomain();
+        this.sqlDomain.setBaseDomain(dataSourceName);
+    }
+    
     /**
      * 查询操作.
      *
@@ -301,8 +312,9 @@ public class SqlExecutor {
             }
         }
     }
-
-    private boolean initLocalTable(String checkTableSql) {
+    
+    // 检查表是否存在，如果存在则返回表名
+    private Map<String, String> checkTable(String checkTableSql) {
         //检查数据库中是否存在此表
         ResponseData<Map<String, String>> resultRes = this.executeQuery(checkTableSql);
         if (resultRes.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
@@ -314,8 +326,17 @@ public class SqlExecutor {
             throw new WeIdBaseException(
                 ErrorCode.getTypeByErrorCode(resultRes.getErrorCode()));
         }
-        String tableName = sqlDomain.getTableName();
         Map<String, String> result = resultRes.getResult();
+        //如果数据库中存在此表
+        if (result != null) {
+            return result;
+        }
+        return null;
+    }
+    
+    private boolean initLocalTable(String checkTableSql) {
+        Map<String, String> result = checkTable(checkTableSql);
+        String tableName = sqlDomain.getTableName();
         //如果数据库中存在此表
         if (result != null
             && tableName.equalsIgnoreCase(result.get(DataDriverConstant.SQL_COLUMN_DATA))) {
@@ -344,6 +365,28 @@ public class SqlExecutor {
             throw new WeIdBaseException(
                 ErrorCode.getTypeByErrorCode(createRes.getErrorCode()));
         }
+    }
+    
+    /**
+     * 此方法用于非Domain体系创建自定义表使用.
+     * 
+     * @param checkTableSql 检查表是否存在的SQL语句
+     * @param createTableSql 创建表的SQL语句
+     * @return 返回表是否创建成功
+     */
+    public boolean createTable(String checkTableSql, String createTableSql) {
+        // 先检查表
+        Map<String, String> result = checkTable(checkTableSql);
+        if (result == null) {
+            // 说明表不存在,创建表
+            this.createTable(createTableSql);
+            // 再确认一次是否存在
+            result = checkTable(checkTableSql);
+            if (result == null) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private String buildExecuteSql(String exeSql, Connection conn) throws SQLException {
