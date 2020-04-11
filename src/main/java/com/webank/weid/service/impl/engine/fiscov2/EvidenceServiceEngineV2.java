@@ -96,6 +96,9 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     ) {
         try {
             List<byte[]> hashByteList = new ArrayList<>();
+            if (!DataToolUtils.isValidHash(hashValue)) {
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT, null);
+            }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
             String address = WeIdUtils
                 .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
@@ -161,11 +164,21 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             List<byte[]> hashByteList = new ArrayList<>();
             List<String> signerList = new ArrayList<>();
             List<BigInteger> timestampList = new ArrayList<>();
+            List<String> logList = new ArrayList<>();
+            List<String> sigList = new ArrayList<>();
             for (int i = 0; i < hashValues.size(); i++) {
+                if (hashValues.get(i) == null) {
+                    hashValues.set(i, StringUtils.EMPTY);
+                }
+                if (!DataToolUtils.isValidHash(hashValues.get(i))) {
+                    continue;
+                }
                 hashByteList
                     .add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValues.get(i)));
                 signerList.add(WeIdUtils.convertWeIdToAddress(signers.get(i)));
                 timestampList.add(new BigInteger(String.valueOf(timestamp.get(i)), 10));
+                logList.add(logs.get(i));
+                sigList.add(signatures.get(i));
             }
             EvidenceContract evidenceContractWriter =
                 reloadContract(
@@ -177,8 +190,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 evidenceContractWriter.createEvidence(
                     hashByteList,
                     signerList,
-                    signatures,
-                    logs,
+                    sigList,
+                    logList,
                     timestampList
                 ).send();
 
@@ -226,11 +239,23 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             List<byte[]> hashByteList = new ArrayList<>();
             List<String> signerList = new ArrayList<>();
             List<BigInteger> timestampList = new ArrayList<>();
+            List<String> customKeyList = new ArrayList<>();
+            List<String> logList = new ArrayList<>();
+            List<String> sigList = new ArrayList<>();
             for (int i = 0; i < hashValues.size(); i++) {
+                if (hashValues.get(i) == null) {
+                    hashValues.set(i, StringUtils.EMPTY);
+                }
+                if (!DataToolUtils.isValidHash(hashValues.get(i))) {
+                    continue;
+                }
                 hashByteList
                     .add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValues.get(i)));
                 signerList.add(WeIdUtils.convertWeIdToAddress(signers.get(i)));
                 timestampList.add(new BigInteger(String.valueOf(timestamp.get(i)), 10));
+                customKeyList.add(customKeys.get(i));
+                logList.add(logs.get(i));
+                sigList.add(signatures.get(i));
             }
             EvidenceContract evidenceContractWriter =
                 reloadContract(
@@ -242,10 +267,10 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 evidenceContractWriter.createEvidenceWithExtraKey(
                     hashByteList,
                     signerList,
-                    signatures,
-                    logs,
+                    sigList,
+                    logList,
                     timestampList,
-                    customKeys
+                    customKeyList
                 ).send();
 
             TransactionInfo info = new TransactionInfo(receipt);
@@ -283,6 +308,9 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     ) {
         try {
             List<byte[]> hashByteList = new ArrayList<>();
+            if (!DataToolUtils.isValidHash(hashValue)) {
+                return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT, null);
+            }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
             List<String> sigList = new ArrayList<>();
             sigList.add(StringUtils.EMPTY);
@@ -566,6 +594,9 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String privateKey) {
         try {
             List<byte[]> hashByteList = new ArrayList<>();
+            if (!DataToolUtils.isValidHash(hashValue)) {
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT, null);
+            }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
             String address = WeIdUtils
                 .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));

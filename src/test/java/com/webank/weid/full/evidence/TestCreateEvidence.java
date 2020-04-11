@@ -315,6 +315,16 @@ public class TestCreateEvidence extends TestBaseService {
         }
         Assert.assertTrue(result);
 
+        // test illegal hashs
+        List<String> faultyHashValues = new ArrayList<>();
+        faultyHashValues.addAll(hashValues);
+        faultyHashValues.set(1, null);
+        ResponseData<List<Boolean>> faultyResp = engine
+            .batchCreateEvidence(faultyHashValues, signatures, logs, timestamps, signers,
+                privateKey);
+        booleans = faultyResp.getResult();
+        Assert.assertFalse(booleans.get(1));
+
         // custom keys (semi filled)
         start = System.currentTimeMillis();
         resp = engine
@@ -342,8 +352,10 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertNotNull(evidenceInfo0);
         Assert.assertNotNull(evidenceInfo1);
         Assert.assertNotNull(evidenceInfo1k);
+        // ran for 3 times
         Assert.assertEquals(evidenceInfo0.getSignInfo()
-            .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 2);
+            .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 3);
+        // ran only twice (one set null in between)
         Assert.assertEquals(evidenceInfo1.getSignInfo()
             .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 2);
         Assert.assertEquals(evidenceInfo1.getCredentialHash(), evidenceInfo1k.getCredentialHash());
