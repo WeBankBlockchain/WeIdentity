@@ -30,10 +30,18 @@ import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 public class BatchTransactionUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(BatchTransactionUtils.class);
-    private static final Integer THRESHOLD = 3;
+
+    /**
+     * 阈值，当写入的交易达到这个条数时，换新文件.
+     */
+    private static final Integer THRESHOLD = 10000;
     private static OutputStreamWriter ow = null;
     private static String secretKey;
     private static String currentFilePath;
+
+    /**
+     * 本机IP地址.
+     */
     private static String ipAddr;
     private static Integer count;
     private static String currentDir = System.getProperty("user.dir");
