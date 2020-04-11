@@ -738,9 +738,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 
         Map<String, String> credentialInfoMap = buildCredentialInfo(preCredential, claimJson);
 
-        ResponseData<CredentialTemplateEntity> resp = getCptService()
-            .queryCredentialTemplate(cptId);
-        CredentialTemplateEntity credentialTemplate = resp.getResult();
+        ResponseData<CredentialTemplateEntity> res = getCptService().queryCredentialTemplate(cptId);
+        CredentialTemplateEntity credentialTemplate = res.getResult();
 
         UserResult userResult = UserClient.makeCredential(credentialInfoMap, credentialTemplate);
 

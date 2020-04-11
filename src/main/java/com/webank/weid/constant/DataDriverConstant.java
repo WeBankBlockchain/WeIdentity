@@ -82,9 +82,14 @@ public final class DataDriverConstant {
     public static final String JDBC_NUM_TEST_PER_ER = "jdbc.numTestsPerEvictionRun";
 
     /**
-     * jdbc maxWait properties.
+     * jdbc minEvictableIdleTimeMillis properties.
      */
     public static final String JDBC_MIN_EITM = "jdbc.minEvictableIdleTimeMillis";
+    
+    /**
+     * jdbc initialSize properties.
+     */
+    public static final String JDBC_INIT_SIZE = "jdbc.initialSize";
 
     /**
      * jdbc driverClassName.
@@ -148,11 +153,13 @@ public final class DataDriverConstant {
     public static final String POOL_URL = "url";
     public static final String POOL_USERNAME = "username";
     public static final String POOL_PASSWORD = "password";
-    public static final String POOL_MAX_ACTIVE = "maxActive";
+    public static final String POOL_INITIAL_SIZE = "initialSize";
+    public static final String POOL_MAX_ACTIVE = "maxTotal";
     public static final String POOL_MIN_IDLE = "minIdle";
     public static final String POOL_MAX_IDLE = "maxIdle";
-    public static final String POOL_MAX_WAIT = "maxWait";
-    public static final String POOL_MAX_REMOVE_ABANDONED = "removeAbandoned";
+    public static final String POOL_MAX_WAIT = "maxWaitMillis";
+    public static final String POOL_MAX_REMOVE_ABANDONED = "removeAbandonedOnBorrow";
+    public static final String POOL_MAX_REMOVE_MAINTENANCE = "removeAbandonedOnMaintenance";
     public static final String POOL_MAX_REMOVE_ABANDONED_TIMEOUT = "removeAbandonedTimeout";
     public static final String POOL_TEST_ON_BORROW = "testOnBorrow";
     public static final String POOL_TEST_ON_WHILE = "testWhileIdle";
@@ -167,6 +174,7 @@ public final class DataDriverConstant {
     public static final String POOL_DRIVER_NAME_DEFAULT_VALUE = "com.mysql.jdbc.Driver";
     public static final String POOL_MAX_ACTIVE_DEFAULT_VALUE = "50";
     public static final String POOL_MIN_IDLE_DEFAULT_VALUE = "5";
+    public static final String POOL_INIT_DEFAULT_VALUE = "5";
     public static final String POOL_MAX_IDLE_DEFAULT_VALUE = "5";
     public static final String POOL_MAX_WAIT_DEFAULT_VALUE = "10000";
     public static final String POOL_NUM_TEST_PER_ER_DEFAULT_VALUE = "5";
