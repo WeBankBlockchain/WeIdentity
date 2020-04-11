@@ -28,10 +28,12 @@ import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.abi.datatypes.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
@@ -42,6 +44,7 @@ import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.impl.inner.PropertiesService;
 import com.webank.weid.util.BatchTransactionUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
@@ -210,7 +213,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
 
             //如果
-            boolean flag = true;
+            boolean flag = getOfflineFlag();
             if (flag) {
                 String rawData = new StringBuffer()
                     .append(hashValue)
@@ -410,7 +413,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
             //如果
-            boolean flag = true;
+            boolean flag = getOfflineFlag();
             if (flag) {
                 String rawData = new StringBuffer()
                     .append(hashValue)
@@ -470,5 +473,14 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private boolean isChainStringLengthValid(String string) {
         return string.length() < WeIdConstant.ON_CHAIN_STRING_LENGTH;
+    }
+    
+    private boolean getOfflineFlag() {
+        String flag = PropertiesService.getInstance()
+            .getProperty(ParamKeyConstant.ENABLE_OFFLINE);
+        if (StringUtils.isNotBlank(flag)) {
+            return new Boolean(flag);
+        }
+        return false;
     }
 }
