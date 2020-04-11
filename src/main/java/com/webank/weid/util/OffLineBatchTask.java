@@ -31,8 +31,6 @@ public class OffLineBatchTask extends AbstractService {
 
     private static final Logger logger = LoggerFactory.getLogger(OffLineBatchTask.class);
 
-    //private static EvidenceServiceEngine engine;
-
     private static Map<String, String> userKey = new HashMap<>();
 
     private static String secretKey;
@@ -83,7 +81,10 @@ public class OffLineBatchTask extends AbstractService {
 
 
     /**
-     * 批量上链接口
+     * 批量上链接口.
+     *
+     * @param transactionArgs 上链交易参数
+     * @return 每条交易的上链结果
      */
     public static ResponseData<List<Boolean>> sendBatchTransaction(
         List<TransactionArgs> transactionArgs) {
@@ -108,7 +109,6 @@ public class OffLineBatchTask extends AbstractService {
             switch (method) {
 
                 case "createEvidence":
-                    //批量接口
                     customKeys.add(StringUtils.EMPTY);
                     signers.add(argArray[4]);
                     break;
