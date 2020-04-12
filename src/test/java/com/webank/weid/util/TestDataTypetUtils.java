@@ -19,6 +19,11 @@
 
 package com.webank.weid.util;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 import org.bcos.web3j.abi.datatypes.DynamicArray;
 import org.bcos.web3j.abi.datatypes.DynamicBytes;
 import org.bcos.web3j.abi.datatypes.StaticArray;
@@ -30,6 +35,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.WeIdConstant;
 
 /**
  * test DataToolUtils.
@@ -217,5 +224,23 @@ public class TestDataTypetUtils {
         result = DataToolUtils.stringToDynamicBytes(str);
         newstr = DataToolUtils.dynamicBytesToString(result);
         Assert.assertEquals(str, newstr);
+    }
+
+    @Test
+    public void testHashConversion() {
+        String hash = DataToolUtils.sha3(UUID.randomUUID().toString());
+        byte[] convertedHash = DataToolUtils.convertHashStrIntoHashByte32Array(hash);
+        Assert.assertEquals(convertedHash.length, WeIdConstant.BYTES32_FIXED_LENGTH.intValue());
+        String convertedBackStr = DataToolUtils
+            .convertHashByte32ArrayIntoHashStr(convertedHash);
+        Assert.assertEquals(hash, convertedBackStr);
+        Assert.assertEquals(hash.length(), WeIdConstant.BYTES32_FIXED_LENGTH * 2 + 2);
+        List<String> listX = new ArrayList(
+            Arrays.asList("a", "b", "c", "d", "f", "f", "g"));
+        List<String> listY = new ArrayList(Arrays.asList("a", "c", "f", "f", "g"));
+        List<Boolean> result = DataToolUtils.strictCheckExistence(listX, listY);
+        Assert.assertTrue(result.get(0) && result.get(2));
+        Assert.assertFalse(result.get(1) || result.get(3));
+        Assert.assertEquals(result.size(), 7);
     }
 }
