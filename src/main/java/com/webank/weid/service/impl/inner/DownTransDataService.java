@@ -33,19 +33,15 @@ import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.DataTypeCastException;
-import com.webank.weid.protocol.amop.GetBarCodeDataArgs;
+import com.webank.weid.protocol.amop.GetTransDataArgs;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.suite.api.persistence.Persistence;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.crypto.CryptServiceFactory;
 import com.webank.weid.suite.entity.CryptType;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.entity.TransCodeBaseData;
 import com.webank.weid.suite.transmission.TransmissionService;
-import com.webank.weid.suite.transportation.bar.protocol.BarCodeData;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -53,32 +49,14 @@ import com.webank.weid.util.DataToolUtils;
  * @author yanggang
  *
  */
-public class DownBarCodeDataService implements TransmissionService<String> {
+public class DownTransDataService extends InnerService implements TransmissionService<String> {
     
-    private static final Logger logger =  LoggerFactory.getLogger(DownBarCodeDataService.class);
+    private static final Logger logger =  LoggerFactory.getLogger(DownTransDataService.class);
 
-    private Persistence dataDriver;
-    
-    private WeIdService weidService;
-    
-    private WeIdService getWeIdService() {
-        if (weidService == null) {
-            weidService = new WeIdServiceImpl();
-        }
-        return weidService;
-    }
-    
-    private Persistence getDataDriver() {
-        if (dataDriver == null) {
-            dataDriver = new MysqlDriver();
-        }
-        return dataDriver;
-    }
-    
     @Override
     public ResponseData<String> service(String message) {
         try {
-            GetBarCodeDataArgs arg = DataToolUtils.deserialize(message, GetBarCodeDataArgs.class);
+            GetTransDataArgs arg = DataToolUtils.deserialize(message, GetTransDataArgs.class);
             return getBarCodeData(arg);
         } catch (Exception e) {
             logger.error("[onPush] get barCodeData has error.", e);
@@ -89,7 +67,9 @@ public class DownBarCodeDataService implements TransmissionService<String> {
         }
     }
     
-    private ResponseData<String> getBarCodeData(GetBarCodeDataArgs arg) {
+    private ResponseData<String> getBarCodeData(
+        GetTransDataArgs arg
+    ) throws ClassNotFoundException {
         logger.info("[getBarCodeData] begin query data param:{}", arg);
         ResponseData<String> barCodeRes = new ResponseData<String>();
         barCodeRes.setResult(StringUtils.EMPTY);
@@ -112,11 +92,11 @@ public class DownBarCodeDataService implements TransmissionService<String> {
             return barCodeRes;
         }
         // 解析数据
-        BarCodeData barCodeData = DataToolUtils.deserialize(
-            responseData.getResult(), BarCodeData.class);
+        TransCodeBaseData codeData = (TransCodeBaseData)DataToolUtils.deserialize(
+            responseData.getResult(), Class.forName(arg.getClassName())
+        );
         //得到数据编解码类型(原文&密文)
-        EncodeType encodeType =
-            EncodeType.getObject(String.valueOf(barCodeData.getEncodeType()));
+        EncodeType encodeType = EncodeType.getEncodeType(codeData.getEncodeType());
         logger.info("[getBarCodeData] the encode is {}", encodeType.name());
         if (encodeType == EncodeType.ORIGINAL) {
             // 原文类型
@@ -134,12 +114,12 @@ public class DownBarCodeDataService implements TransmissionService<String> {
                 return barCodeRes;
             }
             logger.info("[getBarCodeData] begin decrypt the data");
-            String data = String.valueOf(barCodeData.getData());
+            String data = String.valueOf(codeData.getData());
             String value = CryptServiceFactory
                 .getCryptService(CryptType.AES)
                 .decrypt(data, encryptKey.getEncryptKey());
-            barCodeData.setData(value);
-            barCodeRes.setResult(DataToolUtils.serialize(barCodeData));
+            codeData.setData(value);
+            barCodeRes.setResult(DataToolUtils.serialize(codeData));
             barCodeRes.setErrorCode(ErrorCode.SUCCESS);
             logger.info("[getBarCodeData] query data successfully.");
             return barCodeRes;
@@ -156,7 +136,7 @@ public class DownBarCodeDataService implements TransmissionService<String> {
      * @param arg 请求参数
      * @return 返回密钥对象
      */
-    private GetEncryptKeyResponse getEncryptKey(GetBarCodeDataArgs arg) {
+    private GetEncryptKeyResponse getEncryptKey(GetTransDataArgs arg) {
         logger.info("[getEncryptKey] begin query encrypt key param:{}", arg);
         GetEncryptKeyResponse encryptResponse = new GetEncryptKeyResponse(); 
         ResponseData<String>  keyResponse = this.getDataDriver().get(
@@ -208,7 +188,7 @@ public class DownBarCodeDataService implements TransmissionService<String> {
      * @param keyMap 查询出来的key数据
      * @return
      */
-    private boolean checkAuthority(GetBarCodeDataArgs arg, Map<String, Object> keyMap) {
+    private boolean checkAuthority(GetTransDataArgs arg, Map<String, Object> keyMap) {
         if (keyMap == null) {
             logger.error("[checkAuthority] illegal input.");
             return false;
