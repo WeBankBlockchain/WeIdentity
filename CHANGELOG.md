@@ -1,3 +1,13 @@
+### V1.6.1 (2020-04-12)
+- Features:
+1. QRCode transportation supports AMOP channel.
+2. Evidence supports offline, delayed and timed/cron-job manner blockchain transactions.
+3. Evidence supports batch creation transactions.
+4. Visualized build-tools now supports batch evidence transactions display and management.
+
+- Bugfixes:
+1. Fix a data inconsistency issue when using AMOP channel in multi-active scenarios.
+
 ### V1.6.0 (2020-03-24)
 - Features:
 1. Endpoint service now supports reentrance and whitelist for remote servers.
