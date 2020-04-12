@@ -1742,6 +1742,7 @@ public final class DataToolUtils {
 
     /**
      * check if the input string is Uft-8.
+     *
      * @param string input
      * @return true, otherwise false
      */
@@ -1780,6 +1781,86 @@ public final class DataToolUtils {
         } catch (SocketException e) {
             return false;
         }
+    }
+
+    /**
+     * Convert a hash string (0x[64Bytes]) into a byte array with 32 bytes length by compressing
+     * each two nearby characters into one.
+     *
+     * @param hash hash String
+     * @return byte array
+     */
+    public static byte[] convertHashStrIntoHashByte32Array(String hash) {
+        if (!isValidHash(hash)) {
+            return null;
+        }
+        byte[] originHashByte = hash.getBytes(StandardCharsets.UTF_8);
+        byte[] result = new byte[WeIdConstant.BYTES32_FIXED_LENGTH];
+        for (int i = 0; i < WeIdConstant.BYTES32_FIXED_LENGTH; i++) {
+            String hex = new String(
+                new byte[]{originHashByte[2 + i * 2], originHashByte[3 + i * 2]});
+            int val = Integer.parseInt(hex, 16);
+            result[i] = (byte) val;
+        }
+        return result;
+    }
+
+    /**
+     * Convert a byte array with 32 bytes into a hash String by stretching the two halfs of a hex
+     * byte into two separate hex string. Padding with zeros must be kept in mind.
+     *
+     * @param hash hash byte array
+     * @return hash String
+     */
+    public static String convertHashByte32ArrayIntoHashStr(byte[] hash) {
+        StringBuilder convertedBackStr = new StringBuilder().append(WeIdConstant.HEX_PREFIX);
+        for (int i = 0; i < WeIdConstant.BYTES32_FIXED_LENGTH; i++) {
+            String hex = Integer
+                .toHexString(((int) hash[i]) >= 0 ? ((int) hash[i]) : ((int) hash[i]) + 256);
+            if (hex.length() == 1) {
+                hex = "0" + hex;
+            }
+            convertedBackStr.append(hex);
+        }
+        return convertedBackStr.toString();
+    }
+
+    /**
+     * An intermediate fix to convert Bytes32 Object List from web3sdk 2.x into a real String list.
+     *
+     * @param byteList Bytes32 Object list
+     * @return hash String list
+     */
+    public static List<String> convertBytes32ObjectListToStringHashList(
+        List<org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32> byteList) {
+        List<String> strList = new ArrayList<>();
+        for (int i = 0; i < byteList.size(); i++) {
+            strList.add(DataToolUtils.convertHashByte32ArrayIntoHashStr(
+                ((org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32) (byteList.toArray()[i]))
+                    .getValue()));
+        }
+        return strList;
+    }
+
+    /**
+     * Strictly check two lists' elements existence whether items in src exists in dst list or not.
+     *
+     * @param src source list
+     * @param dst dest list
+     * @return boolean list, each true / false indicating existing or not.
+     */
+    public static List<Boolean> strictCheckExistence(List<String> src, List<String> dst) {
+        List<Boolean> result = new ArrayList<>();
+        int index = 0;
+        for (int i = 0; i < src.size(); i++) {
+            if (src.get(i).equalsIgnoreCase(dst.get(index))) {
+                result.add(true);
+                index++;
+            } else {
+                result.add(false);
+            }
+        }
+        return result;
     }
 }
 
