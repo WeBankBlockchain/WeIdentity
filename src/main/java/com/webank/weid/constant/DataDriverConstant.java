@@ -21,7 +21,7 @@ package com.webank.weid.constant;
 
 /**
  * constant for DataDriver.
- * 
+ *
  * @author tonychen 2019年3月25日
  */
 public final class DataDriverConstant {
@@ -35,6 +35,11 @@ public final class DataDriverConstant {
      * jdbc url properties.
      */
     public static final String JDBC_URL = "jdbc.url";
+    
+    /**
+     * jdbc driver properties.
+     */
+    public static final String JDBC_DRIVER = "jdbc.driver";
 
     /**
      * jdbc username properties.
@@ -45,72 +50,77 @@ public final class DataDriverConstant {
      * jdbc user password properties.
      */
     public static final String JDBC_USER_PASSWORD = "jdbc.password";
-    
+
     /**
      * jdbc maxActive properties.
      */
     public static final String JDBC_MAX_ACTIVE = "jdbc.maxActive";
-    
+
     /**
      * jdbc minIdle properties.
      */
     public static final String JDBC_MIN_IDLE = "jdbc.minIdle";
-    
+
     /**
      * jdbc minIdle properties.
      */
     public static final String JDBC_MAX_IDLE = "jdbc.maxIdle";
-    
+
     /**
      * jdbc maxWait properties.
      */
     public static final String JDBC_MAX_WAIT = "jdbc.maxWait";
-    
+
     /**
      * jdbc timeBetweenEvictionRunsMillis properties.
      */
     public static final String JDBC_TIME_BETWEEN_ERM = "jdbc.timeBetweenEvictionRunsMillis";
-    
+
     /**
      * jdbc numTestsPerEvictionRun properties.
      */
     public static final String JDBC_NUM_TEST_PER_ER = "jdbc.numTestsPerEvictionRun";
-    
+
     /**
-     * jdbc maxWait properties.
+     * jdbc minEvictableIdleTimeMillis properties.
      */
     public static final String JDBC_MIN_EITM = "jdbc.minEvictableIdleTimeMillis";
     
     /**
+     * jdbc initialSize properties.
+     */
+    public static final String JDBC_INIT_SIZE = "jdbc.initialSize";
+
+    /**
      * jdbc driverClassName.
      */
     public static final String JDBC_MYSQL_DRIVER_CLASS_NAME = "com.mysql.jdbc.Driver";
-   
+
     /**
      * jdbc removeAbandoned.
      */
     public static final String JDBC_REMOVE_ABANDONED = "true";
-    
+
     /**
      * jdbc removeAbandonedTimeout.
      */
     public static final String JDBC_REMOVE_ABANDONED_TIMEOUT = "180";
-    
+
     /**
      * jdbc testOnBorrow.
      */
     public static final String JDBC_TEST_ON_BORROW = "false";
-    
+
     /**
      * jdbc testOnWhile.
      */
     public static final String JDBC_TEST_ON_WHILE = "true";
-    
+
     /**
      * jdbc validationQuery.
      */
     public static final String JDBC_VALIDATION_QUERY = "SELECT 1";
-    
+
     /**
      * sql execute status.
      */
@@ -135,7 +145,7 @@ public final class DataDriverConstant {
      * sql index.
      */
     public static final int SQL_INDEX_THIRD = 3;
-    
+
     /**
      * the key of ConnectionPool.
      */
@@ -143,11 +153,13 @@ public final class DataDriverConstant {
     public static final String POOL_URL = "url";
     public static final String POOL_USERNAME = "username";
     public static final String POOL_PASSWORD = "password";
-    public static final String POOL_MAX_ACTIVE = "maxActive";
+    public static final String POOL_INITIAL_SIZE = "initialSize";
+    public static final String POOL_MAX_ACTIVE = "maxTotal";
     public static final String POOL_MIN_IDLE = "minIdle";
     public static final String POOL_MAX_IDLE = "maxIdle";
-    public static final String POOL_MAX_WAIT = "maxWait";
-    public static final String POOL_MAX_REMOVE_ABANDONED = "removeAbandoned";
+    public static final String POOL_MAX_WAIT = "maxWaitMillis";
+    public static final String POOL_MAX_REMOVE_ABANDONED = "removeAbandonedOnBorrow";
+    public static final String POOL_MAX_REMOVE_MAINTENANCE = "removeAbandonedOnMaintenance";
     public static final String POOL_MAX_REMOVE_ABANDONED_TIMEOUT = "removeAbandonedTimeout";
     public static final String POOL_TEST_ON_BORROW = "testOnBorrow";
     public static final String POOL_TEST_ON_WHILE = "testWhileIdle";
@@ -155,12 +167,14 @@ public final class DataDriverConstant {
     public static final String POOL_NUM_TEST_PER_ER = "numTestsPerEvictionRun";
     public static final String POOL_VALIDATION_QUERY = "validationQuery";
     public static final String POOL_MIN_EITM = "minEvictableIdleTimeMillis";
-    
+
     /**
-     *  the default value for pool.
+     * the default value for pool.
      */
+    public static final String POOL_DRIVER_NAME_DEFAULT_VALUE = "com.mysql.jdbc.Driver";
     public static final String POOL_MAX_ACTIVE_DEFAULT_VALUE = "50";
     public static final String POOL_MIN_IDLE_DEFAULT_VALUE = "5";
+    public static final String POOL_INIT_DEFAULT_VALUE = "5";
     public static final String POOL_MAX_IDLE_DEFAULT_VALUE = "5";
     public static final String POOL_MAX_WAIT_DEFAULT_VALUE = "10000";
     public static final String POOL_NUM_TEST_PER_ER_DEFAULT_VALUE = "5";
@@ -172,7 +186,7 @@ public final class DataDriverConstant {
      */
     public static final String DOMAIN_DEFAULT_INFO = "domain.defaultInfo";
     public static final String DOMAIN_DEFAULT_INFO_TIMEOUT = "domain.defaultInfo.timeout";
-    
+
     /**
      * 系统domain之私钥存储domainKey.
      */
@@ -181,8 +195,10 @@ public final class DataDriverConstant {
     public static final String DOMAIN_ISSUER_TEMPLATE_SECRET = "domain.templateSecret";
 
     public static final String DOMAIN_USER_MASTER_SECRET = "domain.masterKey";
- 
+
     public static final String DOMAIN_USER_CREDENTIAL_SIGNATURE = "domain.credentialSignature";
-    
+
     public static final String DOMAIN_RESOURCE_INFO = "domain.resourceInfo";
+
+    public static final String DOMAIN_WEID_AUTH = "domain.weIdAuth";
 }

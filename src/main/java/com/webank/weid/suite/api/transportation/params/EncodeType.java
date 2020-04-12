@@ -19,6 +19,9 @@
 
 package com.webank.weid.suite.api.transportation.params;
 
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
+
 /**
  * enumeration of supported coding types.
  * 
@@ -50,22 +53,18 @@ public enum EncodeType {
     public int getCode() {
         return code;
     }
-
-    public String toString() {
-        return String.valueOf(this.code);
-    }
     
     /**
      * get EncodeType by code.
-     * @param value code value
-     * @return codeType
+     * @param code code value
+     * @return EncodeType
      */
-    public static EncodeType getObject(String value) {
+    public static EncodeType getEncodeType(int code) {
         for (EncodeType codeType : EncodeType.values()) {
-            if (String.valueOf(codeType.getCode()).equals(value)) {
+            if (code == codeType.getCode()) {
                 return codeType;
             }
         }
-        return null;
+        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
     }
 }
