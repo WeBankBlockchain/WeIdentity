@@ -8,7 +8,7 @@
 
 ## 1. 发现 bug
 
-使用过程中遇到的任何问题，可以查看 [FAQ](https://github.com/WeBankFinTech/weid-doc/blob/master/docs/zh_CN/docs/faq.md)，或者给我们提 [issue](https://github.com/WeBankFinTech/WeIdentity/issues)。
+使用过程中遇到的任何问题，可以查看 [FAQ](https://weidentity.readthedocs.io/zh_CN/latest/docs/faq.html)，或者给我们提 [issue](https://github.com/WeBankFinTech/WeIdentity/issues)。
 
 ## 2. 优化建议
 

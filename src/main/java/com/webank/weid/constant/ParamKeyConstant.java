@@ -42,6 +42,11 @@ public final class ParamKeyConstant {
     public static final String AUTHORITY_ISSUER_NAME = "name";
 
     /**
+     * UTF-8.
+     */
+    public static final String UTF_8 = "UTF-8";
+
+    /**
      * CptService related param names.
      */
     public static final String CPT_JSON_SCHEMA = "cptJsonSchema";
@@ -91,4 +96,17 @@ public final class ParamKeyConstant {
     public static final String WEID_AUTH_CHALLENGE = "challenge";
 
     public static final String TRNSACTION_RECEIPT_STATUS_SUCCESS = "0x0";
+    
+    /**
+     * 内置配置Key.
+     */
+    public static final String RSYNC_IP = "rsyncIp";
+    public static final String RSYNC_PORT = "rsyncPort";
+    public static final String RSYNC_USER = "rsyncUser";
+    public static final String RSYNC_PWD_NAME = "rsyncPwdName";
+    public static final String RSYNC_BIN_LOG_MODULE = "binLog";
+    public static final String BIN_LOG_PATH = "binLogPath";
+    public static final String ENABLE_OFFLINE = "enableOffLine";
+    public static final String INTEVAL_PERIOD = "inteval_period";
+    
 }

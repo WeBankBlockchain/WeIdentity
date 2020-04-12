@@ -19,6 +19,8 @@
 
 package com.webank.weid.service.impl.engine;
 
+import java.util.List;
+
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -27,8 +29,21 @@ public interface EvidenceServiceEngine extends ReloadStaticContract {
     ResponseData<String> createEvidence(
         String hashValue,
         String signature,
-        String extra,
+        String log,
         Long timestamp,
+        String privateKey
+    );
+
+    /**
+     * Batch creation of evidences. Return values are a list which indicates successful or failed
+     * creation with strict order of input evidences.
+     */
+    ResponseData<List<Boolean>> batchCreateEvidence(
+        List<String> hashValues,
+        List<String> signatures,
+        List<String> logs,
+        List<Long> timestamp,
+        List<String> signers,
         String privateKey
     );
 
@@ -44,9 +59,19 @@ public interface EvidenceServiceEngine extends ReloadStaticContract {
     ResponseData<String> createEvidenceWithCustomKey(
         String hashValue,
         String signature,
-        String extra,
+        String log,
         Long timestamp,
-        String extraKey,
+        String customKey,
+        String privateKey
+    );
+
+    ResponseData<List<Boolean>> batchCreateEvidenceWithCustomKey(
+        List<String> hashValues,
+        List<String> signatures,
+        List<String> logs,
+        List<Long> timestamps,
+        List<String> signers,
+        List<String> customKeys,
         String privateKey
     );
 

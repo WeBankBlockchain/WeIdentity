@@ -19,27 +19,27 @@
 
 package com.webank.weid.suite.transportation.qr.impl;
 
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.ProtocolSuiteException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.inf.JsonSerializer;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.QrCodeTransportation;
+import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.params.TransMode;
+import com.webank.weid.suite.api.transportation.params.TransType;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
 import com.webank.weid.suite.entity.QrCodeVersion;
-import com.webank.weid.suite.transportation.AbstractJsonTransportation;
-import com.webank.weid.suite.transportation.qr.protocol.QrCodeBaseData;
-import com.webank.weid.suite.transportation.qr.protocol.QrCodeVersion1;
+import com.webank.weid.suite.entity.TransCodeBaseData;
+import com.webank.weid.suite.transmission.TransmissionFactory;
+import com.webank.weid.suite.transportation.AbstractCodeTransportation;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -47,30 +47,31 @@ import com.webank.weid.util.DataToolUtils;
  * @author v_wbgyang
  *
  */
-public class QrCodeJsonTransportationImpl
-    extends AbstractJsonTransportation
+public class QrCodeTransportationImpl 
+    extends AbstractCodeTransportation
     implements QrCodeTransportation {
 
     private static final Logger logger = 
-        LoggerFactory.getLogger(QrCodeJsonTransportationImpl.class);
-    
-    private static final QrCodeVersion version = QrCodeVersion.V1;
-    
-    /**
-     * 支持的协议版本配置.
-     */
-    private static final Map<String, Class<?>> protocol_version_map;
-    
-    static {
-        protocol_version_map = new HashMap<String, Class<?>>();
-        protocol_version_map.put(QrCodeVersion.V1.name(), QrCodeVersion1.class);
-    }
+        LoggerFactory.getLogger(QrCodeTransportationImpl.class);
     
     @Override
     public <T extends JsonSerializer> ResponseData<String> serialize(
         T object, 
-        ProtocolProperty property) {
-        
+        ProtocolProperty property
+    ) {
+        if (property != null && property.getTransMode() == TransMode.DOWNLOAD_MODE) {
+            logger.error(
+                "[serialize] should to call serialize(WeIdAuthentication weIdAuthentication, "
+                + "T object, ProtocolProperty property).");
+            return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.THIS_IS_UNSUPPORTED); 
+        }
+        return serializeInner(object, property);
+    }
+    
+    protected <T extends JsonSerializer> ResponseData<String> serializeInner(
+        T object, 
+        ProtocolProperty property
+    ) {
         logger.info(
             "[serialize] begin to execute QrCodeTransportation serialization, property:{}.",
             property
@@ -92,20 +93,21 @@ public class QrCodeJsonTransportationImpl
         }
         try {
             // 根据协议版本生成协议实体对象
-            QrCodeBaseData qrCodeData = 
-                QrCodeBaseData.newInstance(
-                    protocol_version_map.get(version.name())
-                );
-            // 构建协议header
-            qrCodeData.buildQrCodeData(
-                property,
-                fiscoConfig.getCurrentOrgId()
-            );
+            QrCodeVersion version = QrCodeVersion.V1;
+            if (property.getTransMode() == TransMode.DOWNLOAD_MODE) {
+                // 下载模式
+                version = QrCodeVersion.V2;
+            }
+            TransCodeBaseData codeData = TransCodeBaseData.newInstance(version.getClz());
+            // 构建协议基础数据
+            String uuId = DataToolUtils.getUuId32();
+            codeData.buildCodeData(property, fiscoConfig.getCurrentOrgId(), uuId);
+            
             // 创建编解码实体对象，对此实体中的data编码操作
             EncodeData encodeData = 
                 new EncodeData(
-                    qrCodeData.getId(),
-                    qrCodeData.getOrgId(),
+                    codeData.getId(),
+                    codeData.getOrgId(),
                     object.toJson(),
                     super.getVerifiers()
                 );
@@ -113,13 +115,21 @@ public class QrCodeJsonTransportationImpl
             // 进行编码处理
             String data = 
                 EncodeProcessorFactory
-                    .getEncodeProcessor(qrCodeData.getEncodeType())
+                    .getEncodeProcessor(property.getEncodeType())
                     .encode(encodeData);
-            qrCodeData.setData(data);
-            // 将协议实体转换成协议字符串数据
-            String transString = qrCodeData.buildBuffer().getTransString();
+            codeData.setData(data);
+            if (!codeData.check()) {
+                throw new ProtocolSuiteException(ErrorCode.TRANSPORTATION_PROTOCOL_FIELD_INVALID);
+            }
+            
+            logger.info("[serialize] the transMode is {}", property.getTransMode());
+            if (version == QrCodeVersion.V2) {
+                // 下载模式
+                //save BarCodeData
+                saveTransData(codeData.getId(), codeData);
+            }
             logger.info("[serialize] QrCodeTransportation serialization finished.");
-            return new ResponseData<String>(transString, ErrorCode.SUCCESS);
+            return new ResponseData<String>(codeData.buildCodeString(), ErrorCode.SUCCESS); 
         } catch (WeIdBaseException e) {
             logger.error("[serialize] QrCodeTransportation serialization due to base error.", e);
             return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
@@ -152,7 +162,11 @@ public class QrCodeJsonTransportationImpl
             );
             return new ResponseData<T>(null, errorCode);
         }
-        return deserializeInner(weIdAuthentication, transString, clazz);
+        TransMode transMode = super.getTransMode(transString);
+        if (transMode == TransMode.DATA_MODE) {
+            return deserializeInner(weIdAuthentication, transString, clazz);
+        }
+        return deserializeInnerForDown(weIdAuthentication, transString, clazz);
     }
     
     private <T extends JsonSerializer> ResponseData<T> deserializeInner(
@@ -164,48 +178,78 @@ public class QrCodeJsonTransportationImpl
             logger.info("[deserialize] begin to execute QrCodeTransportation deserialize.");
             logger.info("[deserialize] the transString:{}.", transString);
             //解析协议版本
-            QrCodeVersion version = QrCodeBaseData.getQrCodeVersion(transString);
+            int versionCode = TransCodeBaseData.getVersion(transString);
+            QrCodeVersion version = QrCodeVersion.getVersion(versionCode);
             //根据协议版本生成协议实体对象
-            QrCodeBaseData qrCodeData = 
-                QrCodeBaseData.newInstance(protocol_version_map.get(version.name()));
+            TransCodeBaseData codeData = TransCodeBaseData.newInstance(version.getClz());
             //将协议字符串构建成协议对象
-            qrCodeData.buildData(transString);
+            codeData.buildCodeData(transString);
             EncodeData encodeData = 
                 new EncodeData(
-                    qrCodeData.getId(),
-                    qrCodeData.getOrgId(),
-                    qrCodeData.getData(),
+                    codeData.getId(),
+                    codeData.getOrgId(),
+                    String.valueOf(codeData.getData()),
                     weIdAuthentication
                 );
-            logger.info("[deserialize] encode by {}.", qrCodeData.getEncodeType().name());
+            EncodeType enCodeType = EncodeType.getEncodeType(codeData.getEncodeType());
+            logger.info("[deserialize] encode by {}.", enCodeType.name());
             //进行解码处理
-            String data = 
+            String jsonString = 
                 EncodeProcessorFactory
-                    .getEncodeProcessor(qrCodeData.getEncodeType())
+                    .getEncodeProcessor(enCodeType)
                     .decode(encodeData);
-            //将解压出来的数据进行反序列化成原数据对象
-            //T presentation = JsonUtil.jsonStrToObj(clazz, data);
-            String presentationEStr = DataToolUtils.convertUtcToTimestamp(data);
-            String presentationEStrNew = presentationEStr;
-            if (DataToolUtils.isValidFromToJson(presentationEStr)) {
-                presentationEStrNew = DataToolUtils.removeTagFromToJson(presentationEStr);
-            }
-            T object = null;
-            Method method = getFromJsonMethod(clazz);
-            if (method == null) {
-                //调用工具的反序列化 
-                object = (T) DataToolUtils.deserialize(presentationEStrNew, clazz);
-            } else  {
-                object = (T) method.invoke(null, presentationEStrNew);
-            }
             logger.info("[deserialize] QrCodeTransportation deserialize finished.");
-            return new ResponseData<T>(object, ErrorCode.SUCCESS);
+            return super.buildObject(jsonString, clazz);
         } catch (WeIdBaseException e) {
             logger.error("[deserialize] QrCodeTransportation deserialize due to base error.", e);
             return new ResponseData<T>(null, e.getErrorCode());
         } catch (Exception e) {
             logger.error("[deserialize] QrCodeTransportation deserialize due to unknown error.", e);
             return new ResponseData<T>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+    
+    private <T extends JsonSerializer> ResponseData<T> deserializeInnerForDown(
+        WeIdAuthentication weIdAuthentication,
+        String transString, 
+        Class<T> clazz
+    ) {
+        try {
+            logger.info("[deserialize] begin to execute JsonTransportation deserialize.");
+            logger.info("[deserialize] the transString:{}.", transString);
+            // 解析协议版本
+            int versionCode = TransCodeBaseData.getVersion(transString);
+            QrCodeVersion version = QrCodeVersion.getVersion(versionCode);
+            //根据协议版本生成协议实体对象
+            TransCodeBaseData codeData = TransCodeBaseData.newInstance(version.getClz());
+            //将协议字符串构建成协议对象
+            codeData.buildCodeData(transString);
+            // 获取协议请求下载通过类型
+            TransType type = TransType.getTransmissionByCode(codeData.getTransTypeCode());
+            // 获取原始数据，两种协议获取方式，目前只实现一种amop，支持https扩展
+            ResponseData<String> result = TransmissionFactory.getTransmisson(type)
+                .send(buildRequest(type, codeData, weIdAuthentication));
+            if (result.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                    "[deserialize] channel request fail:{}-{}.",
+                    result.getErrorCode(),
+                    result.getErrorMessage()
+                );
+                return new ResponseData<T>(null, 
+                    ErrorCode.getTypeByErrorCode(result.getErrorCode().intValue()));
+            }
+            codeData = (TransCodeBaseData)DataToolUtils.deserialize(
+                result.getResult(), 
+                version.getClz()
+            );
+            return super.buildObject(String.valueOf(codeData.getData()), clazz);
+        } catch (WeIdBaseException e) {
+            logger.error("[deserialize] BarCodeTransportation deserialize due to base error.", e);
+            return new ResponseData<T>(null, e.getErrorCode());
+        } catch (Exception e) {
+            logger.error(
+                "[deserialize] BarCodeTransportation deserialize due to unknown error.", e);
+            return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
     }
 }
