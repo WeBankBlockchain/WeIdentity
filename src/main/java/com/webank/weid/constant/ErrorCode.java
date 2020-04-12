@@ -100,7 +100,8 @@ public enum ErrorCode {
     /**
      * The credential issuer mismatch.
      */
-    CREDENTIAL_ISSUER_MISMATCH(100403, "issuer weId does not match the weId of credential"),
+    CREDENTIAL_ISSUER_MISMATCH(100403,
+        "issuer weId does not match the weId of credential"),
 
     /**
      * The credential signature broken.
@@ -323,12 +324,18 @@ public enum ErrorCode {
     /**
      * The credential evidence interface does not support fisco bcos 1.3.
      */
-    CREDENTIAL_EVIDENCE_NOT_SUPPORTED(100503, "evidence interface does not support fisco bcos 1.3"),
+    FISCO_BCOS_VERSION_NOT_SUPPORTED(170000,
+        "this function does not support current fisco bcos version"),
 
     /**
      * On-chain string length exceeded acceptable max.
      */
     ON_CHAIN_STRING_TOO_LONG(100504, "on-chain String length exceeds limit"),
+
+    /**
+     * offline evidence transaction saved failed.
+     */
+    OFFLINE_EVIDENCE_SAVE_FAILED(100505, "offline evidence transaction saved failed."),
 
     /**
      * The challenge is invalid.
@@ -479,7 +486,7 @@ public enum ErrorCode {
      */
     TRANSPORTATION_PROTOCOL_FIELD_INVALID(
         100806,
-        "the protocol field values cannot be included '|'."
+        "the protocol field value invalid."
     ),
 
     /**
@@ -496,12 +503,12 @@ public enum ErrorCode {
      * pdf transfer error.
      */
     TRANSPORTATION_PDF_VERIFY_ERROR(100809, "pdf verify error, please check the error log."),
-    
+
     /**
      * the transmission type is invalid.
      */
     TRANSPORTATION_TRANSMISSION_TYPE_INVALID(100810, "the trans type is invalid."),
-    
+
     /**
      * the URI type is invalid.
      */
@@ -511,6 +518,11 @@ public enum ErrorCode {
      * no spcifyer to set.
      */
     TRANSPORTATION_NO_SPECIFYER_TO_SET(100812, "no spcifyer to set."),
+
+    /**
+     * the trans mode is invalid.
+     */
+    TRANSPORTATION_TRANSMODE_TYPE_INVALID(100813, "the trans mode is invalid."),
 
     /**
      * Authority issuer main error code.
@@ -704,7 +716,7 @@ public enum ErrorCode {
         100113,
         "weIdAuth callback is not registered."
     ),
-    
+
     /**
      * the channelId is null.
      */
@@ -712,7 +724,7 @@ public enum ErrorCode {
         100114,
         "the channelId is null."
     ),
-    
+
     /**
      * the channelId is invalid.
      */
@@ -789,27 +801,27 @@ public enum ErrorCode {
      * the data is expire.
      */
     SQL_DATA_EXPIRE(160015, "the data is expire."),
-    
+
     /**
      * no premission.
      */
     CNS_NO_PERMISSION(160016, "no premission for this cns."),
-    
+
     /**
      * the cns does not exist.
      */
     CNS_DOES_NOT_EXIST(160017, "the cns does not exist."),
-    
+
     /**
      * the cns is used.
      */
     CNS_IS_USED(160018, "the cns is used."),
-    
+
     /**
      * the cns is not used.
      */
     CNS_IS_NOT_USED(160019, "the cns is not used."),
-    
+
     /**
      * the code is undefined.
      */
@@ -819,12 +831,12 @@ public enum ErrorCode {
      * the data does not exist.
      */
     SQL_DATA_DOES_NOT_EXIST(160021, "the data does not exist."),
-    
+
     /**
      * this is unsupported.
      */
     THIS_IS_UNSUPPORTED(160022, "this is unsupported."),
-    
+
     /**
      * this is repeated call.
      */

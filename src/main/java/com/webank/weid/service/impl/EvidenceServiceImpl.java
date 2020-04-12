@@ -28,10 +28,12 @@ import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.abi.datatypes.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
@@ -42,6 +44,8 @@ import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.impl.inner.PropertiesService;
+import com.webank.weid.util.BatchTransactionUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -177,8 +181,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
      */
     private ResponseData<String> getHashValue(Hashable object) {
         if (object == null) {
-            // Support empty hash value
-            return new ResponseData<>(WeIdConstant.HEX_PREFIX, ErrorCode.SUCCESS);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
         try {
             String hashValue = object.getHash();
@@ -208,6 +211,33 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
+
+            //如果
+            boolean flag = getOfflineFlag();
+            if (flag) {
+                String rawData = new StringBuffer()
+                    .append(hashValue)
+                    .append(signature)
+                    .append(extra)
+                    .append(timestamp)
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                String hash = DataToolUtils.sha3(rawData);
+                String requestId = new BigInteger(hash.substring(2), 16).toString();
+                String[] args = new String[5];
+                args[0] = hashValue;
+                args[1] = signature;
+                args[2] = extra;
+                args[3] = String.valueOf(timestamp);
+                args[4] = privateKey;
+                boolean isSuccess = BatchTransactionUtils
+                    .writeTransaction(requestId, "createEvidence", args, StringUtils.EMPTY);
+                if (isSuccess) {
+                    return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                } else {
+                    return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
+                }
+            }
+
             return evidenceServiceEngine.createEvidence(
                 hashValue,
                 signature,
@@ -361,6 +391,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (!isChainStringLengthValid(log) || !isChainStringLengthValid(customKey)) {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ON_CHAIN_STRING_TOO_LONG);
         }
+        if (StringUtils.isEmpty(customKey)) {
+            customKey = StringUtils.EMPTY;
+        }
         ResponseData<String> hashResp = getHashValue(object);
         String hashValue = hashResp.getResult();
         if (StringUtils.isEmpty(hashResp.getResult())) {
@@ -379,6 +412,35 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
+            //如果
+            boolean flag = getOfflineFlag();
+            if (flag) {
+                String rawData = new StringBuffer()
+                    .append(hashValue)
+                    .append(signature)
+                    .append(log)
+                    .append(timestamp)
+                    .append(customKey)
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                String hash = DataToolUtils.sha3(rawData);
+                String requestId = new BigInteger(hash.substring(2), 16).toString();
+                String[] args = new String[6];
+                args[0] = hashValue;
+                args[1] = signature;
+                args[2] = log;
+                args[3] = String.valueOf(timestamp);
+                args[4] = customKey;
+                args[5] = privateKey;
+
+                boolean isSuccess = BatchTransactionUtils
+                    .writeTransaction(requestId, "createEvidenceWithCustomKey", args,
+                        StringUtils.EMPTY);
+                if (isSuccess) {
+                    return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                } else {
+                    return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
+                }
+            }
             return evidenceServiceEngine.createEvidenceWithCustomKey(
                 hashValue,
                 signature,
@@ -411,5 +473,14 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private boolean isChainStringLengthValid(String string) {
         return string.length() < WeIdConstant.ON_CHAIN_STRING_LENGTH;
+    }
+    
+    private boolean getOfflineFlag() {
+        String flag = PropertiesService.getInstance()
+            .getProperty(ParamKeyConstant.ENABLE_OFFLINE);
+        if (StringUtils.isNotBlank(flag)) {
+            return new Boolean(flag);
+        }
+        return false;
     }
 }

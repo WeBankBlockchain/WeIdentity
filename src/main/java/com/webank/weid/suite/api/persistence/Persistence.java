@@ -21,6 +21,7 @@ package com.webank.weid.suite.api.persistence;
 
 import java.util.List;
 
+import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
@@ -61,7 +62,7 @@ public interface Persistence {
 
     /**
      * delete data by id.
-     * 
+     *
      * @param domain the domain of the data.
      * @param id the key of the data.
      * @return the data you stored.
@@ -70,14 +71,14 @@ public interface Persistence {
 
     /**
      * update data by id.
-     * 
+     *
      * @param domain the domain of the data.
      * @param id the key you store with.
      * @param data the data you want to update into.
      * @return execute status of the "update" operation.
      */
     public ResponseData<Integer> update(String domain, String id, String data);
-    
+
     /**
      * save data to storage if not exist, others for update.
      *
@@ -87,4 +88,12 @@ public interface Persistence {
      * @return execute status of the "save" operation.
      */
     public ResponseData<Integer> saveOrUpdate(String domain, String id, String data);
+
+    /**
+     * save transaction to storage.
+     *
+     * @param transactionArgs the transaction info.
+     * @return execute status of the "saveTransaction" operation.
+     */
+    public ResponseData<Integer> saveTransaction(TransactionArgs transactionArgs);
 }

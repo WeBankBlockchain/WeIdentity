@@ -19,7 +19,6 @@
 
 package com.webank.weid.suite.transportation.json.impl;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +33,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.transportation.inf.JsonTransportation;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
+import com.webank.weid.suite.api.transportation.params.TransMode;
 import com.webank.weid.suite.encode.EncodeProcessorFactory;
 import com.webank.weid.suite.entity.EncodeData;
 import com.webank.weid.suite.entity.JsonVersion;
@@ -57,6 +57,20 @@ public class JsonTransportationImpl
 
     @Override
     public <T extends JsonSerializer> ResponseData<String> serialize(
+        T object,
+        ProtocolProperty property
+    ) {
+        if (property != null && property.getTransMode() == TransMode.DOWNLOAD_MODE) {
+            logger.error(
+                "[serialize] should to call serialize(WeIdAuthentication weIdAuthentication, "
+                + "T object, ProtocolProperty property).");
+            return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.THIS_IS_UNSUPPORTED); 
+        }
+        return serializeInner(object, property);
+    }
+    
+    @Override
+    protected <T extends JsonSerializer> ResponseData<String> serializeInner(
         T object,
         ProtocolProperty property
     ) {
@@ -179,34 +193,17 @@ public class JsonTransportationImpl
                     weIdAuthentication
                 );
             //根据编解码类型获取编解码枚举对象
-            EncodeType encodeType =
-                EncodeType.getObject(String.valueOf(jsonBaseData.getEncodeType()));
+            EncodeType encodeType = EncodeType.getEncodeType(jsonBaseData.getEncodeType());
             if (encodeType == null) {
                 return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
             }
             logger.info("[deserialize] decode by {}.", encodeType.name());
             //进行解码操作
-            String presentationEStr =
+            String jsonString =
                 EncodeProcessorFactory
                     .getEncodeProcessor(encodeType)
                     .decode(encodeData);
-            //T object =
-            //      (T) DataToolUtils.jsonStrToObj(clazz, presentationEStr);
-            String presentationEJson = DataToolUtils.convertUtcToTimestamp(presentationEStr);
-            String presentationEJsonNew = presentationEJson;
-            if (DataToolUtils.isValidFromToJson(presentationEJson)) {
-                presentationEJsonNew = DataToolUtils.removeTagFromToJson(presentationEJson);
-            }
-            T object = null;
-            Method method = getFromJsonMethod(clazz);
-            if (method == null) {
-                //调用工具的反序列化 
-                object = (T) DataToolUtils.deserialize(presentationEJsonNew, clazz);
-            } else  {
-                object = (T) method.invoke(null, presentationEJsonNew);
-            }
-            logger.info("[deserialize] JsonTransportation deserialize finished.");
-            return new ResponseData<T>(object, ErrorCode.SUCCESS);
+            return super.buildObject(jsonString, clazz);
         } catch (WeIdBaseException e) {
             logger.error("[deserialize] JsonTransportation deserialize due to base error.", e);
             return new ResponseData<T>(null, e.getErrorCode());
@@ -245,10 +242,10 @@ public class JsonTransportationImpl
             || StringUtils.isBlank(jsonBaseData.getData().toString())) {
             return ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID;
         }
-        if (JsonVersion.getJsonVersion(jsonBaseData.getVersion()) == null) {
+        if (JsonVersion.getVersion(jsonBaseData.getVersion()) == null) {
             return ErrorCode.TRANSPORTATION_PROTOCOL_VERSION_ERROR;
         }
-        if (EncodeType.getObject(String.valueOf(jsonBaseData.getEncodeType())) == null) {
+        if (EncodeType.getEncodeType(jsonBaseData.getEncodeType()) == null) {
             return ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR;
         }
         return ErrorCode.SUCCESS;

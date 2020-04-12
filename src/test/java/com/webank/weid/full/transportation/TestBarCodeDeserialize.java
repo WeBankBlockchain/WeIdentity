@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.ResponseData;
@@ -197,7 +198,7 @@ public class TestBarCodeDeserialize extends TestBaseTransportation {
         );
         LogUtil.info(logger, "deserialize", wrapperRes);
         Assert.assertEquals(
-            ErrorCode.TRANSPORTATION_BASE_ERROR.getCode(),
+            ErrorCode.TRANSPORTATION_PROTOCOL_STRING_INVALID.getCode(),
             wrapperRes.getErrorCode().intValue()
         );
         Assert.assertNull(wrapperRes.getResult());
@@ -240,8 +241,8 @@ public class TestBarCodeDeserialize extends TestBaseTransportation {
     public void testDeserializeCase6() {
         new MockUp<EncodeType>() {
             @Mock
-            public EncodeType getObject(String value) {
-                return null;
+            public EncodeType getEncodeType(int code) {
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
             }
         };
         ResponseData<PresentationE> wrapperRes = transportation.deserialize(
@@ -265,8 +266,8 @@ public class TestBarCodeDeserialize extends TestBaseTransportation {
     public void testDeserializeCase7() {
         new MockUp<EncodeType>() {
             @Mock
-            public EncodeType getObject(String value) {
-                return null;
+            public EncodeType getEncodeType(int code) {
+                throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
             }
         };
 

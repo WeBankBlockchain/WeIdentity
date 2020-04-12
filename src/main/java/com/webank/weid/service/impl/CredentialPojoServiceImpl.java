@@ -71,8 +71,8 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
@@ -90,7 +90,7 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author tonychen 2019年4月17日
  */
-public class CredentialPojoServiceImpl extends BaseService implements CredentialPojoService {
+public class CredentialPojoServiceImpl implements CredentialPojoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
     private static final String NOT_DISCLOSED =
@@ -99,16 +99,37 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         CredentialFieldDisclosureValue.DISCLOSED.getStatus().toString();
     private static final String EXISTED =
         CredentialFieldDisclosureValue.EXISTED.getStatus().toString();
-    private static WeIdService weIdService = new WeIdServiceImpl();
-    private static CptService cptService = new CptServiceImpl();
+    private static WeIdService weIdService;
+    private static CptService cptService;
     private static Persistence dataDriver;
-    PdfTransportationImpl pdfTransportation = new PdfTransportationImpl();
+    private static PdfTransportation pdfTransportation;
 
     private static Persistence getDataDriver() {
         if (dataDriver == null) {
             dataDriver = new MysqlDriver();
         }
         return dataDriver;
+    }
+
+    private static WeIdService getWeIdService() {
+        if (weIdService == null) {
+            weIdService = new WeIdServiceImpl();
+        }
+        return weIdService;
+    }
+
+    private static CptService getCptService() {
+        if (cptService == null) {
+            cptService = new CptServiceImpl();
+        }
+        return cptService;
+    }
+
+    private static PdfTransportation getPdfTransportation() {
+        if (pdfTransportation == null) {
+            pdfTransportation = new PdfTransportationImpl();
+        }
+        return pdfTransportation;
     }
 
     /**
@@ -602,7 +623,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (StringUtils.isEmpty(publicKey)) {
             // Fetch public key from chain
             ResponseData<WeIdDocument> innerResponseData =
-                weIdService.getWeIdDocument(issuerWeid);
+                getWeIdService().getWeIdDocument(issuerWeid);
             if (innerResponseData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "Error occurred when fetching WeIdentity DID document for: {}, msg: {}",
@@ -654,7 +675,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
         try {
             String claimStr = DataToolUtils.serialize(claim);
-            Cpt cpt = cptService.queryCpt(cptId).getResult();
+            Cpt cpt = getCptService().queryCpt(cptId).getResult();
             if (cpt == null) {
                 logger.error(ErrorCode.CREDENTIAL_CPT_NOT_EXISTS.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CPT_NOT_EXISTS;
@@ -717,8 +738,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
         Map<String, String> credentialInfoMap = buildCredentialInfo(preCredential, claimJson);
 
-        ResponseData<CredentialTemplateEntity> resp = cptService.queryCredentialTemplate(cptId);
-        CredentialTemplateEntity credentialTemplate = resp.getResult();
+        ResponseData<CredentialTemplateEntity> res = getCptService().queryCredentialTemplate(cptId);
+        CredentialTemplateEntity credentialTemplate = res.getResult();
 
         UserResult userResult = UserClient.makeCredential(credentialInfoMap, credentialTemplate);
 
@@ -995,7 +1016,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             logger.error("Create Credential, private key does not match the current weid.");
             return new ResponseData<>(null, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
-        if (!weIdService.isWeIdExist(callerAuth.getWeId()).getResult()) {
+        if (!getWeIdService().isWeIdExist(callerAuth.getWeId()).getResult()) {
             return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         }
         String privateKey = callerAuth.getWeIdPrivateKey().getPrivateKey();
@@ -1282,11 +1303,11 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         PresentationE presentationE) {
 
         //verify pdf
-        PdfAttributeInfo pdfAttributeInfo = pdfTransportation.getBaseData(serializePdf);
+        PdfAttributeInfo pdfAttributeInfo = getPdfTransportation().getBaseData(serializePdf);
         if (pdfAttributeInfo == null) {
             logger.error("[verifyPresentationFromPDF] get pdf base data error.");
         }
-        Boolean retVerifyPdf = pdfTransportation.verifyPdf(
+        Boolean retVerifyPdf = getPdfTransportation().verifyPdf(
             presentationE,
             pdfTemplatePath,
             pdfAttributeInfo,
@@ -1345,7 +1366,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         }
 
         //verify Signature of PresentationE
-        WeIdDocument weIdDocument = weIdService.getWeIdDocument(presenterWeId).getResult();
+        WeIdDocument weIdDocument = getWeIdService().getWeIdDocument(presenterWeId).getResult();
         if (weIdDocument == null) {
             logger.error(
                 "[verify]presentation verify failed, because the presenter weid :{} "
@@ -1598,7 +1619,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         if (!WeIdUtils.isWeIdValid(presentationPolicyE.getPolicyPublisherWeId())) {
             return ErrorCode.PRESENTATION_POLICY_PUBLISHER_WEID_INVALID;
         }
-        ResponseData<Boolean> weIdRes = weIdService
+        ResponseData<Boolean> weIdRes = getWeIdService()
             .isWeIdExist(presentationPolicyE.getPolicyPublisherWeId());
         if (ErrorCode.SUCCESS.getCode() != weIdRes.getErrorCode() || !weIdRes.getResult()) {
             return ErrorCode.PRESENTATION_POLICY_PUBLISHER_WEID_NOT_EXIST;
@@ -1868,7 +1889,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             HashMap<String, String> userCredentialInfo = DataToolUtils
                 .deserialize(masterKeyResp.getResult(), HashMap.class);
             String masterSecret = userCredentialInfo.get("masterSecret");
-            ResponseData<CredentialTemplateEntity> credentialTemplateResp = cptService
+            ResponseData<CredentialTemplateEntity> credentialTemplateResp = getCptService()
                 .queryCredentialTemplate(cptId);
             CredentialTemplateEntity credentialTemplate = credentialTemplateResp.getResult();
             Map<String, String> credentialInfoMap = new HashMap<>();
@@ -2037,12 +2058,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             logger.error("FromWeId and ToWeId must be different.");
             return ErrorCode.AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT;
         }
-        ResponseData<Boolean> existResp = weIdService.isWeIdExist(fromWeId);
+        ResponseData<Boolean> existResp = getWeIdService().isWeIdExist(fromWeId);
         if (!existResp.getResult()) {
             logger.error("From WeID illegal: {}", existResp.getErrorMessage());
             return ErrorCode.getTypeByErrorCode(existResp.getErrorCode());
         }
-        existResp = weIdService.isWeIdExist(toWeId);
+        existResp = getWeIdService().isWeIdExist(toWeId);
         if (!existResp.getResult()) {
             logger.error("To WeID illegal: {}", existResp.getErrorMessage());
             return ErrorCode.getTypeByErrorCode(existResp.getErrorCode());
