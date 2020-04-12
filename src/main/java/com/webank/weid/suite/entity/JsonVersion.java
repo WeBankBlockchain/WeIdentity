@@ -19,6 +19,9 @@
 
 package com.webank.weid.suite.entity;
 
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
+
 /**
  * JSON传输协议枚举.
  * @author v_wbgyang
@@ -44,12 +47,12 @@ public enum JsonVersion {
      * @param code the JsonVersion
      * @return JsonVersion
      */
-    public static JsonVersion getJsonVersion(int code) {
+    public static JsonVersion getVersion(int code) {
         for (JsonVersion version : JsonVersion.values()) {
             if (version.getCode() == code) {
                 return version;
             }
         }
-        return null;
+        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_VERSION_ERROR);
     }
 }

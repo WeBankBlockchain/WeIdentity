@@ -19,6 +19,10 @@
 
 package com.webank.weid.suite.entity;
 
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.suite.transportation.bar.protocol.BarCodeVersion1;
+
 /**
  * JSON传输协议枚举.
  * @author v_wbgyang
@@ -26,30 +30,37 @@ package com.webank.weid.suite.entity;
  */
 public enum BarCodeVersion {
 
-    V1(1);
+    V1(1, BarCodeVersion1.class);
     
     private int code;
+    
+    private Class<?> clz;
 
-    BarCodeVersion(int code) {
+    BarCodeVersion(int code, Class<?> clz) {
         this.code = code;
+        this.clz = clz;
     }
 
     public int getCode() {
         return code;
     }
     
+    public Class<?> getClz() {
+        return clz;
+    }
+    
     /**
-     * get JsonVersion By code.
+     * get BarCodeVersion By code.
      *
-     * @param code the JsonVersion
-     * @return JsonVersion
+     * @param code the BarCodeVersion
+     * @return BarCodeVersion
      */
-    public static BarCodeVersion getJsonVersion(int code) {
+    public static BarCodeVersion getVersion(int code) {
         for (BarCodeVersion version : BarCodeVersion.values()) {
             if (version.getCode() == code) {
                 return version;
             }
         }
-        return null;
+        throw new WeIdBaseException(ErrorCode.TRANSPORTATION_PROTOCOL_VERSION_ERROR);
     }
 }
