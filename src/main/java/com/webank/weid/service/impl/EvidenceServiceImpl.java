@@ -211,7 +211,6 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
 
-            //如果
             boolean flag = getOfflineFlag();
             if (flag) {
 
@@ -412,7 +411,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getNoMillisecondTimeStamp();
-            //如果
+
             boolean flag = getOfflineFlag();
             if (flag) {
 
