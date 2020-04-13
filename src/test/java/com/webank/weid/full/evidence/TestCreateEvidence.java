@@ -311,7 +311,7 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(booleans.size(), hashValues.size());
         Boolean result = true;
         for (int i = 0; i < booleans.size(); i++) {
-            result &= booleans.get(i);
+            result = result && booleans.get(i).booleanValue();
         }
         Assert.assertTrue(result);
 
@@ -338,7 +338,7 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(booleans.size(), hashValues.size());
         result = true;
         for (int i = 0; i < booleans.size(); i++) {
-            result &= booleans.get(i);
+            result = result && booleans.get(i).booleanValue();
         }
         Assert.assertTrue(result);
 
