@@ -119,6 +119,7 @@ public class BatchTransactionUtils {
      * @param method 交易方法
      * @param args 交易参数
      * @param extra 额外信息
+     * @return 如果成功，返回true，否则flase
      */
     public static boolean writeTransaction(
         String requestId,
