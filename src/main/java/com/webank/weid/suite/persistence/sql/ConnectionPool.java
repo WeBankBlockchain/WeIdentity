@@ -115,7 +115,7 @@ public class ConnectionPool {
             DataDriverConstant.POOL_MIN_EITM_DEFAULT_VALUE
         );
         // 初始化大小
-        String initSizeKey = dsNamePrefix + DataDriverConstant.JDBC_MIN_EITM;
+        String initSizeKey = dsNamePrefix + DataDriverConstant.JDBC_INIT_SIZE;
         String initSize = PropertyUtils.getProperty(
             initSizeKey,
             DataDriverConstant.POOL_INIT_DEFAULT_VALUE
