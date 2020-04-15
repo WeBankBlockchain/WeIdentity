@@ -36,7 +36,8 @@ if (!gradle.startParameter.isOffline()) {
 
 group 'com.webank'
 
-version = "1.6.2-SNAPSHOT"
+version = new File("./VERSION").getText('UTF-8').trim()
+println 'Current product version: ' + version
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -221,7 +222,7 @@ artifacts {
 jar {
     baseName = project.name
     destinationDir file('dist/app')
-    archiveName project.name + '-' + version + '.jar'
+    archiveName project.name + "-" + version + ".jar"
 
     exclude '**/*.xml'
     exclude '**/*.properties'
@@ -258,11 +259,11 @@ if (!gradle.startParameter.isOffline()) {
             html.enabled false
         }
     }
-    
-	jacoco{
+
+    jacoco {
         toolVersion = "0.8.5"
     }
-    
+
     check.dependsOn jacocoTestReport
 
     checkstyle {
@@ -310,18 +311,19 @@ if (!gradle.startParameter.isOffline()) {
         repositories {
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
 
                 snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots") {
-                    authentication(userName: System.getenv('SONATYPE_USERNAME'), password: System.getenv('SONATYPE_PASSWORD'))
+                    authentication(userName: sonatypeUsername, password: sonatypePassword)
                 }
 
                 pom.project {
-                    name 'weid-java-sdk'
+                    name project.name
                     packaging 'jar'
-                    description 'Java SDK for WeIdentity.'
+                    description 'WeIdentity Java SDK'
                     url 'https://github.com/WeBankFinTech/WeIdentity'
 
                     scm {
@@ -349,24 +351,13 @@ if (!gradle.startParameter.isOffline()) {
         }
     }
 
-    signing
-            {
-                required { gradle.taskGraph.hasTask("uploadArchives") }
-                sign configurations.archives
-            }
-
-
+    signing {
+        required { gradle.taskGraph.hasTask("uploadArchives") }
+        sign configurations.archives
+    }
 }
 
-import org.gradle.plugins.signing.Sign
-
 gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.allTasks.any { it instanceof Sign }) {
-        allprojects { ext."signing.keyId" = System.getenv('GPG_KEY_ID') }
-        allprojects { ext."signing.secretKeyRingFile" = System.getenv('GPG_KEY_LOCATION') }
-        allprojects { ext."signing.password" = System.getenv('GPG_PASSPHRASE') }
-    }
-    // Do not sign archives by default (a local build without gpg keyring should succeed)
     if (taskGraph.allTasks.any { it.name == 'build' || it.name == 'assemble' }) {
         tasks.findAll {
             it.name == 'signArchives' || it.name == 'signDocsJar' || it.name == 'signTestJar'
