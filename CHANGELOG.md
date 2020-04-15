@@ -1,3 +1,7 @@
+### V1.6.2
+- Bugfixes:
+1. Fix a DB Connection Pool initialization issue.
+
 ### V1.6.1 (2020-04-12)
 - Features:
 1. QRCode transportation supports AMOP channel.
