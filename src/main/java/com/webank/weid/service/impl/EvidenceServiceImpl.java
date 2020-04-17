@@ -209,7 +209,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             String signature = new String(
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
-            Long timestamp = DateUtils.getNoMillisecondTimeStamp();
+            Long timestamp = DateUtils.getCurrentTimeStamp();
 
             boolean flag = getOfflineFlag();
             if (flag) {
@@ -410,7 +410,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             String signature = new String(
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
-            Long timestamp = DateUtils.getNoMillisecondTimeStamp();
+            Long timestamp = DateUtils.getCurrentTimeStamp();
 
             boolean flag = getOfflineFlag();
             if (flag) {
