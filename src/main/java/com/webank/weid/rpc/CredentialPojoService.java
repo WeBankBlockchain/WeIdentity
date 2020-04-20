@@ -131,6 +131,15 @@ public interface CredentialPojoService {
     );
 
     /**
+     * Verify the validity of a credential. Public key must be provided. This is offline interface.
+     * 
+     * @param issuerPublicKey the specified public key which used to verify credential signature
+     * @param credential the credential
+     * @return the verification result. True if yes, false otherwise with exact verify error codes
+     */
+    ResponseData<Boolean> verifyOffline(WeIdPublicKey issuerPublicKey, CredentialPojo credential);
+
+    /**
      * verify the presentation and pdf information.
      * @param pdfTemplatePath path of pdf template
      * @param serializePdf byte[] of serialize by pdf transportation
