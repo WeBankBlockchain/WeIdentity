@@ -47,6 +47,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.exception.WeIdBaseException;
@@ -118,6 +119,7 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
 
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setChannelService(service);
+        channelEthereumService.setTimeout(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT * 1000);
         web3j = Web3j.build(channelEthereumService, service.getGroupId());
         if (web3j == null) {
             logger.error("[WeServiceImplV2] web3j init failed. ");
@@ -191,10 +193,11 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
     public String getVersion() throws IOException {
         return this.getWeb3j().getNodeVersion().send().getNodeVersion().getVersion();
     }
-    
+
+    @Override
     protected String queryBucketFromCns() throws WeIdBaseException {
         try {
-            List<CnsInfo>  cnsInfoList = cnsService.queryCnsByNameAndVersion(CNS_NAME, CNS_VERSION);
+            List<CnsInfo> cnsInfoList = cnsService.queryCnsByNameAndVersion(CNS_NAME, CNS_VERSION);
             if (cnsInfoList.size() == 0) {
                 logger.warn("[queryBucketFromCns] can not find data from CNS.");
                 return StringUtils.EMPTY;
