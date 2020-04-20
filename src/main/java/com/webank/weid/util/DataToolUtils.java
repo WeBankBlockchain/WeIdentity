@@ -590,7 +590,24 @@ public final class DataToolUtils {
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
     }
-
+    
+    /**
+     * Verify whether the message and the Signature matches the given public Key.
+     *
+     * @param message This should be from the same plain-text source with the signature Data.
+     * @param signature this is a signature string of Base64.
+     * @param publicKey the string is a publicKey.
+     * @return true if yes, false otherwise
+     * @throws SignatureException Signature is the exception.
+     */
+    public static boolean verifySignature(
+        String message,
+        String signature,
+        String publicKey)
+        throws SignatureException {
+        return verifySignature(message, signature, new BigInteger(publicKey));
+    }
+    
     /**
      * eecrypt the data.
      *
