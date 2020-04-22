@@ -36,7 +36,11 @@ if (!gradle.startParameter.isOffline()) {
 
 group 'com.webank'
 
-version = new File("./VERSION").getText('UTF-8').trim()
+version = "0.0.0"
+def versionFile = file("VERSION")
+versionFile.eachLine { line ->
+    version = line
+}
 println 'Current product version: ' + version
 
 // Specify JDK version - may vary in different scenarios
