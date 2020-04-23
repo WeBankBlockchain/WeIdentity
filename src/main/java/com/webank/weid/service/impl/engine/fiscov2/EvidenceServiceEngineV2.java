@@ -636,8 +636,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
             } else {
                 for (EvidenceAttributeChangedEventResponse event : eventList) {
-                    if (event.sigs.get(0).equalsIgnoreCase(signature)
-                        && event.signer.get(0).equalsIgnoreCase(address)) {
+                    if (event.sigs.toArray()[0].toString().equalsIgnoreCase(signature)
+                        && event.signer.toArray()[0].toString().equalsIgnoreCase(address)) {
                         return new ResponseData<>(hashValue, ErrorCode.SUCCESS, info);
                     }
                 }

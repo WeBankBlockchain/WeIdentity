@@ -60,6 +60,30 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private WeIdService weIdService = new WeIdServiceImpl();
 
+    @Override
+    public ResponseData<Boolean> createRawEvidenceWithCustomKey(
+        String hashValue,
+        String signature,
+        String log,
+        Long timestamp,
+        String extraKey,
+        String privateKey
+    ) {
+        ResponseData<String> hashResp = evidenceServiceEngine.createEvidenceWithCustomKey(
+            hashValue,
+            signature,
+            log,
+            timestamp,
+            extraKey,
+            privateKey
+        );
+        if (hashResp.getResult().equalsIgnoreCase(hashValue)) {
+            return new ResponseData<>(true, ErrorCode.SUCCESS);
+        } else {
+            return new ResponseData<>(false, hashResp.getErrorCode(), hashResp.getErrorMessage());
+        }
+    }
+
     /**
      * Create a new evidence to the blockchain and get the evidence address.
      *
