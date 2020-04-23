@@ -282,6 +282,13 @@ public enum ErrorCode {
 
 
     /**
+     * lite credential does not support selective disclosure.
+     */
+    CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE(100440,
+        "lite credential does not support selective disclosure."),
+
+
+    /**
      * Authorization WeIDs: from and to must be different.
      */
     AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT(100450,
