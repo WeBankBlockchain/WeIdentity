@@ -49,14 +49,9 @@ public final class CredentialConstant {
     public static final String CPT_TYPE_KEY = "cptType";
 
     /**
-     * The Constant zkp Credential type.
+     * The Constant selective Credential type.
      */
-    public static final String ZKP_CREDENTIAL_TYPE = "zkp";
-
-    /**
-     * The Constant original Credential type.
-     */
-    public static final String ORIGINAL_CREDENTIAL_TYPE = "hashTree";
+    public static final String SELECTIVE_CREDENTIAL_TYPE = "hashTree";
 
     /**
      * The Constant is an field in PresentationPolicyE.
