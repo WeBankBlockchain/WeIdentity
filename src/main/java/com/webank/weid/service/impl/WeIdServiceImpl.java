@@ -36,6 +36,7 @@ import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
@@ -621,4 +622,16 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             || StringUtils.isEmpty(setAuthenticationArgs.getPublicKey()));
     }
 
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.WeIdService#delegateCreateWeId(
+     * com.webank.weid.protocol.base.WeIdPublicKey,
+     * com.webank.weid.protocol.base.WeIdAuthentication)
+     */
+    @Override
+    public ResponseData<String> delegateCreateWeId(
+        WeIdPublicKey publicKey,
+        WeIdAuthentication weIdAuthentication) {
+
+        return null;
+    }
 }
