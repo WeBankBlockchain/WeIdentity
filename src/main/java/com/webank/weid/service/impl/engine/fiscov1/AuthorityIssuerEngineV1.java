@@ -89,7 +89,12 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
             AuthorityIssuerController.class);
         specificIssuerController = getContractService(
             fiscoConfig.getSpecificIssuerAddress(),
-            SpecificIssuerController.class); 
+            SpecificIssuerController.class);
+    }
+
+    @Override
+    public ResponseData<String> getWeIdFromOrgId(String orgId) {
+        return new ResponseData<>(StringUtils.EMPTY, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
 
     /**

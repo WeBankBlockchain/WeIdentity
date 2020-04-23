@@ -19,9 +19,6 @@
 
 package com.webank.weid.rpc;
 
-import java.util.List;
-import java.util.Map;
-
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.HashString;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -139,4 +136,15 @@ public interface EvidenceService {
      */
     ResponseData<Boolean> verifySigner(EvidenceInfo evidenceInfo, String weId, String publicKey);
 
+    /**
+     * A direct pass-thru method to create raw evidence where all inputs can be customized.
+     */
+    ResponseData<Boolean> createRawEvidenceWithCustomKey(
+        String hashValue,
+        String signature,
+        String log,
+        Long timestamp,
+        String extraKey,
+        String privateKey
+    );
 }
