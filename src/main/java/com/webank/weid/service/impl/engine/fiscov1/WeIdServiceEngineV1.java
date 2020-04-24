@@ -127,14 +127,7 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             reload();
         }
     }
-    
-    /**
-     * 重新加载静态合约对象.
-     */
-    public void reload() {
-        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
-    }
-    
+
     private static ResolveEventLogResult resolveAttributeEvent(
         String weId,
         TransactionReceipt receipt,
@@ -395,6 +388,13 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
         }
     }
 
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
+        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
+    }
+
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.WeIdController#isWeIdExist(java.lang.String)
      */
@@ -469,7 +469,9 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
     public ResponseData<Boolean> createWeId(
         String weAddress,
         String publicKey,
-        String privateKey) {
+        String privateKey,
+        boolean isDelegate) {
+
         WeIdContract weIdContract = (WeIdContract) reloadContract(
             fiscoConfig.getWeIdAddress(),
             privateKey,
@@ -483,12 +485,18 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
                     .toString());
             DynamicBytes created = DataToolUtils
                 .stringToDynamicBytes(DateUtils.getNoMillisecondTimeStampString());
-            Future<TransactionReceipt> future = weIdContract.createWeId(
-                new Address(weAddress),
-                auth,
-                created,
-                DateUtils.getNoMillisecondTimeStampInt256()
-            );
+
+            Future<TransactionReceipt> future = null;
+            if (isDelegate) {
+                return new ResponseData<>(false, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+            } else {
+                future = weIdContract.createWeId(
+                    new Address(weAddress),
+                    auth,
+                    created,
+                    DateUtils.getNoMillisecondTimeStampInt256()
+                );
+            }
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             TransactionInfo info = new TransactionInfo(receipt);
@@ -525,20 +533,27 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
         String weAddress,
         String attributeKey,
         String value,
-        String privateKey) {
+        String privateKey,
+        boolean isDelegate) {
+
         try {
             WeIdContract weIdContract = (WeIdContract) reloadContract(
                 fiscoConfig.getWeIdAddress(),
                 privateKey,
                 WeIdContract.class);
-            Future<TransactionReceipt> future =
-                weIdContract.setAttribute(
-                    new Address(weAddress),
-                    DataToolUtils.stringToBytes32(attributeKey),
-                    DataToolUtils.stringToDynamicBytes(
-                        value),
-                    DateUtils.getNoMillisecondTimeStampInt256()
-                );
+            Future<TransactionReceipt> future = null;
+            if (isDelegate) {
+                return new ResponseData<>(false, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+            } else {
+                future =
+                    weIdContract.setAttribute(
+                        new Address(weAddress),
+                        DataToolUtils.stringToBytes32(attributeKey),
+                        DataToolUtils.stringToDynamicBytes(
+                            value),
+                        DateUtils.getNoMillisecondTimeStampInt256()
+                    );
+            }
             TransactionReceipt receipt =
                 future.get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
             TransactionInfo info = new TransactionInfo(receipt);
@@ -559,5 +574,4 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_TIMEOUT);
         }
     }
-
 }
