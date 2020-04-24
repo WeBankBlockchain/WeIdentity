@@ -22,7 +22,10 @@ package com.webank.weid.rpc;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
+import com.webank.weid.protocol.request.PublicKeyArgs;
+import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
@@ -89,6 +92,18 @@ public interface WeIdService {
     ResponseData<Boolean> setPublicKey(SetPublicKeyArgs setPublicKeyArgs);
 
     /**
+     * Set public key in the WeIdentity DID Document.
+     *
+     * @param publicKeyArgs the set public key args
+     * @param delegateAuth the delegate's auth
+     * @return true if the "set" operation succeeds, false otherwise.
+     */
+    ResponseData<Boolean> delegateSetPublicKey(
+        PublicKeyArgs publicKeyArgs,
+        WeIdAuthentication delegateAuth
+    );
+
+    /**
      * Set service properties.
      *
      * @param setServiceArgs your service name and endpoint
@@ -97,12 +112,36 @@ public interface WeIdService {
     ResponseData<Boolean> setService(SetServiceArgs setServiceArgs);
 
     /**
+     * Set service properties.
+     *
+     * @param serviceArgs your service name and endpoint
+     * @param delegateAuth the delegate's auth
+     * @return true if the "set" operation succeeds, false otherwise.
+     */
+    ResponseData<Boolean> delegateSetService(
+        ServiceArgs serviceArgs,
+        WeIdAuthentication delegateAuth
+    );
+
+    /**
      * Set authentications in WeIdentity DID.
      *
      * @param setAuthenticationArgs A public key is needed.
      * @return true if the "set" operation succeeds, false otherwise.
      */
     ResponseData<Boolean> setAuthentication(SetAuthenticationArgs setAuthenticationArgs);
+
+    /**
+     * Set authentications in WeIdentity DID.
+     *
+     * @param authenticationArgs A public key is needed.
+     * @param delegateAuth the delegate's auth
+     * @return true if the "set" operation succeeds, false otherwise.
+     */
+    ResponseData<Boolean> delegateSetAuthentication(
+        AuthenticationArgs authenticationArgs,
+        WeIdAuthentication delegateAuth
+    );
 
     /**
      * Check if the WeIdentity DID exists on chain.
