@@ -327,7 +327,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                 attributeKey,
                 attrValue,
                 privateKey,
-                true);
+                false);
         } catch (PrivateKeyIllegalException e) {
             logger.error("[removePublicKey] set PublicKey failed because privateKey is illegal. ",
                 e);
@@ -543,7 +543,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                         WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX,
                         attrValue,
                         privateKey,
-                        true);
+                        false);
             } catch (PrivateKeyIllegalException e) {
                 logger
                     .error("remove authenticate with private key exception. Error message :{}", e);
