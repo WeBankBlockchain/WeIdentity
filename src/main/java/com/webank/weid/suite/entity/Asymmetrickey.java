@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,11 +19,11 @@
 
 package com.webank.weid.suite.entity;
 
-/**
- * 加解密类型枚举.
- * @author v_wbgyang
- *
- */
-public enum CryptType {
-    AES, RSA;
+import lombok.Data;
+
+@Data
+public class Asymmetrickey {
+    
+    private String privavteKey;
+    private String publicKey;
 }
