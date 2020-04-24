@@ -94,7 +94,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
     }
-    
+
     /**
      * 构造函数.
      */
@@ -102,13 +102,6 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         if (weIdContract == null) {
             reload();
         }
-    }
-    
-    /**
-     * 重新加载静态合约对象.
-     */
-    public void reload() {
-        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
     }
 
     private static ResolveEventLogResult resolveAttributeEvent(
@@ -373,6 +366,13 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         }
     }
 
+    /**
+     * 重新加载静态合约对象.
+     */
+    public void reload() {
+        weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
+    }
+
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.WeIdController#isWeIdExist(java.lang.String)
      */
@@ -432,7 +432,11 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      * #createWeId(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Boolean> createWeId(String weAddress, String publicKey, String privateKey) {
+    public ResponseData<Boolean> createWeId(
+        String weAddress,
+        String publicKey,
+        String privateKey,
+        boolean isDelegate) {
 
         String auth = new StringBuffer()
             .append(publicKey)
@@ -444,12 +448,22 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         WeIdContract weIdContract =
             reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
         try {
-            receipt = weIdContract.createWeId(
-                weAddress,
-                DataToolUtils.stringToByteArray(auth),
-                DataToolUtils.stringToByteArray(created),
-                BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp())
-            ).send();
+            if (isDelegate) {
+                receipt = weIdContract.delegateCreateWeId(
+                    weAddress,
+                    DataToolUtils.stringToByteArray(auth),
+                    DataToolUtils.stringToByteArray(created),
+                    BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp())
+                ).send();
+            } else {
+
+                receipt = weIdContract.createWeId(
+                    weAddress,
+                    DataToolUtils.stringToByteArray(auth),
+                    DataToolUtils.stringToByteArray(created),
+                    BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp())
+                ).send();
+            }
 
             TransactionInfo info = new TransactionInfo(receipt);
             List<WeIdAttributeChangedEventResponse> response =
@@ -474,20 +488,35 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      * #setAttribute(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Boolean> setAttribute(String weAddress, String attributeKey, String value,
-        String privateKey) {
+    public ResponseData<Boolean> setAttribute(
+        String weAddress,
+        String attributeKey,
+        String value,
+        String privateKey,
+        boolean isDelegate) {
+
         try {
             WeIdContract weIdContract =
                 reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
             byte[] attrValue = value.getBytes();
             BigInteger updated = BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp());
-            TransactionReceipt transactionReceipt =
-                weIdContract.setAttribute(
+            TransactionReceipt transactionReceipt = null;
+            if (isDelegate) {
+                transactionReceipt = weIdContract.delegateSetAttribute(
                     weAddress,
                     DataToolUtils.stringToByte32Array(attributeKey),
                     attrValue,
                     updated
                 ).send();
+            } else {
+                transactionReceipt =
+                    weIdContract.setAttribute(
+                        weAddress,
+                        DataToolUtils.stringToByte32Array(attributeKey),
+                        attrValue,
+                        updated
+                    ).send();
+            }
 
             TransactionInfo info = new TransactionInfo(transactionReceipt);
             List<WeIdAttributeChangedEventResponse> response =
