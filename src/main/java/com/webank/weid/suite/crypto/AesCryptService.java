@@ -34,7 +34,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.exception.EncodeSuiteException;
-import com.webank.weid.suite.encode.CipherEncodeProcessor;
 import com.webank.weid.suite.entity.CryptType;
 
 /**
@@ -44,7 +43,7 @@ import com.webank.weid.suite.entity.CryptType;
  */
 public class AesCryptService implements CryptService {
     
-    private static final Logger logger = LoggerFactory.getLogger(CipherEncodeProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(AesCryptService.class);
     
     private static final String KEY_ALGORITHM = CryptType.AES.name();
     
