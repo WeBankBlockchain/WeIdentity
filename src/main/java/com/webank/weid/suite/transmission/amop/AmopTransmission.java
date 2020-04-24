@@ -83,29 +83,35 @@ public class AmopTransmission extends AbstractTransmission implements Transmissi
 
     private ResponseData<String> sendAmop(TransmissionRequest<?> request) {
         logger.info("[AmopTransmission.sendAmop] request by AMOP.");
-        TransmissionlRequestWarp<?> requestWarp = super.authTransmission(request);
-        AmopCommonArgs amopCommonArgs = buildAmopCommonArgs(requestWarp);
+        // 此处由于集群环境下的bug，暂时不走认证通道
+        // TransmissionlRequestWarp<?> requestWarp = super.authTransmission(request);
+        AmopCommonArgs amopCommonArgs = buildAmopCommonArgs(request);
         logger.info("[AmopTransmission.sendAmop] messageId:{}, request: {}", 
             amopCommonArgs.getMessageId(), amopCommonArgs);
         ResponseData<AmopResponse> amopResponse = amopTransmissionPoxy.send(amopCommonArgs);
         logger.info("[AmopTransmission.sendAmop] messageId:{}, response: {}.", 
             amopResponse.getResult().getMessageId(), amopResponse);
         ResponseData<String> response = processResult(amopResponse);
+        /*
+        // 数据不走认证通道 不需要解密
         if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
             //请求成功解密数据
             String original = super.decryptData(response.getResult(), requestWarp.getWeIdAuthObj());
             response.setResult(original);
         }
+        */
         return response;
     }
-
+    
+    /*
     private AmopCommonArgs buildAmopCommonArgs(TransmissionlRequestWarp<?> requestWarp) {
         AmopCommonArgs amopCommonArgs = buildAmopCommonArgs(requestWarp.getRequest());
         amopCommonArgs.setChannelId(requestWarp.getWeIdAuthObj().getChannelId());
         amopCommonArgs.setMessage(requestWarp.getEncodeData());
         return amopCommonArgs;
     }
-
+    */
+    
     private AmopCommonArgs buildAmopCommonArgs(TransmissionRequest<?> request) {
         AmopCommonArgs args = new AmopCommonArgs();
         args.setServiceType(request.getServiceType());
