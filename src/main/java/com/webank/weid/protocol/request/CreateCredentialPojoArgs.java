@@ -21,6 +21,7 @@ package com.webank.weid.protocol.request;
 
 import lombok.Data;
 
+import com.webank.weid.constant.CredentialType;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.util.CredentialUtils;
 
@@ -71,4 +72,9 @@ public class CreateCredentialPojoArgs<T> {
      * Optional:credential context.
      */
     private String context = CredentialUtils.getDefaultCredentialContext();
+
+    /**
+     * credential type.
+     */
+    private CredentialType type = CredentialType.ORIGINAL;
 }
