@@ -94,7 +94,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
     }
-    
+
     /**
      * 构造函数.
      */
@@ -103,7 +103,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             reload();
         }
     }
-    
+
     /**
      * 重新加载静态合约对象.
      */
@@ -156,11 +156,12 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
 
     private static void buildupWeIdAttribute(
         String key, String value, String weId, WeIdDocument result) {
+        System.out.println(key + "," + value + "," + weId);
         if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)) {
-            buildWeIdPublicKeys(value, weId, result);
+            buildWeIdPublicKeys(key, value, weId, result);
         } else if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX)) {
             if (!value.contains(WeIdConstant.REMOVED_PUBKEY_TAG)) {
-                buildWeIdPublicKeys(value, weId, result);
+                buildWeIdPublicKeys(null, value, weId, result);
             }
             buildWeIdAuthentication(value, weId, result);
         } else if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_SERVICE_PREFIX)) {
@@ -170,16 +171,27 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         }
     }
 
-    private static void buildWeIdPublicKeys(String value, String weId, WeIdDocument result) {
+    private static void buildWeIdPublicKeys(String key, String value, String weId,
+        WeIdDocument result) {
 
         logger.info("method buildWeIdPublicKeys() parameter::value:{}, weId:{}, "
             + "result:{}", value, weId, result);
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
 
+        String type = "Secp256k1";
+        // Identify explicit type from key
+        if (!StringUtils.isEmpty(key)) {
+            String[] keyArray = StringUtils.splitByWholeSeparator(key, "/");
+            if (keyArray.length > 2) {
+                type = keyArray[2];
+            }
+        }
+
         // Only store the latest public key
         // OBSOLETE and non-OBSOLETE public keys are regarded as the same
         String trimmedPubKey = StringUtils
             .splitByWholeSeparator(value.replace(WeIdConstant.REMOVED_PUBKEY_TAG, ""), "/")[0];
+        ;
         for (PublicKeyProperty pr : pubkeyList) {
             if (pr.getPublicKey().contains(trimmedPubKey)) {
                 return;
@@ -200,6 +212,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             String owner = WeIdUtils.convertAddressToWeId(weAddress);
             pubKey.setOwner(owner);
         }
+        pubKey.setType(type);
         result.getPublicKey().add(pubKey);
     }
 

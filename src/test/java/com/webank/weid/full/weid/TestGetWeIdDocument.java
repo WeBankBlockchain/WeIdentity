@@ -30,6 +30,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
@@ -152,6 +153,24 @@ public class TestGetWeIdDocument extends TestBaseService {
         Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
             weIdDoc.getErrorCode().intValue());
         Assert.assertNull(weIdDoc.getResult());
+    }
+
+    @Test
+    public void testDifferentPublicKeyType() {
+        CreateWeIdDataResult createWeIdResult = super.createWeId();
+        SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
+        setPublicKeyArgs.setWeId(createWeIdResult.getWeId());
+        setPublicKeyArgs.setPublicKey("bcabu298t876Buc");
+        setPublicKeyArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
+        setPublicKeyArgs.getUserWeIdPrivateKey()
+            .setPrivateKey(createWeIdResult.getUserWeIdPrivateKey().getPrivateKey());
+        setPublicKeyArgs.setType("RSA");
+        setPublicKeyArgs.setOwner(createWeIdResult.getWeId());
+        weIdService.setPublicKey(setPublicKeyArgs);
+        ResponseData<WeIdDocument> weIdDoc = weIdService.getWeIdDocument(createWeIdResult.getWeId());
+        Assert.assertEquals(weIdDoc.getResult().getPublicKey().size(), 2);
+        Assert.assertTrue(weIdDoc.getResult().getPublicKey().get(0).getType().equals("RSA"));
+
     }
 
     /**

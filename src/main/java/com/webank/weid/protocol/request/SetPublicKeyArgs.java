@@ -61,6 +61,6 @@ public class SetPublicKeyArgs {
      * @param type the public key type
      */
     public void setType(String type) {
-        this.type = "Secp256k1";
+        this.type = type;
     }
 }
