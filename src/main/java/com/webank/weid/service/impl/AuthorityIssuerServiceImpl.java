@@ -437,4 +437,17 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             < WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH
             && !StringUtils.isWhitespace(name);
     }
+
+    @Override
+    public ResponseData<String> getWeIdByOrgId(String orgId) {
+        if (!isValidAuthorityIssuerName(orgId)) {
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL);
+        }
+        try {
+            return authEngine.getWeIdFromOrgId(orgId);
+        } catch (Exception e) {
+            logger.error("Failed to get WeID, Error Message:{}", e);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
+    }
 }

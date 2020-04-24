@@ -50,6 +50,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.service.impl.EvidenceServiceImpl;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
@@ -359,6 +360,23 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(evidenceInfo1.getSignInfo()
             .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 2);
         Assert.assertEquals(evidenceInfo1.getCredentialHash(), evidenceInfo1k.getCredentialHash());
+    }
+
+    @Test
+    public void testRawCreation() {
+        CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+        credential.setId(UUID.randomUUID().toString());
+        String hash = credential.getHash();
+        String sig = "testSig";
+        String log = "";
+        String customKey = credential.getId();
+        ResponseData<Boolean> resp = evidenceService
+            .createRawEvidenceWithCustomKey(hash, sig, log, System.currentTimeMillis(), customKey,
+                privateKey);
+        Assert.assertTrue(resp.getResult());
+        ResponseData<EvidenceInfo> eviResp = evidenceService.getEvidenceByCustomKey(customKey);
+        System.out.println();
+        Assert.assertTrue(eviResp.getResult().getSignatures().get(0).equalsIgnoreCase(sig));
     }
 
     /**

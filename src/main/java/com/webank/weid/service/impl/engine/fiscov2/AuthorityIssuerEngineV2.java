@@ -67,7 +67,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
             reload();
         }
     }
-    
+
     /**
      * 重新加载静态合约对象.
      */
@@ -76,6 +76,24 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
             AuthorityIssuerController.class);
         specificIssuerController = getContractService(fiscoConfig.getSpecificIssuerAddress(),
             SpecificIssuerController.class);
+    }
+
+    @Override
+    public ResponseData<String> getWeIdFromOrgId(String orgId) {
+        try {
+            byte[] name = new byte[32];
+            System.arraycopy(orgId.getBytes(), 0, name, 0, orgId.getBytes().length);
+            String address = authorityIssuerController
+                .getAddressFromName(name).send();
+            if (WeIdConstant.EMPTY_ADDRESS.equalsIgnoreCase(address)) {
+                return new ResponseData<>(StringUtils.EMPTY,
+                    ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS);
+            }
+            return new ResponseData<>(WeIdUtils.convertAddressToWeId(address), ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("get authority issuer WeID failed.", e);
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.AUTHORITY_ISSUER_ERROR);
+        }
     }
 
     /* (non-Javadoc)
