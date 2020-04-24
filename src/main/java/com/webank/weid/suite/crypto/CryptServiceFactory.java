@@ -40,6 +40,7 @@ public class CryptServiceFactory {
     
     static {
         cryptServiceMap.put(CryptType.AES.name(), new AesCryptService());
+        cryptServiceMap.put(CryptType.RSA.name(), new RsaCryptService());
     }
 
     /**
