@@ -19,7 +19,9 @@
 
 package com.webank.weid.rpc;
 
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
@@ -49,6 +51,18 @@ public interface WeIdService {
      * @return WeIdentity DID
      */
     ResponseData<String> createWeId(CreateWeIdArgs createWeIdArgs);
+
+    /**
+     * Create a WeIdentity DID from the provided public key.
+     *
+     * @param publicKey the public key to create a weid
+     * @param weIdAuthentication your private key
+     * @return WeIdentity DID
+     */
+    ResponseData<String> delegateCreateWeId(
+        WeIdPublicKey publicKey,
+        WeIdAuthentication weIdAuthentication
+    );
 
     /**
      * Query WeIdentity DID document.
