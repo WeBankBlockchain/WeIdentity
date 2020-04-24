@@ -19,6 +19,16 @@
 
 package com.webank.weid.suite.crypto;
 
+import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+
+import org.bouncycastle.util.encoders.Base64;
+
+import com.webank.weid.suite.entity.Asymmetrickey;
+import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -27,6 +37,8 @@ import com.webank.weid.util.DataToolUtils;
  *
  */
 public class KeyGenerator {
+    
+    public static final int DEFAULT_KEY_SIZE = 1024;
 
     /**
      * 使用UUID作为秘钥.
@@ -34,5 +46,31 @@ public class KeyGenerator {
      */
     public static String getKey() {
         return DataToolUtils.getUuId32();   
+    }
+    
+    /**
+     * 生成RSA非对称加密密钥.
+     * @return 返回Asymmetrickey 非对此秘钥
+     * @throws NoSuchAlgorithmException 找不到Algorithm异常
+     */
+    public static Asymmetrickey getKeyForRsa() throws NoSuchAlgorithmException {
+        // KeyPairGenerator类用于生成公钥和私钥对，基于RSA算法生成对象
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(CryptType.RSA.name());
+        // 初始化密钥对生成器，密钥大小为96-1024位
+        keyPairGen.initialize(DEFAULT_KEY_SIZE, new SecureRandom());
+        // 生成一个密钥对，保存在keyPair中
+        KeyPair keyPair = keyPairGen.generateKeyPair();
+        String pub = new String(
+            Base64.encode(keyPair.getPublic().getEncoded()), 
+            StandardCharsets.UTF_8
+        );
+        String pri = new String(
+            Base64.encode(keyPair.getPrivate().getEncoded()),
+            StandardCharsets.UTF_8
+        );
+        Asymmetrickey key = new Asymmetrickey();
+        key.setPrivavteKey(pri);
+        key.setPublicKey(pub);
+        return key;
     }
 }
