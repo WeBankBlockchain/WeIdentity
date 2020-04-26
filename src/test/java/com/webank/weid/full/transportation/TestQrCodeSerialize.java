@@ -172,7 +172,7 @@ public class TestQrCodeSerialize extends TestBaseTransportation {
     @Test
     public void testSerialize_serializeEmptyCredentialPojo() {
 
-        CredentialPojo credentialPojo1 = new CredentialPojo();
+        CredentialPojo credentialPojo1 = copyCredentialPojo(credentialPojo);
         ResponseData<String> response =
             TransportationFactory.newQrCodeTransportation().specify(verifier)
                 .serialize(credentialPojo1, new ProtocolProperty(EncodeType.ORIGINAL));
