@@ -37,7 +37,7 @@ public class PublicKeyProperty {
     /**
      * Required: The type.
      */
-    private String type = "Secp256k1";
+    private String type;
 
     /**
      * Required: The owner.
