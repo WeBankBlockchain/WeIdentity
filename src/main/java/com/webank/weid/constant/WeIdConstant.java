@@ -241,5 +241,29 @@ public final class WeIdConstant {
 
     public static final Integer ON_CHAIN_STRING_LENGTH = 2097152;
 
-    public static final String EVIDENCE_ATTRIBUTE_DELIMETER = "|";
+    public static enum PublicKeyType {
+        RSA("RSA"),
+        SECP256K1("Secp256k1");
+
+        /**
+         * The Type Name of the Credential Proof.
+         */
+        private String typeName;
+
+        /**
+         * Constructor.
+         */
+        PublicKeyType(String typeName) {
+            this.typeName = typeName;
+        }
+
+        /**
+         * Getter.
+         *
+         * @return typeName
+         */
+        public String getTypeName() {
+            return typeName;
+        }
+    }
 }
