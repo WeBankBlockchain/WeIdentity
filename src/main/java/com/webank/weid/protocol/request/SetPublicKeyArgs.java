@@ -21,6 +21,8 @@ package com.webank.weid.protocol.request;
 
 import lombok.Data;
 
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.constant.WeIdConstant.PublicKeyType;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 
 /**
@@ -39,7 +41,7 @@ public class SetPublicKeyArgs {
     /**
      * Required: The type.
      */
-    private String type = "Secp256k1";
+    private PublicKeyType type = PublicKeyType.SECP256K1;
 
     /**
      * Required: The owner.
@@ -60,7 +62,7 @@ public class SetPublicKeyArgs {
      * nothing to do.
      * @param type the public key type
      */
-    public void setType(String type) {
-        this.type = "Secp256k1";
+    public void setType(PublicKeyType type) {
+        this.type = type;
     }
 }
