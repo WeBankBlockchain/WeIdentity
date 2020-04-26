@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Test SignatureUtils.
  *
- * @author v_wbjnzhang
+ * @author v_wbjnzhang and chaoxinhu
  */
 public class TestSignatureUtils {
 
@@ -71,5 +71,17 @@ public class TestSignatureUtils {
         Sign.SignatureData signatureData = DataToolUtils
             .convertBase64StringToSignatureData(new String(Base64.encode(serialized)));
         logger.info(signatureData.toString());
+    }
+
+    @Test
+    public void testSecp256k1Signatures() {
+        String hexPrivKey =
+            "58317564669857453586637110679746575832914889677346283755719850144028639639651";
+        String msg = "12345";
+        org.fisco.bcos.web3j.crypto.ECKeyPair keyPair
+            = org.fisco.bcos.web3j.crypto.ECKeyPair.create(new BigInteger(hexPrivKey, 10));
+        String sig = DataToolUtils.secp256k1Sign(msg, new BigInteger(hexPrivKey, 10));
+        Boolean result = DataToolUtils.secp256k1VerifySignature(msg, sig, keyPair.getPublicKey());
+        Assert.assertTrue(result);
     }
 }

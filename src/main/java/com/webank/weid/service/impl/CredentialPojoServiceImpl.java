@@ -466,8 +466,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     }
 
     private static ErrorCode verifyContent(
-        CredentialPojo credential, 
-        String publicKey, 
+        CredentialPojo credential,
+        String publicKey,
         boolean offLine
     ) {
         ErrorCode errorCode;
@@ -534,8 +534,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     }
 
     private static ErrorCode verifyContentInner(
-        CredentialPojo credential, 
-        String publicKey, 
+        CredentialPojo credential,
+        String publicKey,
         boolean offline
     ) {
         ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credential);
@@ -913,12 +913,9 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         if (!StringUtils.isBlank(publicKey)) {
             boolean result;
             try {
-                result = DataToolUtils
-                    .verifySignature(
-                        rawData,
-                        credential.getSignature(),
-                        new BigInteger(publicKey)
-                    );
+                // For Lite CredentialPojo, we begin to use Secp256k1 verify to fit external type
+                result = DataToolUtils.secp256k1VerifySignature(rawData, credential.getSignature(),
+                    new BigInteger(publicKey));
             } catch (Exception e) {
                 logger.error("[verifyContent] verify signature fail.", e);
                 return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
@@ -941,7 +938,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         } else {
             WeIdDocument weIdDocument = innerResponseData.getResult();
             ErrorCode verifyErrorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, credential.getSignature(), weIdDocument);
+                .verifySecp256k1SignatureFromWeId(rawData, credential.getSignature(), weIdDocument);
             if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<Boolean>(false,
                     ErrorCode.getTypeByErrorCode(innerResponseData.getErrorCode()));
@@ -1102,12 +1099,12 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 
         String rawData = CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(credentialPojo);
 
-        String signature = DataToolUtils.sign(rawData, privateKey);
+        // For Lite CredentialPojo, we begin to use Secp256k1 format signature to fit external type
+        String signature = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey, 10));
 
         String proofType = CredentialProofType.ECDSA.getTypeName();
         credentialPojo.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
         credentialPojo.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
-        //credentialPojo.addType(CredentialType.LITE1.getName());
         ResponseData<CredentialPojo> responseData = new ResponseData<>(
             credentialPojo,
             ErrorCode.SUCCESS
@@ -1451,7 +1448,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
-    
+
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#verify(
      *          com.webank.weid.protocol.base.CredentialPojo,
@@ -1476,7 +1473,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         }
         return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
-    
+
     @Override
     public ResponseData<Boolean> verifyPresentationFromPdf(
         String pdfTemplatePath,
