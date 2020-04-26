@@ -21,6 +21,8 @@ package com.webank.weid.protocol.base;
 
 import lombok.Data;
 
+import com.webank.weid.constant.WeIdConstant.PublicKeyType;
+
 /**
  * The base data structure for AuthenticationProperty.
  *
@@ -32,7 +34,7 @@ public class AuthenticationProperty {
     /**
      * Required: The type.
      */
-    private String type = "Secp256k1";
+    private String type = PublicKeyType.SECP256K1.getTypeName();
 
     /**
      * Required: The public key.

@@ -27,14 +27,19 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.WeIdConstant.PublicKeyType;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * getWeIdDocument method for testing WeIdService.
@@ -120,6 +125,38 @@ public class TestGetWeIdDocument extends TestBaseService {
         Assert.assertEquals(2, weIdDoc.getResult().getService().size());
         Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
         Assert.assertEquals(1, weIdDoc.getResult().getPublicKey().size());
+    }
+
+    @Test
+    public void testDifferentPublicKeyType() {
+        CreateWeIdDataResult createWeIdResult = super.createWeId();
+        SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
+        setPublicKeyArgs.setWeId(createWeIdResult.getWeId());
+        setPublicKeyArgs.setPublicKey("bcabu298t876Buc");
+        setPublicKeyArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
+        setPublicKeyArgs.getUserWeIdPrivateKey()
+            .setPrivateKey(createWeIdResult.getUserWeIdPrivateKey().getPrivateKey());
+        setPublicKeyArgs.setType(PublicKeyType.RSA);
+        setPublicKeyArgs.setOwner(createWeIdResult.getWeId());
+        weIdService.setPublicKey(setPublicKeyArgs);
+        ResponseData<WeIdDocument> weIdDoc = weIdService
+            .getWeIdDocument(createWeIdResult.getWeId());
+        Assert.assertEquals(weIdDoc.getResult().getPublicKey().size(), 2);
+        Assert.assertTrue(weIdDoc.getResult().getPublicKey().get(0).getType().equals("RSA"));
+        // test delegate
+        PublicKeyArgs publicKeyArgs = new PublicKeyArgs();
+        publicKeyArgs.setOwner(setPublicKeyArgs.getOwner());
+        publicKeyArgs.setPublicKey("abcabac123123");
+        publicKeyArgs.setType(PublicKeyType.RSA);
+        publicKeyArgs.setWeId(setPublicKeyArgs.getWeId());
+        WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+        weIdAuthentication.setWeId(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+        weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
+        weIdAuthentication.getWeIdPrivateKey().setPrivateKey(privateKey);
+        ResponseData<Boolean> resp = weIdService
+            .delegateSetPublicKey(publicKeyArgs, weIdAuthentication);
+        weIdDoc = weIdService.getWeIdDocument(createWeIdResult.getWeId());
+        Assert.assertEquals(weIdDoc.getResult().getPublicKey().size(), 3);
     }
 
     /**
