@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.constant.WeIdConstant.PublicKeyType;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
@@ -376,13 +377,15 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
 
         String privateKey = setPublicKeyArgs.getUserWeIdPrivateKey().getPrivateKey();
         return processSetPubKey(
-            setPublicKeyArgs.getType(),
+            setPublicKeyArgs.getType().getTypeName(),
             weAddress,
             owner,
             pubKey,
             privateKey,
             false);
     }
+
+
 
     /**
      * Set Service.
@@ -700,7 +703,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         String privateKey = delegateAuth.getWeIdPrivateKey().getPrivateKey();
 
         return processSetPubKey(
-            publicKeyArgs.getType(),
+            publicKeyArgs.getType().getTypeName(),
             weAddress,
             owner,
             pubKey,
