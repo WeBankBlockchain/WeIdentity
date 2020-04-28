@@ -40,10 +40,10 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
+import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
+import com.webank.weid.suite.api.crypto.params.CryptoType;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.crypto.KeyGenerator;
-import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.EncodeData;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
@@ -84,8 +84,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             
             //将数据进行AES加密处理
             String value = 
-                CryptServiceFactory
-                    .getCryptService(CryptType.AES)
+                CryptoServiceFactory
+                    .getCryptoService(CryptoType.AES)
                     .encrypt(encodeData.getData(), key);
             
             //保存秘钥
@@ -117,8 +117,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             String key = this.getEntryptKey(encodeData);
             //将数据进行AES解密
             String value = 
-                CryptServiceFactory
-                    .getCryptService(CryptType.AES)
+                CryptoServiceFactory
+                    .getCryptoService(CryptoType.AES)
                     .decrypt(encodeData.getData(), key);
             //数据进行解压
             logger.info("[decode] cipher decode process finished.");
