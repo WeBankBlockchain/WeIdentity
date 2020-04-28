@@ -1,3 +1,22 @@
+/*
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
+ *
+ *       This file is part of weid-java-sdk.
+ *
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weid-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.webank.weid.suite.crypto;
 
 import java.nio.charset.Charset;
@@ -19,14 +38,15 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.EncodeSuiteException;
-import com.webank.weid.suite.entity.CryptType;
+import com.webank.weid.suite.api.crypto.inf.CryptoService;
+import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.util.DataToolUtils;
 
-public class RsaCryptService implements CryptService {
+public class RsaCryptoService implements CryptoService {
 
-    private static final Logger logger = LoggerFactory.getLogger(RsaCryptService.class);
+    private static final Logger logger = LoggerFactory.getLogger(RsaCryptoService.class);
 
-    private static final String KEY_ALGORITHM = CryptType.RSA.name();
+    private static final String KEY_ALGORITHM = CryptoType.RSA.name();
     
     static {
         Security.addProvider(new BouncyCastleProvider());
@@ -43,7 +63,7 @@ public class RsaCryptService implements CryptService {
             Cipher cipher = Cipher.getInstance(KEY_ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, pub);
             byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
-            return new String(Base64.encodeBase64(encrypted), StandardCharsets.UTF_8);
+            return Base64.encodeBase64String(encrypted);
         } catch (Exception e) {
             logger.error("RSA encrypt error, please check the log.", e);
             throw new EncodeSuiteException();
