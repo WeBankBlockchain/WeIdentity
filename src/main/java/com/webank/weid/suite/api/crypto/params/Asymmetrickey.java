@@ -17,7 +17,7 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.entity;
+package com.webank.weid.suite.api.crypto.params;
 
 import lombok.Data;
 
