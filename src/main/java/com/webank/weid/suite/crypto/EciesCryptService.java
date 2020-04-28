@@ -1,53 +1,47 @@
 package com.webank.weid.suite.crypto;
 
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.security.KeyFactory;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Security;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 
-import javax.crypto.Cipher;
+import com.webank.wedpr.ecies.EciesResult;
+import com.webank.wedpr.ecies.NativeInterface;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.EncodeSuiteException;
-import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.util.DataToolUtils;
 
-public class RsaCryptService implements CryptService {
-
-    private static final Logger logger = LoggerFactory.getLogger(RsaCryptService.class);
-
-    private static final String KEY_ALGORITHM = CryptType.RSA.name();
+public class EciesCryptService implements CryptService {
     
-    static {
-        Security.addProvider(new BouncyCastleProvider());
-    }
+    private static final Logger logger = LoggerFactory.getLogger(EciesCryptService.class);
     
     @Override
     public String encrypt(String content, String key) throws EncodeSuiteException {
-        logger.info("begin encrypt by RSA");
+        logger.info("begin encrypt by ecies.");
         checkForEncrypt(content, key);
-        try {
-            byte[] pubByte = Base64.decodeBase64(key);
-            PublicKey pub = KeyFactory.getInstance(KEY_ALGORITHM)
-                .generatePublic(new X509EncodedKeySpec(pubByte));
-            Cipher cipher = Cipher.getInstance(KEY_ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE, pub);
-            byte[] encrypted = cipher.doFinal(content.getBytes(StandardCharsets.UTF_8));
-            return new String(Base64.encodeBase64(encrypted), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            logger.error("RSA encrypt error, please check the log.", e);
-            throw new EncodeSuiteException();
+        String data = Numeric.toHexStringNoPrefix(content.getBytes(StandardCharsets.UTF_8));
+        BigInteger pub = new BigInteger(Base64.decodeBase64(key));
+        String pubValue = Numeric.toHexStringNoPrefixZeroPadded(
+            pub, Keys.PUBLIC_KEY_LENGTH_IN_HEX);
+        EciesResult result =  NativeInterface.eciesEncrypt(pubValue, data); // 加密
+        if (result != null) {
+            if (StringUtils.isBlank(result.wedprErrorMessage)) {
+                logger.info("encrypt by ecies successfully.");
+                byte[] buffer = Base64.encodeBase64(
+                    Numeric.hexStringToByteArray(result.encryptMessage));
+                return new String(buffer, StandardCharsets.UTF_8);
+            }
+            logger.error("encrypt by ecies fail, message = {}.", result.wedprErrorMessage);
+            throw new EncodeSuiteException(result.wedprErrorMessage);
         }
+        throw new EncodeSuiteException(ErrorCode.UNKNOW_ERROR);
     }
     
     private void checkForEncrypt(String content, String key) {
@@ -78,22 +72,23 @@ public class RsaCryptService implements CryptService {
     
     @Override
     public String decrypt(String content, String key) throws EncodeSuiteException {
-        logger.info("begin decrypt by RSA");
+        logger.info("begin decrypt by ecies.");
         checkForDecrypt(content, key);
-        try {
-            // 64位解码加密后的字符串
-            byte[] inputByte = Base64.decodeBase64(content);
-            byte[] priByte = Base64.decodeBase64(key);
-            PrivateKey priKey = KeyFactory.getInstance(KEY_ALGORITHM)
-                .generatePrivate(new PKCS8EncodedKeySpec(priByte));
-            // RSA解密
-            Cipher cipher = Cipher.getInstance(KEY_ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE, priKey);
-            return new String(cipher.doFinal(inputByte), StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            logger.error("RAS decrypt error, please check the log.", e);
-            throw new EncodeSuiteException();
+        String data = Numeric.toHexStringNoPrefix(Base64.decodeBase64(content));
+        BigInteger pri = new BigInteger(Base64.decodeBase64(key));
+        String priValue = Numeric.toHexStringNoPrefixZeroPadded(
+            pri, Keys.PRIVATE_KEY_LENGTH_IN_HEX);
+        EciesResult deResult =  NativeInterface.eciesDecrypt(priValue, data);
+        if (deResult != null) {
+            if (StringUtils.isBlank(deResult.wedprErrorMessage)) {
+                logger.info("decrypt by ecies successfully.");
+                byte[] buffer = Numeric.hexStringToByteArray(deResult.decryptMessage);
+                return new String(buffer, StandardCharsets.UTF_8);
+            }
+            logger.error("decrypt by ecies fail, message = {}.", deResult.wedprErrorMessage);
+            throw new EncodeSuiteException(deResult.wedprErrorMessage);
         }
+        throw new EncodeSuiteException(ErrorCode.UNKNOW_ERROR);
     }
     
     private void checkForDecrypt(String content, String key) {
