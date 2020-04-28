@@ -17,7 +17,7 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.crypto;
+package com.webank.weid.suite.api.crypto.params;
 
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
@@ -27,8 +27,6 @@ import java.security.SecureRandom;
 
 import org.apache.commons.codec.binary.Base64;
 
-import com.webank.weid.suite.entity.Asymmetrickey;
-import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -65,7 +63,7 @@ public class KeyGenerator {
      */
     public static Asymmetrickey getKeyForRsa(int keySize) throws NoSuchAlgorithmException {
         // KeyPairGenerator类用于生成公钥和私钥对，基于RSA算法生成对象
-        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(CryptType.RSA.name());
+        KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(CryptoType.RSA.name());
         // 初始化密钥对生成器，密钥大小单位为位
         keyPairGen.initialize(keySize, new SecureRandom());
         // 生成一个密钥对，保存在keyPair中

@@ -17,7 +17,7 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.crypto;
+package com.webank.weid.suite.api.crypto.inf;
 
 import com.webank.weid.exception.EncodeSuiteException;
 
@@ -26,7 +26,7 @@ import com.webank.weid.exception.EncodeSuiteException;
  * @author v_wbgyang
  *
  */
-public interface CryptService {
+public interface CryptoService {
 
     /**
      * 加密方法.

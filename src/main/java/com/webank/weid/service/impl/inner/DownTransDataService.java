@@ -37,9 +37,9 @@ import com.webank.weid.protocol.amop.GetTransDataArgs;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
+import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.entity.TransCodeBaseData;
 import com.webank.weid.suite.transmission.TransmissionService;
 import com.webank.weid.util.DataToolUtils;
@@ -115,8 +115,8 @@ public class DownTransDataService extends InnerService implements TransmissionSe
             }
             logger.info("[getBarCodeData] begin decrypt the data");
             String data = String.valueOf(codeData.getData());
-            String value = CryptServiceFactory
-                .getCryptService(CryptType.AES)
+            String value = CryptoServiceFactory
+                .getCryptoService(CryptoType.AES)
                 .decrypt(data, encryptKey.getEncryptKey());
             codeData.setData(value);
             barCodeRes.setResult(DataToolUtils.serialize(codeData));
