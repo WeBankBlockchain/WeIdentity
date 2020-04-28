@@ -145,7 +145,7 @@ dependencies {
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
             compile("org.fisco-bcos:web3sdk:2.4.0-0423-SNAPSHOT")
-            compile files("lib/WeDPR-Java-SDK.jar")
+            compile fileTree(dir: 'lib', include: '*.jar')
             testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval
         } else {
             compile fileTree(dir: 'dist/lib', include: '*.jar')
@@ -163,7 +163,7 @@ dependencies {
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
             compile("org.fisco-bcos:web3sdk:2.4.0-0423-SNAPSHOT")
-            compile files("lib/WeDPR-Java-SDK.jar")
+			compile fileTree(dir: 'lib', include: '*.jar')
             testCompile logger, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval
         } else {
             compileOnly files('dist/lib/lombok-1.18.10.jar')
@@ -211,6 +211,12 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 test {
    systemProperty "jdk.tls.namedGroups", "${jdkTlsNamedGroups}"
    jvmArgs "-javaagent:${classpath.find { it.name.contains("jmockit") }.absolutePath}"
+   doFirst {
+     copy {
+            from file('src/main/resources/WeDPR_dynamic_lib')
+            into 'src/test/resources/WeDPR_dynamic_lib'
+        }
+   }
 }
 
 artifacts {
