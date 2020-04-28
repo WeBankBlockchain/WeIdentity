@@ -35,12 +35,12 @@ import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
+import com.webank.weid.suite.api.crypto.inf.CryptoService;
+import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.transportation.TransportationFactory;
 import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.crypto.CryptService;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.entity.CryptType;
 
 /**
  * 二维码协议反序列化测试.
@@ -191,10 +191,10 @@ public class TestJsonDeserialize extends TestBaseTransportation {
                 new ProtocolProperty(EncodeType.CIPHER)
             );
 
-        new MockUp<CryptServiceFactory>() {
+        new MockUp<CryptoServiceFactory>() {
             @Mock
-            public CryptService getCryptService(CryptType cryptType) {
-                return new HashMap<String, CryptService>().get("key");
+            public CryptoService getCryptoService(CryptoType cryptType) {
+                return new HashMap<String, CryptoService>().get("key");
             }
         };
 

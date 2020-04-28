@@ -17,13 +17,13 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.entity;
+package com.webank.weid.suite.api.crypto.params;
 
 /**
  * 加解密类型枚举.
  * @author v_wbgyang
  *
  */
-public enum CryptType {
+public enum CryptoType {
     AES, RSA, ECIES;
 }
