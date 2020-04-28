@@ -25,5 +25,5 @@ package com.webank.weid.suite.entity;
  *
  */
 public enum CryptType {
-    AES, RSA;
+    AES, RSA, ECIES;
 }
