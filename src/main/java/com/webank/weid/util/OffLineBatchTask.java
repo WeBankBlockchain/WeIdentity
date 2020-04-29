@@ -16,9 +16,9 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.AbstractService;
+import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
+import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 
 /**
@@ -147,7 +147,7 @@ public class OffLineBatchTask extends AbstractService {
                 return null;
             }
             String deCryptData = resp.getResult();
-            privateKey = CryptServiceFactory.getCryptService(CryptType.AES)
+            privateKey = CryptoServiceFactory.getCryptoService(CryptoType.AES)
                 .decrypt(deCryptData, getKey());
             userKey.put(weId, privateKey);
             return privateKey;
