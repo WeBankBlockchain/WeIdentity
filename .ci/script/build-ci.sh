@@ -42,6 +42,7 @@ function modify_config()
     cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/test/resources
     cp ${java_source_code_dir}/.ci/node.crt ${java_source_code_dir}/src/test/resources
     cp ${java_source_code_dir}/.ci/node.key ${java_source_code_dir}/src/test/resources
+	cp -r ${java_source_code_dir}/src/main/resources/WeDPR_dynamic_lib ${java_source_code_dir}/src/test/resources
     echo "modify sdk config finished..."
 }
 
