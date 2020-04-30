@@ -157,6 +157,13 @@ public class TestGetWeIdDocument extends TestBaseService {
             .delegateSetPublicKey(publicKeyArgs, weIdAuthentication);
         weIdDoc = weIdService.getWeIdDocument(createWeIdResult.getWeId());
         Assert.assertEquals(weIdDoc.getResult().getPublicKey().size(), 3);
+        weIdAuthentication = new WeIdAuthentication();
+        weIdAuthentication.setWeId(createWeIdResult.getWeId());
+        weIdAuthentication.setWeIdPrivateKey(createWeIdResult.getUserWeIdPrivateKey());
+        ResponseData<Boolean> resp2 = weIdService
+            .delegateSetPublicKey(publicKeyArgs, weIdAuthentication);
+        weIdDoc = weIdService.getWeIdDocument(createWeIdResult.getWeId());
+        Assert.assertEquals(weIdDoc.getResult().getPublicKey().size(), 3);
     }
 
     /**
