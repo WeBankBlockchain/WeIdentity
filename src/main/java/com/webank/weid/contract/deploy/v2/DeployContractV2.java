@@ -116,8 +116,8 @@ public class DeployContractV2 extends AddressProcess {
     public static void deployContract(String privateKey) {
         initWeb3j();
         initCredentials(privateKey);
-        String weIdContractAddress = deployWeIdContract();
         String roleControllerAddress = deployRoleControllerContracts();
+        String weIdContractAddress = deployWeIdContract(roleControllerAddress);
         Map<String, String> addrList = deployIssuerContracts(roleControllerAddress);
         if (addrList.containsKey("AuthorityIssuerData")) {
             String authorityIssuerDataAddress = addrList.get("AuthorityIssuerData");
@@ -130,14 +130,14 @@ public class DeployContractV2 extends AddressProcess {
         deployEvidenceContractsNew();
         registerToCns();
     }
-    
+
     private static void registerToCns() {
         String privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
         WeIdPrivateKey weIdPrivate = new WeIdPrivateKey();
         weIdPrivate.setPrivateKey(privateKey);
         RegisterAddressV2.registerAddress(weIdPrivate);
     }
-    
+
 
     private static String deployRoleControllerContracts() {
         if (web3j == null) {
@@ -158,7 +158,7 @@ public class DeployContractV2 extends AddressProcess {
         }
     }
 
-    private static String deployWeIdContract() {
+    private static String deployWeIdContract(String roleControllerAddress) {
         if (web3j == null) {
             initWeb3j();
         }
@@ -168,7 +168,8 @@ public class DeployContractV2 extends AddressProcess {
             weIdContract = WeIdContract.deploy(
                 web3j,
                 credentials,
-                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT))
+                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                roleControllerAddress)
                 .send();
         } catch (Exception e) {
             logger.error("WeIdContract deploy error.", e);
