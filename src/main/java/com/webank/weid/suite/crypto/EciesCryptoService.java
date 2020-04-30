@@ -47,9 +47,14 @@ public class EciesCryptoService implements CryptoService {
         logger.info("begin encrypt by ecies.");
         checkForEncrypt(content, key);
         String data = Numeric.toHexStringNoPrefix(content.getBytes(StandardCharsets.UTF_8));
-        BigInteger pub = new BigInteger(Base64.decodeBase64(key));
-        String pubValue = Numeric.toHexStringNoPrefixZeroPadded(
-            pub, Keys.PUBLIC_KEY_LENGTH_IN_HEX);
+        String pubValue = null;
+        if (isNumeric(key)) {
+            //如果为10进制数字
+            BigInteger bigInt = new BigInteger(key);
+            pubValue = Numeric.toHexStringNoPrefixZeroPadded(bigInt, Keys.PUBLIC_KEY_LENGTH_IN_HEX);
+        } else {
+            pubValue = Numeric.toHexStringNoPrefix(Base64.decodeBase64(key));
+        }
         EciesResult result =  NativeInterface.eciesEncrypt(pubValue, data); // 加密
         if (result != null) {
             if (StringUtils.isBlank(result.wedprErrorMessage)) {
@@ -83,8 +88,8 @@ public class EciesCryptoService implements CryptoService {
             throw new EncodeSuiteException(ErrorCode.ILLEGAL_INPUT, errorMessage);
         }
         // 检查publicKey是否为标准base64格式
-        if (!DataToolUtils.isValidBase64String(key)) {
-            errorMessage = "input publicKey is not a valid Base64 string.";
+        if (!DataToolUtils.isValidBase64String(key) && !isNumeric(key)) {
+            errorMessage = "input publicKey is not a valid Base64 string or Digit string.";
             throw new EncodeSuiteException(ErrorCode.ILLEGAL_INPUT, errorMessage);
         }
     }
@@ -94,9 +99,15 @@ public class EciesCryptoService implements CryptoService {
         logger.info("begin decrypt by ecies.");
         checkForDecrypt(content, key);
         String data = Numeric.toHexStringNoPrefix(Base64.decodeBase64(content));
-        BigInteger pri = new BigInteger(Base64.decodeBase64(key));
-        String priValue = Numeric.toHexStringNoPrefixZeroPadded(
-            pri, Keys.PRIVATE_KEY_LENGTH_IN_HEX);
+        String priValue = null;
+        if (isNumeric(key)) {
+            //如果为10进制数字
+            BigInteger bigInt = new BigInteger(key);
+            priValue = Numeric.toHexStringNoPrefixZeroPadded(
+                bigInt, Keys.PRIVATE_KEY_LENGTH_IN_HEX);
+        } else {
+            priValue = Numeric.toHexStringNoPrefix(Base64.decodeBase64(key));
+        }
         EciesResult deResult =  NativeInterface.eciesDecrypt(priValue, data);
         if (deResult != null) {
             if (StringUtils.isBlank(deResult.wedprErrorMessage)) {
@@ -128,9 +139,17 @@ public class EciesCryptoService implements CryptoService {
             throw new EncodeSuiteException(ErrorCode.ILLEGAL_INPUT, errorMessage);
         }
         // 检查privateKey是否为标准base64格式
-        if (!DataToolUtils.isValidBase64String(key)) {
-            errorMessage = "input privateKey is not a valid Base64 string.";
+        if (!DataToolUtils.isValidBase64String(key) && !isNumeric(key)) {
+            errorMessage = "input privateKey is not a valid Base64 string or Digit string.";
             throw new EncodeSuiteException(ErrorCode.ILLEGAL_INPUT, errorMessage);
         } 
+    }
+    
+    private static boolean isNumeric(final String str) {
+        // null or empty
+        if (str == null || str.length() == 0) {
+            return false;
+        }
+        return str.chars().allMatch(Character::isDigit);
     }
 }
