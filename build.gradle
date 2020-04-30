@@ -140,7 +140,7 @@ dependencies {
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
             compile logger, lombok, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf, caffeine, oval
-            compile("com.webank:weid-contract-java:1.2.19") {
+            compile("com.webank:weid-contract-java:1.2.20") {
                 exclude group: "org.fisco-bcos", module: "web3sdk"
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
@@ -158,7 +158,7 @@ dependencies {
             testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
             testCompileOnly 'org.projectlombok:lombok:1.18.10'
             compile logger, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf, caffeine, oval
-            compile("com.webank:weid-contract-java:1.2.19") {
+            compile("com.webank:weid-contract-java:1.2.20") {
                 exclude group: "org.fisco-bcos", module: "web3sdk"
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
             }
