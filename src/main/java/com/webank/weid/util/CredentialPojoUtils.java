@@ -82,8 +82,7 @@ public final class CredentialPojoUtils {
             // Preserve the same behavior as in CredentialUtils - will merge later
             credMap.remove(ParamKeyConstant.PROOF);
             credMap.put(ParamKeyConstant.PROOF, null);
-            String claimHash = getClaimHash(credential, salt, disclosures);
-            credMap.put(ParamKeyConstant.CLAIM, claimHash);
+            credMap.put(ParamKeyConstant.CLAIM, getClaimHash(credential, salt, disclosures));
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
             logger.error("get Credential Thumbprint WithoutSig error.", e);
@@ -110,8 +109,7 @@ public final class CredentialPojoUtils {
             // Preserve the same behavior as in CredentialUtils - will merge later
             credMap.remove(ParamKeyConstant.PROOF);
             //credMap.put(ParamKeyConstant.PROOF, null);
-            String claimHash = getLiteClaimHash(credential);
-            credMap.put(ParamKeyConstant.CLAIM, claimHash);
+            credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credential));
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
             logger.error("get Credential Thumbprint WithoutSig error.", e);
@@ -190,8 +188,7 @@ public final class CredentialPojoUtils {
         try {
             Map<String, Object> credMap = DataToolUtils.objToMap(credential);
             // Replace the Claim value object with claim hash value to preserve immutability
-            String claimHash = getClaimHash(credential, salt, disclosures);
-            credMap.put(ParamKeyConstant.CLAIM, claimHash);
+            credMap.put(ParamKeyConstant.CLAIM, getClaimHash(credential, salt, disclosures));
             // Remove the whole Salt field to preserve immutability
             Map<String, Object> proof = (Map<String, Object>) credMap.get(ParamKeyConstant.PROOF);
             proof.remove(ParamKeyConstant.PROOF_SALT);
@@ -234,8 +231,7 @@ public final class CredentialPojoUtils {
         try {
             Map<String, Object> credMap = DataToolUtils.objToMap(credentialPojo);
             // Replace the Claim value object with claim hash value to preserve immutability
-            String claimHash = getLiteClaimHash(credentialPojo);
-            credMap.put(ParamKeyConstant.CLAIM, claimHash);
+            credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credentialPojo));
             // Remove the whole Salt field to preserve immutability
             Map<String, Object> proof = (Map<String, Object>) credMap.get(ParamKeyConstant.PROOF);
             proof.remove(ParamKeyConstant.PROOF_SALT);
@@ -460,20 +456,13 @@ public final class CredentialPojoUtils {
      * Get the lite credential claim hash.
      *
      * @param credential Credential
-     * @return the unique claim hash value
+     * @return the claimMap value
      */
-    public static String getLiteClaimHash(
+    public static Map<String, Object> getLiteClaimHash(
         CredentialPojo credential) {
 
         Map<String, Object> claim = credential.getClaim();
-        Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
-        try {
-            String jsonData = DataToolUtils.mapToCompactJson(newClaim);
-            return jsonData;
-        } catch (Exception e) {
-            logger.error("[getClaimHash] get claim hash failed. {}", e);
-        }
-        return StringUtils.EMPTY;
+        return  DataToolUtils.clone((HashMap) claim);
     }
 
     /**
@@ -482,9 +471,9 @@ public final class CredentialPojoUtils {
      * @param credential Credential
      * @param salt Salt Map
      * @param disclosures Disclosure Map
-     * @return the unique claim hash value
+     * @return the claimMap value
      */
-    public static String getClaimHash(
+    public static Map<String, Object> getClaimHash(
         CredentialPojo credential,
         Map<String, Object> salt,
         Map<String, Object> disclosures
@@ -493,13 +482,7 @@ public final class CredentialPojoUtils {
         Map<String, Object> claim = credential.getClaim();
         Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
         addSaltAndGetHash(newClaim, salt, disclosures);
-        try {
-            String jsonData = DataToolUtils.mapToCompactJson(newClaim);
-            return jsonData;
-        } catch (Exception e) {
-            logger.error("[getClaimHash] get claim hash failed. {}", e);
-        }
-        return StringUtils.EMPTY;
+        return newClaim;
     }
 
     private static void addSaltAndGetHash(
