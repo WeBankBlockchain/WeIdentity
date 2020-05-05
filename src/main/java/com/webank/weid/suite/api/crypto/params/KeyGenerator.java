@@ -27,6 +27,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.utils.Numeric;
 import org.fisco.bcos.web3j.crypto.Keys;
 
@@ -92,6 +93,9 @@ public class KeyGenerator {
      * @return 返回补位后的base64密钥
      */
     public static String decimalKeyToBase64(String decimalKey) {
+        if (!StringUtils.isNumeric(decimalKey)) {
+            return StringUtils.EMPTY;
+        }
         BigInteger bigInt = new BigInteger(decimalKey, 10);
         int keySize = Keys.PUBLIC_KEY_LENGTH_IN_HEX;
         //公钥字节长度为63, 64, 65
@@ -109,6 +113,9 @@ public class KeyGenerator {
      * @return 返回10进制的数字密钥
      */
     public static String base64KeyTodecimal(String base64Key) {
+        if (!DataToolUtils.isValidBase64String(base64Key)) {
+            return StringUtils.EMPTY; 
+        }
         return Numeric.toBigInt(Base64.decodeBase64(base64Key)).toString();
     }
 }
