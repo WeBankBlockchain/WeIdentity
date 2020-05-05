@@ -940,8 +940,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             ErrorCode verifyErrorCode = DataToolUtils
                 .verifySecp256k1SignatureFromWeId(rawData, credential.getSignature(), weIdDocument);
             if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                return new ResponseData<Boolean>(false,
-                    ErrorCode.getTypeByErrorCode(innerResponseData.getErrorCode()));
+                return new ResponseData<Boolean>(false, verifyErrorCode);
             }
             return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
 
