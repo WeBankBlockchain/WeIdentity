@@ -782,7 +782,9 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     public ResponseData<Boolean> delegateSetService(
         ServiceArgs serviceArgs,
         WeIdAuthentication delegateAuth) {
-
+        if (delegateAuth == null) {
+            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+        }
         if (serviceArgs == null || StringUtils.isEmpty(serviceArgs.getServiceEndpoint())
             || !WeIdUtils.isWeIdValid(serviceArgs.getWeId())) {
             logger.error("[setService]: input parameter setServiceArgs is illegal.");
@@ -858,8 +860,10 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         AuthenticationArgs authenticationArgs,
         WeIdAuthentication delegateAuth) {
 
+        if (delegateAuth == null) {
+            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
+        }
         if (authenticationArgs == null || !WeIdUtils.isWeIdValid(authenticationArgs.getWeId())
-            || StringUtils.isEmpty(authenticationArgs.getOwner())
             || StringUtils.isEmpty(authenticationArgs.getPublicKey())) {
             return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
         }
