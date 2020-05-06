@@ -93,6 +93,7 @@ import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.utils.Numeric;
 import org.bouncycastle.util.encoders.Base64;
 import org.fisco.bcos.web3j.crypto.ECDSASign;
+import org.fisco.bcos.web3j.crypto.ECDSASignature;
 import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
 import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
 import org.slf4j.Logger;
@@ -578,6 +579,31 @@ public final class DataToolUtils {
         ECDSASign ecdsaSign = new ECDSASign();
         byte[] hashBytes = Hash.sha3(rawData.getBytes());
         return ecdsaSign.secp256Verify(hashBytes, publicKey, sigData);
+    }
+
+    /**
+     * Recover WeID from message and Signature (Secp256k1 type of sig only).
+     *
+     * @param rawData Raw Data
+     * @param sigBase64 signature in base64
+     * @return WeID
+     */
+    public static String recoverWeIdFromMsgAndSecp256Sig(String rawData, String sigBase64) {
+        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData = secp256k1SigBase64Deserialization(
+            sigBase64);
+        byte[] hashBytes = Hash.sha3(rawData.getBytes());
+        org.fisco.bcos.web3j.crypto.Sign.SignatureData modifiedSigData =
+            new org.fisco.bcos.web3j.crypto.Sign.SignatureData(
+                (byte) (sigData.getV() + 27),
+                sigData.getR(),
+                sigData.getS());
+        ECDSASignature sig =
+            new ECDSASignature(
+                org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getR()),
+                org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getS()));
+        BigInteger k = org.fisco.bcos.web3j.crypto.Sign
+            .recoverFromSignature(modifiedSigData.getV() - 27, sig, hashBytes);
+        return WeIdUtils.convertPublicKeyToWeId(k.toString(10));
     }
 
     /**
