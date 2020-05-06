@@ -255,4 +255,26 @@ public final class WeIdUtils {
             .publicKeyFromPrivate(new BigInteger(privateKey));
         return convertPublicKeyToWeId(String.valueOf(publicKey));
     }
+
+    /**
+     * Check private key length.
+     *
+     * @param privateKey private key string in decimal
+     * @return true if OK, false otherwise
+     */
+    public static boolean isPrivateKeyLengthValid(String privateKey) {
+        if (StringUtils.isBlank(privateKey)) {
+            return false;
+        }
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey(privateKey);
+        try {
+            BigInteger privKeyBig = new BigInteger(privateKey, 10);
+            BigInteger maxPrivKeyValue = new BigInteger(
+                "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141", 16);
+            return (privKeyBig.compareTo(maxPrivKeyValue) <= 0);
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
