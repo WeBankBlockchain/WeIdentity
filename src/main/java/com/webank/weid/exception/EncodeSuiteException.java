@@ -45,6 +45,15 @@ public class EncodeSuiteException extends WeIdBaseException {
         this.errorCode = errorCode;
     }
     
+    public EncodeSuiteException(String message) {
+        super(message);
+    }
+    
+    public EncodeSuiteException(ErrorCode errorCode, String message) {
+        super(message);
+        this.errorCode = errorCode;
+    }
+    
     public ErrorCode getErrorCode() {
         return errorCode;
     }
