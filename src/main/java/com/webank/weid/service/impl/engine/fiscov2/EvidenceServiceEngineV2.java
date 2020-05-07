@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -44,6 +45,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ResolveEventLogStatus;
+import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.EvidenceContract;
 import com.webank.weid.contract.v2.EvidenceContract.EvidenceAttributeChangedEventResponse;
 import com.webank.weid.protocol.base.EvidenceInfo;
@@ -193,7 +195,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                     sigList,
                     logList,
                     timestampList
-                ).send();
+                ).sendAsync().get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
             TransactionInfo info = new TransactionInfo(receipt);
             List<EvidenceAttributeChangedEventResponse> eventList =
@@ -271,7 +273,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                     logList,
                     timestampList,
                     customKeyList
-                ).send();
+                ).sendAsync().get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
             TransactionInfo info = new TransactionInfo(receipt);
             List<EvidenceAttributeChangedEventResponse> eventList =
@@ -634,8 +636,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
             } else {
                 for (EvidenceAttributeChangedEventResponse event : eventList) {
-                    if (event.sigs.get(0).equalsIgnoreCase(signature)
-                        && event.signer.get(0).equalsIgnoreCase(address)) {
+                    if (event.sigs.toArray()[0].toString().equalsIgnoreCase(signature)
+                        && event.signer.toArray()[0].toString().equalsIgnoreCase(address)) {
                         return new ResponseData<>(hashValue, ErrorCode.SUCCESS, info);
                     }
                 }

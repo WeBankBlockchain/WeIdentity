@@ -142,4 +142,12 @@ public interface AuthorityIssuerService {
         Integer index,
         Integer num
     );
+
+    /**
+     * Get an issuer's WeID from its name (org ID).
+     *
+     * @param orgId the org id
+     * @return WeID
+     */
+    ResponseData<String> getWeIdByOrgId(String orgId);
 }

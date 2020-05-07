@@ -100,7 +100,7 @@ public class TestSetPublicKey extends TestBaseService {
         ResponseData<Boolean> response = weIdService.setPublicKey(setPublicKeyArgs);
         LogUtil.info(logger, "setPublicKey", response);
 
-        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
+        Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }

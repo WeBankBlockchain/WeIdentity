@@ -36,9 +36,15 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
      * @param weAddress identity on blockchain
      * @param publicKey public key of the identity
      * @param privateKey privateKey identity's private key
+     * @param isDelegate true if the caller is a delegate
      * @return result
      */
-    ResponseData<Boolean> createWeId(String weAddress, String publicKey, String privateKey);
+    ResponseData<Boolean> createWeId(
+        String weAddress,
+        String publicKey,
+        String privateKey,
+        boolean isDelegate
+    );
 
     /**
      * write attribute to blockchain.
@@ -47,13 +53,15 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
      * @param attributeKey the key of the attribute
      * @param value the value of the attribute
      * @param privateKey identity's private key
+     * @param isDelegate true if the caller is a delegate
      * @return result
      */
     ResponseData<Boolean> setAttribute(
         String weAddress,
         String attributeKey,
         String value,
-        String privateKey
+        String privateKey,
+        boolean isDelegate
     );
 
     /**

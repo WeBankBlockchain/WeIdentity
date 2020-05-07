@@ -19,7 +19,6 @@
 
 package com.webank.weid.service.impl.callback;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +30,6 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.inner.DownTransDataService;
-import com.webank.weid.suite.auth.impl.WeIdAuthImpl;
-import com.webank.weid.suite.auth.inf.WeIdAuth;
-import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.suite.transmission.TransmissionService;
 import com.webank.weid.suite.transmission.TransmissionServiceCenter;
 import com.webank.weid.util.DataToolUtils;
@@ -49,20 +43,21 @@ public class CommonCallback extends AmopCallback {
 
     private static final Logger logger =  LoggerFactory.getLogger(CommonCallback.class);
 
-    private static WeIdAuth weIdAuthService;
+    //private static WeIdAuth weIdAuthService;
 
     static {
         // 初始化默认的服务处理
         initDefaultService();
     }
 
+    /*
     private WeIdAuth getweIdAuthService() {
         if (weIdAuthService == null) {
             weIdAuthService = new WeIdAuthImpl();
         }
         return weIdAuthService;
     }
-
+    */
     private static void initDefaultService() {
         register(ServiceType.SYS_GET_TRANS_DATA.name(), new DownTransDataService());
     }
@@ -86,6 +81,8 @@ public class CommonCallback extends AmopCallback {
                 ); 
                 return super.onPush(arg);
             }
+            // 此处暂时不走认证模式
+            /*
             String channelId = arg.getChannelId();
             if (StringUtils.isBlank(channelId)) {
                 logger.error("[CommonCallBack] the channelId is null, messageId:{}.", messageId);
@@ -101,16 +98,19 @@ public class CommonCallback extends AmopCallback {
                 CryptServiceFactory
                     .getCryptService(CryptType.AES)
                     .decrypt(arg.getMessage(), weIdAuth.getSymmetricKey());
+            */
             logger.info("[CommonCallBack] begin request the service, messageId : {}", messageId);
-            AmopResponse amopResponse = buildAmopResponse(service.service(message), arg);
+            AmopResponse amopResponse = buildAmopResponse(service.service(arg.getMessage()), arg);
             logger.info("[CommonCallBack] begin encrypt the data, messageId : {}", messageId);
+            /*
+            // 数据暂时不走认证模式
             //加密响应数据
             String originalData = 
                 CryptServiceFactory
                     .getCryptService(CryptType.AES)
                     .encrypt(amopResponse.getResult(), weIdAuth.getSymmetricKey());
-
             amopResponse.setResult(originalData);
+            */
             logger.info("[CommonCallBack] onPush finish and the reponse : {}", amopResponse);
             return amopResponse;
         } catch (WeIdBaseException e) {
