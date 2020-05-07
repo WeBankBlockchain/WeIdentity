@@ -1,3 +1,17 @@
+### V1.6.2 (2020-05-07)
+- Features:
+1. CryptoService, built-in support for ECIES and RSA encryption and decryption.
+2. Support delegate creation and modification of WeID.
+3. Lite Credential support, a light-weight portable format which uses Secp256k1 universal signature.
+4. Support Offline verification of Credential.
+5. Allow customize public key types for WeID e.g. RSA public keys.
+
+- Bugfixes:
+1. Fix a DB Connection Pool initialization issue.
+2. Fix a hash conflict issue in offline Evidence transactions.
+3. Allow long blockchain operations correctly timed-out.
+4. Fix an issue where credential's hash generation contains escape characters in inner Claim json.
+
 ### V1.6.1 (2020-04-12)
 - Features:
 1. QRCode transportation supports AMOP channel.

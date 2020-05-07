@@ -27,11 +27,11 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
+import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.auth.impl.WeIdAuthImpl;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
 import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
-import com.webank.weid.suite.crypto.CryptServiceFactory;
-import com.webank.weid.suite.entity.CryptType;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -88,8 +88,8 @@ public abstract class AbstractTransmission implements Transmission {
      * @return 返回明文数据
      */
     protected String decryptData(String encodeData, WeIdAuthObj weIdAuth) {
-        return CryptServiceFactory
-            .getCryptService(CryptType.AES)
+        return CryptoServiceFactory
+            .getCryptoService(CryptoType.AES)
             .decrypt(encodeData, weIdAuth.getSymmetricKey());
     }
 
@@ -101,8 +101,8 @@ public abstract class AbstractTransmission implements Transmission {
      * @return 返回加密后的数据
      */
     protected String encryptData(String originalData, WeIdAuthObj weIdAuth) {
-        return CryptServiceFactory
-            .getCryptService(CryptType.AES)
+        return CryptoServiceFactory
+            .getCryptoService(CryptoType.AES)
             .encrypt(originalData, weIdAuth.getSymmetricKey());
     }
 
