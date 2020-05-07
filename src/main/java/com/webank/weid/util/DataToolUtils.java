@@ -92,6 +92,8 @@ import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.bcos.web3j.utils.Numeric;
 import org.bouncycastle.util.encoders.Base64;
+import org.fisco.bcos.web3j.crypto.ECDSASign;
+import org.fisco.bcos.web3j.crypto.ECDSASignature;
 import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
 import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
 import org.slf4j.Logger;
@@ -514,6 +516,97 @@ public final class DataToolUtils {
     }
 
     /**
+     * Secp256k1 sign.
+     *
+     * @param rawData original raw data
+     * @param privateKey private key in BigInteger format
+     */
+    public static String secp256k1Sign(String rawData, BigInteger privateKey) {
+        ECDSASign ecdsaSign = new ECDSASign();
+        org.fisco.bcos.web3j.crypto.ECKeyPair keyPair = org.fisco.bcos.web3j.crypto.ECKeyPair
+            .create(privateKey);
+        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData = ecdsaSign
+            .secp256SignMessage(rawData.getBytes(), keyPair);
+        return secp256k1SigBase64Serialization(sigData);
+    }
+
+    /**
+     * Serialize secp256k1 signature into base64 encoded, in R, S, V (0, 1) format.
+     *
+     * @param sigData secp256k1 signature (v = 0,1)
+     * @return base64 string
+     */
+    public static String secp256k1SigBase64Serialization(
+        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData) {
+        byte[] sigBytes = new byte[65];
+        sigBytes[64] = sigData.getV();
+        System.arraycopy(sigData.getR(), 0, sigBytes, 0, 32);
+        System.arraycopy(sigData.getS(), 0, sigBytes, 32, 32);
+        return new String(base64Encode(sigBytes), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * De-Serialize secp256k1 signature base64 encoded string, in R, S, V (0, 1) format.
+     *
+     * @param signature signature base64 string
+     * @return secp256k1 signature (v = 0,1)
+     */
+    public static org.fisco.bcos.web3j.crypto.Sign.SignatureData secp256k1SigBase64Deserialization(
+        String signature
+    ) {
+        byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
+        byte[] r = new byte[32];
+        byte[] s = new byte[32];
+        System.arraycopy(sigBytes, 0, r, 0, 32);
+        System.arraycopy(sigBytes, 32, s, 0, 32);
+        return new org.fisco.bcos.web3j.crypto.Sign.SignatureData(sigBytes[64], r, s);
+    }
+
+    /**
+     * Verify secp256k1 signature.
+     *
+     * @param rawData original raw data
+     * @param signatureBase64 signature base64 string
+     * @param publicKey in BigInteger format
+     */
+    public static boolean secp256k1VerifySignature(
+        String rawData,
+        String signatureBase64,
+        BigInteger publicKey
+    ) {
+        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData = secp256k1SigBase64Deserialization(
+            signatureBase64);
+        ECDSASign ecdsaSign = new ECDSASign();
+        byte[] hashBytes = Hash.sha3(rawData.getBytes());
+        return ecdsaSign.secp256Verify(hashBytes, publicKey, sigData);
+    }
+
+    /**
+     * Recover WeID from message and Signature (Secp256k1 type of sig only).
+     *
+     * @param rawData Raw Data
+     * @param sigBase64 signature in base64
+     * @return WeID
+     */
+    public static String recoverWeIdFromMsgAndSecp256Sig(String rawData, String sigBase64) {
+        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData = secp256k1SigBase64Deserialization(
+            sigBase64);
+        byte[] hashBytes = Hash.sha3(rawData.getBytes());
+        org.fisco.bcos.web3j.crypto.Sign.SignatureData modifiedSigData =
+            new org.fisco.bcos.web3j.crypto.Sign.SignatureData(
+                (byte) (sigData.getV() + 27),
+                sigData.getR(),
+                sigData.getS());
+        ECDSASignature sig =
+            new ECDSASignature(
+                org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getR()),
+                org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getS()));
+        BigInteger k = org.fisco.bcos.web3j.crypto.Sign
+            .recoverFromSignature(modifiedSigData.getV() - 27, sig, hashBytes);
+        return WeIdUtils.convertPublicKeyToWeId(k.toString(10));
+    }
+
+    /**
      * Sign a object based on the given privateKey in Decimal String BigInt.
      *
      * @param rawData this rawData to be signed,
@@ -589,6 +682,23 @@ public final class DataToolUtils {
         Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
         BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
         return extractedPublicKey.equals(publicKey);
+    }
+
+    /**
+     * Verify whether the message and the Signature matches the given public Key.
+     *
+     * @param message This should be from the same plain-text source with the signature Data.
+     * @param signature this is a signature string of Base64.
+     * @param publicKey the string is a publicKey.
+     * @return true if yes, false otherwise
+     * @throws SignatureException Signature is the exception.
+     */
+    public static boolean verifySignature(
+        String message,
+        String signature,
+        String publicKey)
+        throws SignatureException {
+        return verifySignature(message, signature, new BigInteger(publicKey));
     }
 
     /**
@@ -724,6 +834,50 @@ public final class DataToolUtils {
     public static Sign.SignatureData rawSignatureDeserialization(int v, byte[] r, byte[] s) {
         byte valueByte = (byte) v;
         return new Sign.SignatureData(valueByte, r, s);
+    }
+
+    /**
+     * Verify a secp256k1 signature (base64).
+     *
+     * @param rawData the rawData to be verified
+     * @param signature the Signature Data in secp256k1 style
+     * @param weIdDocument the WeIdDocument to be extracted
+     * @return true if yes, false otherwise with exact error codes
+     */
+    public static ErrorCode verifySecp256k1SignatureFromWeId(
+        String rawData,
+        String signature,
+        WeIdDocument weIdDocument) {
+        List<String> publicKeysListToVerify = new ArrayList<String>();
+
+        // Traverse public key list indexed Authentication key list
+        for (AuthenticationProperty authenticationProperty : weIdDocument
+            .getAuthentication()) {
+            String index = authenticationProperty.getPublicKey();
+            for (PublicKeyProperty publicKeyProperty : weIdDocument.getPublicKey()) {
+                if (publicKeyProperty.getId().equalsIgnoreCase(index)) {
+                    publicKeysListToVerify.add(publicKeyProperty.getPublicKey());
+                }
+            }
+        }
+        try {
+            boolean result = false;
+            for (String publicKeyItem : publicKeysListToVerify) {
+                if (StringUtils.isNotEmpty(publicKeyItem)) {
+                    result =
+                        result
+                            || secp256k1VerifySignature(
+                            rawData, signature, new BigInteger(publicKeyItem));
+                }
+            }
+            if (!result) {
+                return ErrorCode.CREDENTIAL_ISSUER_MISMATCH;
+            }
+        } catch (Exception e) {
+            logger.error("some exceptions occurred in signature verification", e);
+            return ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE;
+        }
+        return ErrorCode.SUCCESS;
     }
 
     /**

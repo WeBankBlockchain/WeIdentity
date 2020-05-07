@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.CredentialType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
@@ -49,6 +50,7 @@ import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -250,6 +252,40 @@ public class TestCreateCredentialPojo extends TestBaseService {
             .getResult();
         verifyResp = credentialPojoService.verify(tripleSigned.getIssuer(), tripleSigned);
         Assert.assertFalse(verifyResp.getResult());
+    }
+
+    @Test
+    public void testLiteCredentialPojo() {
+        CreateWeIdDataResult createWeIdDataResult = super.createWeId();
+        CreateCredentialPojoArgs<Map<String, Object>> args =
+            TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdDataResult);
+        args.setType(CredentialType.LITE1);
+        args.setCptId(cptBaseInfo.getCptId());
+        ResponseData<CredentialPojo> response = credentialPojoService.createCredential(args);
+        LogUtil.info(logger, "createLiteCredential", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        CredentialPojo liteCredential = response.getResult();
+        ResponseData<Boolean> resp =
+            credentialPojoService.verify(liteCredential.getIssuer(), liteCredential);
+        Assert.assertTrue(resp.getResult());
+        String recovererdWeId = DataToolUtils.recoverWeIdFromMsgAndSecp256Sig(
+            CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(liteCredential),
+            liteCredential.getSignature());
+        Assert.assertEquals(recovererdWeId, liteCredential.getIssuer());
+
+        // LiteCredential:
+        // 1. getThumbprint() -> signature (针对凭证claim内容生成thumbprint，用私钥生成签名)
+        String thumbprint = CredentialPojoUtils
+            .getLiteCredentialThumbprintWithoutSig(liteCredential);
+        System.out.println("Lite Credential Thumbprint: " + thumbprint + ", Thumbprint hash: "
+            + DataToolUtils.sha3(thumbprint) + ", signature: " + liteCredential.getSignature());
+        // 2. getHash() -> createEvidence (对凭证完整内容包括签名内容进行hash，claim支持选择性披露)
+        System.out.println("Lite Credential Hash: "
+            + CredentialPojoUtils.getLiteCredentialPojoHash(liteCredential));
+        Assert.assertEquals(CredentialPojoUtils.getLiteCredentialPojoHash(liteCredential),
+            liteCredential.getHash());
+        // 3. toJson() -> encrypt (唯一的序列化方法，瘦身，用于打包传输)
+        System.out.println("Lite Credential toJson: " + liteCredential.toJson());
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,22 +17,31 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.crypto;
+package com.webank.weid.protocol.request;
 
-import com.webank.weid.util.DataToolUtils;
+import lombok.Data;
 
 /**
- * 秘钥生成器.
- * @author v_wbgyang
+ * The Arguments when setting services.
  *
+ * @author tonychen 2020.4.24
  */
-public class KeyGenerator {
+@Data
+public class ServiceArgs {
 
     /**
-     * 使用UUID作为秘钥.
-     * @return 返回UUID字符串
+     * Required: user's WeIdentity DID.
      */
-    public static String getKey() {
-        return DataToolUtils.getUuId32();   
-    }
+    private String weId;
+
+    /**
+     * Required: service type.
+     */
+    private String type;
+
+    /**
+     * Required: service endpoint.
+     */
+    private String serviceEndpoint;
+
 }

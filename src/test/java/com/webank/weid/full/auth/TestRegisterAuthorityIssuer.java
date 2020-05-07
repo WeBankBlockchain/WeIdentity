@@ -452,6 +452,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
         ResponseData<AuthorityIssuer> queryResponse = authorityIssuerService
             .queryAuthorityIssuerInfo(weId.getWeId());
         Assert.assertTrue(queryResponse.getResult().getName().equalsIgnoreCase(chiName));
+        ResponseData<String> weIdresp = authorityIssuerService.getWeIdByOrgId(chiName);
+        Assert.assertTrue(weIdresp.getResult().equalsIgnoreCase(weId.getWeId()));
     }
 
     /**
