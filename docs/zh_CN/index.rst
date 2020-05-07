@@ -4,8 +4,18 @@
 .. include:: docs/README.rst
 
 .. toctree::
-   :maxdepth: 1
-   :caption: Contents:
+   :maxdepth: 4
+   :hidden:
 
    docs/weidentity-java-sdk-doc.rst
-   返回首页 <https://weidentity.readthedocs.io/zh_CN/latest/>
+   docs/amop-service.rst
+   docs/authority-issuer-service.rst
+   docs/basic-data-structure.rst
+   docs/cache-manager.rst
+   docs/cpt-service.rst
+   docs/credential-service.rst
+   docs/credentialpojo-service.rst
+   docs/crypto-service.rst
+   docs/evidence-service.rst
+   docs/transportation.rst
+   docs/weid-service.rst

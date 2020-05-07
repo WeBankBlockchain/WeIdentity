@@ -30,3 +30,11 @@ License
 
 This project is released under
 `LGPLv3 <https://opensource.org/licenses/LGPL-3.0>`__.
+
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+   :caption: Contents:
+
+   docs/weidentity-java-sdk-doc.rst
+   返回首页 <https://weidentity.readthedocs.io/zh_CN/latest/>
