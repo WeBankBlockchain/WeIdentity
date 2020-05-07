@@ -879,6 +879,9 @@ public final class CredentialPojoUtils {
             || StringUtils.isBlank(callerAuth.getWeIdPublicKeyId())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
+        if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {
+            return ErrorCode.WEID_INVALID;
+        }
         return ErrorCode.SUCCESS;
     }
 
