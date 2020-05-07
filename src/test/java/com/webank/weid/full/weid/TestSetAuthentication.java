@@ -32,7 +32,9 @@ import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -688,5 +690,30 @@ public class TestSetAuthentication extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
+    }
+
+    @Test
+    public void testDelegateSetAuth_weIdIsNotExist() {
+
+        PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
+        String pubKey = passwordKey.getPublicKey();
+        String weId = "did:weid:101:0x52560bcb2aea030347fe1891f09" + System.currentTimeMillis();
+        LogUtil.info(logger, "weid", weId);
+
+        AuthenticationArgs authenticationArgs = new AuthenticationArgs();
+        authenticationArgs.setWeId(weId);
+        authenticationArgs.setPublicKey(pubKey);
+
+        String delegateWeId = createWeIdNew.getWeId();
+        String delegatePrivateKey = this.privateKey;
+        WeIdAuthentication weIdAuthentication = new WeIdAuthentication(delegateWeId,
+            delegatePrivateKey);
+
+        ResponseData<Boolean> response = weIdService
+            .delegateSetAuthentication(authenticationArgs, weIdAuthentication);
+        LogUtil.info(logger, "response", response);
+        Assert.assertTrue(ErrorCode.WEID_DOES_NOT_EXIST.getCode() == response.getErrorCode()
+            || ErrorCode.WEID_INVALID.getCode() == response.getErrorCode());
+        Assert.assertEquals(Boolean.FALSE, response.getResult());
     }
 }
