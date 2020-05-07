@@ -34,10 +34,6 @@ public interface EvidenceServiceEngine extends ReloadStaticContract {
         String privateKey
     );
 
-    /**
-     * Batch creation of evidences. Return values are a list which indicates successful or failed
-     * creation with strict order of input evidences.
-     */
     ResponseData<List<Boolean>> batchCreateEvidence(
         List<String> hashValues,
         List<String> signatures,

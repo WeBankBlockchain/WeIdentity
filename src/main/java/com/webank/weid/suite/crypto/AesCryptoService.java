@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -34,19 +35,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.exception.EncodeSuiteException;
-import com.webank.weid.suite.encode.CipherEncodeProcessor;
-import com.webank.weid.suite.entity.CryptType;
+import com.webank.weid.suite.api.crypto.inf.CryptoService;
+import com.webank.weid.suite.api.crypto.params.CryptoType;
 
 /**
  * AES加解密处理类.
  * @author v_wbgyang
  *
  */
-public class AesCryptService implements CryptService {
+public class AesCryptoService implements CryptoService {
     
-    private static final Logger logger = LoggerFactory.getLogger(CipherEncodeProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(AesCryptoService.class);
     
-    private static final String KEY_ALGORITHM = CryptType.AES.name();
+    private static final String KEY_ALGORITHM = CryptoType.AES.name();
     
     private static final String DEFAULT_CIPHER_ALGORITHM = "AES/ECB/PKCS5Padding"; 
     
