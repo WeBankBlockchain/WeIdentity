@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
+import com.webank.weid.constant.CredentialType;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
@@ -464,10 +465,14 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         }
     }
 
-    private static ErrorCode verifyContent(CredentialPojo credential, String publicKey) {
+    private static ErrorCode verifyContent(
+        CredentialPojo credential,
+        String publicKey,
+        boolean offLine
+    ) {
         ErrorCode errorCode;
         try {
-            errorCode = verifyContentInner(credential, publicKey);
+            errorCode = verifyContentInner(credential, publicKey, offLine);
         } catch (WeIdBaseException ex) {
             logger.error("[verifyContent] verify credential has exception.", ex);
             return ex.getErrorCode();
@@ -528,7 +533,11 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         return ErrorCode.SUCCESS;
     }
 
-    private static ErrorCode verifyContentInner(CredentialPojo credential, String publicKey) {
+    private static ErrorCode verifyContentInner(
+        CredentialPojo credential,
+        String publicKey,
+        boolean offline
+    ) {
         ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credential);
         if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
             return checkResp;
@@ -542,7 +551,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             .intValue() || credential.getCptId() == CredentialConstant.EMBEDDED_TIMESTAMP_CPT
             .intValue()) {
             // This is a multi-signed Credential. We firstly verify itself (i.e. external check)
-            ErrorCode errorCode = verifySingleSignedCredential(credential, publicKey);
+            ErrorCode errorCode = verifySingleSignedCredential(credential, publicKey, offline);
             if (errorCode != ErrorCode.SUCCESS) {
                 return errorCode;
             }
@@ -570,7 +579,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                     } else {
                         innerCredential = (CredentialPojo) innerCredentialObject;
                     }
-                    errorCode = verifyContentInner(innerCredential, null);
+                    errorCode = verifyContentInner(innerCredential, null, offline);
                     if (errorCode != ErrorCode.SUCCESS) {
                         return errorCode;
                     }
@@ -581,17 +590,19 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             }
             return ErrorCode.SUCCESS;
         }
-        return verifySingleSignedCredential(credential, publicKey);
+        return verifySingleSignedCredential(credential, publicKey, offline);
     }
 
     private static ErrorCode verifySingleSignedCredential(
         CredentialPojo credential,
-        String publicKey
+        String publicKey,
+        boolean offline
     ) {
         ErrorCode errorCode = verifyCptFormat(
             credential.getCptId(),
             credential.getClaim(),
-            CredentialPojoUtils.isSelectivelyDisclosed(credential.getSalt())
+            CredentialPojoUtils.isSelectivelyDisclosed(credential.getSalt()),
+            offline
         );
         if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
             return errorCode;
@@ -655,8 +666,11 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     }
 
 
-    private static ErrorCode verifyCptFormat(Integer cptId, Map<String, Object> claim,
-        boolean isSelectivelyDisclosed) {
+    private static ErrorCode verifyCptFormat(
+        Integer cptId, Map<String, Object> claim,
+        boolean isSelectivelyDisclosed,
+        boolean offline
+    ) {
         if (cptId == CredentialConstant.CREDENTIALPOJO_EMBEDDED_SIGNATURE_CPT.intValue()) {
             if (!claim.containsKey("credentialList")) {
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
@@ -674,6 +688,9 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             }
         }
         try {
+            if (offline) {
+                return ErrorCode.SUCCESS;
+            }
             String claimStr = DataToolUtils.serialize(claim);
             Cpt cpt = getCptService().queryCpt(cptId).getResult();
             if (cpt == null) {
@@ -720,7 +737,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 
         List<String> types = credential.getType();
         for (String type : types) {
-            if (StringUtils.equals(type, CredentialConstant.ZKP_CREDENTIAL_TYPE)) {
+            if (StringUtils.equals(type, CredentialType.ZKP.getName())) {
                 return true;
             }
         }
@@ -879,6 +896,115 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         }
     }
 
+    private static boolean isLiteCredential(CredentialPojo credential) {
+
+        List<String> types = credential.getType();
+        if (types.contains(CredentialType.LITE1.getName())) {
+            return true;
+        }
+        return false;
+    }
+
+    private static ResponseData<Boolean> verifyLiteCredential(
+        CredentialPojo credential,
+        String publicKey) {
+        // Lite Credential only contains limited areas (others truncated)
+        if (credential.getCptId() == null || credential.getCptId().intValue() < 0) {
+            return new ResponseData<>(false, ErrorCode.CPT_ID_ILLEGAL);
+        }
+        if (!WeIdUtils.isWeIdValid(credential.getIssuer())) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_INVALID);
+        }
+        if (credential.getClaim() == null || credential.getClaim().size() == 0) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS);
+        }
+        if (credential.getProof() == null || StringUtils.isEmpty(credential.getSignature())) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_NOT_EXISTS);
+        }
+        String rawData = CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(credential);
+        if (!StringUtils.isBlank(publicKey)) {
+            boolean result;
+            try {
+                // For Lite CredentialPojo, we begin to use Secp256k1 verify to fit external type
+                result = DataToolUtils.secp256k1VerifySignature(rawData, credential.getSignature(),
+                    new BigInteger(publicKey));
+            } catch (Exception e) {
+                logger.error("[verifyContent] verify signature fail.", e);
+                return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
+            }
+            if (!result) {
+                return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
+            }
+            return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+        }
+        String issuerWeid = credential.getIssuer();
+        // Fetch public key from chain
+        ResponseData<WeIdDocument> innerResponseData =
+            getWeIdService().getWeIdDocument(issuerWeid);
+        if (innerResponseData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            logger.error(
+                "Error occurred when fetching WeIdentity DID document for: {}, msg: {}",
+                issuerWeid, innerResponseData.getErrorMessage());
+            return new ResponseData<Boolean>(false,
+                ErrorCode.getTypeByErrorCode(innerResponseData.getErrorCode()));
+        } else {
+            WeIdDocument weIdDocument = innerResponseData.getResult();
+            ErrorCode verifyErrorCode = DataToolUtils
+                .verifySecp256k1SignatureFromWeId(rawData, credential.getSignature(), weIdDocument);
+            if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<Boolean>(false, verifyErrorCode);
+            }
+            return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
+
+        }
+    }
+
+    /**
+     * Verify the authorization info in an authorization token credential.
+     *
+     * @param authInfo the auth info in CPT101 format
+     * @return success if valid, specific error codes otherwise
+     */
+    public static ErrorCode verifyAuthInfo(Cpt101 authInfo) {
+        if (authInfo == null) {
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+
+        String serviceUrl = authInfo.getServiceUrl();
+        String resourceId = authInfo.getResourceId();
+        Long duration = authInfo.getDuration();
+        if (!CredentialUtils.isValidUuid(resourceId)) {
+            logger.error("Resource ID illegal: is not a valid UUID.");
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        if (!DataToolUtils.isValidEndpointUrl(serviceUrl)) {
+            logger.error("Service URL illegal.");
+            return ErrorCode.ILLEGAL_INPUT;
+        }
+        if (duration < 0) {
+            logger.error("Auth token duration of validity illegal: already expired.");
+            return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
+        }
+
+        String fromWeId = authInfo.getFromWeId();
+        String toWeId = authInfo.getToWeId();
+        if (fromWeId.equalsIgnoreCase(toWeId)) {
+            logger.error("FromWeId and ToWeId must be different.");
+            return ErrorCode.AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT;
+        }
+        ResponseData<Boolean> existResp = getWeIdService().isWeIdExist(fromWeId);
+        if (!existResp.getResult()) {
+            logger.error("From WeID illegal: {}", existResp.getErrorMessage());
+            return ErrorCode.getTypeByErrorCode(existResp.getErrorCode());
+        }
+        existResp = getWeIdService().isWeIdExist(toWeId);
+        if (!existResp.getResult()) {
+            logger.error("To WeID illegal: {}", existResp.getErrorMessage());
+            return ErrorCode.getTypeByErrorCode(existResp.getErrorCode());
+        }
+        return ErrorCode.SUCCESS;
+    }
+
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CredentialPojoService#createCredential(
      *          com.webank.weid.protocol.request.CreateCredentialPojoArgs
@@ -933,7 +1059,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 result.setExpirationDate(newExpirationDate);
             }
             result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
-            result.addType(CredentialConstant.ORIGINAL_CREDENTIAL_TYPE);
+            result.addType(args.getType().getName());
+
             Object claimObject = args.getClaim();
             String claimStr = null;
             if (!(claimObject instanceof String)) {
@@ -945,11 +1072,15 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             HashMap<String, Object> claimMap = DataToolUtils.deserialize(claimStr, HashMap.class);
             result.setClaim(claimMap);
 
+            String privateKey = args.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey();
+            if (StringUtils.equals(args.getType().getName(), CredentialType.LITE1.getName())) {
+                return createLiteCredential(result, privateKey);
+            }
+
             Map<String, Object> saltMap = DataToolUtils.clone(claimMap);
             generateSalt(saltMap, null);
             String rawData = CredentialPojoUtils
                 .getCredentialThumbprintWithoutSig(result, saltMap, null);
-            String privateKey = args.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey();
 
             String signature = DataToolUtils.sign(rawData, privateKey);
 
@@ -962,7 +1093,6 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
             result.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
             result.setSalt(saltMap);
-
             ResponseData<CredentialPojo> responseData = new ResponseData<>(
                 result,
                 ErrorCode.SUCCESS
@@ -973,6 +1103,24 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             logger.error("Generate Credential failed due to system error. ", e);
             return new ResponseData<>(null, ErrorCode.CREDENTIAL_ERROR);
         }
+    }
+
+    private ResponseData<CredentialPojo> createLiteCredential(CredentialPojo credentialPojo,
+        String privateKey) {
+
+        String rawData = CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(credentialPojo);
+
+        // For Lite CredentialPojo, we begin to use Secp256k1 format signature to fit external type
+        String signature = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey, 10));
+
+        String proofType = CredentialProofType.ECDSA.getTypeName();
+        credentialPojo.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
+        credentialPojo.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
+        ResponseData<CredentialPojo> responseData = new ResponseData<>(
+            credentialPojo,
+            ErrorCode.SUCCESS
+        );
+        return responseData;
     }
 
     /**
@@ -1094,6 +1242,20 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     public ResponseData<CredentialPojo> createSelectiveCredential(
         CredentialPojo credential,
         ClaimPolicy claimPolicy) {
+
+        if (credential == null) {
+            logger.error("[createSelectiveCredential] input credential is null");
+            return new ResponseData<CredentialPojo>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (credential.getType() != null 
+            && (credential.getType().contains(CredentialType.LITE1.getName()) 
+            || credential.getType().contains(CredentialType.ZKP.getName()))) {
+            logger.error(
+                "[createSelectiveCredential] the credential does not support selective "
+                    + "disclosure, type = {}.", credential.getType());
+            return new ResponseData<CredentialPojo>(null,
+                ErrorCode.CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE);
+        }
         try {
             CredentialPojo credentialClone = DataToolUtils.clone(credential);
             ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credentialClone);
@@ -1193,7 +1355,10 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             logger.error("[verify] The input issuer weid is not match the credential's.");
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
         }
-        ErrorCode errorCode = verifyContent(credential, null);
+        if (isLiteCredential(credential)) {
+            return verifyLiteCredential(credential, null);
+        }
+        ErrorCode errorCode = verifyContent(credential, null, false);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[verify] credential verify failed. error message :{}", errorCode);
             return new ResponseData<Boolean>(false, errorCode);
@@ -1216,7 +1381,10 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         if (StringUtils.isEmpty(publicKey)) {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
         }
-        ErrorCode errorCode = verifyContent(credential, publicKey);
+        if (isLiteCredential(credential)) {
+            return verifyLiteCredential(credential, issuerPublicKey.getPublicKey());
+        }
+        ErrorCode errorCode = verifyContent(credential, publicKey, false);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<Boolean>(false, errorCode);
         }
@@ -1278,7 +1446,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                     return verifyZkpCredential(credential);
 
                 }
-                ErrorCode verifyCredentialResult = verifyContent(credential, null);
+                ErrorCode verifyCredentialResult = verifyContent(credential, null, false);
                 if (verifyCredentialResult.getCode() != ErrorCode.SUCCESS.getCode()) {
                     logger.error(
                         "[verify] verify credential {} failed.", credential);
@@ -1291,6 +1459,31 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 "[verify] verify credential error.", e);
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see com.webank.weid.rpc.CredentialPojoService#verify(
+     *          com.webank.weid.protocol.base.CredentialPojo,
+     *          com.webank.weid.protocol.base.WeIdPublicKey
+     *      )
+     */
+    @Override
+    public ResponseData<Boolean> verifyOffline(
+        WeIdPublicKey issuerPublicKey,
+        CredentialPojo credential) {
+
+        String publicKey = issuerPublicKey.getPublicKey();
+        if (StringUtils.isEmpty(publicKey)) {
+            return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
+        }
+        if (isLiteCredential(credential)) {
+            return verifyLiteCredential(credential, issuerPublicKey.getPublicKey());
+        }
+        ErrorCode errorCode = verifyContent(credential, publicKey, true);
+        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<Boolean>(false, errorCode);
+        }
+        return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
 
     @Override
@@ -1650,7 +1843,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicy.getPolicy();
 
         String policyType = presentationPolicy.getPolicyType();
-        if (StringUtils.equals(policyType, CredentialConstant.ZKP_CREDENTIAL_TYPE)) {
+        if (StringUtils.equals(policyType, CredentialType.ZKP.getName())) {
             newCredentialList = generateZkpCredentialList(credentialList, presentationPolicy,
                 userId);
         } else {
@@ -1913,7 +2106,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 encodedVerificationRule);
             List<String> zkpTyps = new ArrayList<>();
             zkpTyps.add(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
-            zkpTyps.add(CredentialConstant.ZKP_CREDENTIAL_TYPE);
+            zkpTyps.add(CredentialType.ZKP.getName());
             credentialClone.setType(zkpTyps);
             return new ResponseData<CredentialPojo>(credentialClone, ErrorCode.SUCCESS);
         } catch (DataTypeCastException e) {
@@ -2023,52 +2216,6 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             return new ResponseData<>(null, innerErrorCode);
         }
         return resp;
-    }
-
-    /**
-     * Verify the authorization info in an authorization token credential.
-     *
-     * @param authInfo the auth info in CPT101 format
-     * @return success if valid, specific error codes otherwise
-     */
-    public static ErrorCode verifyAuthInfo(Cpt101 authInfo) {
-        if (authInfo == null) {
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-
-        String serviceUrl = authInfo.getServiceUrl();
-        String resourceId = authInfo.getResourceId();
-        Long duration = authInfo.getDuration();
-        if (!CredentialUtils.isValidUuid(resourceId)) {
-            logger.error("Resource ID illegal: is not a valid UUID.");
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (!DataToolUtils.isValidEndpointUrl(serviceUrl)) {
-            logger.error("Service URL illegal.");
-            return ErrorCode.ILLEGAL_INPUT;
-        }
-        if (duration < 0) {
-            logger.error("Auth token duration of validity illegal: already expired.");
-            return ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL;
-        }
-
-        String fromWeId = authInfo.getFromWeId();
-        String toWeId = authInfo.getToWeId();
-        if (fromWeId.equalsIgnoreCase(toWeId)) {
-            logger.error("FromWeId and ToWeId must be different.");
-            return ErrorCode.AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT;
-        }
-        ResponseData<Boolean> existResp = getWeIdService().isWeIdExist(fromWeId);
-        if (!existResp.getResult()) {
-            logger.error("From WeID illegal: {}", existResp.getErrorMessage());
-            return ErrorCode.getTypeByErrorCode(existResp.getErrorCode());
-        }
-        existResp = getWeIdService().isWeIdExist(toWeId);
-        if (!existResp.getResult()) {
-            logger.error("To WeID illegal: {}", existResp.getErrorMessage());
-            return ErrorCode.getTypeByErrorCode(existResp.getErrorCode());
-        }
-        return ErrorCode.SUCCESS;
     }
 
 }

@@ -82,8 +82,34 @@ public final class CredentialPojoUtils {
             // Preserve the same behavior as in CredentialUtils - will merge later
             credMap.remove(ParamKeyConstant.PROOF);
             credMap.put(ParamKeyConstant.PROOF, null);
-            String claimHash = getClaimHash(credential, salt, disclosures);
-            credMap.put(ParamKeyConstant.CLAIM, claimHash);
+            credMap.put(ParamKeyConstant.CLAIM, getClaimHash(credential, salt, disclosures));
+            return DataToolUtils.mapToCompactJson(credMap);
+        } catch (Exception e) {
+            logger.error("get Credential Thumbprint WithoutSig error.", e);
+            return StringUtils.EMPTY;
+        }
+    }
+
+    /**
+     * Concat all fields of lite Credential info, without Signature, in Json format. This should be
+     * invoked when calculating Credential Signature. Return null if credential format is illegal.
+     * Note that: 1. Keys should be dict-ordered; 2. Claim should use standard getLiteClaimHash(); 
+     * 3. Use compact output to avoid Json format confusion.
+     *
+     * @param credential target Credential object
+     * @return Hash value in String.
+     */
+    public static String getLiteCredentialThumbprintWithoutSig(
+        CredentialPojo credential) {
+        try {
+            Map<String, Object> credMap = DataToolUtils.objToMap(credential);
+            credMap.remove(ParamKeyConstant.ISSUANCE_DATE);
+            credMap.remove(ParamKeyConstant.CONTEXT);
+            credMap.put(ParamKeyConstant.PROOF_TYPE, "lite1");
+            // Preserve the same behavior as in CredentialUtils - will merge later
+            credMap.remove(ParamKeyConstant.PROOF);
+            //credMap.put(ParamKeyConstant.PROOF, null);
+            credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credential));
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
             logger.error("get Credential Thumbprint WithoutSig error.", e);
@@ -162,8 +188,7 @@ public final class CredentialPojoUtils {
         try {
             Map<String, Object> credMap = DataToolUtils.objToMap(credential);
             // Replace the Claim value object with claim hash value to preserve immutability
-            String claimHash = getClaimHash(credential, salt, disclosures);
-            credMap.put(ParamKeyConstant.CLAIM, claimHash);
+            credMap.put(ParamKeyConstant.CLAIM, getClaimHash(credential, salt, disclosures));
             // Remove the whole Salt field to preserve immutability
             Map<String, Object> proof = (Map<String, Object>) credMap.get(ParamKeyConstant.PROOF);
             proof.remove(ParamKeyConstant.PROOF_SALT);
@@ -193,6 +218,32 @@ public final class CredentialPojoUtils {
             return StringUtils.EMPTY;
         }
         return DataToolUtils.sha3(rawData);
+    }
+
+    /**
+     * Create a full lite CredentialPojo Hash for a Credential based on all its fields.
+     *
+     * @param credentialPojo target Credential object
+     * @return Hash value in String.
+     */
+    public static String getLiteCredentialPojoHash(CredentialPojo credentialPojo) {
+
+        try {
+            Map<String, Object> credMap = DataToolUtils.objToMap(credentialPojo);
+            // Replace the Claim value object with claim hash value to preserve immutability
+            credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credentialPojo));
+            // Remove the whole Salt field to preserve immutability
+            Map<String, Object> proof = (Map<String, Object>) credMap.get(ParamKeyConstant.PROOF);
+            proof.remove(ParamKeyConstant.PROOF_SALT);
+            proof.put(ParamKeyConstant.PROOF_SALT, null);
+            credMap.remove(ParamKeyConstant.PROOF);
+            credMap.put(ParamKeyConstant.PROOF, proof);
+            String rawData = DataToolUtils.mapToCompactJson(credMap);
+            return DataToolUtils.sha3(rawData);
+        } catch (Exception e) {
+            logger.error("get Credential Thumbprint error.", e);
+            return StringUtils.EMPTY;
+        }
     }
 
     /**
@@ -401,6 +452,18 @@ public final class CredentialPojoUtils {
         return false;
     }
 
+    /**
+     * Get the lite credential claim hash.
+     *
+     * @param credential Credential
+     * @return the claimMap value
+     */
+    public static Map<String, Object> getLiteClaimHash(
+        CredentialPojo credential) {
+
+        Map<String, Object> claim = credential.getClaim();
+        return  DataToolUtils.clone((HashMap) claim);
+    }
 
     /**
      * Get the claim hash. This is irrelevant to selective disclosure.
@@ -408,9 +471,9 @@ public final class CredentialPojoUtils {
      * @param credential Credential
      * @param salt Salt Map
      * @param disclosures Disclosure Map
-     * @return the unique claim hash value
+     * @return the claimMap value
      */
-    public static String getClaimHash(
+    public static Map<String, Object> getClaimHash(
         CredentialPojo credential,
         Map<String, Object> salt,
         Map<String, Object> disclosures
@@ -419,13 +482,7 @@ public final class CredentialPojoUtils {
         Map<String, Object> claim = credential.getClaim();
         Map<String, Object> newClaim = DataToolUtils.clone((HashMap) claim);
         addSaltAndGetHash(newClaim, salt, disclosures);
-        try {
-            String jsonData = DataToolUtils.mapToCompactJson(newClaim);
-            return jsonData;
-        } catch (Exception e) {
-            logger.error("[getClaimHash] get claim hash failed. {}", e);
-        }
-        return StringUtils.EMPTY;
+        return newClaim;
     }
 
     private static void addSaltAndGetHash(
@@ -821,6 +878,9 @@ public final class CredentialPojoUtils {
             || StringUtils.isBlank(callerAuth.getWeIdPrivateKey().getPrivateKey())
             || StringUtils.isBlank(callerAuth.getWeIdPublicKeyId())) {
             return ErrorCode.ILLEGAL_INPUT;
+        }
+        if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {
+            return ErrorCode.WEID_INVALID;
         }
         return ErrorCode.SUCCESS;
     }
