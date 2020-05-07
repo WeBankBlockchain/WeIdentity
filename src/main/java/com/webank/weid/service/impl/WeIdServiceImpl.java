@@ -470,19 +470,18 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         String weId,
         boolean isDelegate) {
         if (WeIdUtils.isWeIdValid(weId)) {
+            ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
+            if (isWeIdExistResp.getResult() == null || !isWeIdExistResp.getResult()) {
+                logger.error("[setAuthentication]: failed, the weid :{} does not exist",
+                    weId);
+                return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
+            }
             String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-
             if (StringUtils.isEmpty(owner)) {
                 owner = weAddress;
             } else {
                 if (WeIdUtils.isWeIdValid(owner)) {
                     owner = WeIdUtils.convertWeIdToAddress(owner);
-                    ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
-                    if (isWeIdExistResp.getResult() == null || !isWeIdExistResp.getResult()) {
-                        logger.error("[setAuthentication]: failed, the weid :{} does not exist",
-                            weId);
-                        return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
-                    }
                 } else {
                     logger.error("[setAuthentication]: owner : {} is invalid.", owner);
                     return new ResponseData<>(false, ErrorCode.WEID_INVALID);
