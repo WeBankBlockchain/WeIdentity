@@ -280,13 +280,11 @@ public enum ErrorCode {
     CREDENTIAL_USE_VERIFY_FUNCTION_ERROR(100439,
         "presentation from pdf transportation, please use verifyPresentationFromPDF function"),
 
-
     /**
-     * lite credential does not support selective disclosure.
+     * the credential does not support selective disclosure.
      */
     CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE(100440,
-        "lite credential does not support selective disclosure."),
-
+        "the credential does not support selective disclosure."),
 
     /**
      * Authorization WeIDs: from and to must be different.
