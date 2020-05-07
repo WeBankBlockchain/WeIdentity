@@ -1247,11 +1247,12 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             logger.error("[createSelectiveCredential] input credential is null");
             return new ResponseData<CredentialPojo>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        if (credential.getType() != null && credential.getType()
-            .contains(CredentialType.LITE1.getName())) {
+        if (credential.getType() != null 
+            && (credential.getType().contains(CredentialType.LITE1.getName()) 
+            || credential.getType().contains(CredentialType.ZKP.getName()))) {
             logger.error(
-                "[createSelectiveCredential] lite credential does not support selective "
-                    + "disclosure.");
+                "[createSelectiveCredential] the credential does not support selective "
+                    + "disclosure, type = {}.", credential.getType());
             return new ResponseData<CredentialPojo>(null,
                 ErrorCode.CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE);
         }
