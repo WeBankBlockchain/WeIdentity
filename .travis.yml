@@ -46,16 +46,16 @@ jobs:
       if: (branch = master)
     - stage: "dependency pipeline"
       script:
-        - chmod u+x .ci/script/weid-build-tools/build-ci.sh
-        - .ci/script/weid-build-tools/build-ci.sh
-      name: "Build Tools simple CI"
-      if: (branch = master)
-    - stage: "dependency pipeline"
-      script:
         - chmod +x .ci/script/weid-sample/build-ci.sh
         - .ci/script/weid-sample/build-ci.sh
       name: "Sample simple CI"
       if: (branch = master)
+#    - stage: "dependency pipeline"
+#      script:
+#        - chmod u+x .ci/script/weid-build-tools/build-ci.sh
+#        - .ci/script/weid-build-tools/build-ci.sh
+#      name: "Build Tools simple CI"
+#      if: (branch = master)
 
 deploy:
   provider: releases
