@@ -19,6 +19,7 @@
 
 package com.webank.weid.suite.api.crypto.params;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -26,6 +27,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.web3j.crypto.Keys;
 
 import com.webank.weid.util.DataToolUtils;
 
@@ -80,5 +84,38 @@ public class KeyGenerator {
         key.setPrivavteKey(pri);
         key.setPublicKey(pub);
         return key;
+    }
+    
+    /**
+     * 将WeId生成的10进制密钥转换成可以加解密的Base64密钥.
+     * 该方法根据密钥字节长度自动判断是公钥还私钥
+     * @param decimalKey 10进制的数字密钥
+     * @return 返回补位后的base64密钥
+     */
+    public static String decimalKeyToBase64(String decimalKey) {
+        if (!StringUtils.isNumeric(decimalKey)) {
+            return StringUtils.EMPTY;
+        }
+        BigInteger bigInt = new BigInteger(decimalKey, 10);
+        int keySize = Keys.PUBLIC_KEY_LENGTH_IN_HEX;
+        //公钥字节长度为63, 64, 65
+        //私钥的字节长度32, 33, 30, 31
+        if (bigInt.toByteArray().length < 50) {
+            keySize = Keys.PRIVATE_KEY_LENGTH_IN_HEX;
+        }
+        String hex = Numeric.toHexStringNoPrefixZeroPadded(bigInt, keySize);
+        return Base64.encodeBase64String(Numeric.hexStringToByteArray(hex));
+    }
+    
+    /**
+     * 将Base64类型的密钥转换成10进制的数字密钥.
+     * @param base64Key Base64类型密钥
+     * @return 返回10进制的数字密钥
+     */
+    public static String base64KeyTodecimal(String base64Key) {
+        if (!DataToolUtils.isValidBase64String(base64Key)) {
+            return StringUtils.EMPTY; 
+        }
+        return Numeric.toBigInt(Base64.decodeBase64(base64Key)).toString();
     }
 }
