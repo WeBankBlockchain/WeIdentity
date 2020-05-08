@@ -908,7 +908,19 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     private static ResponseData<Boolean> verifyLiteCredential(
         CredentialPojo credential,
         String publicKey) {
-
+        // Lite Credential only contains limited areas (others truncated)
+        if (credential.getCptId() == null || credential.getCptId().intValue() < 0) {
+            return new ResponseData<>(false, ErrorCode.CPT_ID_ILLEGAL);
+        }
+        if (!WeIdUtils.isWeIdValid(credential.getIssuer())) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_INVALID);
+        }
+        if (credential.getClaim() == null || credential.getClaim().size() == 0) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS);
+        }
+        if (credential.getProof() == null || StringUtils.isEmpty(credential.getSignature())) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_NOT_EXISTS);
+        }
         String rawData = CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(credential);
         if (!StringUtils.isBlank(publicKey)) {
             boolean result;
@@ -940,8 +952,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             ErrorCode verifyErrorCode = DataToolUtils
                 .verifySecp256k1SignatureFromWeId(rawData, credential.getSignature(), weIdDocument);
             if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                return new ResponseData<Boolean>(false,
-                    ErrorCode.getTypeByErrorCode(innerResponseData.getErrorCode()));
+                return new ResponseData<Boolean>(false, verifyErrorCode);
             }
             return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
 
@@ -1236,11 +1247,12 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             logger.error("[createSelectiveCredential] input credential is null");
             return new ResponseData<CredentialPojo>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        if (credential.getType() != null && credential.getType()
-            .contains(CredentialType.LITE1.getName())) {
+        if (credential.getType() != null 
+            && (credential.getType().contains(CredentialType.LITE1.getName()) 
+            || credential.getType().contains(CredentialType.ZKP.getName()))) {
             logger.error(
-                "[createSelectiveCredential] lite credential does not support selective "
-                    + "disclosure.");
+                "[createSelectiveCredential] the credential does not support selective "
+                    + "disclosure, type = {}.", credential.getType());
             return new ResponseData<CredentialPojo>(null,
                 ErrorCode.CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE);
         }
