@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.constant.ProcessingMode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
@@ -43,7 +43,6 @@ import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.impl.inner.PropertiesService;
 import com.webank.weid.util.BatchTransactionUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
@@ -59,6 +58,22 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
 
     private WeIdService weIdService = new WeIdServiceImpl();
+    
+    private ProcessingMode processingMode = ProcessingMode.IMMEDIATE;
+    
+    public EvidenceServiceImpl() {
+        super();
+    }
+    
+    /**
+     * 传入processingMode来决定上链模式.
+     * 
+     * @param processingMode 上链模式
+     */
+    public EvidenceServiceImpl(ProcessingMode processingMode) {
+        super();
+        this.processingMode = processingMode;
+    }
 
     @Override
     public ResponseData<Boolean> createRawEvidenceWithCustomKey(
@@ -234,10 +249,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getCurrentTimeStamp();
-
-            boolean flag = getOfflineFlag();
-            if (flag) {
-
+            if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
                 String[] args = new String[5];
                 args[0] = hashValue;
                 args[1] = signature;
@@ -435,10 +447,8 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getCurrentTimeStamp();
-
-            boolean flag = getOfflineFlag();
-            if (flag) {
-
+            
+            if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
                 String[] args = new String[6];
                 args[0] = hashValue;
                 args[1] = signature;
@@ -464,6 +474,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
                 }
             }
+
             return evidenceServiceEngine.createEvidenceWithCustomKey(
                 hashValue,
                 signature,
@@ -496,14 +507,5 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private boolean isChainStringLengthValid(String string) {
         return string.length() < WeIdConstant.ON_CHAIN_STRING_LENGTH;
-    }
-
-    private boolean getOfflineFlag() {
-        String flag = PropertiesService.getInstance()
-            .getProperty(ParamKeyConstant.ENABLE_OFFLINE);
-        if (StringUtils.isNotBlank(flag)) {
-            return new Boolean(flag);
-        }
-        return false;
     }
 }

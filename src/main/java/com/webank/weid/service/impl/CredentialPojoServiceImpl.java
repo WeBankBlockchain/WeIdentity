@@ -1251,8 +1251,8 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             && (credential.getType().contains(CredentialType.LITE1.getName()) 
             || credential.getType().contains(CredentialType.ZKP.getName()))) {
             logger.error(
-                "[createSelectiveCredential] the credential does not support selective "
-                    + "disclosure, type = {}.", credential.getType());
+                "[createSelectiveCredential] Lite Credential and ZKP Credential DO NOT support "
+                + "this function(createSelectiveCredential), type = {}.", credential.getType());
             return new ResponseData<CredentialPojo>(null,
                 ErrorCode.CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE);
         }
