@@ -659,7 +659,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
             }
             if (!result) {
-                return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
+                return ErrorCode.CREDENTIAL_VERIFY_FAIL;
             }
             return ErrorCode.SUCCESS;
         }
@@ -730,7 +730,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
         }
 
-        return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ERROR);
+        return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_VERIFY_FAIL);
     }
 
     private static Boolean isZkpCredential(CredentialPojo credential) {
@@ -933,7 +933,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
             }
             if (!result) {
-                return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
+                return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_VERIFY_FAIL);
             }
             return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
         }

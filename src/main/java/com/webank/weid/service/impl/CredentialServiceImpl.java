@@ -509,7 +509,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     DataToolUtils
                         .verifySignature(rawData, signatureData, new BigInteger(publicKey));
                 if (!result) {
-                    return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
+                    return new ResponseData<>(false, ErrorCode.CREDENTIAL_VERIFY_FAIL);
                 }
                 return new ResponseData<>(true, ErrorCode.SUCCESS);
             }
