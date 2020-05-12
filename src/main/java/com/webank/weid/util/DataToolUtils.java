@@ -871,7 +871,7 @@ public final class DataToolUtils {
                 }
             }
             if (!result) {
-                return ErrorCode.CREDENTIAL_ISSUER_MISMATCH;
+                return ErrorCode.CREDENTIAL_VERIFY_FAIL;
             }
         } catch (Exception e) {
             logger.error("some exceptions occurred in signature verification", e);
@@ -943,7 +943,7 @@ public final class DataToolUtils {
                 }
             }
             if (!result) {
-                return ErrorCode.CREDENTIAL_ISSUER_MISMATCH;
+                return ErrorCode.CREDENTIAL_VERIFY_FAIL;
             }
         } catch (SignatureException e) {
             logger.error("some exceptions occurred in signature verification", e);
