@@ -29,7 +29,6 @@ import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
 import com.webank.weid.suite.api.transportation.inf.QrCodeTransportation;
 import com.webank.weid.suite.api.transportation.inf.Transportation;
 import com.webank.weid.suite.api.transportation.params.TransportationType;
-import com.webank.weid.suite.transportation.bar.impl.BarCodeTransportationImpl;
 import com.webank.weid.suite.transportation.json.impl.JsonTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
 import com.webank.weid.suite.transportation.qr.impl.QrCodeTransportationImpl;
@@ -63,8 +62,6 @@ public class TransportationFactory {
         switch (transportationType) {
             case JSON:
                 return new JsonTransportationImpl();
-            case BAR_CODE:
-                return new BarCodeTransportationImpl();
             case QR_CODE:
                 return new QrCodeTransportationImpl();
             default:
