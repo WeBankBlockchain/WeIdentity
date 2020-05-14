@@ -22,9 +22,7 @@ package com.webank.weid.service.fisco.v2;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
@@ -107,9 +105,7 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
         service = buildFiscoBcosService(fiscoConfig);
         service.setPushCallback((ChannelPushCallback) pushCallBack);
         // Set topics for AMOP
-        Set<String> topics = new HashSet<String>();
-        topics.add(fiscoConfig.getCurrentOrgId());
-        service.setTopics(topics);
+        service.setTopics(super.getTopic());
         try {
             service.run();
         } catch (Exception e) {
