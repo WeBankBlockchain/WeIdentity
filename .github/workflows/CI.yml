@@ -1,0 +1,254 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master, develop, release/** ]
+
+jobs:
+  weid-java-sdk-ci:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 3
+      - name: Verify MySQL connection and create CI DB
+        run: |
+          sudo systemctl start mysql.service
+          sudo apt-get install -y mysql-client
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'CREATE DATABASE IF NOT EXISTS cidb;'
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'show databases;'
+      - name: Prepare blockchain nodes and certificates
+        run: |
+          mkdir -p fisco && cd fisco
+          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh && chmod u+x build_chain.sh
+          bash build_chain.sh -l "127.0.0.1:2" -p 30300,20200,8545
+          bash nodes/127.0.0.1/start_all.sh
+          ps -ef | grep -v grep | grep fisco
+          cd ..
+          cp ./fisco/nodes/127.0.0.1/sdk/* ./.ci/
+      - name: Prepare gradle
+        uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 5.4.1
+      - name: source-code deployment
+        run: |
+          export NODE_IP=127.0.0.1:20200
+          export NODE2_IP=127.0.0.1:20201
+          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          chmod u+x .ci/script/build-ci.sh
+          .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root
+      - name: Run CI
+        run: |
+          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          gradle check -i
+          gradle jacocoTestReport
+          bash <(curl -s https://codecov.io/bash)
+      - name: Download failed log (if any)
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: sdk-log
+          path: /home/runner/work/WeIdentity/WeIdentity/build/reports/
+  weid-sample-ci:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 3
+      - name: Verify MySQL connection and create CI DB
+        run: |
+          sudo systemctl start mysql.service
+          sudo apt-get install -y mysql-client
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'CREATE DATABASE IF NOT EXISTS cidb;'
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'show databases;'
+      - name: Prepare blockchain nodes and certificates
+        run: |
+          mkdir -p fisco && cd fisco
+          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh && chmod u+x build_chain.sh
+          bash build_chain.sh -l "127.0.0.1:2" -p 30300,20200,8545
+          bash nodes/127.0.0.1/start_all.sh
+          ps -ef | grep -v grep | grep fisco
+          cd ..
+          cp ./fisco/nodes/127.0.0.1/sdk/* ./.ci/
+      - name: Prepare gradle
+        uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 5.4.1
+      - name: source-code deployment
+        run: |
+          export NODE_IP=127.0.0.1:20200
+          export NODE2_IP=127.0.0.1:20201
+          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          chmod u+x .ci/script/build-ci.sh
+          .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root
+      - name: Checkout and prepare
+        run: |
+          git clone https://github.com/WeBankFinTech/weid-sample.git
+          cd weid-sample
+          git checkout develop
+          cd ..
+          mkdir -p weid-sample/dependencies
+          cp dist/app/*.jar weid-sample/dependencies/weid-java-sdk-pipeline.jar
+          mkdir -p weid-sample/libs
+          cp dist/lib/*.jar weid-sample/libs/
+          cp ecdsa_key weid-sample/keys/priv/
+          cp src/main/resources/fisco.properties weid-sample/src/main/resources/
+          cp src/main/resources/weidentity.properties weid-sample/src/main/resources/
+          cp .ci/ca.crt weid-sample/src/main/resources/
+          cp .ci/node.crt weid-sample/src/main/resources/
+          cp .ci/node.key weid-sample/src/main/resources/
+      - name: Run CI
+        run: |
+          cd weid-sample
+          chmod u+x *.sh
+          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          export NODE_IP=127.0.0.1:20200
+          export NODE2_IP=127.0.0.1:20201
+          ./build.sh
+          ./sample-ci.sh
+      - name: Download failed log (if any)
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: sample-log
+          path: /home/runner/work/WeIdentity/WeIdentity/weid-sample/build/reports/
+  weid-http-service-ci:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 3
+      - name: Verify MySQL connection and create CI DB
+        run: |
+          sudo systemctl start mysql.service
+          sudo apt-get install -y mysql-client
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'CREATE DATABASE IF NOT EXISTS cidb;'
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'show databases;'
+      - name: Prepare blockchain nodes and certificates
+        run: |
+          mkdir -p fisco && cd fisco
+          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh && chmod u+x build_chain.sh
+          bash build_chain.sh -l "127.0.0.1:2" -p 30300,20200,8545
+          bash nodes/127.0.0.1/start_all.sh
+          ps -ef | grep -v grep | grep fisco
+          cd ..
+          cp ./fisco/nodes/127.0.0.1/sdk/* ./.ci/
+      - name: Prepare gradle
+        uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 5.4.1
+      - name: source-code deployment
+        run: |
+          export NODE_IP=127.0.0.1:20200
+          export NODE2_IP=127.0.0.1:20201
+          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          chmod u+x .ci/script/build-ci.sh
+          .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root
+      - name: Checkout and prepare
+        run: |
+          git clone https://github.com/WeBankFinTech/weid-http-service.git
+          cp dist/app/*.jar weid-http-service/dependencies/weid-java-sdk-pipeline.jar
+          mkdir -p weid-http-service/libs
+          cp dist/lib/* weid-http-service/libs
+          cp ecdsa_key weid-http-service/src/main/resources/ && cp ecdsa_key weid-http-service/src/test/resources/ && cp ecdsa_key weid-http-service/keys/priv/ && cp ecdsa_key weid-http-service/dist/keys/priv/
+          cp src/main/resources/fisco.properties weid-http-service/src/main/resources/
+          cp src/main/resources/fisco.properties weid-http-service/src/test/resources/
+          cp src/main/resources/weidentity.properties weid-http-service/src/main/resources/
+          cp src/main/resources/weidentity.properties weid-http-service/src/test/resources/
+          cp .ci/ca.crt weid-http-service/src/test/resources/
+          cp .ci/ca.crt weid-http-service/src/main/resources/
+          cp .ci/node.crt weid-http-service/src/test/resources/
+          cp .ci/node.crt weid-http-service/src/main/resources/
+          cp .ci/node.key weid-http-service/src/test/resources/
+          cp .ci/node.key weid-http-service/src/main/resources/
+      - name: Run CI
+        run: |
+          cd weid-http-service/
+          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.6.1/bin:$PATH
+          ls -ll libs
+          gradle clean build -i -x test
+      - name: Download failed log (if any)
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: http-service-log
+          path: /home/runner/work/WeIdentity/WeIdentity/weid-http-service/build/reports/
+  weid-build-tools-ci:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 3
+      - name: Verify MySQL connection and create CI DB
+        run: |
+          sudo systemctl start mysql.service
+          sudo apt-get install -y mysql-client
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'CREATE DATABASE IF NOT EXISTS cidb;'
+          mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'show databases;'
+      - name: Prepare blockchain nodes and certificates
+        run: |
+          mkdir -p fisco && cd fisco
+          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh && chmod u+x build_chain.sh
+          bash build_chain.sh -l "127.0.0.1:2" -p 30300,20200,8545
+          bash nodes/127.0.0.1/start_all.sh
+          ps -ef | grep -v grep | grep fisco
+          cd ..
+          cp ./fisco/nodes/127.0.0.1/sdk/* ./.ci/
+      - name: Prepare gradle
+        uses: eskatos/gradle-command-action@v1
+        with:
+          gradle-version: 5.4.1
+      - name: source-code deployment
+        run: |
+          export NODE_IP=127.0.0.1:20200
+          export NODE2_IP=127.0.0.1:20201
+          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          chmod u+x .ci/script/build-ci.sh
+          .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root
+      - name: Checkout and prepare
+        run: |
+          git clone https://github.com/WeBankFinTech/weid-build-tools.git
+          mkdir -p weid-build-tools/dependencies
+          cp dist/app/*.jar weid-build-tools/dependencies/weid-java-sdk-pipeline.jar
+          wget https://github.com/FISCO-BCOS/fisco-solc/raw/master/fisco-solc-ubuntu
+          sudo cp fisco-solc-ubuntu /usr/bin/fisco-solc
+          sudo chmod u+x /usr/bin/fisco-solc
+          cp .ci/ca.crt weid-build-tools/resources/
+          cp .ci/node.crt weid-build-tools/resources/
+          cp .ci/node.key weid-build-tools/resources/
+      - name: Run CI
+        run: |
+          cd weid-build-tools/
+          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          sed -i -e '$a\org_id=test' run.config
+          sed -i -e '$a\blockchain_address=127.0.0.1:20200' run.config
+          sed -i -e '$a\mysql_address=127.0.0.1:3306' run.config
+          sed -i -e '$a\mysql_database=cidb' run.config
+          sed -i -e '$a\mysql_username=root' run.config
+          sed -i -e '$a\mysql_password=root' run.config
+          chmod u+x compile.sh
+          ./compile.sh
+          chmod u+x deploy.sh
+          ./deploy.sh
+          cp ./script/build_tools_ci.sh .
+          chmod u+x build_tools_ci.sh
+          ./build_tools_ci.sh
+      - name: Download failed log (if any)
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v1
+        with:
+          name: build-tools-log
+          path: /home/runner/work/WeIdentity/WeIdentity/weid-build-tools/build/reports/
