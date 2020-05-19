@@ -16,6 +16,7 @@ import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoderFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.contract.v2.DataBucket;
@@ -28,13 +29,14 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
 public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketServiceEngine {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(DataBucketServiceEngineV2.class);
-    
-    private static DataBucket dataBucket;
-    
+
+    private DataBucket dataBucket;
+    private CnsType cnsType;
+
     private static TransactionDecoder txDecodeSampleDecoder;
-    
+
     static {
         txDecodeSampleDecoder = TransactionDecoderFactory.buildTransactionDecoder(
                 DataBucket.ABI, DataBucket.BINARY);
@@ -42,21 +44,24 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
 
     /**
      * 构造函数.
+     * 
+     * @param cnsType cns类型枚举
      */
-    public DataBucketServiceEngineV2() {
+    public DataBucketServiceEngineV2(CnsType cnsType) {
+        this.cnsType = cnsType;
         loadDataBucket();
     }
-    
+
     private void loadDataBucket() {
         if (dataBucket == null) {
-            dataBucket = super.getContractService(super.getBucketAddress(), DataBucket.class);
+            dataBucket = super.getContractService(getBucketAddress(cnsType), DataBucket.class);
         }
     }
-    
+
     private DataBucket getDataBucket(String privateKey) {
-        return super.reloadContract(super.getBucketAddress(), privateKey, DataBucket.class);
+        return super.reloadContract(getBucketAddress(cnsType), privateKey, DataBucket.class);
     }
-    
+
     @Override
     public ResponseData<Boolean> put(
         String hash, 
@@ -119,7 +124,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
                 errorCode.getCode(), errorCode.getCodeDesc()); 
         }
     }
-    
+
     @Override
     public ResponseData<String> get(String hash, String key) {
         Bytes32 keyByte32 = DataToolUtils.bytesArrayToBytes32(key.getBytes());
@@ -130,7 +135,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
                 logger.error("[get] the hash does not exits, hash is {}.", hash);
                 return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.CNS_DOES_NOT_EXIST);
             }
-            logger.info("[get] get address successfully, hash: {}, key: {}, address: {}", 
+            logger.info("[get] get address successfully, hash: {}, key: {}, value: {}", 
                 hash, key, tuple.getValue2());
             return new ResponseData<String>(tuple.getValue2(), ErrorCode.SUCCESS);  
         } catch (Exception e) {

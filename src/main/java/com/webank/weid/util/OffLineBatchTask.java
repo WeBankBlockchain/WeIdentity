@@ -121,16 +121,16 @@ public class OffLineBatchTask extends AbstractService {
                     break;
             }
         }
-
-        return evidenceServiceEngine
-            .batchCreateEvidenceWithCustomKey(
-                hashValues,
-                signatures,
-                logs,
-                timestamp,
-                signers,
-                customKeys,
-                privateKey);
+        return null;
+        //return evidenceServiceEngine
+        //    .batchCreateEvidenceWithCustomKey(
+        //        hashValues,
+        //        signatures,
+        //        logs,
+        //        timestamp,
+        //        signers,
+        //        customKeys,
+        //        privateKey);
     }
 
     private static String getPrivateKeyByWeId(String weId) {

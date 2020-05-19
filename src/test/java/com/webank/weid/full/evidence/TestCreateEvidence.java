@@ -294,7 +294,8 @@ public class TestCreateEvidence extends TestBaseService {
                 customKeys.add(StringUtils.EMPTY);
             }
         }
-        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine();
+
+        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine(masterGroupId);
 
         // raw creation
         Long start = System.currentTimeMillis();

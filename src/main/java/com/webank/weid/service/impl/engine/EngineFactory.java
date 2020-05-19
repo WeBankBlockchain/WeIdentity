@@ -19,6 +19,7 @@
 
 package com.webank.weid.service.impl.engine;
 
+import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.service.impl.engine.fiscov1.AuthorityIssuerEngineV1;
 import com.webank.weid.service.impl.engine.fiscov1.CptServiceEngineV1;
@@ -75,13 +76,14 @@ public class EngineFactory {
 
     /**
      * create EvidenceServiceEngine.
+     * @param groupId 群组编号
      * @return EvidenceServiceEngine object
      */
-    public static EvidenceServiceEngine createEvidenceServiceEngine() {
+    public static EvidenceServiceEngine createEvidenceServiceEngine(Integer groupId) {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return new EvidenceServiceEngineV1();
         }
-        return new EvidenceServiceEngineV2();
+        return new EvidenceServiceEngineV2(groupId);
     }
 
     /**
@@ -97,12 +99,13 @@ public class EngineFactory {
     
     /**
      * create DataBucketServiceEngine.
+     * @param cnsType cns类型枚举
      * @return DataBucketServiceEngine object
     */
-    public static DataBucketServiceEngine createDataBucketServiceEngine() {
+    public static DataBucketServiceEngine createDataBucketServiceEngine(CnsType cnsType) {
         if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             return null;
         }
-        return new DataBucketServiceEngineV2();
+        return new DataBucketServiceEngineV2(cnsType);
     }
 }

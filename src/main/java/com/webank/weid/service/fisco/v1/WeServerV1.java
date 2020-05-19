@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.config.FiscoConfig;
+import com.webank.weid.constant.CnsType;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.exception.WeIdBaseException;
@@ -54,9 +55,9 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
 
     private static final Logger logger = LoggerFactory.getLogger(WeServerV1.class);
 
-    private static Web3j web3j;
-    private static Service service;
-    private static Credentials credentials;
+    private Web3j web3j;
+    private Service service;
+    private Credentials credentials;
 
     public WeServerV1(FiscoConfig fiscoConfig) {
         super(fiscoConfig, new OnNotifyCallbackV1());
@@ -78,7 +79,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     }
 
     @Override
-    protected void initWeb3j() {
+    protected void initWeb3j(Integer groupId) {
         logger.info("[WeServiceImplV1] begin to init web3j instance..");
         service = buildFiscoBcosService(fiscoConfig);
         service.setPushCallback((ChannelPushCallback) pushCallBack);
@@ -195,7 +196,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     }
 
     @Override
-    protected String queryBucketFromCns() throws WeIdBaseException {
+    protected String queryBucketFromCns(CnsType cnsType) throws WeIdBaseException {
         return null;
     }
 }
