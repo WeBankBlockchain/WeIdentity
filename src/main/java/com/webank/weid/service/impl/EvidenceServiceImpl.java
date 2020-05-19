@@ -43,6 +43,9 @@ import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
+import com.webank.weid.service.impl.inner.PropertiesService;
 import com.webank.weid.util.BatchTransactionUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
@@ -61,18 +64,27 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     
     private ProcessingMode processingMode = ProcessingMode.IMMEDIATE;
     
+    private EvidenceServiceEngine evidenceServiceEngine;
+    
     public EvidenceServiceImpl() {
         super();
+        initEvidenceServiceEngine(masterGroupId);
     }
     
     /**
      * 传入processingMode来决定上链模式.
      * 
      * @param processingMode 上链模式
+     * @param groupId 群组编号
      */
-    public EvidenceServiceImpl(ProcessingMode processingMode) {
-        super();
+    public EvidenceServiceImpl(ProcessingMode processingMode, Integer groupId) {
+        super(groupId);
         this.processingMode = processingMode;
+        initEvidenceServiceEngine(groupId);
+    }
+
+    private void initEvidenceServiceEngine(Integer groupId) {
+        evidenceServiceEngine = EngineFactory.createEvidenceServiceEngine(groupId);
     }
 
     @Override
