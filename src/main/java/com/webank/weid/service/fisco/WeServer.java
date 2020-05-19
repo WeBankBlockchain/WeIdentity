@@ -20,6 +20,7 @@
 package com.webank.weid.service.fisco;
 
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,6 +31,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
@@ -49,34 +51,24 @@ public abstract class WeServer<W, C, S> {
     public static final int MAX_AMOP_REQUEST_TIMEOUT = 50000;
     public static final int AMOP_REQUEST_TIMEOUT = Integer
         .valueOf(PropertyUtils.getProperty("amop.request.timeout", "5000"));
-    
-    //默认的全局cns名称
-    public static final String CNS_NAME;
-    private static final String DEFAULT_CNS_NAME = "allOrg";
-    //默认的全局cns版本
-    public static final String CNS_VERSION = "v1.1";
-    //全局唯一bucket地址
-    protected static String bucketAddress;
-    
-    static {
-        String profile = PropertyUtils.getProperty("cns.profile.active");
-        if (StringUtils.isNotBlank(profile)) {
-            CNS_NAME = profile + "/" + DEFAULT_CNS_NAME;
-        } else {
-            CNS_NAME = DEFAULT_CNS_NAME;
-        }
-    }
-    
+
     /**
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(WeServer.class);
 
     /**
-     * WeServer对象.
+     * WeServer对象上下文.
      */
-    private static WeServer<?, ?, ?> weServer;
+    private static ConcurrentHashMap<Integer, WeServer<?, ?, ?>>  weServerContext = 
+        new ConcurrentHashMap<>();
 
+    /**
+     * bucket地址映射Map.
+     */
+    private static ConcurrentHashMap<String, String> bucketAddressMap = 
+        new ConcurrentHashMap<>();
+    
     /**
      * FISCO配置对象.
      */
@@ -103,14 +95,20 @@ public abstract class WeServer<W, C, S> {
      * 初始化WeServer服务,进行多线程安全保护,确保整个应用只初始化一次 并且根据配置FISCO的版本来自动初始化对应版本的服务.
      *
      * @param fiscoConfig FISCO配置对象
+     * @param groupId 群组ID
      * @param <W> Web3j对象
      * @param <C> Credential对象
      * @param <S> Service 对象
      * @return 返回WeServer对象
      */
-    public static synchronized <W, C, S> WeServer<W, C, S> init(FiscoConfig fiscoConfig) {
+    public static synchronized <W, C, S> WeServer<W, C, S> getInstance(
+        FiscoConfig fiscoConfig, 
+        Integer groupId
+    ) {
+        WeServer<?, ?, ?> weServer = weServerContext.get(groupId);
         if (weServer == null) {
             synchronized (WeServer.class) {
+                weServer = weServerContext.get(groupId);
                 if (weServer == null) {
                     if (fiscoConfig.getVersion()
                         .startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
@@ -118,11 +116,12 @@ public abstract class WeServer<W, C, S> {
                     } else {
                         weServer = new WeServerV2(fiscoConfig);
                     }
-                    weServer.initWeb3j();
+                    weServer.initWeb3j(groupId);
+                    weServerContext.put(groupId, weServer);
                 }
             }
         }
-        return (WeServer<W, C, S>) weServer;
+        return (WeServer<W, C, S>)weServer;
     }
 
     /**
@@ -233,8 +232,10 @@ public abstract class WeServer<W, C, S> {
 
     /**
      * 初始化Web3j.
+     * 
+     * @param groupId 群组Id
      */
-    protected abstract void initWeb3j();
+    protected abstract void initWeb3j(Integer groupId);
 
     /**
      * 发送AMOP消息.
@@ -252,7 +253,7 @@ public abstract class WeServer<W, C, S> {
      * @throws IOException 可能出现的异常.
      */
     public abstract int getBlockNumber() throws IOException;
-    
+
     /**
      * 获取FISCO-BCOS版本.
      * 
@@ -260,22 +261,27 @@ public abstract class WeServer<W, C, S> {
      * @throws IOException 可能出现的异常.
      */
     public abstract String getVersion() throws IOException;
-    
+
     /**
      * 查询bucketAddress.
+     * 
+     * @param cnsType cns类型枚举
      * @return 返回bucket合约地址
      * @throws WeIdBaseException 查询合约地址异常
      */
-    protected abstract String queryBucketFromCns() throws WeIdBaseException;
-    
+    protected abstract String queryBucketFromCns(CnsType cnsType) throws WeIdBaseException;
+
     /**
      * 获取Bucket地址.
      * 
+     * @param cnsType cns类型枚举
      * @return 返回bucket地址
      */
-    public String getBucketAddress() {
+    public String getBucketAddress(CnsType cnsType) {
+        String bucketAddress = bucketAddressMap.get(cnsType.toString());
         if (StringUtils.isEmpty(bucketAddress)) {
-            bucketAddress = this.queryBucketFromCns();
+            bucketAddress = this.queryBucketFromCns(cnsType);
+            bucketAddressMap.put(cnsType.toString(), bucketAddress);
         }
         logger.info("the bucket address is {}", bucketAddress);
         return bucketAddress;
