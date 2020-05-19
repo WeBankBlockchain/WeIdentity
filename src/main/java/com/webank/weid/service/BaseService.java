@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.WeIdBaseException;
@@ -52,12 +53,12 @@ import com.webank.weid.util.DataToolUtils;
 public abstract class BaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseService.class);
-    
-    private static DataBucketServiceEngine bucket;
 
     protected static FiscoConfig fiscoConfig;
 
-    protected static WeServer<?, ?, ?> weServer;
+    protected static Integer masterGroupId;
+
+    protected WeServer<?, ?, ?> weServer;
 
     static {
         fiscoConfig = new FiscoConfig();
@@ -65,43 +66,50 @@ public abstract class BaseService {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
         }
         fiscoConfig.check();
+        masterGroupId = Integer.parseInt(fiscoConfig.getGroupId());
     }
 
     /**
      * Constructor.
      */
     public BaseService() {
-        if (weServer == null) {
-            init();
-        }
+        weServer = getWeServer(masterGroupId);
     }
 
     /**
-     * initialization WeServer.
+     * Constructor.
+     * 
+     * @param groupId 群组编号
      */
-    protected static void init() {
-        if (weServer == null) {
-            weServer = WeServer.init(fiscoConfig);
-        }
+    public BaseService(Integer groupId) {
+        weServer = getWeServer(groupId);
     }
 
-    protected static DataBucketServiceEngine getBucket() {
-        if (bucket == null) {
-            bucket = EngineFactory.createDataBucketServiceEngine();
-        }
-        return bucket;
+    private static WeServer<?, ?, ?> getWeServer(Integer groupId) {
+        return WeServer.getInstance(fiscoConfig, groupId);
     }
-    
+
+    protected static DataBucketServiceEngine getBucket(CnsType cnsType) {
+        return EngineFactory.createDataBucketServiceEngine(cnsType);
+    }
+
     /**
      * Gets the web3j.
      *
      * @return the web3j
      */
     public static Object getWeb3j() {
-        if (weServer == null) {
-            init();
-        }
-        return weServer.getWeb3j();
+        return getWeb3j(masterGroupId);
+    }
+
+    /**
+     * Gets the web3j .
+     * 
+     * @param groupId 群组ID
+     * @return the web3j
+     */
+    public static Object getWeb3j(Integer groupId) {
+        return getWeServer(groupId).getWeb3j();
     }
 
     /**
@@ -109,10 +117,7 @@ public abstract class BaseService {
      *
      * @return the web3j
      */
-    protected static Class<?> getWeb3jClass() {
-        if (weServer == null) {
-            init();
-        }
+    protected Class<?> getWeb3jClass() {
         return weServer.getWeb3jClass();
     }
 
@@ -123,12 +128,20 @@ public abstract class BaseService {
      * @throws IOException possible exceptions to sending transactions
      */
     public static int getBlockNumber() throws IOException {
-        if (weServer == null) {
-            init();
-        }
-        return weServer.getBlockNumber();
+        return getBlockNumber(masterGroupId);
     }
-
+    
+    /**
+     * get current blockNumber.
+     *
+     * @param groupId 群组编号
+     * @return return blockNumber
+     * @throws IOException possible exceptions to sending transactions
+     */
+    public static int getBlockNumber(Integer groupId) throws IOException {
+        return getWeServer(groupId).getBlockNumber();
+    }
+    
     /**
      * get FISCO-BCOS version.
      *
@@ -136,23 +149,19 @@ public abstract class BaseService {
      * @throws IOException possible exceptions to sending transactions
      */
     public static String getVersion() throws IOException {
-        if (weServer == null) {
-            init();
-        }
-        return weServer.getVersion();
+        return getWeServer(masterGroupId).getVersion();
     }
-    
+
     /**
      * 查询bucket地址信息.
+     * 
+     * @param cnsType cns类型枚举对象
      * @return 返回bucket地址
      */
-    public static String getBucketAddress() {
-        if (weServer == null) {
-            init();
-        }
-        return weServer.getBucketAddress();
+    public static String getBucketAddress(CnsType cnsType) {
+        return getWeServer(masterGroupId).getBucketAddress(cnsType);
     }
-    
+
     /**
      * Get the Sequence parameter.
      *
@@ -183,9 +192,6 @@ public abstract class BaseService {
      * @return the RegistCallBack
      */
     protected RegistCallBack getPushCallback() {
-        if (weServer == null) {
-            init();
-        }
         return weServer.getPushCallback();
     }
 
@@ -259,7 +265,7 @@ public abstract class BaseService {
         responseStruct.setResult(msgBodyObj);
         return responseStruct;
     }
-    
+
     /**
      * 重新拉取合约地址 并且重新加载相关合约.
      */
@@ -269,22 +275,23 @@ public abstract class BaseService {
         if (StringUtils.isBlank(hash)) {
             throw new WeIdBaseException("the value of cns.contract.follow is null.");
         }
-        String  weIdAddress = getAddress(hash, WeIdConstant.CNS_WEID_ADDRESS);
-        String  issuerAddress = getAddress(hash, WeIdConstant.CNS_AUTH_ADDRESS);
-        String  specificIssuerAddress = getAddress(hash, WeIdConstant.CNS_SPECIFIC_ADDRESS);
-        String  evidenceAddress = getAddress(hash, WeIdConstant.CNS_EVIDENCE_ADDRESS); 
-        String  cptAddress = getAddress(hash, WeIdConstant.CNS_CPT_ADDRESS);
+        CnsType cnsType = CnsType.DEFAULT;
+        String  weIdAddress = getAddress(cnsType, hash, WeIdConstant.CNS_WEID_ADDRESS);
+        String  issuerAddress = getAddress(cnsType, hash, WeIdConstant.CNS_AUTH_ADDRESS);
+        String  specificAddress = getAddress(cnsType, hash, WeIdConstant.CNS_SPECIFIC_ADDRESS);
+        String  evidenceAddress = getAddress(cnsType, hash, WeIdConstant.CNS_EVIDENCE_ADDRESS); 
+        String  cptAddress = getAddress(cnsType, hash, WeIdConstant.CNS_CPT_ADDRESS);
         fiscoConfig.setWeIdAddress(weIdAddress);
         fiscoConfig.setCptAddress(cptAddress);
         fiscoConfig.setIssuerAddress(issuerAddress);
-        fiscoConfig.setSpecificIssuerAddress(specificIssuerAddress);
+        fiscoConfig.setSpecificIssuerAddress(specificAddress);
         fiscoConfig.setEvidenceAddress(evidenceAddress); 
         if (!fiscoConfig.checkAddress()) {
             throw new WeIdBaseException("can not found the contract address by hash: " + hash);
         }
     }
-    
-    private static String getAddress(String hash, String key) {
-        return getBucket().get(hash, key).getResult();
+
+    private static String getAddress(CnsType cnsType, String hash, String key) {
+        return getBucket(cnsType).get(hash, key).getResult();
     }
 }
