@@ -144,7 +144,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseService {
             copyCredentialPojo);
         LogUtil.info(logger, "testVerifyCredentialByPubKey", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -163,7 +163,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseService {
             copyCredentialPojo);
         LogUtil.info(logger, "testVerifyCredentialByPubKey", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -215,7 +215,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseService {
             copyCredentialPojo);
         LogUtil.info(logger, "testVerifyCredentialByPubKey", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -269,7 +269,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseService {
             copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -286,7 +286,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseService {
             credentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -619,7 +619,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseService {
             copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
