@@ -114,7 +114,7 @@ public class TestVerifyCredential extends TestBaseService {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setContext(context);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -151,7 +151,7 @@ public class TestVerifyCredential extends TestBaseService {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setCptId(cptId);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -258,7 +258,7 @@ public class TestVerifyCredential extends TestBaseService {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setIssuer(issuer);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -476,7 +476,7 @@ public class TestVerifyCredential extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredential(credentialWrapper.getCredential());
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
