@@ -25,5 +25,5 @@ package com.webank.weid.suite.api.transportation.params;
  *
  */
 public enum TransportationType {
-    JSON, BAR_CODE, QR_CODE
+    JSON, QR_CODE
 }
