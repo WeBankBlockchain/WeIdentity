@@ -83,10 +83,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
         service = buildFiscoBcosService(fiscoConfig);
         service.setPushCallback((ChannelPushCallback) pushCallBack);
         // Set topics for AMOP
-        List<String> topics = new ArrayList<String>();
-        topics.add(fiscoConfig.getCurrentOrgId());
-        service.setTopics(topics);
-
+        service.setTopics(new ArrayList<>(super.getTopic()));
         try {
             service.run();
         } catch (Exception e) {
