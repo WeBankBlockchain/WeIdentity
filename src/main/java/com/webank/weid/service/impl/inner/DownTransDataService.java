@@ -45,7 +45,7 @@ import com.webank.weid.suite.transmission.TransmissionService;
 import com.webank.weid.util.DataToolUtils;
 
 /**
- * 根据资源获取barCodeData回调处理.
+ * 根据资源获取CodeData回调处理.
  * @author yanggang
  *
  */
@@ -57,39 +57,39 @@ public class DownTransDataService extends InnerService implements TransmissionSe
     public ResponseData<String> service(String message) {
         try {
             GetTransDataArgs arg = DataToolUtils.deserialize(message, GetTransDataArgs.class);
-            return getBarCodeData(arg);
+            return getCodeData(arg);
         } catch (Exception e) {
-            logger.error("[onPush] get barCodeData has error.", e);
-            ResponseData<String> barCodeRes = new ResponseData<String>();
-            barCodeRes.setResult(StringUtils.EMPTY);
-            barCodeRes.setErrorCode(ErrorCode.UNKNOW_ERROR);
-            return barCodeRes;
+            logger.error("[onPush] get CodeData has error.", e);
+            ResponseData<String> codeDataRes = new ResponseData<String>();
+            codeDataRes.setResult(StringUtils.EMPTY);
+            codeDataRes.setErrorCode(ErrorCode.UNKNOW_ERROR);
+            return codeDataRes;
         }
     }
     
-    private ResponseData<String> getBarCodeData(
+    private ResponseData<String> getCodeData(
         GetTransDataArgs arg
     ) throws ClassNotFoundException {
-        logger.info("[getBarCodeData] begin query data param:{}", arg);
-        ResponseData<String> barCodeRes = new ResponseData<String>();
-        barCodeRes.setResult(StringUtils.EMPTY);
+        logger.info("[getCodeData] begin query data param:{}", arg);
+        ResponseData<String> codeDataRes = new ResponseData<String>();
+        codeDataRes.setResult(StringUtils.EMPTY);
         ResponseData<String> responseData = this.getDataDriver().get(
             DataDriverConstant.DOMAIN_RESOURCE_INFO, arg.getResourceId());
         // 数据查询出错
         if (responseData.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
-                "[getBarCodeData] query data has error: {} - {}.",
+                "[getCodeData] query data has error: {} - {}.",
                 responseData.getErrorCode(),
                 responseData.getErrorMessage()
             );
-            barCodeRes.setErrorCode(ErrorCode.getTypeByErrorCode(responseData.getErrorCode()));
-            return barCodeRes;
+            codeDataRes.setErrorCode(ErrorCode.getTypeByErrorCode(responseData.getErrorCode()));
+            return codeDataRes;
         }
         // 数据不存在
         if (StringUtils.isBlank(responseData.getResult())) {
-            logger.error("[getBarCodeData] the data does not exist.");
-            barCodeRes.setErrorCode(ErrorCode.SQL_DATA_DOES_NOT_EXIST);
-            return barCodeRes;
+            logger.error("[getCodeData] the data does not exist.");
+            codeDataRes.setErrorCode(ErrorCode.SQL_DATA_DOES_NOT_EXIST);
+            return codeDataRes;
         }
         // 解析数据
         TransCodeBaseData codeData = (TransCodeBaseData)DataToolUtils.deserialize(
@@ -97,37 +97,37 @@ public class DownTransDataService extends InnerService implements TransmissionSe
         );
         //得到数据编解码类型(原文&密文)
         EncodeType encodeType = EncodeType.getEncodeType(codeData.getEncodeType());
-        logger.info("[getBarCodeData] the encode is {}", encodeType.name());
+        logger.info("[getCodeData] the encode is {}", encodeType.name());
         if (encodeType == EncodeType.ORIGINAL) {
             // 原文类型
-            barCodeRes.setResult(responseData.getResult());
-            barCodeRes.setErrorCode(ErrorCode.SUCCESS);
-            logger.info("[getBarCodeData] query data successfully.");
-            return barCodeRes;
+            codeDataRes.setResult(responseData.getResult());
+            codeDataRes.setErrorCode(ErrorCode.SUCCESS);
+            logger.info("[getCodeData] query data successfully.");
+            return codeDataRes;
         } else if (encodeType == EncodeType.CIPHER) { //密文类型
             // 获取密钥
             GetEncryptKeyResponse encryptKey = getEncryptKey(arg);
             if (encryptKey.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[getBarCodeData] query the key has error.");
-                barCodeRes.setErrorCode(
+                logger.error("[getCodeData] query the key has error.");
+                codeDataRes.setErrorCode(
                     ErrorCode.getTypeByErrorCode(encryptKey.getErrorCode().intValue()));
-                return barCodeRes;
+                return codeDataRes;
             }
-            logger.info("[getBarCodeData] begin decrypt the data");
+            logger.info("[getCodeData] begin decrypt the data");
             String data = String.valueOf(codeData.getData());
             String value = CryptoServiceFactory
                 .getCryptoService(CryptoType.AES)
                 .decrypt(data, encryptKey.getEncryptKey());
             codeData.setData(value);
-            barCodeRes.setResult(DataToolUtils.serialize(codeData));
-            barCodeRes.setErrorCode(ErrorCode.SUCCESS);
-            logger.info("[getBarCodeData] query data successfully.");
-            return barCodeRes;
+            codeDataRes.setResult(DataToolUtils.serialize(codeData));
+            codeDataRes.setErrorCode(ErrorCode.SUCCESS);
+            logger.info("[getCodeData] query data successfully.");
+            return codeDataRes;
         } else {
             // 数据找不到编解码类型
-            logger.error("[getBarCodeData] the encode type error.");
-            barCodeRes.setErrorCode(ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
-            return barCodeRes;
+            logger.error("[getCodeData] the encode type error.");
+            codeDataRes.setErrorCode(ErrorCode.TRANSPORTATION_PROTOCOL_ENCODE_ERROR);
+            return codeDataRes;
         }
     }
     
