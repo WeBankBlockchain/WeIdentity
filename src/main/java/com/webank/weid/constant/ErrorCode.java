@@ -287,6 +287,11 @@ public enum ErrorCode {
         "the credential does not support selective disclosure."),
 
     /**
+     * credential verify fail.
+     */
+    CREDENTIAL_VERIFY_FAIL(100441, "credential verify fail."),
+
+    /**
      * Authorization WeIDs: from and to must be different.
      */
     AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT(100450,
