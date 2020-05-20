@@ -42,19 +42,19 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
 
     protected TransmissionRequest<GetTransDataArgs> buildRequest(
         TransType type, 
-        TransCodeBaseData barCodeData,
+        TransCodeBaseData codeData,
         WeIdAuthentication weIdAuthentication
     ) {
         TransmissionRequest<GetTransDataArgs> request = new TransmissionRequest<>();
-        request.setOrgId(barCodeData.getOrgId());
+        request.setOrgId(codeData.getOrgId());
         request.setServiceType(ServiceType.SYS_GET_TRANS_DATA.name());
         request.setWeIdAuthentication(weIdAuthentication);
-        request.setArgs(getBarCodeArgs(barCodeData, weIdAuthentication));
+        request.setArgs(getCodeDataArgs(codeData, weIdAuthentication));
         request.setTransType(type);
         return request;
     }
     
-    protected GetTransDataArgs getBarCodeArgs(
+    protected GetTransDataArgs getCodeDataArgs(
         TransCodeBaseData codeData, 
         WeIdAuthentication weIdAuthentication
     ) {
