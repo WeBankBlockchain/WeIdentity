@@ -20,6 +20,8 @@
 package com.webank.weid.service.fisco;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -177,7 +179,22 @@ public abstract class WeServer<W, C, S> {
             return timeOut;
         }
     }
-
+    
+    /**
+     * 获取AMOP监听的topic.
+     *
+     * @return 返回topic集合，目前sdk只支持单topic监听
+     */
+    protected Set<String> getTopic() {
+        Set<String> topics = new HashSet<String>();
+        if (StringUtils.isNotBlank(FiscoConfig.topic)) {
+            topics.add(fiscoConfig.getCurrentOrgId() + "_" + FiscoConfig.topic);
+        } else {
+            topics.add(fiscoConfig.getCurrentOrgId());
+        }
+        return topics;
+    }
+    
     /**
      * 获取Web3j对象.
      *
