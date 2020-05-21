@@ -213,11 +213,11 @@ public class BatchTransactionUtils {
         }
         int length = args.length;
         StringBuffer content = new StringBuffer();
-        for (int i = 0; i < length - 1; i++) {
+        for (int i = 0; i < length - 2; i++) {
 
             content.append(args[i]).append(",");
         }
-        String privateKey = args[length - 1];
+        String privateKey = args[length - 2];
 
         String weId = WeIdUtils.getWeIdFromPrivateKey(privateKey);
 
@@ -233,7 +233,8 @@ public class BatchTransactionUtils {
         //    return null;
         //}
 
-        content.append(weId);
+        content.append(weId).append(",");
+        content.append(args[length - 1]);
         return content.toString();
     }
 
