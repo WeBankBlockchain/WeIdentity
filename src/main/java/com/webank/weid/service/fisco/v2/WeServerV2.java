@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.client.Service;
@@ -104,9 +105,7 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
     protected void initWeb3j(Integer groupId) {
         logger.info("[WeServiceImplV2] begin to init web3j instance..");
         service = buildFiscoBcosService(fiscoConfig, groupId);
-        service.setPushCallback((ChannelPushCallback) pushCallBack);
-        // Set topics for AMOP
-        service.setTopics(super.getTopic());
+        topicListener(groupId);
         try {
             service.run();
         } catch (Exception e) {
@@ -122,6 +121,13 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             logger.error("[WeServiceImplV2] web3j init failed. ");
             throw new InitWeb3jException();
         }
+
+        // 检查群组Id是否存在
+        if (!checkGroupId(groupId)) {
+            logger.error("[WeServiceImplV2] the groupId does not exist.");
+            throw new InitWeb3jException();
+        }
+
         credentials = GenCredential.create();
         if (credentials == null) {
             logger.error("[WeServiceImplV2] credentials init failed. ");
@@ -129,6 +135,15 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
         }
         cnsService = new CnsService(web3j, credentials);
         logger.info("[WeServiceImplV2] init web3j instance success..");
+    }
+
+    private void topicListener(Integer groupId) {
+        // 如果为主群组
+        if (fiscoConfig.getGroupId().equals(String.valueOf(groupId))) {
+            service.setPushCallback((ChannelPushCallback) pushCallBack);
+            // Set topics for AMOP
+            service.setTopics(super.getTopic());
+        }
     }
 
     private Service buildFiscoBcosService(FiscoConfig fiscoConfig, Integer groupId) {
@@ -205,5 +220,26 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             logger.error("[queryBucketFromCns] query address has error.", e);
             throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
         }
+    }
+
+    @Override
+    public boolean checkGroupId(Integer groupId) {
+        if (groupId == null) {
+            return false;
+        }
+        try {
+            List<String> result = this.getWeb3j().getGroupList().send().getResult();
+            if (CollectionUtils.isEmpty(result)) {
+                return false;
+            }
+            for (String string : result) {
+                if (string.equals(String.valueOf(groupId))) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            logger.error("[checkGroupId] check the groupId has error.", e);
+        }
+        return false;
     }
 }

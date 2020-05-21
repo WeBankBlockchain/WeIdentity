@@ -283,7 +283,14 @@ public abstract class WeServer<W, C, S> {
             bucketAddress = this.queryBucketFromCns(cnsType);
             bucketAddressMap.put(cnsType.toString(), bucketAddress);
         }
-        logger.info("the bucket address is {}", bucketAddress);
         return bucketAddress;
     }
+    
+    /**
+     * 检查groupId是否存在.
+     * 
+     * @param groupId 群组Id
+     * @return true表示群组存在，false表示群组不存在
+     */
+    public abstract boolean checkGroupId(Integer groupId);
 }

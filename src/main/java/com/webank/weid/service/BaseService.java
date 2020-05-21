@@ -163,6 +163,16 @@ public abstract class BaseService {
     }
 
     /**
+     * 检查群组是否存在.
+     * 
+     * @param groupId 被检查群组
+     * @return true表示群组存在，false表示群组不存在
+     */
+    public static boolean checkGroupId(Integer groupId) {
+        return getWeServer(masterGroupId).checkGroupId(groupId);
+    }
+    
+    /**
      * Get the Sequence parameter.
      *
      * @return the seq
