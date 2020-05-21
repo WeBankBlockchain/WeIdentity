@@ -199,4 +199,9 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     protected String queryBucketFromCns(CnsType cnsType) throws WeIdBaseException {
         return null;
     }
+
+    @Override
+    public boolean checkGroupId(Integer groupId) {
+        return false;
+    }
 }
