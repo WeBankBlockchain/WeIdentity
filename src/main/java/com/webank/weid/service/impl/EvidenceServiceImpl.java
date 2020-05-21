@@ -66,6 +66,8 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     
     private EvidenceServiceEngine evidenceServiceEngine;
     
+    private Integer groupId;
+    
     public EvidenceServiceImpl() {
         super();
         initEvidenceServiceEngine(masterGroupId);
@@ -85,6 +87,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private void initEvidenceServiceEngine(Integer groupId) {
         evidenceServiceEngine = EngineFactory.createEvidenceServiceEngine(groupId);
+        this.groupId = groupId;
     }
 
     @Override
@@ -262,18 +265,20 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getCurrentTimeStamp();
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
-                String[] args = new String[5];
+                String[] args = new String[6];
                 args[0] = hashValue;
                 args[1] = signature;
                 args[2] = extra;
                 args[3] = String.valueOf(timestamp);
                 args[4] = privateKey;
+                args[5] = String.valueOf(this.groupId);
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
                     .append(extra)
                     .append(timestamp)
-                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
+                    .append(this.groupId).toString();
                 String hash = DataToolUtils.sha3(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
@@ -461,20 +466,22 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             Long timestamp = DateUtils.getCurrentTimeStamp();
             
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
-                String[] args = new String[6];
+                String[] args = new String[7];
                 args[0] = hashValue;
                 args[1] = signature;
                 args[2] = log;
                 args[3] = String.valueOf(timestamp);
                 args[4] = customKey;
                 args[5] = privateKey;
+                args[6] = String.valueOf(this.groupId);
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
                     .append(log)
                     .append(timestamp)
                     .append(customKey)
-                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
+                    .append(this.groupId).toString();
                 String hash = DataToolUtils.sha3(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
