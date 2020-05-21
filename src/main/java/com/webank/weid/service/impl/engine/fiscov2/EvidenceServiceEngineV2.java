@@ -72,7 +72,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
 
     private EvidenceContract evidenceContract;
 
-    private String address;
+    private String evidenceAddress;
     
     private Integer groupId;
 
@@ -84,20 +84,23 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         super(groupId);
         this.groupId = groupId;
         initEvidenceAddress(); 
-        evidenceContract = getContractService(this.address, EvidenceContract.class);
+        evidenceContract = getContractService(this.evidenceAddress, EvidenceContract.class);
     }
 
     private void initEvidenceAddress() {
         if (groupId == null || masterGroupId.intValue() == groupId.intValue()) {
             logger.info("[initEvidenceAddress] the groupId is master.");
-            this.address = fiscoConfig.getEvidenceAddress();
+            this.evidenceAddress = fiscoConfig.getEvidenceAddress();
         } else {
             String hash = PropertiesService.getInstance()
                 .getProperty(ParamKeyConstant.SHARE_CNS + groupId);
             logger.info("[initEvidenceAddress] get hash from properteis. hash = {}", hash);
-            this.address = super.getBucket(CnsType.SHARE)
+            this.evidenceAddress = super.getBucket(CnsType.SHARE)
                 .get(hash, WeIdConstant.CNS_EVIDENCE_ADDRESS).getResult();
-            logger.info("[initEvidenceAddress] get the address from cns. address = {}", address);
+            logger.info(
+                "[initEvidenceAddress] get the address from cns. address = {}", 
+                evidenceAddress
+            );
         }
     }
 
@@ -127,7 +130,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    this.address,
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -197,7 +200,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             }
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    this.address,
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -274,7 +277,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             }
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    this.address,
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -339,7 +342,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             signerList.add(address);
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    this.address,
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -627,7 +630,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             extraKeyList.add(extraKey);
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    this.address,
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
