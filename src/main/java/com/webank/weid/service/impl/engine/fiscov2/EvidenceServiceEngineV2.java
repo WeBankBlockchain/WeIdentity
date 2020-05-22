@@ -43,7 +43,9 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.EvidenceContract;
@@ -55,6 +57,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
+import com.webank.weid.service.impl.inner.PropertiesService;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -67,25 +70,38 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV2.class);
 
-    private static EvidenceContract evidenceContract;
+    private EvidenceContract evidenceContract;
+
+    private String evidenceAddress;
+    
+    private Integer groupId;
 
     /**
      * 构造函数.
+     * @param groupId 群组编号
      */
-    public EvidenceServiceEngineV2() {
-        if (evidenceContract == null) {
-            reload();
-        }
+    public EvidenceServiceEngineV2(Integer groupId) {
+        super(groupId);
+        this.groupId = groupId;
+        initEvidenceAddress(); 
+        evidenceContract = getContractService(this.evidenceAddress, EvidenceContract.class);
     }
 
-    /**
-     * 重新加载静态合约对象.
-     */
-    @Override
-    public void reload() {
-        evidenceContract = getContractService(
-            fiscoConfig.getEvidenceAddress(),
-            EvidenceContract.class);
+    private void initEvidenceAddress() {
+        if (groupId == null || masterGroupId.intValue() == groupId.intValue()) {
+            logger.info("[initEvidenceAddress] the groupId is master.");
+            this.evidenceAddress = fiscoConfig.getEvidenceAddress();
+        } else {
+            String hash = PropertiesService.getInstance()
+                .getProperty(ParamKeyConstant.SHARE_CNS + groupId);
+            logger.info("[initEvidenceAddress] get hash from properteis. hash = {}", hash);
+            this.evidenceAddress = super.getBucket(CnsType.SHARE)
+                .get(hash, WeIdConstant.CNS_EVIDENCE_ADDRESS).getResult();
+            logger.info(
+                "[initEvidenceAddress] get the address from cns. address = {}", 
+                evidenceAddress
+            );
+        }
     }
 
     @Override
@@ -114,7 +130,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -184,7 +200,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             }
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -261,7 +277,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             }
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -326,7 +342,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             signerList.add(address);
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -405,7 +421,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         }
     }
 
-    private static void resolveTransaction(
+    private void resolveTransaction(
         String hash,
         int startBlockNumber,
         EvidenceInfo evidenceInfo) {
@@ -415,7 +431,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             int currentBlockNumber = previousBlock;
             BcosBlock latestBlock = null;
             try {
-                latestBlock = ((Web3j) getWeb3j()).getBlockByNumber(
+                latestBlock = ((Web3j) weServer.getWeb3j()).getBlockByNumber(
                     new DefaultBlockParameterNumber(currentBlockNumber), true).send();
             } catch (IOException e) {
                 logger.error(
@@ -436,7 +452,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 for (Transaction transaction : transList) {
                     String transHash = transaction.getHash();
 
-                    BcosTransactionReceipt rec1 = ((Web3j) getWeb3j())
+                    BcosTransactionReceipt rec1 = ((Web3j) weServer.getWeb3j())
                         .getTransactionReceipt(transHash)
                         .send();
                     TransactionReceipt receipt = rec1.getTransactionReceipt().get();
@@ -466,7 +482,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         }
     }
 
-    private static ResolveEventLogResult resolveEventLog(
+    private ResolveEventLogResult resolveEventLog(
         String hash,
         Log log,
         TransactionReceipt receipt,
@@ -480,7 +496,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         return response;
     }
 
-    private static ResolveEventLogResult resolveAttributeEvent(
+    private ResolveEventLogResult resolveAttributeEvent(
         String hash,
         TransactionReceipt receipt,
         EvidenceInfo evidenceInfo) {
@@ -614,7 +630,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             extraKeyList.add(extraKey);
             EvidenceContract evidenceContractWriter =
                 reloadContract(
-                    fiscoConfig.getEvidenceAddress(),
+                    this.evidenceAddress,
                     privateKey,
                     EvidenceContract.class
                 );

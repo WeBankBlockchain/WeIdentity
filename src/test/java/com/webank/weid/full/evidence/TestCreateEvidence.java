@@ -39,11 +39,14 @@ import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.EvidenceInfo;
+import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.OffLineBatchTask;
 
 /**
  * Test CreateEvidence.
@@ -294,7 +297,8 @@ public class TestCreateEvidence extends TestBaseService {
                 customKeys.add(StringUtils.EMPTY);
             }
         }
-        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine();
+
+        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine(masterGroupId);
 
         // raw creation
         Long start = System.currentTimeMillis();
@@ -355,6 +359,36 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(evidenceInfo1.getSignInfo()
             .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 2);
         Assert.assertEquals(evidenceInfo1.getCredentialHash(), evidenceInfo1k.getCredentialHash());
+    }
+
+    /**
+     * This test can only be invoked when using multi-group with group = 1 and 2.
+     */
+    public void testBatchCreateMultiGroup() {
+        int batchSize = 100;
+        List<TransactionArgs> transactionArgsList = new ArrayList<>();
+        for (int i = 0; i < batchSize; i++) {
+            CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+            credential.setId(UUID.randomUUID().toString());
+            String hash = credential.getHash();
+            TransactionArgs args = new TransactionArgs();
+            args.setMethod("createEvidence");
+            List<String> argList = new ArrayList<>();
+            argList.add(credential.getHash());
+            argList.add(new String(DataToolUtils.base64Encode(DataToolUtils
+                .simpleSignatureSerialization(DataToolUtils.signMessage(hash, privateKey))),
+                StandardCharsets.UTF_8));
+            argList.add("test log" + i);
+            argList.add(DateUtils.getNoMillisecondTimeStampString());
+            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            if (i % 2 == 1) {
+                argList.add("2");
+            }
+            args.setArgs(String.join(",", argList));
+            transactionArgsList.add(args);
+        }
+        OffLineBatchTask task = new OffLineBatchTask();
+        task.sendBatchTransaction(transactionArgsList);
     }
 
     @Test

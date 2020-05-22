@@ -43,6 +43,9 @@ import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
+import com.webank.weid.service.impl.inner.PropertiesService;
 import com.webank.weid.util.BatchTransactionUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
@@ -61,18 +64,30 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     
     private ProcessingMode processingMode = ProcessingMode.IMMEDIATE;
     
+    private EvidenceServiceEngine evidenceServiceEngine;
+    
+    private Integer groupId;
+    
     public EvidenceServiceImpl() {
         super();
+        initEvidenceServiceEngine(masterGroupId);
     }
     
     /**
      * 传入processingMode来决定上链模式.
      * 
      * @param processingMode 上链模式
+     * @param groupId 群组编号
      */
-    public EvidenceServiceImpl(ProcessingMode processingMode) {
-        super();
+    public EvidenceServiceImpl(ProcessingMode processingMode, Integer groupId) {
+        super(groupId);
         this.processingMode = processingMode;
+        initEvidenceServiceEngine(groupId);
+    }
+
+    private void initEvidenceServiceEngine(Integer groupId) {
+        evidenceServiceEngine = EngineFactory.createEvidenceServiceEngine(groupId);
+        this.groupId = groupId;
     }
 
     @Override
@@ -250,18 +265,20 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 StandardCharsets.UTF_8);
             Long timestamp = DateUtils.getCurrentTimeStamp();
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
-                String[] args = new String[5];
+                String[] args = new String[6];
                 args[0] = hashValue;
                 args[1] = signature;
                 args[2] = extra;
                 args[3] = String.valueOf(timestamp);
                 args[4] = privateKey;
+                args[5] = String.valueOf(this.groupId);
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
                     .append(extra)
                     .append(timestamp)
-                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
+                    .append(this.groupId).toString();
                 String hash = DataToolUtils.sha3(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
@@ -449,20 +466,22 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             Long timestamp = DateUtils.getCurrentTimeStamp();
             
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
-                String[] args = new String[6];
+                String[] args = new String[7];
                 args[0] = hashValue;
                 args[1] = signature;
                 args[2] = log;
                 args[3] = String.valueOf(timestamp);
                 args[4] = customKey;
                 args[5] = privateKey;
+                args[6] = String.valueOf(this.groupId);
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
                     .append(log)
                     .append(timestamp)
                     .append(customKey)
-                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
+                    .append(this.groupId).toString();
                 String hash = DataToolUtils.sha3(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils

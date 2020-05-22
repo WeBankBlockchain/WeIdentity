@@ -520,6 +520,7 @@ public final class DataToolUtils {
      *
      * @param rawData original raw data
      * @param privateKey private key in BigInteger format
+     * @return base64 string for signature value
      */
     public static String secp256k1Sign(String rawData, BigInteger privateKey) {
         ECDSASign ecdsaSign = new ECDSASign();
@@ -568,6 +569,7 @@ public final class DataToolUtils {
      * @param rawData original raw data
      * @param signatureBase64 signature base64 string
      * @param publicKey in BigInteger format
+     * @return return boolean result, true is success and false is fail
      */
     public static boolean secp256k1VerifySignature(
         String rawData,
