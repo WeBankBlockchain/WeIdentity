@@ -24,7 +24,7 @@ import java.util.List;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.response.ResponseData;
 
-public interface EvidenceServiceEngine extends ReloadStaticContract {
+public interface EvidenceServiceEngine {
 
     ResponseData<String> createEvidence(
         String hashValue,
