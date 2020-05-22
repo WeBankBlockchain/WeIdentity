@@ -102,7 +102,7 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
      *
      * @param privateKey the private key
      */
-    private static AuthorityIssuerController reloadAuthorityIssuerContract(String privateKey) {
+    private AuthorityIssuerController reloadAuthorityIssuerContract(String privateKey) {
         AuthorityIssuerController authorityIssuerController = reloadContract(
             fiscoConfig.getIssuerAddress(),
             privateKey,
@@ -111,7 +111,7 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
         return authorityIssuerController;
     }
 
-    private static SpecificIssuerController reloadSpecificIssuerContract(String privateKey) {
+    private SpecificIssuerController reloadSpecificIssuerContract(String privateKey) {
         SpecificIssuerController specificIssuerController = reloadContract(
             fiscoConfig.getSpecificIssuerAddress(),
             privateKey,
