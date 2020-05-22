@@ -138,6 +138,13 @@ public interface EvidenceService {
 
     /**
      * A direct pass-thru method to create raw evidence where all inputs can be customized.
+     * @param hashValue the hash value
+     * @param signature the signature value
+     * @param log the log
+     * @param timestamp the timestamp
+     * @param extraKey the extra data
+     * @param privateKey the private key
+     * @return true if yes, false otherwise
      */
     ResponseData<Boolean> createRawEvidenceWithCustomKey(
         String hashValue,
