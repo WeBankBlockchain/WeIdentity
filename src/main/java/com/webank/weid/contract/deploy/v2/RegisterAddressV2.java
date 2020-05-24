@@ -113,4 +113,18 @@ public class RegisterAddressV2 {
             new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)).send();
         return dataBucket.getContractAddress();
     }
+    
+    /**
+     * 链上启用CNS.
+     * @param cnsType cns类型
+     * @param hash hash值
+     * @param weIdPrivateKey hash所属私钥
+     * @return 返回是否启用成功
+     */
+    public static boolean enableHash(CnsType cnsType, String hash, WeIdPrivateKey weIdPrivateKey) {
+        logger.info("[enableHash] enable hash on chain.");
+        boolean result = getBucket(cnsType).enableHash(hash, weIdPrivateKey).getResult();
+        logger.info("[enableHash] the result of enable. result = {}", result);
+        return result;
+    }
 }
