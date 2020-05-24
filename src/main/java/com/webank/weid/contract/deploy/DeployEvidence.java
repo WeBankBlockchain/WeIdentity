@@ -72,11 +72,19 @@ public abstract class DeployEvidence {
             privateKey = args[1];
         }
 
-        deployContract(privateKey, groupId);
+        deployContract(privateKey, groupId, true);
         System.exit(0);
     }
     
-    public static void deployContract(String privateKey, Integer groupId) {
-        DeployEvidenceV2.deployContract(privateKey, groupId);
+    /**
+     * 部署evidence合约.
+     * 
+     * @param privateKey 私钥地址
+     * @param groupId 群组编号
+     * @param instantEnable 是否即时启用
+     * @return 返回部署的hash值
+     */
+    public static String deployContract(String privateKey, Integer groupId, boolean instantEnable) {
+        return DeployEvidenceV2.deployContract(privateKey, groupId, instantEnable);
     }
 }
