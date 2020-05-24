@@ -89,7 +89,11 @@ public class DeployEvidenceV2 extends AddressProcess {
         }
     }
     
-    public static void deployContract(String inputPrivateKey, Integer groupId) {
+    public static String deployContract(
+        String inputPrivateKey, 
+        Integer groupId, 
+        boolean instantEnable
+    ) {
         initWeb3j(groupId);
         String privateKey = initCredentials(inputPrivateKey);
         String evidenceAddress = deployEvidenceContractsNew(groupId);
@@ -118,10 +122,16 @@ public class DeployEvidenceV2 extends AddressProcess {
             WeIdConstant.CNS_GROUP_ID, 
             weIdPrivateKey
         );
-        // 默认启用最新的配置: cns.contract.share.follow.<groupId>
-        Map<String, String> properties = new HashMap<>();
-        properties.put(ParamKeyConstant.SHARE_CNS + groupId.toString(), hash);
-        PropertiesService.getInstance().saveProperties(properties);
+        
+        if (instantEnable) {
+            // 启用最新的配置: cns.contract.share.follow.<groupId>
+            Map<String, String> properties = new HashMap<>();
+            properties.put(ParamKeyConstant.SHARE_CNS + groupId.toString(), hash);
+            PropertiesService.getInstance().saveProperties(properties);
+            // 合约上也启用hash
+            RegisterAddressV2.enableHash(cnsType, hash, weIdPrivateKey);
+        }
+        return hash;
     }
     
     private static String deployEvidenceContractsNew(Integer groupId) {
