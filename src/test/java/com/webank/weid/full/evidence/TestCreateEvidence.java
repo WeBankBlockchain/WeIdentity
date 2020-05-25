@@ -100,7 +100,8 @@ public class TestCreateEvidence extends TestBaseService {
             evidenceInfo.getSignInfo().get(signerWeId).getLogs().get(0).equals("1.23"));
         Assert.assertTrue(
             evidenceInfo.getSignInfo().get(signerWeId).getLogs().get(1).equals("13.15"));
-        ResponseData<Boolean> resp = evidenceService.verifySigner(evidenceInfo, signerWeId);
+        ResponseData<Boolean> resp = evidenceService
+            .verifySigner(credential, evidenceInfo, signerWeId);
         Assert.assertTrue(resp.getResult());
     }
 
@@ -132,10 +133,12 @@ public class TestCreateEvidence extends TestBaseService {
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
         Assert.assertEquals(evidenceInfo.getSignInfo().get(signer1).getLogs().size(), 2);
         Assert.assertEquals(evidenceInfo.getSignInfo().get(signer2).getLogs().size(), 2);
-        ResponseData<Boolean> resp = evidenceService.verifySigner(evidenceInfo, signer1);
+        ResponseData<Boolean> resp = evidenceService
+            .verifySigner(credential, evidenceInfo, signer1);
         Assert.assertTrue(resp.getResult());
-        resp = evidenceService.verifySigner(evidenceInfo, signer2);
-        Assert.assertTrue(resp.getResult());
+        resp = evidenceService.verifySigner(credential, evidenceInfo, signer2);
+        // here it should be false since signer changed
+        Assert.assertFalse(resp.getResult());
     }
 
     @Test
