@@ -19,6 +19,7 @@
 
 package com.webank.weid.rpc;
 
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.HashString;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -118,26 +119,40 @@ public interface EvidenceService {
     <T> ResponseData<HashString> generateHash(T object);
 
     /**
-     * Validate whether an evidence is signed by this WeID - will perform on-Chain key check.
+     * Validate whether a credential created the evidence, and this evidence is signed by this WeID
+     * - will perform on-Chain key check.
      *
+     * @param credentialPojo the credentialPojo
      * @param evidenceInfo the evidence info fetched from chain
      * @param weId the WeID
      * @return true if yes, false otherwise
      */
-    ResponseData<Boolean> verifySigner(EvidenceInfo evidenceInfo, String weId);
+    ResponseData<Boolean> verifySigner(
+        CredentialPojo credentialPojo,
+        EvidenceInfo evidenceInfo,
+        String weId
+    );
 
     /**
-     * Validate whether an evidence is signed by this WeID with passed-in public key.
+     * Validate whether a credential created the evidence, and this evidence is signed by this WeID
+     * based on the passed-in publicKey.
      *
+     * @param credentialPojo the credentialPojo
      * @param evidenceInfo the evidence info fetched from chain
      * @param weId the WeID
      * @param publicKey the public key
      * @return true if yes, false otherwise
      */
-    ResponseData<Boolean> verifySigner(EvidenceInfo evidenceInfo, String weId, String publicKey);
+    ResponseData<Boolean> verifySigner(
+        CredentialPojo credentialPojo,
+        EvidenceInfo evidenceInfo,
+        String weId,
+        String publicKey
+    );
 
     /**
      * A direct pass-thru method to create raw evidence where all inputs can be customized.
+     *
      * @param hashValue the hash value
      * @param signature the signature value
      * @param log the log
@@ -146,12 +161,36 @@ public interface EvidenceService {
      * @param privateKey the private key
      * @return true if yes, false otherwise
      */
+    @Deprecated
     ResponseData<Boolean> createRawEvidenceWithCustomKey(
         String hashValue,
         String signature,
         String log,
         Long timestamp,
         String extraKey,
+        String privateKey
+    );
+
+    /**
+     * A direct pass-thru method to create raw evidence where all inputs, including signer, can be
+     * customized.
+     *
+     * @param hashValue the hash value
+     * @param signature the signature value
+     * @param log the log
+     * @param timestamp the timestamp
+     * @param extraKey the extra data
+     * @param signer the signer
+     * @param privateKey the private key
+     * @return true if yes, false otherwise
+     */
+    ResponseData<Boolean> createRawEvidenceWithSpecificSigner(
+        String hashValue,
+        String signature,
+        String log,
+        Long timestamp,
+        String extraKey,
+        String signer,
         String privateKey
     );
 }
