@@ -51,11 +51,6 @@ public class DeployEvidenceV2 extends AddressProcess {
      * The credentials.
      */
     private static Credentials credentials;
-
-    /**
-     * web3j object.
-     */
-    private static Web3j web3j;
     
     /**
      * Inits the credentials.
@@ -83,10 +78,8 @@ public class DeployEvidenceV2 extends AddressProcess {
         return credentials.getEcKeyPair().getPrivateKey().toString();
     }
     
-    protected static void initWeb3j(Integer groupId) {
-        if (web3j == null) {
-            web3j = (Web3j) BaseService.getWeb3j(groupId);
-        }
+    protected static Web3j getWeb3j(Integer groupId) {
+        return (Web3j) BaseService.getWeb3j(groupId);
     }
     
     public static String deployContract(
@@ -94,7 +87,6 @@ public class DeployEvidenceV2 extends AddressProcess {
         Integer groupId, 
         boolean instantEnable
     ) {
-        initWeb3j(groupId);
         String privateKey = initCredentials(inputPrivateKey);
         String evidenceAddress = deployEvidenceContractsNew(groupId);
         // 将地址注册到cns中
@@ -138,7 +130,7 @@ public class DeployEvidenceV2 extends AddressProcess {
         try {
             EvidenceContract evidenceContract =
                 EvidenceContract.deploy(
-                    web3j,
+                    getWeb3j(groupId),
                     credentials,
                     new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)
                 ).send();
