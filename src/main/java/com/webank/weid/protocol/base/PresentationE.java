@@ -19,6 +19,7 @@
 
 package com.webank.weid.protocol.base;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -198,9 +199,9 @@ public class PresentationE implements RawSerializer, IProof {
         }
         // 更新proof里面的签名
         String signature = 
-            DataToolUtils.sign(
+            DataToolUtils.secp256k1Sign(
                 this.toRawData(),
-                weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
+                new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
             );
         this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
         logger.info("[commit] commit credential with weIdAuthentication is success.");
