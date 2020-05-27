@@ -165,13 +165,17 @@ public class WeIdAuthImpl implements WeIdAuth {
         }
         WeIdDocument weIdDocument = weIdDoc.getResult();
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument);
+            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            logger.error(
-                "[createMutualAuthenticatedChannel] verify challenge signature failed,"
-                    + " Error code:{}",
-                verifyErrorCode.getCode());
-            return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
+            verifyErrorCode = DataToolUtils
+                .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument);
+            if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                    "[createMutualAuthenticatedChannel] verify challenge signature failed,"
+                        + " Error code:{}",
+                    verifyErrorCode.getCode());
+                return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
+            }
         }
         return new ResponseData<WeIdAuthObj>(weIdAuthObj, ErrorCode.SUCCESS);
     }
@@ -247,13 +251,17 @@ public class WeIdAuthImpl implements WeIdAuth {
 
         //验证对手方对challenge的签名
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument);
+            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            logger.error(
-                "[createMutualAuthenticatedChannel] verify challenge signature failed, "
-                    + "Error code:{}",
-                verifyErrorCode.getCode());
-            return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
+            verifyErrorCode = DataToolUtils
+                .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument);
+            if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                    "[createMutualAuthenticatedChannel] verify challenge signature failed, "
+                        + "Error code:{}",
+                    verifyErrorCode.getCode());
+                return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
+            }
         }
 
         //双向auth，发起方也需要对对手方的challenge进行签名
