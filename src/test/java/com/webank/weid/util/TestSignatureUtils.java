@@ -20,6 +20,7 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
+import java.security.SignatureException;
 
 import com.lambdaworks.codec.Base64;
 import org.bcos.web3j.crypto.ECKeyPair;
@@ -81,7 +82,7 @@ public class TestSignatureUtils {
         org.fisco.bcos.web3j.crypto.ECKeyPair keyPair
             = org.fisco.bcos.web3j.crypto.ECKeyPair.create(new BigInteger(hexPrivKey, 10));
         String sig = DataToolUtils.secp256k1Sign(msg, new BigInteger(hexPrivKey, 10));
-        Boolean result = DataToolUtils.secp256k1VerifySignature(msg, sig, keyPair.getPublicKey());
+        Boolean result = DataToolUtils.verifySecp256k1Signature(msg, sig, keyPair.getPublicKey());
         Assert.assertTrue(result);
     }
 }
