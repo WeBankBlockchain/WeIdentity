@@ -137,7 +137,7 @@ public class CredentialPojo implements IProof, JsonSerializer, Hashable {
                     CredentialPojo.class
                 );
                 credentialPojo.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
-                credentialPojo.setIssuanceDate(0L);
+                //credentialPojo.setIssuanceDate(0L);
                 credentialPojo.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
                 credentialPojo.addType(CredentialType.LITE1.getName());
                 return credentialPojo;
