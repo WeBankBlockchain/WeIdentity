@@ -19,6 +19,7 @@
 
 package com.webank.weid.util;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -314,10 +315,7 @@ public final class CredentialUtils {
         Map<String, Object> disclosureMap) {
         String rawData = CredentialUtils
             .getCredentialThumbprintWithoutSig(credential, disclosureMap);
-        Sign.SignatureData sigData = DataToolUtils.signMessage(rawData, privateKey);
-        return new String(
-            DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-            StandardCharsets.UTF_8);
+        return DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
     }
 
     /**
