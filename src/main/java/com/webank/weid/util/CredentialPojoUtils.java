@@ -103,7 +103,7 @@ public final class CredentialPojoUtils {
         CredentialPojo credential) {
         try {
             Map<String, Object> credMap = DataToolUtils.objToMap(credential);
-            credMap.remove(ParamKeyConstant.ISSUANCE_DATE);
+            //credMap.remove(ParamKeyConstant.ISSUANCE_DATE);
             credMap.remove(ParamKeyConstant.CONTEXT);
             credMap.put(ParamKeyConstant.PROOF_TYPE, "lite1");
             // Preserve the same behavior as in CredentialUtils - will merge later
