@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +44,6 @@ import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
-import com.webank.weid.service.impl.inner.PropertiesService;
 import com.webank.weid.util.BatchTransactionUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
@@ -61,21 +59,21 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
 
     private WeIdService weIdService = new WeIdServiceImpl();
-    
+
     private ProcessingMode processingMode = ProcessingMode.IMMEDIATE;
-    
+
     private EvidenceServiceEngine evidenceServiceEngine;
-    
+
     private Integer groupId;
-    
+
     public EvidenceServiceImpl() {
         super();
         initEvidenceServiceEngine(masterGroupId);
     }
-    
+
     /**
      * 传入processingMode来决定上链模式.
-     * 
+     *
      * @param processingMode 上链模式
      * @param groupId 群组编号
      */
@@ -258,11 +256,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     private ResponseData<String> hashToNewEvidence(String hashValue, String privateKey,
         String extra) {
         try {
-            Sign.SignatureData sigData =
-                DataToolUtils.signMessage(hashValue, privateKey);
-            String signature = new String(
-                DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-                StandardCharsets.UTF_8);
+            String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
             Long timestamp = DateUtils.getCurrentTimeStamp();
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
                 String[] args = new String[6];
@@ -396,16 +390,27 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Decode(signature.getBytes(StandardCharsets.UTF_8))
             );
         if (StringUtils.isEmpty(publicKey)) {
-            return verifySignatureToSigner(
+            ResponseData<Boolean> verifyResp = verifySecp256k1SignatureToSigner(
                 evidenceInfo.getCredentialHash(),
                 WeIdUtils.convertAddressToWeId(weId),
-                signatureData
-            );
+                signature);
+            if (verifyResp.getResult()) {
+                return verifyResp;
+            } else {
+                return verifySignatureToSigner(
+                    evidenceInfo.getCredentialHash(),
+                    WeIdUtils.convertAddressToWeId(weId),
+                    signatureData
+                );
+            }
         } else {
             try {
                 boolean result = DataToolUtils
+                    .verifySecp256k1Signature(evidenceInfo.getCredentialHash(), signature,
+                        new BigInteger(publicKey)) || DataToolUtils
                     .verifySignature(evidenceInfo.getCredentialHash(), signatureData,
                         new BigInteger(publicKey));
+
                 if (!result) {
                     logger.error("Public key does not match signature.");
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
@@ -415,6 +420,33 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 logger.error("Passed-in signature illegal");
                 return new ResponseData<>(false, ErrorCode.WEID_PUBLICKEY_INVALID);
             }
+        }
+    }
+
+    private ResponseData<Boolean> verifySecp256k1SignatureToSigner(
+        String rawData,
+        String signerWeId,
+        String secp256k1sig
+    ) {
+        try {
+            ResponseData<WeIdDocument> innerResponseData =
+                weIdService.getWeIdDocument(signerWeId);
+            if (innerResponseData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                    "Error occurred when fetching WeIdentity DID document for: {}, msg: {}",
+                    signerWeId, innerResponseData.getErrorMessage());
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
+            }
+            WeIdDocument weIdDocument = innerResponseData.getResult();
+            ErrorCode errorCode = DataToolUtils
+                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument);
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false, errorCode);
+            }
+            return new ResponseData<>(true, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("error occurred during verifying signatures from chain: ", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
     }
 
@@ -458,13 +490,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         String privateKey = weIdPrivateKey.getPrivateKey();
         try {
-            Sign.SignatureData sigData =
-                DataToolUtils.signMessage(hashValue, privateKey);
-            String signature = new String(
-                DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-                StandardCharsets.UTF_8);
+            String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
             Long timestamp = DateUtils.getCurrentTimeStamp();
-            
+
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
                 String[] args = new String[7];
                 args[0] = hashValue;
