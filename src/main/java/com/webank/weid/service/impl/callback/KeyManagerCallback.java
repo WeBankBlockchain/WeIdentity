@@ -145,11 +145,18 @@ public class KeyManagerCallback extends AmopCallback {
             domRes.getResult()
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            logger.info(
-                "[checkAuthority] the data is be changed, this weid is {}.",
-                arg.getWeId()
+            errorCode = DataToolUtils.verifySecp256k1SignatureFromWeId(
+                arg.getKeyId(),
+                arg.getSignValue(),
+                domRes.getResult()
             );
-            return false;
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.info(
+                    "[checkAuthority] the data is be changed, this weid is {}.",
+                    arg.getWeId()
+                );
+                return false;
+            }
         }
         return true;
     }

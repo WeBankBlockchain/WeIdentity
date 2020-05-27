@@ -98,8 +98,10 @@ public class TestVerifyCredentialWithSpecifiedPubKey extends TestBaseService {
             credentialService.verifyCredentialWithSpecifiedPubKey(credentialWrapper, weIdPublicKey);
         LogUtil.info(logger, "verifyCredentialWithSpecifiedPubKey", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
-            response.getErrorCode().intValue());
+        Assert.assertTrue(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode()
+            == response.getErrorCode().intValue() || ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode()
+            == response.getErrorCode().intValue() || response.getErrorCode().intValue()
+            == ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode());
         Assert.assertEquals(false, response.getResult());
     }
 
