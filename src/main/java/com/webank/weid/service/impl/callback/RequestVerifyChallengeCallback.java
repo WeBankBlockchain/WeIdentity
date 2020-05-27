@@ -40,6 +40,7 @@ import com.webank.weid.util.DataToolUtils;
 
 /**
  * amop callback for verifying challenge.
+ *
  * @author tonychen 2020年3月10日
  */
 public class RequestVerifyChallengeCallback extends AmopCallback {
@@ -75,12 +76,16 @@ public class RequestVerifyChallengeCallback extends AmopCallback {
         String rawData = challenge.toJson();
         ResponseData<WeIdDocument> weIdDocResp = weIdService.getWeIdDocument(weId);
         ErrorCode errorCode = DataToolUtils
-            .verifySignatureFromWeId(rawData, signData, weIdDocResp.getResult());
+            .verifySecp256k1SignatureFromWeId(rawData, signData, weIdDocResp.getResult());
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            logger.error("[RequestVerifyChallengeCallback] verify challenge signature failed.");
-            result.setErrorCode(errorCode.getCode());
-            result.setErrorMessage(errorCode.getCodeDesc());
-            return result;
+            errorCode = DataToolUtils
+                .verifySignatureFromWeId(rawData, signData, weIdDocResp.getResult());
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[RequestVerifyChallengeCallback] verify challenge signature failed.");
+                result.setErrorCode(errorCode.getCode());
+                result.setErrorMessage(errorCode.getCodeDesc());
+                return result;
+            }
         }
 
         result.setErrorCode(ErrorCode.SUCCESS.getCode());
