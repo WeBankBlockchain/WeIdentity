@@ -286,6 +286,24 @@ public class TestCreateCredentialPojo extends TestBaseService {
             liteCredential.getHash());
         // 3. toJson() -> encrypt (唯一的序列化方法，瘦身，用于打包传输)
         System.out.println("Lite Credential toJson: " + liteCredential.toJson());
+
+        // Original CredentialPojo:
+        CredentialPojo tempCredential = copyCredentialPojo(credentialPojo);
+        thumbprint = CredentialPojoUtils.getCredentialThumbprintWithoutSig(tempCredential,
+            tempCredential.getSalt(), null);
+        System.out.println("Original Credential Thumbprint: " + thumbprint);
+        System.out.println("Original Credential Hash: "
+            + CredentialPojoUtils.getCredentialPojoHash(tempCredential, null));
+        System.out.println("Original Credential toJson: " + tempCredential.toJson());
+
+        // Original SD CredentialPojo:
+        CredentialPojo tempSdCredential = copyCredentialPojo(selectiveCredentialPojo);
+        thumbprint = CredentialPojoUtils.getCredentialThumbprintWithoutSig(tempSdCredential,
+            tempSdCredential.getSalt(), null);
+        System.out.println("Original SD Credential Thumbprint: " + thumbprint);
+        System.out.println("Original SD Credential Hash: "
+            + CredentialPojoUtils.getCredentialPojoHash(tempSdCredential, null));
+        System.out.println("Original SD Credential toJson: " + tempSdCredential.toJson());
     }
 
     /**
