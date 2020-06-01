@@ -137,7 +137,7 @@ public class CredentialPojo implements IProof, JsonSerializer, Hashable {
                     CredentialPojo.class
                 );
                 credentialPojo.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
-                credentialPojo.setIssuanceDate(0L);
+                //credentialPojo.setIssuanceDate(0L);
                 credentialPojo.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
                 credentialPojo.addType(CredentialType.LITE1.getName());
                 return credentialPojo;
@@ -241,7 +241,7 @@ public class CredentialPojo implements IProof, JsonSerializer, Hashable {
             try {
                 String signature = this.getSignature();
                 Map<String, Object> credMap = DataToolUtils.objToMap(this);
-                credMap.remove(ParamKeyConstant.ISSUANCE_DATE);
+                //credMap.remove(ParamKeyConstant.ISSUANCE_DATE);
                 credMap.remove(ParamKeyConstant.CONTEXT);
                 credMap.remove(ParamKeyConstant.PROOF);
                 credMap.put(ParamKeyConstant.PROOF_TYPE, CredentialType.LITE1.getName());

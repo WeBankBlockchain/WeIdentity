@@ -23,9 +23,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
@@ -35,28 +33,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-import static com.webank.weid.full.TestBaseUtil.createEcKeyPair;
-import static com.webank.weid.util.CredentialUtils.copyCredential;
-
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.EvidenceInfo;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.inf.Hashable;
+import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.EvidenceService;
-import com.webank.weid.service.impl.EvidenceServiceImpl;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
-import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.OffLineBatchTask;
 
 /**
  * Test CreateEvidence.
@@ -190,50 +180,58 @@ public class TestCreateEvidence extends TestBaseService {
 
     @Test
     public void testCreateEvidence_CustomKeyMultiSignerMultiTimes() {
-        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
-            super.copyCreateWeId(createWeIdResultWithSetAttr);
         CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+        Assert.assertNotNull(credential);
         credential.setId(UUID.randomUUID().toString());
         String credId = credential.getId();
         List<String> list = new ArrayList<>();
         String log = "X:112.5,Y:97.6";
         list.add(log);
-        evidenceService.createEvidenceWithLogAndCustomKey(
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
+            super.copyCreateWeId(createWeIdResultWithSetAttr);
+        ResponseData<String> resp = evidenceService.createEvidenceWithLogAndCustomKey(
             credential,
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey(),
             log,
             credId
         );
+        Assert.assertTrue(!StringUtils.isEmpty(resp.getResult()));
         log = "X:122.5,Y:94.3";
         list.add(log);
-        evidenceService.createEvidenceWithLogAndCustomKey(
+        resp = evidenceService.createEvidenceWithLogAndCustomKey(
             credential,
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey(),
             log,
             credId
         );
+        Assert.assertTrue(!StringUtils.isEmpty(resp.getResult()));
         log = "X:102.5,Y:99.1";
         list.add(log);
-        evidenceService.createEvidenceWithLogAndCustomKey(
+        resp = evidenceService.createEvidenceWithLogAndCustomKey(
             credential,
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey(),
             log,
             credId
         );
+        Assert.assertTrue(!StringUtils.isEmpty(resp.getResult()));
         log = "X:0,Y:0";
         list.add(log);
-        evidenceService.addLogByCustomKey(credId, log,
+        ResponseData<Boolean> respBool = evidenceService.addLogByCustomKey(credId, log,
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        Assert.assertTrue(respBool.getResult());
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr2 = createWeIdWithSetAttr();
-        evidenceService.createEvidenceWithLogAndCustomKey(
+        resp = evidenceService.createEvidenceWithLogAndCustomKey(
             credential,
             tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey(),
             "Age:22",
             credId
         );
+        Assert.assertTrue(!StringUtils.isEmpty(resp.getResult()));
         ResponseData<EvidenceInfo> eviCustomKey = evidenceService.getEvidenceByCustomKey(credId);
         EvidenceInfo evi = eviCustomKey.getResult();
         String signer = tempCreateWeIdResultWithSetAttr.getWeId();
+        Assert.assertNotNull(evi.getSignInfo());
+        Assert.assertNotNull(evi.getSignInfo().get(signer));
         Assert.assertEquals(evi.getSignInfo().get(signer).getLogs(), list);
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
         Assert.assertTrue(evi.getSignInfo().get(signer2).getLogs().contains("Age:22")
@@ -299,7 +297,8 @@ public class TestCreateEvidence extends TestBaseService {
                 customKeys.add(StringUtils.EMPTY);
             }
         }
-        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine();
+
+        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine(masterGroupId);
 
         // raw creation
         Long start = System.currentTimeMillis();
@@ -360,6 +359,36 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(evidenceInfo1.getSignInfo()
             .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 2);
         Assert.assertEquals(evidenceInfo1.getCredentialHash(), evidenceInfo1k.getCredentialHash());
+    }
+
+    /**
+     * This test can only be invoked when using multi-group with group = 1 and 2.
+     */
+    public void testBatchCreateMultiGroup() {
+        int batchSize = 100;
+        List<TransactionArgs> transactionArgsList = new ArrayList<>();
+        for (int i = 0; i < batchSize; i++) {
+            CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+            credential.setId(UUID.randomUUID().toString());
+            String hash = credential.getHash();
+            TransactionArgs args = new TransactionArgs();
+            args.setMethod("createEvidence");
+            List<String> argList = new ArrayList<>();
+            argList.add(credential.getHash());
+            argList.add(new String(DataToolUtils.base64Encode(DataToolUtils
+                .simpleSignatureSerialization(DataToolUtils.signMessage(hash, privateKey))),
+                StandardCharsets.UTF_8));
+            argList.add("test log" + i);
+            argList.add(DateUtils.getNoMillisecondTimeStampString());
+            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            if (i % 2 == 1) {
+                argList.add("2");
+            }
+            args.setArgs(String.join(",", argList));
+            transactionArgsList.add(args);
+        }
+        OffLineBatchTask task = new OffLineBatchTask();
+        task.sendBatchTransaction(transactionArgsList);
     }
 
     @Test
@@ -446,404 +475,6 @@ public class TestCreateEvidence extends TestBaseService {
             ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-
-    /**
-     * case9: privateKey is not exist.
-     */
-    @Test
-    public void testCreateEvidence_privateKeyNotExist() {
-        PasswordKey passwordKey = createEcKeyPair();
-        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
-        weIdPrivateKey.setPrivateKey(passwordKey.getPrivateKey());
-        ResponseData<String> response = evidenceService
-            .createEvidence(credential, weIdPrivateKey);
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertTrue(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case: credential id is null.
-     */
-    @Test
-    public void testCreateEvidence_idNull() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setId(null);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case: credential id is null.
-     */
-    @Test
-    public void testCreateEvidence_idBlank() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setId("");
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ID_NOT_EXISTS.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the cptId is null of credential.
-     */
-    @Test
-    public void testCreateEvidence_cptIdNull() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setCptId(null);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CPT_ID_ILLEGAL.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the cptId is not exist.
-     */
-    @Test
-    public void testCreateEvidence_cptIdNotExist() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setCptId(999999999);
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertEquals(
-            ErrorCode.SUCCESS.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertFalse(response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the cptId is minus.
-     */
-    // CI hold: @Test
-    public void testCreateEvidence_cptIdIsMinus() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setCptId(-1);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CPT_ID_ILLEGAL.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the issuer is null.
-     */
-    @Test
-    public void testCreateEvidence_issuerIsNull() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setIssuer(null);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the issuer is blank.
-     */
-    @Test
-    public void testCreateEvidence_issuerIsBlank() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setIssuer("");
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the issuer is invalid.
-     */
-    @Test
-    public void testCreateEvidence_invalidIssuer() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b656");
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the issuer is not exist.
-     */
-    @Test
-    public void testCreateEvidence_issuerNotExist() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setIssuer("did:weid:0x39e5e6f663ef77409144014ceb063713b65600e7");
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.SUCCESS.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the claim is null.
-     */
-    @Test
-    public void testCreateEvidence_claimNull() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setClaim(null);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the claim is blank.
-     */
-    @Test
-    public void testCreateEvidence_claimBlank() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setClaim(new HashMap<>());
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the issuanceDate is null.
-     */
-    @Test
-    public void testCreateEvidence_issuanceDateNull() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setIssuanceDate(null);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the issuanceDate is minus.
-     */
-    @Test
-    public void testCreateEvidence_issuanceDateIsMinus() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setIssuanceDate(-1L);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_ISSUANCE_DATE_ILLEGAL.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the expireDate is minus.
-     */
-    @Test
-    public void testCreateEvidence_expireDateIsMinus() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setExpirationDate(-1L);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
-            innerResp.getErrorCode().intValue());
-
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the expireDate is null.
-     */
-    @Test
-    public void testCreateEvidence_expireDateNull() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setExpirationDate(null);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_EXPIRE_DATE_ILLEGAL.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the expireDate is passed.
-     */
-    @Test
-    public void testCreateEvidence_expireDatePassed() {
-        Credential tempCredential = copyCredential(credential);
-        long expireDate = System.currentTimeMillis() - 10000;
-        tempCredential.setExpirationDate(expireDate);
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_EXPIRED.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the pfooof is null.
-     */
-    @Test
-    public void testCreateEvidence_proofNull() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setProof(null);
-        ResponseData<String> hashResp = credentialService.getCredentialHash(tempCredential);
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertEquals(
-            ErrorCode.ILLEGAL_INPUT.getCode(),
-            hashResp.getErrorCode().intValue());
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case12: the proof is blank.
-     */
-    @Test
-    public void testCreateEvidence_proofBlank() {
-        Credential tempCredential = copyCredential(credential);
-        tempCredential.setProof(new HashMap<>());
-        ResponseData<String> innerResp = credentialService.getCredentialHash(tempCredential);
-        Assert.assertEquals(
-            ErrorCode.CREDENTIAL_SIGNATURE_TYPE_ILLEGAL.getCode(),
-            innerResp.getErrorCode().intValue());
-        ResponseData<String> response = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "createEvidence", response);
-
-        Assert.assertFalse(!response.getResult().isEmpty());
-    }
-
-    /**
-     * case13: selectively disclosure: credentialPojo.
-     */
-    @Test
-    public void testEvidenceFull_SelectivelyDisclosurePojo() {
-        if (credentialPojo == null) {
-            credentialPojo = super.createCredentialPojo(createCredentialPojoArgs);
-        }
-        CredentialPojo originalCredential = copyCredentialPojo(credentialPojo);
-        CredentialPojo sdCredential = copyCredentialPojo(selectiveCredentialPojo);
-        Assert.assertTrue(CredentialPojoUtils.isSelectivelyDisclosed(sdCredential.getSalt()));
-        Assert.assertTrue(originalCredential.getSignature().equals(sdCredential.getSignature()));
-        String originalHashValue = credentialPojoService.getCredentialPojoHash(originalCredential)
-            .getResult();
-        String sdHashValue = credentialPojoService.getCredentialPojoHash(sdCredential).getResult();
-        Assert.assertTrue(originalHashValue.equalsIgnoreCase(sdHashValue));
-        String originalAddr = evidenceService
-            .createEvidence(originalCredential, createWeIdNew.getUserWeIdPrivateKey()).getResult();
-        String sdAddr = evidenceService
-            .createEvidence(sdCredential, createWeIdNew.getUserWeIdPrivateKey()).getResult();
-        Assert.assertTrue(!StringUtils.isEmpty(originalAddr));
-        Assert.assertTrue(!StringUtils.isEmpty(sdAddr));
-        EvidenceInfo originalEvi = evidenceService.getEvidence(originalAddr).getResult();
-        EvidenceInfo sdEvi = evidenceService.getEvidence(sdAddr).getResult();
-        Assert.assertTrue(
-            originalEvi.getCredentialHash().equalsIgnoreCase(sdEvi.getCredentialHash()));
-    }
-
-
-    /**
-     * case14: selectively disclosure: credential.
-     */
-    @Test
-    public void testEvidenceFull_SelectivelyDisclosure() {
-        Credential tempCredential = copyCredential(credential);
-        Map<String, Object> claim = tempCredential.getClaim();
-        Map<String, Object> disclosure = new HashMap<>(claim);
-        // Set a nothing-to-disclose CredentialWrapper flag
-        for (Map.Entry<String, Object> entry : claim.entrySet()) {
-            disclosure.put(entry.getKey(), "0");
-        }
-        CredentialWrapper credentialWrapper = new CredentialWrapper();
-        credentialWrapper.setCredential(tempCredential);
-        credentialWrapper.setDisclosure(disclosure);
-        String originalAddr = evidenceService
-            .createEvidence(tempCredential, createWeIdNew.getUserWeIdPrivateKey()).getResult();
-        String sdAddr = evidenceService
-            .createEvidence(credentialWrapper, createWeIdNew.getUserWeIdPrivateKey()).getResult();
-        Assert.assertTrue(!StringUtils.isEmpty(originalAddr));
-        Assert.assertTrue(!StringUtils.isEmpty(sdAddr));
-        EvidenceInfo originalEvi = evidenceService.getEvidence(originalAddr).getResult();
-        EvidenceInfo sdEvi = evidenceService.getEvidence(sdAddr).getResult();
-        Assert.assertTrue(
-            originalEvi.getCredentialHash().equalsIgnoreCase(sdEvi.getCredentialHash()));
     }
 
     /**

@@ -22,10 +22,9 @@ package com.webank.weid.service.fisco.v2;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.client.Service;
@@ -46,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.webank.weid.config.FiscoConfig;
+import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
@@ -60,10 +60,10 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
 
     private static final Logger logger = LoggerFactory.getLogger(WeServerV2.class);
 
-    private static Web3j web3j;
-    private static Service service;
-    private static Credentials credentials;
-    private static CnsService cnsService;
+    private Web3j web3j;
+    private Service service;
+    private Credentials credentials;
+    private CnsService cnsService;
 
     public WeServerV2(FiscoConfig fiscoConfig) {
         super(fiscoConfig, new OnNotifyCallbackV2());
@@ -102,14 +102,10 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
     }
 
     @Override
-    protected void initWeb3j() {
+    protected void initWeb3j(Integer groupId) {
         logger.info("[WeServiceImplV2] begin to init web3j instance..");
-        service = buildFiscoBcosService(fiscoConfig);
-        service.setPushCallback((ChannelPushCallback) pushCallBack);
-        // Set topics for AMOP
-        Set<String> topics = new HashSet<String>();
-        topics.add(fiscoConfig.getCurrentOrgId());
-        service.setTopics(topics);
+        service = buildFiscoBcosService(fiscoConfig, groupId);
+        topicListener(groupId);
         try {
             service.run();
         } catch (Exception e) {
@@ -126,6 +122,12 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             throw new InitWeb3jException();
         }
 
+        // 检查群组Id是否存在
+        if (!checkGroupId(groupId)) {
+            logger.error("[WeServiceImplV2] the groupId does not exist.");
+            throw new InitWeb3jException();
+        }
+
         credentials = GenCredential.create();
         if (credentials == null) {
             logger.error("[WeServiceImplV2] credentials init failed. ");
@@ -135,13 +137,21 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
         logger.info("[WeServiceImplV2] init web3j instance success..");
     }
 
-    private Service buildFiscoBcosService(FiscoConfig fiscoConfig) {
+    private void topicListener(Integer groupId) {
+        // 如果为主群组
+        if (fiscoConfig.getGroupId().equals(String.valueOf(groupId))) {
+            service.setPushCallback((ChannelPushCallback) pushCallBack);
+            // Set topics for AMOP
+            service.setTopics(super.getTopic());
+        }
+    }
+
+    private Service buildFiscoBcosService(FiscoConfig fiscoConfig, Integer groupId) {
 
         Service service = new Service();
         service.setOrgID(fiscoConfig.getCurrentOrgId());
         service.setConnectSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkTimeout()));
         // group info
-        Integer groupId = Integer.valueOf(fiscoConfig.getGroupId());
         service.setGroupId(groupId);
 
         // connect key and string
@@ -195,9 +205,11 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
     }
 
     @Override
-    protected String queryBucketFromCns() throws WeIdBaseException {
+    protected String queryBucketFromCns(CnsType cnsType) throws WeIdBaseException {
         try {
-            List<CnsInfo> cnsInfoList = cnsService.queryCnsByNameAndVersion(CNS_NAME, CNS_VERSION);
+            logger.info("[queryBucketFromCns] query address by type = {}.", cnsType.getName());
+            List<CnsInfo> cnsInfoList = cnsService.queryCnsByNameAndVersion(
+                cnsType.getName(), cnsType.getVersion());
             if (cnsInfoList.size() == 0) {
                 logger.warn("[queryBucketFromCns] can not find data from CNS.");
                 return StringUtils.EMPTY;
@@ -208,5 +220,26 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             logger.error("[queryBucketFromCns] query address has error.", e);
             throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
         }
+    }
+
+    @Override
+    public boolean checkGroupId(Integer groupId) {
+        if (groupId == null) {
+            return false;
+        }
+        try {
+            List<String> result = this.getWeb3j().getGroupList().send().getResult();
+            if (CollectionUtils.isEmpty(result)) {
+                return false;
+            }
+            for (String string : result) {
+                if (string.equals(String.valueOf(groupId))) {
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            logger.error("[checkGroupId] check the groupId has error.", e);
+        }
+        return false;
     }
 }

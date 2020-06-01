@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -154,6 +154,13 @@ public class TestGetWeIdDocument extends TestBaseService {
         weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
         weIdAuthentication.getWeIdPrivateKey().setPrivateKey(privateKey);
         ResponseData<Boolean> resp = weIdService
+            .delegateSetPublicKey(publicKeyArgs, weIdAuthentication);
+        weIdDoc = weIdService.getWeIdDocument(createWeIdResult.getWeId());
+        Assert.assertEquals(weIdDoc.getResult().getPublicKey().size(), 3);
+        weIdAuthentication = new WeIdAuthentication();
+        weIdAuthentication.setWeId(createWeIdResult.getWeId());
+        weIdAuthentication.setWeIdPrivateKey(createWeIdResult.getUserWeIdPrivateKey());
+        ResponseData<Boolean> resp2 = weIdService
             .delegateSetPublicKey(publicKeyArgs, weIdAuthentication);
         weIdDoc = weIdService.getWeIdDocument(createWeIdResult.getWeId());
         Assert.assertEquals(weIdDoc.getResult().getPublicKey().size(), 3);

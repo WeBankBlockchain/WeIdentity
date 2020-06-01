@@ -506,6 +506,7 @@ public final class DataToolUtils {
      * @param privateKeyString the private key string
      * @return SignatureData
      */
+    @Deprecated
     public static Sign.SignatureData signMessage(
         String message,
         String privateKeyString) {
@@ -520,6 +521,7 @@ public final class DataToolUtils {
      *
      * @param rawData original raw data
      * @param privateKey private key in BigInteger format
+     * @return base64 string for signature value
      */
     public static String secp256k1Sign(String rawData, BigInteger privateKey) {
         ECDSASign ecdsaSign = new ECDSASign();
@@ -568,17 +570,26 @@ public final class DataToolUtils {
      * @param rawData original raw data
      * @param signatureBase64 signature base64 string
      * @param publicKey in BigInteger format
+     * @return return boolean result, true is success and false is fail
      */
-    public static boolean secp256k1VerifySignature(
+    public static boolean verifySecp256k1Signature(
         String rawData,
         String signatureBase64,
         BigInteger publicKey
     ) {
-        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData = secp256k1SigBase64Deserialization(
-            signatureBase64);
-        ECDSASign ecdsaSign = new ECDSASign();
-        byte[] hashBytes = Hash.sha3(rawData.getBytes());
-        return ecdsaSign.secp256Verify(hashBytes, publicKey, sigData);
+        try {
+            if (rawData == null) {
+                return false;
+            }
+            org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData =
+                secp256k1SigBase64Deserialization(signatureBase64);
+            ECDSASign ecdsaSign = new ECDSASign();
+            byte[] hashBytes = Hash.sha3(rawData.getBytes());
+            return ecdsaSign.secp256Verify(hashBytes, publicKey, sigData);
+        } catch (Exception e) {
+            logger.error("Error occurred during secp256k1 sig verification: {}", e);
+            return false;
+        }
     }
 
     /**
@@ -613,6 +624,7 @@ public final class DataToolUtils {
      * @param privateKeyString the private key string
      * @return String the data after signature
      */
+    @Deprecated
     public static String sign(
         String rawData,
         String privateKeyString) {
@@ -669,36 +681,21 @@ public final class DataToolUtils {
      * @param signature this is a signature string of Base64.
      * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
      * @return true if yes, false otherwise
-     * @throws SignatureException Signature is the exception.
      */
     public static boolean verifySignature(
         String message,
         String signature,
-        BigInteger publicKey)
-        throws SignatureException {
-        if (message == null) {
+        BigInteger publicKey) {
+        try {
+            if (message == null) {
+                return false;
+            }
+            Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
+            BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
+            return extractedPublicKey.equals(publicKey);
+        } catch (SignatureException e) {
             return false;
         }
-        Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
-        BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
-        return extractedPublicKey.equals(publicKey);
-    }
-
-    /**
-     * Verify whether the message and the Signature matches the given public Key.
-     *
-     * @param message This should be from the same plain-text source with the signature Data.
-     * @param signature this is a signature string of Base64.
-     * @param publicKey the string is a publicKey.
-     * @return true if yes, false otherwise
-     * @throws SignatureException Signature is the exception.
-     */
-    public static boolean verifySignature(
-        String message,
-        String signature,
-        String publicKey)
-        throws SignatureException {
-        return verifySignature(message, signature, new BigInteger(publicKey));
     }
 
     /**
@@ -850,6 +847,12 @@ public final class DataToolUtils {
         WeIdDocument weIdDocument) {
         List<String> publicKeysListToVerify = new ArrayList<String>();
 
+        try {
+            secp256k1SigBase64Deserialization(signature);
+        } catch (Exception e) {
+            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
+        }
+
         // Traverse public key list indexed Authentication key list
         for (AuthenticationProperty authenticationProperty : weIdDocument
             .getAuthentication()) {
@@ -866,12 +869,12 @@ public final class DataToolUtils {
                 if (StringUtils.isNotEmpty(publicKeyItem)) {
                     result =
                         result
-                            || secp256k1VerifySignature(
+                            || verifySecp256k1Signature(
                             rawData, signature, new BigInteger(publicKeyItem));
                 }
             }
             if (!result) {
-                return ErrorCode.CREDENTIAL_ISSUER_MISMATCH;
+                return ErrorCode.CREDENTIAL_VERIFY_FAIL;
             }
         } catch (Exception e) {
             logger.error("some exceptions occurred in signature verification", e);
@@ -943,7 +946,7 @@ public final class DataToolUtils {
                 }
             }
             if (!result) {
-                return ErrorCode.CREDENTIAL_ISSUER_MISMATCH;
+                return ErrorCode.CREDENTIAL_VERIFY_FAIL;
             }
         } catch (SignatureException e) {
             logger.error("some exceptions occurred in signature verification", e);

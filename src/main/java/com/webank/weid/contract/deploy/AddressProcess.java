@@ -92,6 +92,22 @@ public abstract class AddressProcess {
         return address;
     }
     
+    protected static ContractConfig getContractConfig() {
+        ContractConfig contractConfig = new ContractConfig();
+        String weIdAddress = getAddress("weIdContract.address");
+        String issuerAddress = getAddress("authorityIssuer.address");
+        String specificAddress = getAddress("specificIssuer.address");
+        String evidenceAddress = getAddress("evidenceController.address");
+        String cptAddress = getAddress("cptController.address");
+
+        contractConfig.setWeIdAddress(weIdAddress);
+        contractConfig.setIssuerAddress(issuerAddress);
+        contractConfig.setSpecificIssuerAddress(specificAddress);
+        contractConfig.setEvidenceAddress(evidenceAddress);
+        contractConfig.setCptAddress(cptAddress);
+        return contractConfig;
+    }
+    
     /**
      * 根据合约地址获取hash数据.
      * @param contractConfig 合约数据
@@ -116,6 +132,12 @@ public abstract class AddressProcess {
             .append(cptAddress)
             .append(specificAddress)
             .append(evidenceAddress);
+        return DataToolUtils.getHash(address.toString());
+    }
+    
+    public static String getHashForShare(Integer groupId, String evidenceAddress) {
+        StringBuffer address = new StringBuffer();
+        address.append("share").append(groupId).append(evidenceAddress);
         return DataToolUtils.getHash(address.toString());
     }
 }

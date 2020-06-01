@@ -19,6 +19,8 @@
 
 package com.webank.weid.suite.transportation;
 
+import java.math.BigInteger;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.ErrorCode;
@@ -42,19 +44,19 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
 
     protected TransmissionRequest<GetTransDataArgs> buildRequest(
         TransType type, 
-        TransCodeBaseData barCodeData,
+        TransCodeBaseData codeData,
         WeIdAuthentication weIdAuthentication
     ) {
         TransmissionRequest<GetTransDataArgs> request = new TransmissionRequest<>();
-        request.setOrgId(barCodeData.getOrgId());
+        request.setOrgId(codeData.getOrgId());
         request.setServiceType(ServiceType.SYS_GET_TRANS_DATA.name());
         request.setWeIdAuthentication(weIdAuthentication);
-        request.setArgs(getBarCodeArgs(barCodeData, weIdAuthentication));
+        request.setArgs(getCodeDataArgs(codeData, weIdAuthentication));
         request.setTransType(type);
         return request;
     }
     
-    protected GetTransDataArgs getBarCodeArgs(
+    protected GetTransDataArgs getCodeDataArgs(
         TransCodeBaseData codeData, 
         WeIdAuthentication weIdAuthentication
     ) {
@@ -64,9 +66,9 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
         args.setFromOrgId(fiscoConfig.getCurrentOrgId());
         args.setWeId(weIdAuthentication.getWeId());
         args.setClassName(codeData.getClass().getName());
-        String signValue = DataToolUtils.sign(
+        String signValue = DataToolUtils.secp256k1Sign(
             codeData.getId(), 
-            weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
+            new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
         );
         args.setSignValue(signValue);
         return args;
