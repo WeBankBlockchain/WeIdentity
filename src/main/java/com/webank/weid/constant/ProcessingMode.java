@@ -17,13 +17,22 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.api.transportation.params;
+package com.webank.weid.constant;
 
 /**
- * 封装类型定义.
- * @author yanggang
+ * 上链处理模式.
+ * @author v_wbgyang
  *
  */
-public enum TransportationType {
-    JSON, QR_CODE
+public enum ProcessingMode {
+    
+    /**
+     * 立即上链模式，此模式下会立即将数据发送至区块链节点.
+     */
+    IMMEDIATE,
+    
+    /**
+     * 批量延迟上链模式，此模式下会先将数据存入介质中，然后异步去上链处理.
+     */
+    PERIODIC_AND_BATCH
 }

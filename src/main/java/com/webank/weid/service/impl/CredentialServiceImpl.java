@@ -498,18 +498,25 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 } else {
                     WeIdDocument weIdDocument = innerResponseData.getResult();
                     ErrorCode errorCode = DataToolUtils
-                        .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+                        .verifySecp256k1SignatureFromWeId(rawData, credential.getSignature(),
+                            weIdDocument);
                     if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                        return new ResponseData<>(false, errorCode);
+                        errorCode = DataToolUtils
+                            .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+                        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                            return new ResponseData<>(false, errorCode);
+                        }
                     }
                     return new ResponseData<>(true, ErrorCode.SUCCESS);
                 }
             } else {
                 boolean result =
-                    DataToolUtils
+                    DataToolUtils.verifySecp256k1Signature(rawData,
+                        credential.getSignature(), new BigInteger(publicKey))
+                        || DataToolUtils
                         .verifySignature(rawData, signatureData, new BigInteger(publicKey));
                 if (!result) {
-                    return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
+                    return new ResponseData<>(false, ErrorCode.CREDENTIAL_VERIFY_FAIL);
                 }
                 return new ResponseData<>(true, ErrorCode.SUCCESS);
             }
