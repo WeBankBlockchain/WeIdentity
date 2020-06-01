@@ -1,3 +1,17 @@
+### V1.6.3 (2020-06-01)
+- Features:
+1. Multi-group deployment support to separate Evidence and other smart contracts.
+2. Users can choose Evidence processing mode (instant or batch-type).
+3. Configurations in DB and properties can now be updated automatically.
+4. Signature creation is now unified to use Ethereum type with Base64 encoding (v = 0/1).
+
+- Bugfixes:
+1. All WeID delegate calls now requires admin/committee privilege from private key.
+2. BarCode and QR Code types are merged.
+3. AMOP Listening now requires to specify topic.
+4. LiteCredential's Hash and Signature's raw message now correctly includes issuanceDate.
+5. Migrate to GitHub Actions for CI and pipeline.
+
 ### V1.6.2 (2020-05-07)
 - Features:
 1. CryptoService, built-in support for ECIES and RSA encryption and decryption.

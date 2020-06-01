@@ -106,7 +106,7 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
                </ul>
             </td>
             <td>
-               <a href="https://travis-ci.org/WeBankFinTech/WeIdentity"><img src="https://travis-ci.org/WeBankFinTech/WeIdentity.svg?branch=master" /></a>
+               <a href="https://github.com/WeBankFinTech/WeIdentity"><img src="https://github.com/WeBankFinTech/WeIdentity/workflows/CI/badge.svg?branch=master" /></a>
                <a href="https://github.com/WeBankFinTech/WeIdentity/releases/latest"><img src="https://img.shields.io/github/release/WeBankFinTech/WeIdentity.svg" /></a>
                <a href="https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%22weid-java-sdk%22"><img src="https://img.shields.io/maven-central/v/com.webank/weid-java-sdk.svg?label=Maven%20Central" /></a>
                <a href="https://www.codacy.com/manual/chaoxinhu/WeIdentity?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WeBankFinTech/WeIdentity&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/37d3bc478ede4839ba16ccac469ad3f2" /></a>
