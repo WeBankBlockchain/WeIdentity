@@ -7,6 +7,11 @@ weid_config_tpl=${java_source_code_dir}/src/main/resources/weidentity.properties
 weid_config=${java_source_code_dir}/src/main/resources/weidentity.properties
 font=${java_source_code_dir}/src/main/resources/NotoSansCJKtc-Regular.ttf
 
+export MYSQL_ADDRESS=${1:-0.0.0.0:3306}
+export MYSQL_DATABASE=${2:-database}
+export MYSQL_USERNAME=${3:-username}
+export MYSQL_PASSWORD=${4:-password}
+
 JAVA_OPTS='-Djdk.tls.namedGroups="secp256r1,secp256k1"'
 
 function modify_config()
@@ -34,8 +39,7 @@ function modify_config()
     NODEVAR='${ORG_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
     cp ${weid_config} ${java_source_code_dir}/src/test/resources/
-    # cat ${weid_config}
-    
+
     if [ -e ${java_source_code_dir}/ecdsa_key ];then
         cp ${java_source_code_dir}/ecdsa_key ${java_source_code_dir}/src/test/resources/
     fi
@@ -53,6 +57,8 @@ function gradle_build_sdk()
     cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/main/resources
     cp ${java_source_code_dir}/.ci/node.crt ${java_source_code_dir}/src/main/resources
     cp ${java_source_code_dir}/.ci/node.key ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/dist/lib/NotoSansCJKtc-Regular.ttf ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/dist/lib/NotoSansCJKtc-Regular.ttf ${java_source_code_dir}/src/test/resources
     
     export FISCO_BCOS_VERSION="2"
     export CNS_CONTRACT_FOLLOW=
@@ -66,11 +72,11 @@ function gradle_build_sdk()
     content="$NODE_IP"
     #content="0.0.0.0:8900"
     export BLOCKCHIAN_NODE_INFO=${content}
-    export ORG_ID="webank-ci"
-    export MYSQL_ADDRESS=0.0.0.0:3306
-    export MYSQL_DATABASE=database
-    export MYSQL_USERNAME=username
-    export MYSQL_PASSWORD=password
+    export ORG_ID="webank_ci"
+    echo $MYSQL_ADDRESS
+    echo $MYSQL_DATABASE
+    echo $MYSQL_USERNAME
+    echo $MYSQL_PASSWORD
     NODEVAR='${ORG_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
 

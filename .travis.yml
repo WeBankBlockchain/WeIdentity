@@ -1,16 +1,10 @@
 sudo: false
 dist: trusty
 
-# blocklist
-
-
-# safelist
+# With the readiness of github action, now travis CI only needs to run on master
 branches:
   only:
     - master
-    - develop
-    - /^v\d+\.\d+\.\d+$/
-    - /^release.*/
 
 language: java
 jdk:

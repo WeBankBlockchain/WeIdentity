@@ -26,13 +26,12 @@ import java.nio.charset.StandardCharsets;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
 import org.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.constant.ProcessingMode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
@@ -43,7 +42,8 @@ import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.EvidenceService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.impl.inner.PropertiesService;
+import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.BatchTransactionUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
@@ -59,6 +59,34 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
 
     private WeIdService weIdService = new WeIdServiceImpl();
+
+    private ProcessingMode processingMode = ProcessingMode.IMMEDIATE;
+
+    private EvidenceServiceEngine evidenceServiceEngine;
+
+    private Integer groupId;
+
+    public EvidenceServiceImpl() {
+        super();
+        initEvidenceServiceEngine(masterGroupId);
+    }
+
+    /**
+     * 传入processingMode来决定上链模式.
+     *
+     * @param processingMode 上链模式
+     * @param groupId 群组编号
+     */
+    public EvidenceServiceImpl(ProcessingMode processingMode, Integer groupId) {
+        super(groupId);
+        this.processingMode = processingMode;
+        initEvidenceServiceEngine(groupId);
+    }
+
+    private void initEvidenceServiceEngine(Integer groupId) {
+        evidenceServiceEngine = EngineFactory.createEvidenceServiceEngine(groupId);
+        this.groupId = groupId;
+    }
 
     @Override
     public ResponseData<Boolean> createRawEvidenceWithCustomKey(
@@ -228,28 +256,23 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     private ResponseData<String> hashToNewEvidence(String hashValue, String privateKey,
         String extra) {
         try {
-            Sign.SignatureData sigData =
-                DataToolUtils.signMessage(hashValue, privateKey);
-            String signature = new String(
-                DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-                StandardCharsets.UTF_8);
+            String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
             Long timestamp = DateUtils.getCurrentTimeStamp();
-
-            boolean flag = getOfflineFlag();
-            if (flag) {
-
-                String[] args = new String[5];
+            if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
+                String[] args = new String[6];
                 args[0] = hashValue;
                 args[1] = signature;
                 args[2] = extra;
                 args[3] = String.valueOf(timestamp);
                 args[4] = privateKey;
+                args[5] = String.valueOf(this.groupId);
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
                     .append(extra)
                     .append(timestamp)
-                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
+                    .append(this.groupId).toString();
                 String hash = DataToolUtils.sha3(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
@@ -367,16 +390,27 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 DataToolUtils.base64Decode(signature.getBytes(StandardCharsets.UTF_8))
             );
         if (StringUtils.isEmpty(publicKey)) {
-            return verifySignatureToSigner(
+            ResponseData<Boolean> verifyResp = verifySecp256k1SignatureToSigner(
                 evidenceInfo.getCredentialHash(),
                 WeIdUtils.convertAddressToWeId(weId),
-                signatureData
-            );
+                signature);
+            if (verifyResp.getResult()) {
+                return verifyResp;
+            } else {
+                return verifySignatureToSigner(
+                    evidenceInfo.getCredentialHash(),
+                    WeIdUtils.convertAddressToWeId(weId),
+                    signatureData
+                );
+            }
         } else {
             try {
                 boolean result = DataToolUtils
+                    .verifySecp256k1Signature(evidenceInfo.getCredentialHash(), signature,
+                        new BigInteger(publicKey)) || DataToolUtils
                     .verifySignature(evidenceInfo.getCredentialHash(), signatureData,
                         new BigInteger(publicKey));
+
                 if (!result) {
                     logger.error("Public key does not match signature.");
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
@@ -386,6 +420,33 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 logger.error("Passed-in signature illegal");
                 return new ResponseData<>(false, ErrorCode.WEID_PUBLICKEY_INVALID);
             }
+        }
+    }
+
+    private ResponseData<Boolean> verifySecp256k1SignatureToSigner(
+        String rawData,
+        String signerWeId,
+        String secp256k1sig
+    ) {
+        try {
+            ResponseData<WeIdDocument> innerResponseData =
+                weIdService.getWeIdDocument(signerWeId);
+            if (innerResponseData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                    "Error occurred when fetching WeIdentity DID document for: {}, msg: {}",
+                    signerWeId, innerResponseData.getErrorMessage());
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
+            }
+            WeIdDocument weIdDocument = innerResponseData.getResult();
+            ErrorCode errorCode = DataToolUtils
+                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument);
+            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false, errorCode);
+            }
+            return new ResponseData<>(true, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("error occurred during verifying signatures from chain: ", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
     }
 
@@ -429,30 +490,26 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         String privateKey = weIdPrivateKey.getPrivateKey();
         try {
-            Sign.SignatureData sigData =
-                DataToolUtils.signMessage(hashValue, privateKey);
-            String signature = new String(
-                DataToolUtils.base64Encode(DataToolUtils.simpleSignatureSerialization(sigData)),
-                StandardCharsets.UTF_8);
+            String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
             Long timestamp = DateUtils.getCurrentTimeStamp();
 
-            boolean flag = getOfflineFlag();
-            if (flag) {
-
-                String[] args = new String[6];
+            if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
+                String[] args = new String[7];
                 args[0] = hashValue;
                 args[1] = signature;
                 args[2] = log;
                 args[3] = String.valueOf(timestamp);
                 args[4] = customKey;
                 args[5] = privateKey;
+                args[6] = String.valueOf(this.groupId);
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
                     .append(log)
                     .append(timestamp)
                     .append(customKey)
-                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey)).toString();
+                    .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
+                    .append(this.groupId).toString();
                 String hash = DataToolUtils.sha3(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
@@ -464,6 +521,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
                 }
             }
+
             return evidenceServiceEngine.createEvidenceWithCustomKey(
                 hashValue,
                 signature,
@@ -496,14 +554,5 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private boolean isChainStringLengthValid(String string) {
         return string.length() < WeIdConstant.ON_CHAIN_STRING_LENGTH;
-    }
-
-    private boolean getOfflineFlag() {
-        String flag = PropertiesService.getInstance()
-            .getProperty(ParamKeyConstant.ENABLE_OFFLINE);
-        if (StringUtils.isNotBlank(flag)) {
-            return new Boolean(flag);
-        }
-        return false;
     }
 }

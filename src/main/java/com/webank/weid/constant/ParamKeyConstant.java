@@ -108,5 +108,5 @@ public final class ParamKeyConstant {
     public static final String BIN_LOG_PATH = "binLogPath";
     public static final String ENABLE_OFFLINE = "enableOffLine";
     public static final String INTEVAL_PERIOD = "inteval_period";
-    
+    public static final String SHARE_CNS = "cns.contract.share.follow.";
 }

@@ -6,8 +6,11 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
@@ -22,7 +25,9 @@ import com.webank.weid.util.DataToolUtils;
  *
  */
 public class PropertiesService extends InnerService {
-
+    
+    private static final Logger logger =  LoggerFactory.getLogger(PropertiesService.class);
+    
     private static PropertiesService instance;
 
     // 存放内置配置得对象
@@ -70,7 +75,7 @@ public class PropertiesService extends InnerService {
             }
         };
         timer = new Timer();
-        timer.scheduleAtFixedRate(task, 0, intevalPeriod);
+        timer.scheduleAtFixedRate(task, intevalPeriod, intevalPeriod);
     }
     
     private static void reStartMonitor() {
@@ -124,18 +129,74 @@ public class PropertiesService extends InnerService {
      * 更新properties缓存数据,后续可以用于定时更新.
      */
     private void load() {
+        logger.info("[load] begin load properties.");
         synchronized (properties) {
-            Map<String, String> query = query();
-            properties.clear();
-            properties.putAll(query);
-            if (instance != null) {
-                Long intevalPeriod = getIntevalPeriod();
-                if (intevalPeriod != null 
-                    && intevalPeriod.longValue() != prevIntevalPeriod.longValue()) {
-                    reStartMonitor();
+            try {
+                Map<String, String> query = query();
+                processUpdate(query);
+                if (instance != null) {
+                    Long intevalPeriod = getIntevalPeriod();
+                    if (intevalPeriod != null 
+                        && intevalPeriod.longValue() != prevIntevalPeriod.longValue()) {
+                        reStartMonitor();
+                    }
                 }
+            } catch (Throwable e) {
+                logger.error("[load] the properties load error.", e);
             }
         }
+    }
+
+    /*
+     * properties 中存放的是现内存中的所有配置数据
+     * queryMap 中为数据库中查询出来最新的配置数据
+     * 此处更新内存中的数据，并日志输出，需要删除的key, 新增的key，更新的key
+     * 
+     * 更新过程： 先把更新数据库中的key全量放入内存中，然后处理需要删除的key
+     */
+    private void processUpdate(Map<String, String> queryMap) {
+        // 判断两个map是否一致，如果一致则不用后续处理
+        if (queryMap.equals(properties)) {
+            logger.info("[processUpdate] configuration not changed.");
+            return;
+        }
+        Set<String> delKey = getDeleteKey(queryMap);
+        if (delKey.size() > 0) {
+            logger.info("[processUpdate] del key = {}.", delKey);
+        }
+        Set<String> updateKey = getUpdateKey(queryMap);
+        if (updateKey.size() > 0) {
+            logger.info("[processUpdate] update key = {}.", updateKey); 
+            print(queryMap, updateKey);
+        }
+        properties.putAll(queryMap);
+        delKey.stream().forEach(key -> properties.remove(key));
+        logger.info("[processUpdate] configuration change complete.");
+    }
+
+    private void print(Map<String, String> queryMap, Set<String> keys) {
+        // 日志输出变化项, 此处未来需要对隐秘数据进行过滤
+        keys.stream().forEach(key -> logger.info(
+            "[processUpdate] key: {}, value: {} ---> {}", 
+            key, 
+            properties.get(key), 
+            queryMap.get(key)
+        ));
+    }
+    
+    private Set<String> getDeleteKey(Map<String, String> queryMap) {
+        return properties.entrySet()
+            .stream()
+            .filter(entry -> !queryMap.containsKey(entry.getKey()))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)).keySet();
+    }
+
+    private Set<String> getUpdateKey(Map<String, String> queryMap) {
+        return queryMap.entrySet()
+            .stream()
+            .filter(entry -> (properties.containsKey(entry.getKey()) 
+                && !StringUtils.equals(entry.getValue(), properties.get(entry.getKey()))))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)).keySet();
     }
 
     /**
@@ -144,7 +205,7 @@ public class PropertiesService extends InnerService {
      * @param data 存入的配置数据
      * @return 返回添加结果
      */
-    public boolean addProperties(Map<String, String> data) {
+    public boolean saveProperties(Map<String, String> data) {
         synchronized (properties) {
             Map<String, String> query = this.query();
             query.putAll(data);
@@ -168,9 +229,7 @@ public class PropertiesService extends InnerService {
             // 查询数据库中得配置
             Map<String, String> query = this.query();
             // 删除对应的key
-            for (String string : data) {
-                query.remove(string);
-            }
+            data.stream().forEach(key -> query.remove(key));
             // 更新到数据库中
             if (this.save(query)) {
                 // 同步配置到内存
@@ -187,6 +246,14 @@ public class PropertiesService extends InnerService {
         if (StringUtils.isNotBlank(responseData.getResult())) {
             map = DataToolUtils.deserialize(responseData.getResult(), Map.class);
         }
+        // 处理value为null的转换成空字符串, 因为ConcurrentHashMap中不允许null值存在
+        map.entrySet().stream().forEach(
+            entry -> {
+                if (entry.getValue() == null) {
+                    entry.setValue(StringUtils.EMPTY); 
+                }
+            }
+        );
         return map;
     }
 
