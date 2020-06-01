@@ -35,6 +35,8 @@ import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.config.ContractConfig;
+import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.deploy.AddressProcess;
 import com.webank.weid.contract.v2.AuthorityIssuerController;
@@ -116,8 +118,8 @@ public class DeployContractV2 extends AddressProcess {
     public static void deployContract(String privateKey) {
         initWeb3j();
         initCredentials(privateKey);
-        String weIdContractAddress = deployWeIdContract();
         String roleControllerAddress = deployRoleControllerContracts();
+        String weIdContractAddress = deployWeIdContract(roleControllerAddress);
         Map<String, String> addrList = deployIssuerContracts(roleControllerAddress);
         if (addrList.containsKey("AuthorityIssuerData")) {
             String authorityIssuerDataAddress = addrList.get("AuthorityIssuerData");
@@ -130,14 +132,14 @@ public class DeployContractV2 extends AddressProcess {
         deployEvidenceContractsNew();
         registerToCns();
     }
-    
+
     private static void registerToCns() {
         String privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
         WeIdPrivateKey weIdPrivate = new WeIdPrivateKey();
         weIdPrivate.setPrivateKey(privateKey);
-        RegisterAddressV2.registerAddress(weIdPrivate);
+        registerAddress(weIdPrivate);
     }
-    
+
 
     private static String deployRoleControllerContracts() {
         if (web3j == null) {
@@ -158,7 +160,7 @@ public class DeployContractV2 extends AddressProcess {
         }
     }
 
-    private static String deployWeIdContract() {
+    private static String deployWeIdContract(String roleControllerAddress) {
         if (web3j == null) {
             initWeb3j();
         }
@@ -168,7 +170,8 @@ public class DeployContractV2 extends AddressProcess {
             weIdContract = WeIdContract.deploy(
                 web3j,
                 credentials,
-                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT))
+                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                roleControllerAddress)
                 .send();
         } catch (Exception e) {
             logger.error("WeIdContract deploy error.", e);
@@ -382,5 +385,59 @@ public class DeployContractV2 extends AddressProcess {
             logger.error("EvidenceFactory deploy exception", e);
         }
         return StringUtils.EMPTY;
+    }
+    
+    /**
+     * 根据私钥将合约地址注册到cns中.
+     * @param privateKey 私钥信息
+     */
+    public static void registerAddress(WeIdPrivateKey privateKey) {
+        CnsType  cnsType = CnsType.DEFAULT;
+        //先進行cns注冊
+        RegisterAddressV2.registerBucketToCns(cnsType);
+        //获取地址hash
+        ContractConfig contractConfig = getContractConfig();
+        String hash = getHashByAddress(contractConfig);
+        logger.info("[registerAddress] contract hash = {}.", hash);
+        RegisterAddressV2.registerAddress(
+            cnsType,
+            hash, 
+            contractConfig.getWeIdAddress(), 
+            WeIdConstant.CNS_WEID_ADDRESS, 
+            privateKey
+        );
+
+        RegisterAddressV2.registerAddress(
+            cnsType,
+            hash, 
+            contractConfig.getIssuerAddress(),
+            WeIdConstant.CNS_AUTH_ADDRESS, 
+            privateKey
+        );
+
+        RegisterAddressV2.registerAddress(
+            cnsType,
+            hash,
+            contractConfig.getSpecificIssuerAddress(), 
+            WeIdConstant.CNS_SPECIFIC_ADDRESS,
+            privateKey
+        );
+
+        RegisterAddressV2.registerAddress(
+            cnsType,
+            hash, 
+            contractConfig.getEvidenceAddress(), 
+            WeIdConstant.CNS_EVIDENCE_ADDRESS, 
+            privateKey
+        );
+
+        RegisterAddressV2.registerAddress(
+            cnsType,
+            hash, 
+            contractConfig.getCptAddress(), 
+            WeIdConstant.CNS_CPT_ADDRESS, 
+            privateKey
+        );
+        writeAddressToFile(hash, "hash");
     }
 }

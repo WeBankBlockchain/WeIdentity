@@ -1,10 +1,12 @@
 package com.webank.weid.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
@@ -16,6 +18,8 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.AbstractService;
+import com.webank.weid.service.impl.engine.EngineFactory;
+import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.persistence.Persistence;
@@ -89,48 +93,149 @@ public class OffLineBatchTask extends AbstractService {
     public static ResponseData<List<Boolean>> sendBatchTransaction(
         List<TransactionArgs> transactionArgs) {
 
-        List<String> hashValues = new ArrayList<>();
-        List<String> signatures = new ArrayList<>();
-        List<String> logs = new ArrayList<>();
-        List<Long> timestamp = new ArrayList<>();
-        List<String> signers = new ArrayList<>();
-        List<String> customKeys = new ArrayList<>();
+        Map<Integer, List<String>> hashesByGroup = new HashMap<>();
+        Map<Integer, List<String>> signaturesByGroup = new HashMap<>();
+        Map<Integer, List<String>> logsByGroup = new HashMap<>();
+        Map<Integer, List<Long>> timestampsByGroup = new HashMap<>();
+        Map<Integer, List<String>> signersByGroup = new HashMap<>();
+        Map<Integer, List<String>> customKeysByGroup = new HashMap<>();
+
+        // Preserve order
+        Map<Integer, List<Integer>> orderByGroup = new HashMap<>();
 
         for (TransactionArgs transaction : transactionArgs) {
 
             String args = transaction.getArgs();
             String[] argArray = StringUtils.splitByWholeSeparatorPreserveAllTokens(args, ",");
-            hashValues.add(argArray[0]);
-            signatures.add(argArray[1]);
-            logs.add(argArray[2]);
-            timestamp.add(Long.valueOf(argArray[3]));
 
             String method = transaction.getMethod();
+            Integer groupId = Integer.valueOf(fiscoConfig.getGroupId());
             switch (method) {
 
                 case "createEvidence":
-                    customKeys.add(StringUtils.EMPTY);
-                    signers.add(argArray[4]);
+                    if (argArray.length > 5) {
+                        groupId = Integer.valueOf(argArray[5]);
+                    }
+                    updateCommonFields(hashesByGroup, signaturesByGroup, logsByGroup,
+                        timestampsByGroup, groupId, argArray);
+                    if (CollectionUtils.size(customKeysByGroup.get(groupId)) == 0) {
+                        List<String> list = new ArrayList<>();
+                        list.add(StringUtils.EMPTY);
+                        customKeysByGroup.put(groupId, list);
+                    } else {
+                        customKeysByGroup.get(groupId).add(StringUtils.EMPTY);
+                    }
+                    if (CollectionUtils.size(signersByGroup.get(groupId)) == 0) {
+                        List<String> list = new ArrayList<>();
+                        list.add(argArray[4]);
+                        signersByGroup.put(groupId, list);
+                    } else {
+                        signersByGroup.get(groupId).add(argArray[4]);
+                    }
+                    if (CollectionUtils.size(orderByGroup.get(groupId)) == 0) {
+                        List<Integer> list = new ArrayList<>();
+                        list.add(transactionArgs.indexOf(transaction));
+                        orderByGroup.put(groupId, list);
+                    } else {
+                        orderByGroup.get(groupId).add(transactionArgs.indexOf(transaction));
+                    }
                     break;
                 case "createEvidenceWithCustomKey":
-                    //批量接口
-                    customKeys.add(argArray[4]);
-                    signers.add(argArray[5]);
+                    if (argArray.length > 6) {
+                        groupId = Integer.valueOf(argArray[6]);
+                    }
+                    updateCommonFields(hashesByGroup, signaturesByGroup, logsByGroup,
+                        timestampsByGroup, groupId, argArray);
+                    if (CollectionUtils.size(customKeysByGroup.get(groupId)) == 0) {
+                        List<String> list = new ArrayList<>();
+                        list.add(argArray[4]);
+                        customKeysByGroup.put(groupId, list);
+                    } else {
+                        customKeysByGroup.get(groupId).add(argArray[4]);
+                    }
+                    if (CollectionUtils.size(signersByGroup.get(groupId)) == 0) {
+                        List<String> list = new ArrayList<>();
+                        list.add(argArray[5]);
+                        signersByGroup.put(groupId, list);
+                    } else {
+                        signersByGroup.get(groupId).add(argArray[5]);
+                    }
+                    if (CollectionUtils.size(orderByGroup.get(groupId)) == 0) {
+                        List<Integer> list = new ArrayList<>();
+                        list.add(transactionArgs.indexOf(transaction));
+                        orderByGroup.put(groupId, list);
+                    } else {
+                        orderByGroup.get(groupId).add(transactionArgs.indexOf(transaction));
+                    }
                     break;
                 default:
                     break;
             }
         }
 
-        return evidenceServiceEngine
-            .batchCreateEvidenceWithCustomKey(
-                hashValues,
-                signatures,
-                logs,
-                timestamp,
-                signers,
-                customKeys,
-                privateKey);
+        List<Boolean> resp = Arrays.asList(new Boolean[transactionArgs.size()]);
+
+        // Separately go batch creation and merge responses
+        for (Integer groupId : hashesByGroup.keySet()) {
+            EvidenceServiceEngine evidenceServiceEngine = EngineFactory
+                .createEvidenceServiceEngine(groupId);
+            List<Boolean> subResp = evidenceServiceEngine.batchCreateEvidenceWithCustomKey(
+                hashesByGroup.get(groupId),
+                signaturesByGroup.get(groupId),
+                logsByGroup.get(groupId),
+                timestampsByGroup.get(groupId),
+                signersByGroup.get(groupId),
+                customKeysByGroup.get(groupId),
+                privateKey
+            ).getResult();
+
+            // merge
+            List<Integer> orders = orderByGroup.get(groupId);
+            int index = 0;
+            for (Boolean boolValue : subResp) {
+                resp.set(orders.get(index), boolValue);
+                index++;
+            }
+        }
+        return new ResponseData<>(resp, ErrorCode.SUCCESS, null);
+    }
+
+    private static void updateCommonFields(
+        Map<Integer, List<String>> hashesByGroup,
+        Map<Integer, List<String>> signaturesByGroup,
+        Map<Integer, List<String>> logsByGroup,
+        Map<Integer, List<Long>> timestampsByGroup,
+        Integer groupId,
+        String[] argArray
+    ) {
+        if (CollectionUtils.size(hashesByGroup.get(groupId)) == 0) {
+            List<String> list = new ArrayList<>();
+            list.add(argArray[0]);
+            hashesByGroup.put(groupId, list);
+        } else {
+            hashesByGroup.get(groupId).add(argArray[0]);
+        }
+        if (CollectionUtils.size(signaturesByGroup.get(groupId)) == 0) {
+            List<String> list = new ArrayList<>();
+            list.add(argArray[1]);
+            signaturesByGroup.put(groupId, list);
+        } else {
+            signaturesByGroup.get(groupId).add(argArray[1]);
+        }
+        if (CollectionUtils.size(logsByGroup.get(groupId)) == 0) {
+            List<String> list = new ArrayList<>();
+            list.add(argArray[2]);
+            logsByGroup.put(groupId, list);
+        } else {
+            logsByGroup.get(groupId).add(argArray[2]);
+        }
+        if (CollectionUtils.size(timestampsByGroup.get(groupId)) == 0) {
+            List<Long> list = new ArrayList<>();
+            list.add(Long.valueOf(argArray[3]));
+            timestampsByGroup.put(groupId, list);
+        } else {
+            timestampsByGroup.get(groupId).add(Long.valueOf(argArray[3]));
+        }
     }
 
     private static String getPrivateKeyByWeId(String weId) {
