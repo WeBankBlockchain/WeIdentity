@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -26,9 +26,11 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
-import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.EvidenceInfo;
+import com.webank.weid.protocol.base.HashString;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DateUtils;
 
 /**
  * TestGetEvidence v_wbpenghu.
@@ -36,20 +38,17 @@ import com.webank.weid.protocol.response.ResponseData;
 public class TestGetEvidence extends TestBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestGetEvidence.class);
-    private static Credential evidenceCredential = null;
     private static String evidenceAddress;
 
     @Override
     public synchronized void testInit() {
         super.testInit();
-        if (evidenceCredential == null) {
-            Credential credential = super.createCredential(createCredentialArgs).getCredential();
-            ResponseData<String> evidence = evidenceService
-                .createEvidence(credential, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-            Assert.assertTrue(!evidence.getResult().isEmpty());
-            evidenceCredential = credential;
-            evidenceAddress = evidence.getResult();
-        }
+        HashString str = new HashString(
+            DataToolUtils.sha3(DateUtils.getNoMillisecondTimeStampString()));
+        ResponseData<String> evidence = evidenceService
+            .createEvidence(str, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        Assert.assertTrue(!evidence.getResult().isEmpty());
+        evidenceAddress = evidence.getResult();
     }
 
     /**
@@ -63,8 +62,6 @@ public class TestGetEvidence extends TestBaseService {
         Assert.assertEquals(0, responseData.getErrorCode().intValue());
         Assert.assertEquals("success", responseData.getErrorMessage());
         EvidenceInfo evidenceInfo = responseData.getResult();
-        Assert.assertTrue(
-            evidenceCredential.getIssuer().contains(evidenceInfo.getSigners().get(0)));
         for (int i = 1; i < evidenceInfo.getSignatures().size(); i++) {
             Assert.assertEquals("0x0000000000000000000000000000000000000000",
                 evidenceInfo.getSigners().get(i));

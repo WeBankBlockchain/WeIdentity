@@ -81,7 +81,6 @@ public final class CredentialPojoUtils {
             Map<String, Object> credMap = DataToolUtils.objToMap(credential);
             // Preserve the same behavior as in CredentialUtils - will merge later
             credMap.remove(ParamKeyConstant.PROOF);
-            credMap.put(ParamKeyConstant.PROOF, null);
             credMap.put(ParamKeyConstant.CLAIM, getClaimHash(credential, salt, disclosures));
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
@@ -93,7 +92,7 @@ public final class CredentialPojoUtils {
     /**
      * Concat all fields of lite Credential info, without Signature, in Json format. This should be
      * invoked when calculating Credential Signature. Return null if credential format is illegal.
-     * Note that: 1. Keys should be dict-ordered; 2. Claim should use standard getLiteClaimHash(); 
+     * Note that: 1. Keys should be dict-ordered; 2. Claim should use standard getLiteClaimHash();
      * 3. Use compact output to avoid Json format confusion.
      *
      * @param credential target Credential object
@@ -103,12 +102,11 @@ public final class CredentialPojoUtils {
         CredentialPojo credential) {
         try {
             Map<String, Object> credMap = DataToolUtils.objToMap(credential);
-            credMap.remove(ParamKeyConstant.ISSUANCE_DATE);
+            //credMap.remove(ParamKeyConstant.ISSUANCE_DATE);
             credMap.remove(ParamKeyConstant.CONTEXT);
             credMap.put(ParamKeyConstant.PROOF_TYPE, "lite1");
             // Preserve the same behavior as in CredentialUtils - will merge later
             credMap.remove(ParamKeyConstant.PROOF);
-            //credMap.put(ParamKeyConstant.PROOF, null);
             credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credential));
             return DataToolUtils.mapToCompactJson(credMap);
         } catch (Exception e) {
@@ -180,7 +178,7 @@ public final class CredentialPojoUtils {
      * @param disclosures Disclosure Map
      * @return Hash value in String.
      */
-    public static String getCredentialPojoThumbprint(
+    private static String getCredentialPojoRawDataWithProofWithoutSalt(
         CredentialPojo credential,
         Map<String, Object> salt,
         Map<String, Object> disclosures
@@ -212,11 +210,14 @@ public final class CredentialPojoUtils {
      */
     public static String getCredentialPojoHash(CredentialPojo credentialPojo,
         Map<String, Object> disclosures) {
-        String rawData = getCredentialPojoThumbprint(credentialPojo, credentialPojo.getSalt(),
+        String rawData = getCredentialPojoRawDataWithProofWithoutSalt(
+            credentialPojo,
+            credentialPojo.getSalt(),
             disclosures);
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
+        // System.out.println(rawData);
         return DataToolUtils.sha3(rawData);
     }
 
@@ -230,15 +231,14 @@ public final class CredentialPojoUtils {
 
         try {
             Map<String, Object> credMap = DataToolUtils.objToMap(credentialPojo);
-            // Replace the Claim value object with claim hash value to preserve immutability
-            credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credentialPojo));
-            // Remove the whole Salt field to preserve immutability
-            Map<String, Object> proof = (Map<String, Object>) credMap.get(ParamKeyConstant.PROOF);
-            proof.remove(ParamKeyConstant.PROOF_SALT);
-            proof.put(ParamKeyConstant.PROOF_SALT, null);
+            credMap.remove(ParamKeyConstant.CONTEXT);
+            credMap.put(ParamKeyConstant.PROOF_TYPE, "lite1");
             credMap.remove(ParamKeyConstant.PROOF);
-            credMap.put(ParamKeyConstant.PROOF, proof);
+            String signature = credentialPojo.getSignature();
+            credMap.put(ParamKeyConstant.PROOF, signature);
+            credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credentialPojo));
             String rawData = DataToolUtils.mapToCompactJson(credMap);
+            //System.out.println("LiteCredential's Pre-Hash for evidence: " + rawData);
             return DataToolUtils.sha3(rawData);
         } catch (Exception e) {
             logger.error("get Credential Thumbprint error.", e);
@@ -462,7 +462,7 @@ public final class CredentialPojoUtils {
         CredentialPojo credential) {
 
         Map<String, Object> claim = credential.getClaim();
-        return  DataToolUtils.clone((HashMap) claim);
+        return DataToolUtils.clone((HashMap) claim);
     }
 
     /**

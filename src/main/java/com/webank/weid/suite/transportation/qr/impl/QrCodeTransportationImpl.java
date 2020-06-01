@@ -125,7 +125,7 @@ public class QrCodeTransportationImpl
             logger.info("[serialize] the transMode is {}", property.getTransMode());
             if (version == QrCodeVersion.V2) {
                 // 下载模式
-                //save BarCodeData
+                //save CodeData
                 saveTransData(codeData.getId(), codeData);
             }
             logger.info("[serialize] QrCodeTransportation serialization finished.");
@@ -244,11 +244,11 @@ public class QrCodeTransportationImpl
             );
             return super.buildObject(String.valueOf(codeData.getData()), clazz);
         } catch (WeIdBaseException e) {
-            logger.error("[deserialize] BarCodeTransportation deserialize due to base error.", e);
+            logger.error("[deserialize] QrCodeTransportation deserialize due to base error.", e);
             return new ResponseData<T>(null, e.getErrorCode());
         } catch (Exception e) {
             logger.error(
-                "[deserialize] BarCodeTransportation deserialize due to unknown error.", e);
+                "[deserialize] QrCodeTransportation deserialize due to unknown error.", e);
             return new ResponseData<T>(null, ErrorCode.TRANSPORTATION_BASE_ERROR);
         }
     }

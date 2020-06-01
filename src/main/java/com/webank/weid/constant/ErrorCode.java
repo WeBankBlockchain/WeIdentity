@@ -281,10 +281,17 @@ public enum ErrorCode {
         "presentation from pdf transportation, please use verifyPresentationFromPDF function"),
 
     /**
-     * the credential does not support selective disclosure.
+     * the error code shows that the credential passed in the 
+     * function is not supported by this function.
      */
     CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE(100440,
-        "the credential does not support selective disclosure."),
+        "the error code shows that the credential passed in the "
+        + "function is not supported by this function."),
+
+    /**
+     * credential verify fail.
+     */
+    CREDENTIAL_VERIFY_FAIL(100441, "credential verify fail."),
 
     /**
      * Authorization WeIDs: from and to must be different.
