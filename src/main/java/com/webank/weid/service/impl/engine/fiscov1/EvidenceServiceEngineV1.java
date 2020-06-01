@@ -81,7 +81,6 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
     /**
      * 重新加载静态合约对象.
      */
-    @Override
     public void reload() {
         evidenceContract = getContractService(
             fiscoConfig.getEvidenceAddress(),

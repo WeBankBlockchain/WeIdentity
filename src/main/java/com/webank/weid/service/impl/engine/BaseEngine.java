@@ -33,8 +33,16 @@ import com.webank.weid.service.BaseService;
 public abstract class BaseEngine extends BaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseEngine.class);
+    
+    public BaseEngine() {
+        super();
+    }
+    
+    public BaseEngine(Integer groupId) {
+        super(groupId);
+    }
 
-    private static <T> T loadContract(
+    private <T> T loadContract(
         String contractAddress,
         Object credentials,
         Class<T> cls) throws NoSuchMethodException, IllegalAccessException,
@@ -48,11 +56,11 @@ public abstract class BaseEngine extends BaseService {
             BigInteger.class,
             BigInteger.class
         );
-
+        Object obj = weServer.getWeb3j();
         contract = method.invoke(
             null,
             contractAddress,
-            getWeb3j(),
+            obj,
             credentials,
             WeIdConstant.GAS_PRICE,
             WeIdConstant.GAS_LIMIT
@@ -69,14 +77,10 @@ public abstract class BaseEngine extends BaseService {
      * @param <T> t
      * @return the contract
      */
-    protected static <T> T reloadContract(
+    protected <T> T reloadContract(
         String contractAddress,
         String privateKey,
         Class<T> cls) {
-
-        if (weServer == null) {
-            init();
-        }
 
         T contract = null;
         try {
@@ -103,14 +107,10 @@ public abstract class BaseEngine extends BaseService {
      * @param <T> t
      * @return the contract service
      */
-    protected static <T> T getContractService(String contractAddress, Class<T> cls) {
+    protected <T> T getContractService(String contractAddress, Class<T> cls) {
 
         T contract = null;
         try {
-            // load contract
-            if (weServer == null) {
-                init();
-            }
             contract = loadContract(contractAddress, weServer.getCredentials(), cls);
             logger.info(cls.getSimpleName() + " init succ");
 

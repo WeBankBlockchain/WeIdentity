@@ -134,7 +134,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -153,7 +153,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -202,7 +202,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -253,7 +253,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -399,27 +399,6 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         LogUtil.info(logger, "verifyCredential", response);
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_CLAIM_NOT_EXISTS.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: mock SignatureException.
-     */
-    @Test
-    public void testVerifyCredentialCase20() {
-
-        new MockUp<DataToolUtils>() {
-            @Mock
-            public Sign.SignatureData simpleSignatureDeserialization(
-                byte[] serializedSignatureData) throws SignatureException {
-                throw new SignatureException();
-            }
-        };
-        ResponseData<Boolean> response = super.verifyCredentialPojo(credentialPojo);
-        LogUtil.info(logger, "verifyCredential", response);
-
-        Assert.assertEquals(ErrorCode.CREDENTIAL_SIGNATURE_BROKEN.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }

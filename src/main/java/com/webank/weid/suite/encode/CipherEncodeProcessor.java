@@ -19,6 +19,7 @@
 
 package com.webank.weid.suite.encode;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,25 +51,24 @@ import com.webank.weid.util.DataToolUtils;
 
 /**
  * 密文编解码处理器.
- * 
- * @author v_wbgyang
  *
+ * @author v_wbgyang
  */
 public class CipherEncodeProcessor extends BaseService implements EncodeProcessor {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(CipherEncodeProcessor.class);
-    
+
     private Persistence dataDriver;
-    
+
     protected AmopService amopService = new AmopServiceImpl();
-    
+
     private Persistence getDataDriver() {
         if (dataDriver == null) {
             dataDriver = new MysqlDriver();
         }
         return dataDriver;
     }
-    
+
     /**
      * 密文编码处理：先进行压缩，然后进行AES加密.
      */
@@ -81,13 +81,13 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             keyMap.put(ParamKeyConstant.KEY_DATA, key);
             keyMap.put(ParamKeyConstant.KEY_VERIFIERS, encodeData.getVerifiers());
             String saveData = DataToolUtils.serialize(keyMap);
-            
+
             //将数据进行AES加密处理
-            String value = 
+            String value =
                 CryptoServiceFactory
                     .getCryptoService(CryptoType.AES)
                     .encrypt(encodeData.getData(), key);
-            
+
             //保存秘钥
             ResponseData<Integer> response = this.getDataDriver().save(
                 DataDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId(), saveData);
@@ -104,9 +104,9 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         } catch (Exception e) {
             logger.error("[encode] encode processor has unknow error.", e);
             throw new EncodeSuiteException(e);
-        }  
+        }
     }
-    
+
     /**
      * 密文解码处理：先进行AES解密， 然后进行解压.
      */
@@ -116,7 +116,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         try {
             String key = this.getEntryptKey(encodeData);
             //将数据进行AES解密
-            String value = 
+            String value =
                 CryptoServiceFactory
                     .getCryptoService(CryptoType.AES)
                     .decrypt(encodeData.getData(), key);
@@ -129,12 +129,12 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         } catch (Exception e) {
             logger.error("[decode] decode processor has unknow error.", e);
             throw new EncodeSuiteException(e);
-        }  
+        }
     }
-    
+
     /**
      * 获取秘钥.
-     * 
+     *
      * @param encodeData 编解码实体
      * @return return the key
      */
@@ -143,7 +143,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         if (fiscoConfig.getCurrentOrgId().equals(encodeData.getOrgId())) {
             logger.info("get Encrypt Key from DB.");
             //保存秘钥
-            ResponseData<String> response = 
+            ResponseData<String> response =
                 this.getDataDriver().get(DataDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId());
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
@@ -154,13 +154,13 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         } else {
             logger.info("get Encrypt Key By AMOP.");
             //获取秘钥，
-            return this.requestEncryptKeyByAmop(encodeData);  
+            return this.requestEncryptKeyByAmop(encodeData);
         }
     }
-    
+
     /**
      * 本机构取秘钥(需要判断权限控制).
-     * 
+     *
      * @param encodeData 编解码实体
      * @param value 数据库中存储的秘钥结构数据
      * @return 返回秘钥
@@ -172,27 +172,28 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         }
         try {
             Map<String, Object> keyMap = DataToolUtils.deserialize(
-                value, 
+                value,
                 new HashMap<String, Object>().getClass()
             );
             String weId = encodeData.getWeIdAuthentication().getWeId();
-            List<String> verifiers = (ArrayList<String>)keyMap.get(ParamKeyConstant.KEY_VERIFIERS);
+            List<String> verifiers = (ArrayList<String>) keyMap.get(ParamKeyConstant.KEY_VERIFIERS);
             // 如果verifiers为empty,或者传入的weId为空，或者weId不在指定列表中，则无权限获取秘钥数据
-            if (CollectionUtils.isEmpty(verifiers) 
-                || StringUtils.isBlank(weId) 
+            if (CollectionUtils.isEmpty(verifiers)
+                || StringUtils.isBlank(weId)
                 || !verifiers.contains(weId)) {
                 logger.error("[getEncryptKey] no access to get the data, this weid is {}.", weId);
                 throw new EncodeSuiteException(ErrorCode.ENCRYPT_KEY_NO_PERMISSION);
             }
-            return (String)keyMap.get(ParamKeyConstant.KEY_DATA);
+            return (String) keyMap.get(ParamKeyConstant.KEY_DATA);
         } catch (DataTypeCastException e) {
             logger.error("[getEncryptKey] deserialize the data error, you should upgrade SDK.", e);
             throw new EncodeSuiteException(ErrorCode.ENCRYPT_KEY_INVALID);
         }
     }
-    
+
     /**
      * 通过AMOP获取秘钥.
+     *
      * @param encodeData 编解码实体
      * @return 返回秘钥
      */
@@ -203,19 +204,20 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         args.setToOrgId(encodeData.getOrgId());
         args.setFromOrgId(fiscoConfig.getCurrentOrgId());
         if (encodeData.getWeIdAuthentication() != null) {
-            String signValue = DataToolUtils.sign(
-                encodeData.getId(), 
-                encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey()
+            String signValue = DataToolUtils.secp256k1Sign(
+                encodeData.getId(),
+                new BigInteger(
+                    encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
             );
             args.setSignValue(signValue);
             args.setWeId(encodeData.getWeIdAuthentication().getWeId());
         }
-        ResponseData<GetEncryptKeyResponse> resResponse = 
+        ResponseData<GetEncryptKeyResponse> resResponse =
             amopService.getEncryptKey(encodeData.getOrgId(), args);
         if (resResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[requestEncryptKeyByAmop] AMOP response fail, dataId={}, "
-                + "errorCode={}, errorMessage={}",
+                    + "errorCode={}, errorMessage={}",
                 encodeData.getId(),
                 resResponse.getErrorCode(),
                 resResponse.getErrorMessage()
@@ -225,12 +227,12 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             );
         }
         GetEncryptKeyResponse keyResponse = resResponse.getResult();
-        ErrorCode errorCode = 
-                ErrorCode.getTypeByErrorCode(keyResponse.getErrorCode().intValue());
+        ErrorCode errorCode =
+            ErrorCode.getTypeByErrorCode(keyResponse.getErrorCode().intValue());
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[requestEncryptKeyByAmop] requestEncryptKey error, dataId={},"
-                + " errorCode={}, errorMessage={}",
+                    + " errorCode={}, errorMessage={}",
                 encodeData.getId(),
                 keyResponse.getErrorCode(),
                 keyResponse.getErrorMessage()
