@@ -19,6 +19,9 @@
 
 package com.webank.weid.full.auth;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -148,7 +151,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(super.createWeId(), privateKey);
         registerAuthorityIssuerArgs.getAuthorityIssuer()
-            .setCreated(System.currentTimeMillis() + 4000);
+            .setCreated(DateUtils.getNoMillisecondTimeStamp() + 4000);
 
         ResponseData<Boolean> response = new ResponseData<>(false,
             ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
@@ -176,7 +179,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeId, privateKey);
         registerAuthorityIssuerArgs.getAuthorityIssuer()
-            .setCreated(System.currentTimeMillis() - 4000);
+            .setCreated(DateUtils.getNoMillisecondTimeStamp() - 4000);
 
         ResponseData<Boolean> response = new ResponseData<>(false,
             ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS);
@@ -348,6 +351,74 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
         Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
+    }
+
+    /**
+     * Happy path: register full authority issuer info.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_FullInfo() {
+        CreateWeIdDataResult createWeIdDataResult = createWeIdWithSetAttr();
+        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdDataResult, privateKey);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setName("temp" + Math.random());
+        String desc = "WB1";
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setDescription(desc);
+        List<String> extraStr = new ArrayList<>();
+        extraStr.add("temp");
+        extraStr.add("test");
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setExtraStr32(extraStr);
+        List<Integer> extraInt = new ArrayList<>();
+        extraInt.add(123);
+        extraInt.add(234);
+        registerAuthorityIssuerArgs.getAuthorityIssuer().setExtraInt(extraInt);
+
+        ResponseData<Boolean> response =
+            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
+        Assert.assertEquals(true, response.getResult());
+
+        ResponseData<AuthorityIssuer> queryResp =
+            authorityIssuerService.queryAuthorityIssuerInfo(createWeIdDataResult.getWeId());
+        Assert.assertEquals(queryResp.getResult().getDescription(), desc);
+        Assert.assertEquals(queryResp.getResult().getExtraStr32(), extraStr);
+        Assert.assertEquals(queryResp.getResult().getExtraInt(), extraInt);
+    }
+
+    /**
+     * Register authority issuer info with erroneous params.
+     */
+    @Test
+    public void testRegisterAuthorityIssuer_ErroneousInfo() {
+        CreateWeIdDataResult createWeIdDataResult = createWeIdWithSetAttr();
+        RegisterAuthorityIssuerArgs arg =
+            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdDataResult, privateKey);
+        arg.getAuthorityIssuer().setName("temp" + Math.random());
+        String desc = "WB1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        arg.getAuthorityIssuer().setDescription(desc);
+        Assert.assertFalse(authorityIssuerService.registerAuthorityIssuer(arg).getResult());
+
+        desc = "WB1";
+        arg.getAuthorityIssuer().setDescription(desc);
+        List<String> extraStr = new ArrayList<>();
+        extraStr.add("temp");
+        extraStr.add("WB1aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+        arg.getAuthorityIssuer().setExtraStr32(extraStr);
+        Assert.assertFalse(authorityIssuerService.registerAuthorityIssuer(arg).getResult());
+
+        extraStr = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            extraStr.add("temp");
+        }
+        arg.getAuthorityIssuer().setExtraStr32(extraStr);
+        Assert.assertFalse(authorityIssuerService.registerAuthorityIssuer(arg).getResult());
+
+        arg.getAuthorityIssuer().setExtraStr32(new ArrayList<>());
+        List<Integer> extraInt = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            extraInt.add(123);
+        }
+        arg.getAuthorityIssuer().setExtraInt(extraInt);
+        Assert.assertFalse(authorityIssuerService.registerAuthorityIssuer(arg).getResult());
     }
 
     /**
