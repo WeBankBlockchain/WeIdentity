@@ -132,17 +132,18 @@ public class TestBaseUtil {
 
     /**
      * build CreateCredentialPojoArgs no cptId.
+     *
      * @return CreateCredentialPojoArgs
      */
     public static CreateCredentialPojoArgs<Map<String, Object>> buildCreateCredentialPojoArgs4MlCpt(
-            CreateWeIdDataResult createWeId) {
+        CreateWeIdDataResult createWeId) {
 
         CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
-                new CreateCredentialPojoArgs<Map<String, Object>>();
+            new CreateCredentialPojoArgs<Map<String, Object>>();
 
         createCredentialPojoArgs.setIssuer(createWeId.getWeId());
         createCredentialPojoArgs.setExpirationDate(
-                System.currentTimeMillis() + (1000 * 60 * 60 * 24));
+            System.currentTimeMillis() + (1000 * 60 * 60 * 24));
         createCredentialPojoArgs.setWeIdAuthentication(buildWeIdAuthentication(createWeId));
         try {
             createCredentialPojoArgs.setClaim(buildCptJsonSchemaDataFromFile4MlCpt());
@@ -156,6 +157,7 @@ public class TestBaseUtil {
 
     /**
      * build CreateCredentialPojoArgs no cptId.
+     *
      * @return CreateCredentialPojoArgs
      */
     public static CreateCredentialPojoArgs<Map<String, Object>>
@@ -163,11 +165,11 @@ public class TestBaseUtil {
             CreateWeIdDataResult createWeId) {
 
         CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
-                new CreateCredentialPojoArgs<Map<String, Object>>();
+            new CreateCredentialPojoArgs<Map<String, Object>>();
 
         createCredentialPojoArgs.setIssuer(createWeId.getWeId());
         createCredentialPojoArgs.setExpirationDate(
-                System.currentTimeMillis() + (1000 * 60 * 60 * 24));
+            System.currentTimeMillis() + (1000 * 60 * 60 * 24));
         createCredentialPojoArgs.setWeIdAuthentication(buildWeIdAuthentication(createWeId));
         try {
             createCredentialPojoArgs.setClaim(buildCptJsonSchemaDataFromFile4MultiCpt());
@@ -181,6 +183,7 @@ public class TestBaseUtil {
 
     /**
      * build CreateCredentialPojoArgs no cptId.
+     *
      * @return CreateCredentialPojoArgs
      */
     public static CreateCredentialPojoArgs<Map<String, Object>>
@@ -236,11 +239,12 @@ public class TestBaseUtil {
 
     /**
      * build cpt json schemaData.
+     *
      * @return HashMap
      * @throws IOException IOException
      */
-    public static HashMap<String, Object>
-        buildCptJsonSchemaDataFromFile4MultiCpt() throws IOException {
+    public static HashMap<String, Object> buildCptJsonSchemaDataFromFile4MultiCpt()
+        throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
         JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-claim.json");
@@ -250,11 +254,12 @@ public class TestBaseUtil {
 
     /**
      * build cpt json schemaData.
+     *
      * @return HashMap
      * @throws IOException IOException
      */
-    public static HashMap<String, Object>
-        buildCptJsonSchemaDataFromFile4MlCpt() throws IOException {
+    public static HashMap<String, Object> buildCptJsonSchemaDataFromFile4MlCpt()
+        throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
         JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-claim.json");
@@ -264,11 +269,12 @@ public class TestBaseUtil {
 
     /**
      * build cpt json schemaData.
+     *
      * @return HashMap
      * @throws IOException IOException
      */
-    public static HashMap<String, Object>
-        buildCptJsonSchemaDataFromFile4SpecTplCpt() throws IOException {
+    public static HashMap<String, Object> buildCptJsonSchemaDataFromFile4SpecTplCpt()
+        throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
         JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-claim.json");
@@ -293,6 +299,7 @@ public class TestBaseUtil {
 
     /**
      * build MultiLevel CptMapArgs.
+     *
      * @param createWeId WeId
      * @return CptMapArgs
      */
@@ -316,6 +323,7 @@ public class TestBaseUtil {
 
     /**
      * build default CptMapArgs.
+     *
      * @param createWeId WeId
      * @return CptMapArgs
      */
@@ -339,6 +347,7 @@ public class TestBaseUtil {
 
     /**
      * build default CptMapArgs.
+     *
      * @param createWeId WeId
      * @return CptMapArgs
      */
@@ -518,10 +527,13 @@ public class TestBaseUtil {
         CreateWeIdDataResult createWeId,
         String privateKey) {
 
-        AuthorityIssuer authorityIssuer = new AuthorityIssuer();
-        authorityIssuer.setWeId(createWeId.getWeId());
-        authorityIssuer.setName(TestData.AUTHORITY_ISSUER_NAME);
-        authorityIssuer.setAccValue(TestData.AUTHORITY_ISSUER_ACCVALUE);
+        AuthorityIssuer authorityIssuer = new AuthorityIssuer(
+            createWeId.getWeId(),
+            TestData.AUTHORITY_ISSUER_NAME,
+            TestData.AUTHORITY_ISSUER_ACCVALUE,
+            null,
+            null,
+            null);
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = new RegisterAuthorityIssuerArgs();
         registerAuthorityIssuerArgs.setAuthorityIssuer(authorityIssuer);

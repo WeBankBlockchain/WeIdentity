@@ -575,6 +575,16 @@ public enum ErrorCode {
         "the specific issuer type is illegal"
     ),
 
+    AUTORITY_ISSUER_DESCRIPTION_ILLEGAL(
+        100209,
+        "authority issuer description illegal"
+    ),
+
+    AUTHORITY_ISSUER_EXTRA_PARAM_ILLEGAL(
+        100210,
+        "authority issuer extra param illegal"
+    ),
+
     /**
      * the key of the data is empty.
      */
