@@ -17238,3 +17238,13 @@ CryptoService
    // AES解密
    String decrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES).decrypt(encrypt, key);
 ----
+
+异常场景对接口的影响
+---------------------
+
+- mysql连接异常受影响接口：Persistence相关和serialize密文。
+
+- 节点连接异常受影响接口：createWeId，createEvidence，registerAuthorityIssuer，RegisterIssuerType，RegisterCpt，VerifyCredentialWithSpecifiedPubKey，GetWeIdDocument，verifyLiteCredential。
+
+- 节点连接正常，但不满足3f+1受影响接口：createWeId，createEvidence，registerAuthorityIssuer，RegisterIssuerType，RegisterCpt。
+
