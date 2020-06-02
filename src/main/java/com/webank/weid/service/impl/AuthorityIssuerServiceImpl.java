@@ -24,6 +24,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -173,6 +174,7 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
      * @param issuerType the specified issuer type
      * @return Execution result
      */
+    @Override
     public ResponseData<Boolean> registerIssuerType(
         WeIdAuthentication callerAuth,
         String issuerType
@@ -203,6 +205,7 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
      * @param targetIssuerWeId the weId of the issuer who will be marked as a specific issuer type
      * @return Execution result
      */
+    @Override
     public ResponseData<Boolean> addIssuerIntoIssuerType(
         WeIdAuthentication callerAuth,
         String issuerType,
@@ -231,6 +234,7 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
      * @param targetIssuerWeId the weId of the issuer to be removed from a specific issuer list
      * @return Execution result
      */
+    @Override
     public ResponseData<Boolean> removeIssuerFromIssuerType(
         WeIdAuthentication callerAuth,
         String issuerType,
@@ -260,6 +264,7 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
      * @param targetIssuerWeId the WeId
      * @return true if yes, false otherwise
      */
+    @Override
     public ResponseData<Boolean> isSpecificTypeIssuer(
         String issuerType,
         String targetIssuerWeId
@@ -288,6 +293,7 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
      * @param num the number of issuers
      * @return the list
      */
+    @Override
     public ResponseData<List<String>> getAllSpecificTypeIssuerList(
         String issuerType,
         Integer index,
@@ -413,7 +419,7 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return ErrorCode.WEID_INVALID;
         }
         String name = args.getName();
-        if (!isValidAuthorityIssuerName(name)) {
+        if (!isValidAuthorityIssuerBytes32Param(name)) {
             return ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL;
         }
         String accValue = args.getAccValue();
@@ -428,10 +434,35 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return ErrorCode.AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL;
         }
 
+        // Check additional, optional params
+        if (!StringUtils.isEmpty(args.getDescription())
+            && !isValidAuthorityIssuerBytes32Param(args.getDescription())) {
+            logger.error("Authority Issuer description length illegal: ", args.getDescription());
+            return ErrorCode.AUTORITY_ISSUER_DESCRIPTION_ILLEGAL;
+        }
+        List<String> extraStr32s = args.getExtraStr32();
+        List<Integer> extraInts = args.getExtraInt();
+        if (!CollectionUtils.isEmpty(extraStr32s)) {
+            if (extraStr32s.size() > WeIdConstant.AUTHORITY_ISSUER_EXTRA_PARAM_LENGTH) {
+                logger.error("Authority Issuer extra param size exceeds maximum.");
+                return ErrorCode.AUTHORITY_ISSUER_EXTRA_PARAM_ILLEGAL;
+            }
+            for (String extraStr : extraStr32s) {
+                if (!isValidAuthorityIssuerBytes32Param(extraStr)) {
+                    logger.error("Authority Issuer extra String length illegal.");
+                    return ErrorCode.AUTHORITY_ISSUER_EXTRA_PARAM_ILLEGAL;
+                }
+            }
+        }
+        if (!CollectionUtils.isEmpty(extraInts)
+            && extraInts.size() > WeIdConstant.AUTHORITY_ISSUER_EXTRA_PARAM_LENGTH) {
+            logger.error("Authority Issuer extra param size exceeds maximum.");
+            return ErrorCode.AUTHORITY_ISSUER_EXTRA_PARAM_ILLEGAL;
+        }
         return ErrorCode.SUCCESS;
     }
 
-    private boolean isValidAuthorityIssuerName(String name) {
+    private boolean isValidAuthorityIssuerBytes32Param(String name) {
         return !StringUtils.isEmpty(name)
             && name.getBytes(StandardCharsets.UTF_8).length
             < WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH
@@ -440,7 +471,7 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
 
     @Override
     public ResponseData<String> getWeIdByOrgId(String orgId) {
-        if (!isValidAuthorityIssuerName(orgId)) {
+        if (!isValidAuthorityIssuerBytes32Param(orgId)) {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL);
         }
         try {
