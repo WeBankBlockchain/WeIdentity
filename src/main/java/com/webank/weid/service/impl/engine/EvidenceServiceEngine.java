@@ -45,8 +45,18 @@ public interface EvidenceServiceEngine {
 
     ResponseData<Boolean> addLog(
         String hashValue,
+        String sig,
         String log,
         Long timestamp,
+        String privateKey
+    );
+
+    ResponseData<Boolean> addLogByCustomKey(
+        String hashValue,
+        String signature,
+        String log,
+        Long timestamp,
+        String customKey,
         String privateKey
     );
 
@@ -75,4 +85,11 @@ public interface EvidenceServiceEngine {
 
     ResponseData<EvidenceInfo> getInfoByCustomKey(String extraKey);
 
+    ResponseData<Boolean> setAttribute(
+        String hashValue,
+        String key,
+        String value,
+        Long timestamp,
+        String privateKey
+    );
 }
