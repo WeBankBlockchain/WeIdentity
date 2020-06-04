@@ -48,4 +48,10 @@ public class EvidenceSignInfo {
      * The extra value this signer records on chain.
      */
     private List<String> logs = new ArrayList<>();
+
+    /**
+     * Whether this signer revoked this evidence. This is initialized as null, and will be set
+     * appropriate values upon getEvidence().
+     */
+    private Boolean revoked = null;
 }
