@@ -234,7 +234,17 @@ public final class WeIdConstant {
      * Removed WeID authentication specified tag.
      */
     public static final String REMOVED_AUTHENTICATION_TAG = "OBSOLETEAUTH";
-    
+
+    /**
+     * Evidence Revoke attribute key.
+     */
+    public static final String EVIDENCE_REVOKE_KEY = "revoke";
+
+    /**
+     * Evidence Un-Revoke attribute key.
+     */
+    public static final String EVIDENCE_UNREVOKE_KEY = "unrevoke";
+
     /**
      * the address key in bucket.
      */
