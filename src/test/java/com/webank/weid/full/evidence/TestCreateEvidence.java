@@ -20,6 +20,7 @@
 package com.webank.weid.full.evidence;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,7 @@ import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.EvidenceInfo;
+import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -157,25 +159,58 @@ public class TestCreateEvidence extends TestBaseService {
     }
 
     @Test
+    public void testCreateEvidenceDupAndNonExist() {
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
+            super.copyCreateWeId(createWeIdResultWithSetAttr);
+        CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+        credential.setId(UUID.randomUUID().toString());
+        String hash = evidenceService.generateHash(credential).getResult().getHash();
+        ResponseData<String> createResp1 = evidenceService.createEvidence(credential,
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        ResponseData<String> createResp2 = evidenceService.createEvidence(credential,
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        Assert.assertEquals(createResp1.getResult(), hash);
+        Assert.assertEquals(createResp2.getResult(), StringUtils.EMPTY);
+        Assert.assertEquals(createResp2.getErrorCode().intValue(),
+            ErrorCode.CREDENTIAL_EVIDENCE_ALREADY_EXISTS.getCode());
+        createResp2 = evidenceService.createEvidenceWithLogAndCustomKey(credential,
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey(), "a", credential.getId());
+        Assert.assertEquals(createResp2.getResult(), StringUtils.EMPTY);
+        Assert.assertEquals(createResp2.getErrorCode().intValue(),
+            ErrorCode.CREDENTIAL_EVIDENCE_ALREADY_EXISTS.getCode());
+        credential.setId(UUID.randomUUID().toString());
+        ResponseData<Boolean> addResp1 = evidenceService.addLogByHash(credential.getHash(), "a",
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        Assert.assertEquals(addResp1.getResult(), false);
+        Assert.assertEquals(addResp1.getErrorCode().intValue(),
+            ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST.getCode());
+        ResponseData<Boolean> addResp2 = evidenceService.addSignatureAndLogByHash(
+            credential.getHash(), "a", tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        Assert.assertEquals(addResp2.getResult(), false);
+        Assert.assertEquals(addResp2.getErrorCode().intValue(),
+            ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST.getCode());
+    }
+
+    @Test
     public void testCreateEvidence_MultipleSigners() {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
         credential.setId(UUID.randomUUID().toString());
         String hash = evidenceService.generateHash(credential).getResult().getHash();
-        evidenceService.createEvidence(credential,
+        ResponseData<String> createResp1 = evidenceService.createEvidence(credential,
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        evidenceService.addLogByHash(hash, "1.23",
+        ResponseData<Boolean> addResp1 = evidenceService.addLogByHash(hash, "1.23",
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        evidenceService.addLogByHash(hash, "13.15",
+        ResponseData<Boolean> addResp2 = evidenceService.addLogByHash(hash, "13.15",
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         // Another guy signs
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr2 = createWeIdWithSetAttr();
-        evidenceService.createEvidence(credential,
+        ResponseData<Boolean> createResp2 = evidenceService.addSignatureAndLogByHash(
+            credential.getHash(), "", tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey());
+        ResponseData<Boolean> addResp3 = evidenceService.addLogByHash(hash, "abc",
             tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey());
-        evidenceService.addLogByHash(hash, "abc",
-            tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey());
-        evidenceService.addLogByHash(hash, "eef",
+        ResponseData<Boolean> addResp4 = evidenceService.addLogByHash(hash, "eef",
             tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey());
         // Now check
         ResponseData<EvidenceInfo> eviInfo = evidenceService.getEvidence(hash);
@@ -224,7 +259,7 @@ public class TestCreateEvidence extends TestBaseService {
             evi2.getSignInfo().get(signer).getLogs());
         evidenceService.addLogByHash(hash, "Insane",
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        evidenceService.addLogByCustomKey(credId, "Difficult",
+        evidenceService.addLogByCustomKey(null, credId, "Difficult",
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         evi2 = evidenceService.getEvidenceByCustomKey(credId).getResult();
         Assert.assertEquals(evi2.getSignInfo().get(signer).getLogs().size(), 3);
@@ -252,35 +287,56 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertTrue(!StringUtils.isEmpty(resp.getResult()));
         log = "X:122.5,Y:94.3";
         list.add(log);
-        resp = evidenceService.createEvidenceWithLogAndCustomKey(
-            credential,
-            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey(),
+        ResponseData<Boolean> addResp = evidenceService.addLogByCustomKey(
+            null,
+            credId,
             log,
-            credId
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey()
         );
-        Assert.assertTrue(!StringUtils.isEmpty(resp.getResult()));
+        Assert.assertTrue(addResp.getResult());
         log = "X:102.5,Y:99.1";
         list.add(log);
-        resp = evidenceService.createEvidenceWithLogAndCustomKey(
-            credential,
-            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey(),
+        addResp = evidenceService.addLogByCustomKey(
+            null,
+            credId,
             log,
-            credId
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey()
         );
-        Assert.assertTrue(!StringUtils.isEmpty(resp.getResult()));
+        Assert.assertTrue(addResp.getResult());
         log = "X:0,Y:0";
         list.add(log);
-        ResponseData<Boolean> respBool = evidenceService.addLogByCustomKey(credId, log,
+        addResp = evidenceService.addLogByHash(credential.getHash(), log,
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        Assert.assertTrue(respBool.getResult());
+        Assert.assertTrue(addResp.getResult());
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr2 = createWeIdWithSetAttr();
-        resp = evidenceService.createEvidenceWithLogAndCustomKey(
-            credential,
-            tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey(),
-            "Age:22",
-            credId
+        addResp = evidenceService.addLogByCustomKey(
+            null,
+            credId,
+            "Age:11",
+            tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey()
         );
-        Assert.assertTrue(!StringUtils.isEmpty(resp.getResult()));
+        Assert.assertTrue(addResp.getResult());
+        addResp = evidenceService.addSignatureAndLogByCustomKey(
+            null,
+            credId,
+            "Age:22",
+            tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey()
+        );
+        Assert.assertTrue(addResp.getResult());
+        addResp = evidenceService.addSignatureAndLogByCustomKey(
+            null,
+            credId,
+            "Age:33",
+            tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey()
+        );
+        Assert.assertTrue(addResp.getResult());
+        addResp = evidenceService.addLogByCustomKey(
+            null,
+            credId,
+            "Age:44",
+            tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey()
+        );
+        Assert.assertTrue(addResp.getResult());
         ResponseData<EvidenceInfo> eviCustomKey = evidenceService.getEvidenceByCustomKey(credId);
         EvidenceInfo evi = eviCustomKey.getResult();
         String signer = tempCreateWeIdResultWithSetAttr.getWeId();
@@ -289,7 +345,7 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(evi.getSignInfo().get(signer).getLogs(), list);
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
         Assert.assertTrue(evi.getSignInfo().get(signer2).getLogs().contains("Age:22")
-            && evi.getSignInfo().get(signer2).getLogs().size() == 1);
+            && evi.getSignInfo().get(signer2).getLogs().size() == 3);
     }
 
     @Test
@@ -316,7 +372,7 @@ public class TestCreateEvidence extends TestBaseService {
             outputBuffer.append("a");
         }
         log = outputBuffer.toString();
-        evidenceService.addLogByCustomKey(credId, log,
+        evidenceService.addLogByCustomKey(null, credId, log,
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         evi = evidenceService.getEvidenceByCustomKey(credId).getResult();
         Assert.assertNotNull(evi);
@@ -325,8 +381,6 @@ public class TestCreateEvidence extends TestBaseService {
 
     @Test
     public void testBatchCreate() throws Exception {
-        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
-            super.copyCreateWeId(createWeIdResultWithSetAttr);
         List<String> hashValues = new ArrayList<>();
         List<String> signatures = new ArrayList<>();
         List<Long> timestamps = new ArrayList<>();
@@ -339,9 +393,7 @@ public class TestCreateEvidence extends TestBaseService {
             credential.setId(UUID.randomUUID().toString());
             String hash = credential.getHash();
             hashValues.add(credential.getHash());
-            signatures.add(new String(DataToolUtils.base64Encode(DataToolUtils
-                .simpleSignatureSerialization(DataToolUtils.signMessage(hash, privateKey))),
-                StandardCharsets.UTF_8));
+            signatures.add(DataToolUtils.secp256k1Sign(hash, new BigInteger(privateKey)));
             timestamps.add(System.currentTimeMillis());
             signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
             logs.add("test log" + i);
@@ -391,10 +443,11 @@ public class TestCreateEvidence extends TestBaseService {
         booleans = resp.getResult();
         Assert.assertEquals(booleans.size(), hashValues.size());
         result = true;
+        // All hashes already existed, so all fail.
         for (int i = 0; i < booleans.size(); i++) {
             result = result && booleans.get(i).booleanValue();
         }
-        Assert.assertTrue(result);
+        Assert.assertFalse(result);
 
         // Check get
         String hash0 = hashValues.get(0);
@@ -402,17 +455,8 @@ public class TestCreateEvidence extends TestBaseService {
         String key1 = customKeys.get(1);
         EvidenceInfo evidenceInfo0 = evidenceService.getEvidence(hash0).getResult();
         EvidenceInfo evidenceInfo1 = evidenceService.getEvidence(hash1).getResult();
-        EvidenceInfo evidenceInfo1k = evidenceService.getEvidenceByCustomKey(key1).getResult();
         Assert.assertNotNull(evidenceInfo0);
         Assert.assertNotNull(evidenceInfo1);
-        Assert.assertNotNull(evidenceInfo1k);
-        // ran for 3 times
-        Assert.assertEquals(evidenceInfo0.getSignInfo()
-            .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 3);
-        // ran only twice (one set null in between)
-        Assert.assertEquals(evidenceInfo1.getSignInfo()
-            .get(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey)).getLogs().size(), 2);
-        Assert.assertEquals(evidenceInfo1.getCredentialHash(), evidenceInfo1k.getCredentialHash());
     }
 
     /**
@@ -489,6 +533,41 @@ public class TestCreateEvidence extends TestBaseService {
     }
 
     /**
+     * Test status: revoked.
+     */
+    @Test
+    public void testSetRevokeStatus() {
+        CreateWeIdDataResult tempCreateWeIdResultWithSetAttr = createWeId();
+        CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+        credential.setId(UUID.randomUUID().toString());
+        String hash = evidenceService.generateHash(credential).getResult().getHash();
+        ResponseData<String> createResp1 = evidenceService.createEvidence(credential,
+            tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
+        weIdAuthentication
+            .setWeIdPrivateKey(tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        ResponseData<Boolean> revokeResp = evidenceService.revoke(credential, weIdAuthentication);
+        Assert.assertTrue(revokeResp.getResult());
+        ResponseData<EvidenceInfo> getResp = evidenceService.getEvidence(credential.getHash());
+        Assert.assertNotNull(getResp.getResult());
+        Assert.assertTrue(getResp.getResult().getSignInfo()
+            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+        revokeResp = evidenceService.unRevoke(credential, weIdAuthentication);
+        getResp = evidenceService.getEvidence(credential.getHash());
+        Assert.assertFalse(getResp.getResult().getSignInfo()
+            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+        revokeResp = evidenceService.revoke(credential, weIdAuthentication);
+        getResp = evidenceService.getEvidence(credential.getHash());
+        Assert.assertTrue(getResp.getResult().getSignInfo()
+            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+        EvidenceInfo evidenceInfo = getResp.getResult();
+        Assert.assertFalse(evidenceService.isRevoked(
+            evidenceInfo, createWeIdResultWithSetAttr.getWeId()).getResult());
+        Assert.assertTrue(evidenceService.isRevoked(
+            evidenceInfo, tempCreateWeIdResultWithSetAttr.getWeId()).getResult());
+    }
+
+    /**
      * case3: weIdPrivateKey is null.
      */
     @Test
@@ -498,7 +577,7 @@ public class TestCreateEvidence extends TestBaseService {
         LogUtil.info(logger, "createEvidence", response);
 
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
+            ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
@@ -516,7 +595,7 @@ public class TestCreateEvidence extends TestBaseService {
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         LogUtil.info(logger, "createEvidence", response);
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
+            ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
@@ -534,7 +613,7 @@ public class TestCreateEvidence extends TestBaseService {
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         LogUtil.info(logger, "createEvidence", response);
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
+            ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }
@@ -552,7 +631,7 @@ public class TestCreateEvidence extends TestBaseService {
             .createEvidence(credential, tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         LogUtil.info(logger, "createEvidence", response);
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_PRIVATE_KEY_NOT_EXISTS.getCode(),
+            ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(!response.getResult().isEmpty());
     }

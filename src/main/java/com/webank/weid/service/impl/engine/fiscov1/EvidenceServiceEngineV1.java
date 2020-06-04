@@ -21,7 +21,6 @@ package com.webank.weid.service.impl.engine.fiscov1;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -150,6 +149,7 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
     @Override
     public ResponseData<Boolean> addLog(
         String hashValue,
+        String sig,
         String log,
         Long timestamp,
         String privateKey
@@ -195,6 +195,18 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
     @Override
     public ResponseData<String> getHashByCustomKey(String customKey) {
         return new ResponseData<String>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public ResponseData<Boolean> addLogByCustomKey(
+        String hashValue,
+        String signature,
+        String log,
+        Long timestamp,
+        String customKey,
+        String privateKey
+    ) {
+        return new ResponseData<>(false, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
 
     private static boolean isSignEvent(EvidenceAttributeChangedEventResponse event) {
@@ -411,5 +423,16 @@ public class EvidenceServiceEngineV1 extends BaseEngine implements EvidenceServi
     public ResponseData<EvidenceInfo> getInfoByCustomKey(String extraKey) {
 
         return new ResponseData<EvidenceInfo>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public ResponseData<Boolean> setAttribute(
+        String hashValue,
+        String key,
+        String value,
+        Long timestamp,
+        String privateKey
+    ) {
+        return new ResponseData<>(false, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
 }

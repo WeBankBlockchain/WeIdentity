@@ -23,8 +23,10 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -50,6 +52,7 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.EvidenceContract;
 import com.webank.weid.contract.v2.EvidenceContract.EvidenceAttributeChangedEventResponse;
 import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.contract.v2.EvidenceContract.EvidenceExtraAttributeChangedEventResponse;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
@@ -72,17 +75,18 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     private EvidenceContract evidenceContract;
 
     private String evidenceAddress;
-    
+
     private Integer groupId;
 
     /**
      * 构造函数.
+     *
      * @param groupId 群组编号
      */
     public EvidenceServiceEngineV2(Integer groupId) {
         super(groupId);
         this.groupId = groupId;
-        initEvidenceAddress(); 
+        initEvidenceAddress();
         evidenceContract = getContractService(this.evidenceAddress, EvidenceContract.class);
     }
 
@@ -98,7 +102,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             throw new WeIdBaseException("can not found the evidence address from chain");
         }
         logger.info(
-            "[initEvidenceAddress] get the address from cns. address = {}", 
+            "[initEvidenceAddress] get the address from cns. address = {}",
             evidenceAddress
         );
     }
@@ -145,9 +149,12 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             TransactionInfo info = new TransactionInfo(receipt);
             List<EvidenceAttributeChangedEventResponse> eventList =
                 evidenceContract.getEvidenceAttributeChangedEvents(receipt);
-            if (eventList == null || eventList.isEmpty()) {
+            if (eventList == null) {
                 return new ResponseData<>(StringUtils.EMPTY,
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else if (eventList.isEmpty()) {
+                return new ResponseData<>(StringUtils.EMPTY,
+                    ErrorCode.CREDENTIAL_EVIDENCE_ALREADY_EXISTS, info);
             } else {
                 for (EvidenceAttributeChangedEventResponse event : eventList) {
                     if (event.sigs.toArray()[0].toString().equalsIgnoreCase(signature)
@@ -215,9 +222,11 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             TransactionInfo info = new TransactionInfo(receipt);
             List<EvidenceAttributeChangedEventResponse> eventList =
                 evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
-            if (eventList == null || eventList.isEmpty()) {
-                return new ResponseData<>(result,
-                    ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            if (eventList == null) {
+                return new ResponseData<>(result, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else if (eventList.isEmpty()) {
+                return new ResponseData<>(result, ErrorCode.CREDENTIAL_EVIDENCE_ALREADY_EXISTS,
+                    info);
             } else {
                 List<String> returnedHashs = new ArrayList<>();
                 for (EvidenceAttributeChangedEventResponse event : eventList) {
@@ -293,9 +302,12 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             TransactionInfo info = new TransactionInfo(receipt);
             List<EvidenceAttributeChangedEventResponse> eventList =
                 evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
-            if (eventList == null || eventList.isEmpty()) {
+            if (eventList == null) {
                 return new ResponseData<>(result,
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else if (eventList.isEmpty()) {
+                return new ResponseData<>(result, ErrorCode.CREDENTIAL_EVIDENCE_ALREADY_EXISTS,
+                    info);
             } else {
                 List<String> returnedHashs = new ArrayList<>();
                 for (EvidenceAttributeChangedEventResponse event : eventList) {
@@ -319,6 +331,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     @Override
     public ResponseData<Boolean> addLog(
         String hashValue,
+        String sig,
         String log,
         Long timestamp,
         String privateKey
@@ -330,7 +343,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
             List<String> sigList = new ArrayList<>();
-            sigList.add(StringUtils.EMPTY);
+            sigList.add(sig);
             List<String> logList = new ArrayList<>();
             logList.add(log);
             List<BigInteger> timestampList = new ArrayList<>();
@@ -345,9 +358,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                     privateKey,
                     EvidenceContract.class
                 );
-            signerList.add(address);
             TransactionReceipt receipt =
-                evidenceContractWriter.createEvidence(
+                evidenceContractWriter.addSignatureAndLogs(
                     hashByteList,
                     signerList,
                     sigList,
@@ -357,8 +369,75 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             TransactionInfo info = new TransactionInfo(receipt);
             List<EvidenceAttributeChangedEventResponse> eventList =
                 evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
-            if (eventList == null || eventList.isEmpty()) {
+            if (eventList == null) {
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else if (eventList.isEmpty()) {
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST, info);
+            } else {
+                for (EvidenceAttributeChangedEventResponse event : eventList) {
+                    if (event.signer.toArray()[0].toString().equalsIgnoreCase(address)) {
+                        return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+                    }
+                }
+            }
+            return new ResponseData<>(false,
+                ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT);
+        } catch (Exception e) {
+            logger.error("add log failed due to system error. ", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<Boolean> addLogByCustomKey(
+        String hashValue,
+        String sig,
+        String log,
+        Long timestamp,
+        String customKey,
+        String privateKey
+    ) {
+        try {
+            List<byte[]> hashByteList = new ArrayList<>();
+            if (!DataToolUtils.isValidHash(hashValue)) {
+                return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT, null);
+            }
+            hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
+            List<String> sigList = new ArrayList<>();
+            sigList.add(sig);
+            List<String> logList = new ArrayList<>();
+            logList.add(log);
+            List<BigInteger> timestampList = new ArrayList<>();
+            timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
+            String address = WeIdUtils
+                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            List<String> signerList = new ArrayList<>();
+            signerList.add(address);
+            List<String> customKeyList = new ArrayList<>();
+            customKeyList.add(customKey);
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    this.evidenceAddress,
+                    privateKey,
+                    EvidenceContract.class
+                );
+            signerList.add(address);
+            TransactionReceipt receipt =
+                evidenceContractWriter.addSignatureAndLogsWithExtraKey(
+                    hashByteList,
+                    signerList,
+                    sigList,
+                    logList,
+                    timestampList,
+                    customKeyList
+                ).send();
+            TransactionInfo info = new TransactionInfo(receipt);
+            List<EvidenceAttributeChangedEventResponse> eventList =
+                evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
+            if (eventList == null) {
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else if (eventList.isEmpty()) {
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST, info);
             } else {
                 for (EvidenceAttributeChangedEventResponse event : eventList) {
                     if (event.signer.toArray()[0].toString().equalsIgnoreCase(address)) {
@@ -398,6 +477,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     public ResponseData<EvidenceInfo> getInfo(String hash) {
         EvidenceInfo evidenceInfo = new EvidenceInfo();
         evidenceInfo.setCredentialHash(hash);
+        Map<String, List<String>> perSignerRedoLog = new HashMap<>();
         int latestBlockNumber = 0;
         byte[] hashByte = DataToolUtils.convertHashStrIntoHashByte32Array(hash);
         try {
@@ -405,7 +485,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             if (latestBlockNumber == 0) {
                 return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST);
             }
-            resolveTransaction(hash, latestBlockNumber, evidenceInfo);
+            resolveTransaction(hash, latestBlockNumber, evidenceInfo, perSignerRedoLog);
             // Reverse the order of the list
             for (String signer : evidenceInfo.getSigners()) {
                 List<String> extraList = evidenceInfo.getSignInfo().get(signer).getLogs();
@@ -423,7 +503,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     private void resolveTransaction(
         String hash,
         int startBlockNumber,
-        EvidenceInfo evidenceInfo) {
+        EvidenceInfo evidenceInfo,
+        Map<String, List<String>> perSignerRedoLog) {
 
         int previousBlock = startBlockNumber;
         while (previousBlock != 0) {
@@ -465,7 +546,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                             topicSet.add(log.getTopics().get(0));
                         }
                         ResolveEventLogResult returnValue =
-                            resolveEventLog(hash, log, receipt, evidenceInfo);
+                            resolveEventLog(hash, log, receipt, evidenceInfo, perSignerRedoLog);
                         if (returnValue.getResultStatus().equals(
                             ResolveEventLogStatus.STATUS_SUCCESS)) {
                             if (returnValue.getPreviousBlock() == currentBlockNumber) {
@@ -485,10 +566,11 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String hash,
         Log log,
         TransactionReceipt receipt,
-        EvidenceInfo evidenceInfo) {
+        EvidenceInfo evidenceInfo,
+        Map<String, List<String>> perSignerRedoLog) {
         String topic = log.getTopics().get(0);
         if (!StringUtils.isBlank(topic)) {
-            return resolveAttributeEvent(hash, receipt, evidenceInfo);
+            return resolveAttributeEvent(hash, receipt, evidenceInfo, perSignerRedoLog);
         }
         ResolveEventLogResult response = new ResolveEventLogResult();
         response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENT_NULL);
@@ -498,99 +580,185 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
     private ResolveEventLogResult resolveAttributeEvent(
         String hash,
         TransactionReceipt receipt,
-        EvidenceInfo evidenceInfo) {
+        EvidenceInfo evidenceInfo,
+        Map<String, List<String>> perSignerRedoLog) {
         List<EvidenceAttributeChangedEventResponse> eventList =
             evidenceContract.getEvidenceAttributeChangedEvents(receipt);
+        List<EvidenceExtraAttributeChangedEventResponse> extraEventList =
+            evidenceContract.getEvidenceExtraAttributeChangedEvents(receipt);
         ResolveEventLogResult response = new ResolveEventLogResult();
-        if (CollectionUtils.isEmpty(eventList)) {
+        if (CollectionUtils.isEmpty(eventList) && CollectionUtils.isEmpty(extraEventList)) {
             response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENTLOG_NULL);
             return response;
         }
 
         int previousBlock = 0;
-        // Actual construction code
-        // there should be only 1 attrib-change event so it is fine to do so
-        for (EvidenceAttributeChangedEventResponse event : eventList) {
-            if (CollectionUtils.isEmpty(event.signer) || CollectionUtils.isEmpty(event.hash)) {
-                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_RES_NULL);
-                return response;
-            }
-            // the event is a full list of everything. Go thru the list and locate the hash
-            for (int index = 0; index < CollectionUtils.size(event.hash); index++) {
-                if (hash.equalsIgnoreCase(DataToolUtils.convertHashByte32ArrayIntoHashStr(
-                    ((Bytes32) event.hash.toArray()[index]).getValue()))) {
-                    String signerWeId = WeIdUtils
-                        .convertAddressToWeId(event.signer.toArray()[index].toString());
-                    String currentLog = event.logs.toArray()[index].toString();
-                    String currentSig = event.sigs.toArray()[index].toString();
-                    if (!StringUtils.isEmpty(currentLog) && !StringUtils.isEmpty(currentSig)) {
-                        // this is a sign/log event, sig will override unconditionally,
-                        // but logs will try to append.
-                        EvidenceSignInfo signInfo = new EvidenceSignInfo();
-                        signInfo.setSignature(currentSig);
-                        if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
-                            signInfo.setTimestamp(
-                                evidenceInfo.getSignInfo().get(signerWeId).getTimestamp());
-                            List<String> oldLogs = evidenceInfo.getSignInfo().get(signerWeId)
-                                .getLogs();
-                            oldLogs.add(currentLog);
-                            signInfo.setLogs(oldLogs);
-                        } else {
-                            signInfo
-                                .setTimestamp(String.valueOf(
-                                    ((Uint256) event.updated.toArray()[index]).getValue()
-                                        .longValue()));
-                            signInfo.getLogs().add(currentLog);
+        if (!CollectionUtils.isEmpty(eventList)) {
+            // Actual construction code
+            // there should be only 1 attrib-change event so it is fine to do so
+            for (EvidenceAttributeChangedEventResponse event : eventList) {
+                if (CollectionUtils.isEmpty(event.signer) || CollectionUtils.isEmpty(event.hash)) {
+                    response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_RES_NULL);
+                    return response;
+                }
+                // the event is a full list of everything. Go thru the list and locate the hash
+                for (int index = 0; index < CollectionUtils.size(event.hash); index++) {
+                    if (hash.equalsIgnoreCase(DataToolUtils.convertHashByte32ArrayIntoHashStr(
+                        ((Bytes32) event.hash.toArray()[index]).getValue()))) {
+                        String signerWeId = WeIdUtils
+                            .convertAddressToWeId(event.signer.toArray()[index].toString());
+                        if (CollectionUtils.size(perSignerRedoLog.get(signerWeId)) == 0) {
+                            perSignerRedoLog.put(signerWeId, new ArrayList<>());
                         }
-                        evidenceInfo.getSignInfo().put(signerWeId, signInfo);
-                    } else if (!StringUtils.isEmpty(currentLog)) {
-                        // this is a pure log event, just keep appending
-                        EvidenceSignInfo tempInfo = new EvidenceSignInfo();
-                        if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
-                            // already existing evidenceInfo, hence just append a log entry.
-                            // sig will override, timestamp will use existing one (always newer)
-                            tempInfo.setSignature(
-                                evidenceInfo.getSignInfo().get(signerWeId).getSignature());
-                            tempInfo.setTimestamp(
-                                evidenceInfo.getSignInfo().get(signerWeId).getTimestamp());
-                            List<String> oldLogs = evidenceInfo.getSignInfo().get(signerWeId)
-                                .getLogs();
-                            oldLogs.add(currentLog);
-                            tempInfo.setLogs(oldLogs);
+                        String currentLog = event.logs.toArray()[index].toString();
+                        String currentSig = event.sigs.toArray()[index].toString();
+                        if (!StringUtils.isEmpty(currentLog) && !StringUtils.isEmpty(currentSig)) {
+                            // this is a sign/log event, sig will override unconditionally,
+                            // but logs will try to append.
+                            EvidenceSignInfo signInfo = new EvidenceSignInfo();
+                            signInfo.setSignature(currentSig);
+                            if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
+                                signInfo.setTimestamp(
+                                    evidenceInfo.getSignInfo().get(signerWeId).getTimestamp());
+                                List<String> oldLogs = evidenceInfo.getSignInfo().get(signerWeId)
+                                    .getLogs();
+                                perSignerRedoLog.get(signerWeId).add(currentLog);
+                                oldLogs.addAll(perSignerRedoLog.get(signerWeId));
+                                perSignerRedoLog.put(signerWeId, new ArrayList<>());
+                                signInfo.setLogs(oldLogs);
+                                signInfo.setRevoked(
+                                    evidenceInfo.getSignInfo().get(signerWeId).getRevoked());
+                            } else {
+                                signInfo
+                                    .setTimestamp(String.valueOf(
+                                        ((Uint256) event.updated.toArray()[index]).getValue()
+                                            .longValue()));
+                                perSignerRedoLog.get(signerWeId).add(currentLog);
+                                signInfo.getLogs().addAll(perSignerRedoLog.get(signerWeId));
+                                perSignerRedoLog.put(signerWeId, new ArrayList<>());
+                            }
+                            evidenceInfo.getSignInfo().put(signerWeId, signInfo);
+                        } else if (!StringUtils.isEmpty(currentLog)) {
+                            // this is a pure log event, just keep appending
+                            EvidenceSignInfo tempInfo = new EvidenceSignInfo();
+                            if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
+                                // already existing evidenceInfo, hence just append a log entry.
+                                // sig will override, timestamp will use existing one (always newer)
+                                tempInfo.setSignature(
+                                    evidenceInfo.getSignInfo().get(signerWeId).getSignature());
+                                tempInfo.setTimestamp(
+                                    evidenceInfo.getSignInfo().get(signerWeId).getTimestamp());
+                                List<String> oldLogs = evidenceInfo.getSignInfo().get(signerWeId)
+                                    .getLogs();
+                                //oldLogs.add(currentLog);
+                                tempInfo.setLogs(oldLogs);
+                                tempInfo.setRevoked(
+                                    evidenceInfo.getSignInfo().get(signerWeId).getRevoked());
+                                perSignerRedoLog.get(signerWeId).add(currentLog);
+                            } else {
+                                // haven't constructed anything yet, so create a new one now
+                                tempInfo.setSignature(StringUtils.EMPTY);
+                                tempInfo
+                                    .setTimestamp(String.valueOf(
+                                        ((Uint256) event.updated.toArray()[index]).getValue()
+                                            .longValue()));
+                                //tempInfo.getLogs().add(currentLog);
+                                perSignerRedoLog.get(signerWeId).add(currentLog);
+                            }
+                            evidenceInfo.getSignInfo().put(signerWeId, tempInfo);
+                        } else if (!StringUtils.isEmpty(currentSig)) {
+                            // this is a pure sig event, just override
+                            EvidenceSignInfo signInfo = new EvidenceSignInfo();
+                            signInfo.setSignature(currentSig);
+                            if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
+                                signInfo.setTimestamp(
+                                    evidenceInfo.getSignInfo().get(signerWeId).getTimestamp());
+                                evidenceInfo.getSignInfo().get(signerWeId).getLogs()
+                                    .addAll(perSignerRedoLog.get(signerWeId));
+                                signInfo
+                                    .setLogs(evidenceInfo.getSignInfo().get(signerWeId).getLogs());
+                                perSignerRedoLog.put(signerWeId, new ArrayList<>());
+                                signInfo.setRevoked(
+                                    evidenceInfo.getSignInfo().get(signerWeId).getRevoked());
+                            } else {
+                                signInfo
+                                    .setTimestamp(String.valueOf(
+                                        ((Uint256) event.updated.toArray()[index]).getValue()
+                                            .longValue()));
+                                signInfo.setLogs(perSignerRedoLog.get(signerWeId));
+                                perSignerRedoLog.put(signerWeId, new ArrayList<>());
+                            }
+                            evidenceInfo.getSignInfo().put(signerWeId, signInfo);
                         } else {
-                            // haven't constructed anything yet, so create a new one now
-                            tempInfo.setSignature(StringUtils.EMPTY);
-                            tempInfo
-                                .setTimestamp(String.valueOf(
-                                    ((Uint256) event.updated.toArray()[index]).getValue()
-                                        .longValue()));
-                            tempInfo.getLogs().add(currentLog);
+                            // An empty event
+                            continue;
                         }
-                        evidenceInfo.getSignInfo().put(signerWeId, tempInfo);
-                    } else if (!StringUtils.isEmpty(currentSig)) {
-                        // this is a pure sig event, just override
-                        EvidenceSignInfo signInfo = new EvidenceSignInfo();
-                        signInfo.setSignature(currentSig);
-                        if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
-                            signInfo.setTimestamp(
-                                evidenceInfo.getSignInfo().get(signerWeId).getTimestamp());
-                            signInfo.setLogs(evidenceInfo.getSignInfo().get(signerWeId).getLogs());
-                        } else {
-                            signInfo
-                                .setTimestamp(String.valueOf(
-                                    ((Uint256) event.updated.toArray()[index]).getValue()
-                                        .longValue()));
-                        }
-                        evidenceInfo.getSignInfo().put(signerWeId, signInfo);
-                    } else {
-                        // An empty event
-                        continue;
+                        previousBlock = ((Uint256) event.previousBlock.toArray()[index]).getValue()
+                            .intValue();
                     }
-                    previousBlock = ((Uint256) event.previousBlock.toArray()[index]).getValue()
-                        .intValue();
                 }
             }
         }
+        if (!CollectionUtils.isEmpty(extraEventList)) {
+            for (EvidenceExtraAttributeChangedEventResponse event : extraEventList) {
+                if (CollectionUtils.isEmpty(event.signer) || CollectionUtils.isEmpty(event.hash)) {
+                    response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_RES_NULL);
+                    return response;
+                }
+                for (int index = 0; index < CollectionUtils.size(event.hash); index++) {
+                    if (hash.equalsIgnoreCase(DataToolUtils.convertHashByte32ArrayIntoHashStr(
+                        ((Bytes32) event.hash.toArray()[index]).getValue()))) {
+                        String signerWeId = WeIdUtils
+                            .convertAddressToWeId(event.signer.toArray()[index].toString());
+                        String attributeKey = event.keys.toArray()[index].toString();
+                        if (attributeKey.equalsIgnoreCase(WeIdConstant.EVIDENCE_REVOKE_KEY)) {
+                            // this is a revoke event. Use the first to be found unconditionally.
+                            if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
+                                // already existing evidence info, just modify status
+                                if (evidenceInfo.getSignInfo().get(signerWeId).getRevoked()
+                                    == null) {
+                                    evidenceInfo.getSignInfo().get(signerWeId).setRevoked(true);
+                                }
+                            } else {
+                                // Non existent evidence info, create a new one with time & stat
+                                EvidenceSignInfo signInfo = new EvidenceSignInfo();
+                                signInfo.setTimestamp(
+                                    String.valueOf(((Uint256) event.updated.toArray()[index])
+                                        .getValue().longValue()));
+                                signInfo.setRevoked(true);
+                                evidenceInfo.getSignInfo().put(signerWeId, signInfo);
+                            }
+                        } else if (attributeKey
+                            .equalsIgnoreCase(WeIdConstant.EVIDENCE_UNREVOKE_KEY)) {
+                            if (evidenceInfo.getSignInfo().containsKey(signerWeId)) {
+                                // already existing evidence info, just modify timestamp & status
+                                evidenceInfo.getSignInfo().get(signerWeId).setTimestamp(
+                                    String.valueOf(((Uint256) event.updated.toArray()[index])
+                                        .getValue().longValue()));
+                                if (evidenceInfo.getSignInfo().get(signerWeId).getRevoked()
+                                    == null) {
+                                    evidenceInfo.getSignInfo().get(signerWeId).setRevoked(false);
+                                }
+                            } else {
+                                // Non existent evidence info, create a new one with time & stat
+                                EvidenceSignInfo signInfo = new EvidenceSignInfo();
+                                signInfo.setTimestamp(
+                                    String.valueOf(((Uint256) event.updated.toArray()[index])
+                                        .getValue().longValue()));
+                                signInfo.setRevoked(false);
+                                evidenceInfo.getSignInfo().put(signerWeId, signInfo);
+                            }
+                        } else {
+                            // other keys attribute, please add in here
+                            continue;
+                        }
+                        previousBlock = ((Uint256) event.previousBlock.toArray()[index]).getValue()
+                            .intValue();
+                    }
+                }
+            }
+        }
+
         response.setPreviousBlock(previousBlock);
         response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_SUCCESS);
         return response;
@@ -646,9 +814,12 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             TransactionInfo info = new TransactionInfo(receipt);
             List<EvidenceAttributeChangedEventResponse> eventList =
                 evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
-            if (eventList == null || eventList.isEmpty()) {
+            if (eventList == null) {
                 return new ResponseData<>(StringUtils.EMPTY,
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else if (eventList.isEmpty()) {
+                return new ResponseData<>(StringUtils.EMPTY,
+                    ErrorCode.CREDENTIAL_EVIDENCE_ALREADY_EXISTS, info);
             } else {
                 for (EvidenceAttributeChangedEventResponse event : eventList) {
                     if (event.sigs.toArray()[0].toString().equalsIgnoreCase(signature)
@@ -688,6 +859,66 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         } catch (Exception e) {
             logger.error("[getInfoByCustomKey] get evidence info failed. ", e);
             return new ResponseData<EvidenceInfo>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<Boolean> setAttribute(
+        String hashValue,
+        String key,
+        String value,
+        Long timestamp,
+        String privateKey
+    ) {
+        try {
+            List<byte[]> hashByteList = new ArrayList<>();
+            if (!DataToolUtils.isValidHash(hashValue)) {
+                return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT, null);
+            }
+            hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
+            List<String> keyList = new ArrayList<>();
+            keyList.add(key);
+            List<String> valueList = new ArrayList<>();
+            valueList.add(value);
+            List<BigInteger> timestampList = new ArrayList<>();
+            timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
+            String address = WeIdUtils
+                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            List<String> signerList = new ArrayList<>();
+            signerList.add(address);
+            EvidenceContract evidenceContractWriter =
+                reloadContract(
+                    this.evidenceAddress,
+                    privateKey,
+                    EvidenceContract.class
+                );
+            TransactionReceipt receipt =
+                evidenceContractWriter.setAttribute(
+                    hashByteList,
+                    signerList,
+                    keyList,
+                    valueList,
+                    timestampList
+                ).send();
+            TransactionInfo info = new TransactionInfo(receipt);
+            List<EvidenceExtraAttributeChangedEventResponse> eventList =
+                evidenceContractWriter.getEvidenceExtraAttributeChangedEvents(receipt);
+            if (eventList == null) {
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
+            } else if (eventList.isEmpty()) {
+                return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST, info);
+            } else {
+                for (EvidenceExtraAttributeChangedEventResponse event : eventList) {
+                    if (event.signer.toArray()[0].toString().equalsIgnoreCase(address)) {
+                        return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+                    }
+                }
+            }
+            return new ResponseData<>(false,
+                ErrorCode.CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT);
+        } catch (Exception e) {
+            logger.error("add log failed due to system error. ", e);
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
         }
     }
 }

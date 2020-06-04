@@ -335,9 +335,14 @@ public enum ErrorCode {
     CREDENTIAL_EVIDENCE_HASH_MISMATCH(100501, "evidence hash mismatch"),
 
     /**
-     * The credential evidence hash mismatch.
+     * The credential evidence does not exist on chain.
      */
     CREDENTIAL_EVIDENCE_NOT_EXIST(100502, "evidence does not exist on chain"),
+
+    /**
+     * The credential evidence already exists on chain.
+     */
+    CREDENTIAL_EVIDENCE_ALREADY_EXISTS(100503, "evidence already exists on chain"),
 
     /**
      * The credential evidence interface does not support fisco bcos 1.3.
