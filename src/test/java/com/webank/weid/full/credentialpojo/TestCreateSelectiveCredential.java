@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.ClaimPolicy;
@@ -158,7 +159,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         CredentialPojo modifiedDoubleSigned = copyCredentialPojo(doubleSigned);
         Map<String, Object> modifiedClaim = new HashMap<>();
         modifiedClaim.put("credentialList", credPojoList);
-        modifiedDoubleSigned.setClaim(modifiedClaim);
+        modifiedDoubleSigned = setCredentialPojoValue(
+            modifiedDoubleSigned, 
+            ParamKeyConstant.CLAIM, 
+            modifiedClaim
+        );
         serializedjson = modifiedDoubleSigned.toJson();
         System.out.println("B is: " + serializedjson);
         Assert.assertTrue(
@@ -265,7 +270,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
-        copyCredentialPojo.setContext("~!@#$%^&*()_中国123we");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CONTEXT, 
+            "~!@#$%^&*()_中国123we"
+        );
 
         ResponseData<CredentialPojo> response =
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
@@ -285,7 +294,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setContext(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CONTEXT, 
+            null
+        );
 
         ResponseData<CredentialPojo> response =
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
@@ -305,7 +318,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setContext("");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CONTEXT, 
+            ""
+        );
 
         ResponseData<CredentialPojo> response =
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
@@ -327,7 +344,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
             chars[i] = (char) (i % 127);
         }
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setContext(String.valueOf(chars));
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CONTEXT, 
+            String.valueOf(chars)
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -349,7 +370,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         stringList.add("你好哈");
         stringList.add("!@#$%^&*(*)/.,><;lkjhg");
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setType(stringList);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.TYPE, 
+            stringList
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -368,7 +393,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_typeNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setType(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.TYPE, 
+            null
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -390,7 +419,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_typeBlank() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setType(new ArrayList<>());
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.TYPE, 
+            new ArrayList<>()
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -414,7 +447,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
             stringList.add(s);
         }
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setType(stringList);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.TYPE, 
+            stringList
+        );
 
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
@@ -434,7 +471,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_cptIdNotExist() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setCptId(Integer.MAX_VALUE);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CPT_ID, 
+            Integer.MAX_VALUE
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -459,7 +500,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_issuerNotExist() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b6ffffff");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            "did:weid:101:0x39e5e6f663ef77409144014ceb063713b6ffffff"
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -484,7 +529,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_invalidIssuer() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer("weid:did:101:0x39e5e6f663ef77409144014ceb063713b6ffffff");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            "weid:did:101:0x39e5e6f663ef77409144014ceb063713b6ffffff"
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -504,7 +553,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_issuerNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            null
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -524,7 +577,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_issuerBlank() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer("");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            ""
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -545,7 +602,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
 
         long currentDate = System.currentTimeMillis();
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setExpirationDate(currentDate - 1000);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.EXPIRATION_DATE, 
+            currentDate - 1000
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -565,7 +626,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_IssuanceDatePassed() {
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
         long currentDate = System.currentTimeMillis();
-        copyCredentialPojo.setIssuanceDate(currentDate - 10000);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUANCE_DATE, 
+            currentDate - 10000
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -585,8 +650,17 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_expirationed() {
         long currentDate = System.currentTimeMillis();
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuanceDate(currentDate + 20000);
-        copyCredentialPojo.setExpirationDate(currentDate + 10000);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUANCE_DATE, 
+            currentDate + 20000
+        );
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.EXPIRATION_DATE, 
+            currentDate + 10000
+        );
+
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -606,7 +680,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_claimNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setClaim(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CLAIM, 
+            null
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -626,7 +704,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_claimBlank() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setClaim(new HashMap<>());
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CLAIM, 
+            new HashMap<>()
+        );
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -774,7 +856,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":0,\"gender\":0,\"age\":0,\"id\":0}");
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setProof(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            null
+        );
 
         ResponseData<CredentialPojo> response =
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
@@ -793,7 +879,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":0,\"gender\":0,\"age\":0,\"id\":0}");
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setProof(new HashMap<>());
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            new HashMap<>()
+        );
 
         ResponseData<CredentialPojo> response =
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
@@ -815,7 +905,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proofMap = copyCredentialPojo.getProof();
         proofMap.remove("creator");
-        copyCredentialPojo.setProof(proofMap);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proofMap
+        );
 
         ResponseData<CredentialPojo> response =
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
@@ -837,7 +931,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proofMap = copyCredentialPojo.getProof();
         proofMap.remove("salt");
-        copyCredentialPojo.setProof(proofMap);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proofMap
+        );
 
         ResponseData<CredentialPojo> response =
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);
@@ -861,7 +959,11 @@ public class TestCreateSelectiveCredential extends TestBaseService {
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proofMap = copyCredentialPojo.getProof();
         proofMap.remove("signatureValue");
-        copyCredentialPojo.setProof(proofMap);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proofMap
+        );
 
         ResponseData<CredentialPojo> response =
             credentialPojoService.createSelectiveCredential(copyCredentialPojo, claimPolicy);

@@ -35,6 +35,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
@@ -75,7 +76,12 @@ public class TestCreateEvidence extends TestBaseService {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-        credential.setId(UUID.randomUUID().toString());
+        credential = setCredentialPojoValue(
+            credential, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            UUID.randomUUID().toString()
+        );
+        
         String hash = evidenceService.generateHash(credential).getResult().getHash();
         // Direct call of add - should fail
         ResponseData<Boolean> addResp = evidenceService.addLogByHash(hash, "3.23",
@@ -109,7 +115,11 @@ public class TestCreateEvidence extends TestBaseService {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-        credential.setId(UUID.randomUUID().toString());
+        credential = setCredentialPojoValue(
+            credential, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            UUID.randomUUID().toString()
+        );
         String hash = evidenceService.generateHash(credential).getResult().getHash();
         evidenceService.createEvidence(credential,
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
@@ -143,7 +153,11 @@ public class TestCreateEvidence extends TestBaseService {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-        credential.setId(UUID.randomUUID().toString());
+        credential = setCredentialPojoValue(
+            credential, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            UUID.randomUUID().toString()
+        );
         String hash = evidenceService.generateHash(credential).getResult().getHash();
         String credId = credential.getId();
         ResponseData<String> cresp = evidenceService.createEvidenceWithLogAndCustomKey(
@@ -182,7 +196,11 @@ public class TestCreateEvidence extends TestBaseService {
     public void testCreateEvidence_CustomKeyMultiSignerMultiTimes() {
         CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
         Assert.assertNotNull(credential);
-        credential.setId(UUID.randomUUID().toString());
+        credential = setCredentialPojoValue(
+            credential, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            UUID.randomUUID().toString()
+        );
         String credId = credential.getId();
         List<String> list = new ArrayList<>();
         String log = "X:112.5,Y:97.6";
@@ -243,7 +261,11 @@ public class TestCreateEvidence extends TestBaseService {
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr =
             super.copyCreateWeId(createWeIdResultWithSetAttr);
         CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-        credential.setId(UUID.randomUUID().toString());
+        credential = setCredentialPojoValue(
+            credential, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            UUID.randomUUID().toString()
+        );
         String credId = credential.getId();
         String log = DataToolUtils.serialize(credential);
         evidenceService.createEvidenceWithLogAndCustomKey(
@@ -282,7 +304,11 @@ public class TestCreateEvidence extends TestBaseService {
         int batchSize = 100;
         for (int i = 0; i < batchSize; i++) {
             CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-            credential.setId(UUID.randomUUID().toString());
+            credential = setCredentialPojoValue(
+                credential, 
+                ParamKeyConstant.CREDENTIAL_ID, 
+                UUID.randomUUID().toString()
+            );
             String hash = credential.getHash();
             hashValues.add(credential.getHash());
             signatures.add(new String(DataToolUtils.base64Encode(DataToolUtils
@@ -369,7 +395,11 @@ public class TestCreateEvidence extends TestBaseService {
         List<TransactionArgs> transactionArgsList = new ArrayList<>();
         for (int i = 0; i < batchSize; i++) {
             CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-            credential.setId(UUID.randomUUID().toString());
+            credential = setCredentialPojoValue(
+                credential, 
+                ParamKeyConstant.CREDENTIAL_ID, 
+                UUID.randomUUID().toString()
+            );
             String hash = credential.getHash();
             TransactionArgs args = new TransactionArgs();
             args.setMethod("createEvidence");
@@ -394,7 +424,11 @@ public class TestCreateEvidence extends TestBaseService {
     @Test
     public void testRawCreation() {
         CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-        credential.setId(UUID.randomUUID().toString());
+        credential = setCredentialPojoValue(
+            credential, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            UUID.randomUUID().toString()
+        );
         String hash = credential.getHash();
         String sig = "testSig";
         String log = "";

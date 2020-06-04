@@ -38,6 +38,7 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialType;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -125,7 +126,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         Map<String, Object> claim = modifiedTsCred.getClaim();
         String tstamp = (String) claim.get("authoritySignature");
         claim.put("authoritySignature", tstamp + "a");
-        modifiedTsCred.setClaim(claim);
+        modifiedTsCred = setCredentialPojoValue(modifiedTsCred, ParamKeyConstant.CLAIM, claim);
         respData = credentialPojoService.verify(modifiedTsCred.getIssuer(), modifiedTsCred);
         Assert.assertFalse(respData.getResult());
         Assert.assertEquals(respData.getErrorCode().intValue(),
@@ -134,7 +135,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         claim = modifiedTsCred.getClaim();
         Long stamptime = (long) claim.get("timestamp");
         claim.put("timestamp", stamptime - 100);
-        modifiedTsCred.setClaim(claim);
+        modifiedTsCred = setCredentialPojoValue(modifiedTsCred, ParamKeyConstant.CLAIM, claim);
         respData = credentialPojoService.verify(modifiedTsCred.getIssuer(), modifiedTsCred);
         Assert.assertFalse(respData.getResult());
         Assert.assertEquals(respData.getErrorCode().intValue(),

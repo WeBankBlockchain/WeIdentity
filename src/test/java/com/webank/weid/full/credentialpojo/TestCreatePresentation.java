@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Challenge;
@@ -434,7 +435,11 @@ public class TestCreatePresentation extends TestBaseService {
     public void testCreatePresentation_issuerNotExist() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b6123456");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            "did:weid:101:0x39e5e6f663ef77409144014ceb063713b6123456"
+        );
         credentialList.clear();
         credentialList.add(copyCredentialPojo);
         ResponseData<PresentationE> response = credentialPojoService.createPresentation(
@@ -457,7 +462,11 @@ public class TestCreatePresentation extends TestBaseService {
     public void testCreatePresentation_issuerNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            null
+        );
         credentialList.clear();
         credentialList.add(copyCredentialPojo);
 

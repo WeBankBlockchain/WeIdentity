@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.Data;
+import lombok.Getter;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,7 @@ import com.webank.weid.util.DataToolUtils;
  *
  * @author junqizhang 2019.04
  */
-@Data
+@Getter
 public class CredentialPojo implements IProof, JsonSerializer, Hashable {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojo.class);
@@ -130,17 +132,15 @@ public class CredentialPojo implements IProof, JsonSerializer, Hashable {
             String signature = String.valueOf(credentialMap.get(ParamKeyConstant.PROOF));
             credentialMap.remove(ParamKeyConstant.PROOF_TYPE);
             credentialMap.remove(ParamKeyConstant.PROOF);
-            CredentialPojo credentialPojo;
             try {
-                credentialPojo = DataToolUtils.mapToObj(
-                    credentialMap,
-                    CredentialPojo.class
-                );
-                credentialPojo.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
-                //credentialPojo.setIssuanceDate(0L);
-                credentialPojo.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
-                credentialPojo.addType(CredentialType.LITE1.getName());
-                return credentialPojo;
+                Map<String, Object> proof = new HashMap<String, Object>();
+                proof.put(ParamKeyConstant.PROOF_SIGNATURE, signature);
+                credentialMap.put(ParamKeyConstant.PROOF, proof);
+                List<String> types = new ArrayList<String>();
+                types.add(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
+                types.add(CredentialType.LITE1.getName());
+                credentialMap.put(ParamKeyConstant.TYPE, types);
+                return DataToolUtils.mapToObj(credentialMap, CredentialPojo.class);
             } catch (Exception e) {
                 logger.error("[fromJson] deserialize failed. error message:{}", e);
                 return null;
@@ -168,18 +168,6 @@ public class CredentialPojo implements IProof, JsonSerializer, Hashable {
     }
 
     /**
-     * 添加type.
-     *
-     * @param typeValue the typeValue
-     */
-    public void addType(String typeValue) {
-        if (type == null) {
-            type = new ArrayList<String>();
-        }
-        type.add(typeValue);
-    }
-
-    /**
      * Directly extract the signature value from credential.
      *
      * @return signature value
@@ -204,28 +192,6 @@ public class CredentialPojo implements IProof, JsonSerializer, Hashable {
      */
     public Map<String, Object> getSalt() {
         return (Map<String, Object>) getValueFromProof(proof, ParamKeyConstant.PROOF_SALT);
-    }
-
-    /**
-     * put the salt into proof.
-     *
-     * @param salt map of salt
-     */
-    public void setSalt(Map<String, Object> salt) {
-        putProofValue(ParamKeyConstant.PROOF_SALT, salt);
-    }
-
-    /**
-     * put the key-value into proof.
-     *
-     * @param key the key of proof
-     * @param value the value of proof
-     */
-    public void putProofValue(String key, Object value) {
-        if (proof == null) {
-            proof = new HashMap<>();
-        }
-        proof.put(key, value);
     }
 
     /**

@@ -21,6 +21,7 @@ package com.webank.weid.full.credentialpojo;
 
 import java.security.SignatureException;
 import java.util.Map;
+import java.util.UUID;
 
 import mockit.Mock;
 import mockit.MockUp;
@@ -113,7 +114,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_contextNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setContext(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CONTEXT, 
+            null
+        );
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -129,7 +134,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_contentError() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(selectiveCredentialPojo);
-        copyCredentialPojo.setContext("xxx");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CONTEXT, 
+            "xxx"
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -148,7 +157,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         CredentialPojo copyCredentialPojo = copyCredentialPojo(selectiveCredentialPojo);
 
         CptBaseInfo cpt = super.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
-        copyCredentialPojo.setCptId(cpt.getCptId());
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CPT_ID, 
+            cpt.getCptId()
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -165,7 +178,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_idNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setId(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            null
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -182,7 +199,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_idNotExist() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(selectiveCredentialPojo);
-        copyCredentialPojo.setId("xxxxx");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            "xxxxx"
+        );
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -198,7 +219,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_OtherId() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setId(credentialPojoNew.getId());
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CREDENTIAL_ID, 
+            credentialPojoNew.getId()
+        );
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -214,7 +239,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_issuerNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(selectiveCredentialPojo);
-        copyCredentialPojo.setIssuer(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            null
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -231,7 +260,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_invalidIsuuer() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(selectiveCredentialPojo);
-        copyCredentialPojo.setIssuer("xxxxxxxxxxx");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            "xxxxxxxxxxx"
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -248,7 +281,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_credentialPojoIssuerOther() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(selectiveCredentialPojo);
-        copyCredentialPojo.setIssuer(createWeIdNew.getWeId());
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            createWeIdNew.getWeId()
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -297,7 +334,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_issuanceDateMinus() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuanceDate(-1L);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUANCE_DATE, 
+            -1L
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -314,7 +355,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_issuanceDateFuture() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(selectiveCredentialPojo);
-        copyCredentialPojo.setIssuanceDate(System.currentTimeMillis() + 100000);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUANCE_DATE, 
+            System.currentTimeMillis() + 100000
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -331,7 +376,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_minusExpirationDate() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setExpirationDate(-1L);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.EXPIRATION_DATE, 
+            -1L
+        );
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -347,7 +396,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredentialCase16() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setExpirationDate(credentialPojo.getIssuanceDate() - 100000000);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.EXPIRATION_DATE, 
+            credentialPojo.getIssuanceDate() - 100000000
+        );
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -363,7 +416,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_expirationDateNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setExpirationDate(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.EXPIRATION_DATE, 
+            null
+        );
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -379,7 +436,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredential_issuanceDateNull() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuanceDate(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUANCE_DATE, 
+            null
+        );
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -394,7 +455,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     @Test
     public void testVerifyCredential_claimNull() {
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setClaim(null);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.CLAIM, 
+            null
+        );
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -411,7 +476,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         CredentialPojo newCredential = copyCredentialPojo(credentialPojo);
         Map<String, Object> proof = newCredential.getProof();
         proof.put(ParamKeyConstant.PROOF_SIGNATURE, StringUtils.EMPTY);
-        newCredential.setProof(proof);
+        newCredential = setCredentialPojoValue(
+            newCredential, 
+            ParamKeyConstant.PROOF, 
+            proof
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(newCredential);
         LogUtil.info(logger, "verifyCredential", response);
@@ -429,7 +498,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         CredentialPojo newCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proof = newCredentialPojo.getProof();
         proof.put(ParamKeyConstant.PROOF_SIGNATURE, null);
-        newCredentialPojo.setProof(proof);
+        newCredentialPojo = setCredentialPojoValue(
+            newCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proof
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(newCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -449,7 +522,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         Map<String, Object> proof = newCredentialPojo.getProof();
         proof.remove(ParamKeyConstant.PROOF_SIGNATURE);
         proof.put(ParamKeyConstant.PROOF_SIGNATURE, "xxxxxxxxxxx");
-        newCredentialPojo.setProof(proof);
+        newCredentialPojo = setCredentialPojoValue(
+            newCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proof
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(newCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -468,7 +545,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         CredentialPojo newCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proof = newCredentialPojo.getProof();
         proof.put(ParamKeyConstant.PROOF_SIGNATURE, "12341234");
-        newCredentialPojo.setProof(proof);
+        newCredentialPojo = setCredentialPojoValue(
+            newCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proof
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(newCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -485,8 +566,17 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredentialCase27() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuanceDate(System.currentTimeMillis() - 12000);
-        copyCredentialPojo.setExpirationDate(System.currentTimeMillis() - 10000);
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUANCE_DATE, 
+            System.currentTimeMillis() - 12000
+        );
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.EXPIRATION_DATE, 
+            System.currentTimeMillis() - 10000
+        );
+
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
@@ -527,7 +617,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         CredentialPojo newCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proof = newCredentialPojo.getProof();
         proof.put(ParamKeyConstant.PROOF_CREATOR, null);
-        newCredentialPojo.setProof(proof);
+        newCredentialPojo = setCredentialPojoValue(
+            newCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proof
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(newCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -544,7 +638,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
     public void testVerifyCredentialCase30() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(selectiveCredentialPojo);
-        copyCredentialPojo.setIssuer("did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797441");
+        copyCredentialPojo = setCredentialPojoValue(
+            copyCredentialPojo, 
+            ParamKeyConstant.ISSUER, 
+            "did:weid:0xbb1670306aedfaeb75cff9581c99e56ba4797441"
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -563,7 +661,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         CredentialPojo newCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proof = newCredentialPojo.getProof();
         proof.put(ParamKeyConstant.PROOF_TYPE, null);
-        newCredentialPojo.setProof(proof);
+        newCredentialPojo = setCredentialPojoValue(
+            newCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proof
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(newCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -582,7 +684,11 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         CredentialPojo newCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proof = newCredentialPojo.getProof();
         proof.remove(ParamKeyConstant.PROOF_SIGNATURE);
-        newCredentialPojo.setProof(proof);
+        newCredentialPojo = setCredentialPojoValue(
+            newCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proof
+        );
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(newCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -601,8 +707,12 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         CredentialPojo newCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proof = newCredentialPojo.getProof();
         proof.remove(ParamKeyConstant.PROOF_CREATOR);
-        newCredentialPojo.setProof(proof);
-
+        newCredentialPojo = setCredentialPojoValue(
+            newCredentialPojo, 
+            ParamKeyConstant.PROOF, 
+            proof
+        );
+        
         ResponseData<Boolean> response = super.verifyCredentialPojo(newCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 

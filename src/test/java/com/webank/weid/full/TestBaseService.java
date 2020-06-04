@@ -55,6 +55,7 @@ import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialUtils;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -718,6 +719,20 @@ public abstract class TestBaseService extends BaseTest {
 
     protected CredentialPojo copyCredentialPojo(CredentialPojo credentialPojo) {
         return CredentialUtils.copyCredential(credentialPojo);
+    }
+    
+    protected CredentialPojo setCredentialPojoValue(
+        CredentialPojo credentialPojo, 
+        String key, 
+        Object value
+    ) {
+        try {
+            Map<String, Object> objToMap = DataToolUtils.objToMap(credentialPojo);
+            objToMap.put(key, value);
+            return DataToolUtils.mapToObj(objToMap, CredentialPojo.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     protected CreateWeIdDataResult copyCreateWeId(CreateWeIdDataResult createWeId) {

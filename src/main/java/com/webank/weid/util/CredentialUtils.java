@@ -160,38 +160,36 @@ public final class CredentialUtils {
      * @return new credentialPojo
      */
     public static CredentialPojo copyCredential(CredentialPojo credentialPojo) {
-        CredentialPojo cpj = new CredentialPojo();
-        cpj.setContext(credentialPojo.getContext());
-        cpj.setIssuanceDate(credentialPojo.getIssuanceDate());
-        cpj.setCptId(credentialPojo.getCptId());
-        cpj.setExpirationDate(credentialPojo.getExpirationDate());
-        cpj.setIssuer(credentialPojo.getIssuer());
-        cpj.setId(credentialPojo.getId());
+        try {
+            Map<String, Object> cpj = DataToolUtils.objToMap(credentialPojo);
 
-        Map<String, Object> originalProof = credentialPojo.getProof();
-        if (originalProof != null) {
-            Map<String, Object> proof = DataToolUtils
-                .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
-            cpj.setProof(proof);
-        }
-        Map<String, Object> originalClaim = credentialPojo.getClaim();
-        if (originalClaim != null) {
-            Map<String, Object> claim = DataToolUtils
-                .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
-            cpj.setClaim(claim);
-        }
-        List<String> originalType = credentialPojo.getType();
-        if (originalType != null) {
-            List<String> type = new ArrayList<>(originalType.size());
-            if (originalType.size() > 0) {
-                for (String originalTypeItem : originalType) {
-                    type.add(originalTypeItem);
-                }
+            Map<String, Object> originalProof = credentialPojo.getProof();
+            if (originalProof != null) {
+                Map<String, Object> proof = DataToolUtils
+                    .deserialize(DataToolUtils.serialize(originalProof), HashMap.class);
+                cpj.put(ParamKeyConstant.PROOF, proof);
             }
-            cpj.setType(type);
+            Map<String, Object> originalClaim = credentialPojo.getClaim();
+            if (originalClaim != null) {
+                Map<String, Object> claim = DataToolUtils
+                    .deserialize(DataToolUtils.serialize(originalClaim), HashMap.class);
+                cpj.put(ParamKeyConstant.CLAIM, claim);
+            }
+            List<String> originalType = credentialPojo.getType();
+            if (originalType != null) {
+                List<String> type = new ArrayList<>(originalType.size());
+                if (originalType.size() > 0) {
+                    for (String originalTypeItem : originalType) {
+                        type.add(originalTypeItem);
+                    }
+                }
+                cpj.put(ParamKeyConstant.TYPE, type);
+            }
+            CredentialPojo credential = DataToolUtils.mapToObj(cpj, CredentialPojo.class);
+            return credential;
+        } catch (Exception e) {
+            return null;
         }
-
-        return cpj;
     }
 
     /**

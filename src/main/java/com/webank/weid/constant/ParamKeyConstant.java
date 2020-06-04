@@ -59,6 +59,8 @@ public final class ParamKeyConstant {
     public static final String CPT_ID = "cptId";
     public static final String ISSUER = "issuer";
     public static final String CLAIM = "claim";
+    public static final String TYPE = "type";
+    public static final String CREDENTIAL_LIST = "credentialList";
     public static final String EXPIRATION_DATE = "expirationDate";
     public static final String CREDENTIAL_SIGNATURE = "signature";
     public static final String CONTEXT = "context";
