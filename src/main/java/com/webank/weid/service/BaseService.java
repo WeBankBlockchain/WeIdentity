@@ -40,6 +40,7 @@ import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.WeServer;
+import com.webank.weid.service.fisco.WeServerUtils;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
 import com.webank.weid.service.impl.engine.EngineFactory;
@@ -169,7 +170,7 @@ public abstract class BaseService {
      * @return true表示群组存在，false表示群组不存在
      */
     public static boolean checkGroupId(Integer groupId) {
-        return getWeServer(masterGroupId).checkGroupId(groupId);
+        return WeServerUtils.getGroupList().contains(String.valueOf(groupId));
     }
     
     /**
