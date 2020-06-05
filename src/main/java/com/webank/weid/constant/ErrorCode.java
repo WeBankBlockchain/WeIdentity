@@ -101,7 +101,7 @@ public enum ErrorCode {
      * The credential issuer mismatch.
      */
     CREDENTIAL_ISSUER_MISMATCH(100403,
-        "issuer weId does not match the weId of credential"),
+        "issuer (signer) weId does not match the weId of credential"),
 
     /**
      * The credential signature broken.
