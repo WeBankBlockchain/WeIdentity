@@ -54,6 +54,7 @@ import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.rpc.callback.OnNotifyCallbackV2;
 import com.webank.weid.service.fisco.WeServer;
+import com.webank.weid.service.fisco.WeServerUtils;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 
 public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
@@ -119,19 +120,12 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
         web3j = Web3j.build(channelEthereumService, service.getGroupId());
         if (web3j == null) {
             logger.error("[WeServiceImplV2] web3j init failed. ");
-            throw new InitWeb3jException();
+            throw new InitWeb3jException("web3j init failed.");
         }
-
-        // 检查群组Id是否存在
-        if (!checkGroupId(groupId)) {
-            logger.error("[WeServiceImplV2] the groupId does not exist.");
-            throw new InitWeb3jException();
-        }
-
         credentials = GenCredential.create();
         if (credentials == null) {
             logger.error("[WeServiceImplV2] credentials init failed. ");
-            throw new InitWeb3jException();
+            throw new InitWeb3jException("credentials init failed.");
         }
         cnsService = new CnsService(web3j, credentials);
         logger.info("[WeServiceImplV2] init web3j instance success..");
@@ -164,13 +158,19 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             .setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
         channelConnections
             .setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
-        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(",")));
+        // 根据群组获取节点列表
+        List<String> nodeList = WeServerUtils.getGroupMapping().get(groupId.toString());
+        if (CollectionUtils.isEmpty(nodeList)) {
+            logger.error("[WeServiceImplV2] the groupId does not exist, please check.");
+            throw new InitWeb3jException("the groupId does not exist, groupId = " + groupId + ".");
+        }
+        channelConnections.setConnectionsStr(nodeList);
         GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
         connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
         service.setAllChannelConnections(connectionsConfig);
 
         // thread pool params
-        service.setThreadPool(super.initializePool());
+        service.setThreadPool(super.initializePool(groupId));
         return service;
     }
 
@@ -220,26 +220,5 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             logger.error("[queryBucketFromCns] query address has error.", e);
             throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
         }
-    }
-
-    @Override
-    public boolean checkGroupId(Integer groupId) {
-        if (groupId == null) {
-            return false;
-        }
-        try {
-            List<String> result = this.getWeb3j().getGroupList().send().getResult();
-            if (CollectionUtils.isEmpty(result)) {
-                return false;
-            }
-            for (String string : result) {
-                if (string.equals(String.valueOf(groupId))) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            logger.error("[checkGroupId] check the groupId has error.", e);
-        }
-        return false;
     }
 }
