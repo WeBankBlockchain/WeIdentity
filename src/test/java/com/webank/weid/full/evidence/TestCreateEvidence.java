@@ -100,8 +100,60 @@ public class TestCreateEvidence extends TestBaseService {
             evidenceInfo.getSignInfo().get(signerWeId).getLogs().get(0).equals("1.23"));
         Assert.assertTrue(
             evidenceInfo.getSignInfo().get(signerWeId).getLogs().get(1).equals("13.15"));
-        ResponseData<Boolean> resp = evidenceService.verifySigner(evidenceInfo, signerWeId);
+        ResponseData<Boolean> resp = evidenceService
+            .verifySigner(credential, evidenceInfo, signerWeId);
         Assert.assertTrue(resp.getResult());
+    }
+
+    @Test
+    public void testEvidenceManipulationFailures() {
+        CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+        credential.setId(UUID.randomUUID().toString());
+        String hash = credential.getHash();
+        CreateWeIdDataResult cwdr = createWeIdWithSetAttr();
+        // Get another signer here:
+        String tempSigner = cwdr.getWeId();
+        evidenceService
+            .createRawEvidenceWithSpecificSigner(hash, credential.getSignature(), "temp-log",
+                DateUtils.getNoMillisecondTimeStamp(), credential.getId(), tempSigner, privateKey);
+        ResponseData<EvidenceInfo> eviResp = evidenceService.getEvidence(hash);
+        Assert.assertNotNull(eviResp.getResult());
+        ResponseData<Boolean> verifyResp = evidenceService
+            .verifySigner(credential, eviResp.getResult(), tempSigner);
+        // Here it should fail, since: signer's sig ! from privatekey, and issuer != signer
+        Assert.assertFalse(verifyResp.getResult());
+        Assert.assertEquals(verifyResp.getErrorCode().intValue(),
+            ErrorCode.CREDENTIAL_ISSUER_MISMATCH.getCode());
+
+        //----
+        credential.setId(UUID.randomUUID().toString());
+        credential.setIssuer(tempSigner);
+        hash = credential.getHash();
+        // Get another signer here:
+        evidenceService.createRawEvidenceWithSpecificSigner(hash, credential.getSignature(),
+            "temp-log", DateUtils.getNoMillisecondTimeStamp(), credential.getId(), tempSigner,
+            privateKey);
+        eviResp = evidenceService.getEvidence(hash);
+        Assert.assertNotNull(eviResp.getResult());
+        verifyResp = evidenceService.verifySigner(credential, eviResp.getResult(), tempSigner);
+        // Here it should fail, since: signer's sig ! from privatekey
+        Assert.assertFalse(verifyResp.getResult());
+        Assert.assertEquals(verifyResp.getErrorCode().intValue(),
+            ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode());
+
+        //----
+        credential.setId(UUID.randomUUID().toString());
+        credential.setIssuer(tempSigner);
+        hash = credential.getHash();
+        // Get another signer here:
+        evidenceService.createRawEvidenceWithSpecificSigner(hash, credential.getSignature(),
+            "temp-log", DateUtils.getNoMillisecondTimeStamp(), credential.getId(), tempSigner,
+            cwdr.getUserWeIdPrivateKey().getPrivateKey());
+        eviResp = evidenceService.getEvidence(hash);
+        Assert.assertNotNull(eviResp.getResult());
+        verifyResp = evidenceService.verifySigner(credential, eviResp.getResult(), tempSigner);
+        // Here it should still fail, since: signer's sig ! from privatekey
+        Assert.assertFalse(verifyResp.getResult());
     }
 
     @Test
@@ -132,10 +184,12 @@ public class TestCreateEvidence extends TestBaseService {
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
         Assert.assertEquals(evidenceInfo.getSignInfo().get(signer1).getLogs().size(), 2);
         Assert.assertEquals(evidenceInfo.getSignInfo().get(signer2).getLogs().size(), 2);
-        ResponseData<Boolean> resp = evidenceService.verifySigner(evidenceInfo, signer1);
+        ResponseData<Boolean> resp = evidenceService
+            .verifySigner(credential, evidenceInfo, signer1);
         Assert.assertTrue(resp.getResult());
-        resp = evidenceService.verifySigner(evidenceInfo, signer2);
-        Assert.assertTrue(resp.getResult());
+        resp = evidenceService.verifySigner(credential, evidenceInfo, signer2);
+        // here it should be false since signer changed
+        Assert.assertFalse(resp.getResult());
     }
 
     @Test
@@ -397,15 +451,41 @@ public class TestCreateEvidence extends TestBaseService {
         credential.setId(UUID.randomUUID().toString());
         String hash = credential.getHash();
         String sig = "testSig";
-        String log = "";
+        String log = "abc";
         String customKey = credential.getId();
         ResponseData<Boolean> resp = evidenceService
             .createRawEvidenceWithCustomKey(hash, sig, log, System.currentTimeMillis(), customKey,
                 privateKey);
         Assert.assertTrue(resp.getResult());
         ResponseData<EvidenceInfo> eviResp = evidenceService.getEvidenceByCustomKey(customKey);
-        System.out.println();
         Assert.assertTrue(eviResp.getResult().getSignatures().get(0).equalsIgnoreCase(sig));
+
+        //----
+        credential.setId(UUID.randomUUID().toString());
+        hash = credential.getHash();
+        String signer1 = createWeIdResultWithSetAttr.getWeId();
+        resp = evidenceService.createRawEvidenceWithSpecificSigner(hash, sig, log,
+            System.currentTimeMillis(), StringUtils.EMPTY, signer1, privateKey);
+        Assert.assertTrue(resp.getResult());
+        eviResp = evidenceService.getEvidence(hash);
+        Assert.assertTrue(hash.equalsIgnoreCase(eviResp.getResult().getCredentialHash()));
+        Assert.assertTrue(eviResp.getResult().getSigners().size() == 1);
+        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(signer1));
+
+        //----
+        credential.setId(UUID.randomUUID().toString());
+        hash = credential.getHash();
+        resp = evidenceService.createRawEvidenceWithSpecificSigner(hash, sig, log,
+            System.currentTimeMillis(), credential.getId(), signer1, privateKey);
+        Assert.assertTrue(resp.getResult());
+        eviResp = evidenceService.getEvidence(hash);
+        ResponseData<EvidenceInfo> eviResp2 =
+            evidenceService.getEvidenceByCustomKey(credential.getId());
+        Assert.assertEquals(eviResp.getResult().getCredentialHash(),
+            eviResp2.getResult().getCredentialHash());
+        Assert.assertTrue(hash.equalsIgnoreCase(eviResp.getResult().getCredentialHash()));
+        Assert.assertTrue(eviResp.getResult().getSigners().size() == 1);
+        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(signer1));
     }
 
     /**

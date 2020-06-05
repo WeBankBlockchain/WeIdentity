@@ -37,6 +37,7 @@ import com.webank.weid.constant.CptType;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
+import com.webank.weid.constant.CredentialType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.WeIdBaseException;
@@ -1034,6 +1035,21 @@ public final class CredentialPojoUtils {
             if (StringUtils.equals(cptType, CptType.ZKP.getName().toString())) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    /**
+     * Check if this CredentialPojo is Lite Credential.
+     *
+     * @param credential the credential
+     * @return true if yes, false otherwise
+     */
+    public static boolean isLiteCredential(CredentialPojo credential) {
+
+        List<String> types = credential.getType();
+        if (types.contains(CredentialType.LITE1.getName())) {
+            return true;
         }
         return false;
     }
