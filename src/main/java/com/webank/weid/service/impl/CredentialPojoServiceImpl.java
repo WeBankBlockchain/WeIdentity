@@ -901,15 +901,6 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         }
     }
 
-    private static boolean isLiteCredential(CredentialPojo credential) {
-
-        List<String> types = credential.getType();
-        if (types.contains(CredentialType.LITE1.getName())) {
-            return true;
-        }
-        return false;
-    }
-
     private static ResponseData<Boolean> verifyLiteCredential(
         CredentialPojo credential,
         String publicKey) {
@@ -1360,7 +1351,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             logger.error("[verify] The input issuer weid is not match the credential's.");
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
         }
-        if (isLiteCredential(credential)) {
+        if (CredentialPojoUtils.isLiteCredential(credential)) {
             return verifyLiteCredential(credential, null);
         }
         ErrorCode errorCode = verifyContent(credential, null, false);
@@ -1386,7 +1377,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         if (StringUtils.isEmpty(publicKey)) {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
         }
-        if (isLiteCredential(credential)) {
+        if (CredentialPojoUtils.isLiteCredential(credential)) {
             return verifyLiteCredential(credential, issuerPublicKey.getPublicKey());
         }
         ErrorCode errorCode = verifyContent(credential, publicKey, false);
@@ -1481,7 +1472,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         if (StringUtils.isEmpty(publicKey)) {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_PUBLIC_KEY_NOT_EXISTS);
         }
-        if (isLiteCredential(credential)) {
+        if (CredentialPojoUtils.isLiteCredential(credential)) {
             return verifyLiteCredential(credential, issuerPublicKey.getPublicKey());
         }
         ErrorCode errorCode = verifyContent(credential, publicKey, true);
