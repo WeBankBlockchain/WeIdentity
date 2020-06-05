@@ -150,11 +150,12 @@ public abstract class WeServer<W, C, S> {
     /**
      * 初始化Web3sdk线程池信息.
      *
+     * @param groupId 群组编号
      * @return 返回线程池对象
      */
-    protected ThreadPoolTaskExecutor initializePool() {
+    protected ThreadPoolTaskExecutor initializePool(Integer groupId) {
         ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setBeanName("web3sdk");
+        pool.setBeanName("web3sdk-group" + groupId);
         pool.setCorePoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkCorePoolSize()));
         pool.setMaxPoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkMaxPoolSize()));
         pool.setQueueCapacity(Integer.valueOf(fiscoConfig.getWeb3sdkQueueSize()));
@@ -285,12 +286,4 @@ public abstract class WeServer<W, C, S> {
         }
         return bucketAddress;
     }
-    
-    /**
-     * 检查groupId是否存在.
-     * 
-     * @param groupId 群组Id
-     * @return true表示群组存在，false表示群组不存在
-     */
-    public abstract boolean checkGroupId(Integer groupId);
 }
