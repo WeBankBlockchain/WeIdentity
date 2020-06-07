@@ -34,6 +34,7 @@ import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DateUtils;
 
 /**
  * queryAuthorityIssuerInfo method for testing AuthorityIssuerService.
@@ -202,7 +203,7 @@ public class TestQueryAuthorityIssuerInfo extends TestBaseService {
         weIdPrivateKey.setPrivateKey(privateKey);
         registerAuthorityIssuerArgs.setWeIdPrivateKey(weIdPrivateKey);
         registerAuthorityIssuerArgs.getAuthorityIssuer()
-            .setCreated(System.currentTimeMillis() + 1000000);
+            .setCreated(DateUtils.getNoMillisecondTimeStamp() + 1000000);
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);

@@ -1592,6 +1592,21 @@ public final class DataToolUtils {
     }
 
     /**
+     * Check if the byte array is empty.
+     *
+     * @param byteArray the byte[]
+     * @return true if empty, false otherwise
+     */
+    public static boolean isByteArrayEmpty(byte[] byteArray) {
+        for (int index = 0; index < byteArray.length; index++) {
+            if (byteArray[index] != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * convert byte32List to String.
      *
      * @param bytesList list
