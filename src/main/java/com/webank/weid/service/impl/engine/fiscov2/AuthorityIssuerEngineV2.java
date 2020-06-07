@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -106,9 +107,22 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         String weAddress = WeIdUtils.convertWeIdToAddress(authorityIssuer.getWeId());
         List<byte[]> stringAttributes = new ArrayList<byte[]>();
         stringAttributes.add(authorityIssuer.getName().getBytes());
+        if (!StringUtils.isEmpty(authorityIssuer.getDescription())) {
+            stringAttributes.add(authorityIssuer.getDescription().getBytes());
+        }
+        List<String> extraStr32s = authorityIssuer.getExtraStr32();
+        for (int index = 0; index < extraStr32s.size(); index++) {
+            stringAttributes.add(extraStr32s.get(index).getBytes());
+        }
         List<BigInteger> longAttributes = new ArrayList<>();
         Long createDate = DateUtils.getNoMillisecondTimeStamp();
         longAttributes.add(BigInteger.valueOf(createDate));
+        // The second integer value is updated to be added
+        longAttributes.add(BigInteger.valueOf(createDate));
+        List<Integer> extraInts = authorityIssuer.getExtraInt();
+        for (int index = 0; index < extraInts.size(); index++) {
+            longAttributes.add(BigInteger.valueOf(extraInts.get(index)));
+        }
         try {
             AuthorityIssuerController authorityIssuerController = reloadContract(
                 fiscoConfig.getIssuerAddress(),
@@ -261,10 +275,35 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
 
             AuthorityIssuer result = new AuthorityIssuer();
             result.setWeId(weId);
-            String name = DataToolUtils.byte32ListToString(
-                bytes32Attributes,
-                WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH
-            );
+
+            String name = new String(bytes32Attributes.get(0)).trim();
+            result.setName(name);
+
+            if (!DataToolUtils.isByteArrayEmpty(bytes32Attributes.get(1))) {
+                String desc = new String(bytes32Attributes.get(1)).trim();
+                result.setDescription(desc);
+            }
+
+            List<String> extraStr32s = new ArrayList<>();
+            for (int index = 0; index < WeIdConstant.AUTHORITY_ISSUER_EXTRA_PARAM_LENGTH; index++) {
+                byte[] extraByte = bytes32Attributes.get(index + 2);
+                if (!DataToolUtils.isByteArrayEmpty(extraByte)) {
+                    extraStr32s.add(new String(extraByte).trim());
+                }
+            }
+            result.setExtraStr32(extraStr32s);
+
+            // 0 is created, 1 is reserved for updated
+            List<Integer> extraInts = new ArrayList<>();
+            for (int index = 0; index < WeIdConstant.AUTHORITY_ISSUER_EXTRA_PARAM_LENGTH; index++) {
+                Integer intValue = int256Attributes.get(index + 2).intValue();
+                if (intValue == 0) {
+                    continue;
+                }
+                extraInts.add(intValue);
+            }
+            result.setExtraInt(extraInts);
+
             Long createDate = Long
                 .valueOf(int256Attributes.get(0).longValue());
             if (StringUtils.isEmpty(name) && createDate.equals(WeIdConstant.LONG_VALUE_ZERO)) {
@@ -272,8 +311,8 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                     null, ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS
                 );
             }
-            result.setName(name);
             result.setCreated(createDate);
+
             // Accumulator Value is unable to load due to Solidity 0.4.4 restrictions - left blank.
             result.setAccValue("");
             resultData.setResult(result);
