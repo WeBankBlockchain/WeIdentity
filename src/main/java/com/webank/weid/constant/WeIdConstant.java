@@ -90,6 +90,11 @@ public final class WeIdConstant {
     public static final Integer AUTHORITY_ISSUER_ARRAY_LEGNTH = 16;
 
     /**
+     * The Constant Authority Issuer extra param list max length.
+     */
+    public static final Integer AUTHORITY_ISSUER_EXTRA_PARAM_LENGTH = 10;
+
+    /**
      * The default accumulator value.
      */
     public static final String DEFAULT_ACCUMULATOR_VALUE = "1";
