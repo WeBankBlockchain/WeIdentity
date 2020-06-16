@@ -31,7 +31,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
@@ -244,7 +243,8 @@ public class HttpClient {
      */
     public static String doPost(String url, Object params, boolean isSsL) throws Exception {
 
-        logger.debug("doPost start. url:{},params:{}", url, JSON.toJSONString(params));
+        String paramsString = DataToolUtils.serialize(params);
+        logger.debug("doPost start. url:{},params:{}", url, paramsString);
         CloseableHttpClient httpClient;
         if (isSsL) {
             httpClient = HttpClients.custom().setSSLSocketFactory(createSsLConn())
@@ -261,7 +261,7 @@ public class HttpClient {
             httpPost.addHeader("Content-type", "application/json; charset=utf-8");
             httpPost.setHeader("Accept", "application/json");
             httpPost.setEntity(
-                new StringEntity(JSON.toJSONString(params), Charset.forName("UTF-8")));//发送的参数
+                new StringEntity(paramsString, Charset.forName("UTF-8")));//发送的参数
 
             response = httpClient.execute(httpPost);
             int statusCode = response.getStatusLine().getStatusCode();
