@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import com.alibaba.fastjson.JSONObject;
 import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import org.apache.commons.lang3.StringUtils;
@@ -203,7 +202,7 @@ public class TimestampUtils {
             if (null == responseData) {
                 return null;
             }
-            return JSONObject.parseObject(responseData, AccessTokenResponse.class);
+            return DataToolUtils.deserialize(responseData, AccessTokenResponse.class);
         } catch (Exception e) {
             logger.error("Error occurred during getting access token: " + e.getMessage());
             throw e;
@@ -258,7 +257,7 @@ public class TimestampUtils {
             if (StringUtils.isBlank(responseData)) {
                 return null;
             }
-            return JSONObject.parseObject(responseData, SignTicketResponse.class);
+            return DataToolUtils.deserialize(responseData, SignTicketResponse.class);
         } catch (Exception e) {
             logger.error("Error occurred during getting sign ticket: " + e.getMessage());
             throw e;
@@ -306,7 +305,7 @@ public class TimestampUtils {
             if (StringUtils.isBlank(responseData)) {
                 return null;
             }
-            return JSONObject.parseObject(responseData, GetTimestampResponse.class);
+            return DataToolUtils.deserialize(responseData, GetTimestampResponse.class);
         } catch (Exception e) {
             logger.error("Error occurred during getting sign ticket: " + e.getMessage());
             throw e;
@@ -357,7 +356,7 @@ public class TimestampUtils {
             if (StringUtils.isBlank(responseData)) {
                 return null;
             }
-            return JSONObject.parseObject(responseData, VerifyTimestampResponse.class);
+            return DataToolUtils.deserialize(responseData, VerifyTimestampResponse.class);
         } catch (Exception e) {
             logger.error("Error occurred during getting sign ticket: " + e.getMessage());
             throw e;
