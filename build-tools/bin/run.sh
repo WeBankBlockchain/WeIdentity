@@ -11,7 +11,9 @@ if [ -d dist/ ];then
     rm -rf dist/*.jar
 fi
 
-gradle clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
+chmod u+x gradlew
+
+./gradlew clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
 
 cp -r ./build-tools/* dist/
 
