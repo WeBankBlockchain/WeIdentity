@@ -42,6 +42,7 @@ versionFile.eachLine { line ->
     version = line
 }
 println 'Current product version: ' + version
+def repo ="${repoType}"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -52,7 +53,13 @@ targetCompatibility = 1.8
 repositories {
     if (!gradle.startParameter.isOffline()) {
         mavenLocal()
-        mavenCentral()
+        if ("cn" == repo) {
+            println "use cn repo"
+            maven {url "http://maven.aliyun.com/nexus/content/groups/public/"}
+        } else {
+            println "use default repo"
+            mavenCentral()
+        }
         maven { url "https://dl.bintray.com/ethereum/maven/" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url "https://oss.sonatype.org/content/groups/public/" }
