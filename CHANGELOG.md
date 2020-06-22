@@ -1,3 +1,7 @@
+### V1.6.4 (2020-06-16)
+- Bugfixes:
+1. Update all dependencies to mitigate potential security risks.
+
 ### V1.6.3 (2020-06-01)
 - Features:
 1. Multi-group deployment support to separate Evidence and other smart contracts.
