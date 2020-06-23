@@ -142,13 +142,15 @@ public class KeyManagerCallback extends AmopCallback {
         ErrorCode errorCode = DataToolUtils.verifySignatureFromWeId(
             arg.getKeyId(),
             arg.getSignValue(),
-            domRes.getResult()
+            domRes.getResult(),
+            null
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             errorCode = DataToolUtils.verifySecp256k1SignatureFromWeId(
                 arg.getKeyId(),
                 arg.getSignValue(),
-                domRes.getResult()
+                domRes.getResult(),
+                null
             );
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.info(
