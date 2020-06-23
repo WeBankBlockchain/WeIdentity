@@ -165,10 +165,10 @@ public class WeIdAuthImpl implements WeIdAuth {
         }
         WeIdDocument weIdDocument = weIdDoc.getResult();
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument);
+            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             verifyErrorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument);
+                .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
             if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[createMutualAuthenticatedChannel] verify challenge signature failed,"
@@ -251,10 +251,10 @@ public class WeIdAuthImpl implements WeIdAuth {
 
         //验证对手方对challenge的签名
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument);
+            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             verifyErrorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument);
+                .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
             if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[createMutualAuthenticatedChannel] verify challenge signature failed, "
