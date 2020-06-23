@@ -49,16 +49,16 @@ import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
+import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
-import com.webank.weid.protocol.request.SetAuthenticationArgs;
-import com.webank.weid.protocol.request.SetPublicKeyArgs;
-import com.webank.weid.protocol.request.SetServiceArgs;
+import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.util.DataToolUtils;
 
@@ -162,7 +162,7 @@ public class TestBaseUtil {
      */
     public static CreateCredentialPojoArgs<Map<String, Object>>
         buildCreateCredentialPojoArgs4MultiCpt(
-            CreateWeIdDataResult createWeId) {
+        CreateWeIdDataResult createWeId) {
 
         CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
             new CreateCredentialPojoArgs<Map<String, Object>>();
@@ -566,15 +566,11 @@ public class TestBaseUtil {
      *
      * @return SetAuthenticationArgs
      */
-    public static SetAuthenticationArgs buildSetAuthenticationArgs(
+    public static AuthenticationArgs buildSetAuthenticationArgs(
         CreateWeIdDataResult createWeId) {
 
-        SetAuthenticationArgs setAuthenticationArgs = new SetAuthenticationArgs();
-        setAuthenticationArgs.setWeId(createWeId.getWeId());
+        AuthenticationArgs setAuthenticationArgs = new AuthenticationArgs();
         setAuthenticationArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-        setAuthenticationArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
-        setAuthenticationArgs.getUserWeIdPrivateKey()
-            .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
 
         return setAuthenticationArgs;
     }
@@ -585,14 +581,10 @@ public class TestBaseUtil {
      * @param createWeId WeId
      * @return SetPublicKeyArgs
      */
-    public static SetPublicKeyArgs buildSetPublicKeyArgs(CreateWeIdDataResult createWeId) {
+    public static PublicKeyArgs buildSetPublicKeyArgs(CreateWeIdDataResult createWeId) {
 
-        SetPublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
-        setPublicKeyArgs.setWeId(createWeId.getWeId());
+        PublicKeyArgs setPublicKeyArgs = new PublicKeyArgs();
         setPublicKeyArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-        setPublicKeyArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
-        setPublicKeyArgs.getUserWeIdPrivateKey()
-            .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
 
         return setPublicKeyArgs;
     }
@@ -603,17 +595,12 @@ public class TestBaseUtil {
      * @param createWeId WeId
      * @return SetServiceArgs
      */
-    public static SetServiceArgs buildSetServiceArgs(CreateWeIdDataResult createWeId) {
+    public static ServiceArgs buildSetServiceArgs(CreateWeIdDataResult createWeId) {
 
-        SetServiceArgs setServiceArgs = new SetServiceArgs();
-        setServiceArgs.setWeId(createWeId.getWeId());
-        setServiceArgs.setType(TestData.SERVICE_TYPE);
-        setServiceArgs.setServiceEndpoint(TestData.SERVICE_ENDPOINT);
-        setServiceArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
-        setServiceArgs.getUserWeIdPrivateKey()
-            .setPrivateKey(createWeId.getUserWeIdPrivateKey().getPrivateKey());
-
-        return setServiceArgs;
+        ServiceArgs serviceArgs = new ServiceArgs();
+        serviceArgs.setType(TestData.SERVICE_TYPE);
+        serviceArgs.setServiceEndpoint(TestData.SERVICE_ENDPOINT);
+        return serviceArgs;
     }
 
     /**

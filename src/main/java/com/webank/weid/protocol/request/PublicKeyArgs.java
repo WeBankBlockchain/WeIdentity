@@ -32,11 +32,6 @@ import com.webank.weid.constant.WeIdConstant.PublicKeyType;
 public class PublicKeyArgs {
 
     /**
-     * Required: The WeIdentity DID.
-     */
-    private String weId;
-
-    /**
      * Required: The type.
      */
     private PublicKeyType type = PublicKeyType.SECP256K1;
@@ -58,5 +53,18 @@ public class PublicKeyArgs {
      */
     public void setType(PublicKeyType type) {
         this.type = type;
+    }
+
+    public PublicKeyArgs() {
+        super();
+    }
+
+    public PublicKeyArgs(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public PublicKeyArgs(String owner, String publicKey) {
+        this.owner = owner;
+        this.publicKey = publicKey;
     }
 }

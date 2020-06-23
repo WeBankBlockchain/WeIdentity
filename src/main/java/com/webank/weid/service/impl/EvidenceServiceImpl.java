@@ -382,7 +382,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
             ErrorCode errorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+                .verifySignatureFromWeId(rawData, signatureData, weIdDocument, null);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(false, errorCode);
             }
@@ -532,7 +532,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
             ErrorCode errorCode = DataToolUtils
-                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument);
+                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument, null);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(false, errorCode);
             }

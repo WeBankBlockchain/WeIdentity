@@ -864,6 +864,11 @@ public final class CredentialPojoUtils {
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return errorCode;
         }
+        if (args.getWeIdAuthentication() != null
+            && !StringUtils.isEmpty(args.getWeIdAuthentication().getWeId())
+            && !args.getWeIdAuthentication().getWeId().equalsIgnoreCase(args.getIssuer())) {
+            return ErrorCode.CREDENTIAL_ISSUER_INVALID;
+        }
         return isWeIdAuthenticationValid(args.getWeIdAuthentication());
     }
 
