@@ -40,4 +40,9 @@ public class AuthenticationProperty {
      * Required: The public key.
      */
     private String publicKey;
+
+    /**
+     * Required: Revoked, or not.
+     */
+    private Boolean revoked = false;
 }
