@@ -21,14 +21,12 @@ package com.webank.weid.rpc;
 
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
-import com.webank.weid.protocol.request.SetAuthenticationArgs;
-import com.webank.weid.protocol.request.SetPublicKeyArgs;
-import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -84,63 +82,82 @@ public interface WeIdService {
     ResponseData<WeIdDocument> getWeIdDocument(String weId);
 
     /**
-     * Set public key in the WeIdentity DID Document.
+     * Add a public key in the WeIdentity DID Document. If this key is already revoked, then it will
+     * be un-revoked.
      *
-     * @param setPublicKeyArgs the set public key args
-     * @return true if the "set" operation succeeds, false otherwise.
+     * @param weId the WeID to add public key to
+     * @param publicKeyArgs the public key args
+     * @param privateKey the private key to send blockchain transaction
+     * @return the public key ID, -1 if any error occurred
      */
-    ResponseData<Boolean> setPublicKey(SetPublicKeyArgs setPublicKeyArgs);
+    ResponseData<Integer> addPublicKey(String weId, PublicKeyArgs publicKeyArgs,
+        WeIdPrivateKey privateKey);
 
     /**
-     * Set public key in the WeIdentity DID Document.
+     * Add a public key in the WeIdentity DID Document by other delegate caller (currently it must
+     * be admin / committee). If this key is already revoked, then it will be un-revoked.
      *
+     * @param weId the WeID to add public key to
      * @param publicKeyArgs the set public key args
      * @param delegateAuth the delegate's auth
-     * @return true if the "set" operation succeeds, false otherwise.
+     * @return the public key ID, -1 if any error occurred
      */
-    ResponseData<Boolean> delegateSetPublicKey(
+    ResponseData<Integer> delegateAddPublicKey(
+        String weId,
         PublicKeyArgs publicKeyArgs,
-        WeIdAuthentication delegateAuth
+        WeIdPrivateKey delegateAuth
     );
 
     /**
      * Set service properties.
      *
-     * @param setServiceArgs your service name and endpoint
+     * @param weId the WeID to set service to
+     * @param serviceArgs your service name and endpoint
+     * @param privateKey the private key
      * @return true if the "set" operation succeeds, false otherwise.
      */
-    ResponseData<Boolean> setService(SetServiceArgs setServiceArgs);
+    ResponseData<Boolean> setService(String weId, ServiceArgs serviceArgs,
+        WeIdPrivateKey privateKey);
 
     /**
      * Set service properties.
      *
+     * @param weId the WeID to set service to
      * @param serviceArgs your service name and endpoint
      * @param delegateAuth the delegate's auth
      * @return true if the "set" operation succeeds, false otherwise.
      */
     ResponseData<Boolean> delegateSetService(
+        String weId,
         ServiceArgs serviceArgs,
-        WeIdAuthentication delegateAuth
+        WeIdPrivateKey delegateAuth
     );
 
     /**
      * Set authentications in WeIdentity DID.
      *
-     * @param setAuthenticationArgs A public key is needed.
+     * @param weId the WeID to set auth to
+     * @param authenticationArgs A public key is needed
+     * @param privateKey the private key
      * @return true if the "set" operation succeeds, false otherwise.
      */
-    ResponseData<Boolean> setAuthentication(SetAuthenticationArgs setAuthenticationArgs);
+    ResponseData<Boolean> setAuthentication(
+        String weId,
+        AuthenticationArgs authenticationArgs,
+        WeIdPrivateKey privateKey);
 
     /**
      * Set authentications in WeIdentity DID.
      *
+     * @param weId the WeID to set auth to
      * @param authenticationArgs A public key is needed.
      * @param delegateAuth the delegate's auth
      * @return true if the "set" operation succeeds, false otherwise.
      */
     ResponseData<Boolean> delegateSetAuthentication(
+        String weId,
         AuthenticationArgs authenticationArgs,
-        WeIdAuthentication delegateAuth
+        WeIdPrivateKey delegateAuth
     );
 
     /**
@@ -154,16 +171,26 @@ public interface WeIdService {
     /**
      * Remove a public key enlisted in WeID document together with the its authentication.
      *
-     * @param setPublicKeyArgs the to-be-deleted publicKey
+     * @param weId the WeID to delete public key from
+     * @param publicKeyArgs the public key args
+     * @param privateKey the private key to send blockchain transaction
      * @return true if succeeds, false otherwise
      */
-    ResponseData<Boolean> removePublicKeyWithAuthentication(SetPublicKeyArgs setPublicKeyArgs);
+    ResponseData<Boolean> revokePublicKeyWithAuthentication(
+        String weId,
+        PublicKeyArgs publicKeyArgs,
+        WeIdPrivateKey privateKey);
 
     /**
      * Remove an authentication tag in WeID document only - will not affect its public key.
      *
-     * @param setAuthenticationArgs the to-be-deleted publicKey
+     * @param weId the WeID to remove auth from
+     * @param authenticationArgs A public key is needed
+     * @param privateKey the private key
      * @return true if succeeds, false otherwise
      */
-    ResponseData<Boolean> removeAuthentication(SetAuthenticationArgs setAuthenticationArgs);
+    ResponseData<Boolean> revokeAuthentication(
+        String weId,
+        AuthenticationArgs authenticationArgs,
+        WeIdPrivateKey privateKey);
 }

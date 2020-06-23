@@ -22,12 +22,7 @@ package com.webank.weid.full;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
-import mockit.Mock;
-import mockit.MockUp;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,13 +39,14 @@ import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
+import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.request.SetAuthenticationArgs;
-import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -109,19 +105,19 @@ public abstract class TestBaseService extends BaseTest {
      * parameters needed to create credentialPojos.
      */
     protected static volatile CreateCredentialPojoArgs<Map<String, Object>>
-            createCredentialPojoArgs1 = null;
+        createCredentialPojoArgs1 = null;
 
     /**
      * parameters needed to create credentialPojos.
      */
     protected static volatile CreateCredentialPojoArgs<Map<String, Object>>
-            createCredentialPojoArgs2 = null;
+        createCredentialPojoArgs2 = null;
 
     /**
      * parameters needed to create credentialPojos.
      */
     protected static volatile CreateCredentialPojoArgs<Map<String, Object>>
-            createCredentialPojoArgs3 = null;
+        createCredentialPojoArgs3 = null;
 
     /**
      * parameters needed to create credentialPojos.
@@ -200,7 +196,7 @@ public abstract class TestBaseService extends BaseTest {
      * initializing related services.
      */
     @Override
-    public synchronized void testInit()  {
+    public synchronized void testInit() {
 
         if (!isInitIssuer) {
             try {
@@ -282,7 +278,7 @@ public abstract class TestBaseService extends BaseTest {
         if (createCredentialPojoArgs1 == null) {
             registerCptArgs1 = TestBaseUtil.buildCptArgs4MlCpt(createWeIdResultWithSetAttr);
             createCredentialPojoArgs1 =
-                    TestBaseUtil.buildCreateCredentialPojoArgs4MlCpt(createWeIdResultWithSetAttr);
+                TestBaseUtil.buildCreateCredentialPojoArgs4MlCpt(createWeIdResultWithSetAttr);
             cptBaseInfo1 = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs1);
             createCredentialPojoArgs1.setCptId(cptBaseInfo1.getCptId());
         }
@@ -317,14 +313,14 @@ public abstract class TestBaseService extends BaseTest {
         if (createCredentialArgs == null) {
             registerCptArgs = TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
             createCredentialArgs =
-                    TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr);
+                TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr);
             cptBaseInfo = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs);
             createCredentialArgs.setCptId(cptBaseInfo.getCptId());
         }
         if (createCredentialPojoArgs2 == null) {
             registerCptArgs2 = TestBaseUtil.buildCptArgs4MlCpt(createWeIdResultWithSetAttr);
             createCredentialPojoArgs2 =
-                    TestBaseUtil.buildCreateCredentialPojoArgs4MlCpt(createWeIdResultWithSetAttr);
+                TestBaseUtil.buildCreateCredentialPojoArgs4MlCpt(createWeIdResultWithSetAttr);
             cptBaseInfo2 = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs2);
             createCredentialPojoArgs2.setCptId(cptBaseInfo2.getCptId());
         }
@@ -332,8 +328,8 @@ public abstract class TestBaseService extends BaseTest {
         if (createCredentialPojoArgs3 == null) {
             registerCptArgs3 = TestBaseUtil.buildCptArgs4MultiCpt(createWeIdResultWithSetAttr);
             createCredentialPojoArgs3 =
-                    TestBaseUtil
-                        .buildCreateCredentialPojoArgs4MultiCpt(createWeIdResultWithSetAttr);
+                TestBaseUtil
+                    .buildCreateCredentialPojoArgs4MultiCpt(createWeIdResultWithSetAttr);
             cptBaseInfo3 = this.registerCpt(createWeIdResultWithSetAttr, registerCptArgs3);
             createCredentialPojoArgs3.setCptId(cptBaseInfo3.getCptId());
         }
@@ -644,7 +640,7 @@ public abstract class TestBaseService extends BaseTest {
     }
 
     /**
-     * setPublicKey default.
+     * addPublicKey default.
      *
      * @param createResult createResult
      * @param publicKey publicKey
@@ -655,16 +651,18 @@ public abstract class TestBaseService extends BaseTest {
         String publicKey,
         String owner) {
 
-        // setPublicKey for this WeId
-        SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createResult);
-        setPublicKeyArgs.setPublicKey(publicKey);
-        setPublicKeyArgs.setOwner(owner);
+        // No longer required, since this will be automatically set now.
 
-        ResponseData<Boolean> responseSetPub = weIdService.setPublicKey(setPublicKeyArgs);
-        LogUtil.info(logger, "setPublicKey", responseSetPub);
+        // SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createResult);
+        // setPublicKeyArgs.setPublicKey(publicKey);
+        // setPublicKeyArgs.setOwner(owner);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetPub.getErrorCode().intValue());
-        Assert.assertEquals(true, responseSetPub.getResult());
+        // ResponseData<Integer> responseSetPub = weIdService.addPublicKey(setPublicKeyArgs);
+        // LogUtil.info(logger, "addPublicKey", responseSetPub);
+
+        // Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+        //     responseSetPub.getErrorCode().intValue());
+        // Assert.assertNotEquals(0, responseSetPub.getResult().intValue());
     }
 
     /**
@@ -680,11 +678,12 @@ public abstract class TestBaseService extends BaseTest {
         String serviceEnpoint) {
 
         // setService for this WeIdentity DID
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createResult);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createResult);
         setServiceArgs.setType(serviceType);
         setServiceArgs.setServiceEndpoint(serviceEnpoint);
 
-        ResponseData<Boolean> responseSetSer = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> responseSetSer = weIdService.setService(createResult.getWeId(),
+            setServiceArgs, createResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", responseSetSer);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetSer.getErrorCode().intValue());
@@ -704,12 +703,13 @@ public abstract class TestBaseService extends BaseTest {
         String owner) {
 
         // setAuthenticate for this WeIdentity DID
-        SetAuthenticationArgs setAuthenticationArgs =
+        AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createResult);
         setAuthenticationArgs.setOwner(owner);
         setAuthenticationArgs.setPublicKey(publicKey);
         ResponseData<Boolean> responseSetAuth =
-            weIdService.setAuthentication(setAuthenticationArgs);
+            weIdService.setAuthentication(createResult.getWeId(), setAuthenticationArgs,
+                createResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setAuthentication", responseSetAuth);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetAuth.getErrorCode().intValue());
