@@ -42,7 +42,7 @@ public class QrCodeVersion1 extends TransCodeBaseData {
     // 协议数据位置定义
     private static final int VERSION_INDEX = 0;
     private static final int ENCODE_INDEX = 1;
-    private static final int ORGID_INDEX = 2;
+    private static final int AMOPID_INDEX = 2;
     private static final int RESOURCEID_INDEX = 3;
     private static final int DATA_INDEX = 4;
     private static final int EXTENDDATA_INDEX = 5;
@@ -63,8 +63,8 @@ public class QrCodeVersion1 extends TransCodeBaseData {
         buffer.append(version.getCode()).append(PROTOCOL_PARTITION);
         // 第二段 控制协议编解码相关
         buffer.append(super.getEncodeType()).append(PROTOCOL_PARTITION);
-        // 第三段 控制机构id
-        buffer.append(super.getOrgId()).append(PROTOCOL_PARTITION);
+        // 第三段 控制AmopId
+        buffer.append(super.getAmopId()).append(PROTOCOL_PARTITION);
         // 第四段 控制资源Id
         buffer.append(super.getId()).append(PROTOCOL_PARTITION);
         // 第五段 控制资源数据
@@ -89,8 +89,8 @@ public class QrCodeVersion1 extends TransCodeBaseData {
             String enCodeString = codeStrings[ENCODE_INDEX];
             this.setEncodeType(Integer.parseInt(enCodeString));
             // 第三段 控制机构id
-            String orgIdString = codeStrings[ORGID_INDEX];
-            this.setOrgId(orgIdString);
+            String amopId = codeStrings[AMOPID_INDEX];
+            this.setAmopId(amopId);
             // 第四段 控制资源Id
             String resourceIdString = codeStrings[RESOURCEID_INDEX];
             this.setId(resourceIdString);

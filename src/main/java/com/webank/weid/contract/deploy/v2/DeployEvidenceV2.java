@@ -20,8 +20,6 @@
 package com.webank.weid.contract.deploy.v2;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
@@ -31,14 +29,13 @@ import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.CnsType;
-import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.deploy.AddressProcess;
 import com.webank.weid.contract.v2.EvidenceContract;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.inner.PropertiesService;
 
 public class DeployEvidenceV2 extends AddressProcess {
     
@@ -83,21 +80,22 @@ public class DeployEvidenceV2 extends AddressProcess {
     }
     
     public static String deployContract(
+        FiscoConfig fiscoConfig,
         String inputPrivateKey, 
         Integer groupId, 
         boolean instantEnable
     ) {
         String privateKey = initCredentials(inputPrivateKey);
-        String evidenceAddress = deployEvidenceContractsNew(groupId);
-        // 将地址注册到cns中
-        CnsType cnsType = CnsType.SHARE;
-        // 注册SHARE CNS
-        RegisterAddressV2.registerBucketToCns(cnsType);
-        // 根据群组和evidence Address获取hash
-        String hash = getHashForShare(groupId, evidenceAddress);
         // 构建私钥对象
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
         weIdPrivateKey.setPrivateKey(privateKey);
+        
+        String evidenceAddress = deployEvidenceContractsNew(groupId);
+        // 将地址注册到cns中
+        CnsType cnsType = CnsType.SHARE;
+        RegisterAddressV2.registerAllCns(weIdPrivateKey);
+        // 根据群组和evidence Address获取hash
+        String hash = getHashForShare(groupId, evidenceAddress);
         // 将evidence地址注册到cns中
         RegisterAddressV2.registerAddress(
             cnsType, 
@@ -116,10 +114,20 @@ public class DeployEvidenceV2 extends AddressProcess {
         );
         
         if (instantEnable) {
-            // 启用最新的配置: cns.contract.share.follow.<groupId>
-            Map<String, String> properties = new HashMap<>();
-            properties.put(ParamKeyConstant.SHARE_CNS + groupId.toString(), hash);
-            PropertiesService.getInstance().saveProperties(properties);
+            //将evidence hash配置到机构配置cns中
+            RegisterAddressV2.registerHashToOrgConfig(
+                fiscoConfig.getCurrentOrgId(), 
+                WeIdConstant.CNS_EVIDENCE_HASH + groupId.toString(), 
+                hash, 
+                weIdPrivateKey
+            );
+            //将evidence地址配置到机构配置cns中
+            RegisterAddressV2.registerHashToOrgConfig(
+                fiscoConfig.getCurrentOrgId(), 
+                WeIdConstant.CNS_EVIDENCE_ADDRESS + groupId.toString(), 
+                evidenceAddress, 
+                weIdPrivateKey
+            );
             // 合约上也启用hash
             RegisterAddressV2.enableHash(cnsType, hash, weIdPrivateKey);
         }

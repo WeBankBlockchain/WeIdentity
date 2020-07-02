@@ -19,13 +19,16 @@
 
 package com.webank.weid.contract.deploy;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.config.FiscoConfig;
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.deploy.v1.DeployContractV1;
 import com.webank.weid.contract.deploy.v2.DeployContractV2;
+import com.webank.weid.exception.WeIdBaseException;
 
 /**
  * The Class DeployContract.
@@ -59,19 +62,33 @@ public abstract class DeployContract {
      */
     public static void main(String[] args) {
         
+        String chainId = args[0];
         String privateKey = null;
-        if (args != null && args.length > 0) {
-            privateKey = args[0];
+        if (args != null && args.length > 2) {
+            privateKey = args[1];
         }
-        deployContract(privateKey);
+        if (StringUtils.isBlank(privateKey)) {
+            privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
+        }
+        fiscoConfig.setChainId(chainId);
+        try {
+            deployContract(privateKey, true);
+        } catch (WeIdBaseException e) {
+            if (e.getErrorCode().getCode() == ErrorCode.CNS_NO_PERMISSION.getCode()) {
+                System.out.println("deploy fail, Maybe your private key is incorrect. Please make "
+                    + "sure that the root directory of the private key file ecdsa_key that "
+                    + "you deployed for the first time exists in the root directory.");
+            }
+            throw e;
+        }
         System.exit(0);
     }
     
-    public static void deployContract(String privateKey) {
+    public static void deployContract(String privateKey, boolean instantEnable) {
         if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             DeployContractV1.deployContract(privateKey);
         } else {
-            DeployContractV2.deployContract(privateKey);
+            DeployContractV2.deployContract(privateKey, fiscoConfig, instantEnable);
         } 
     }
 }
