@@ -63,13 +63,13 @@ public abstract class TransCodeBaseData extends TransBaseData {
      *  根据协议配置, 机构编码和资源编号构建协议对象.
      *  
      * @param property 协议配置
-     * @param orgId 机构编码
+     * @param amopId 机构编码
      * @param resourceId 资源编号
      */
-    public void buildCodeData(ProtocolProperty property, String orgId, String resourceId) { 
+    public void buildCodeData(ProtocolProperty property, String amopId, String resourceId) { 
         this.setEncodeType(property.getEncodeType().getCode());
         this.setId(resourceId);
-        this.setOrgId(orgId);
+        this.setAmopId(amopId);
         this.setTransTypeCode(property.getTransType().getCode());
         this.setUriTypeCode(property.getUriType().getCode());
     }
@@ -80,8 +80,8 @@ public abstract class TransCodeBaseData extends TransBaseData {
      * @return true表示正确，false表示错误
      */
     public boolean check() {
-        if (super.getOrgId().indexOf(PROTOCOL_PARTITION) != -1) {
-            logger.error("[check] the value of orgId error, orgId: {}", super.getOrgId());
+        if (super.getAmopId().indexOf(PROTOCOL_PARTITION) != -1) {
+            logger.error("[check] the value of amopId error, amopId: {}", super.getAmopId());
             return false;
         }
         return true;

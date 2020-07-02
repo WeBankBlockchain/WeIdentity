@@ -46,9 +46,9 @@ public class TransBaseData {
     private int encodeType;
     
     /**
-     * user agent的机构ID.
+     * user agent的Amop ID.
      */
-    private String orgId;
+    private String amopId;
     
     /**
      * 协议数据Id.

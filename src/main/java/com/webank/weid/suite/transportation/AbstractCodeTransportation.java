@@ -48,7 +48,7 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
         WeIdAuthentication weIdAuthentication
     ) {
         TransmissionRequest<GetTransDataArgs> request = new TransmissionRequest<>();
-        request.setOrgId(codeData.getOrgId());
+        request.setAmopId(codeData.getAmopId());
         request.setServiceType(ServiceType.SYS_GET_TRANS_DATA.name());
         request.setWeIdAuthentication(weIdAuthentication);
         request.setArgs(getCodeDataArgs(codeData, weIdAuthentication));
@@ -62,8 +62,8 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
     ) {
         GetTransDataArgs args = new GetTransDataArgs();
         args.setResourceId(codeData.getId());
-        args.setToOrgId(codeData.getOrgId());
-        args.setFromOrgId(fiscoConfig.getCurrentOrgId());
+        args.setToAmopId(codeData.getAmopId());
+        args.setFromAmopId(fiscoConfig.getAmopId());
         args.setWeId(weIdAuthentication.getWeId());
         args.setClassName(codeData.getClass().getName());
         String signValue = DataToolUtils.secp256k1Sign(

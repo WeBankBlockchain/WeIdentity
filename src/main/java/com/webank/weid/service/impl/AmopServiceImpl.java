@@ -96,23 +96,23 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 
     @Override
     public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
-        String targetOrgId,
+        String toAmopId,
         Integer policyId,
         String targetUserWeId
     ) {
         try {
-            if (StringUtils.isBlank(fiscoConfig.getCurrentOrgId())) {
-                logger.error("the orgId is null, policyId = {}", policyId);
+            if (StringUtils.isBlank(fiscoConfig.getAmopId())) {
+                logger.error("the amopId is null, policyId = {}", policyId);
                 return new ResponseData<PolicyAndChallenge>(null, ErrorCode.ILLEGAL_INPUT);
             }
             GetPolicyAndChallengeArgs args = new GetPolicyAndChallengeArgs();
-            args.setFromOrgId(fiscoConfig.getCurrentOrgId());
-            args.setToOrgId(targetOrgId);
+            args.setFromAmopId(fiscoConfig.getAmopId());
+            args.setToAmopId(toAmopId);
             args.setPolicyId(String.valueOf(policyId));
             args.setMessageId(super.getSeq());
             args.setTargetUserWeId(targetUserWeId);
             ResponseData<GetPolicyAndChallengeResponse> retResponse =
-                this.getPolicyAndChallenge(targetOrgId, args);
+                this.getPolicyAndChallenge(toAmopId, args);
             if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("AMOP response fail, policyId={}, errorCode={}, errorMessage={}",
                     policyId,
@@ -135,11 +135,11 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     }
 
     private ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(
-        String toOrgId,
+        String toAmopId,
         GetPolicyAndChallengeArgs args) {
         return this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             args,
             GetPolicyAndChallengeArgs.class,
             GetPolicyAndChallengeResponse.class,
@@ -151,10 +151,10 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     /**
      * 发送普通消息的AMOP请求接口.
      */
-    public ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args) {
+    public ResponseData<AmopResponse> request(String toAmopId, AmopCommonArgs args) {
         return this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             args,
             AmopCommonArgs.class,
             AmopResponse.class,
@@ -166,11 +166,11 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     /**
      * 通过AMOP获取秘钥请求接口.
      */
-    public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId,
+    public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toAmopId,
         GetEncryptKeyArgs args) {
         return this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             args,
             GetEncryptKeyArgs.class,
             GetEncryptKeyResponse.class,
@@ -189,17 +189,17 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     /**
      * request PolicyAndPreCredential.
      *
-     * @param toOrgId toOrgId
+     * @param toAmopId toAmopId
      * @param args args
      * @return PolicyAndPreCredential
      */
     public ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
-        String toOrgId,
+        String toAmopId,
         GetPolicyAndPreCredentialArgs args) {
 
         return this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             args,
             GetPolicyAndPreCredentialArgs.class,
             PolicyAndPreCredentialResponse.class,
@@ -214,7 +214,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      */
     @Override
     public ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
-        String toOrgId,
+        String toAmopId,
         RequestIssueCredentialArgs args) {
 
         int checkErrorCode = checkIssueCredentialArgs(args).getCode();
@@ -260,7 +260,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         PresentationE presentation = presentationResp.getResult();
         ResponseData<RequestIssueCredentialResponse> resp =
             requestIssueCredentialInner(
-                toOrgId,
+                toAmopId,
                 args,
                 userCredential,
                 presentation);
@@ -300,7 +300,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     }
 
     private ResponseData<RequestIssueCredentialResponse> requestIssueCredentialInner(
-        String toOrgId,
+        String toAmopId,
         RequestIssueCredentialArgs args,
         CredentialPojo userCredential,
         PresentationE presentation) {
@@ -319,8 +319,8 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 
         // AMOP request (issuer to issue credential)
         ResponseData<RequestIssueCredentialResponse> resp = this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             issueCredentialArgs,
             IssueCredentialArgs.class,
             RequestIssueCredentialResponse.class,
@@ -413,12 +413,12 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      */
     @Override
     public ResponseData<GetWeIdAuthResponse> getWeIdAuth(
-        String toOrgId,
+        String toAmopId,
         GetWeIdAuthArgs args) {
 
         ResponseData<GetWeIdAuthResponse> resp = this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             args,
             GetWeIdAuthArgs.class,
             GetWeIdAuthResponse.class,
@@ -434,12 +434,12 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      * com.webank.weid.protocol.amop.RequestVerifyChallengeArgs)
      */
     @Override
-    public ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(String toOrgId,
+    public ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(String toAmopId,
         RequestVerifyChallengeArgs args) {
 
         ResponseData<RequestVerifyChallengeResponse> resp = this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             args,
             RequestVerifyChallengeArgs.class,
             RequestVerifyChallengeResponse.class,
@@ -453,10 +453,10 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     /**
      * 发送通用消息的AMOP请求接口.
      */
-    public ResponseData<AmopResponse> send(String toOrgId, AmopCommonArgs args) {
+    public ResponseData<AmopResponse> send(String toAmopId, AmopCommonArgs args) {
         return this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             args,
             AmopCommonArgs.class,
             AmopResponse.class,
