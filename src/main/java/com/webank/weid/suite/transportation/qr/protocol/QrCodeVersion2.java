@@ -59,7 +59,7 @@ public class QrCodeVersion2 extends TransCodeBaseData {
         buffer.append(version.getCode()).append(PROTOCOL_PARTITION);
         // 第二段 控制协议编解码相关
         buffer.append(super.getEncodeType()).append(super.getUriTypeCode()).append("00")
-            .append(super.getOrgId()).append(PROTOCOL_PARTITION);
+            .append(super.getAmopId()).append(PROTOCOL_PARTITION);
         // 第三段 控制资源Id
         buffer.append(super.getId());
         return buffer.toString();
@@ -95,8 +95,8 @@ public class QrCodeVersion2 extends TransCodeBaseData {
             // 第三/四个字符为备份字段 不解析
             
             // 第五个字符开始为orgId(后续有uriCode决定)
-            String orgId = enCodeString.substring(4);
-            this.setOrgId(orgId);
+            String amopId = enCodeString.substring(4);
+            this.setAmopId(amopId);
             // 解析第三段 资源id
             this.setId(codeStrings[RESOURCEID_INDEX]);
         } catch (Exception e) {

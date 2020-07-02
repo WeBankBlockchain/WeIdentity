@@ -29,14 +29,28 @@ public interface DataBucketServiceEngine {
     ResponseData<String> get(String hash, String key);
     
     /**
-     * 以admin身份根据hash移除相应的key，当key为null的时候移除的为hash自身.
+     * 根据Hash删除extra里面的key.
      * 
      * @param hash 根据合约地址出来的hash值，全局唯一
      * @param key 存放数据的key
      * @param privateKey 存放数据的私钥信息,
      * @return 返回是否移除成功
      */
-    ResponseData<Boolean> remove(String hash, String key, WeIdPrivateKey privateKey);
+    ResponseData<Boolean> removeExtraItem(String hash, String key, WeIdPrivateKey privateKey);
+    
+    /**
+     *删除Hash.
+     * 
+     * @param hash 根据合约地址出来的hash值，全局唯一
+     * @param force 是否强制删除
+     * @param privateKey 存放数据的私钥信息,
+     * @return 返回是否移除成功
+     */
+    ResponseData<Boolean> removeDataBucketItem(
+        String hash, 
+        boolean force,
+        WeIdPrivateKey privateKey
+    );
     
     /**
      * 机构在使用某个hash的时候，可以根据自己的私钥信息来表示机构自己正在使用这个hash，
@@ -63,4 +77,15 @@ public interface DataBucketServiceEngine {
      * @return 返回所有的hash信息
      */
     ResponseData<List<HashContract>> getAllHash();
+    
+    /**
+     *当用户私钥丢失的情况，管理员给hash进行所属重置.
+     *
+     * @param hash 需要重置的hash
+     * @param newOwner 新的所属地址
+     * @param privateKey 重置hash的用户私钥
+     * @return 返回是否重置成功
+     */
+    ResponseData<Boolean> updateHashOwner(String hash, String newOwner, WeIdPrivateKey privateKey);
+    
 }

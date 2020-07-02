@@ -34,9 +34,9 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 public class EncodeData {
 
     /**
-     * 机构名称.
+     * 通讯Id.
      */
-    private String orgId;
+    private String amopId;
    
     /**
      * 待编解码字符串.
@@ -58,38 +58,43 @@ public class EncodeData {
      */
     private WeIdAuthentication weIdAuthentication;
    
-    private EncodeData(String id, String orgId, String data) {
+    private EncodeData(String id, String amopId, String data) {
         this.id = id;
-        this.orgId = orgId;
+        this.amopId = amopId;
         this.data = data;
     }
     
     /**
      * 构建编解码对象.
-     * @param orgId 协议所属机构
+     * @param amopId 协议所属机构
      * @param id 数据编号
      * @param data 需要编解码数据
      * @param verifiers 协议数据指定用户
      */
     public EncodeData(
         String id,
-        String orgId,
+        String amopId,
         String data,
         List<String> verifiers
     ) {
-        this(id, orgId, data);
+        this(id, amopId, data);
         this.verifiers = verifiers;
     }
     
     /**
      * 构建编解码对象.
-     * @param orgId 协议所属机构
+     * @param amopId 协议所属机构
      * @param id 数据编号
      * @param data 需要编解码数据
      * @param weIdAuthentication 解码身份信息
      */
-    public EncodeData(String id, String orgId, String data, WeIdAuthentication weIdAuthentication) {
-        this(id, orgId, data);
+    public EncodeData(
+        String id, 
+        String amopId, 
+        String data, 
+        WeIdAuthentication weIdAuthentication
+    ) {
+        this(id, amopId, data);
         this.weIdAuthentication = weIdAuthentication;
     }
 }

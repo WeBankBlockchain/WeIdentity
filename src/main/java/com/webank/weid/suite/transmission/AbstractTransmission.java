@@ -63,7 +63,7 @@ public abstract class AbstractTransmission implements Transmission {
     protected <T> TransmissionlRequestWarp<T> authTransmission(TransmissionRequest<T> request) {
         logger.info("[AbstractTransmission.auth] begin auth the transmission.");
         ResponseData<WeIdAuthObj> authResponse = getWeIdAuthService().createAuthenticatedChannel(
-            request.getOrgId(), request.getWeIdAuthentication());
+            request.getAmopId(), request.getWeIdAuthentication());
         if (authResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             //认证失败
             logger.error("[AbstractTransmission.auth] auth fail:{}-{}.",

@@ -46,14 +46,14 @@ public class AmopBaseMsgArgs implements IArgs {
     protected String messageId;
 
     /**
-     * 来源机构id.
+     * 来源AmopId.
      */
-    protected String fromOrgId;
+    protected String fromAmopId;
 
     /**
-     * 目的机构id.
+     * 目的AmopId.
      */
-    protected String toOrgId;
+    protected String toAmopId;
     
     /**
      * 业务类型.
