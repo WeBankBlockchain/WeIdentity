@@ -27,16 +27,12 @@ specificissuer.contractaddress=
 # It is not recommended. Production use default configuration
 cns.profile.active=${CNS_PROFILE_ACTIVE}
 
-# Set up the contract you use with this configuration.
-cns.contract.follow=${CNS_CONTRACT_FOLLOW}
-
 #######################################################################################################
 #                                                                                                     #
 #         web3sdk connection config                                                                   #
 #                                                                                                     #
 #######################################################################################################
 # blockchain connection params
-chain.id=${CHAIN_ID}
 web3sdk.timeout=30
 web3sdk.core-pool-size=100
 web3sdk.max-pool-size=200

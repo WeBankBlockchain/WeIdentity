@@ -59,7 +59,7 @@ public class AmopTransmission extends AbstractTransmission implements Transmissi
         try {
             initAmopChannelPoxy();
             //如果请求机构和目标机构为同机构，则走本地模式，不加密
-            if (amopTransmissionPoxy.getCurrentOrgId().equals(request.getOrgId())) {
+            if (amopTransmissionPoxy.getCurrentAmopId().equals(request.getAmopId())) {
                 return sendLocal(request);
             } else {
                 return sendAmop(request);
@@ -115,9 +115,9 @@ public class AmopTransmission extends AbstractTransmission implements Transmissi
     private AmopCommonArgs buildAmopCommonArgs(TransmissionRequest<?> request) {
         AmopCommonArgs args = new AmopCommonArgs();
         args.setServiceType(request.getServiceType());
-        args.setFromOrgId(amopTransmissionPoxy.getCurrentOrgId());
+        args.setFromAmopId(amopTransmissionPoxy.getCurrentAmopId());
         args.setMessage(super.getOriginalData(request.getArgs()));
-        args.setToOrgId(request.getOrgId());
+        args.setToAmopId(request.getAmopId());
         args.setMessageId(DataToolUtils.getUuId32());
         return args;
     }

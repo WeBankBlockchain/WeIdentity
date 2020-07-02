@@ -104,7 +104,7 @@ public class JsonTransportationImpl
                 EncodeData encodeData =
                     new EncodeData(
                         jsonBaseData.getId(),
-                        jsonBaseData.getOrgId(),
+                        jsonBaseData.getAmopId(),
                         object.toJson(),
                         super.getVerifiers()
                     );
@@ -188,7 +188,7 @@ public class JsonTransportationImpl
             EncodeData encodeData =
                 new EncodeData(
                     jsonBaseData.getId(),
-                    jsonBaseData.getOrgId(),
+                    jsonBaseData.getAmopId(),
                     jsonBaseData.getData().toString(),
                     weIdAuthentication
                 );
@@ -223,7 +223,7 @@ public class JsonTransportationImpl
         JsonBaseData jsonBaseData = new JsonBaseData();
         jsonBaseData.setEncodeType(property.getEncodeType().getCode());
         jsonBaseData.setId(DataToolUtils.getUuId32());
-        jsonBaseData.setOrgId(fiscoConfig.getCurrentOrgId());
+        jsonBaseData.setAmopId(fiscoConfig.getAmopId());
         jsonBaseData.setVersion(version.getCode());
         return jsonBaseData;
     }
@@ -237,7 +237,7 @@ public class JsonTransportationImpl
     private ErrorCode checkJsonBaseData(JsonBaseData jsonBaseData) {
         if (jsonBaseData == null
             || StringUtils.isBlank(jsonBaseData.getId())
-            || StringUtils.isBlank(jsonBaseData.getOrgId())
+            || StringUtils.isBlank(jsonBaseData.getAmopId())
             || jsonBaseData.getData() == null
             || StringUtils.isBlank(jsonBaseData.getData().toString())) {
             return ErrorCode.TRANSPORTATION_PROTOCOL_DATA_INVALID;
