@@ -42,50 +42,50 @@ public interface AmopService {
 
     void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback);
 
-    ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args);
+    ResponseData<AmopResponse> request(String toAmopId, AmopCommonArgs args);
 
     ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
-        String orgId,
+        String amopId,
         Integer policyId,
         String targetUserWeId
     );
 
     ResponseData<GetEncryptKeyResponse> getEncryptKey(
-        String toOrgId,
+        String toAmopId,
         GetEncryptKeyArgs args
     );
 
     ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
-        String toOrgId,
+        String toAmopId,
         GetPolicyAndPreCredentialArgs args
     );
 
     ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
-        String toOrgId,
+        String toAmopId,
         RequestIssueCredentialArgs args
     );
     
-    ResponseData<AmopResponse> send(String toOrgId, AmopCommonArgs args);
+    ResponseData<AmopResponse> send(String toAmopId, AmopCommonArgs args);
 
     /**
      * get weIdAuth object.
-     * @param toOrgId target organization id
+     * @param toAmopId target organization id
      * @param args random number
      * @return return the GetWeIdAuthResponse
      */
     ResponseData<GetWeIdAuthResponse> getWeIdAuth(
-        String toOrgId,
+        String toAmopId,
         GetWeIdAuthArgs args
     );
 
     /**
      * verify challenge signature.
-     * @param toOrgId target organization id
+     * @param toAmopId target organization id
      * @param args verify args
      * @return return the RequestVerifyChallengeResponse
      */
     ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(
-        String toOrgId,
+        String toAmopId,
         RequestVerifyChallengeArgs args
     );
 
