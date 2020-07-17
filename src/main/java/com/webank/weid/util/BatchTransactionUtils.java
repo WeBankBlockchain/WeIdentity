@@ -9,19 +9,18 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
-
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 
 /**
  * 批量交易处理类.
@@ -99,12 +98,12 @@ public class BatchTransactionUtils {
         if (!StringUtils.isBlank(secretKey)) {
             return secretKey;
         } else {
-            ResponseData<String> dbResp = getDataDriver().get(MysqlDriverConstant.DOMAIN_ENCRYPTKEY,
+            ResponseData<String> dbResp = getDataDriver().get(DataDriverConstant.DOMAIN_ENCRYPTKEY,
                 PropertyUtils.getProperty("blockchain.orgid"));
             Integer errorCode = dbResp.getErrorCode();
             if (errorCode != ErrorCode.SUCCESS.getCode()) {
                 logger
-                    .error("[writeTransaction] add encrypt private key to db failed.errorcode:{}",
+                    .error("[writeTransaction] save encrypt private key to db failed.errorcode:{}",
                         errorCode);
                 return null;
             }
@@ -226,10 +225,10 @@ public class BatchTransactionUtils {
         //String encryptKey = CryptServiceFactory.getCryptService(CryptType.AES)
         //    .encrypt(privateKey, getKey());
         //ResponseData<Integer> dbResp = getDataDriver()
-        //    .saveOrUpdate(MysqlDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
+        //    .saveOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
         //Integer errorCode = dbResp.getErrorCode();
         //if (errorCode != ErrorCode.SUCCESS.getCode()) {
-        //    logger.error("[writeTransaction] add encrypt private key to db failed.errorcode:{}",
+        //    logger.error("[writeTransaction] save encrypt private key to db failed.errorcode:{}",
         //        errorCode);
         //    return null;
         //}

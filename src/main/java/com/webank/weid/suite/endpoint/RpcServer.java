@@ -184,7 +184,7 @@ public class RpcServer {
      * @param requestName request name
      * @param functorImpl the implemented fuctor
      * @param inAddrList the in-Addr list (can be empty)
-     * @throws Exception add to files exception
+     * @throws Exception save to files exception
      */
     public static void registerEndpoint(
         String requestName,

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -15,7 +14,8 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 
 public class TestSave extends TestBaseTransportation {
 
@@ -32,7 +32,7 @@ public class TestSave extends TestBaseTransportation {
     }
 
     /**
-     * case:test add.
+     * case:test save.
      */
     public void testSave_success() {
 
@@ -43,7 +43,7 @@ public class TestSave extends TestBaseTransportation {
             idname = "test" + Math.random() + "select";
         }
 
-        ResponseData<Integer> res = persistence.add(
+        ResponseData<Integer> res = persistence.save(
             "domain.default",
             idname,
             "data123456");
@@ -56,7 +56,7 @@ public class TestSave extends TestBaseTransportation {
     }
 
     /**
-     * case:test batch add.
+     * case:test batch save.
      */
     public void testBatchSave_success() {
         persistence.delete("domain.default", "12345");
@@ -68,7 +68,7 @@ public class TestSave extends TestBaseTransportation {
         datas.add("12345");
         datas.add("~！@#￥%……&&*（）？》《");
 
-        ResponseData<Integer> res = persistence.batchAdd(
+        ResponseData<Integer> res = persistence.batchSave(
             "domain.default", ids, datas);
         LogUtil.info(logger, "persistence", res);
 
@@ -85,7 +85,7 @@ public class TestSave extends TestBaseTransportation {
     }
 
     /**
-     * case:test batch add.
+     * case:test batch save.
      */
     public void testBatchSave_sizeNotEqual() {
         persistence.delete("domain.default", "12345");
@@ -95,7 +95,7 @@ public class TestSave extends TestBaseTransportation {
         List<String> datas = new ArrayList<>();
         datas.add("12345");
         datas.add("~！@#￥%……&&*（）？》《");
-        ResponseData<Integer> res = persistence.batchAdd(
+        ResponseData<Integer> res = persistence.batchSave(
             "domain.default", ids, datas);
         LogUtil.info(logger, "persistence", res);
 
@@ -119,13 +119,13 @@ public class TestSave extends TestBaseTransportation {
         }
 
         ResponseData<Integer> res = persistence
-            .add("domain.default", idname, "data123456");
+            .save("domain.default", idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
 
         ResponseData<Integer> res1 = persistence
-            .add("domain.default", idname, "data123456");
+            .save("domain.default", idname, "data123456");
         Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res1.getErrorCode().intValue());
     }
 
@@ -137,7 +137,7 @@ public class TestSave extends TestBaseTransportation {
             persistence.delete(null, idname);
         }
 
-        ResponseData<Integer> res = persistence.add("datasource1",
+        ResponseData<Integer> res = persistence.save("datasource1",
             idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
@@ -149,7 +149,7 @@ public class TestSave extends TestBaseTransportation {
      * case:domain spit by : but the databases and table begin with space and end with space.
      */
     public void testSave_domainContainSpace() {
-        ResponseData<Integer> res = persistence.add(
+        ResponseData<Integer> res = persistence.save(
             " datasource1 : sdk_all_data ", "123456", "data123456");
         LogUtil.info(logger, "persistence", res);
 
@@ -165,7 +165,7 @@ public class TestSave extends TestBaseTransportation {
         if (persistence.get(null, "123456") != null) {
             persistence.delete(null, "123456");
         }
-        ResponseData<Integer> res = persistence.add(null,
+        ResponseData<Integer> res = persistence.save(null,
             "123456", "data123456");
         LogUtil.info(logger, "persistence", res);
 
@@ -182,7 +182,7 @@ public class TestSave extends TestBaseTransportation {
         if (persistence.get("", idname) != null) {
             persistence.delete("", idname);
         }
-        ResponseData<Integer> res = persistence.add("",
+        ResponseData<Integer> res = persistence.save("",
             idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
@@ -197,7 +197,7 @@ public class TestSave extends TestBaseTransportation {
      */
     public void testSave_domainContainZh() {
         String id = idname + System.currentTimeMillis();
-        ResponseData<Integer> res = persistence.add("datasource1:夏石龙",
+        ResponseData<Integer> res = persistence.save("datasource1:夏石龙",
                 id, "data123456");
         LogUtil.info(logger, "persistence", res);
 
@@ -213,7 +213,7 @@ public class TestSave extends TestBaseTransportation {
     public void testSave_domainContainSpecialChar() {
 
         ResponseData<Integer> res = persistence
-            .add("datasource1:mnj><:??li", "123456", "data123456");
+            .save("datasource1:mnj><:??li", "123456", "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
@@ -232,7 +232,7 @@ public class TestSave extends TestBaseTransportation {
             idname = "test" + Math.random() + "中国";
         }
         ResponseData<Integer> res = persistence
-            .add("domain.default", idname, "data123456");
+            .save("domain.default", idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
@@ -253,7 +253,7 @@ public class TestSave extends TestBaseTransportation {
             idname = "test" + Math.random() + "0x23！@#￥%……&*-+";
         }
         ResponseData<Integer> res = persistence
-            .add("domain.default", idname, "data123456");
+            .save("domain.default", idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
@@ -275,7 +275,7 @@ public class TestSave extends TestBaseTransportation {
         }
 
         ResponseData<Integer> res = persistence
-            .add("domain.default", idname, "data123456");
+            .save("domain.default", idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
@@ -295,7 +295,7 @@ public class TestSave extends TestBaseTransportation {
             response = persistence.get("domain.default", idname);
             idname = "test" + Math.random();
         }
-        ResponseData<Integer> res = persistence.add(
+        ResponseData<Integer> res = persistence.save(
             "domain.default", idname, "中国我爱你");
         LogUtil.info(logger, "persistence", res);
 
@@ -319,7 +319,7 @@ public class TestSave extends TestBaseTransportation {
             idname = "test" + Math.random();
         }
 
-        ResponseData<Integer> res = persistence.add(
+        ResponseData<Integer> res = persistence.save(
             "domain.default", idname, "12!@##$$%^^&*()-+?>we");
         LogUtil.info(logger, "persistence", res);
 
@@ -343,7 +343,7 @@ public class TestSave extends TestBaseTransportation {
             idname = "test" + Math.random();
         }
 
-        ResponseData<Integer> res = persistence.add(
+        ResponseData<Integer> res = persistence.save(
             "domain.default", idname, String.valueOf(chars));
         LogUtil.info(logger, "persistence", res);
 

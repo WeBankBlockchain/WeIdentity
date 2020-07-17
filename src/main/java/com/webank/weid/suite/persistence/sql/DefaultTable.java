@@ -17,11 +17,11 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.persistence.mysql;
-
-import lombok.Data;
+package com.webank.weid.suite.persistence.sql;
 
 import java.util.Date;
+
+import lombok.Data;
 
 @Data
 public class DefaultTable {

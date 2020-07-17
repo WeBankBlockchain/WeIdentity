@@ -35,7 +35,6 @@ import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.IssuerClient;
 import com.webank.wedpr.selectivedisclosure.IssuerResult;
 import com.webank.wedpr.selectivedisclosure.proto.TemplatePublicKey;
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.EventEncoder;
@@ -61,7 +60,7 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.CptController;
@@ -78,7 +77,8 @@ import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
@@ -280,7 +280,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             ErrorCode errorCode = processTemplate(cptId, cptJsonSchemaNew);
             int code = errorCode.getCode();
             if (code != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[updateCpt] add credential template failed. errorcode:{} ", code);
+                logger.error("[updateCpt] save credential template failed. errorcode:{} ", code);
                 return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
             }
             return response;
@@ -328,7 +328,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             ErrorCode errorCode = processTemplate(cptId, cptJsonSchemaNew);
             int code = errorCode.getCode();
             if (code != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[updateCpt] add credential template failed. errorcode:{} ", code);
+                logger.error("[updateCpt] save credential template failed. errorcode:{} ", code);
                 return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
             }
             return response;
@@ -378,7 +378,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             ErrorCode errorCode = processTemplate(cptId, cptJsonSchemaNew);
             int code = errorCode.getCode();
             if (code != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[updateCpt] add credential template failed. errorcode:{} ", code);
+                logger.error("[updateCpt] save credential template failed. errorcode:{} ", code);
                 return new ResponseData<CptBaseInfo>(null, ErrorCode.TRANSACTION_TIMEOUT);
             }
             return response;
@@ -405,11 +405,11 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
                 this.getDataDriver().saveOrUpdate(
-                    MysqlDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
+                    DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);
             if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[processTemplate] add credential template to db failed.");
+                logger.error("[processTemplate] save credential template to db failed.");
                 throw new DatabaseException("database error!");
             }
             TransactionReceipt receipt = cptController.putCredentialTemplate(

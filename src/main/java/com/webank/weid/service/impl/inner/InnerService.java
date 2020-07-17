@@ -2,8 +2,8 @@ package com.webank.weid.service.impl.inner;
 
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 
 public abstract class InnerService {
     

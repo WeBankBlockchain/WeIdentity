@@ -24,13 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.DataTypeCastException;
@@ -41,7 +40,8 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 
 public class KeyManagerCallback extends AmopCallback {
@@ -71,7 +71,7 @@ public class KeyManagerCallback extends AmopCallback {
         logger.info("[KeyManagerCallback.onPush] begin query key param:{}", arg);
         GetEncryptKeyResponse encryptResponse = new GetEncryptKeyResponse(); 
         ResponseData<String>  keyResponse = this.getDataDriver().get(
-            MysqlDriverConstant.DOMAIN_ENCRYPTKEY, arg.getKeyId());
+            DataDriverConstant.DOMAIN_ENCRYPTKEY, arg.getKeyId());
         if (keyResponse.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
             && StringUtils.isBlank(keyResponse.getResult())) {
             logger.info("[KeyManagerCallback.onPush] the encrypt key is not exists.");

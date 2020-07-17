@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.response.ResponseData;
@@ -33,7 +33,7 @@ public class PropertiesService extends InnerService {
     // 存放内置配置得对象
     private static ConcurrentHashMap<String, String> properties = new ConcurrentHashMap<>();
     private static final String KEY = "aa6d69cde0904d2aad1713d75cafa718";
-    private static final String DOMAIN = MysqlDriverConstant.DOMAIN_DEFAULT_INFO;
+    private static final String DOMAIN = DataDriverConstant.DOMAIN_DEFAULT_INFO;
     private static final Long DEFAULT_INTEVAL_PERIOD = 60L * 5 * 1000;
     private static Timer timer;
     private static Long prevIntevalPeriod = DEFAULT_INTEVAL_PERIOD;
