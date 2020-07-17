@@ -151,7 +151,7 @@ function gradle_build_sdk()
         rm -rf dist/conf
         rm -rf dist/*.jar
     fi
-    gradle clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
+    ./gradlew clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
     echo "compile java code done."
 }
 
