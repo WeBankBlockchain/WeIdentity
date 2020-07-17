@@ -1,4 +1,4 @@
-package com.webank.weid.full.persistence;
+package com.webank.weid.full.persistence.TestMysql;
 
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -8,8 +8,8 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 
 
 public class TestDelete extends TestBaseTransportation {
@@ -34,7 +34,7 @@ public class TestDelete extends TestBaseTransportation {
     }
 
     /**
-     * case:test save.
+     * case:test add.
      */
     public void save_data() {
 
@@ -42,7 +42,7 @@ public class TestDelete extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
 
-        ResponseData<Integer> result = persistence.save(domain, id, data);
+        ResponseData<Integer> result = persistence.add(domain, id, data);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), result.getErrorCode().intValue());
         Assert.assertEquals(1, result.getResult().intValue());

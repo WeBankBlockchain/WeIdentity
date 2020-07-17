@@ -15,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author karenli
@@ -57,28 +54,33 @@ public class RedisDriver implements Persistence {
     }
 
     @Override
-    public ResponseData<Integer> batchAdd(String domain, List<String> ids, List<String> dataList) {
+    public ResponseData<Integer> batchAdd(String domain, HashMap<String,String> keyValueList) {
 
         try {
             List<Object> idHashList = new ArrayList<>();
-            for (String id : ids) {
+            List<Object> dataList = new ArrayList<>();
+            Iterator<String> iterator = keyValueList.keySet().iterator();
+            while (iterator.hasNext()) {
+                String id = iterator.next();
+                String data = keyValueList.get(id);
                 if (StringUtils.isEmpty(id)) {
                     logger.error("[redis->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
                 idHashList.add(DataToolUtils.getHash(id));
+                dataList.add(data);
             }
             RedisDomain redisDomain = new RedisDomain(domain);
             List<List<Object>> dataLists = new ArrayList<List<Object>>();
             dataLists.add(idHashList);
             dataLists.add(Arrays.asList(dataList.toArray()));
             //处理失效时间
-            dataLists.add(fixedListWithDefault(ids.size(), redisDomain.getExpire()));
+            dataLists.add(fixedListWithDefault(idHashList.size(), redisDomain.getExpire()));
             //处理创建时间和更新时间
-            List<Object> nowList = fixedListWithDefault(ids.size(), redisDomain.getNow());
+            List<Object> nowList = fixedListWithDefault(idHashList.size(), redisDomain.getNow());
             dataLists.add(nowList);
             dataLists.add(nowList);
-            return new RedisExecutor(redisDomain).batchSave(dataLists);
+            return new RedisExecutor(redisDomain).batchAdd(dataLists);
         } catch (WeIdBaseException e) {
             logger.error("[redis->batchAdd] batchAdd the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());

@@ -125,7 +125,7 @@ public class QrCodeTransportationImpl
             logger.info("[serialize] the transMode is {}", property.getTransMode());
             if (version == QrCodeVersion.V2) {
                 // 下载模式
-                //save CodeData
+                //add CodeData
                 saveTransData(codeData.getId(), codeData);
             }
             logger.info("[serialize] QrCodeTransportation serialization finished.");

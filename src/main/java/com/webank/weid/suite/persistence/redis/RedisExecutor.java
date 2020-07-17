@@ -182,7 +182,7 @@ public class RedisExecutor {
      * @param dataList 占位符所需要的数据
      * @return 返回受影响的行数
      */
-    public ResponseData<Integer> batchSave(List<List<Object>> dataList) {
+    public ResponseData<Integer> batchAdd(List<List<Object>> dataList) {
 
         ResponseData<Integer> result = new ResponseData<Integer>();
         List<DefaultValue> value = new ArrayList<>();

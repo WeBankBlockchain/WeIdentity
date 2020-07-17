@@ -50,7 +50,7 @@ import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.CredentialType;
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
@@ -72,9 +72,9 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 import com.webank.weid.util.CredentialPojoUtils;
@@ -777,12 +777,12 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             .append(cptId).toString();
         //String id=(String)preCredential.getClaim().get(CredentialConstant.CREDENTIAL_META_KEY_ID);
 
-        //save masterSecret and credentialSecretsBlindingFactors to persistence.
+        //add masterSecret and credentialSecretsBlindingFactors to persistence.
         ResponseData<Integer> dbResp = getDataDriver()
-            .saveOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
+            .saveOrUpdate(MysqlDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
         if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
-                "[makeCredential] save masterSecret and blindingFactors to db failed.");
+                "[makeCredential] add masterSecret and blindingFactors to db failed.");
             return null;
         }
 
@@ -2083,14 +2083,14 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             String encodedVerificationRule = Utils.protoToEncodedString(verificationRule);
             ResponseData<String> dbResp =
                 getDataDriver().get(
-                    DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
+                    MysqlDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                     credential.getId());
             Integer cptId = credentialClone.getCptId();
             String id = new StringBuffer().append(userId).append("_").append(cptId).toString();
             String newCredentialSignature = dbResp.getResult();
             ResponseData<String> masterKeyResp =
                 getDataDriver().get(
-                    DataDriverConstant.DOMAIN_USER_MASTER_SECRET,
+                    MysqlDriverConstant.DOMAIN_USER_MASTER_SECRET,
                     id);
             HashMap<String, String> userCredentialInfo = DataToolUtils
                 .deserialize(masterKeyResp.getResult(), HashMap.class);

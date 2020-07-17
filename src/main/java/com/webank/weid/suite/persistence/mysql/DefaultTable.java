@@ -17,7 +17,7 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.persistence.sql;
+package com.webank.weid.suite.persistence.mysql;
 
 import java.util.Date;
 

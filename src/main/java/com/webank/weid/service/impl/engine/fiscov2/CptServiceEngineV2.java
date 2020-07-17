@@ -50,7 +50,7 @@ import org.fisco.bcos.web3j.tuples.generated.Tuple7;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
@@ -65,8 +65,8 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
@@ -279,11 +279,11 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
                 getDataDriver().saveOrUpdate(
-                    DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
+                    MysqlDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);
             if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[processTemplate] save credential template to db failed.");
+                logger.error("[processTemplate] add credential template to db failed.");
                 throw new DatabaseException("database error!");
             }
             TransactionReceipt receipt = cptController.putCredentialTemplate(

@@ -24,6 +24,8 @@ package com.webank.weid.constant;
  *
  * @author lingfenghe
  */
+
+//枚举类
 public enum ErrorCode {
 
     /**
@@ -83,7 +85,7 @@ public enum ErrorCode {
     CPT_EVENT_LOG_NULL(100304, "cpt event log is null."),
 
     /**
-     * credential template save failed.
+     * credential template add failed.
      */
     CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR(100305, "cpt credential template saved with error."),
 
@@ -101,7 +103,7 @@ public enum ErrorCode {
      * The credential issuer mismatch.
      */
     CREDENTIAL_ISSUER_MISMATCH(100403,
-        "issuer weId does not match the weId of credential"),
+        "issuer (signer) weId does not match the weId of credential"),
 
     /**
      * The credential signature broken.
@@ -575,6 +577,16 @@ public enum ErrorCode {
         "the specific issuer type is illegal"
     ),
 
+    AUTORITY_ISSUER_DESCRIPTION_ILLEGAL(
+        100209,
+        "authority issuer description illegal"
+    ),
+
+    AUTHORITY_ISSUER_EXTRA_PARAM_ILLEGAL(
+        100210,
+        "authority issuer extra param illegal"
+    ),
+
     /**
      * the key of the data is empty.
      */
@@ -600,11 +612,11 @@ public enum ErrorCode {
     ),
 
     /**
-     * the data does not match for batch save.
+     * the data does not match for batch add.
      */
     PRESISTENCE_BATCH_SAVE_DATA_MISMATCH(
         100904,
-        "the data does not match for batch save."
+        "the data does not match for batch add."
     ),
 
     /**
@@ -853,6 +865,24 @@ public enum ErrorCode {
      * this is repeated call.
      */
     THIS_IS_REPEATED_CALL(160023, "this is repeated call."),
+
+    /**
+     * can not get the connection from Redis.
+     */
+    REDIS_GET_CONNECTION_ERROR(
+            160024,
+            "can not get the connection from Redis, please check the error log."
+    ),
+
+    /**
+     * redis execute failed.
+     */
+    REDIS_EXECUTE_FAILED(160025, "redis execute failed."),
+
+    /**
+     * the data is expire.
+     */
+    REDIS_DATA_EXPIRE(160026, "the data is expire."),
 
     /**
      * other uncatched exceptions or error.
