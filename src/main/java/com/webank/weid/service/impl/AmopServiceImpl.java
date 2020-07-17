@@ -27,12 +27,13 @@ import java.util.Map;
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.UserClient;
 import com.webank.wedpr.selectivedisclosure.UserResult;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.AmopMsgType;
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
@@ -62,8 +63,7 @@ import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.WeIdUtils;
@@ -375,7 +375,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String id = new StringBuffer().append(userId).append("_").append(cptId)
             .toString();
         ResponseData<String> dbResp = getDataDriver()
-            .get(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id);
+            .get(MysqlDriverConstant.DOMAIN_USER_MASTER_SECRET, id);
         if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             throw new DatabaseException("database error!");
         }
@@ -399,7 +399,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String dbKey = credentialPojo.getId();
         ResponseData<Integer> dbResponse =
             getDataDriver().saveOrUpdate(
-                DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
+                MysqlDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                 dbKey,
                 newCredentialSignature);
         if (dbResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {

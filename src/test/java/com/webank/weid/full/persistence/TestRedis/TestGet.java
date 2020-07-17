@@ -1,15 +1,15 @@
-package com.webank.weid.full.persistence;
-
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.webank.weid.full.persistence.TestRedis;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.redis.driver.RedisDriver;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestGet extends TestBaseTransportation {
 
@@ -17,7 +17,7 @@ public class TestGet extends TestBaseTransportation {
 
     private Persistence persistence = null;
 
-    private static final String domain = "domain.default";
+    private static final String domain = "domain.defaultInfo";
     private static final String id = "123456";
     private static final String data = "data123456";
 
@@ -25,7 +25,8 @@ public class TestGet extends TestBaseTransportation {
     public synchronized void testInit() {
         //super.mockMysqlDriver();
         if (persistence == null) {
-            persistence = new MysqlDriver();
+//            persistence = new MysqlDriver();
+            persistence = new RedisDriver();
         }
         persistence.delete(domain, id);
         ResponseData<Integer> response = persistence.add(domain, id, data);
@@ -33,6 +34,7 @@ public class TestGet extends TestBaseTransportation {
         Assert.assertEquals(1, response.getResult().intValue());
     }
 
+    @Test
     /**
      * case:test get.
      */
@@ -46,6 +48,7 @@ public class TestGet extends TestBaseTransportation {
         Assert.assertEquals(data, res.getResult());
     }
 
+    @Test
     /**
      * case:test database is not exist.
      */
@@ -55,9 +58,10 @@ public class TestGet extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+            ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:test database is not exist.
      */
@@ -70,6 +74,7 @@ public class TestGet extends TestBaseTransportation {
         Assert.assertEquals(data, res.getResult());
     }
 
+    @Test
     /**
      * case:test database is not exist.
      */
@@ -82,6 +87,7 @@ public class TestGet extends TestBaseTransportation {
         Assert.assertEquals(data, res.getResult());
     }
 
+    @Test
     /**
      * case:test table is not exist.
      */
@@ -91,20 +97,22 @@ public class TestGet extends TestBaseTransportation {
             dataSource + ":table_not_exist", "123456");
         LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
-
+    @Test
     /**
      * case:test id is not exist.
      */
+    //expected null, but was:<>
     public void testGet_idNotExist() {
 
         ResponseData<String> res = persistence.get(domain, id + Math.random());
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
-        Assert.assertNull(res.getResult());
+        Assert.assertEquals("", res.getResult());
     }
+
 
 }

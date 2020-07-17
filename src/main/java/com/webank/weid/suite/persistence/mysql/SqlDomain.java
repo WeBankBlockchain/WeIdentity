@@ -17,19 +17,18 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.persistence.sql;
+package com.webank.weid.suite.persistence.mysql;
 
-import java.util.Date;
-
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.util.PropertyUtils;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.util.PropertyUtils;
+import java.util.Date;
 
 @Getter
 public class SqlDomain {
@@ -107,11 +106,11 @@ public class SqlDomain {
 
     private void resolveDomain() {
         if (StringUtils.isBlank(this.key)) {
-            this.key = DataDriverConstant.DOMAIN_DEFAULT_INFO;
+            this.key = MysqlDriverConstant.DOMAIN_DEFAULT_INFO;
         }
         this.value = PropertyUtils.getProperty(this.key);
         if (StringUtils.isBlank(this.value) 
-            && DataDriverConstant.DOMAIN_DEFAULT_INFO.equals(this.key)) {
+            && MysqlDriverConstant.DOMAIN_DEFAULT_INFO.equals(this.key)) {
             this.baseDomain = ConnectionPool.getFirstDataSourceName();
             this.tableDomain = DEFAULT_TABLE;
         } else if (StringUtils.isNotBlank(this.value) 
@@ -141,7 +140,7 @@ public class SqlDomain {
     private void resolveDomainTimeout() {
         String timeout = PropertyUtils.getProperty(this.key + ".timeout");
         if (StringUtils.isBlank(timeout)) {
-            timeout =  PropertyUtils.getProperty(DataDriverConstant.DOMAIN_DEFAULT_INFO_TIMEOUT);
+            timeout =  PropertyUtils.getProperty(MysqlDriverConstant.DOMAIN_DEFAULT_INFO_TIMEOUT);
         }
         if (StringUtils.isNotBlank(timeout)) {
             this.timeout = Long.parseLong(timeout);

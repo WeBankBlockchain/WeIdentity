@@ -1,21 +1,21 @@
-package com.webank.weid.full.persistence;
-
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
-import org.junit.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.webank.weid.full.persistence.TestRedis;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.redis.driver.RedisDriver;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TestUpdate extends TestBaseTransportation {
 
     private static final Logger logger = LoggerFactory.getLogger(TestUpdate.class);
 
-    private static String domain = "domain.default";
+    private static String domain = "domain.defaultInfo";
 
     private static String id = "123456";
 
@@ -26,14 +26,15 @@ public class TestUpdate extends TestBaseTransportation {
     @Override
     public synchronized void testInit() {
         //super.mockMysqlDriver();
-        persistence = new MysqlDriver();
-
+//        persistence = new MysqlDriver();
+        persistence = new RedisDriver();
         persistence.delete(domain, id);
         ResponseData<Integer> ret = persistence.add(domain, id, data);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), ret.getErrorCode().intValue());
 
     }
 
+    @Test
     /**
      * case:test update.
      */
@@ -49,6 +50,7 @@ public class TestUpdate extends TestBaseTransportation {
         Assert.assertEquals(data + " update", result.getResult());
     }
 
+    @Test
     /**
      * case:test update domain is null.
      */
@@ -63,6 +65,7 @@ public class TestUpdate extends TestBaseTransportation {
         Assert.assertEquals(afterData, result.getResult());
     }
 
+    @Test
     /**
      * case:domain is blank.
      */
@@ -77,6 +80,7 @@ public class TestUpdate extends TestBaseTransportation {
         Assert.assertEquals(afterData, result.getResult());
     }
 
+    @Test
     /**
      * case:test update.
      */
@@ -87,9 +91,10 @@ public class TestUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+            ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:test update database is null.
      */
@@ -100,9 +105,10 @@ public class TestUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+            ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:test update database is blank.
      */
@@ -112,9 +118,10 @@ public class TestUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+            ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:test update table is not exist.
      */
@@ -124,9 +131,10 @@ public class TestUpdate extends TestBaseTransportation {
             "datasource1:sdk_all_data_not_exist", id, data);
         LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:test update table is null.
      */
@@ -135,11 +143,11 @@ public class TestUpdate extends TestBaseTransportation {
         ResponseData<Integer> res = persistence.update("datasource1:null", id, data);
         LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(),
+        Assert.assertEquals(ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(),
             res.getErrorCode().intValue());
     }
 
-
+    @Test
     /**
      * case:test update table is blank.
      */
@@ -152,6 +160,7 @@ public class TestUpdate extends TestBaseTransportation {
             ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:test update id is not exist.
      */
@@ -165,6 +174,7 @@ public class TestUpdate extends TestBaseTransportation {
         Assert.assertEquals(0, res.getResult().intValue());
     }
 
+    @Test
     /**
      * case:test update table is not exist.
      */
@@ -177,6 +187,7 @@ public class TestUpdate extends TestBaseTransportation {
             res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:test update id is blank.
      */
@@ -190,6 +201,7 @@ public class TestUpdate extends TestBaseTransportation {
             res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:test update data is null.
      */
@@ -203,6 +215,7 @@ public class TestUpdate extends TestBaseTransportation {
         Assert.assertEquals(1, res.getResult().intValue());
     }
 
+    @Test
     /**
      * case:test update data is blank.
      */
