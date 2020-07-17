@@ -1,3 +1,22 @@
+/*
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
+ *
+ *       This file is part of weid-java-sdk.
+ *
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weid-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.webank.weid.service.fisco;
 
 import java.util.ArrayList;
@@ -36,8 +55,9 @@ public class WeServerUtils {
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(WeServerUtils.class);
-    //存放每个一个节点的web3j对象，用于获取当前节点所属的群组
+    // 存放每个一个节点的web3j对象，用于获取当前节点所属的群组，key : ipPort, value : Web3j对象  
     private static final Map<String, Web3j> WEB3J_MAP = new ConcurrentHashMap<String, Web3j>();
+    // 存放群组的节点列表, key - 群组Id, value - 节点列表
     private static final Map<String, List<String>> GROUP_NODE_MAP = 
         new ConcurrentHashMap<String, List<String>>();
     private static final Integer DEFAULT_GROUP_ID = 0;
@@ -80,33 +100,21 @@ public class WeServerUtils {
             // 如果不存在则初始化
             if (web3j == null) {
                 logger.info("[init] begin init web3j, node: {}.", node);
-                WEB3J_MAP.put(node, buildFiscoBcosService(fiscoConfig, node));
+                WEB3J_MAP.put(node, buildWeb3j(fiscoConfig, node));
             }
         }
     }
 
-    private static Web3j buildFiscoBcosService(FiscoConfig fiscoConfig, String node) {
+    private static Web3j buildWeb3j(FiscoConfig fiscoConfig, String node) {
         Service service = new Service();
         service.setOrgID(getOrgId(fiscoConfig));
         service.setConnectSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkTimeout()));
         // group info
         service.setGroupId(DEFAULT_GROUP_ID);
-
-        // connect key and string
-        ChannelConnections channelConnections = new ChannelConnections();
-        channelConnections.setGroupId(DEFAULT_GROUP_ID);
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        channelConnections
-            .setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
-        channelConnections
-            .setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
-        channelConnections
-            .setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
         List<String> nodeList = new ArrayList<String>();
         nodeList.add(node);
-        channelConnections.setConnectionsStr(nodeList);
-        GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
-        connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
+        GroupChannelConnectionsConfig connectionsConfig = buildGroupChannelConnectionsConfig(
+            DEFAULT_GROUP_ID, fiscoConfig, nodeList);
         service.setAllChannelConnections(connectionsConfig);
         // thread pool params
         service.setThreadPool(executor);
@@ -117,13 +125,52 @@ public class WeServerUtils {
             logger.error("[init] Service init failed. ", e);
             throw new InitWeb3jException(e);
         }
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setChannelService(service);
-        channelEthereumService.setTimeout(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT * 1000);
+        ChannelEthereumService channelEthereumService = buildChannelEthereumService(service);
         logger.info("[init] begin build the Web3j, node: {}.", node);
         return Web3j.build(channelEthereumService, DEFAULT_GROUP_ID);
     }
+    
+    /**
+     * 构建GroupChannelConnectionsConfig.
+     * @param groupId 群组编号
+     * @param fiscoConfig fisco配置
+     * @param nodeList 节点列表
+     * @return 返回GroupChannelConnectionsConfig对象
+     */
+    public static GroupChannelConnectionsConfig buildGroupChannelConnectionsConfig(
+        Integer groupId,
+        FiscoConfig fiscoConfig,
+        List<String> nodeList
+    ) {
+        // connect key and string
+        ChannelConnections channelConnections = new ChannelConnections();
+        channelConnections.setGroupId(groupId);
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        channelConnections
+            .setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
+        channelConnections
+            .setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
+        channelConnections
+            .setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
 
+        channelConnections.setConnectionsStr(nodeList);
+        GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
+        connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
+        return connectionsConfig;
+    }
+
+    /**
+     * 构建ChannelEthereumService.
+     * @param service Web3sdk中的 Service对象
+     * @return 返回ChannelEthereumService对象
+     */
+    public static ChannelEthereumService buildChannelEthereumService(Service service) {
+        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
+        channelEthereumService.setChannelService(service);
+        channelEthereumService.setTimeout(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT * 1000);
+        return channelEthereumService;
+    }
+    
     private static String getOrgId(FiscoConfig fiscoConfig) {
         return fiscoConfig.getCurrentOrgId() + "_group";
     }
