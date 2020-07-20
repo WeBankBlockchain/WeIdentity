@@ -96,14 +96,14 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
         channelEthereumService.setChannelService(service);
         web3j = Web3j.build(channelEthereumService);
         if (web3j == null) {
-            logger.error("[WeServiceImplV1] web3j init failed. ");
-            throw new InitWeb3jException();
+            logger.error("[WeServiceImplV1] web3j init failed.");
+            throw new InitWeb3jException("web3j init failed.");
         }
 
         credentials = GenCredential.create();
         if (credentials == null) {
-            logger.error("[WeServiceImplV1] credentials init failed. ");
-            throw new InitWeb3jException();
+            logger.error("[WeServiceImplV1] credentials init failed.");
+            throw new InitWeb3jException("credentials init failed.");
         }
         logger.info("[WeServiceImplV1] init web3j instance success..");
     }
@@ -128,7 +128,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
         service.setAllChannelConnections(allChannelConnections);
 
         // thread pool params
-        service.setThreadPool(super.initializePool());
+        service.setThreadPool(super.initializePool(Integer.parseInt(fiscoConfig.getGroupId())));
         return service;
     }
     
@@ -198,10 +198,5 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     @Override
     protected String queryBucketFromCns(CnsType cnsType) throws WeIdBaseException {
         return null;
-    }
-
-    @Override
-    public boolean checkGroupId(Integer groupId) {
-        return false;
     }
 }
