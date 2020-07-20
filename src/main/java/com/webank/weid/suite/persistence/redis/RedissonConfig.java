@@ -22,7 +22,7 @@ public class RedissonConfig {
     //单节点模式
     public RedissonClient redissonSingleClient(){
         Config config = new Config();
-        config.useSingleServer().setAddress(PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL_SINGLE));
+        config.useSingleServer().setAddress(PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL));
         RedissonClient client= Redisson.create(config);
 
         return client;
@@ -36,7 +36,7 @@ public class RedissonConfig {
          //集群状态扫描间隔时间，单位是毫秒, 可以用"rediss://"来启用SSL连接
         try {
             config.useClusterServers().setScanInterval(RedisDriverConstant.SCAN_INTERVAL)
-                    .addNodeAddress(PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL_CLUSTER).split(","))
+                    .addNodeAddress(PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL).split(","))
                     .setMasterConnectionMinimumIdleSize(RedisDriverConstant.MASTER_CONNECTION_MINIMUM_IDLE_SIZE)
                     .setMasterConnectionPoolSize(RedisDriverConstant.MASTER_CONNECTION_POOL_SIZE)
                     .setMasterConnectionMinimumIdleSize(RedisDriverConstant.MASTER_CONNECTION_MINIMUM_IDLE_SIZE)

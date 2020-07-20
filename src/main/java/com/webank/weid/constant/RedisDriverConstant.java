@@ -17,13 +17,11 @@ public class RedisDriverConstant {
 
     public static final String DOMAIN_DEFAULT_INFO = "domain.defaultInfo";
 
-    public static final String REDISSON_URL_SINGLE="redisson.url.single";
-    public static final String REDISSON_URL_CLUSTER="redisson.url.cluster";
+    public static final String REDISSON_URL="redisson.url";
 
     /**
      * the default value for redis cluster config.
      */
-
     public static final Integer IDLE_CONNECTION_TIMEOUT = 10000;
     public static final Integer PING_TIMEOUT=1000;
     public static final Integer CONNECT_TIMEOUT=10000;
