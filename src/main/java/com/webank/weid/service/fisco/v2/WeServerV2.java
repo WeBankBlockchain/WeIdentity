@@ -21,7 +21,6 @@ package com.webank.weid.service.fisco.v2;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -30,7 +29,6 @@ import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.dto.ChannelRequest;
 import org.fisco.bcos.channel.dto.ChannelResponse;
-import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -42,18 +40,17 @@ import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.rpc.callback.OnNotifyCallbackV2;
 import com.webank.weid.service.fisco.WeServer;
+import com.webank.weid.service.fisco.WeServerUtils;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 
 public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
@@ -112,26 +109,18 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             logger.error("[WeServiceImplV2] Service init failed. ", e);
             throw new InitWeb3jException(e);
         }
-
-        ChannelEthereumService channelEthereumService = new ChannelEthereumService();
-        channelEthereumService.setChannelService(service);
-        channelEthereumService.setTimeout(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT * 1000);
+        
+        ChannelEthereumService channelEthereumService = WeServerUtils
+            .buildChannelEthereumService(service);
         web3j = Web3j.build(channelEthereumService, service.getGroupId());
         if (web3j == null) {
             logger.error("[WeServiceImplV2] web3j init failed. ");
-            throw new InitWeb3jException();
+            throw new InitWeb3jException("web3j init failed.");
         }
-
-        // 检查群组Id是否存在
-        if (!checkGroupId(groupId)) {
-            logger.error("[WeServiceImplV2] the groupId does not exist.");
-            throw new InitWeb3jException();
-        }
-
         credentials = GenCredential.create();
         if (credentials == null) {
-            logger.error("[WeServiceImplV2] credentials init failed. ");
-            throw new InitWeb3jException();
+            logger.error("[WeServiceImplV2] the credentials for web3j init failed. ");
+            throw new InitWeb3jException("the credentials for web3j init failed.");
         }
         cnsService = new CnsService(web3j, credentials);
         logger.info("[WeServiceImplV2] init web3j instance success..");
@@ -153,24 +142,18 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
         service.setConnectSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkTimeout()));
         // group info
         service.setGroupId(groupId);
-
-        // connect key and string
-        ChannelConnections channelConnections = new ChannelConnections();
-        channelConnections.setGroupId(groupId);
-        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        channelConnections
-            .setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
-        channelConnections
-            .setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
-        channelConnections
-            .setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
-        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(",")));
-        GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();
-        connectionsConfig.setAllChannelConnections(Arrays.asList(channelConnections));
+        
+        // 根据群组获取节点列表
+        List<String> nodeList = WeServerUtils.getGroupMapping().get(groupId.toString());
+        if (CollectionUtils.isEmpty(nodeList)) {
+            logger.error("[WeServiceImplV2] the groupId does not exist, please check.");
+            throw new InitWeb3jException("the groupId does not exist, groupId = " + groupId + ".");
+        }
+        GroupChannelConnectionsConfig connectionsConfig = WeServerUtils
+            .buildGroupChannelConnectionsConfig(groupId, fiscoConfig, nodeList);
         service.setAllChannelConnections(connectionsConfig);
-
         // thread pool params
-        service.setThreadPool(super.initializePool());
+        service.setThreadPool(super.initializePool(groupId));
         return service;
     }
 
@@ -220,26 +203,5 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
             logger.error("[queryBucketFromCns] query address has error.", e);
             throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
         }
-    }
-
-    @Override
-    public boolean checkGroupId(Integer groupId) {
-        if (groupId == null) {
-            return false;
-        }
-        try {
-            List<String> result = this.getWeb3j().getGroupList().send().getResult();
-            if (CollectionUtils.isEmpty(result)) {
-                return false;
-            }
-            for (String string : result) {
-                if (string.equals(String.valueOf(groupId))) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            logger.error("[checkGroupId] check the groupId has error.", e);
-        }
-        return false;
     }
 }
