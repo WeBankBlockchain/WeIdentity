@@ -38,6 +38,7 @@ import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.bcos.web3j.protocol.core.Response;
 import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -161,7 +162,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
 
         ChannelRequest request = new ChannelRequest();
         request.setTimeout(super.getTimeOut(timeOut));
-        request.setToTopic(amopCommonArgs.getToOrgId());
+        request.setToTopic(amopCommonArgs.getToAmopId());
         request.setMessageID(amopCommonArgs.getMessageId());
         request.setContent(amopCommonArgs.getMessage());
 
@@ -196,7 +197,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     }
 
     @Override
-    protected String queryBucketFromCns(CnsType cnsType) throws WeIdBaseException {
+    protected CnsInfo queryCnsInfo(CnsType cnsType) throws WeIdBaseException {
         return null;
     }
 }

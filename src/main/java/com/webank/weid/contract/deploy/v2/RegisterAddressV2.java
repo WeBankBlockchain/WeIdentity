@@ -1,8 +1,11 @@
 package com.webank.weid.contract.deploy.v2;
 
+import java.math.BigInteger;
+
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.Credentials;
 import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.fisco.bcos.web3j.precompile.cns.CnsService;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
@@ -10,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.CnsType;
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.DataBucket;
 import com.webank.weid.exception.WeIdBaseException;
@@ -30,9 +34,9 @@ public class RegisterAddressV2 {
 
     private static Credentials credentials;
 
-    private static Credentials getCredentials() {
+    private static Credentials getCredentials(String inputPrivateKey) {
         if (credentials == null) {
-            credentials = GenCredential.create();
+            credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));
         }
         return credentials;
     }
@@ -56,7 +60,7 @@ public class RegisterAddressV2 {
         String key, 
         WeIdPrivateKey privateKey
     ) {
-        logger.info("[registerAddress] begin register address = {}.", address);
+        logger.info("[registerAddress] begin register key = {}, value = {}.", key, address);
         if (StringUtils.isBlank(address)) {
             logger.error("[registerAddress] can not find the address.");
             throw new WeIdBaseException("register address fail.");
@@ -64,7 +68,7 @@ public class RegisterAddressV2 {
         ResponseData<Boolean> result = getBucket(cnsType).put(hash, key, address, privateKey);
         if (!result.getResult()) {
             logger.error("[registerAddress] register address fail, please check the log.");
-            throw new WeIdBaseException("register address fail.");
+            throw new WeIdBaseException(ErrorCode.getTypeByErrorCode(result.getErrorCode()));
         }
         logger.info("[registerAddress] register address successfully.");
     }
@@ -72,23 +76,29 @@ public class RegisterAddressV2 {
     /**
      * 注册全局bucket地址.
      * @param cnsType 需要注册的cns类型
+     * @param weIdPrivateKey 私钥信息
      * @throws WeIdBaseException 注册过程中的异常
      */
-    public static void registerBucketToCns(CnsType cnsType) throws WeIdBaseException {
+    public static void registerBucketToCns(
+        CnsType cnsType, 
+        WeIdPrivateKey weIdPrivateKey
+    ) throws WeIdBaseException {
         logger.info(
             "[registerBucketToCns] begin register bucket to CNS, type = {}.", 
             cnsType.getName()
         );
-        String bucketAddr = BaseService.getBucketAddress(cnsType);
+        String privateKey = weIdPrivateKey.getPrivateKey();
+        CnsInfo cnsInfo = BaseService.getBucketByCns(cnsType);
         //如果地址是为空则说明是首次注册
-        if (StringUtils.isNotBlank(bucketAddr)) {
+        if (cnsInfo != null && StringUtils.isNotBlank(cnsInfo.getAddress())) {
             logger.info("[registerBucketToCns] the bucket is registed, it is no need to regist.");
             return;
         }
         try {
             //先进行地址部署
-            bucketAddr = deployBucket();
-            String resultJson = new CnsService((Web3j)BaseService.getWeb3j(), getCredentials())
+            String bucketAddr = deployBucket(privateKey);
+            String resultJson = 
+                new CnsService((Web3j)BaseService.getWeb3j(), getCredentials(privateKey))
                 .registerCns(cnsType.getName(), cnsType.getVersion(), bucketAddr, DataBucket.ABI);
             CnsResponse result = DataToolUtils.deserialize(resultJson, CnsResponse.class);
             if (result.getCode() != 0) {
@@ -103,13 +113,13 @@ public class RegisterAddressV2 {
             throw new WeIdBaseException("register bucket has error.", e);
         }
     }
-
-    private static String deployBucket() throws Exception {
+    
+    private static String deployBucket(String privateKey) throws Exception {
         logger.info("[deployBucket] begin deploy bucket.");
         //先进行地址部署
         DataBucket dataBucket = DataBucket.deploy(
             (Web3j)BaseService.getWeb3j(),
-            getCredentials(), 
+            getCredentials(privateKey), 
             new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)).send();
         return dataBucket.getContractAddress();
     }
@@ -126,5 +136,39 @@ public class RegisterAddressV2 {
         boolean result = getBucket(cnsType).enableHash(hash, weIdPrivateKey).getResult();
         logger.info("[enableHash] the result of enable. result = {}", result);
         return result;
+    }
+    
+    /**
+     * 注册所有的databucket到cns中.
+     * @param privateKey 部署DataBucket私钥
+     */
+    public static void registerAllCns(WeIdPrivateKey privateKey) {
+        for (CnsType cnsType : CnsType.values()) {
+            // 注册cns
+            RegisterAddressV2.registerBucketToCns(cnsType, privateKey);
+        }
+    }
+    
+    /**
+     * 将数据注册到机构配置CNS中
+     * @param module 存储模块
+     * @param key 存放的key
+     * @param value 存放的值
+     * @param privateKey 私钥
+     */
+    public static void registerHashToOrgConfig(
+        String module, 
+        String key, 
+        String value, 
+        WeIdPrivateKey privateKey
+    ) {
+        // 默认将主合约hash注册到机构配置cns中
+        RegisterAddressV2.registerAddress(
+            CnsType.ORG_CONFING,
+            module, 
+            value, 
+            key, 
+            privateKey
+        );
     }
 }
