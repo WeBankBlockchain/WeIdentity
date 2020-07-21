@@ -33,4 +33,12 @@ public class WeIdPrivateKey {
      * Required: The private key.
      */
     private String privateKey;
+
+    public WeIdPrivateKey() {
+        super();
+    }
+
+    public WeIdPrivateKey(String privateKey) {
+        this.privateKey = privateKey;
+    }
 }

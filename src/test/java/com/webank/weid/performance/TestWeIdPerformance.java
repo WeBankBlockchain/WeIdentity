@@ -29,8 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.BaseTest;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.request.SetServiceArgs;
+import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -96,14 +95,11 @@ public class TestWeIdPerformance extends BaseTest {
         String serviceEnpoint) {
 
         // setService for this WeIdentity DID
-        SetServiceArgs setServiceArgs = new SetServiceArgs();
-        setServiceArgs.setWeId(createResult.getWeId());
+        ServiceArgs setServiceArgs = new ServiceArgs();
         setServiceArgs.setType(serviceType);
         setServiceArgs.setServiceEndpoint(serviceEnpoint);
-        setServiceArgs.setUserWeIdPrivateKey(new WeIdPrivateKey());
-        setServiceArgs.getUserWeIdPrivateKey()
-            .setPrivateKey(createResult.getUserWeIdPrivateKey().getPrivateKey());
-        ResponseData<Boolean> responseSetSer = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> responseSetSer = weIdService.setService(createResult.getWeId(),
+            setServiceArgs, createResult.getUserWeIdPrivateKey());
         // check is success
         if (responseSetSer.getErrorCode() != ErrorCode.SUCCESS.getCode()
             || !responseSetSer.getResult()) {

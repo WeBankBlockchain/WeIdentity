@@ -30,7 +30,8 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.request.SetServiceArgs;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
@@ -53,9 +54,10 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_sucess() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(createWeIdResult.getWeId(),
+            setServiceArgs, createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
@@ -68,15 +70,17 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_twoTypeDifferentServices() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ResponseData<Boolean> response = weIdService.setService(createWeIdResult.getWeId(),
+            setServiceArgs, createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
 
-        SetServiceArgs setServiceArgs1 = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs1 = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs1.setType("1234");
-        ResponseData<Boolean> response1 = weIdService.setService(setServiceArgs1);
+        ResponseData<Boolean> response1 = weIdService.setService(createWeIdResult.getWeId(),
+            setServiceArgs1, createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response1);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(true, response1.getResult());
@@ -96,15 +100,19 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_twoEndpointDifferentServices() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ResponseData<Boolean> response = weIdService.setService(createWeIdResult.getWeId(),
+            setServiceArgs, createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(true, response.getResult());
 
-        SetServiceArgs setServiceArgs1 = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs1 = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs1.setServiceEndpoint("http:test.com");
-        ResponseData<Boolean> response1 = weIdService.setService(setServiceArgs1);
+        ResponseData<Boolean> response1 = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs1,
+            createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response1);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
         Assert.assertEquals(true, response1.getResult());
@@ -122,10 +130,10 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_weIdIsNull() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setWeId(null);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(null, setServiceArgs,
+            createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
@@ -138,10 +146,10 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_invalidWeId() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setWeId("di:weid:0xsdg!@#$%^&《》");
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService("di:weid:0xsdg!@#$%^&《》",
+            setServiceArgs, createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), response.getErrorCode().intValue());
@@ -154,10 +162,12 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_weIdNotExist() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setWeId("did:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac7a");
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            "did:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac7a",
+            setServiceArgs,
+            createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_DOES_NOT_EXIST.getCode(),
@@ -171,15 +181,15 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_weIdTooLong() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         char[] chars = new char[1000];
         for (int i = 0; i < chars.length; i++) {
             chars[i] = (char) (i % 127);
         }
         String weId = String.valueOf(chars);
         weId = "did:weid:0xbbd97a63365b6c9fb6b011a8d294307a3b7dac7" + weId;
-        setServiceArgs.setWeId(weId);
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(weId, setServiceArgs,
+            createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(),
@@ -193,10 +203,10 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_otherWeId() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setWeId(createWeIdNew.getWeId());
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(createWeIdNew.getWeId(),
+            setServiceArgs, createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -210,26 +220,13 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_typeNull() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setType(null);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        LogUtil.info(logger, "setService", response);
-
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: type is blank.
-     */
-    @Test
-    public void testSetService_typeBlank() {
-
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setType(" ");
-
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs,
+            createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -242,10 +239,13 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_typeIsAnyString() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setType("x123!@#$%^&*()_+=-?><:;sdf");
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs,
+            createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(
@@ -259,14 +259,17 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_typeTooLong() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs
             .setType("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs,
+            createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
-        Assert.assertEquals(ErrorCode.WEID_SERVICE_TYPE_OVERLIMIT.getCode(), 
+        Assert.assertEquals(ErrorCode.WEID_SERVICE_TYPE_OVERLIMIT.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -277,46 +280,17 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_endpointNull() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         setServiceArgs.setServiceEndpoint(null);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs,
+            createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: serviceEndpoint is blank.
-     */
-    @Test
-    public void testSetService_endpointBlank() {
-
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setServiceEndpoint("");
-
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        LogUtil.info(logger, "setService", response);
-
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: serviceEndpoint is blank.
-     */
-    @Test
-    public void testSetService_endpointZh() {
-
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setServiceEndpoint("你好");
-
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        LogUtil.info(logger, "setService", response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(true, response.getResult());
     }
 
     /**
@@ -325,26 +299,12 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_priKeyNull() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setUserWeIdPrivateKey(null);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        LogUtil.info(logger, "setService", response);
-
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: privateKey is null.
-     */
-    @Test
-    public void testSetService_setPriKeyNull() {
-
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.getUserWeIdPrivateKey().setPrivateKey(null);
-
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs,
+            null);
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
@@ -352,22 +312,6 @@ public class TestSetService extends TestBaseService {
         Assert.assertEquals(false, response.getResult());
     }
 
-    /**
-     * case: privateKey is blank.
-     */
-    @Test
-    public void testSetService_setPriKeyBlank() {
-
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.getUserWeIdPrivateKey().setPrivateKey(" ");
-
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        LogUtil.info(logger, "setService", response);
-
-        Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
 
     /**
      * case: the private key belongs to other WeIdentity DID.
@@ -375,11 +319,12 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_priKeyIsOtherWeid() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        setServiceArgs.setUserWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
-
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs,
+            createWeIdNew.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -393,10 +338,12 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetService_prikeyNotMatch() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.getUserWeIdPrivateKey().setPrivateKey("11111111111111");
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs,
+            new WeIdPrivateKey("111111111"));
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -410,12 +357,13 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetServiceCase12() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
         PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
-        setServiceArgs.getUserWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(),
+            setServiceArgs,
+            new WeIdPrivateKey(passwordKey.getPrivateKey()));
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH.getCode(),
@@ -429,7 +377,8 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetServiceCase17() {
 
-        ResponseData<Boolean> response = weIdService.setService(null);
+        ResponseData<Boolean> response = weIdService.setService(createWeIdResult.getWeId(),
+            null, createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
@@ -442,10 +391,10 @@ public class TestSetService extends TestBaseService {
     @Test
     public void testSetServiceCase18() {
 
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.getUserWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxxxxx");
+        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
 
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
+        ResponseData<Boolean> response = weIdService.setService(
+            createWeIdResult.getWeId(), setServiceArgs, new WeIdPrivateKey("xxxxxxx"));
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
