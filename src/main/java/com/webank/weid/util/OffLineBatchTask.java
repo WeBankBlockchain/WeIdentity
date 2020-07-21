@@ -13,7 +13,7 @@ import org.fisco.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -22,8 +22,8 @@ import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 
 /**
  * 离线交易批处理工具类.
@@ -69,12 +69,12 @@ public class OffLineBatchTask extends AbstractService {
         if (!StringUtils.isBlank(secretKey)) {
             return secretKey;
         } else {
-            ResponseData<String> dbResp = getDataDriver().get(DataDriverConstant.DOMAIN_ENCRYPTKEY,
+            ResponseData<String> dbResp = getDataDriver().get(MysqlDriverConstant.DOMAIN_ENCRYPTKEY,
                 PropertyUtils.getProperty("blockchain.orgid"));
             Integer errorCode = dbResp.getErrorCode();
             if (errorCode != ErrorCode.SUCCESS.getCode()) {
                 logger
-                    .error("[writeTransaction] save encrypt private key to db failed.errorcode:{}",
+                    .error("[writeTransaction] add encrypt private key to db failed.errorcode:{}",
                         errorCode);
                 return null;
             }

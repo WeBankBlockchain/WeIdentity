@@ -19,12 +19,6 @@
 
 package com.webank.weid.app;
 
-import java.io.PrintStream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
@@ -34,6 +28,11 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.PrintStream;
 
 /**
  * commands for testing.

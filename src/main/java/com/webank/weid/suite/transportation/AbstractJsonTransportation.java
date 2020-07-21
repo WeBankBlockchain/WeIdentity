@@ -25,7 +25,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdAuthentication;
@@ -74,8 +74,8 @@ public abstract class AbstractJsonTransportation
     );
     
     protected void saveTransData(String id, Object data) {
-        ResponseData<Integer> save = getDataDriver().save(
-            DataDriverConstant.DOMAIN_RESOURCE_INFO, 
+        ResponseData<Integer> save = getDataDriver().add(
+            MysqlDriverConstant.DOMAIN_RESOURCE_INFO,
             id, 
             DataToolUtils.serialize(data)
         );

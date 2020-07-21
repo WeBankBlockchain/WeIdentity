@@ -18,6 +18,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 3
+      - name: Start Redis Server
+        uses: supercharge/redis-github-action@1.1.0
+        with:
+          redis-version: 5
+      - name: Verify Redis connection
+        run: |
+          sudo docker exec redis redis-cli
+          set test 1
+          get test
       - name: Verify MySQL connection and create CI DB
         run: |
           sudo systemctl start mysql.service
