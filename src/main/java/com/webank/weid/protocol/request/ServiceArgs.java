@@ -30,11 +30,6 @@ import lombok.Data;
 public class ServiceArgs {
 
     /**
-     * Required: user's WeIdentity DID.
-     */
-    private String weId;
-
-    /**
      * Required: service type.
      */
     private String type;
