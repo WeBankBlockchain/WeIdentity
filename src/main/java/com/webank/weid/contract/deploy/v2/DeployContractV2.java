@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.config.ContractConfig;
+import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.deploy.AddressProcess;
@@ -114,8 +115,15 @@ public class DeployContractV2 extends AddressProcess {
     /**
      * depoly contract on FISCO BCOS 2.0.
      * @param privateKey the private key
+     * @param fiscoConfig 配置信息
+     * @param instantEnable 是否即时启用机构配置，源码安装以及build-tool命令版本安装即时启用，
+     *      build-tools-web 版本点击启用时候启用
      */
-    public static void deployContract(String privateKey) {
+    public static void deployContract(
+        String privateKey, 
+        FiscoConfig fiscoConfig,
+        boolean instantEnable
+    ) {
         initWeb3j();
         initCredentials(privateKey);
         String roleControllerAddress = deployRoleControllerContracts();
@@ -130,14 +138,18 @@ public class DeployContractV2 extends AddressProcess {
             );
         }
         deployEvidenceContractsNew();
-        registerToCns();
+        // cns处理
+        registerToCns(fiscoConfig, instantEnable);
     }
 
-    private static void registerToCns() {
+    private static void registerToCns(
+        FiscoConfig fiscoConfig,
+        boolean instantEnable
+    ) {
         String privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
         WeIdPrivateKey weIdPrivate = new WeIdPrivateKey();
         weIdPrivate.setPrivateKey(privateKey);
-        registerAddress(weIdPrivate);
+        registerAddress(weIdPrivate, fiscoConfig, instantEnable);
     }
 
 
@@ -390,12 +402,18 @@ public class DeployContractV2 extends AddressProcess {
     /**
      * 根据私钥将合约地址注册到cns中.
      * @param privateKey 私钥信息
+     * @param fiscoConfig 配置信息
+     * @param instantEnable 是否即时启用
      */
-    public static void registerAddress(WeIdPrivateKey privateKey) {
+    public static void registerAddress(
+        WeIdPrivateKey privateKey, 
+        FiscoConfig fiscoConfig,
+        boolean instantEnable
+    ) {
         CnsType  cnsType = CnsType.DEFAULT;
-        //先進行cns注冊
-        RegisterAddressV2.registerBucketToCns(cnsType);
-        //获取地址hash
+        // 先進行cns注冊
+        RegisterAddressV2.registerAllCns(privateKey);
+        // 获取地址hash
         ContractConfig contractConfig = getContractConfig();
         String hash = getHashByAddress(contractConfig);
         logger.info("[registerAddress] contract hash = {}.", hash);
@@ -438,6 +456,66 @@ public class DeployContractV2 extends AddressProcess {
             WeIdConstant.CNS_CPT_ADDRESS, 
             privateKey
         );
+        
+        RegisterAddressV2.registerAddress(
+            cnsType,
+            hash, 
+            fiscoConfig.getChainId(), 
+            WeIdConstant.CNS_CHAIN_ID, 
+            privateKey
+        );
+        
         writeAddressToFile(hash, "hash");
+        
+        //如果为即时启用
+        if (instantEnable) {
+            putGlobalValue(fiscoConfig, contractConfig, privateKey);
+            // 合约上也启用hash
+            RegisterAddressV2.enableHash(cnsType, hash, privateKey);
+        }
+    }
+    
+    public static void putGlobalValue(
+        FiscoConfig fiscoConfig, 
+        ContractConfig contract, 
+        WeIdPrivateKey privateKey
+    ) {
+        String hash = getHashByAddress(contract);
+        // 将weid合约地址写入全局配置中
+        putGlobalValue(WeIdConstant.CNS_WEID_ADDRESS, contract.getWeIdAddress(), privateKey);
+        // 将issuer合约地址写入全局配置中
+        putGlobalValue(WeIdConstant.CNS_AUTH_ADDRESS, contract.getIssuerAddress(), privateKey);
+        // 将SpecificIssuer合约地址写入全局配置中
+        putGlobalValue(
+            WeIdConstant.CNS_SPECIFIC_ADDRESS, 
+            contract.getSpecificIssuerAddress(), 
+            privateKey
+        );
+        // 将Evidence合约地址写入全局配置中
+        putGlobalValue(
+            WeIdConstant.CNS_EVIDENCE_ADDRESS, 
+            contract.getEvidenceAddress(), 
+            privateKey
+        );
+        // 将Cpt合约地址写入全局配置中
+        putGlobalValue(WeIdConstant.CNS_CPT_ADDRESS, contract.getCptAddress(), privateKey);
+        // 将ChainId写入全局配置中
+        putGlobalValue(WeIdConstant.CNS_CHAIN_ID, fiscoConfig.getChainId(), privateKey);
+        // 将主Hash写入全局配置中
+        putGlobalValue(WeIdConstant.CNS_MAIN_HASH, hash, privateKey);
+    }
+    
+    private static void putGlobalValue(String key, String value, WeIdPrivateKey privateKey) {
+        // 存放数据的cns块
+        CnsType cnsType = CnsType.ORG_CONFING;
+        // 存放全局配置的key
+        String module = WeIdConstant.CNS_GLOBAL_KEY;
+        RegisterAddressV2.registerAddress(
+            cnsType,
+            module, 
+            value, 
+            key, 
+            privateKey
+        );
     }
 }

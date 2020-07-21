@@ -45,11 +45,11 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.EvidenceContract;
 import com.webank.weid.contract.v2.EvidenceContract.EvidenceAttributeChangedEventResponse;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
@@ -57,7 +57,6 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
-import com.webank.weid.service.impl.inner.PropertiesService;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -91,17 +90,17 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         if (groupId == null || masterGroupId.intValue() == groupId.intValue()) {
             logger.info("[initEvidenceAddress] the groupId is master.");
             this.evidenceAddress = fiscoConfig.getEvidenceAddress();
-        } else {
-            String hash = PropertiesService.getInstance()
-                .getProperty(ParamKeyConstant.SHARE_CNS + groupId);
-            logger.info("[initEvidenceAddress] get hash from properteis. hash = {}", hash);
-            this.evidenceAddress = super.getBucket(CnsType.SHARE)
-                .get(hash, WeIdConstant.CNS_EVIDENCE_ADDRESS).getResult();
-            logger.info(
-                "[initEvidenceAddress] get the address from cns. address = {}", 
-                evidenceAddress
-            );
+            return;
         }
+        this.evidenceAddress = super.getBucket(CnsType.ORG_CONFING).get(
+            fiscoConfig.getCurrentOrgId(), WeIdConstant.CNS_EVIDENCE_ADDRESS + groupId).getResult();
+        if (StringUtils.isBlank(evidenceAddress)) {
+            throw new WeIdBaseException("can not found the evidence address from chain");
+        }
+        logger.info(
+            "[initEvidenceAddress] get the address from cns. address = {}", 
+            evidenceAddress
+        );
     }
 
     @Override
