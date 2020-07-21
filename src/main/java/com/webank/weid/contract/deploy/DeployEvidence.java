@@ -85,6 +85,6 @@ public abstract class DeployEvidence {
      * @return 返回部署的hash值
      */
     public static String deployContract(String privateKey, Integer groupId, boolean instantEnable) {
-        return DeployEvidenceV2.deployContract(privateKey, groupId, instantEnable);
+        return DeployEvidenceV2.deployContract(fiscoConfig, privateKey, groupId, instantEnable);
     }
 }

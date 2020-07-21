@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.AbstractService;
 
 /**
  * The WeIdentity DID Utils.
@@ -48,10 +50,9 @@ public final class WeIdUtils {
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
 
-    /**
-     * read the chainId from properties.
-     */
-    private static final String CHAIN_ID = PropertyUtils.getProperty("chain.id");
+    private static String getChainId() {
+        return BaseService.getChainId();
+    }
 
     /**
      * Convert a WeIdentity DID to a fisco account address.
@@ -110,12 +111,12 @@ public final class WeIdUtils {
     }
 
     private static String buildWeIdByAddress(String address) {
-        if (StringUtils.isEmpty(CHAIN_ID)) {
+        if (StringUtils.isEmpty(getChainId())) {
             throw new WeIdBaseException("the chain Id is illegal.");
         }
         StringBuffer weId = new StringBuffer();
         weId.append(WeIdConstant.WEID_PREFIX)
-            .append(CHAIN_ID)
+            .append(getChainId())
             .append(WeIdConstant.WEID_SEPARATOR);
         if (!StringUtils.contains(address, WeIdConstant.HEX_PREFIX)) {
             weId.append(WeIdConstant.HEX_PREFIX);
@@ -179,7 +180,7 @@ public final class WeIdUtils {
     public static boolean isMatchTheChainId(String weId) {
         String[] weIdFields = StringUtils.splitByWholeSeparator(weId, WeIdConstant.WEID_SEPARATOR);
         if (weIdFields.length == 4) {
-            return weIdFields[2].equals(CHAIN_ID);
+            return weIdFields[2].equals(getChainId());
         }
         return true;
     }

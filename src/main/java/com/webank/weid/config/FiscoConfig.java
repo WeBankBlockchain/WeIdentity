@@ -67,10 +67,6 @@ public class FiscoConfig {
     private String issuerAddress;
     private String evidenceAddress;
     private String specificIssuerAddress;
-    
-    @NotNull(message = "the chain.id is undefined")
-    @NotEmpty(message = "the value of chain.id is null")
-    @MatchPattern(pattern = "\\d+", message = "the value of chain.id is invalid")
     private String chainId;
     
     @NotNull(message = "the web3sdk.timeout is undefined")
@@ -141,7 +137,10 @@ public class FiscoConfig {
     @NotEmpty(message = "the value of blockchain.orgid is null")
     private String currentOrgId;
     
-    @NotNull(message = "the cns.contract.follow is undefined")
+    @NotNull(message = "the amop.id is undefined")
+    @NotEmpty(message = "the value of amop.id is null")
+    private String amopId;
+    
     private String cnsContractFollow;
 
     /**
@@ -176,6 +175,7 @@ public class FiscoConfig {
             v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
             v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
             currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
+            amopId = PropertyUtils.getProperty("amop.id");
             cnsContractFollow = PropertyUtils.getProperty("cns.contract.follow");
             return true;
         } catch (Exception e) {
