@@ -499,10 +499,10 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     WeIdDocument weIdDocument = innerResponseData.getResult();
                     ErrorCode errorCode = DataToolUtils
                         .verifySecp256k1SignatureFromWeId(rawData, credential.getSignature(),
-                            weIdDocument);
+                            weIdDocument, null);
                     if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                         errorCode = DataToolUtils
-                            .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+                            .verifySignatureFromWeId(rawData, signatureData, weIdDocument, null);
                         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                             return new ResponseData<>(false, errorCode);
                         }
