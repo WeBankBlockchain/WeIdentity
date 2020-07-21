@@ -34,12 +34,17 @@ public enum CnsType {
     /**
      * 默认的cns定义，此cns用于weid主合约存储.
      */
-    DEFAULT("allOrg", "v1.1"),
+    DEFAULT("allOrg", "v2.1"),
 
     /**
      * 共享cns定义，此cns可作为机构共享数据存储.
      */
-    SHARE("share", "v1.1");
+    SHARE("share", "v2.1"),
+    
+    /**
+     * 机构配置CNS定义.
+     */
+    ORG_CONFING("orgConfig", "v2.1");
 
     private static final String SPLIT_CHAR = "/";
 
