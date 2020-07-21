@@ -217,13 +217,15 @@ public class DownTransDataService extends InnerService implements TransmissionSe
         ErrorCode errorCode = DataToolUtils.verifySecp256k1SignatureFromWeId(
             arg.getResourceId(),
             arg.getSignValue(),
-            domRes.getResult()
+            domRes.getResult(),
+            null
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             errorCode = DataToolUtils.verifySignatureFromWeId(
                 arg.getResourceId(),
                 arg.getSignValue(),
-                domRes.getResult()
+                domRes.getResult(),
+                null
             );
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
