@@ -132,7 +132,7 @@ public final class WeIdConstant {
     /**
      * The Constant separator character.
      */
-    public static final String SEPARATOR = "/";
+    public static final String SEPARATOR = "|";
 
     /**
      * The Constant Max authority issuer name length in Chars.
@@ -250,6 +250,8 @@ public final class WeIdConstant {
     public static final String CNS_EVIDENCE_HASH = "evidenceHash";
 
     public static final Integer ON_CHAIN_STRING_LENGTH = 2097152;
+
+    public static final Integer ADD_PUBKEY_FAILURE_CODE = -1;
 
     public static enum PublicKeyType {
         RSA("RSA"),
