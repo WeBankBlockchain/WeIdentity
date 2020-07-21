@@ -20,8 +20,6 @@
 package com.webank.weid.suite.api.persistence.inf;
 
 import java.util.HashMap;
-import java.util.List;
-
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -49,7 +47,7 @@ public interface Persistence {
      * @param keyValueList list of id-data.
      * @return execute status of the "add" operation.
      */
-    public ResponseData<Integer> batchAdd(String domain, HashMap<String,String> keyValueList);
+    public ResponseData<Integer> batchAdd(String domain, HashMap<String, String> keyValueList);
 
     /**
      * query data from storage by id.

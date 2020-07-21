@@ -1,5 +1,17 @@
 package com.webank.weid.suite.persistence.redis.driver;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
@@ -10,12 +22,6 @@ import com.webank.weid.suite.persistence.redis.DefaultValue;
 import com.webank.weid.suite.persistence.redis.RedisDomain;
 import com.webank.weid.suite.persistence.redis.RedisExecutor;
 import com.webank.weid.util.DataToolUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 /**
  * @author karenli
@@ -23,7 +29,6 @@ import java.util.*;
  * @description:
  * @date 2020-07-09 15:19:48
  */
-
 public class RedisDriver implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisDriver.class);
@@ -113,9 +118,10 @@ public class RedisDriver implements Persistence {
             ResponseData<String> response = new RedisExecutor(redisDomain)
                     .executeQuery(redisDomain.getTableDomain(), dataKey);
 
-            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
+            if (response.getErrorCode().intValue()==ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                DefaultValue Data = DataToolUtils.deserialize(response.getResult(),DefaultValue.class);
+                DefaultValue Data = DataToolUtils.deserialize
+                        (response.getResult(), DefaultValue.class);
 
                 //超过超时时间，log输出data超时
                 if (Data != null && Data.getExpire() != null && Data.getExpire().before(new Date())) {
@@ -162,7 +168,7 @@ public class RedisDriver implements Persistence {
     @Override
     public ResponseData<Integer> update(String domain, String id, String data) {
 
-        if (StringUtils.isEmpty(id) || StringUtils.isBlank(this.get(domain,id).getResult())) {
+        if (StringUtils.isEmpty(id) || StringUtils.isBlank(this.get(domain, id).getResult())) {
             logger.error("[redis->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
@@ -171,7 +177,7 @@ public class RedisDriver implements Persistence {
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             Object[] datas = {data, date};
-            return new RedisExecutor(redisDomain).execute(dataKey,datas);
+            return new RedisExecutor(redisDomain).execute(dataKey, datas);
         } catch (WeIdBaseException e) {
             logger.error("[redis->update] update the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -184,8 +190,8 @@ public class RedisDriver implements Persistence {
         ResponseData<String> getRes = this.get(domain, id);
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
         if ((StringUtils.isNotBlank(getRes.getResult())
-                && getRes.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode())
-                || getRes.getErrorCode().intValue() == ErrorCode.SQL_DATA_EXPIRE.getCode()) {
+                && getRes.getErrorCode().intValue()==ErrorCode.SUCCESS.getCode())
+                || getRes.getErrorCode().intValue()==ErrorCode.SQL_DATA_EXPIRE.getCode()) {
             return this.update(domain, id, data);
         }
         return this.add(domain, id, data);

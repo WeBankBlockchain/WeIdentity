@@ -1,16 +1,17 @@
 package com.webank.weid.suite.persistence.redis;
 
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.suite.persistence.mysql.ConnectionPool;
-import com.webank.weid.util.PropertyUtils;
+import java.util.Date;
+
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Date;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.suite.persistence.mysql.ConnectionPool;
+import com.webank.weid.util.PropertyUtils;
 
 /**
  * @author karenli
@@ -20,7 +21,6 @@ import java.util.Date;
  */
 @Getter
 public class RedisDomain {
-
 
     private static final Logger logger = LoggerFactory.getLogger(RedisDomain.class);
 

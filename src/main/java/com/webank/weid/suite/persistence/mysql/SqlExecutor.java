@@ -31,16 +31,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.MysqlDriverConstant;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.response.ResponseData;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.webank.weid.constant.MysqlDriverConstant;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.response.ResponseData;
 
 /**
  * 数据库操作辅助类.

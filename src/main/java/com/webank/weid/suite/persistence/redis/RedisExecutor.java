@@ -1,21 +1,26 @@
 package com.webank.weid.suite.persistence.redis;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.redisson.api.BatchOptions;
+import org.redisson.api.BatchResult;
+import org.redisson.api.RBatch;
+import org.redisson.api.RBucket;
+import org.redisson.api.RedissonClient;
+import org.redisson.client.RedisException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.persistence.mysql.SqlExecutor;
 import com.webank.weid.util.DataToolUtils;
-import org.apache.commons.collections4.CollectionUtils;
-import org.redisson.api.*;
-import org.redisson.client.RedisException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author karenli
@@ -23,7 +28,6 @@ import java.util.concurrent.TimeUnit;
  * @description:
  * @date 2020-07-09 19:43:30
  */
-
 public class RedisExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(SqlExecutor.class);
@@ -37,6 +41,7 @@ public class RedisExecutor {
 
     RedissonConfig redissonConfig = new RedissonConfig();
     RedissonClient client = redissonConfig.redissonClusterClient();
+
     /**
      * 根据domain创建SQL执行器.
      *
@@ -62,11 +67,11 @@ public class RedisExecutor {
 
         ResponseData<String> result = new ResponseData<String>();
         try {
-            if (client == null) {
+            if (client==null) {
                 return
                         new ResponseData<String>(null, ErrorCode.REDIS_GET_CONNECTION_ERROR);
             }
-            RBucket<String> rBucket = client.getBucket(tableDomain +VALUE_SPLIT_CHAR+ datakey);
+            RBucket<String> rBucket = client.getBucket(tableDomain+VALUE_SPLIT_CHAR+datakey);
             result.setErrorCode(ErrorCode.SUCCESS);
             result.setResult(rBucket.get());
         } catch (Exception e) {
@@ -89,7 +94,7 @@ public class RedisExecutor {
 
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
-            if (client == null) {
+            if (client==null) {
                 return
                         new ResponseData<Integer>(null, ErrorCode.REDIS_GET_CONNECTION_ERROR);
             }
@@ -152,12 +157,13 @@ public class RedisExecutor {
 
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
-            if (client == null) {
+            if (client==null) {
                 return
                         new ResponseData<Integer>(null, ErrorCode.REDIS_GET_CONNECTION_ERROR);
             }
 
-            RBucket<String> rBucket=client.getBucket(redisDomain.getTableDomain()+VALUE_SPLIT_CHAR+dataKey);
+            RBucket<String> rBucket=client.getBucket
+                    (redisDomain.getTableDomain()+VALUE_SPLIT_CHAR+dataKey);
             if (rBucket.get()==null){
                 result.setErrorCode(ErrorCode.SUCCESS);
                 result.setResult(RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
@@ -196,7 +202,7 @@ public class RedisExecutor {
         RBatch rBatch = client.createBatch(batchOptions);
 
         try {
-            if (client == null) {
+            if (client==null) {
                 return
                         new ResponseData<Integer>(null, ErrorCode.REDIS_GET_CONNECTION_ERROR);
             }
@@ -223,7 +229,8 @@ public class RedisExecutor {
             }
 
             for (DefaultValue val : value){
-                rBatch.getBucket(redisDomain.getTableDomain()+VALUE_SPLIT_CHAR+val.getId()).setAsync(DataToolUtils.serialize(val));
+                rBatch.getBucket(redisDomain.getTableDomain()+VALUE_SPLIT_CHAR+val.getId())
+                        .setAsync(DataToolUtils.serialize(val));
             }
             BatchResult<?> batchResult = rBatch.execute();
 

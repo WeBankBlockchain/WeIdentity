@@ -19,6 +19,21 @@
 
 package com.webank.weid.suite.persistence.mysql.driver;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
@@ -30,12 +45,6 @@ import com.webank.weid.suite.persistence.mysql.SqlDomain;
 import com.webank.weid.suite.persistence.mysql.SqlExecutor;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.nio.charset.StandardCharsets;
-import java.util.*;
 
 /**
  * mysql operations.
@@ -44,7 +53,8 @@ import java.util.*;
  */
 public class MysqlDriver implements Persistence {
 
-    private static final Logger logger = LoggerFactory.getLogger(com.webank.weid.suite.persistence.mysql.driver.MysqlDriver.class);
+    private static final Logger logger = LoggerFactory.getLogger
+            (com.webank.weid.suite.persistence.mysql.driver.MysqlDriver.class);
 
     private static final String CHECK_TABLE_SQL =
         "SELECT table_name "
