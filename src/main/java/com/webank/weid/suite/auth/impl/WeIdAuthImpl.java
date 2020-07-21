@@ -105,10 +105,10 @@ public class WeIdAuthImpl implements WeIdAuth {
      */
     @Override
     public ResponseData<WeIdAuthObj> createAuthenticatedChannel(
-        String toOrgId,
+        String toAmopId,
         WeIdAuthentication weIdAuthentication) {
 
-        if (StringUtils.isBlank(toOrgId) || weIdAuthentication == null) {
+        if (StringUtils.isBlank(toAmopId) || weIdAuthentication == null) {
 
             logger.error("[createAuthenticatedChannel] illegal input!");
             return new ResponseData<WeIdAuthObj>(null, ErrorCode.ILLEGAL_INPUT);
@@ -122,7 +122,7 @@ public class WeIdAuthImpl implements WeIdAuth {
         //single auth
         getWeIdAuthArgs.setType(0);
         ResponseData<GetWeIdAuthResponse> weIdAuthObjResp = amopService
-            .getWeIdAuth(toOrgId, getWeIdAuthArgs);
+            .getWeIdAuth(toAmopId, getWeIdAuthArgs);
         Integer errCode = weIdAuthObjResp.getErrorCode();
         String errMsg = weIdAuthObjResp.getErrorMessage();
         if (errCode.intValue() != ErrorCode.SUCCESS.getCode()) {

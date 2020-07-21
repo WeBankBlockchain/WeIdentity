@@ -109,7 +109,7 @@ public class PdfTransportationImpl
     private static final String FILE_SEPARATOR = ".";
 
     private static final String PDF_ATTRIBUTE_ID = "id";
-    private static final String PDF_ATTRIBUTE_ORG_ID = "orgId";
+    private static final String PDF_ATTRIBUTE_AMOP_ID = "amopId";
     private static final String PDF_ATTRIBUTE_DATA = "data";
     private static final String PDF_ATTRIBUTE_ENCODE_TYPE = "encodeType";
     private static final String PDF_ATTRIBUTE_VERSION = "version";
@@ -446,7 +446,7 @@ public class PdfTransportationImpl
 
         PDDocumentInformation pdd = document.getDocumentInformation();
         pdd.setCustomMetadataValue(PDF_ATTRIBUTE_ID, pdfAttributeInfo.getId());
-        pdd.setCustomMetadataValue(PDF_ATTRIBUTE_ORG_ID, pdfAttributeInfo.getOrgId());
+        pdd.setCustomMetadataValue(PDF_ATTRIBUTE_AMOP_ID, pdfAttributeInfo.getAmopId());
         pdd.setCustomMetadataValue(PDF_ATTRIBUTE_DATA, String.valueOf(pdfAttributeInfo.getData()));
         pdd.setCustomMetadataValue(
             PDF_ATTRIBUTE_ENCODE_TYPE, String.valueOf(pdfAttributeInfo.getEncodeType()));
@@ -465,7 +465,7 @@ public class PdfTransportationImpl
     private void buildPdfDataFromPdf(PDDocumentInformation pdd, PdfAttributeInfo pdfAttributeInfo) {
 
         pdfAttributeInfo.setId(pdd.getCustomMetadataValue(PDF_ATTRIBUTE_ID));
-        pdfAttributeInfo.setOrgId(pdd.getCustomMetadataValue(PDF_ATTRIBUTE_ORG_ID));
+        pdfAttributeInfo.setAmopId(pdd.getCustomMetadataValue(PDF_ATTRIBUTE_AMOP_ID));
         pdfAttributeInfo.setData(pdd.getCustomMetadataValue(PDF_ATTRIBUTE_DATA));
         pdfAttributeInfo.setEncodeType(
             Integer.parseInt(pdd.getCustomMetadataValue(PDF_ATTRIBUTE_ENCODE_TYPE)));
@@ -949,7 +949,7 @@ public class PdfTransportationImpl
             //创建编解码实体对象并对pdfBaseData中的数据进行解码
             EncodeData encodeData = new EncodeData(
                 pdfAttributeInfo.getId(),
-                pdfAttributeInfo.getOrgId(),
+                pdfAttributeInfo.getAmopId(),
                 String.valueOf(pdfAttributeInfo.getData()),
                 weIdAuthentication
             );
@@ -1129,7 +1129,7 @@ public class PdfTransportationImpl
         pdfAttributeInfo.setVersion(version.getCode());
         pdfAttributeInfo.setEncodeType(property.getEncodeType().getCode());
         pdfAttributeInfo.setId(DataToolUtils.getUuId32());
-        pdfAttributeInfo.setOrgId(fiscoConfig.getCurrentOrgId());
+        pdfAttributeInfo.setAmopId(fiscoConfig.getAmopId());
         return pdfAttributeInfo;
     }
 
@@ -1368,7 +1368,7 @@ public class PdfTransportationImpl
             //加密情况，构建编解码数据，加密数据，设置data属性
             EncodeData encodeData = new EncodeData(
                 pdfAttributeInfo.getId(),
-                pdfAttributeInfo.getOrgId(),
+                pdfAttributeInfo.getAmopId(),
                 object.toJson(),
                 super.getVerifiers()
                     );

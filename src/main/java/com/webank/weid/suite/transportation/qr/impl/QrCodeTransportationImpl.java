@@ -101,13 +101,13 @@ public class QrCodeTransportationImpl
             TransCodeBaseData codeData = TransCodeBaseData.newInstance(version.getClz());
             // 构建协议基础数据
             String uuId = DataToolUtils.getUuId32();
-            codeData.buildCodeData(property, fiscoConfig.getCurrentOrgId(), uuId);
+            codeData.buildCodeData(property, fiscoConfig.getAmopId(), uuId);
             
             // 创建编解码实体对象，对此实体中的data编码操作
             EncodeData encodeData = 
                 new EncodeData(
                     codeData.getId(),
-                    codeData.getOrgId(),
+                    codeData.getAmopId(),
                     object.toJson(),
                     super.getVerifiers()
                 );
@@ -187,7 +187,7 @@ public class QrCodeTransportationImpl
             EncodeData encodeData = 
                 new EncodeData(
                     codeData.getId(),
-                    codeData.getOrgId(),
+                    codeData.getAmopId(),
                     String.valueOf(codeData.getData()),
                     weIdAuthentication
                 );
