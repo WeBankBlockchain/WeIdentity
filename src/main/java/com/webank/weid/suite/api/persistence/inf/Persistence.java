@@ -20,6 +20,8 @@
 package com.webank.weid.suite.api.persistence.inf;
 
 import java.util.HashMap;
+import java.util.Map;
+
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -47,7 +49,7 @@ public interface Persistence {
      * @param keyValueList list of id-data.
      * @return execute status of the "add" operation.
      */
-    public ResponseData<Integer> batchAdd(String domain, HashMap<String, String> keyValueList);
+    public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList);
 
     /**
      * query data from storage by id.
@@ -85,13 +87,13 @@ public interface Persistence {
      * @param data which you want to store to the storage.
      * @return execute status of the "add" operation.
      */
-    public ResponseData<Integer> saveOrUpdate(String domain, String id, String data);
+    public ResponseData<Integer> addOrUpdate(String domain, String id, String data);
 
     /**
      * add transaction to storage.
      *
      * @param transactionArgs the transaction info.
-     * @return execute status of the "saveTransaction" operation.
+     * @return execute status of the "addTransaction" operation.
      */
-    public ResponseData<Integer> saveTransaction(TransactionArgs transactionArgs);
+    public ResponseData<Integer> addTransaction(TransactionArgs transactionArgs);
 }

@@ -51,7 +51,7 @@ datasource1.jdbc.minEvictableIdleTimeMillis=1800000
 ##If you want to configure redis in cluster mode, enter multiple node addresses separated by commas.
 #
 ## The configuration of each data source is prefixed by the name of the data source.
-redisson.url.cluster=redis://${REDIS_ADRESS}
+redisson.url=redis://${REDIS_ADDRESS}
 redis_cluster.idle_connection_timeout=10000;
 redis_cluster.ping_timeout=1000;
 redis_cluster.connect_timeout=10000;

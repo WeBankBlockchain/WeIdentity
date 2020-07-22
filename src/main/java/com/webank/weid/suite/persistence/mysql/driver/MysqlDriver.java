@@ -165,7 +165,7 @@ public class MysqlDriver implements Persistence {
      * @see com.webank.weid.connectivity.driver.DBDriver#batchAdd(java.util.List, java.util.List)
      */
     @Override
-    public ResponseData<Integer> batchAdd(String domain, HashMap<String, String> keyValueList) {
+    public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList) {
         try {
             List<Object> idHashList = new ArrayList<>();
             List<Object> dataList = new ArrayList<>();
@@ -277,11 +277,11 @@ public class MysqlDriver implements Persistence {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.api.persistence.inf.Persistence#saveOrUpdate(java.lang.String,
+     * @see com.webank.weid.suite.api.persistence.inf.Persistence#addOrUpdate(java.lang.String,
      * java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Integer> saveOrUpdate(String domain, String id, String data) {
+    public ResponseData<Integer> addOrUpdate(String domain, String id, String data) {
         ResponseData<String> getRes = this.get(domain, id);
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
         if ((StringUtils.isNotBlank(getRes.getResult())
@@ -294,11 +294,11 @@ public class MysqlDriver implements Persistence {
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.api.persistence.inf.Persistence#saveTransaction(
+     * @see com.webank.weid.suite.api.persistence.inf.Persistence#addTransaction(
      * com.webank.weid.protocol.request.TransactionArgs)
      */
     @Override
-    public ResponseData<Integer> saveTransaction(TransactionArgs transactionArgs) {
+    public ResponseData<Integer> addTransaction(TransactionArgs transactionArgs) {
 
         if (StringUtils.isEmpty(transactionArgs.getRequestId())) {
             logger.error("[mysql->add] the id of the data is empty.");
