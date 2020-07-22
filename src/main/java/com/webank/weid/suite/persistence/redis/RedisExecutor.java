@@ -38,7 +38,7 @@ public class RedisExecutor {
 
     private RedisDomain redisDomain;
 
-    com.webank.weid.suite.persistence.redis.RedissonConfig redissonConfig = new com.webank.weid.suite.persistence.redis.RedissonConfig();
+    RedissonConfig redissonConfig = new RedissonConfig();
     //RedissonClient client = redissonConfig.redissonClusterClient();
     RedissonClient client = redissonConfig.redismodelRecognition();
 

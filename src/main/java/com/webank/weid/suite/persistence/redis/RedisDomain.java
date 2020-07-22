@@ -17,7 +17,7 @@ import com.webank.weid.util.PropertyUtils;
 @Getter
 public class RedisDomain {
 
-    private static final Logger logger = LoggerFactory.getLogger(com.webank.weid.suite.persistence.redis.RedisDomain.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisDomain.class);
 
     /**
      * the split for key.
