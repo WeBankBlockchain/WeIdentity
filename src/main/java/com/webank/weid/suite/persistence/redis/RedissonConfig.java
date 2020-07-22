@@ -1,5 +1,8 @@
 package com.webank.weid.suite.persistence.redis;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -7,13 +10,15 @@ import org.redisson.config.Config;
 import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.util.PropertyUtils;
 
-
 /**
  * redisson配置类.
  *
  * @author karenli 2020年7月3日
  */
 public class RedissonConfig {
+
+    private static final String redisurl = PropertyUtils.getProperty(
+            RedisDriverConstant.REDISSON_URL);
 
     public RedissonConfig() {
     }
@@ -25,8 +30,7 @@ public class RedissonConfig {
      */
     public RedissonClient redissonSingleClient() {
         Config config = new Config();
-        config.useSingleServer().setAddress(
-                PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL));
+        config.useSingleServer().setAddress(redisurl);
         RedissonClient client = Redisson.create(config);
         return client;
     }
@@ -43,8 +47,7 @@ public class RedissonConfig {
         try {
             config.useClusterServers().setScanInterval(RedisDriverConstant.SCAN_INTERVAL)
                     .addNodeAddress(
-                            PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL)
-                                    .split(","))
+                            PropertyUtils.getProperty(redisurl))
                     .setMasterConnectionMinimumIdleSize(
                             RedisDriverConstant.MASTER_CONNECTION_MINIMUM_IDLE_SIZE)
                     .setMasterConnectionPoolSize(
@@ -75,8 +78,9 @@ public class RedissonConfig {
      * @return 返回集群模式/单节点模式的redissonclient.
      */
     public RedissonClient redismodelRecognition() {
-        String redisurl = PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL);
-        if (redisurl.indexOf(",") >= 0) {
+
+        List<String> list = Arrays.asList(redisurl.split(","));
+        if (list.size() > 1) {
             return redissonClusterClient();
         } else {
             return redissonSingleClient();

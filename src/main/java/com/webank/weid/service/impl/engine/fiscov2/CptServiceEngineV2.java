@@ -50,8 +50,8 @@ import org.fisco.bcos.web3j.tuples.generated.Tuple7;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.CptController;
@@ -278,7 +278,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
-                getDataDriver().saveOrUpdate(
+                getDataDriver().addOrUpdate(
                     MysqlDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);

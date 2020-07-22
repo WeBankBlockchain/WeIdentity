@@ -19,7 +19,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.persistence.mysql.SqlExecutor;
+import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -29,7 +29,7 @@ import com.webank.weid.util.DataToolUtils;
  */
 public class RedisExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(SqlExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisExecutor.class);
 
     /**
      * the split for value.
@@ -38,10 +38,9 @@ public class RedisExecutor {
 
     private RedisDomain redisDomain;
 
-    com.webank.weid.suite.persistence.redis.RedissonConfig redissonConfig = new com.webank.weid.suite.persistence.redis.RedissonConfig();
+    RedissonConfig redissonConfig = new RedissonConfig();
     //RedissonClient client = redissonConfig.redissonClusterClient();
     RedissonClient client = redissonConfig.redismodelRecognition();
-
 
     /**
      * 根据domain创建SQL执行器.
