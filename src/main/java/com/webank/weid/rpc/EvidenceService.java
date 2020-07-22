@@ -53,6 +53,7 @@ public interface EvidenceService {
      * @param object the given Java object
      * @param log appendable log entry - can be null or empty
      * @param weIdAuthentication weid authentication (only checks private key)
+     * @return evidence hash value. Return empty string if failed, e.g. already existed.
      */
     ResponseData<String> createEvidenceWithLog(
         Hashable object,
