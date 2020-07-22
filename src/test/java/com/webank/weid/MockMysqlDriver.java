@@ -28,8 +28,8 @@ import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.persistence.mysql.SqlDomain;
 import com.webank.weid.suite.persistence.mysql.SqlExecutor;

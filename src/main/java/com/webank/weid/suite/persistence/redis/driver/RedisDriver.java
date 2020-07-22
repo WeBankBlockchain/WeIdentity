@@ -30,7 +30,7 @@ import com.webank.weid.util.DataToolUtils;
  */
 public class RedisDriver implements Persistence {
 
-    private static final Logger logger = LoggerFactory.getLogger(com.webank.weid.suite.persistence.redis.driver.RedisDriver.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisDriver.class);
 
     private static final Integer FAILED_STATUS = RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS;
 
