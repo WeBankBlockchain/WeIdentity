@@ -74,8 +74,8 @@ public abstract class AbstractJsonTransportation
     );
     
     protected void saveTransData(String id, Object data) {
-        ResponseData<Integer> save = getDataDriver().save(
-            DataDriverConstant.DOMAIN_RESOURCE_INFO, 
+        ResponseData<Integer> save = getDataDriver().add(
+            DataDriverConstant.DOMAIN_RESOURCE_INFO,
             id, 
             DataToolUtils.serialize(data)
         );

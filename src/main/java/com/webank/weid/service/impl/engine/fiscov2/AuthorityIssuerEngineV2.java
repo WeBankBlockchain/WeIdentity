@@ -230,6 +230,53 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         }
     }
 
+    @Override
+    public ResponseData<Boolean> recognizeWeId(Boolean isRecognize, String addr,
+        String privateKey) {
+        try {
+            AuthorityIssuerController authorityIssuerController = reloadContract(
+                fiscoConfig.getIssuerAddress(),
+                privateKey,
+                AuthorityIssuerController.class);
+            TransactionReceipt receipt;
+            if (isRecognize) {
+                receipt = authorityIssuerController.recognizeAuthorityIssuer(addr).send();
+            } else {
+                receipt = authorityIssuerController.deRecognizeAuthorityIssuer(addr).send();
+            }
+            List<AuthorityIssuerRetLogEventResponse> eventList =
+                authorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
+            TransactionInfo info = new TransactionInfo(receipt);
+            AuthorityIssuerRetLogEventResponse event = eventList.get(0);
+            if (event != null) {
+                ErrorCode errorCode;
+                if (isRecognize) {
+                    errorCode = verifyAuthorityIssuerRelatedEvent(
+                        event,
+                        WeIdConstant.ADD_AUTHORITY_ISSUER_OPCODE
+                    );
+                } else {
+                    errorCode = verifyAuthorityIssuerRelatedEvent(
+                        event,
+                        WeIdConstant.REMOVE_AUTHORITY_ISSUER_OPCODE
+                    );
+                }
+                if (ErrorCode.SUCCESS.getCode() != errorCode.getCode()) {
+                    return new ResponseData<>(false, errorCode, info);
+                } else {
+                    return new ResponseData<>(true, errorCode, info);
+                }
+            } else {
+                logger.error("(de-)recognize authority issuer failed, event decoding failure.");
+                return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR, info);
+            }
+
+        } catch (Exception e) {
+            logger.error("(de-)recognize authority issuer failed.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
+                e.getMessage());
+        }
+    }
 
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.AuthorityIssuerController
@@ -315,6 +362,11 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
 
             // Accumulator Value is unable to load due to Solidity 0.4.4 restrictions - left blank.
             result.setAccValue("");
+
+            // Set recognition status
+            boolean recognized = Long.valueOf(int256Attributes.get(15).longValue())
+                .equals(WeIdConstant.RECOGNIZED_AUTHORITY_ISSUER_FLAG) ? true : false;
+            result.setRecognized(recognized);
             resultData.setResult(result);
             return resultData;
         } catch (Exception e) {

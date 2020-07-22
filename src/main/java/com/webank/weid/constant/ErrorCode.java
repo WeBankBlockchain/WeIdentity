@@ -648,6 +648,14 @@ public enum ErrorCode {
     ),
 
     /**
+     * The issuer is not recognized.
+     */
+    AUTHORITY_ISSUER_CONTRACT_ERROR_UNRECOGNIZED(
+        500204,
+        "this issuer has not been recognized yet."
+    ),
+
+    /**
      * The Specific Issuer Contract level error: already exists.
      */
     SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS(
@@ -805,7 +813,7 @@ public enum ErrorCode {
     /**
      * weidentity base exceptions or error.
      */
-    BASE_ERROR(160007, "baes exception error, please check the error log."),
+    BASE_ERROR(160007, "base exception error, please check the error log."),
 
     /**
      * weidentity data type case exceptions or error.
@@ -885,6 +893,24 @@ public enum ErrorCode {
      * this is repeated call.
      */
     THIS_IS_REPEATED_CALL(160023, "this is repeated call."),
+
+    /**
+     * can not get the connection from Redis.
+     */
+    REDIS_GET_CONNECTION_ERROR(
+            160024,
+            "can not get the connection from Redis, please check the error log."
+    ),
+
+    /**
+     * redis execute failed.
+     */
+    REDIS_EXECUTE_FAILED(160025, "redis execute failed."),
+
+    /**
+     * the data is expire.
+     */
+    REDIS_DATA_EXPIRE(160026, "the data is expire."),
 
     /**
      * other uncatched exceptions or error.

@@ -71,6 +71,11 @@ public class AuthorityIssuer {
     private List<Integer> extraInt;
 
     /**
+     * Optional: whether this authority issuer is recognized by admin/committee, or not.
+     */
+    private boolean recognized = false;
+
+    /**
      * Constructor with initialized values.
      *
      * @param weId the WeID

@@ -41,6 +41,7 @@ import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DateUtils;
 
 public class TestCreatePresentation extends TestBaseService {
 
@@ -237,7 +238,7 @@ public class TestCreatePresentation extends TestBaseService {
         credentialList.remove(credentialPojoNew);
 
         Assert.assertEquals(
-            ErrorCode.CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL.getCode(), 
+            ErrorCode.CREDENTIAL_DISCLOSURE_DATA_TYPE_ILLEGAL.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertNull(response.getResult());
@@ -434,7 +435,10 @@ public class TestCreatePresentation extends TestBaseService {
     public void testCreatePresentation_issuerNotExist() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b6123456");
+        String weId = createWeId().getWeId();
+        weId = weId.replace(weId.substring(weId.length() - 4, weId.length()),
+            DateUtils.getNoMillisecondTimeStampString());
+        copyCredentialPojo.setIssuer(weId);
         credentialList.clear();
         credentialList.add(copyCredentialPojo);
         ResponseData<PresentationE> response = credentialPojoService.createPresentation(
@@ -445,9 +449,9 @@ public class TestCreatePresentation extends TestBaseService {
         );
         LogUtil.info(logger, "TestCreatePresentation", response);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
             response.getErrorCode().intValue());
-        Assert.assertNotNull(response.getResult());
+        Assert.assertNull(response.getResult());
     }
 
     /**
@@ -481,8 +485,9 @@ public class TestCreatePresentation extends TestBaseService {
     public void testCreatePresentation_publisherIssuerNotExist() {
 
         final String policyPublisherWeId = presentationPolicyE.getPolicyPublisherWeId();
-        presentationPolicyE
-            .setPolicyPublisherWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b6123456");
+        String weId = createWeId().getWeId();
+        weId = weId.replace(weId.substring(weId.length() - 4, weId.length()), "ffff");
+        presentationPolicyE.setPolicyPublisherWeId(weId);
         ResponseData<PresentationE> response = credentialPojoService.createPresentation(
             credentialList,
             presentationPolicyE,

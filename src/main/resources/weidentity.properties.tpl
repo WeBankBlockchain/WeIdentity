@@ -41,6 +41,27 @@ datasource1.jdbc.numTestsPerEvictionRun=5
 datasource1.jdbc.minEvictableIdleTimeMillis=1800000
 
 
+########################################################################################################
+##                                                                                                     #
+##         redisson config                                                                             #
+##                                                                                                     #
+########################################################################################################
+# Persistence Layer configurations. Do NOT change this if you are not using Persistence Layer features!
+# Redisson config
+# Support multiple data source configurations with comma-separated multiple data sources.
+# If you want to configure redis in cluster mode, enter multiple node addresses separated by commas.
+redis.url=${REDIS_ADDRESS}
+redis.password=${REDIS_PASSWORD}
+redis_single.database=0
+redis_cluster.idle_connection_timeout=10000
+redis_cluster.connect_timeout=10000
+redis_cluster.timeout=3000
+redis_cluster.slave_connection_minimum_idle_size=10
+redis_cluster.slave_connection_pool_size=64
+redis_cluster.master_connection_minimum_idle_size=10
+redis_cluster.master_connection_pool_size=64
+
+
 #######################################################################################################
 #                                                                                                     #
 #         persistence domain config                                                                   #
@@ -79,6 +100,7 @@ domain.weIdAuth=datasource1:weid_auth
 # the domain for save resource
 domain.resourceInfo=datasource1:resource_info
 domain.resourceInfo.timeout=31556908799941
+
 
 #######################################################################################################
 #                                                                                                     #
