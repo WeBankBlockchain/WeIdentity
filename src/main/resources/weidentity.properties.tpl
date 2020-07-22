@@ -18,16 +18,19 @@ nodes=${BLOCKCHIAN_NODE_INFO}
 
 #######################################################################################################
 #                                                                                                     #
-#         datasource config                                                                           #
+#         persistence config                                                                          #
 #                                                                                                     #
 #######################################################################################################
 # Persistence Layer configurations. Do NOT change this if you are not using Persistence Layer features!
+#Support the persistence of mysql and redis. You can choose the type of persistence.
+persistence_type=${PERSISTENCE_TYPE}
+
 # MySQL connection config
 # Support multiple data source configurations with comma-separated multiple data sources.
 datasource.name=datasource1
 
 # The configuration of each data source is prefixed by the name of the data source.
-datasource1.jdbc.url=jdbc:mysql://${MYSQL_ADDRESS}/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai
+datasource1.jdbc.url=jdbc:mysql://${MYSQL_ADDRESS}/${MYSQL_DATABASE}?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&rewriteBatchedStatements=true&serverTimezone=Asia/Shanghai
 datasource1.jdbc.driver=com.mysql.cj.jdbc.Driver
 datasource1.jdbc.username=${MYSQL_USERNAME}
 datasource1.jdbc.password=${MYSQL_PASSWORD}
@@ -39,6 +42,19 @@ datasource1.jdbc.maxWait=10000
 datasource1.jdbc.timeBetweenEvictionRunsMillis=600000
 datasource1.jdbc.numTestsPerEvictionRun=5
 datasource1.jdbc.minEvictableIdleTimeMillis=1800000
+
+# Redis config
+# If you want to configure redis in cluster mode, enter multiple node addresses separated by commas.
+redis.url=${REDIS_ADDRESS}
+redis.password=${REDIS_PASSWORD}
+redis_single.database=0
+redis_cluster.idle_connection_timeout=10000
+redis_cluster.connect_timeout=10000
+redis_cluster.timeout=3000
+redis_cluster.slave_connection_minimum_idle_size=10
+redis_cluster.slave_connection_pool_size=64
+redis_cluster.master_connection_minimum_idle_size=10
+redis_cluster.master_connection_pool_size=64
 
 
 #######################################################################################################
@@ -79,6 +95,7 @@ domain.weIdAuth=datasource1:weid_auth
 # the domain for save resource
 domain.resourceInfo=datasource1:resource_info
 domain.resourceInfo.timeout=31556908799941
+
 
 #######################################################################################################
 #                                                                                                     #

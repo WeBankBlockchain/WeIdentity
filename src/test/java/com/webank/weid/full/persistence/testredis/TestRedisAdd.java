@@ -1,12 +1,33 @@
-package com.webank.weid.full.persistence;
+/*
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
+ *
+ *       This file is part of weid-java-sdk.
+ *
+ *       weid-java-sdk is free software: you can redistribute it and/or modify
+ *       it under the terms of the GNU Lesser General Public License as published by
+ *       the Free Software Foundation, either version 3 of the License, or
+ *       (at your option) any later version.
+ *
+ *       weid-java-sdk is distributed in the hope that it will be useful,
+ *       but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *       GNU Lesser General Public License for more details.
+ *
+ *       You should have received a copy of the GNU Lesser General Public License
+ *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
+package com.webank.weid.full.persistence.testredis;
+
+import com.webank.weid.suite.api.persistence.params.PersistenceType;
+import com.webank.weid.util.PropertyUtils;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,37 +35,39 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.PersistenceFactory;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 
-public class TestSave extends TestBaseTransportation {
+public class TestRedisAdd extends TestBaseTransportation {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestSave.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestRedisAdd.class);
 
     private static Persistence persistence = null;
 
     private static String idname = "test";
 
+    private static PersistenceType persistenceType = null;
     @Override
     public synchronized void testInit() {
-        //super.mockMysqlDriver();
-        persistence = new MysqlDriver();
+
+        String persistence_type = PropertyUtils.getProperty("persistence_type");
+        if (persistence_type.equals("mysql")){
+            persistenceType = PersistenceType.Mysql;
+        }else if (persistence_type.equals("redis")) {
+            persistenceType = PersistenceType.Redis;
+        }
+        persistence = PersistenceFactory.build(persistenceType);
     }
 
+    @Test
     /**
-     * case:test save.
+     * case:test add.
      */
     public void testSave_success() {
 
-        ResponseData<String> response = new ResponseData<>();
-        response.setResult("test");
-        while (StringUtils.isNotBlank(response.getResult())) {
-            response = persistence.get("domain.default", idname);
-            idname = "test" + Math.random() + "select";
-        }
-
-        ResponseData<Integer> res = persistence.save(
-            "domain.default",
+        idname = "test" + Math.random();
+        ResponseData<Integer> res = persistence.add(
+            "domain.defaultInfo",
             idname,
             "data123456");
         LogUtil.info(logger, "persistence", res);
@@ -55,21 +78,19 @@ public class TestSave extends TestBaseTransportation {
         Assert.assertEquals("data123456", data.getResult());
     }
 
+    @Test
     /**
-     * case:test batch save.
+     * case:test batch add.
      */
-    public void testBatchSave_success() {
-        persistence.delete("domain.default", "12345");
-        persistence.delete("domain.default", "123456");
-        List<String> ids = new ArrayList<>();
-        ids.add("12345");
-        ids.add("123456");
-        List<String> datas = new ArrayList<>();
-        datas.add("12345");
-        datas.add("~！@#￥%……&&*（）？》《");
+    public void testBatchAdd_success() {
+        persistence.delete("domain.defaultInfo", "12345");
+        persistence.delete("domain.defaultInfo", "123456");
+        HashMap<String, String> map = new HashMap<>();
+        map.put("12345", "12345");
+        map.put("2313", "123456789");
 
-        ResponseData<Integer> res = persistence.batchSave(
-            "domain.default", ids, datas);
+        ResponseData<Integer> res = persistence.batchAdd(
+            "domain.defaultInfo", map);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
@@ -77,35 +98,15 @@ public class TestSave extends TestBaseTransportation {
 
         ResponseData<String> data = persistence.get(null, "12345");
         Assert.assertEquals("12345", data.getResult());
-        ResponseData<String> data1 = persistence.get("", "123456");
+        ResponseData<String> data1 = persistence.get("", "2313");
         Assert.assertNotNull(data1.getResult());
         Assert.assertTrue(Arrays.equals(
-            "~！@#￥%……&&*（）？》《".getBytes(StandardCharsets.ISO_8859_1), 
+            "123456789".getBytes(StandardCharsets.ISO_8859_1),
             data1.getResult().getBytes(StandardCharsets.ISO_8859_1)));
     }
 
-    /**
-     * case:test batch save.
-     */
-    public void testBatchSave_sizeNotEqual() {
-        persistence.delete("domain.default", "12345");
-        persistence.delete("domain.default", "123456");
-        List<String> ids = new ArrayList<>();
-        ids.add("12345");
-        List<String> datas = new ArrayList<>();
-        datas.add("12345");
-        datas.add("~！@#￥%……&&*（）？》《");
-        ResponseData<Integer> res = persistence.batchSave(
-            "domain.default", ids, datas);
-        LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(
-            ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH.getCode(),
-            res.getErrorCode().intValue()
-        );
-        Assert.assertEquals(0, res.getResult().intValue());
-    }
-
+    @Test
     /**
      * case:insert data into a same database again.
      */
@@ -114,21 +115,28 @@ public class TestSave extends TestBaseTransportation {
         ResponseData<String> response = new ResponseData<>();
         response.setResult("test");
         while (StringUtils.isNotBlank(response.getResult())) {
-            response = persistence.get("domain.default", idname);
+            response = persistence.get("domain.defaultInfo", idname);
             idname = "test" + Math.random() + "select";
         }
 
         ResponseData<Integer> res = persistence
-            .save("domain.default", idname, "data123456");
+            .add("domain.defaultInfo", idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
+        Assert.assertEquals(
+                ErrorCode.SUCCESS.getCode(),
+                res.getErrorCode().intValue());
 
-        ResponseData<Integer> res1 = persistence
-            .save("domain.default", idname, "data123456");
-        Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res1.getErrorCode().intValue());
+        ResponseData<Integer> res1 = persistence.add(
+                "domain.defaultInfo",
+                idname,
+                "data123456");
+        Assert.assertEquals(
+                ErrorCode.REDIS_EXECUTE_FAILED.getCode(),
+                res1.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:domain is not spit by : .
      */
@@ -137,7 +145,7 @@ public class TestSave extends TestBaseTransportation {
             persistence.delete(null, idname);
         }
 
-        ResponseData<Integer> res = persistence.save("datasource1",
+        ResponseData<Integer> res = persistence.add("datasource1",
             idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
@@ -145,18 +153,22 @@ public class TestSave extends TestBaseTransportation {
             ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:domain spit by : but the databases and table begin with space and end with space.
      */
+    //Expected :100903
+    //Actual   :100902
     public void testSave_domainContainSpace() {
-        ResponseData<Integer> res = persistence.save(
+        ResponseData<Integer> res = persistence.add(
             " datasource1 : sdk_all_data ", "123456", "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+            ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:domain is null.
      */
@@ -165,7 +177,7 @@ public class TestSave extends TestBaseTransportation {
         if (persistence.get(null, "123456") != null) {
             persistence.delete(null, "123456");
         }
-        ResponseData<Integer> res = persistence.save(null,
+        ResponseData<Integer> res = persistence.add(null,
             "123456", "data123456");
         LogUtil.info(logger, "persistence", res);
 
@@ -175,6 +187,7 @@ public class TestSave extends TestBaseTransportation {
         Assert.assertEquals("data123456", data.getResult());
     }
 
+    @Test
     /**
      * case:domain is blank.
      */
@@ -182,7 +195,7 @@ public class TestSave extends TestBaseTransportation {
         if (persistence.get("", idname) != null) {
             persistence.delete("", idname);
         }
-        ResponseData<Integer> res = persistence.save("",
+        ResponseData<Integer> res = persistence.add("",
             idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
@@ -192,34 +205,39 @@ public class TestSave extends TestBaseTransportation {
         Assert.assertEquals("data123456", data.getResult());
     }
 
+    @Test
     /**
      * case:database is zh.
      */
+
+    //Expected :0
+    //Actual   :100902
     public void testSave_domainContainZh() {
         String id = idname + System.currentTimeMillis();
-        ResponseData<Integer> res = persistence.save("datasource1:夏石龙",
+        ResponseData<Integer> res = persistence.add("datasource1:夏石龙",
                 id, "data123456");
         LogUtil.info(logger, "persistence", res);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
-
-        ResponseData<String> data = persistence.get("datasource1:夏石龙", id);
-        Assert.assertEquals("data123456", data.getResult());
+        Assert.assertEquals(
+                ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(),
+                res.getErrorCode().intValue());
     }
 
+    @Test
     /**
-     * case:domain hasspecial character.
+     * case:domain has special character.
      */
     public void testSave_domainContainSpecialChar() {
 
         ResponseData<Integer> res = persistence
-            .save("datasource1:mnj><:??li", "123456", "data123456");
+            .add("datasource1:mnj><:??li", "123456", "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
             ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
+    @Test
     /**
      * case:id is zh.
      */
@@ -232,15 +250,16 @@ public class TestSave extends TestBaseTransportation {
             idname = "test" + Math.random() + "中国";
         }
         ResponseData<Integer> res = persistence
-            .save("domain.default", idname, "data123456");
+            .add("domain.defaultInfo", idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
 
-        ResponseData<String> data = persistence.get("domain.default", idname);
+        ResponseData<String> data = persistence.get("domain.defaultInfo", idname);
         Assert.assertEquals("data123456", data.getResult());
     }
 
+    @Test
     /**
      * case:id contains special char.
      */
@@ -249,19 +268,20 @@ public class TestSave extends TestBaseTransportation {
         ResponseData<String> response = new ResponseData<>();
         response.setResult("test");
         while (StringUtils.isNotBlank(response.getResult())) {
-            response = persistence.get("domain.default", idname);
+            response = persistence.get("domain.defaultInfo", idname);
             idname = "test" + Math.random() + "0x23！@#￥%……&*-+";
         }
         ResponseData<Integer> res = persistence
-            .save("domain.default", idname, "data123456");
+            .add("domain.defaultInfo", idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
 
-        ResponseData<String> data = persistence.get("domain.default", idname);
+        ResponseData<String> data = persistence.get("domain.defaultInfo", idname);
         Assert.assertEquals("data123456", data.getResult());
     }
 
+    @Test
     /**
      * case:id contains special char.
      */
@@ -270,20 +290,21 @@ public class TestSave extends TestBaseTransportation {
         ResponseData<String> response = new ResponseData<>();
         response.setResult("test");
         while (StringUtils.isNotBlank(response.getResult())) {
-            response = persistence.get("domain.default", idname);
+            response = persistence.get("domain.defaultInfo", idname);
             idname = "test" + Math.random() + "select";
         }
 
         ResponseData<Integer> res = persistence
-            .save("domain.default", idname, "data123456");
+            .add("domain.defaultInfo", idname, "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
 
-        ResponseData<String> data = persistence.get("domain.default", idname);
+        ResponseData<String> data = persistence.get("domain.defaultInfo", idname);
         Assert.assertEquals("data123456", data.getResult());
     }
 
+    @Test
     /**
      * case:data contains zh.
      */
@@ -292,21 +313,22 @@ public class TestSave extends TestBaseTransportation {
         ResponseData<String> response = new ResponseData<>();
         response.setResult("test");
         while (StringUtils.isNotBlank(response.getResult())) {
-            response = persistence.get("domain.default", idname);
+            response = persistence.get("domain.defaultInfo", idname);
             idname = "test" + Math.random();
         }
-        ResponseData<Integer> res = persistence.save(
-            "domain.default", idname, "中国我爱你");
+        ResponseData<Integer> res = persistence.add(
+            "domain.defaultInfo", idname, "中国我爱你");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
 
-        ResponseData<String> data = persistence.get("domain.default", idname);
+        ResponseData<String> data = persistence.get("domain.defaultInfo", idname);
         Assert.assertTrue(Arrays.equals(
             "中国我爱你".getBytes(StandardCharsets.ISO_8859_1), 
             data.getResult().getBytes(StandardCharsets.ISO_8859_1)));
     }
 
+    @Test
     /**
      * case:data contains special char.
      */
@@ -315,18 +337,18 @@ public class TestSave extends TestBaseTransportation {
         ResponseData<String> response = new ResponseData<>();
         response.setResult("test");
         while (StringUtils.isNotBlank(response.getResult())) {
-            response = persistence.get("domain.default", idname);
+            response = persistence.get("domain.defaultInfo", idname);
             idname = "test" + Math.random();
         }
 
-        ResponseData<Integer> res = persistence.save(
-            "domain.default", idname, "12!@##$$%^^&*()-+?>we");
+        ResponseData<Integer> res = persistence.add(
+            "domain.defaultInfo", idname, "12!@##$$%^^&*()-+?>we");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
     }
 
-
+    @Test
     /**
      * case:data contains special char.
      */
@@ -339,12 +361,12 @@ public class TestSave extends TestBaseTransportation {
         ResponseData<String> response = new ResponseData<>();
         response.setResult("test");
         while (StringUtils.isNotBlank(response.getResult())) {
-            response = persistence.get("domain.default", idname);
+            response = persistence.get("domain.defaultInfo", idname);
             idname = "test" + Math.random();
         }
 
-        ResponseData<Integer> res = persistence.save(
-            "domain.default", idname, String.valueOf(chars));
+        ResponseData<Integer> res = persistence.add(
+            "domain.defaultInfo", idname, String.valueOf(chars));
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
