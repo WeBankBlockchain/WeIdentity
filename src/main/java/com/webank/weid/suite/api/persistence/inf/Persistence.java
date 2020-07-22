@@ -20,6 +20,7 @@
 package com.webank.weid.suite.api.persistence.inf;
 
 import java.util.HashMap;
+
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 
