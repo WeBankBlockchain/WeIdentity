@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.DataTypeCastException;
@@ -44,9 +44,9 @@ import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.crypto.params.KeyGenerator;
-import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.entity.EncodeData;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -89,8 +89,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
                     .encrypt(encodeData.getData(), key);
 
             //保存秘钥
-            ResponseData<Integer> response = this.getDataDriver().save(
-                DataDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId(), saveData);
+            ResponseData<Integer> response = this.getDataDriver().add(
+                MysqlDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId(), saveData);
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
                     ErrorCode.getTypeByErrorCode(response.getErrorCode().intValue())
@@ -144,7 +144,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             logger.info("get Encrypt Key from DB.");
             //保存秘钥
             ResponseData<String> response =
-                this.getDataDriver().get(DataDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId());
+                this.getDataDriver().get(MysqlDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId());
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
                     ErrorCode.getTypeByErrorCode(response.getErrorCode().intValue())

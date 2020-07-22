@@ -1,4 +1,4 @@
-package com.webank.weid.full.persistence;
+package com.webank.weid.full.persistence.testmysql;
 
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -8,8 +8,8 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 
 public class TestUpdate extends TestBaseTransportation {
 
@@ -29,7 +29,7 @@ public class TestUpdate extends TestBaseTransportation {
         persistence = new MysqlDriver();
 
         persistence.delete(domain, id);
-        ResponseData<Integer> ret = persistence.save(domain, id, data);
+        ResponseData<Integer> ret = persistence.add(domain, id, data);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), ret.getErrorCode().intValue());
 
     }
@@ -40,7 +40,7 @@ public class TestUpdate extends TestBaseTransportation {
     public void testUpdate_success() {
 
         ResponseData<Integer> res = persistence.update(
-            domain, id, data + " update");
+                domain, id, data + " update");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
@@ -83,11 +83,11 @@ public class TestUpdate extends TestBaseTransportation {
     public void testUpdate_databaseNotExist() {
 
         ResponseData<Integer> res = persistence.update(
-            "9999:sdk_all_data", id, data);
+                "9999:sdk_all_data", id, data);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
     }
 
     /**
@@ -96,11 +96,11 @@ public class TestUpdate extends TestBaseTransportation {
     public void testUpdate_databaseNull() {
 
         ResponseData<Integer> res = persistence.update(
-            "null:sdk_all_data", id, data);
+                "null:sdk_all_data", id, data);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
     }
 
     /**
@@ -112,7 +112,7 @@ public class TestUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
     }
 
     /**
@@ -121,7 +121,7 @@ public class TestUpdate extends TestBaseTransportation {
     public void testUpdate_tableNotExist() {
 
         ResponseData<Integer> res = persistence.update(
-            "datasource1:sdk_all_data_not_exist", id, data);
+                "datasource1:sdk_all_data_not_exist", id, data);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res.getErrorCode().intValue());
@@ -136,7 +136,7 @@ public class TestUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(),
-            res.getErrorCode().intValue());
+                res.getErrorCode().intValue());
     }
 
 
@@ -149,7 +149,7 @@ public class TestUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
     /**
@@ -158,7 +158,7 @@ public class TestUpdate extends TestBaseTransportation {
     public void testUpdate_idNotExist() {
 
         ResponseData<Integer> res = persistence.update(
-            domain, id + "not exist", data);
+                domain, id + "not exist", data);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
@@ -174,7 +174,7 @@ public class TestUpdate extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.PRESISTENCE_DATA_KEY_INVALID.getCode(),
-            res.getErrorCode().intValue());
+                res.getErrorCode().intValue());
     }
 
     /**
@@ -183,11 +183,11 @@ public class TestUpdate extends TestBaseTransportation {
     public void testUpdate_idBlank() {
 
         ResponseData<Integer> res = persistence.update(
-            "datasource9999:sdk_all_data", "", "data123456");
+                "datasource9999:sdk_all_data", "", "data123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.PRESISTENCE_DATA_KEY_INVALID.getCode(),
-            res.getErrorCode().intValue());
+                res.getErrorCode().intValue());
     }
 
     /**
@@ -196,7 +196,7 @@ public class TestUpdate extends TestBaseTransportation {
     public void testUpdate_dataNull() {
 
         ResponseData<Integer> res = persistence.update(
-            domain, id, null);
+                domain, id, null);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
@@ -209,7 +209,7 @@ public class TestUpdate extends TestBaseTransportation {
     public void testUpdate_dataBlank() {
 
         ResponseData<Integer> res = persistence.update(
-            domain, id, "");
+                domain, id, "");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());

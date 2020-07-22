@@ -39,6 +39,42 @@ datasource1.jdbc.numTestsPerEvictionRun=5
 datasource1.jdbc.minEvictableIdleTimeMillis=1800000
 
 
+
+########################################################################################################
+##                                                                                                     #
+##         redisson config                                                                           #
+##                                                                                                     #
+########################################################################################################
+## Persistence Layer configurations. Do NOT change this if you are not using Persistence Layer features!
+## Redisson config
+## Support multiple data source configurations with comma-separated multiple data sources.
+##If you want to configure redis in cluster mode, enter multiple node addresses separated by commas.
+#
+## The configuration of each data source is prefixed by the name of the data source.
+redisson.url.cluster=redis://${REDIS_ADRESS}
+redis_cluster.idle_connection_timeout=10000;
+redis_cluster.ping_timeout=1000;
+redis_cluster.connect_timeout=10000;
+redis_cluster.timeout=3000;
+redis_cluster.retry_attempts=3;
+redis_cluster.retry_interval=1500;
+redis_cluster.reconnection_timeout=3000;
+redis_cluster.failed_attempts=3;
+redis_cluster.password=${REDIS_PASSWORD};
+redis_cluster.subscriptions_per_connection=5;
+redis_cluster.client_name=null;
+redis_cluster.load_balancer_ref="myloadbalancer";
+redis_cluster.subscription_connection_minimum_idle_size=1;
+redis_cluster.subscription_connection_pool_size=50;
+redis_cluster.slave_connection_minimum_idle_size=10;
+redis_cluster.slave_connection_pool_size=64;
+redis_cluster.master_connection_minimum_idle_size=10;
+redis_cluster.master_connection_pool_size=64;
+redis_cluster.read_mode="slave";
+redis_cluster.subscription_mode="slave";
+redis_cluster.scan_interval=1000;
+
+
 #######################################################################################################
 #                                                                                                     #
 #         persistence domain config                                                                   #

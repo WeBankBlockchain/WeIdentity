@@ -28,11 +28,11 @@ import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.persistence.sql.SqlDomain;
-import com.webank.weid.suite.persistence.sql.SqlExecutor;
+import com.webank.weid.suite.persistence.mysql.SqlDomain;
+import com.webank.weid.suite.persistence.mysql.SqlExecutor;
 
 public abstract class MockMysqlDriver {
 
@@ -65,13 +65,13 @@ public abstract class MockMysqlDriver {
                 if (sql.startsWith("insert")) {
                     if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
                     if (dbMap.containsKey(data[0].toString())) {
                         return new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
@@ -79,13 +79,13 @@ public abstract class MockMysqlDriver {
                 } else if (sql.startsWith("delete")) {
                     if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
                     if (!dbMap.containsKey(data[0].toString())) {
                         return new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.SUCCESS
                         );
                     }
@@ -93,13 +93,13 @@ public abstract class MockMysqlDriver {
                 } else if (sql.startsWith("update")) {
                     if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
                     if (!dbMap.containsKey(data[3].toString())) {
                         return new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.SUCCESS
                         );
                     }
@@ -107,7 +107,7 @@ public abstract class MockMysqlDriver {
                 } else if (sql.startsWith("CREATE")) {
                     if (mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     }
@@ -124,11 +124,11 @@ public abstract class MockMysqlDriver {
                 Map<String, String> map = new HashMap<String, String>();
                 if (mockDbMap.containsKey(tableName)) {
                     if (data != null && data.length > 0) {
-                        map.put(DataDriverConstant.SQL_COLUMN_DATA, 
+                        map.put(MysqlDriverConstant.SQL_COLUMN_DATA,
                             (String)mockDbMap.get(tableName).get(data[0]));
                         return new ResponseData<Map<String, String>>(map, ErrorCode.SUCCESS);
                     }
-                    map.put(DataDriverConstant.SQL_COLUMN_DATA, tableName);
+                    map.put(MysqlDriverConstant.SQL_COLUMN_DATA, tableName);
                     return new ResponseData<Map<String, String>>(map, ErrorCode.SUCCESS);
                 }
                 return new ResponseData<Map<String, String>>(null, ErrorCode.SQL_EXECUTE_FAILED);
@@ -142,7 +142,7 @@ public abstract class MockMysqlDriver {
                     if (CollectionUtils.isEmpty(list) || list.size() != values.size()) {
                         return 
                             new ResponseData<Integer>(
-                                DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                                MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                                 ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
                             );  
                     }
@@ -152,7 +152,7 @@ public abstract class MockMysqlDriver {
                 for (int i = 0; i < idList.size(); i++) {
                     if (mockDbMap.get(tableName).containsKey(idList.get(i))) {
                         return new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS, 
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.SQL_EXECUTE_FAILED
                         );
                     } else {

@@ -17,7 +17,7 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.persistence.sql;
+package com.webank.weid.suite.persistence.mysql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,7 +33,7 @@ import org.apache.commons.dbcp2.BasicDataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.util.PropertyUtils;
 
 public class ConnectionPool {
@@ -59,109 +59,109 @@ public class ConnectionPool {
      */
     private static Properties initProperties(String dsNamePrefix) {
         // 连接URL
-        String dbUrl = PropertyUtils.getProperty(dsNamePrefix + DataDriverConstant.JDBC_URL);
+        String dbUrl = PropertyUtils.getProperty(dsNamePrefix + MysqlDriverConstant.JDBC_URL);
         // 驱动名称
-        String driverNameKey = dsNamePrefix + DataDriverConstant.JDBC_DRIVER;
+        String driverNameKey = dsNamePrefix + MysqlDriverConstant.JDBC_DRIVER;
         String driverClass = PropertyUtils.getProperty(
             driverNameKey,
-            DataDriverConstant.POOL_DRIVER_NAME_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_DRIVER_NAME_DEFAULT_VALUE
         );
         // 用户名
-        String userNameKey = dsNamePrefix + DataDriverConstant.JDBC_USER_NAME;
+        String userNameKey = dsNamePrefix + MysqlDriverConstant.JDBC_USER_NAME;
         String userName = PropertyUtils.getProperty(userNameKey);
         // 密码
-        String passWordKey = dsNamePrefix + DataDriverConstant.JDBC_USER_PASSWORD;
+        String passWordKey = dsNamePrefix + MysqlDriverConstant.JDBC_USER_PASSWORD;
         String passWord = PropertyUtils.getProperty(passWordKey);
         // 最大活跃链接
-        String maxActiveKey = dsNamePrefix + DataDriverConstant.JDBC_MAX_ACTIVE;
+        String maxActiveKey = dsNamePrefix + MysqlDriverConstant.JDBC_MAX_ACTIVE;
         String maxActive = PropertyUtils.getProperty(
             maxActiveKey,
-            DataDriverConstant.POOL_MAX_ACTIVE_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_MAX_ACTIVE_DEFAULT_VALUE
         );
         // 最小空闲链接
-        String minIdleKey = dsNamePrefix + DataDriverConstant.JDBC_MIN_IDLE;
+        String minIdleKey = dsNamePrefix + MysqlDriverConstant.JDBC_MIN_IDLE;
         String minIdle = PropertyUtils.getProperty(
             minIdleKey,
-            DataDriverConstant.POOL_MIN_IDLE_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_MIN_IDLE_DEFAULT_VALUE
         );
         // 最大空闲链接
-        String maxIdleKey = dsNamePrefix + DataDriverConstant.JDBC_MAX_IDLE;
+        String maxIdleKey = dsNamePrefix + MysqlDriverConstant.JDBC_MAX_IDLE;
         String maxIdle = PropertyUtils.getProperty(
             maxIdleKey,
-            DataDriverConstant.POOL_MAX_IDLE_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_MAX_IDLE_DEFAULT_VALUE
         );
         // 获取链接的最大等待时间
-        String maxWaitKey = dsNamePrefix + DataDriverConstant.JDBC_MAX_WAIT;
+        String maxWaitKey = dsNamePrefix + MysqlDriverConstant.JDBC_MAX_WAIT;
         String maxWait = PropertyUtils.getProperty(
             maxWaitKey,
-            DataDriverConstant.POOL_MAX_WAIT_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_MAX_WAIT_DEFAULT_VALUE
         );
         // 轮询检查连接间隔时间
-        String timeBetweenKey = dsNamePrefix + DataDriverConstant.JDBC_TIME_BETWEEN_ERM;
+        String timeBetweenKey = dsNamePrefix + MysqlDriverConstant.JDBC_TIME_BETWEEN_ERM;
         String timeBetween = PropertyUtils.getProperty(
             timeBetweenKey,
-            DataDriverConstant.POOL_TIME_BETWEEN_ERM_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_TIME_BETWEEN_ERM_DEFAULT_VALUE
         );
         // 单次检查连接数据
-        String numTestsPerErKey = dsNamePrefix + DataDriverConstant.JDBC_NUM_TEST_PER_ER;
+        String numTestsPerErKey = dsNamePrefix + MysqlDriverConstant.JDBC_NUM_TEST_PER_ER;
         String numTestsPerEr = PropertyUtils.getProperty(
             numTestsPerErKey,
-            DataDriverConstant.POOL_NUM_TEST_PER_ER_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_NUM_TEST_PER_ER_DEFAULT_VALUE
         );
         // 最小空闲时间的连接将被检查
-        String minEitmKey = dsNamePrefix + DataDriverConstant.JDBC_MIN_EITM;
+        String minEitmKey = dsNamePrefix + MysqlDriverConstant.JDBC_MIN_EITM;
         String minEitm = PropertyUtils.getProperty(
             minEitmKey,
-            DataDriverConstant.POOL_MIN_EITM_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_MIN_EITM_DEFAULT_VALUE
         );
         // 初始化大小
-        String initSizeKey = dsNamePrefix + DataDriverConstant.JDBC_INIT_SIZE;
+        String initSizeKey = dsNamePrefix + MysqlDriverConstant.JDBC_INIT_SIZE;
         String initSize = PropertyUtils.getProperty(
             initSizeKey,
-            DataDriverConstant.POOL_INIT_DEFAULT_VALUE
+            MysqlDriverConstant.POOL_INIT_DEFAULT_VALUE
         );
         Properties p = new Properties();
-        p.setProperty(DataDriverConstant.POOL_URL, dbUrl);
-        p.setProperty(DataDriverConstant.POOL_DRIVER_CLASS_NAME, driverClass);
-        p.setProperty(DataDriverConstant.POOL_USERNAME, userName);
-        p.setProperty(DataDriverConstant.POOL_PASSWORD, passWord);
-        p.setProperty(DataDriverConstant.POOL_MAX_ACTIVE, maxActive);
-        p.setProperty(DataDriverConstant.POOL_MIN_IDLE, minIdle);
-        p.setProperty(DataDriverConstant.POOL_MAX_IDLE, maxIdle);
-        p.setProperty(DataDriverConstant.POOL_MAX_WAIT, maxWait);
-        p.setProperty(DataDriverConstant.POOL_INITIAL_SIZE, initSize);
+        p.setProperty(MysqlDriverConstant.POOL_URL, dbUrl);
+        p.setProperty(MysqlDriverConstant.POOL_DRIVER_CLASS_NAME, driverClass);
+        p.setProperty(MysqlDriverConstant.POOL_USERNAME, userName);
+        p.setProperty(MysqlDriverConstant.POOL_PASSWORD, passWord);
+        p.setProperty(MysqlDriverConstant.POOL_MAX_ACTIVE, maxActive);
+        p.setProperty(MysqlDriverConstant.POOL_MIN_IDLE, minIdle);
+        p.setProperty(MysqlDriverConstant.POOL_MAX_IDLE, maxIdle);
+        p.setProperty(MysqlDriverConstant.POOL_MAX_WAIT, maxWait);
+        p.setProperty(MysqlDriverConstant.POOL_INITIAL_SIZE, initSize);
         // 是否自动回收超时连接
         p.setProperty(
-            DataDriverConstant.POOL_MAX_REMOVE_ABANDONED,
-            DataDriverConstant.JDBC_REMOVE_ABANDONED
+            MysqlDriverConstant.POOL_MAX_REMOVE_ABANDONED,
+            MysqlDriverConstant.JDBC_REMOVE_ABANDONED
         );
         p.setProperty(
-            DataDriverConstant.POOL_MAX_REMOVE_MAINTENANCE,
-            DataDriverConstant.JDBC_REMOVE_ABANDONED
+            MysqlDriverConstant.POOL_MAX_REMOVE_MAINTENANCE,
+            MysqlDriverConstant.JDBC_REMOVE_ABANDONED
         );
         // 是否自动回收超时连接的超时时间
         p.setProperty(
-            DataDriverConstant.POOL_MAX_REMOVE_ABANDONED_TIMEOUT,
-            DataDriverConstant.JDBC_REMOVE_ABANDONED_TIMEOUT
+            MysqlDriverConstant.POOL_MAX_REMOVE_ABANDONED_TIMEOUT,
+            MysqlDriverConstant.JDBC_REMOVE_ABANDONED_TIMEOUT
         );
         // 是否测试借出连接
         p.setProperty(
-            DataDriverConstant.POOL_TEST_ON_BORROW,
-            DataDriverConstant.JDBC_TEST_ON_BORROW
+            MysqlDriverConstant.POOL_TEST_ON_BORROW,
+            MysqlDriverConstant.JDBC_TEST_ON_BORROW
         );
         // 是否开启定时检查
         p.setProperty(
-            DataDriverConstant.POOL_TEST_ON_WHILE,
-            DataDriverConstant.JDBC_TEST_ON_WHILE
+            MysqlDriverConstant.POOL_TEST_ON_WHILE,
+            MysqlDriverConstant.JDBC_TEST_ON_WHILE
         );
-        p.setProperty(DataDriverConstant.POOL_TIME_BETWEEN_ERM, timeBetween);
-        p.setProperty(DataDriverConstant.POOL_NUM_TEST_PER_ER, numTestsPerEr);
+        p.setProperty(MysqlDriverConstant.POOL_TIME_BETWEEN_ERM, timeBetween);
+        p.setProperty(MysqlDriverConstant.POOL_NUM_TEST_PER_ER, numTestsPerEr);
         // 检查连接sql
         p.setProperty(
-            DataDriverConstant.POOL_VALIDATION_QUERY,
-            DataDriverConstant.JDBC_VALIDATION_QUERY
+            MysqlDriverConstant.POOL_VALIDATION_QUERY,
+            MysqlDriverConstant.JDBC_VALIDATION_QUERY
         );
-        p.setProperty(DataDriverConstant.POOL_MIN_EITM, minEitm);
+        p.setProperty(MysqlDriverConstant.POOL_MIN_EITM, minEitm);
         return p;
     }
     
@@ -171,7 +171,7 @@ public class ConnectionPool {
     private static void init() {
         try {
             String dataSourceNameStr = 
-                PropertyUtils.getProperty(DataDriverConstant.JDBC_DATASOURCE_NAME);
+                PropertyUtils.getProperty(MysqlDriverConstant.JDBC_DATASOURCE_NAME);
             String[] dataSourceNames = dataSourceNameStr.split(",");
             for (String string : dataSourceNames) {
                 SOURCE_NAME_LIST.add(string);

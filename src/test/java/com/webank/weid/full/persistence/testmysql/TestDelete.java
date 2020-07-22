@@ -1,4 +1,4 @@
-package com.webank.weid.full.persistence;
+package com.webank.weid.full.persistence.testmysql;
 
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -8,8 +8,8 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 
 
 public class TestDelete extends TestBaseTransportation {
@@ -34,7 +34,7 @@ public class TestDelete extends TestBaseTransportation {
     }
 
     /**
-     * case:test save.
+     * case:test add.
      */
     public void save_data() {
 
@@ -42,7 +42,7 @@ public class TestDelete extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
 
-        ResponseData<Integer> result = persistence.save(domain, id, data);
+        ResponseData<Integer> result = persistence.add(domain, id, data);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), result.getErrorCode().intValue());
         Assert.assertEquals(1, result.getResult().intValue());
@@ -55,11 +55,11 @@ public class TestDelete extends TestBaseTransportation {
         String table = domain.split("\\.")[1];
 
         ResponseData<Integer> res = persistence.delete(
-            "9999999." + table, "123456");
+                "9999999." + table, "123456");
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
     }
 
     /**
@@ -68,11 +68,11 @@ public class TestDelete extends TestBaseTransportation {
     public void testDelete_databaseNull() {
         String table = domain.split("\\.")[1];
         ResponseData<Integer> res = persistence.delete(
-            "null." + table, id);
+                "null." + table, id);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
     }
 
     /**
@@ -85,7 +85,7 @@ public class TestDelete extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_INVALID.getCode(), res.getErrorCode().intValue());
     }
 
     /**
@@ -94,7 +94,7 @@ public class TestDelete extends TestBaseTransportation {
     public void testDelete_tableNotExist() {
         String dataSource = domain.split("\\.")[0];
         ResponseData<Integer> res = persistence.delete(
-            dataSource + ".table_not_exist", id);
+                dataSource + ".table_not_exist", id);
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res.getErrorCode().intValue());
@@ -109,7 +109,7 @@ public class TestDelete extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(
-            ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
+                ErrorCode.PRESISTENCE_DOMAIN_ILLEGAL.getCode(), res.getErrorCode().intValue());
     }
 
 
@@ -134,7 +134,7 @@ public class TestDelete extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.PRESISTENCE_DATA_KEY_INVALID.getCode(),
-            res.getErrorCode().intValue());
+                res.getErrorCode().intValue());
     }
 
     /**
@@ -146,7 +146,7 @@ public class TestDelete extends TestBaseTransportation {
         LogUtil.info(logger, "persistence", res);
 
         Assert.assertEquals(ErrorCode.PRESISTENCE_DATA_KEY_INVALID.getCode(),
-            res.getErrorCode().intValue());
+                res.getErrorCode().intValue());
     }
 
 }

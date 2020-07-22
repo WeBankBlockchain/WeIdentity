@@ -24,7 +24,7 @@ package com.webank.weid.constant;
  *
  * @author tonychen 2019年3月25日
  */
-public final class DataDriverConstant {
+public final class MysqlDriverConstant {
 
     /**
      * jdbc url properties.

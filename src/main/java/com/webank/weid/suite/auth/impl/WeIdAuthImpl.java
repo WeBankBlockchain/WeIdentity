@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.AmopMsgType;
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
@@ -47,11 +47,11 @@ import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.service.impl.callback.RequestVerifyChallengeCallback;
 import com.webank.weid.service.impl.callback.WeIdAuthAmopCallback;
-import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
 import com.webank.weid.suite.auth.inf.WeIdAuthCallback;
 import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -311,7 +311,7 @@ public class WeIdAuthImpl implements WeIdAuth {
         String weIdAuthData = DataToolUtils.serialize(weIdAuthObj);
         String channelId = weIdAuthObj.getChannelId();
         ResponseData<Integer> dbResp = getDataDriver().saveOrUpdate(
-            DataDriverConstant.DOMAIN_WEID_AUTH,
+            MysqlDriverConstant.DOMAIN_WEID_AUTH,
             channelId,
             weIdAuthData);
         Integer errorCode = dbResp.getErrorCode();
@@ -332,7 +332,7 @@ public class WeIdAuthImpl implements WeIdAuth {
     public WeIdAuthObj getWeIdAuthObjByChannelId(String channelId) {
 
         ResponseData<String> dbResp = getDataDriver().get(
-            DataDriverConstant.DOMAIN_WEID_AUTH,
+            MysqlDriverConstant.DOMAIN_WEID_AUTH,
             channelId);
         Integer errorCode = dbResp.getErrorCode();
         if (errorCode != ErrorCode.SUCCESS.getCode()) {

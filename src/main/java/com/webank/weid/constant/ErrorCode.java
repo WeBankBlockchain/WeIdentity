@@ -83,7 +83,7 @@ public enum ErrorCode {
     CPT_EVENT_LOG_NULL(100304, "cpt event log is null."),
 
     /**
-     * credential template save failed.
+     * credential template add failed.
      */
     CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR(100305, "cpt credential template saved with error."),
 
@@ -101,7 +101,7 @@ public enum ErrorCode {
      * The credential issuer mismatch.
      */
     CREDENTIAL_ISSUER_MISMATCH(100403,
-        "issuer weId does not match the weId of credential"),
+            "issuer (signer) weId does not match the weId of credential"),
 
     /**
      * The credential signature broken.
@@ -182,8 +182,8 @@ public enum ErrorCode {
      * The credential private key not exists.
      */
     CREDENTIAL_PUBLIC_KEY_NOT_EXISTS(
-        100421,
-        "public key for verifying credential signature does not exist"
+            100421,
+            "public key for verifying credential signature does not exist"
     ),
 
     /**
@@ -215,8 +215,8 @@ public enum ErrorCode {
      * The credential evidence id mismatch.
      */
     CREDENTIAL_POLICY_FORMAT_DOSE_NOT_MATCH_CLAIM(
-        100427,
-        "credential disclosure format does not match claim"
+            100427,
+            "credential disclosure format does not match claim"
     ),
 
     /**
@@ -243,7 +243,7 @@ public enum ErrorCode {
      * credential has already been disclosed once.
      */
     CREDENTIAL_RE_DISCLOSED(100432,
-        "credential has already been disclosed once, can not be re-disclosed"),
+            "credential has already been disclosed once, can not be re-disclosed"),
 
     /**
      * Timestamp service error.
@@ -254,7 +254,7 @@ public enum ErrorCode {
      * System CPT Claim verification failure.
      */
     CREDENTIAL_SYSTEM_CPT_CLAIM_VERIFY_ERROR(100434, "external credential verify"
-        + " succeeded, but inner content verify failed"),
+            + " succeeded, but inner content verify failed"),
 
     /**
      * Timestamp service unavailable.
@@ -275,18 +275,18 @@ public enum ErrorCode {
      * Timestamp service does not support selectively-disclosed credential's presence.
      */
     TIMESTAMP_CREATION_FAILED_FOR_SELECTIVELY_DISCLOSED(100438,
-        "timestamp creation does not support selectively disclosed credential"),
+            "timestamp creation does not support selectively disclosed credential"),
 
     CREDENTIAL_USE_VERIFY_FUNCTION_ERROR(100439,
-        "presentation from pdf transportation, please use verifyPresentationFromPDF function"),
+            "presentation from pdf transportation, please use verifyPresentationFromPDF function"),
 
     /**
-     * the error code shows that the credential passed in the 
+     * the error code shows that the credential passed in the
      * function is not supported by this function.
      */
     CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE(100440,
-        "the error code shows that the credential passed in the "
-        + "function is not supported by this function."),
+            "the error code shows that the credential passed in the "
+                    + "function is not supported by this function."),
 
     /**
      * credential verify fail.
@@ -297,30 +297,30 @@ public enum ErrorCode {
      * Authorization WeIDs: from and to must be different.
      */
     AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT(100450,
-        "authorization's fromWeId and toWeId must be different"
+            "authorization's fromWeId and toWeId must be different"
     ),
 
     /**
      * Authorization: cannot authorize other WeID's resource.
      */
     AUTHORIZATION_CANNOT_AUTHORIZE_OTHER_WEID_RESOURCE(100451,
-        "cannot authorize other WeID's resource"
+            "cannot authorize other WeID's resource"
     ),
 
     /**
      * The credential evidence contract failure: illegal input.
      */
     CREDENTIAL_EVIDENCE_CONTRACT_FAILURE_ILLEAGAL_INPUT(
-        500401,
-        "credential evidence contract failure: illegal input."
+            500401,
+            "credential evidence contract failure: illegal input."
     ),
 
     /**
      * The credential evidence base error.
      */
     CREDENTIAL_EVIDENCE_BASE_ERROR(
-        100500,
-        "generic error when processing credential evidence tasks"
+            100500,
+            "generic error when processing credential evidence tasks"
     ),
 
     /**
@@ -337,7 +337,7 @@ public enum ErrorCode {
      * The credential evidence interface does not support fisco bcos 1.3.
      */
     FISCO_BCOS_VERSION_NOT_SUPPORTED(170000,
-        "this function does not support current fisco bcos version"),
+            "this function does not support current fisco bcos version"),
 
     /**
      * On-chain string length exceeded acceptable max.
@@ -358,8 +358,8 @@ public enum ErrorCode {
      * The weId of challenge does not match the user's weId.
      */
     PRESENTATION_CHALLENGE_WEID_MISMATCH(
-        100601,
-        "the weId of challenge does not match the user's weId."
+            100601,
+            "the weId of challenge does not match the user's weId."
     ),
 
     /**
@@ -371,8 +371,8 @@ public enum ErrorCode {
      * the credentialList of presentation don't match the claim policy.
      */
     PRESENTATION_CREDENTIALLIST_MISMATCH_CLAIM_POLICY(
-        100603,
-        "the credentiallist of presentation don't match the claim policy."
+            100603,
+            "the credentiallist of presentation don't match the claim policy."
     ),
 
     /**
@@ -384,48 +384,48 @@ public enum ErrorCode {
      * the nonce of challenge does not match the nonce of presentation.
      */
     PRESENTATION_CHALLENGE_NONCE_MISMATCH(
-        100605,
-        "the nonce of challenge does not match the nonce of presentation."
+            100605,
+            "the nonce of challenge does not match the nonce of presentation."
     ),
 
     /**
      * the signature of presentation does not match the presenter.
      */
     PRESENTATION_SIGNATURE_MISMATCH(
-        100606,
-        "the signature of presentation does not match the presenter."
+            100606,
+            "the signature of presentation does not match the presenter."
     ),
 
     /**
      * the presenter weid of presentation does not match the credential.
      */
     PRESENTATION_WEID_CREDENTIAL_WEID_MISMATCH(
-        100607,
-        "the presenter weid of presentation does not match the credential."
+            100607,
+            "the presenter weid of presentation does not match the credential."
     ),
 
     /**
      * the weid of the claim of the presentation does not exist.
      */
     PRESENTATION_CREDENTIAL_CLAIM_WEID_NOT_EXIST(
-        100608,
-        "the weid of the claim of the presentation does not exist."
+            100608,
+            "the weid of the claim of the presentation does not exist."
     ),
 
     /**
      * the publisherWeId of policy is invalid.
      */
     PRESENTATION_POLICY_PUBLISHER_WEID_INVALID(
-        100609,
-        "the publisherWeId of policy is invalid."
+            100609,
+            "the publisherWeId of policy is invalid."
     ),
 
     /**
      * the publisherWeId of policy does not exist.
      */
     PRESENTATION_POLICY_PUBLISHER_WEID_NOT_EXIST(
-        100610,
-        "the publisherWeId of policy does not exist."
+            100610,
+            "the publisherWeId of policy does not exist."
     ),
 
     /**
@@ -497,8 +497,8 @@ public enum ErrorCode {
      * transportation protocol field invalid.
      */
     TRANSPORTATION_PROTOCOL_FIELD_INVALID(
-        100806,
-        "the protocol field value invalid."
+            100806,
+            "the protocol field value invalid."
     ),
 
     /**
@@ -550,8 +550,8 @@ public enum ErrorCode {
      * The authority issuer opcode mismatch.
      */
     AUTHORITY_ISSUER_OPCODE_MISMATCH(
-        100205,
-        "opcode in event log does not match the desired opcode"
+            100205,
+            "opcode in event log does not match the desired opcode"
     ),
 
     /**
@@ -563,88 +563,98 @@ public enum ErrorCode {
      * The authority issuer accvalue illegal.
      */
     AUTHORITY_ISSUER_ACCVALUE_ILLEAGAL(
-        100207,
-        "the authority issuer accumulator value is illegal (integer value required)"
+            100207,
+            "the authority issuer accumulator value is illegal (integer value required)"
     ),
 
     /**
      * The specific issuer type illegal.
      */
     SPECIFIC_ISSUER_TYPE_ILLEGAL(
-        100208,
-        "the specific issuer type is illegal"
+            100208,
+            "the specific issuer type is illegal"
+    ),
+
+    AUTORITY_ISSUER_DESCRIPTION_ILLEGAL(
+            100209,
+            "authority issuer description illegal"
+    ),
+
+    AUTHORITY_ISSUER_EXTRA_PARAM_ILLEGAL(
+            100210,
+            "authority issuer extra param illegal"
     ),
 
     /**
      * the key of the data is empty.
      */
     PRESISTENCE_DATA_KEY_INVALID(
-        100901,
-        "the key of the data is empty."
+            100901,
+            "the key of the data is empty."
     ),
 
     /**
      * the domain is illegal.
      */
     PRESISTENCE_DOMAIN_ILLEGAL(
-        100902,
-        "the domain is illegal."
+            100902,
+            "the domain is illegal."
     ),
 
     /**
      * the domain is illegal.
      */
     PRESISTENCE_DOMAIN_INVALID(
-        100903,
-        "the domain is invalid."
+            100903,
+            "the domain is invalid."
     ),
 
     /**
-     * the data does not match for batch save.
+     * the data does not match for batch add.
      */
     PRESISTENCE_BATCH_SAVE_DATA_MISMATCH(
-        100904,
-        "the data does not match for batch save."
+            100904,
+            "the data does not match for batch add."
     ),
 
     /**
      * The Authority Issuer Contract level error: subject already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_ALREADY_EXIST(
-        500201,
-        "the authority issuer contract error: the subject already exists"
+            500201,
+            "the authority issuer contract error: the subject already exists"
     ),
 
     /**
      * The Authority Issuer Contract level error: subject already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS(
-        500202,
-        "the authority issuer contract error: the subject does not exist"
+            500202,
+            "the authority issuer contract error: the subject does not exist"
     ),
 
     /**
      * The Authority Issuer Contract level error: name already exists.
      */
     AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS(
-        500203,
-        "the authority issuer name already exists."
+            500203,
+            "the authority issuer name already exists."
     ),
 
     /**
      * The Specific Issuer Contract level error: already exists.
      */
     SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS(
-        500501,
-        "the specific issuer type or address already exists."
+            500501,
+            "the specific issuer type or address already exists."
     ),
 
     /**
      * The Specific Issuer Contract level error: already exists.
      */
     SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST(
-        500502,
-        "the specific issuer type or address does not exist."
+            500502,
+            "the specific issuer type or address does not exist."
     ),
 
     /**
@@ -661,8 +671,8 @@ public enum ErrorCode {
      * private key is invalid.
      */
     WEID_PRIVATEKEY_INVALID(
-        100103,
-        "the input private key is invalid, please check and input your private key."
+            100103,
+            "the input private key is invalid, please check and input your private key."
     ),
 
     /**
@@ -689,8 +699,8 @@ public enum ErrorCode {
      * public key and private key are not a keypair.
      */
     WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED(
-        100108,
-        "the public key and private key are not matched."
+            100108,
+            "the public key and private key are not matched."
     ),
 
     /**
@@ -702,47 +712,47 @@ public enum ErrorCode {
      * the length of the setService type is overlimit.
      */
     WEID_SERVICE_TYPE_OVERLIMIT(
-        100110, "the length of service type is overlimit."
+            100110, "the length of service type is overlimit."
     ),
 
     /**
      * you cannot remove your last public key or your own public key.
      */
     WEID_CANNOT_REMOVE_ITS_OWN_PUB_KEY_WITHOUT_BACKUP(
-        100111,
-        "cannot remove this WeID's owner or last public key without an available backup."
+            100111,
+            "cannot remove this WeID's owner or last public key without an available backup."
     ),
 
     /**
      * no permission of weIdAuth.
      */
     WEID_AUTH_NO_PERMISSION(
-        100112,
-        "no permission of weIdAuth."
+            100112,
+            "no permission of weIdAuth."
     ),
 
     /**
      * no permission of weIdAuth.
      */
     WEID_AUTH_NO_CALLBACK(
-        100113,
-        "weIdAuth callback is not registered."
+            100113,
+            "weIdAuth callback is not registered."
     ),
 
     /**
      * the channelId is null.
      */
     WEID_AUTH_CHANNELID_IS_NULL(
-        100114,
-        "the channelId is null."
+            100114,
+            "the channelId is null."
     ),
 
     /**
      * the channelId is invalid.
      */
     WEID_AUTH_CHANNELID_INVALID(
-        100115,
-        "the channelId is invalid."
+            100115,
+            "the channelId is invalid."
     ),
 
     /**
@@ -792,16 +802,16 @@ public enum ErrorCode {
      * AMOP server side has no direct route callback.
      */
     AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE(
-        160012,
-        "amop server side has no direct route callback."
+            160012,
+            "amop server side has no direct route callback."
     ),
 
     /**
      * can not get the connection from pool.
      */
     SQL_GET_CONNECTION_ERROR(
-        160013,
-        "can not get the connection from pool, please check the error log."
+            160013,
+            "can not get the connection from pool, please check the error log."
     ),
 
     /**
@@ -853,6 +863,24 @@ public enum ErrorCode {
      * this is repeated call.
      */
     THIS_IS_REPEATED_CALL(160023, "this is repeated call."),
+
+    /**
+     * can not get the connection from Redis.
+     */
+    REDIS_GET_CONNECTION_ERROR(
+            160024,
+            "can not get the connection from Redis, please check the error log."
+    ),
+
+    /**
+     * redis execute failed.
+     */
+    REDIS_EXECUTE_FAILED(160025, "redis execute failed."),
+
+    /**
+     * the data is expire.
+     */
+    REDIS_DATA_EXPIRE(160026, "the data is expire."),
 
     /**
      * other uncatched exceptions or error.
