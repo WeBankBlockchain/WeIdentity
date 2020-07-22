@@ -62,8 +62,8 @@ import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.WeIdUtils;
@@ -398,7 +398,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         //   .get(CredentialConstant.CREDENTIAL_META_KEY_ID);
         String dbKey = credentialPojo.getId();
         ResponseData<Integer> dbResponse =
-            getDataDriver().saveOrUpdate(
+            getDataDriver().addOrUpdate(
                 DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                 dbKey,
                 newCredentialSignature);
