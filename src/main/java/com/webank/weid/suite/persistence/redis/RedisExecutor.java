@@ -4,12 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.RedisDriverConstant;
-import com.webank.weid.protocol.request.TransactionArgs;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.persistence.mysql.SqlExecutor;
-import com.webank.weid.util.DataToolUtils;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.redisson.api.BatchOptions;
 import org.redisson.api.BatchResult;
@@ -19,6 +14,13 @@ import org.redisson.api.RedissonClient;
 import org.redisson.client.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.RedisDriverConstant;
+import com.webank.weid.protocol.request.TransactionArgs;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.persistence.mysql.SqlExecutor;
+import com.webank.weid.util.DataToolUtils;
 
 /**
  * redis操作辅助类.

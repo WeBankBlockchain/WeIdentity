@@ -7,6 +7,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
@@ -17,9 +22,6 @@ import com.webank.weid.suite.persistence.redis.DefaultValue;
 import com.webank.weid.suite.persistence.redis.RedisDomain;
 import com.webank.weid.suite.persistence.redis.RedisExecutor;
 import com.webank.weid.util.DataToolUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * redis Driver.

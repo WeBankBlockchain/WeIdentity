@@ -60,7 +60,7 @@ import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v1.CptController;
@@ -77,8 +77,8 @@ import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.CptServiceEngine;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
@@ -405,7 +405,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
                 this.getDataDriver().saveOrUpdate(
-                    DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
+                    MysqlDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);
             if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {

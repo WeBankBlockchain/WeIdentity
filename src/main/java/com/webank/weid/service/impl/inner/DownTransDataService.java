@@ -29,7 +29,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.DataTypeCastException;
@@ -74,7 +74,7 @@ public class DownTransDataService extends InnerService implements TransmissionSe
         ResponseData<String> codeDataRes = new ResponseData<String>();
         codeDataRes.setResult(StringUtils.EMPTY);
         ResponseData<String> responseData = this.getDataDriver().get(
-            DataDriverConstant.DOMAIN_RESOURCE_INFO, arg.getResourceId());
+            MysqlDriverConstant.DOMAIN_RESOURCE_INFO, arg.getResourceId());
         // 数据查询出错
         if (responseData.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
@@ -141,7 +141,7 @@ public class DownTransDataService extends InnerService implements TransmissionSe
         logger.info("[getEncryptKey] begin query encrypt key param:{}", arg);
         GetEncryptKeyResponse encryptResponse = new GetEncryptKeyResponse();
         ResponseData<String> keyResponse = this.getDataDriver().get(
-            DataDriverConstant.DOMAIN_ENCRYPTKEY, arg.getResourceId());
+            MysqlDriverConstant.DOMAIN_ENCRYPTKEY, arg.getResourceId());
         if (keyResponse.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
             && StringUtils.isBlank(keyResponse.getResult())) {
             logger.error("[getEncryptKey] the encrypt key is not exists.");

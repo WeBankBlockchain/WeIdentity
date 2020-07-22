@@ -17,7 +17,7 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.persistence.sql;
+package com.webank.weid.suite.persistence.mysql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -37,10 +37,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.ResponseData;
+
 
 /**
  * 数据库操作辅助类.
@@ -62,7 +63,7 @@ public class SqlExecutor {
      */
     public static final String SQL_QUERY = "select id,data,created,expire from $1 where id =?";
     /**
-     * sql for save.
+     * sql for add.
      */
     public static final String SQL_SAVE = "insert into $1(id, data, expire, created, updated) "
         + "values(?,?,?,?,?)";
@@ -76,7 +77,7 @@ public class SqlExecutor {
      */
     public static final String SQL_DELETE = "delete from $1 where id = ?";
     /**
-     * sql for save.
+     * sql for add.
      */
     public static final String SQL_SAVE_TRANSACTION =
         "insert into weidentity_offline_transaction_info"
@@ -195,7 +196,7 @@ public class SqlExecutor {
             if (conn == null) {
                 return
                     new ResponseData<Integer>(
-                        DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                        MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                         ErrorCode.SQL_GET_CONNECTION_ERROR
                     );
             }
@@ -214,7 +215,7 @@ public class SqlExecutor {
         } catch (SQLException e) {
             logger.error("Update data into {{}} with exception", sqlDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
+            result.setResult(MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
             ConnectionPool.close(conn, ps);
         }
@@ -228,7 +229,7 @@ public class SqlExecutor {
      * @param dataList 占位符所需要的数据
      * @return 返回受影响的行数
      */
-    public ResponseData<Integer> batchSave(String sql, List<List<Object>> dataList) {
+    public ResponseData<Integer> batchAdd(String sql, List<List<Object>> dataList) {
         ResponseData<Integer> result = new ResponseData<Integer>();
         Connection conn = null;
         PreparedStatement psts = null;
@@ -238,7 +239,7 @@ public class SqlExecutor {
                 if (CollectionUtils.isEmpty(list) || list.size() != values.size()) {
                     return
                         new ResponseData<Integer>(
-                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
                         );
                 }
@@ -247,7 +248,7 @@ public class SqlExecutor {
             if (conn == null) {
                 return
                     new ResponseData<Integer>(
-                        DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                        MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                         ErrorCode.SQL_GET_CONNECTION_ERROR
                     );
             }
@@ -277,9 +278,9 @@ public class SqlExecutor {
             }
             result.setResult(count);
         } catch (SQLException e) {
-            logger.error("Batch save data to {{}} with exception", sqlDomain.getBaseDomain(), e);
+            logger.error("Batch add data to {{}} with exception", sqlDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
+            result.setResult(MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
             ConnectionPool.close(conn, psts);
         }
@@ -339,7 +340,7 @@ public class SqlExecutor {
         String tableName = sqlDomain.getTableName();
         //如果数据库中存在此表
         if (result != null
-            && tableName.equalsIgnoreCase(result.get(DataDriverConstant.SQL_COLUMN_DATA))) {
+            && tableName.equalsIgnoreCase(result.get(MysqlDriverConstant.SQL_COLUMN_DATA))) {
             //本地缓存记录此表
             TABLE_CACHE.put(sqlDomain.getKey(), tableName);
             logger.info(

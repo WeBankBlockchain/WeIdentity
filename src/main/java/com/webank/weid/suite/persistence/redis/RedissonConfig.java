@@ -1,10 +1,12 @@
 package com.webank.weid.suite.persistence.redis;
 
-import com.webank.weid.constant.RedisDriverConstant;
-import com.webank.weid.util.PropertyUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+
+import com.webank.weid.constant.RedisDriverConstant;
+import com.webank.weid.util.PropertyUtils;
+
 
 /**
  * redisson配置类.

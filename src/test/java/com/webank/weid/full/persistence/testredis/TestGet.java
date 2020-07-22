@@ -1,15 +1,16 @@
 package com.webank.weid.full.persistence.testredis;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.persistence.redis.driver.RedisDriver;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TestGet extends TestBaseTransportation {
 
