@@ -259,7 +259,7 @@ public class PropertiesService extends InnerService {
 
     private boolean save(Map<String, String> data) {
         String value = DataToolUtils.serialize(data);
-        ResponseData<Integer> update = super.getDataDriver().saveOrUpdate(DOMAIN, KEY, value);
+        ResponseData<Integer> update = super.getDataDriver().addOrUpdate(DOMAIN, KEY, value);
         if (update.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
             return true;
         }
