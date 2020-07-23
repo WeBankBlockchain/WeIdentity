@@ -19,7 +19,6 @@
 
 package com.webank.weid.suite.api.persistence.inf;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.weid.protocol.request.TransactionArgs;
