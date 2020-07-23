@@ -3,7 +3,6 @@ package com.webank.weid.suite.persistence.redis;
 import java.util.Arrays;
 import java.util.List;
 
-import com.webank.weid.suite.persistence.mysql.SqlDomain;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -13,7 +12,6 @@ import com.webank.weid.util.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * redisson配置类.
  *
@@ -21,8 +19,8 @@ import org.slf4j.LoggerFactory;
  */
 public class RedissonConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedissonConfig.class);
-    private static final String redisurl = PropertyUtils.getProperty(RedisDriverConstant.REDISSON_URL);
+    private static final String redisurl = PropertyUtils.getProperty(
+            RedisDriverConstant.REDISSON_URL);
 
     public RedissonConfig() {
     }

@@ -19,7 +19,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.persistence.mysql.SqlExecutor;
+import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -29,7 +29,7 @@ import com.webank.weid.util.DataToolUtils;
  */
 public class RedisExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(SqlExecutor.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisExecutor.class);
 
     /**
      * the split for value.

@@ -23,7 +23,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +39,7 @@ import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.persistence.mysql.DefaultTable;
+import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.mysql.SqlDomain;
 import com.webank.weid.suite.persistence.mysql.SqlExecutor;
 import com.webank.weid.util.DataToolUtils;
@@ -115,8 +114,8 @@ public class MysqlDriver implements Persistence {
                 .executeQuery(SqlExecutor.SQL_QUERY, dataKey);
             if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
                 && response.getResult() != null) {
-                DefaultTable tableData = DataToolUtils.deserialize(
-                    DataToolUtils.serialize(response.getResult()), DefaultTable.class);
+                DefaultValue tableData = DataToolUtils.deserialize(
+                    DataToolUtils.serialize(response.getResult()), DefaultValue.class);
                 if (tableData.getExpire() != null && tableData.getExpire().before(new Date())) {
                     logger.error("[mysql->get] the data is expire.");
                     return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.SQL_DATA_EXPIRE);
