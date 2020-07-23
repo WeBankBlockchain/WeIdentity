@@ -37,8 +37,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -196,7 +196,7 @@ public class SqlExecutor {
             if (conn == null) {
                 return
                     new ResponseData<Integer>(
-                        MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                        DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                         ErrorCode.SQL_GET_CONNECTION_ERROR
                     );
             }
@@ -215,7 +215,7 @@ public class SqlExecutor {
         } catch (SQLException e) {
             logger.error("Update data into {{}} with exception", sqlDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS);
+            result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
             ConnectionPool.close(conn, ps);
         }
@@ -239,7 +239,7 @@ public class SqlExecutor {
                 if (CollectionUtils.isEmpty(list) || list.size() != values.size()) {
                     return
                         new ResponseData<Integer>(
-                            MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                            DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                             ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
                         );
                 }
@@ -248,7 +248,7 @@ public class SqlExecutor {
             if (conn == null) {
                 return
                     new ResponseData<Integer>(
-                        MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS,
+                        DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
                         ErrorCode.SQL_GET_CONNECTION_ERROR
                     );
             }
@@ -280,7 +280,7 @@ public class SqlExecutor {
         } catch (SQLException e) {
             logger.error("Batch add data to {{}} with exception", sqlDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
-            result.setResult(MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS);
+            result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
             ConnectionPool.close(conn, psts);
         }
@@ -340,7 +340,7 @@ public class SqlExecutor {
         String tableName = sqlDomain.getTableName();
         //如果数据库中存在此表
         if (result != null
-            && tableName.equalsIgnoreCase(result.get(MysqlDriverConstant.SQL_COLUMN_DATA))) {
+            && tableName.equalsIgnoreCase(result.get(DataDriverConstant.SQL_COLUMN_DATA))) {
             //本地缓存记录此表
             TABLE_CACHE.put(sqlDomain.getKey(), tableName);
             logger.info(

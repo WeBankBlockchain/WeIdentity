@@ -36,7 +36,7 @@ public class TestAdd extends TestBaseTransportation {
      */
     public void testSave_success() {
 
-        idname = "test" + Math.random() + "select";
+        idname = "test" + Math.random();
         ResponseData<Integer> res = persistence.add(
             "domain.defaultInfo",
             idname,

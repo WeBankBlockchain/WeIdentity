@@ -30,8 +30,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
 import com.webank.weid.protocol.amop.RequestVerifyChallengeArgs;
@@ -311,7 +311,7 @@ public class WeIdAuthImpl implements WeIdAuth {
         String weIdAuthData = DataToolUtils.serialize(weIdAuthObj);
         String channelId = weIdAuthObj.getChannelId();
         ResponseData<Integer> dbResp = getDataDriver().addOrUpdate(
-            MysqlDriverConstant.DOMAIN_WEID_AUTH,
+            DataDriverConstant.DOMAIN_WEID_AUTH,
             channelId,
             weIdAuthData);
         Integer errorCode = dbResp.getErrorCode();
@@ -332,7 +332,7 @@ public class WeIdAuthImpl implements WeIdAuth {
     public WeIdAuthObj getWeIdAuthObjByChannelId(String channelId) {
 
         ResponseData<String> dbResp = getDataDriver().get(
-            MysqlDriverConstant.DOMAIN_WEID_AUTH,
+            DataDriverConstant.DOMAIN_WEID_AUTH,
             channelId);
         Integer errorCode = dbResp.getErrorCode();
         if (errorCode != ErrorCode.SUCCESS.getCode()) {

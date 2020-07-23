@@ -50,8 +50,8 @@ import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.CredentialType;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
@@ -779,7 +779,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 
         //save masterSecret and credentialSecretsBlindingFactors to persistence.
         ResponseData<Integer> dbResp = getDataDriver()
-            .addOrUpdate(MysqlDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
+            .addOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
         if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[makeCredential] save masterSecret and blindingFactors to db failed.");
@@ -2083,14 +2083,14 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             String encodedVerificationRule = Utils.protoToEncodedString(verificationRule);
             ResponseData<String> dbResp =
                 getDataDriver().get(
-                    MysqlDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
+                    DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                     credential.getId());
             Integer cptId = credentialClone.getCptId();
             String id = new StringBuffer().append(userId).append("_").append(cptId).toString();
             String newCredentialSignature = dbResp.getResult();
             ResponseData<String> masterKeyResp =
                 getDataDriver().get(
-                    MysqlDriverConstant.DOMAIN_USER_MASTER_SECRET,
+                    DataDriverConstant.DOMAIN_USER_MASTER_SECRET,
                     id);
             HashMap<String, String> userCredentialInfo = DataToolUtils
                 .deserialize(masterKeyResp.getResult(), HashMap.class);

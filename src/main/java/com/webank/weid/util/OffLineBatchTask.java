@@ -13,8 +13,8 @@ import org.fisco.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.AbstractService;
@@ -69,7 +69,7 @@ public class OffLineBatchTask extends AbstractService {
         if (!StringUtils.isBlank(secretKey)) {
             return secretKey;
         } else {
-            ResponseData<String> dbResp = getDataDriver().get(MysqlDriverConstant.DOMAIN_ENCRYPTKEY,
+            ResponseData<String> dbResp = getDataDriver().get(DataDriverConstant.DOMAIN_ENCRYPTKEY,
                 PropertyUtils.getProperty("blockchain.orgid"));
             Integer errorCode = dbResp.getErrorCode();
             if (errorCode != ErrorCode.SUCCESS.getCode()) {

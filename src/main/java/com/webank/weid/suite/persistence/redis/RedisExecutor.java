@@ -15,8 +15,8 @@ import org.redisson.client.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.suite.persistence.DefaultValue;
@@ -130,19 +130,19 @@ public class RedisExecutor {
                 if (datas.length == 3 &&  rbucket.get() != null) {
                     return
                             new ResponseData<Integer>(
-                                    RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
+                                    DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
                                     ErrorCode.REDIS_EXECUTE_FAILED
                             );
                 }
                 rbucket.set(valueString);
             }
             result.setErrorCode(ErrorCode.SUCCESS);
-            result.setResult(RedisDriverConstant.REDISSON_EXECUTE_SUCESS_STATUS);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_SUCESS_STATUS);
 
         } catch (Exception e) {
             logger.error("Update data into {{}} with exception", redisDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.REDIS_EXECUTE_FAILED);
-            result.setResult(RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         } finally {
             client.shutdown();
         }
@@ -167,16 +167,16 @@ public class RedisExecutor {
                     redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
             if (rbucket.get() == null) {
                 result.setErrorCode(ErrorCode.SUCCESS);
-                result.setResult(RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
+                result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
             } else {
                 rbucket.delete();
                 result.setErrorCode(ErrorCode.SUCCESS);
-                result.setResult(RedisDriverConstant.REDISSON_EXECUTE_SUCESS_STATUS);
+                result.setResult(DataDriverConstant.REDISSON_EXECUTE_SUCESS_STATUS);
             }
         } catch (Exception e) {
             logger.error("Delete data into {{}} with exception", redisDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.REDIS_EXECUTE_FAILED);
-            result.setResult(RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         } finally {
             client.shutdown();
         }
@@ -213,7 +213,7 @@ public class RedisExecutor {
                 if (CollectionUtils.isEmpty(list) || list.size() != size) {
                     return
                             new ResponseData<Integer>(
-                                    RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
+                                    DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
                                     ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
                             );
                 }
@@ -239,7 +239,7 @@ public class RedisExecutor {
         } catch (RedisException e) {
             logger.error("Batch add data to {{}} with exception", redisDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.REDIS_EXECUTE_FAILED);
-            result.setResult(RedisDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         } finally {
             client.shutdown();
         }

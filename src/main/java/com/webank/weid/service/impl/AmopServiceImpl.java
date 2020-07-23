@@ -32,8 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
@@ -375,7 +375,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String id = new StringBuffer().append(userId).append("_").append(cptId)
             .toString();
         ResponseData<String> dbResp = getDataDriver()
-            .get(MysqlDriverConstant.DOMAIN_USER_MASTER_SECRET, id);
+            .get(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id);
         if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             throw new DatabaseException("database error!");
         }
@@ -399,7 +399,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         String dbKey = credentialPojo.getId();
         ResponseData<Integer> dbResponse =
             getDataDriver().addOrUpdate(
-                MysqlDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
+                DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                 dbKey,
                 newCredentialSignature);
         if (dbResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
