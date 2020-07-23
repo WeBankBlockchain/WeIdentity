@@ -9,6 +9,8 @@ import org.redisson.config.Config;
 
 import com.webank.weid.constant.RedisDriverConstant;
 import com.webank.weid.util.PropertyUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * redisson配置类.
