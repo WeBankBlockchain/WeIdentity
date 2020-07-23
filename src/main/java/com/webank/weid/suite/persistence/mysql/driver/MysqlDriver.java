@@ -19,6 +19,7 @@
 
 package com.webank.weid.suite.persistence.mysql.driver;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,8 +34,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -57,7 +58,7 @@ public class MysqlDriver implements Persistence {
 
     private static final String CHECK_TABLE_SQL =
         "SELECT table_name "
-            + MysqlDriverConstant.SQL_COLUMN_DATA
+            + DataDriverConstant.SQL_COLUMN_DATA
             + " FROM information_schema.TABLES "
             + " WHERE upper(table_name) = upper('$1')"
             + " and upper(table_schema) = upper('$2')";
@@ -78,7 +79,7 @@ public class MysqlDriver implements Persistence {
             + "PRIMARY KEY (`id`) "
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='the data table'";
 
-    private static final Integer FAILED_STATUS = MysqlDriverConstant.SQL_EXECUTE_FAILED_STATUS;
+    private static final Integer FAILED_STATUS = DataDriverConstant.SQL_EXECUTE_FAILED_STATUS;
 
     private static final ErrorCode KEY_INVALID = ErrorCode.PRESISTENCE_DATA_KEY_INVALID;
 
@@ -123,8 +124,8 @@ public class MysqlDriver implements Persistence {
                 if (StringUtils.isNotBlank(tableData.getData())) {
                     result.setResult(
                         new String(
-                            tableData.getData().getBytes(StandardCharsets.ISO_8859_1),
-                            StandardCharsets.UTF_8
+                            tableData.getData().getBytes(DataDriverConstant.STANDARDCHARSETS_ISO),
+                            DataDriverConstant.STANDARDCHARSETS_UTF_8
                         )
                     );
                 }
@@ -304,7 +305,7 @@ public class MysqlDriver implements Persistence {
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         try {
-            SqlDomain sqlDomain = new SqlDomain(MysqlDriverConstant.DOMAIN_DEFAULT_INFO);
+            SqlDomain sqlDomain = new SqlDomain(DataDriverConstant.DOMAIN_DEFAULT_INFO);
             Object[] datas = {
                 transactionArgs.getRequestId(),
                 transactionArgs.getMethod(),

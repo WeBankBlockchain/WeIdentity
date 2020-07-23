@@ -7,10 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.MysqlDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.suite.persistence.mysql.ConnectionPool;
 import com.webank.weid.util.PropertyUtils;
 
 
@@ -89,41 +88,23 @@ public class RedisDomain {
         resolveDomain();
     }
 
-    //检查Domain，并且设置好tableDomain以及baseDomain
     private void resolveDomain() {
 
-        //当配置key为空，默认为default_info
         if (StringUtils.isBlank(this.key)) {
-            this.key = MysqlDriverConstant.DOMAIN_DEFAULT_INFO;
+            this.key = DataDriverConstant.DOMAIN_DEFAULT_INFO;
         }
         this.value = PropertyUtils.getProperty(this.key);
 
-        //当value为空并且key为default_info时（即default_info没有在properties中）
-        // baseDomain和table_Domain是默认配置
         if (StringUtils.isBlank(this.value)
-                && MysqlDriverConstant.DOMAIN_DEFAULT_INFO.equals(this.key)) {
-            this.baseDomain = ConnectionPool.getFirstDataSourceName();
+                && DataDriverConstant.DOMAIN_DEFAULT_INFO.equals(this.key)) {
             this.tableDomain = DEFAULT_TABLE;
 
-            //当properties中有相应的domain，给baseDomain和tabledomain赋值
         } else if (StringUtils.isNotBlank(this.value)
                 && this.value.split(VALUE_SPLIT_CHAR).length == 2) {
             String[] domains = this.value.split(VALUE_SPLIT_CHAR);
-            //比如datasource1:encrypt_key_info，则baseDomain=datasource1  tableDomain=encrypt_key_info
             this.baseDomain = domains[0];
             this.tableDomain = domains[1];
-            //如果连接池中没有baseDomain（即没有该数据库），报错为xxx数据库不存在
-            if (!ConnectionPool.checkDataSourceName(this.baseDomain)) {
-                logger.error(
-                        "[resolveDomain] the domain {{}:{}} is invalid, {} is not exists.",
-                        this.key,
-                        this.value,
-                        this.baseDomain
-                );
-                throw new WeIdBaseException(ErrorCode.PRESISTENCE_DOMAIN_INVALID);
-            }
         } else {
-            //domain不为空但是形式不为xx：xxxx，（比如domain：default：info）报错domain不合法
             logger.error("[resolveDomain] the domain {{}:{}} is illegal.",
                     this.key,
                     this.value
@@ -136,7 +117,7 @@ public class RedisDomain {
     private void resolveDomainTimeout() {
         String timeout = PropertyUtils.getProperty(this.key + ".timeout");
         if (StringUtils.isBlank(timeout)) {
-            timeout =  PropertyUtils.getProperty(MysqlDriverConstant.DOMAIN_DEFAULT_INFO_TIMEOUT);
+            timeout =  PropertyUtils.getProperty(DataDriverConstant.DOMAIN_DEFAULT_INFO_TIMEOUT);
         }
         if (StringUtils.isNotBlank(timeout)) {
             this.timeout = Long.parseLong(timeout);
@@ -149,7 +130,7 @@ public class RedisDomain {
     }
 
     /**
-     * get the currenttime.
+     * get the current time.
      *
      * @return now
      */
