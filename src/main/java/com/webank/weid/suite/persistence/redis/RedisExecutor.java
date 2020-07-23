@@ -42,7 +42,6 @@ public class RedisExecutor {
     //RedissonClient client = redissonConfig.redissonClusterClient();
     RedissonClient client = redissonConfig.redismodelRecognition();
 
-
     /**
      * 根据domain创建SQL执行器.
      *

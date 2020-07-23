@@ -50,7 +50,7 @@ jobs:
           export NODE2_IP=127.0.0.1:20201
           export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
           chmod u+x .ci/script/build-ci.sh
-          .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root
+          .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root 127.0.0.1:6379
       - name: Run CI
         run: |
           export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH

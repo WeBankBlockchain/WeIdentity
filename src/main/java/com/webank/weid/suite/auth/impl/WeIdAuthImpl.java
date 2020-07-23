@@ -310,7 +310,7 @@ public class WeIdAuthImpl implements WeIdAuth {
 
         String weIdAuthData = DataToolUtils.serialize(weIdAuthObj);
         String channelId = weIdAuthObj.getChannelId();
-        ResponseData<Integer> dbResp = getDataDriver().saveOrUpdate(
+        ResponseData<Integer> dbResp = getDataDriver().addOrUpdate(
             MysqlDriverConstant.DOMAIN_WEID_AUTH,
             channelId,
             weIdAuthData);

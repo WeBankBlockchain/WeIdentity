@@ -278,7 +278,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
             String templateSecretKey = issuerResult.templateSecretKey;
             ResponseData<Integer> resp =
-                getDataDriver().saveOrUpdate(
+                getDataDriver().addOrUpdate(
                     MysqlDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
                     String.valueOf(cptId),
                     templateSecretKey);

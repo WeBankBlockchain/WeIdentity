@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -58,7 +59,7 @@ public class RedisDriver implements Persistence {
     }
 
     @Override
-    public ResponseData<Integer> batchAdd(String domain, HashMap<String, String> keyValueList) {
+    public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList) {
 
         try {
             List<Object> idHashList = new ArrayList<>();
@@ -185,7 +186,7 @@ public class RedisDriver implements Persistence {
     }
 
     @Override
-    public ResponseData<Integer> saveOrUpdate(String domain, String id, String data) {
+    public ResponseData<Integer> addOrUpdate(String domain, String id, String data) {
 
         ResponseData<String> getRes = this.get(domain, id);
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
@@ -198,7 +199,7 @@ public class RedisDriver implements Persistence {
     }
 
     @Override
-    public ResponseData<Integer> saveTransaction(TransactionArgs transactionArgs) {
+    public ResponseData<Integer> addTransaction(TransactionArgs transactionArgs) {
 
         if (StringUtils.isEmpty(transactionArgs.getRequestId())) {
             logger.error("[redis->add] the id of the data is empty.");

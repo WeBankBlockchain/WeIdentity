@@ -175,7 +175,7 @@ public class BatchTransactionUtils {
      */
     private static boolean saveToDb(TransactionArgs transaction) {
 
-        ResponseData<Integer> dbResp = getDataDriver().saveTransaction(transaction);
+        ResponseData<Integer> dbResp = getDataDriver().addTransaction(transaction);
         if (dbResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             return false;
         }
@@ -225,7 +225,7 @@ public class BatchTransactionUtils {
         //String encryptKey = CryptServiceFactory.getCryptService(CryptType.AES)
         //    .encrypt(privateKey, getKey());
         //ResponseData<Integer> dbResp = getDataDriver()
-        //    .saveOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
+        //    .addOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
         //Integer errorCode = dbResp.getErrorCode();
         //if (errorCode != ErrorCode.SUCCESS.getCode()) {
         //    logger.error("[writeTransaction] save encrypt private key to db failed.errorcode:{}",

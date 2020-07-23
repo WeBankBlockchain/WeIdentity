@@ -398,7 +398,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         //   .get(CredentialConstant.CREDENTIAL_META_KEY_ID);
         String dbKey = credentialPojo.getId();
         ResponseData<Integer> dbResponse =
-            getDataDriver().saveOrUpdate(
+            getDataDriver().addOrUpdate(
                 MysqlDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                 dbKey,
                 newCredentialSignature);
