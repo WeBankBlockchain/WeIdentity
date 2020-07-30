@@ -34,6 +34,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DateUtils;
 
 /**
  * setAuthentication method for testing WeIdService.
@@ -401,11 +402,12 @@ public class TestSetAuthentication extends TestBaseService {
      */
     @Test
     public void testSetAuthentication_owerNotExist() {
-
-        final String weid = "did:weid:1:0x39e5e6f663ef77409144014ceb063713b656aaf7";
+        String weId = createWeId().getWeId();
+        weId = weId.replace(weId.substring(weId.length() - 4, weId.length()),
+            DateUtils.getNoMillisecondTimeStampString());
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setOwner(weid);
+        setAuthenticationArgs.setOwner(weId);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResult.getWeId(), setAuthenticationArgs,
@@ -422,8 +424,8 @@ public class TestSetAuthentication extends TestBaseService {
     @Test
     public void testSetAuthentication_twoAuthentication() {
 
-        final String weid1 = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b656aaf7";
-        final String weid2 = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b656aaf8";
+        final String weid1 = createWeId().getWeId();
+        final String weid2 = createWeId().getWeId();
         CreateWeIdDataResult createWeIdResultWithSetAttr = super.createWeId();
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResultWithSetAttr);
@@ -559,7 +561,8 @@ public class TestSetAuthentication extends TestBaseService {
 
         PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
         String pubKey = passwordKey.getPublicKey();
-        String weId = "did:weid:101:0x52560bcb2aea030347fe1891f09" + System.currentTimeMillis();
+        String weId = createWeId().getWeId();
+        weId = weId.replace(weId.substring(weId.length() - 4, weId.length()), "ffff");
         LogUtil.info(logger, "weid", weId);
 
         AuthenticationArgs authenticationArgs = new AuthenticationArgs();

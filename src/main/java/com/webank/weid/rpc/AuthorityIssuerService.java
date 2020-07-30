@@ -23,6 +23,7 @@ import java.util.List;
 
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -62,6 +63,24 @@ public interface AuthorityIssuerService {
      * @return true if yes, false otherwise
      */
     ResponseData<Boolean> isAuthorityIssuer(String weId);
+
+    /**
+     * Recognize this WeID to be an authority issuer.
+     *
+     * @param weId the WeID
+     * @param weIdPrivateKey the private key set
+     * @return true if succeeds, false otherwise
+     */
+    ResponseData<Boolean> recognizeAuthorityIssuer(String weId, WeIdPrivateKey weIdPrivateKey);
+
+    /**
+     * De-recognize this WeID to no longer be and authority issuer.
+     *
+     * @param weId the WeID
+     * @param weIdPrivateKey the private key set
+     * @return true if succeeds, false otherwise
+     */
+    ResponseData<Boolean> deRecognizeAuthorityIssuer(String weId, WeIdPrivateKey weIdPrivateKey);
 
     /**
      * Query the authority issuer information from a given WeIdentity DID.
