@@ -390,14 +390,15 @@ public class TestCreateCredentialPojo extends TestBaseService {
     @Test
     public void testCreateCredentialPojo_authenticationCptSuccess() {
 
-        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
-            TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
-
         CreateWeIdDataResult createWeIdDataResult = super.createWeId();
         super.registerAuthorityIssuer(createWeIdDataResult);
+        authorityIssuerService.recognizeAuthorityIssuer(createWeIdDataResult.getWeId(),
+            new WeIdPrivateKey(privateKey));
         CptBaseInfo cptBaseInfo = super.registerCpt(createWeIdDataResult);
         Assert.assertTrue(cptBaseInfo.getCptId() < 2000000);
 
+        CreateCredentialPojoArgs<Map<String, Object>> createCredentialPojoArgs =
+            TestBaseUtil.buildCreateCredentialPojoArgs(createWeIdResultWithSetAttr);
         createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
 
         ResponseData<CredentialPojo> response =
