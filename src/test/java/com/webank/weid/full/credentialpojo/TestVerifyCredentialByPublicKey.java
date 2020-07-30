@@ -19,13 +19,11 @@
 
 package com.webank.weid.full.credentialpojo;
 
-import java.security.SignatureException;
 import java.util.Map;
 
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -43,7 +41,6 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.util.DataToolUtils;
 
 /**
  * verifyCredential method for testing CredentialService.
@@ -591,8 +588,10 @@ public class TestVerifyCredentialByPublicKey extends TestBaseService {
     public void testVerifyCredential_invalidIssuer() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer("did:weid:101:0xbb1670306aedfaeb75cff9581c99e56ba4797441");
-        
+        String weId = createWeId().getWeId();
+        weId = weId.replace(weId.substring(weId.length() - 4, weId.length()), "ffff");
+        copyCredentialPojo.setIssuer(weId);
+
         ResponseData<Boolean> response = super.verifyCredentialPojo(weIdPublicKey,
             copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
@@ -655,7 +654,7 @@ public class TestVerifyCredentialByPublicKey extends TestBaseService {
 
         ResponseData<Boolean> response = super.verifyCredentialPojo(weIdPublicKey,
             newCredentialPojo);
-        LogUtil.info(logger, "verifyCredential", response); 
+        LogUtil.info(logger, "verifyCredential", response);
 
         Assert.assertEquals(ErrorCode.CREDENTIAL_ISSUER_INVALID.getCode(),
             response.getErrorCode().intValue());
