@@ -21,10 +21,10 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
 
     private static CreateWeIdDataResult createWeId;
 
-    private  String issuerType = null;
+    private String issuerType = null;
 
     @Override
-    public synchronized void testInit()  {
+    public synchronized void testInit() {
 
         super.testInit();
         if (createWeId == null) {
@@ -36,28 +36,13 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
     }
 
     /**
-     * case : test add issuer into issuer type success.
-     */
-    @Test
-    public void testAddIssuerIntoIssuerType_success() {
-        WeIdAuthentication weIdAuthentication =
-            TestBaseUtil.buildWeIdAuthentication(createWeId);
-
-        ResponseData<Boolean> response = authorityIssuerService
-            .addIssuerIntoIssuerType(weIdAuthentication, issuerType, super.createWeId().getWeId());
-        LogUtil.info(logger, "addIssuerIntoIssuerType", response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertTrue(response.getResult());
-    }
-
-    /**
      * case : test repeat add issuer into issuer type success.
      */
     @Test
     public void testAddIssuerIntoIssuerType_repeatFail() {
         WeIdAuthentication weIdAuthentication =
             TestBaseUtil.buildWeIdAuthentication(createWeId);
+        weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey(privateKey));
         CreateWeIdDataResult weId = super.createWeId();
 
         ResponseData<Boolean> response = authorityIssuerService
@@ -207,7 +192,7 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
     public void testAddIssuerIntoIssuerType_otherPriKey() {
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         weIdAuthentication.setWeIdPrivateKey(createWeIdResult.getUserWeIdPrivateKey());
-        
+
         ResponseData<Boolean> response = authorityIssuerService
             .addIssuerIntoIssuerType(weIdAuthentication, issuerType, createWeIdResult.getWeId());
         LogUtil.info(logger, "addIssuerIntoIssuerType", response);
@@ -224,6 +209,8 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
     public void testAddIssuerIntoIssuerType_otherAuthorPriKey() {
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         CreateWeIdDataResult weIdDataResult = super.registerAuthorityIssuer();
+        authorityIssuerService
+            .recognizeAuthorityIssuer(weIdDataResult.getWeId(), new WeIdPrivateKey(privateKey));
         weIdAuthentication.setWeIdPrivateKey(weIdDataResult.getUserWeIdPrivateKey());
 
         ResponseData<Boolean> response = authorityIssuerService
@@ -242,6 +229,7 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
     public void testAddIssuerIntoIssuerType_PubKeyNull() {
 
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
+        weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey(privateKey));
         weIdAuthentication.setWeIdPublicKeyId(null);
 
         ResponseData<Boolean> response = authorityIssuerService
@@ -261,9 +249,10 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         char[] chars = new char[100];
         for (int i = 0; i < chars.length; i++) {
-            chars[i] =  (char)(i % 127);
+            chars[i] = (char) (i % 127);
         }
         weIdAuthentication.setWeIdPublicKeyId(String.valueOf(chars));
+        weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey(privateKey));
 
         ResponseData<Boolean> response = authorityIssuerService
             .addIssuerIntoIssuerType(weIdAuthentication, issuerType, super.createWeId().getWeId());

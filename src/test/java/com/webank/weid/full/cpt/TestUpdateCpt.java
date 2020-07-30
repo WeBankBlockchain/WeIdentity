@@ -36,6 +36,7 @@ import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
@@ -154,7 +155,8 @@ public class TestUpdateCpt extends TestBaseService {
     public void testUpdateCpt_noAuthIssuerUpdateAuthCptFail() {
 
         CreateWeIdDataResult createWeId = super.registerAuthorityIssuer();
-
+        authorityIssuerService.recognizeAuthorityIssuer(createWeId.getWeId(),
+            new WeIdPrivateKey(privateKey));
         CptMapArgs cptMapArgs = TestBaseUtil.buildCptArgs(createWeId);
         CptBaseInfo cptBaseInfo = cptService.registerCpt(cptMapArgs).getResult();
         Assert.assertTrue(cptBaseInfo.getCptId() < 2000000);
