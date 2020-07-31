@@ -100,6 +100,7 @@ import org.fisco.bcos.web3j.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
@@ -107,6 +108,7 @@ import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.RsvSignature;
 
 /**
@@ -468,6 +470,43 @@ public final class DataToolUtils {
         return StringUtils.isNotEmpty(cptJsonSchema)
             && isValidJsonSchema(cptJsonSchema)
             && cptJsonSchema.length() <= WeIdConstant.JSON_SCHEMA_MAX_LENGTH;
+    }
+
+    /**
+     * Check if this json string is in valid format.
+     *
+     * @param json Json string
+     * @return true if yes, false otherwise
+     */
+    public static boolean isValidJsonStr(String json) {
+        if (StringUtils.isEmpty(json)) {
+            return false;
+        }
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.readTree(json);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * create new cpt json schema.
+     *
+     * @param args Map
+     * @return String
+     */
+    public static String cptSchemaToString(CptMapArgs args) {
+
+        Map<String, Object> cptJsonSchema = args.getCptJsonSchema();
+        Map<String, Object> cptJsonSchemaNew = new HashMap<String, Object>();
+        cptJsonSchemaNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
+        cptJsonSchemaNew.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
+        cptJsonSchemaNew.putAll(cptJsonSchema);
+        String cptType = args.getCptType().getName();
+        cptJsonSchemaNew.put(CredentialConstant.CPT_TYPE_KEY, cptType);
+        return DataToolUtils.serialize(cptJsonSchemaNew);
     }
 
     /**
