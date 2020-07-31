@@ -19,10 +19,14 @@
 
 package com.webank.weid.service.impl.engine;
 
+import java.util.List;
+
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.PresentationPolicyE;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 
@@ -32,7 +36,7 @@ import com.webank.weid.protocol.response.RsvSignature;
  * @author tonychen 2019年6月25日
  */
 public interface CptServiceEngine extends ReloadStaticContract {
-    
+
     /**
      * call cpt contract to update cpt based on cptid.
      *
@@ -48,7 +52,8 @@ public interface CptServiceEngine extends ReloadStaticContract {
         String address,
         String cptJsonSchemaNew,
         RsvSignature rsvSignature,
-        String privateKey
+        String privateKey,
+        int dataStorageIndex
     );
 
     /**
@@ -66,7 +71,8 @@ public interface CptServiceEngine extends ReloadStaticContract {
         String address,
         String cptJsonSchemaNew,
         RsvSignature rsvSignature,
-        String privateKey
+        String privateKey,
+        int dataStorageIndex
     );
 
     /**
@@ -82,7 +88,8 @@ public interface CptServiceEngine extends ReloadStaticContract {
         String address,
         String cptJsonSchemaNew,
         RsvSignature rsvSignature,
-        String privateKey
+        String privateKey,
+        int dataStorageIndex
     );
 
     /**
@@ -91,7 +98,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @param cptId the id of the cpt
      * @return cpt info
      */
-    ResponseData<Cpt> queryCpt(int cptId);
+    ResponseData<Cpt> queryCpt(int cptId, int dataStorageIndex);
 
     /**
      * query cpt credential template.
@@ -100,4 +107,16 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @return Cpt Credential Template
      */
     ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId);
+
+    ResponseData<Integer> putPolicyIntoPresentation(List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey);
+
+    ResponseData<PresentationPolicyE> getPolicyFromPresentation(Integer presentationId);
+
+    ResponseData<Integer> putPolicyIntoCpt(Integer cptId, List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey);
+
+    ResponseData<List<Integer>> getPolicyFromCpt(Integer cptId);
+
+    ResponseData<List<Integer>> getCptLists(int startPos, int num, int dataStorageIndex);
 }
