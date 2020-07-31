@@ -268,6 +268,9 @@ public final class WeIdConstant {
 
     public static final Integer ADD_PUBKEY_FAILURE_CODE = -1;
 
+    public static final Integer CPT_DATA_INDEX = 0;
+    public static final Integer POLICY_DATA_INDEX = 1;
+
     public static final Long RECOGNIZED_AUTHORITY_ISSUER_FLAG = 1L;
 
     public static enum PublicKeyType {
