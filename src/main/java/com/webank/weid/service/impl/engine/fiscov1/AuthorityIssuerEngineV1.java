@@ -97,6 +97,11 @@ public class AuthorityIssuerEngineV1 extends BaseEngine implements AuthorityIssu
         return new ResponseData<>(StringUtils.EMPTY, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
 
+    @Override
+    public ResponseData<Boolean> recognizeWeId(Boolean type, String weId, String privateKey) {
+        return new ResponseData<>(false, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+    }
+
     /**
      * Use the given private key to send the transaction to call the contract.
      *

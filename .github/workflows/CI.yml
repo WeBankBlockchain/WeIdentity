@@ -21,7 +21,6 @@ jobs:
       - name: Verify MySQL connection and create CI DB
         run: |
           sudo systemctl start mysql.service
-          sudo apt-get install -y mysql-client
           mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'CREATE DATABASE IF NOT EXISTS cidb;'
           mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'show databases;'
       - name: Prepare blockchain nodes and certificates
