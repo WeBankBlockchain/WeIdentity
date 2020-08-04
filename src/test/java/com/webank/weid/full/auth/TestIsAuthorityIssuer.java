@@ -28,6 +28,8 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -44,29 +46,11 @@ public class TestIsAuthorityIssuer extends TestBaseService {
     private static CreateWeIdDataResult createWeId;
 
     @Override
-    public synchronized void testInit()  {
+    public synchronized void testInit() {
 
         super.testInit();
         if (createWeId == null) {
             createWeId = super.registerAuthorityIssuer();
-        }
-
-    }
-
-    /**
-     * case: test many times isAuthorityIssuer success.
-     */
-    @Test
-    public void testIsAuthorityIssuerRepeatSuccess() {
-
-        String weId = createWeId.getWeId();
-        for (int i = 0; i < 3; i++) {
-            ResponseData<Boolean> response =
-                authorityIssuerService.isAuthorityIssuer(weId);
-            LogUtil.info(logger, "isAuthorityIssuer", response);
-
-            Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-            Assert.assertEquals(true, response.getResult());
         }
 
     }
@@ -80,9 +64,37 @@ public class TestIsAuthorityIssuer extends TestBaseService {
         ResponseData<Boolean> response =
             authorityIssuerService.isAuthorityIssuer(createWeId.getWeId());
         LogUtil.info(logger, "isAuthorityIssuer", response);
+        Assert.assertFalse(response.getResult());
+        AuthorityIssuer authorityIssuer =
+            authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId()).getResult();
+        Assert.assertFalse(authorityIssuer.isRecognized());
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(true, response.getResult());
+        response = authorityIssuerService.recognizeAuthorityIssuer(createWeId.getWeId(),
+            new WeIdPrivateKey(privateKey));
+        Assert.assertTrue(response.getResult());
+        response = authorityIssuerService.isAuthorityIssuer(createWeId.getWeId());
+        Assert.assertTrue(response.getResult());
+        authorityIssuer =
+            authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId()).getResult();
+        Assert.assertTrue(authorityIssuer.isRecognized());
+        authorityIssuerService
+            .deRecognizeAuthorityIssuer(createWeId.getWeId(), new WeIdPrivateKey(privateKey));
+        response = authorityIssuerService.isAuthorityIssuer(createWeId.getWeId());
+        Assert.assertFalse(response.getResult());
+
+        response = authorityIssuerService.recognizeAuthorityIssuer(
+            createWeIdWithSetAttr().getWeId(), new WeIdPrivateKey(privateKey));
+        Assert.assertFalse(response.getResult());
+        Assert.assertEquals(response.getErrorCode().intValue(),
+            ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode());
+
+        authorityIssuerService.recognizeAuthorityIssuer(createWeId.getWeId(),
+            new WeIdPrivateKey(privateKey));
+        response = authorityIssuerService.deRecognizeAuthorityIssuer(createWeId.getWeId(),
+            new WeIdPrivateKey("11111111"));
+        Assert.assertFalse(response.getResult());
+        Assert.assertEquals(response.getErrorCode().intValue(),
+            ErrorCode.CONTRACT_ERROR_NO_PERMISSION.getCode());
     }
 
     /**
@@ -229,5 +241,5 @@ public class TestIsAuthorityIssuer extends TestBaseService {
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
-   
+
 }

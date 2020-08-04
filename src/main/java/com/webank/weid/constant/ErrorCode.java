@@ -648,6 +648,14 @@ public enum ErrorCode {
     ),
 
     /**
+     * The issuer is not recognized.
+     */
+    AUTHORITY_ISSUER_CONTRACT_ERROR_UNRECOGNIZED(
+        500204,
+        "this issuer has not been recognized yet."
+    ),
+
+    /**
      * The Specific Issuer Contract level error: already exists.
      */
     SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_EXISTS(
