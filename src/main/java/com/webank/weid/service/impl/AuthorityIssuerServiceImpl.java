@@ -33,6 +33,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -112,7 +113,60 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return authEngine.isAuthorityIssuer(addr);
         } catch (Exception e) {
             logger.error("check authority issuer id failed.", e);
-            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
+                e.getMessage());
+        }
+    }
+
+    /**
+     * Recognize this WeID to be an authority issuer.
+     *
+     * @param weId the WeID
+     * @param weIdPrivateKey the private key set
+     * @return true if succeeds, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> recognizeAuthorityIssuer(String weId,
+        WeIdPrivateKey weIdPrivateKey) {
+        if (!weIdService.isWeIdExist(weId).getResult()) {
+            return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
+        }
+        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
+            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
+        }
+        String addr = WeIdUtils.convertWeIdToAddress(weId);
+        try {
+            return authEngine.recognizeWeId(true, addr, weIdPrivateKey.getPrivateKey());
+        } catch (Exception e) {
+            logger.error("Failed to recognize authority issuer.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
+                e.getMessage());
+        }
+    }
+
+    /**
+     * De-recognize this WeID to no longer be and authority issuer.
+     *
+     * @param weId the WeID
+     * @param weIdPrivateKey the private key set
+     * @return true if succeeds, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> deRecognizeAuthorityIssuer(String weId,
+        WeIdPrivateKey weIdPrivateKey) {
+        if (!weIdService.isWeIdExist(weId).getResult()) {
+            return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
+        }
+        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey)) {
+            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
+        }
+        String addr = WeIdUtils.convertWeIdToAddress(weId);
+        try {
+            return authEngine.recognizeWeId(false, addr, weIdPrivateKey.getPrivateKey());
+        } catch (Exception e) {
+            logger.error("Failed to recognize authority issuer.", e);
+            return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
+                e.getMessage());
         }
     }
 
