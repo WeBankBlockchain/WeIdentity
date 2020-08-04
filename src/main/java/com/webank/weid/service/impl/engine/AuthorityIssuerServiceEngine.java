@@ -136,4 +136,6 @@ public interface AuthorityIssuerServiceEngine extends ReloadStaticContract {
     );
 
     public ResponseData<String> getWeIdFromOrgId(String orgId);
+
+    public ResponseData<Boolean> recognizeWeId(Boolean isRecognize, String addr, String privateKey);
 }
