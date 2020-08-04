@@ -737,7 +737,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
     /**
      * case: privateKey is valid but is a random integer.
      */
-    @Test
     public void testRegisterAuthorityIssuer_prikeyIsInteger() {
 
         RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
@@ -754,29 +753,8 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
     }
 
     /**
-     * case: privateKey and private key of WeIdentity DID do not match.
-     */
-    @Test
-    public void testRegisterAuthorityIssuerCase15() {
-
-        RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs =
-            TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
-        registerAuthorityIssuerArgs.getWeIdPrivateKey()
-            .setPrivateKey(TestBaseUtil.createEcKeyPair().getPrivateKey());
-
-        ResponseData<Boolean> response =
-            authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
-        LogUtil.info(logger, "registerAuthorityIssuer", response);
-
-        Assert.assertEquals(ErrorCode.CONTRACT_ERROR_NO_PERMISSION.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
      * case: privateKey belongs to the private key of other WeIdentity DID.
      */
-    @Test
     public void testRegisterAuthorityIssuer_otherPrivateKey() {
 
         CreateWeIdDataResult createWeId = super.createWeId();
