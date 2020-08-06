@@ -213,13 +213,22 @@ public class DeployContractV2 extends AddressProcess {
                     authorityIssuerDataAddress).send();
             String cptDataAddress = cptData.getContractAddress();
 
+            CptData policyData =
+                CptData.deploy(
+                    web3j,
+                    credentials,
+                    new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                    authorityIssuerDataAddress).send();
+            String policyDataAddress = policyData.getContractAddress();
+
             CptController cptController =
                 CptController.deploy(
                     web3j,
                     credentials,
                     new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
                     cptDataAddress,
-                    weIdContractAddress
+                    weIdContractAddress,
+                    policyDataAddress
                 ).send();
             String cptControllerAddress = cptController.getContractAddress();
             writeAddressToFile(cptControllerAddress, "cptController.address");

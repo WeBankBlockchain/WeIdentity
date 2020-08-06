@@ -72,6 +72,8 @@ import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.exception.ResolveAttributeException;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.PresentationPolicyE;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
@@ -253,7 +255,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
      */
     @Override
     public ResponseData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey) {
+        RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
 
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
@@ -301,7 +303,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
      */
     @Override
     public ResponseData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey) {
+        RsvSignature rsvSignature, String privateKey, int dataStorageIndexs) {
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
@@ -349,7 +351,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
      */
     @Override
     public ResponseData<CptBaseInfo> registerCpt(String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey) {
+        RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
 
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
@@ -429,7 +431,7 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
      * @see com.webank.weid.service.impl.engine.CptEngineController#queryCpt(int)
      */
     @Override
-    public ResponseData<Cpt> queryCpt(int cptId) {
+    public ResponseData<Cpt> queryCpt(int cptId, int dataStorageIndex) {
         try {
 
             List<Type> typeList = cptController
@@ -566,5 +568,27 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
         }
         return new ResponseData<CredentialTemplateEntity>(credentialTemplateStorage,
             ErrorCode.SUCCESS);
+    }
+
+    @Override
+    public ResponseData<Integer> putPolicyIntoPresentation(List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey) {
+        return new ResponseData<>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public ResponseData<PresentationPolicyE> getPolicyFromPresentation(Integer presentationId) {
+        return new ResponseData<>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public ResponseData<Integer> putPolicyIntoCpt(Integer cptId, List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey) {
+        return new ResponseData<>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+    }
+
+    @Override
+    public ResponseData<List<Integer>> getPolicyFromCpt(Integer cptId) {
+        return new ResponseData<>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
 }

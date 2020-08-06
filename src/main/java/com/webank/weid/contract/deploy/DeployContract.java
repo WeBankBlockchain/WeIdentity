@@ -62,7 +62,8 @@ public abstract class DeployContract {
      */
     public static void main(String[] args) {
         
-        String chainId = args[0];
+        //String chainId = args[0];
+        String chainId = "101";
         String privateKey = null;
         if (args != null && args.length > 2) {
             privateKey = args[1];

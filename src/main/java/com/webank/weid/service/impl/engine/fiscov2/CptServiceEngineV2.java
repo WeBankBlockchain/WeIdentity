@@ -46,6 +46,7 @@ import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceip
 import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.fisco.bcos.web3j.tuples.generated.Tuple7;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,8 +60,11 @@ import com.webank.weid.contract.v2.CptController.CredentialTemplateEventResponse
 import com.webank.weid.contract.v2.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.contract.v2.CptController.UpdateCptRetLogEventResponse;
 import com.webank.weid.exception.DatabaseException;
+import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.PresentationPolicyE;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.service.impl.engine.BaseEngine;
@@ -94,7 +98,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             reload();
         }
     }
-    
+
     /**
      * 重新加载静态合约对象.
      */
@@ -116,7 +120,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      */
     @Override
     public ResponseData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey) {
+        RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
 
         List<byte[]> byteArray = new ArrayList<>();
         TransactionReceipt transactionReceipt;
@@ -138,7 +142,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
                 rsvSignature.getV().getValue(),
                 rsvSignature.getR().getValue(),
-                rsvSignature.getS().getValue()
+                rsvSignature.getS().getValue(),
+                BigInteger.valueOf(Long.valueOf(dataStorageIndex))
             ).send();
 
             ResponseData<CptBaseInfo> response = processUpdateEventLog(cptController,
@@ -167,7 +172,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      */
     @Override
     public ResponseData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey) {
+        RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
 
         List<byte[]> byteArray = new ArrayList<>();
 
@@ -190,7 +195,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
                 rsvSignature.getV().getValue(),
                 rsvSignature.getR().getValue(),
-                rsvSignature.getS().getValue()
+                rsvSignature.getS().getValue(),
+                BigInteger.valueOf(Long.valueOf(dataStorageIndex))
             ).send();
 
             ResponseData<CptBaseInfo> response = processRegisterEventLog(cptController,
@@ -221,7 +227,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         String address,
         String cptJsonSchemaNew,
         RsvSignature rsvSignature,
-        String privateKey) {
+        String privateKey,
+        int dataStorageIndex) {
 
         List<byte[]> byteArray = new ArrayList<>();
         TransactionReceipt transactionReceipt;
@@ -242,7 +249,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
                 rsvSignature.getV().getValue(),
                 rsvSignature.getR().getValue(),
-                rsvSignature.getS().getValue()
+                rsvSignature.getS().getValue(),
+                BigInteger.valueOf(Long.valueOf(dataStorageIndex))
             ).send();
 
             //
@@ -356,13 +364,15 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      * @see com.webank.weid.service.impl.engine.CptEngineController#queryCpt(int)
      */
     @Override
-    public ResponseData<Cpt> queryCpt(int cptId) {
+    public ResponseData<Cpt> queryCpt(int cptId, int dataStorageIndex) {
 
         try {
             Tuple7<String, List<BigInteger>, List<byte[]>, List<byte[]>,
                 BigInteger, byte[], byte[]> valueList =
                 cptController
-                    .queryCpt(new BigInteger(String.valueOf(cptId))).sendAsync()
+                    .queryCpt(new BigInteger(String.valueOf(cptId)),
+                        BigInteger.valueOf(Long.valueOf(dataStorageIndex)))
+                    .sendAsync()
                     .get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
 
             if (valueList == null) {
@@ -489,7 +499,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     }
                 }
             }
-            ResponseData<Cpt> resp = this.queryCpt(cptId);
+            ResponseData<Cpt> resp = this.queryCpt(cptId, WeIdConstant.CPT_DATA_INDEX);
             Cpt cpt = resp.getResult();
 
             Map<String, Object> cptInfo = cpt.getCptJsonSchema();
@@ -509,5 +519,119 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
         return new ResponseData<CredentialTemplateEntity>(credentialTemplateStorage,
             ErrorCode.SUCCESS);
+    }
+
+    @Override
+    public ResponseData<Integer> putPolicyIntoPresentation(List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey) {
+        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey) || !isPolicyIdListValid(policyIdList)) {
+            return new ResponseData<>(-1, ErrorCode.ILLEGAL_INPUT);
+        }
+        CptController cptController =
+            reloadContract(fiscoConfig.getCptAddress(), weIdPrivateKey.getPrivateKey(),
+                CptController.class);
+        List<BigInteger> idBigIntList = new ArrayList<>();
+        for (Integer policyId : policyIdList) {
+            idBigIntList.add(new BigInteger(String.valueOf(policyId), 10));
+        }
+        try {
+            TransactionReceipt transactionReceipt = cptController
+                .putClaimPoliciesIntoPresentationMap(idBigIntList).send();
+            ResponseData<CptBaseInfo> response = processRegisterEventLog(cptController,
+                transactionReceipt);
+            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(response.getResult().getCptId().intValue(),
+                    ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(-1, ErrorCode.UNKNOW_ERROR);
+            }
+        } catch (Exception e) {
+            logger.error("[register policy] register policy failed. exception message: ", e);
+            return new ResponseData<Integer>(-1, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    private boolean isPolicyIdListValid(List<Integer> policyIdList) {
+        for (Integer policyId : policyIdList) {
+            if (policyId < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public ResponseData<PresentationPolicyE> getPolicyFromPresentation(Integer presentationId) {
+        try {
+            Tuple2<List<BigInteger>, String> tuple = cptController
+                .getClaimPoliciesFromPresentationMap(
+                    new BigInteger(String.valueOf(presentationId), 10)).send();
+            List<BigInteger> list = tuple.getValue1();
+            List<Integer> policies = new ArrayList<>();
+            for (Object obj : list) {
+                policies.add(((BigInteger) obj).intValue());
+            }
+            PresentationPolicyE presentationPolicy = new PresentationPolicyE();
+            presentationPolicy.setId(presentationId);
+            Map<Integer, ClaimPolicy> policyMap = new HashMap<>();
+            for (Integer id : policies) {
+                policyMap.put(id, null);
+            }
+            presentationPolicy.setPolicy(policyMap);
+            String addr = tuple.getValue2();
+            presentationPolicy.setPolicyPublisherWeId(WeIdUtils.convertAddressToWeId(addr));
+            return new ResponseData<>(presentationPolicy, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[queryCpt] query Cpt failed. exception message: ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<Integer> putPolicyIntoCpt(Integer cptId, List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey) {
+        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey) || !isPolicyIdListValid(policyIdList)
+            || cptId < 1) {
+            return new ResponseData<>(-1, ErrorCode.ILLEGAL_INPUT);
+        }
+        CptController cptController =
+            reloadContract(fiscoConfig.getCptAddress(), weIdPrivateKey.getPrivateKey(),
+                CptController.class);
+        List<BigInteger> idBigIntList = new ArrayList<>();
+        for (Integer policyId : policyIdList) {
+            idBigIntList.add(new BigInteger(String.valueOf(policyId), 10));
+        }
+        try {
+            TransactionReceipt transactionReceipt = cptController
+                .putClaimPoliciesIntoCptMap(new BigInteger(String.valueOf(cptId), 10), idBigIntList)
+                .send();
+            ResponseData<CptBaseInfo> response = processRegisterEventLog(cptController,
+                transactionReceipt);
+            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(response.getResult().getCptId().intValue(),
+                    ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(-1, ErrorCode.UNKNOW_ERROR);
+            }
+        } catch (Exception e) {
+            logger.error("[register policy] register policy failed. exception message: ", e);
+            return new ResponseData<Integer>(-1, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<List<Integer>> getPolicyFromCpt(Integer cptId) {
+        try {
+            List list = cptController.getClaimPoliciesFromCptMap(
+                new BigInteger(String.valueOf(cptId), 10)).send();
+            List<Integer> policies = new ArrayList<>();
+            for (Object obj : list) {
+                policies.add(((BigInteger) obj).intValue());
+            }
+            return new ResponseData<>(policies, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[queryCpt] query Cpt failed. exception message: ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
     }
 }

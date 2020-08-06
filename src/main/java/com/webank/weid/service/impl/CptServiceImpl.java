@@ -136,14 +136,14 @@ public class CptServiceImpl extends AbstractService implements CptService {
 
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
-            String cptJsonSchemaNew = this.cptSchemaToString(args);
+            String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
                 weId,
                 cptJsonSchemaNew,
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey());
+                weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -175,14 +175,14 @@ public class CptServiceImpl extends AbstractService implements CptService {
 
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
-            String cptJsonSchemaNew = this.cptSchemaToString(args);
+            String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
                 weId,
                 cptJsonSchemaNew,
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey());
+                weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -204,7 +204,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
             String cptIdStr = String.valueOf(cptId);
             ResponseData<Cpt> result = cptCahceNode.get(cptIdStr);
             if (result == null) {
-                result = cptServiceEngine.queryCpt(cptId);
+                result = cptServiceEngine.queryCpt(cptId, WeIdConstant.CPT_DATA_INDEX);
                 if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                     cptCahceNode.put(cptIdStr, result);
                 }
@@ -270,7 +270,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
 
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
-            String cptJsonSchemaNew = this.cptSchemaToString(args);
+            String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
                 weId,
                 cptJsonSchemaNew,
@@ -281,7 +281,8 @@ public class CptServiceImpl extends AbstractService implements CptService {
                 address,
                 cptJsonSchemaNew,
                 rsvSignature,
-                weIdPrivateKey.getPrivateKey());
+                weIdPrivateKey.getPrivateKey(),
+                WeIdConstant.CPT_DATA_INDEX);
             if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                 cptCahceNode.remove(String.valueOf(cptId));
             }
@@ -362,23 +363,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
         return ErrorCode.SUCCESS;
     }
 
-    /**
-     * create new cpt json schema.
-     *
-     * @param cptJsonSchema Map
-     * @return String
-     */
-    private String cptSchemaToString(CptMapArgs args) throws Exception {
 
-        Map<String, Object> cptJsonSchema = args.getCptJsonSchema();
-        Map<String, Object> cptJsonSchemaNew = new HashMap<String, Object>();
-        cptJsonSchemaNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
-        cptJsonSchemaNew.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
-        cptJsonSchemaNew.putAll(cptJsonSchema);
-        String cptType = args.getCptType().getName();
-        cptJsonSchemaNew.put(CredentialConstant.CPT_TYPE_KEY, cptType);
-        return DataToolUtils.serialize(cptJsonSchemaNew);
-    }
 
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.CptService#queryCredentialTemplate(java.lang.Integer)
