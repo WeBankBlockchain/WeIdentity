@@ -126,7 +126,7 @@ function  install_font()
 {
     # download NotoSansCJKtc-Regular.ttf
     if [ ! -f NotoSansCJKtc-Regular.ttf ]; then
-        wget -c https://www.fisco.com.cn/cdn/weevent/weidentity/download/releases/NotoSansCJKtc-Regular.ttf
+        wget -c https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeIdentity/NotoSansCJKtc-Regular.ttf
     fi
 
     if [ -f NotoSansCJKtc-Regular.ttf ]; then
