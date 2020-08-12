@@ -249,6 +249,11 @@ public final class WeIdConstant {
     public static final String CNS_MAIN_HASH = "mainHash";
     public static final String CNS_EVIDENCE_HASH = "evidenceHash";
 
+    /**
+     * When a block contains ge this much txns, it will be stored in mem cache to save networking.
+     */
+    public static final Integer RECEIPTS_COUNT_THRESHOLD = 100;
+
     public static final Integer ON_CHAIN_STRING_LENGTH = 2097152;
 
     public static final Integer ADD_PUBKEY_FAILURE_CODE = -1;
