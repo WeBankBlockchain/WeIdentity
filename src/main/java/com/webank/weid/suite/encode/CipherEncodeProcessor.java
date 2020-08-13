@@ -44,9 +44,9 @@ import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.crypto.params.KeyGenerator;
-import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.entity.EncodeData;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -89,7 +89,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
                     .encrypt(encodeData.getData(), key);
 
             //保存秘钥
-            ResponseData<Integer> response = this.getDataDriver().save(
+            ResponseData<Integer> response = this.getDataDriver().add(
                 DataDriverConstant.DOMAIN_ENCRYPTKEY, encodeData.getId(), saveData);
             if (response.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 throw new EncodeSuiteException(
