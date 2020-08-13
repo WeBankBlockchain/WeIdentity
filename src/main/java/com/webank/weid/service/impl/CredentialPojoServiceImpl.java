@@ -72,9 +72,9 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 import com.webank.weid.util.CredentialPojoUtils;
@@ -784,7 +784,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 
         //save masterSecret and credentialSecretsBlindingFactors to persistence.
         ResponseData<Integer> dbResp = getDataDriver()
-            .saveOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
+            .addOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
         if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[makeCredential] save masterSecret and blindingFactors to db failed.");
