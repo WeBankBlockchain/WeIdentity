@@ -591,4 +591,9 @@ public class CptServiceEngineV1 extends BaseEngine implements CptServiceEngine {
     public ResponseData<List<Integer>> getPolicyFromCpt(Integer cptId) {
         return new ResponseData<>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
     }
+
+    @Override
+    public ResponseData<List<Integer>> getCptLists(int startPos, int num, int dataStorageIndex) {
+        return new ResponseData<>(null, ErrorCode.FISCO_BCOS_VERSION_NOT_SUPPORTED);
+    }
 }

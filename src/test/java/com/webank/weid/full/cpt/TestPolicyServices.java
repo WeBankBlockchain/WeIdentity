@@ -67,6 +67,16 @@ public class TestPolicyServices extends TestBaseService {
         ResponseData<Integer> registerResp = policyService
             .registerClaimPolicy(cptId, claimPolicy.getFieldsToBeDisclosed(), auth);
         Assert.assertTrue(registerResp.getResult() > 0);
+        registerResp = policyService
+            .registerClaimPolicy(cptId, claimPolicy.getFieldsToBeDisclosed(), auth);
+        Assert.assertTrue(registerResp.getResult() > 0);
+        registerResp = policyService
+            .registerClaimPolicy(cptId, claimPolicy.getFieldsToBeDisclosed(), auth);
+        Assert.assertTrue(registerResp.getResult() > 0);
+        ResponseData<List<Integer>> allPoliciesList = policyService
+            .getAllClaimPolicies(0, 3);
+        Assert.assertEquals(allPoliciesList.getResult().size(), 3);
+        System.out.println(DataToolUtils.serialize(allPoliciesList.getResult()));
         ClaimPolicy claimPolicyFromChain = policyService.getClaimPolicy(registerResp.getResult())
             .getResult();
         Assert.assertFalse(StringUtils.isEmpty(claimPolicyFromChain.getFieldsToBeDisclosed()));

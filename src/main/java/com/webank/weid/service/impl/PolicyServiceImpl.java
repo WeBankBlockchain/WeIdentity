@@ -203,4 +203,20 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         presentationPolicy.setPolicy(policyMap);
         return new ResponseData<>(presentationPolicy, ErrorCode.SUCCESS);
     }
+
+
+    /**
+     * Get all claim policies from chain.
+     *
+     * @param startPos start position
+     * @param num batch number
+     * @return claim policy list
+     */
+    @Override
+    public ResponseData<List<Integer>> getAllClaimPolicies(Integer startPos, Integer num) {
+        if (startPos < 0 || num < 1) {
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        return cptServiceEngine.getCptLists(startPos, num, WeIdConstant.POLICY_DATA_INDEX);
+    }
 }

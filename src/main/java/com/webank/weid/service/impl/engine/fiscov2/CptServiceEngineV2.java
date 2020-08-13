@@ -634,4 +634,23 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
+
+    @Override
+    public ResponseData<List<Integer>> getCptLists(int startPos, int num, int dataStorageIndex) {
+        try {
+            List list = cptController.getCptIds(
+                new BigInteger(String.valueOf(startPos), 10),
+                new BigInteger(String.valueOf(num), 10),
+                new BigInteger(String.valueOf(dataStorageIndex), 10)
+            ).send();
+            List<Integer> cpts = new ArrayList<>();
+            for (Object obj : list) {
+                cpts.add(((BigInteger) obj).intValue());
+            }
+            return new ResponseData<>(cpts, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[queryCpt] query Cpt failed. exception message: ", e);
+            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
 }

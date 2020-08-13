@@ -117,4 +117,6 @@ public interface CptServiceEngine extends ReloadStaticContract {
         WeIdPrivateKey weIdPrivateKey);
 
     ResponseData<List<Integer>> getPolicyFromCpt(Integer cptId);
+
+    ResponseData<List<Integer>> getCptLists(int startPos, int num, int dataStorageIndex);
 }

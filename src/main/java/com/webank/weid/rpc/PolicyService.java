@@ -77,4 +77,13 @@ public interface PolicyService {
      * @return the full presentation policy
      */
     ResponseData<PresentationPolicyE> getPresentationPolicy(Integer presentationPolicyId);
+
+    /**
+     * Get all claim policies from chain.
+     *
+     * @param startPos start position
+     * @param num batch number
+     * @return claim policy list
+     */
+    ResponseData<List<Integer>> getAllClaimPolicies(Integer startPos, Integer num);
 }
