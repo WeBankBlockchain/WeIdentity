@@ -19,8 +19,8 @@ import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 
 /**
  * 批量交易处理类.
@@ -175,7 +175,7 @@ public class BatchTransactionUtils {
      */
     private static boolean saveToDb(TransactionArgs transaction) {
 
-        ResponseData<Integer> dbResp = getDataDriver().saveTransaction(transaction);
+        ResponseData<Integer> dbResp = getDataDriver().addTransaction(transaction);
         if (dbResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             return false;
         }
@@ -225,7 +225,7 @@ public class BatchTransactionUtils {
         //String encryptKey = CryptServiceFactory.getCryptService(CryptType.AES)
         //    .encrypt(privateKey, getKey());
         //ResponseData<Integer> dbResp = getDataDriver()
-        //    .saveOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
+        //    .addOrUpdate(DataDriverConstant.DOMAIN_ENCRYPTKEY, weId, encryptKey);
         //Integer errorCode = dbResp.getErrorCode();
         //if (errorCode != ErrorCode.SUCCESS.getCode()) {
         //    logger.error("[writeTransaction] save encrypt private key to db failed.errorcode:{}",

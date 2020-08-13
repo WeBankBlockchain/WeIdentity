@@ -648,9 +648,12 @@ public final class DataToolUtils {
         String message,
         Sign.SignatureData signatureData)
         throws SignatureException {
-
-        return Sign.signedMessageToKey(sha3(message.getBytes(StandardCharsets.UTF_8)),
-            signatureData);
+        try {
+            return Sign.signedMessageToKey(sha3(message.getBytes(StandardCharsets.UTF_8)),
+                    signatureData);
+        } catch (Exception e) {
+            throw new SignatureException(e);
+        }
     }
 
     /**
