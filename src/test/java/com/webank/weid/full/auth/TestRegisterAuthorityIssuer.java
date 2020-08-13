@@ -786,7 +786,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
         LogUtil.info(logger, "registerAuthorityIssuer", response);
 
-        Assert.assertEquals(false, response.getResult());
+        Assert.assertEquals(true, response.getResult());
     }
 
     /**
