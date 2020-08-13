@@ -22,8 +22,8 @@ import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 
 /**
  * 离线交易批处理工具类.
