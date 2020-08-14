@@ -278,8 +278,8 @@ public class TestSetAuthentication extends TestBaseService {
             createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setAuthentication", response);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(true, response.getResult());
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(false, response.getResult());
     }
 
     /**
