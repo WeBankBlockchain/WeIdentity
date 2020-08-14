@@ -46,6 +46,7 @@ import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -634,13 +635,22 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         return !(publicKeyArgs == null
             || publicKeyArgs.getType() == null
             || StringUtils.isEmpty(publicKeyArgs.getType().getTypeName())
-            || StringUtils.isEmpty(publicKeyArgs.getPublicKey()));
+            || StringUtils.isEmpty(publicKeyArgs.getPublicKey())
+            || !(isPublicKeyStringValid(publicKeyArgs.getPublicKey())));
     }
 
     private boolean verifyAuthenticationArgs(AuthenticationArgs authenticationArgs) {
 
         return !(authenticationArgs == null
-            || StringUtils.isEmpty(authenticationArgs.getPublicKey()));
+            || StringUtils.isEmpty(authenticationArgs.getPublicKey())
+            || !(isPublicKeyStringValid(authenticationArgs.getPublicKey())));
+    }
+
+    private boolean isPublicKeyStringValid(String pubKey) {
+        // Allow base64, rsa (alphaNum) and bigInt
+        return (DataToolUtils.isValidBase64String(pubKey)
+            || StringUtils.isAlphanumeric(pubKey)
+            || NumberUtils.isDigits(pubKey));
     }
 
     /* (non-Javadoc)
