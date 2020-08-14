@@ -164,8 +164,8 @@ public class TestSetPublicKey extends TestBaseService {
             setPublicKeyArgs, createWeIdResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "addPublicKey", response);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertNotEquals(WeIdConstant.ADD_PUBKEY_FAILURE_CODE.intValue(),
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
+        Assert.assertEquals(WeIdConstant.ADD_PUBKEY_FAILURE_CODE.intValue(),
             response.getResult().intValue());
     }
 
