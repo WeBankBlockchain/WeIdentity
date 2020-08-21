@@ -42,6 +42,7 @@ import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.DateUtils;
 
 /**
  * createCredential method for testing CredentialService.
@@ -459,7 +460,9 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_issuerNotExist() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer("did:weid:101:0x39e5e6f663ef77409144014ceb063713b6ffffff");
+        String weId = createWeId().getWeId();
+        weId = weId.replace(weId.substring(weId.length() - 4, weId.length()), "ffff");
+        copyCredentialPojo.setIssuer(weId);
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 
@@ -484,7 +487,10 @@ public class TestCreateSelectiveCredential extends TestBaseService {
     public void testCreateSelectiveCredential_invalidIssuer() {
 
         CredentialPojo copyCredentialPojo = copyCredentialPojo(credentialPojo);
-        copyCredentialPojo.setIssuer("weid:did:101:0x39e5e6f663ef77409144014ceb063713b6ffffff");
+        String weId = createWeId().getWeId();
+        weId = weId.replace(weId.substring(weId.length() - 4, weId.length()),
+            DateUtils.getNoMillisecondTimeStampString());
+        copyCredentialPojo.setIssuer(weId);
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":1,\"gender\":0,\"age\":1,\"id\":1}");
 

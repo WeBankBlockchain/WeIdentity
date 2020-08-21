@@ -54,12 +54,19 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
 
     private void loadDataBucket() {
         if (dataBucket == null) {
-            dataBucket = super.getContractService(getBucketAddress(cnsType), DataBucket.class);
+            dataBucket = super.getContractService(
+                getBucketByCns(cnsType).getAddress(), 
+                DataBucket.class
+            );
         }
     }
 
     private DataBucket getDataBucket(String privateKey) {
-        return super.reloadContract(getBucketAddress(cnsType), privateKey, DataBucket.class);
+        return super.reloadContract(
+            getBucketByCns(cnsType).getAddress(), 
+            privateKey, 
+            DataBucket.class
+        );
     }
 
     @Override
@@ -146,7 +153,11 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     }
 
     @Override
-    public ResponseData<Boolean> remove(String hash, String key, WeIdPrivateKey privateKey) {
+    public ResponseData<Boolean> removeExtraItem(
+        String hash, 
+        String key, 
+        WeIdPrivateKey privateKey
+    ) {
         Bytes32 keyByte32 = null;
         if (key == null) {
             keyByte32 = DataToolUtils.bytesArrayToBytes32(StringUtils.EMPTY.getBytes());
@@ -154,7 +165,8 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
             keyByte32 = DataToolUtils.bytesArrayToBytes32(key.getBytes());
         }
         try {
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).remove(
+            logger.info("[remove] remove Extra Item, hash is {}, key is {}.", hash, key);
+            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).removeExtraItem(
                 hash, keyByte32.getValue()).send();
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
@@ -170,7 +182,35 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
-
+    
+    @Override
+    public ResponseData<Boolean> removeDataBucketItem(
+        String hash, 
+        boolean force, 
+        WeIdPrivateKey privateKey
+    ) {
+        try {
+            logger.info("[remove] remove Bucket Item, hash is {}, force is {}.", hash, force);
+            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
+                .removeDataBucketItem(hash, force).send();
+            if (StringUtils
+                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+                logger.info("[remove] remove Bucket Item from chain success, hash is {}.", hash);
+                ErrorCode  code = analysisErrorCode(receipt);
+                return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
+            }
+            logger.error("[remove] remove Bucket Item from chain fail, hash is {}.", hash);
+            return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            logger.error(
+                "[remove] remove Bucket Item from chain has excpetion, hash is {}, exception:",
+                hash, 
+                e
+            );
+            return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+    
     @Override
     public ResponseData<Boolean> enableHash(String hash, WeIdPrivateKey privateKey) {
         try {
@@ -244,6 +284,30 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         } catch (Exception e) {
             logger.error("[getAllHash] get the all hash fail.", e);
             return new ResponseData<List<HashContract>>(hashContractList, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+    
+    @Override
+    public ResponseData<Boolean> updateHashOwner(
+        String hash, 
+        String newOwner, 
+        WeIdPrivateKey privateKey
+    ) {
+        try {
+            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).updateHashOwner(
+                hash, newOwner).send();
+            if (StringUtils
+                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+                logger.info("[updateHashOwner] update owner success, hash is {}.", hash);
+                ErrorCode  code = analysisErrorCode(receipt);
+                return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
+            }
+            logger.error("[updateHashOwner] update owner fail, hash is {}.", hash);
+            return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        } catch (Exception e) {
+            logger.error("[updateHashOwner] update owner has excpetion, hash is {}, exception:", 
+                hash, e);
+            return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
 }

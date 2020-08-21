@@ -26,7 +26,7 @@ import com.webank.weid.suite.api.transportation.params.TransType;
 
 @Data
 public class TransmissionRequest<T> {
-    private String orgId;
+    private String amopId;
     private T args;
     private String serviceType;
     private TransType transType;

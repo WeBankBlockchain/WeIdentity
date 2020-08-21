@@ -99,11 +99,27 @@ public interface CredentialPojoService {
     /**
      * Verify the validity of a credential. Public key will be fetched from chain.
      *
-     * @param issuerWeId the issuer WeId
+     * @param issuerWeId the issuer WeID
      * @param credential the credential
      * @return the verification result. True if yes, false otherwise with exact verify error codes
      */
     ResponseData<Boolean> verify(String issuerWeId, CredentialPojo credential);
+
+    /**
+     * Verify the validity of a credential with public key fetched from chain. Here you can specify
+     * the public key ID from the WeID Document if you well know the ID (you can pass the whole
+     * string, or just the ID).
+     *
+     * @param issuerWeId the issuer WeID
+     * @param weIdPublicKeyId the public key
+     * @param credential the credential
+     * @return true if succeeded, false otherwise
+     */
+    ResponseData<Boolean> verify(
+        String issuerWeId,
+        String weIdPublicKeyId,
+        CredentialPojo credential
+    );
 
     /**
      * Verify the validity of a credential. Public key must be provided.

@@ -140,7 +140,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
      */
     private String getEntryptKey(EncodeData encodeData) {
         //说明是当前机构，这个时候不适用于AMOP获取key，而是从本地数据库中获取key
-        if (fiscoConfig.getCurrentOrgId().equals(encodeData.getOrgId())) {
+        if (fiscoConfig.getAmopId().equals(encodeData.getAmopId())) {
             logger.info("get Encrypt Key from DB.");
             //保存秘钥
             ResponseData<String> response =
@@ -201,8 +201,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         GetEncryptKeyArgs args = new GetEncryptKeyArgs();
         args.setKeyId(encodeData.getId());
         args.setMessageId(DataToolUtils.getUuId32());
-        args.setToOrgId(encodeData.getOrgId());
-        args.setFromOrgId(fiscoConfig.getCurrentOrgId());
+        args.setToAmopId(encodeData.getAmopId());
+        args.setFromAmopId(fiscoConfig.getAmopId());
         if (encodeData.getWeIdAuthentication() != null) {
             String signValue = DataToolUtils.secp256k1Sign(
                 encodeData.getId(),
@@ -213,7 +213,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
             args.setWeId(encodeData.getWeIdAuthentication().getWeId());
         }
         ResponseData<GetEncryptKeyResponse> resResponse =
-            amopService.getEncryptKey(encodeData.getOrgId(), args);
+            amopService.getEncryptKey(encodeData.getAmopId(), args);
         if (resResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[requestEncryptKeyByAmop] AMOP response fail, dataId={}, "

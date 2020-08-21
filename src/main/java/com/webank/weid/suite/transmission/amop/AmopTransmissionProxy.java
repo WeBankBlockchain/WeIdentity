@@ -58,7 +58,7 @@ public class AmopTransmissionProxy extends BaseService {
      * @return 返回AMOP处理结果
      */
     public ResponseData<AmopResponse> send(AmopCommonArgs amopCommonArgs) {
-        return getAmopService().send(amopCommonArgs.getToOrgId(), amopCommonArgs);
+        return getAmopService().send(amopCommonArgs.getToAmopId(), amopCommonArgs);
     }
     
     /**
@@ -79,7 +79,7 @@ public class AmopTransmissionProxy extends BaseService {
      * 
      * @return 返回当前机构名称
      */
-    public String getCurrentOrgId() {
-        return fiscoConfig.getCurrentOrgId();
+    public String getCurrentAmopId() {
+        return fiscoConfig.getAmopId();
     }
 }

@@ -22,6 +22,7 @@ package com.webank.weid.service;
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,7 @@ import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.WeServer;
+import com.webank.weid.service.fisco.WeServerUtils;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
 import com.webank.weid.service.impl.engine.EngineFactory;
@@ -158,8 +160,8 @@ public abstract class BaseService {
      * @param cnsType cns类型枚举对象
      * @return 返回bucket地址
      */
-    public static String getBucketAddress(CnsType cnsType) {
-        return getWeServer(masterGroupId).getBucketAddress(cnsType);
+    public static CnsInfo getBucketByCns(CnsType cnsType) {
+        return getWeServer(masterGroupId).getBucketByCns(cnsType);
     }
 
     /**
@@ -169,7 +171,7 @@ public abstract class BaseService {
      * @return true表示群组存在，false表示群组不存在
      */
     public static boolean checkGroupId(Integer groupId) {
-        return getWeServer(masterGroupId).checkGroupId(groupId);
+        return WeServerUtils.getGroupList().contains(String.valueOf(groupId));
     }
     
     /**
@@ -208,17 +210,17 @@ public abstract class BaseService {
     /**
      * the checkDirectRouteMsgHealth。.
      *
-     * @param toOrgId target orgId.
+     * @param toAmopId target amopId.
      * @param arg the message
      * @return return the health result
      */
     public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(
-        String toOrgId,
+        String toAmopId,
         CheckAmopMsgHealthArgs arg) {
 
         return this.getImpl(
-            fiscoConfig.getCurrentOrgId(),
-            toOrgId,
+            fiscoConfig.getAmopId(),
+            toAmopId,
             arg,
             CheckAmopMsgHealthArgs.class,
             AmopNotifyMsgResult.class,
@@ -228,17 +230,16 @@ public abstract class BaseService {
     }
 
     protected <T, F extends AmopBaseMsgArgs> ResponseData<T> getImpl(
-        String fromOrgId,
-        String toOrgId,
+        String fromAmopId,
+        String toAmopId,
         F arg,
         Class<F> argsClass,
         Class<T> resultClass,
         AmopMsgType msgType,
         int timeOut
     ) {
-
-        arg.setFromOrgId(fromOrgId);
-        arg.setToOrgId(toOrgId);
+        arg.setFromAmopId(fromAmopId);
+        arg.setToAmopId(toAmopId);
 
         String msgBody = DataToolUtils.serialize(arg);
         AmopRequestBody amopRequestBody = new AmopRequestBody();
@@ -247,7 +248,7 @@ public abstract class BaseService {
         String requestBodyStr = DataToolUtils.serialize(amopRequestBody);
 
         AmopCommonArgs amopCommonArgs = new AmopCommonArgs();
-        amopCommonArgs.setToOrgId(toOrgId);
+        amopCommonArgs.setToAmopId(toAmopId);
         amopCommonArgs.setMessage(requestBodyStr);
         amopCommonArgs.setMessageId(getSeq());
         logger.info("direct route request, seq : {}, body ：{}", amopCommonArgs.getMessageId(),
@@ -281,27 +282,38 @@ public abstract class BaseService {
      */
     protected static void reloadAddress() {
         fiscoConfig.load();
-        String hash = fiscoConfig.getCnsContractFollow();
-        if (StringUtils.isBlank(hash)) {
-            throw new WeIdBaseException("the value of cns.contract.follow is null.");
-        }
-        CnsType cnsType = CnsType.DEFAULT;
-        String  weIdAddress = getAddress(cnsType, hash, WeIdConstant.CNS_WEID_ADDRESS);
-        String  issuerAddress = getAddress(cnsType, hash, WeIdConstant.CNS_AUTH_ADDRESS);
-        String  specificAddress = getAddress(cnsType, hash, WeIdConstant.CNS_SPECIFIC_ADDRESS);
-        String  evidenceAddress = getAddress(cnsType, hash, WeIdConstant.CNS_EVIDENCE_ADDRESS); 
-        String  cptAddress = getAddress(cnsType, hash, WeIdConstant.CNS_CPT_ADDRESS);
+        String module = WeIdConstant.CNS_GLOBAL_KEY;
+        CnsType cnsType = CnsType.ORG_CONFING;
+        String  weIdAddress = getAddress(cnsType, module, WeIdConstant.CNS_WEID_ADDRESS);
+        String  issuerAddress = getAddress(cnsType, module, WeIdConstant.CNS_AUTH_ADDRESS);
+        String  specificAddress = getAddress(cnsType, module, WeIdConstant.CNS_SPECIFIC_ADDRESS);
+        String  evidenceAddress = getAddress(cnsType, module, WeIdConstant.CNS_EVIDENCE_ADDRESS); 
+        String  cptAddress = getAddress(cnsType, module, WeIdConstant.CNS_CPT_ADDRESS);
+        String  chainId = getAddress(cnsType, module, WeIdConstant.CNS_CHAIN_ID);
+        fiscoConfig.setChainId(chainId);
         fiscoConfig.setWeIdAddress(weIdAddress);
         fiscoConfig.setCptAddress(cptAddress);
         fiscoConfig.setIssuerAddress(issuerAddress);
         fiscoConfig.setSpecificIssuerAddress(specificAddress);
         fiscoConfig.setEvidenceAddress(evidenceAddress); 
         if (!fiscoConfig.checkAddress()) {
-            throw new WeIdBaseException("can not found the contract address by hash: " + hash);
+            throw new WeIdBaseException(
+                "can not found the contract address, please enable by admin. ");
         }
     }
 
     private static String getAddress(CnsType cnsType, String hash, String key) {
         return getBucket(cnsType).get(hash, key).getResult();
+    }
+    
+    /**
+     * 获取chainId.
+     * @return 返回chainId
+     */
+    public static String getChainId() {
+        if (StringUtils.isBlank(fiscoConfig.getChainId())) {
+            reloadAddress();
+        }
+        return fiscoConfig.getChainId();
     }
 }

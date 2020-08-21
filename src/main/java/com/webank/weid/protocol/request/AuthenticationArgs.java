@@ -30,11 +30,6 @@ import lombok.Data;
 public class AuthenticationArgs {
 
     /**
-     * Required: The WeIdentity DID.
-     */
-    private String weId;
-
-    /**
      * Required: The owner.
      */
     private String owner;

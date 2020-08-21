@@ -38,6 +38,7 @@ import org.bcos.web3j.protocol.Web3j;
 import org.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.bcos.web3j.protocol.core.Response;
 import org.bcos.web3j.protocol.core.methods.response.EthBlockNumber;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,14 +97,14 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
         channelEthereumService.setChannelService(service);
         web3j = Web3j.build(channelEthereumService);
         if (web3j == null) {
-            logger.error("[WeServiceImplV1] web3j init failed. ");
-            throw new InitWeb3jException();
+            logger.error("[WeServiceImplV1] web3j init failed.");
+            throw new InitWeb3jException("web3j init failed.");
         }
 
         credentials = GenCredential.create();
         if (credentials == null) {
-            logger.error("[WeServiceImplV1] credentials init failed. ");
-            throw new InitWeb3jException();
+            logger.error("[WeServiceImplV1] credentials init failed.");
+            throw new InitWeb3jException("credentials init failed.");
         }
         logger.info("[WeServiceImplV1] init web3j instance success..");
     }
@@ -128,7 +129,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
         service.setAllChannelConnections(allChannelConnections);
 
         // thread pool params
-        service.setThreadPool(super.initializePool());
+        service.setThreadPool(super.initializePool(Integer.parseInt(fiscoConfig.getGroupId())));
         return service;
     }
     
@@ -161,7 +162,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
 
         ChannelRequest request = new ChannelRequest();
         request.setTimeout(super.getTimeOut(timeOut));
-        request.setToTopic(amopCommonArgs.getToOrgId());
+        request.setToTopic(amopCommonArgs.getToAmopId());
         request.setMessageID(amopCommonArgs.getMessageId());
         request.setContent(amopCommonArgs.getMessage());
 
@@ -196,12 +197,7 @@ public final class WeServerV1 extends WeServer<Web3j, Credentials, Service> {
     }
 
     @Override
-    protected String queryBucketFromCns(CnsType cnsType) throws WeIdBaseException {
+    protected CnsInfo queryCnsInfo(CnsType cnsType) throws WeIdBaseException {
         return null;
-    }
-
-    @Override
-    public boolean checkGroupId(Integer groupId) {
-        return false;
     }
 }
