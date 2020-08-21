@@ -22,6 +22,8 @@ package com.webank.weid.service.impl;
 import java.io.File;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -33,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ProcessingMode;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
 import com.webank.weid.protocol.base.HashString;
@@ -45,6 +48,7 @@ import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.BatchTransactionUtils;
+import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -112,6 +116,43 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
     }
 
+
+    @Override
+    public ResponseData<Boolean> createRawEvidenceWithSpecificSigner(
+        String hashValue,
+        String signature,
+        String log,
+        Long timestamp,
+        String extraKey,
+        String signer,
+        String privateKey
+    ) {
+        List<String> hashValues = new ArrayList<>();
+        hashValues.add(hashValue);
+        List<String> signatures = new ArrayList<>();
+        signatures.add(signature);
+        List<String> logs = new ArrayList<>();
+        logs.add(log);
+        List<Long> timestamps = new ArrayList<>();
+        timestamps.add(timestamp);
+        List<String> signers = new ArrayList<>();
+        signers.add(signer);
+        if (StringUtils.isEmpty(extraKey)) {
+            ResponseData<List<Boolean>> resp = evidenceServiceEngine.batchCreateEvidence(
+                hashValues, signatures, logs, timestamps, signers, privateKey);
+            return new ResponseData<>(resp.getResult().get(0), resp.getErrorCode(),
+                resp.getErrorMessage());
+        } else {
+            List<String> extraKeys = new ArrayList<>();
+            extraKeys.add(extraKey);
+            ResponseData<List<Boolean>> resp = evidenceServiceEngine
+                .batchCreateEvidenceWithCustomKey(hashValues, signatures, logs, timestamps,
+                    signers, extraKeys, privateKey);
+            return new ResponseData<>(resp.getResult().get(0), resp.getErrorCode(),
+                resp.getErrorMessage());
+        }
+    }
+
     /**
      * Create a new evidence to the blockchain and get the evidence address.
      *
@@ -134,6 +175,14 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             StringUtils.EMPTY);
     }
 
+    /**
+     * Add log entry for an existing evidence. This log will be recorded on blockchain permanently,
+     * and finally it will be fetched as a list when trying to get evidence.
+     *
+     * @param hashValue hash value
+     * @param log log entry - can be null or empty
+     * @param weIdPrivateKey the signer WeID's private key
+     */
     @Override
     public ResponseData<Boolean> addLogByHash(String hashValue, String log,
         WeIdPrivateKey weIdPrivateKey) {
@@ -333,7 +382,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
             ErrorCode errorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, signatureData, weIdDocument);
+                .verifySignatureFromWeId(rawData, signatureData, weIdDocument, null);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(false, errorCode);
             }
@@ -345,21 +394,28 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     }
 
     /**
-     * Validate whether an evidence is signed by this WeID.
+     * Validate whether a credential created the evidence, and this evidence is signed by this WeID
+     * - will perform on-Chain key check.
      *
+     * @param credentialPojo the credentialPojo
      * @param evidenceInfo the evidence info fetched from chain
      * @param weId the WeID
      * @return true if yes, false otherwise
      */
     @Override
-    public ResponseData<Boolean> verifySigner(EvidenceInfo evidenceInfo, String weId) {
-        return verifySigner(evidenceInfo, weId, null);
+    public ResponseData<Boolean> verifySigner(
+        CredentialPojo credentialPojo,
+        EvidenceInfo evidenceInfo,
+        String weId
+    ) {
+        return verifySigner(credentialPojo, evidenceInfo, weId, null);
     }
 
-
     /**
-     * Validate whether an evidence is signed by this WeID with passed-in public key.
+     * Validate whether a credential created the evidence, and this evidence is signed by this WeID
+     * based on the passed-in publicKey.
      *
+     * @param credentialPojo the credentialPojo
      * @param evidenceInfo the evidence info fetched from chain
      * @param weId the WeID
      * @param publicKey the public key
@@ -367,6 +423,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
      */
     @Override
     public ResponseData<Boolean> verifySigner(
+        CredentialPojo credentialPojo,
         EvidenceInfo evidenceInfo,
         String weId,
         String publicKey) {
@@ -380,6 +437,40 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             logger.error("This Evidence does not contain the provided WeID: {}", weId);
             return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
         }
+
+        // 1st: verify hash (accept both thumbprint hash or credential.getHash())
+        if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(credentialPojo.getHash())) {
+            if (CredentialPojoUtils.isLiteCredential(credentialPojo)) {
+                if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(DataToolUtils.sha3(
+                    CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(credentialPojo)))) {
+                    logger.error("Evidence hash mismatches the lite credential hash or thumbprint");
+                    return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
+                }
+            } else {
+                if (CredentialPojoUtils.isEmbeddedCredential(credentialPojo)) {
+                    // Currently unsupported for embedded credential thumbprint hash case
+                    logger.error("Evidence hash mismatches the embedded credential hash");
+                    return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
+                } else {
+                    if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(
+                        DataToolUtils.sha3(
+                            CredentialPojoUtils.getCredentialThumbprintWithoutSig(credentialPojo,
+                                credentialPojo.getSalt(), null)))) {
+                        logger.error("Evidence hash mismatches the non-embedded credential hash or"
+                            + "thumbprint");
+                        return new ResponseData<>(false,
+                            ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
+                    }
+                }
+            }
+        }
+
+        // 2nd: verify signer = issuer
+        if (!credentialPojo.getIssuer().equalsIgnoreCase(weId)) {
+            return new ResponseData<>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
+        }
+
+        // 3rd: verify signature w.r.t. weid (must exist and must be the signer (from pubkey))
         EvidenceSignInfo signInfo = evidenceInfo.getSignInfo().get(weId);
         String signature = signInfo.getSignature();
         if (!DataToolUtils.isValidBase64String(signature)) {
@@ -389,6 +480,8 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             DataToolUtils.simpleSignatureDeserialization(
                 DataToolUtils.base64Decode(signature.getBytes(StandardCharsets.UTF_8))
             );
+
+        // Firstly, we check the secp256k1 style signature
         if (StringUtils.isEmpty(publicKey)) {
             ResponseData<Boolean> verifyResp = verifySecp256k1SignatureToSigner(
                 evidenceInfo.getCredentialHash(),
@@ -439,7 +532,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
             ErrorCode errorCode = DataToolUtils
-                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument);
+                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument, null);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(false, errorCode);
             }

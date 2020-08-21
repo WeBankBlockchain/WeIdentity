@@ -94,42 +94,6 @@ public class TestGetWeIdDocumentJson extends TestBaseService {
     }
 
     /**
-     * case: get weIdDomJson that setService and setAuthentication .
-     */
-    @Test
-    public void testGetWeIdDocument_twoServiceAndAuthentication() {
-        CreateWeIdDataResult createWeIdResult = this.createWeId();
-        SetServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-
-        ResponseData<Boolean> response = weIdService.setService(setServiceArgs);
-        LogUtil.info(logger, "setService", response);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(true, response.getResult());
-
-        SetServiceArgs setServiceArgs1 = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs1.setType("123");
-        setServiceArgs1.setServiceEndpoint("http://test.com");
-
-        ResponseData<Boolean> response1 = weIdService.setService(setServiceArgs1);
-        LogUtil.info(logger, "setService", response1);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
-        Assert.assertEquals(true, response1.getResult());
-
-
-        ResponseData<WeIdDocument> weIdDoc =
-            weIdService.getWeIdDocument(createWeIdResult.getWeId());
-        LogUtil.info(logger, "getWeIdDocument", weIdDoc);
-
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(2, weIdDoc.getResult().getService().size());
-        Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
-        Assert.assertEquals(1, weIdDoc.getResult().getPublicKey().size());
-    }
-
-
-    /**
      * case: weid is invalid.
      */
     @Test

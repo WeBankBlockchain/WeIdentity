@@ -42,6 +42,7 @@ versionFile.eachLine { line ->
     version = line
 }
 println 'Current product version: ' + version
+def repo ="${repoType}"
 
 // Specify JDK version - may vary in different scenarios
 sourceCompatibility = 1.8
@@ -52,7 +53,13 @@ targetCompatibility = 1.8
 repositories {
     if (!gradle.startParameter.isOffline()) {
         mavenLocal()
-        mavenCentral()
+        if ("cn" == repo) {
+            println "use cn repo"
+            maven {url "http://maven.aliyun.com/nexus/content/groups/public/"}
+        } else {
+            println "use default repo"
+            mavenCentral()
+        }
         maven { url "https://dl.bintray.com/ethereum/maven/" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url "https://oss.sonatype.org/content/groups/public/" }
@@ -142,7 +149,7 @@ dependencies {
     if (gradleVer.startsWith("4")) {
         if (!gradle.startParameter.isOffline()) {
             compile logger, lombok, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf, caffeine, oval
-            compile("com.webank:weid-contract-java:1.2.21") {
+            compile("com.webank:weid-contract-java:1.2.23") {
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
                 // exclude group: "org.fisco-bcos", module: "web3sdk"
                 // exclude group: "org.fisco-bcos", module: "web3sdk-weevent"
@@ -163,7 +170,7 @@ dependencies {
             testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
             testCompileOnly 'org.projectlombok:lombok:1.18.10'
             compile logger, apache_commons, json, mysql_driver, zxing, rpc, pdfbox, protobuf, caffeine, oval
-            compile("com.webank:weid-contract-java:1.2.21") {
+            compile("com.webank:weid-contract-java:1.2.23") {
                 exclude group: "org.slf4j", module: "slf4j-log4j12"
                 // exclude group: "org.fisco-bcos", module: "web3sdk"
                 // exclude group: "org.fisco-bcos", module: "web3sdk-weevent"
@@ -206,6 +213,10 @@ processResources {
     exclude '**/**'
 }
 
+clean {
+    delete "dist"
+}
+
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
@@ -245,14 +256,6 @@ jar {
         copy {
             from file('src/main/resources/')
             into 'dist/conf'
-        }
-        copy {
-            from file('dist/lib/NotoSansCJKtc-Regular.ttf')
-            into 'src/main/resources/'
-        }
-        copy {
-            from file('dist/lib/NotoSansCJKtc-Regular.ttf')
-            into 'src/test/resources/'
         }
         if (!gradle.startParameter.isOffline()) {
             copy {

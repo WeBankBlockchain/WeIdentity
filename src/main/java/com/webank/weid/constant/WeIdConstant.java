@@ -90,6 +90,11 @@ public final class WeIdConstant {
     public static final Integer AUTHORITY_ISSUER_ARRAY_LEGNTH = 16;
 
     /**
+     * The Constant Authority Issuer extra param list max length.
+     */
+    public static final Integer AUTHORITY_ISSUER_EXTRA_PARAM_LENGTH = 10;
+
+    /**
      * The default accumulator value.
      */
     public static final String DEFAULT_ACCUMULATOR_VALUE = "1";
@@ -127,7 +132,7 @@ public final class WeIdConstant {
     /**
      * The Constant separator character.
      */
-    public static final String SEPARATOR = "/";
+    public static final String SEPARATOR = "|";
 
     /**
      * The Constant Max authority issuer name length in Chars.
@@ -239,8 +244,16 @@ public final class WeIdConstant {
     public static final String CNS_EVIDENCE_ADDRESS = "EvidenceFactory";
     public static final String CNS_CPT_ADDRESS = "CptController";
     public static final String CNS_GROUP_ID = "groupId";
+    public static final String CNS_CHAIN_ID = "chainId";
+    public static final String CNS_GLOBAL_KEY = "globalKey";
+    public static final String CNS_MAIN_HASH = "mainHash";
+    public static final String CNS_EVIDENCE_HASH = "evidenceHash";
 
     public static final Integer ON_CHAIN_STRING_LENGTH = 2097152;
+
+    public static final Integer ADD_PUBKEY_FAILURE_CODE = -1;
+
+    public static final Long RECOGNIZED_AUTHORITY_ISSUER_FLAG = 1L;
 
     public static enum PublicKeyType {
         RSA("RSA"),

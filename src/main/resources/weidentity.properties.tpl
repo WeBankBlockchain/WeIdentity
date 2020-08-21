@@ -10,6 +10,8 @@ blockchain.orgid=${ORG_ID}
 # Timeout for amop request, default: 5000ms
 amop.request.timeout=5000
 
+amop.id=${AMOP_ID}
+
 # Blockchain node info.
 nodes=${BLOCKCHIAN_NODE_INFO}
 

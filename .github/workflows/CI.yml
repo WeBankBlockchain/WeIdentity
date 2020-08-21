@@ -21,7 +21,6 @@ jobs:
       - name: Verify MySQL connection and create CI DB
         run: |
           sudo systemctl start mysql.service
-          sudo apt-get install -y mysql-client
           mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'CREATE DATABASE IF NOT EXISTS cidb;'
           mysql --host=127.0.0.1 --port=3306 --user=root --password=root -e 'show databases;'
       - name: Prepare blockchain nodes and certificates
@@ -114,7 +113,6 @@ jobs:
           export NODE_IP=127.0.0.1:20200
           export NODE2_IP=127.0.0.1:20201
           ./build.sh
-          ./sample-ci.sh
       - name: Download failed log (if any)
         if: ${{ failure() }}
         uses: actions/upload-artifact@v1
@@ -234,6 +232,7 @@ jobs:
           cd weid-build-tools/
           export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
           sed -i -e '$a\org_id=test' run.config
+          sed -i -e '$a\amop_id=test' run.config
           sed -i -e '$a\blockchain_address=127.0.0.1:20200' run.config
           sed -i -e '$a\mysql_address=127.0.0.1:3306' run.config
           sed -i -e '$a\mysql_database=cidb' run.config
@@ -243,7 +242,7 @@ jobs:
           ./compile.sh
           chmod u+x deploy.sh
           ./deploy.sh
-          cp ./script/build_tools_ci.sh .
+          cp ./common/script/build_tools_ci.sh .
           chmod u+x build_tools_ci.sh
           ./build_tools_ci.sh
       - name: Download failed log (if any)

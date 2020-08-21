@@ -38,6 +38,7 @@ import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
@@ -64,6 +65,8 @@ public class TestRegisterCptArgsWithId extends TestBaseService {
         if (createWeId == null) {
             createWeId = super.createWeId();
             super.registerAuthorityIssuer(createWeId);
+            authorityIssuerService
+                .recognizeAuthorityIssuer(createWeId.getWeId(), new WeIdPrivateKey(privateKey));
         }
     }
 

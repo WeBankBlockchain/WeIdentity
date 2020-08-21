@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -66,7 +67,7 @@ public abstract class WeServer<W, C, S> {
     /**
      * bucket地址映射Map.
      */
-    private static ConcurrentHashMap<String, String> bucketAddressMap = 
+    private static ConcurrentHashMap<String, CnsInfo> bucketAddressMap = 
         new ConcurrentHashMap<>();
     
     /**
@@ -150,11 +151,12 @@ public abstract class WeServer<W, C, S> {
     /**
      * 初始化Web3sdk线程池信息.
      *
+     * @param groupId 群组编号
      * @return 返回线程池对象
      */
-    protected ThreadPoolTaskExecutor initializePool() {
+    protected ThreadPoolTaskExecutor initializePool(Integer groupId) {
         ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setBeanName("web3sdk");
+        pool.setBeanName("web3sdk-group" + groupId);
         pool.setCorePoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkCorePoolSize()));
         pool.setMaxPoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkMaxPoolSize()));
         pool.setQueueCapacity(Integer.valueOf(fiscoConfig.getWeb3sdkQueueSize()));
@@ -187,9 +189,9 @@ public abstract class WeServer<W, C, S> {
     protected Set<String> getTopic() {
         Set<String> topics = new HashSet<String>();
         if (StringUtils.isNotBlank(FiscoConfig.topic)) {
-            topics.add(fiscoConfig.getCurrentOrgId() + "_" + FiscoConfig.topic);
+            topics.add(fiscoConfig.getAmopId() + "_" + FiscoConfig.topic);
         } else {
-            topics.add(fiscoConfig.getCurrentOrgId());
+            topics.add(fiscoConfig.getAmopId());
         }
         return topics;
     }
@@ -266,10 +268,10 @@ public abstract class WeServer<W, C, S> {
      * 查询bucketAddress.
      * 
      * @param cnsType cns类型枚举
-     * @return 返回bucket合约地址
+     * @return 返回CnsInfo
      * @throws WeIdBaseException 查询合约地址异常
      */
-    protected abstract String queryBucketFromCns(CnsType cnsType) throws WeIdBaseException;
+    protected abstract CnsInfo queryCnsInfo(CnsType cnsType) throws WeIdBaseException;
 
     /**
      * 获取Bucket地址.
@@ -277,20 +279,14 @@ public abstract class WeServer<W, C, S> {
      * @param cnsType cns类型枚举
      * @return 返回bucket地址
      */
-    public String getBucketAddress(CnsType cnsType) {
-        String bucketAddress = bucketAddressMap.get(cnsType.toString());
-        if (StringUtils.isEmpty(bucketAddress)) {
-            bucketAddress = this.queryBucketFromCns(cnsType);
-            bucketAddressMap.put(cnsType.toString(), bucketAddress);
+    public CnsInfo getBucketByCns(CnsType cnsType) {
+        CnsInfo cnsInfo = bucketAddressMap.get(cnsType.toString());
+        if (cnsInfo == null) {
+            cnsInfo = this.queryCnsInfo(cnsType);
+            if (cnsInfo != null) {
+                bucketAddressMap.put(cnsType.toString(), cnsInfo);
+            }
         }
-        return bucketAddress;
+        return cnsInfo;
     }
-    
-    /**
-     * 检查groupId是否存在.
-     * 
-     * @param groupId 群组Id
-     * @return true表示群组存在，false表示群组不存在
-     */
-    public abstract boolean checkGroupId(Integer groupId);
 }

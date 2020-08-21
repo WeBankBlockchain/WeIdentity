@@ -101,7 +101,7 @@ public enum ErrorCode {
      * The credential issuer mismatch.
      */
     CREDENTIAL_ISSUER_MISMATCH(100403,
-        "issuer weId does not match the weId of credential"),
+        "issuer (signer) weId does not match the weId of credential"),
 
     /**
      * The credential signature broken.
@@ -166,7 +166,7 @@ public enum ErrorCode {
     /**
      * The credential issuer is invalid.
      */
-    CREDENTIAL_ISSUER_INVALID(100418, "credential issuer invalid"),
+    CREDENTIAL_ISSUER_INVALID(100418, "credential issuer invalid or mismatch the WeID auth"),
 
     /**
      * The credential credential verify signature is exception.
@@ -281,17 +281,23 @@ public enum ErrorCode {
         "presentation from pdf transportation, please use verifyPresentationFromPDF function"),
 
     /**
-     * the error code shows that the credential passed in the 
-     * function is not supported by this function.
+     * the error code shows that the credential passed in the function is not supported by this
+     * function.
      */
     CREDENTIAL_NOT_SUPPORT_SELECTIVE_DISCLOSURE(100440,
         "the error code shows that the credential passed in the "
-        + "function is not supported by this function."),
+            + "function is not supported by this function."),
 
     /**
      * credential verify fail.
      */
     CREDENTIAL_VERIFY_FAIL(100441, "credential verify fail."),
+
+    /**
+     * credential verify succeeded with a wrong public key ID.
+     */
+    CREDENTIAL_VERIFY_SUCCEEDED_WITH_WRONG_PUBLIC_KEY_ID(100442, "credential"
+        + "verify succeeded, but the given public key ID is incorrect."),
 
     /**
      * Authorization WeIDs: from and to must be different.
@@ -575,6 +581,16 @@ public enum ErrorCode {
         "the specific issuer type is illegal"
     ),
 
+    AUTORITY_ISSUER_DESCRIPTION_ILLEGAL(
+        100209,
+        "authority issuer description illegal"
+    ),
+
+    AUTHORITY_ISSUER_EXTRA_PARAM_ILLEGAL(
+        100210,
+        "authority issuer extra param illegal"
+    ),
+
     /**
      * the key of the data is empty.
      */
@@ -629,6 +645,14 @@ public enum ErrorCode {
     AUTHORITY_ISSUER_CONTRACT_ERROR_NAME_ALREADY_EXISTS(
         500203,
         "the authority issuer name already exists."
+    ),
+
+    /**
+     * The issuer is not recognized.
+     */
+    AUTHORITY_ISSUER_CONTRACT_ERROR_UNRECOGNIZED(
+        500204,
+        "this issuer has not been recognized yet."
     ),
 
     /**
@@ -743,6 +767,22 @@ public enum ErrorCode {
     WEID_AUTH_CHANNELID_INVALID(
         100115,
         "the channelId is invalid."
+    ),
+
+    /**
+     * weid pubkey already exists, used in add case.
+     */
+    WEID_PUBLIC_KEY_ALREADY_EXISTS(
+        100116,
+        "this public key already exists and is not revoked."
+    ),
+
+    /**
+     * weid pubkey does not exist, used in revoke case.
+     */
+    WEID_PUBLIC_KEY_NOT_EXIST(
+        100117,
+        "this public key does not exist, or is already revoked."
     ),
 
     /**

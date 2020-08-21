@@ -60,21 +60,20 @@ function modify_config()
     hash=$(cat hash)
     export FISCO_BCOS_VERSION=${FISCO_BCOS_VERSION}
     export CNS_PROFILE_ACTIVE=${CNS_PROFILE_ACTIVE}
-    export CNS_CONTRACT_FOLLOW=${hash}
-    export CHAIN_ID=${CHAIN_ID}
     
-    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${CNS_CONTRACT_FOLLOW}:${CHAIN_ID}'
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${app_xml_config_dir}
     
     export ORG_ID=${ORG_ID}
+    export AMOP_ID=${AMOP_ID}
     export MYSQL_ADDRESS=${MYSQL_ADDRESS}
     export MYSQL_DATABASE=${MYSQL_DATABASE}
     export MYSQL_USERNAME=${MYSQL_USERNAME}
     export MYSQL_PASSWORD=${MYSQL_PASSWORD}
     export BLOCKCHIAN_NODE_INFO=${BLOCKCHIAN_NODE_INFO}
     
-    NODEVAR='${ORG_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
+    NODEVAR='${ORG_ID}:${AMOP_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
     cp ${weid_config} ${app_xml_config_dir}
     echo "modify sdk config finished..."
@@ -130,19 +129,18 @@ function gradle_build_sdk()
 
 	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
     export FISCO_BCOS_VERSION=${bcos_version}
-    export CNS_CONTRACT_FOLLOW=
     export CNS_PROFILE_ACTIVE=${cns_profile_active}
-    export CHAIN_ID=${chain_id}
     
-    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${CNS_CONTRACT_FOLLOW}:${CHAIN_ID}'
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     
     export ORG_ID=${org_id}
+    export AMOP_ID=${amop_id}
     export MYSQL_ADDRESS=${mysql_address}
     export MYSQL_DATABASE=${mysql_database}
     export MYSQL_USERNAME=${mysql_username}
     export MYSQL_PASSWORD=${mysql_password}
-    NODEVAR='${ORG_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
+    NODEVAR='${ORG_ID}:${AMOP_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
 	
     cd ${java_source_code_dir}/
@@ -151,7 +149,7 @@ function gradle_build_sdk()
         rm -rf dist/conf
         rm -rf dist/*.jar
     fi
-    gradle clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
+    ./gradlew clean build -x checkMain -x checkTest -x spotbugsMain -x spotbugsTest -x test
     echo "compile java code done."
 }
 
@@ -164,7 +162,7 @@ function deploy_contract()
 	CLASSPATH=${CLASSPATH}:${jar_file}
 	done
 
-    java ${JAVA_OPTS} -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract $1
+    java ${JAVA_OPTS} -cp "$CLASSPATH" com.webank.weid.contract.deploy.DeployContract ${chain_id} $1
     echo "contract deployment done."
 }
 
