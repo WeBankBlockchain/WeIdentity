@@ -130,7 +130,8 @@ public class TestMysqlAdd extends TestBaseTransportation {
 
         ResponseData<Integer> res1 = persistence
                 .add("domain.defaultInfo", idname, "data123456");
-        Assert.assertEquals(ErrorCode.SQL_EXECUTE_FAILED.getCode(), res1.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.PERSISTENCE_EXECUTE_FAILED.getCode(),
+                res1.getErrorCode().intValue());
     }
 
 
