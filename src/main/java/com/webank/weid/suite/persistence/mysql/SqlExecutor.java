@@ -139,7 +139,7 @@ public class SqlExecutor {
                 return
                     new ResponseData<Map<String, String>>(
                         null,
-                        ErrorCode.SQL_GET_CONNECTION_ERROR
+                        ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR
                     );
             }
 
@@ -173,7 +173,7 @@ public class SqlExecutor {
             result.setResult(dataMap);
         } catch (SQLException e) {
             logger.error("Query data from {{}} with exception", sqlDomain.getBaseDomain(), e);
-            result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
         } finally {
             ConnectionPool.close(conn, ps, rs);
         }
@@ -197,7 +197,7 @@ public class SqlExecutor {
                 return
                     new ResponseData<Integer>(
                         DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                        ErrorCode.SQL_GET_CONNECTION_ERROR
+                        ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR
                     );
             }
             ps = conn.prepareStatement(buildExecuteSql(sql, conn));
@@ -214,7 +214,7 @@ public class SqlExecutor {
             result.setResult(rs);
         } catch (SQLException e) {
             logger.error("Update data into {{}} with exception", sqlDomain.getBaseDomain(), e);
-            result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
             result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
             ConnectionPool.close(conn, ps);
@@ -240,7 +240,7 @@ public class SqlExecutor {
                     return
                         new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                            ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
+                            ErrorCode.PERSISTENCE_BATCH_ADD_DATA_MISMATCH
                         );
                 }
             }
@@ -249,7 +249,7 @@ public class SqlExecutor {
                 return
                     new ResponseData<Integer>(
                         DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                        ErrorCode.SQL_GET_CONNECTION_ERROR
+                        ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR
                     );
             }
             conn.setAutoCommit(false);
@@ -279,7 +279,7 @@ public class SqlExecutor {
             result.setResult(count);
         } catch (SQLException e) {
             logger.error("Batch add data to {{}} with exception", sqlDomain.getBaseDomain(), e);
-            result.setErrorCode(ErrorCode.SQL_EXECUTE_FAILED);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
             result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
             ConnectionPool.close(conn, psts);
