@@ -86,14 +86,14 @@ public class RedisExecutor {
         try {
             if (client == null) {
                 return
-                        new ResponseData<String>(null, ErrorCode.REDIS_GET_CONNECTION_ERROR);
+                        new ResponseData<String>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
             }
             RBucket<String>  rbucket = client.getBucket(tableDomain + VALUE_SPLIT_CHAR + datakey);
             result.setErrorCode(ErrorCode.SUCCESS);
             result.setResult(rbucket.get());
         } catch (Exception e) {
             logger.error("Query data from {{}} with exception", redisDomain.getTableDomain(), e);
-            result.setErrorCode(ErrorCode.REDIS_EXECUTE_FAILED);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
         }
         return result;
     }
@@ -112,7 +112,7 @@ public class RedisExecutor {
         try {
             if (client == null) {
                 return
-                        new ResponseData<Integer>(null, ErrorCode.REDIS_GET_CONNECTION_ERROR);
+                        new ResponseData<Integer>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
             }
             TransactionArgs transactionArgs = new TransactionArgs();
             DefaultValue value = new DefaultValue();
@@ -147,7 +147,7 @@ public class RedisExecutor {
                     return
                             new ResponseData<Integer>(
                                     DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
-                                    ErrorCode.REDIS_EXECUTE_FAILED
+                                    ErrorCode.PERSISTENCE_EXECUTE_FAILED
                             );
                 }
                 rbucket.set(valueString);
@@ -157,7 +157,7 @@ public class RedisExecutor {
 
         } catch (Exception e) {
             logger.error("Update data into {{}} with exception", redisDomain.getBaseDomain(), e);
-            result.setErrorCode(ErrorCode.REDIS_EXECUTE_FAILED);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
             result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         }
         return result;
@@ -176,7 +176,7 @@ public class RedisExecutor {
         try {
             if (client == null) {
                 return
-                        new ResponseData<Integer>(null, ErrorCode.REDIS_GET_CONNECTION_ERROR);
+                        new ResponseData<Integer>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
             }
             RBucket<String> rbucket = client.getBucket(
                     redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
@@ -190,7 +190,7 @@ public class RedisExecutor {
             }
         } catch (Exception e) {
             logger.error("Delete data into {{}} with exception", redisDomain.getBaseDomain(), e);
-            result.setErrorCode(ErrorCode.REDIS_EXECUTE_FAILED);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
             result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         }
         return result;
@@ -211,7 +211,7 @@ public class RedisExecutor {
         try {
             if (client == null) {
                 return
-                        new ResponseData<Integer>(null, ErrorCode.REDIS_GET_CONNECTION_ERROR);
+                        new ResponseData<Integer>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
             }
             List<Object> values = dataList.get(dataList.size() - 1);
             int size = values.size();
@@ -220,7 +220,7 @@ public class RedisExecutor {
                     return
                             new ResponseData<Integer>(
                                     DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
-                                    ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
+                                    ErrorCode.PERSISTENCE_BATCH_ADD_DATA_MISMATCH
                             );
                 }
             }
@@ -244,7 +244,7 @@ public class RedisExecutor {
             result.setResult(size);
         } catch (RedisException e) {
             logger.error("Batch add data to {{}} with exception", redisDomain.getBaseDomain(), e);
-            result.setErrorCode(ErrorCode.REDIS_EXECUTE_FAILED);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
             result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         }
         return result;

@@ -618,9 +618,9 @@ public enum ErrorCode {
     /**
      * the data does not match for batch save.
      */
-    PRESISTENCE_BATCH_SAVE_DATA_MISMATCH(
+    PERSISTENCE_BATCH_ADD_DATA_MISMATCH(
         100904,
-        "the data does not match for batch save."
+        "the data does not match for batch add."
     ),
 
     /**
@@ -824,9 +824,9 @@ public enum ErrorCode {
     DIRECT_ROUTE_MSG_BASE_ERROR(160010, "amop response messageBody error."),
 
     /**
-     * sql execute failed.
+     * persistence execute failed.
      */
-    SQL_EXECUTE_FAILED(160011, "sql execute failed."),
+    PERSISTENCE_EXECUTE_FAILED(160011, "persistence execute failed."),
 
     /**
      * AMOP server side has no direct route callback.
@@ -839,7 +839,7 @@ public enum ErrorCode {
     /**
      * can not get the connection from pool.
      */
-    SQL_GET_CONNECTION_ERROR(
+    PERSISTENCE_GET_CONNECTION_ERROR(
         160013,
         "can not get the connection from pool, please check the error log."
     ),
@@ -852,7 +852,7 @@ public enum ErrorCode {
     /**
      * the data is expire.
      */
-    SQL_DATA_EXPIRE(160015, "the data is expire."),
+    PERSISTENCE_DATA_EXPIRE(160015, "the data is expire."),
 
     /**
      * no premission.
@@ -882,7 +882,7 @@ public enum ErrorCode {
     /**
      * the data does not exist.
      */
-    SQL_DATA_DOES_NOT_EXIST(160021, "the data does not exist."),
+    PERSISTENCE_DATA_DOES_NOT_EXIST(160021, "the data does not exist."),
 
     /**
      * this is unsupported.
@@ -893,24 +893,6 @@ public enum ErrorCode {
      * this is repeated call.
      */
     THIS_IS_REPEATED_CALL(160023, "this is repeated call."),
-
-    /**
-     * can not get the connection from Redis.
-     */
-    REDIS_GET_CONNECTION_ERROR(
-            160024,
-            "can not get the connection from Redis, please check the error log."
-    ),
-
-    /**
-     * redis execute failed.
-     */
-    REDIS_EXECUTE_FAILED(160025, "redis execute failed."),
-
-    /**
-     * the data is expire.
-     */
-    REDIS_DATA_EXPIRE(160026, "the data is expire."),
 
     /**
      * other uncatched exceptions or error.

@@ -17701,16 +17701,42 @@ CryptoService
    String encrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES).encrypt(original, key);
 ----
 
-2. decrypt
+Persistence
+^^^^^^^^^^^^^^^^^
+
+1. add
 ~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.crypto.inf.CryptoService.decrypt
-   接口定义: public String decrypt(String content, String key) throws EncodeSuiteException;
-   接口描述: 根据加密的Base64字符串进行解密，并返回原字符串
+   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.add
+   接口定义: public ResponseData<Integer> add(String domain, String id, String data);
+   接口描述: 将数据存储到配置的存储库中
+
+.. note::
+     注意：数据存储在相应的domain中，目前系统内置domain为7个，如需修改或新增domain，可在weidentity.properties进行自定义配置。
+
+.. list-table::
+   :header-rows: 1
+
+   * - domain
+     - 描述
+   * - defaultInfo
+     - 系统内置默认的domain
+   * - encryptKey
+     - 密钥存储的domain，比如transportation中加密的密钥存储
+   * - templateSecret
+     - 零知识量证明流程需要
+   * - masterKey
+     - 零知识量证明流程需要
+   * - credentialSignature
+     - 零知识量证明流程需要
+   * - weIdAuth
+     - weidauth存放鉴权时使用
+   * - resourceInfo
+     - transportation下载模式存储原资源数据用的
 
 **接口入参**\ :
 
@@ -17722,38 +17748,641 @@ CryptoService
      - 非空
      - 说明
      - 备注
-   * - content
+   * - domain
      - String
      - Y
-     - 待解密字符串
-     -加密后并使用Base64处理的数据
-   * - key
+    - 数据存储的域
+   * - id
      - String
      - Y
-     - 解密数据所使用的秘钥
-     -非对称秘钥请使用Base64处理
+    - 存储数据对应的id
+   * - data
+     - String
+     - Y
+    - 存储的具体数据
 
-**接口返回**\ :   String;
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Integer
+     - 返回结果
+     - 添加数据成功为1，不成功为0
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - persistence的id不能为空
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
+   * - PERSISTENCE_EXECUTE_FAILED
+     - 160011
+     - mysql存储失败
+   * - PERSISTENCE_GET_CONNECTION_ERROR
+     - 160013
+     - 存储库连接池连接失败
 
 **调用示例**
 
 .. code-block:: java
 
-   String key = "abc"; //AES秘钥
-   String encrypt = "xxxx";//密文数据
-   // AES解密
-   String decrypt = CryptoServiceFactory.getCryptoService(CryptoType.AES).decrypt(encrypt, key);
-   
-   key = "AMcwy+851eDtxY/1vcTtxttwqTaBfczp7Q7fL41fGCag"; // weid私钥BASE64
-   encrypt = "xxxx";//密文数据
-   // AES解密
-   String decrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES).decrypt(encrypt, key);
+   String domain = "domain.defaultInfo";
+   String id = "123";
+   String data = "data123456";
+   // 调用persistence.add接口
+   ResponseData<Integer> result = persistence.add(domain, id, data);
+----
+
+2. batchAdd
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.batchAdd
+   接口定义: public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList);
+   接口描述: 数据批量存储到配置的存储库中
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+     - 数据存储的域
+   * - keyValueList
+     - Map<String, String>
+     - Y
+     - 批量数据
+     -存储格式为id-value的形式
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Integer
+     - 返回批量添加的数据数量
+     - 添加数据成功加1，不成功加0
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - persistence的id不能为空
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
+   * - PERSISTENCE_EXECUTE_FAILED
+     - 160011
+     - mysql存储失败
+   * - PERSISTENCE_GET_CONNECTION_ERROR
+     - 160013
+     - 存储库连接池连接失败
+   * - PERSISTENCE_BATCH_ADD_DATA_MISMATCH
+     - 100904
+     - 存储库批量存储参数不匹配
+
+**调用示例**
+
+.. code-block:: java
+
+    String domain = "domain.defaultInfo";
+    String id1 = "12345";
+    String data1 = "data12345";
+    String id2 = "54321";
+    String data2 = "data54321";
+    //以id-value形式将数据批量存储到HashMap
+    HashMap<String, String> map = new HashMap<>();
+        map.put(id1, data1);
+        map.put(id2, data2);
+    //调用persistence.batchAdd接口实现批量存储
+    ResponseData<Integer> res = persistence.batchAdd("domain.defaultInfo", map);
+----
+
+3. get
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.get
+   接口定义: public ResponseData<String> get(String domain, String id);
+   接口描述: 从相关存储库读取数据
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+     - 数据存储的域
+   * - id
+     - String
+     - Y
+     - 数据的id
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData<String>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - String
+     - 返回的具体数据
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - persistence的id不能为空
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
+   * - PERSISTENCE_EXECUTE_FAILED
+     - 160011
+     - mysql存储失败
+   * - PERSISTENCE_GET_CONNECTION_ERROR
+     - 160013
+     - 存储库连接池连接失败
+   * - PERSISTENCE_DATA_EXPIRE
+     - 160015
+     - 存储库数据失效
+
+**调用示例**
+
+.. code-block:: java
+
+    String domain = "domain.defaultInfo";
+    String id = "12345";
+    String data = "data123456";
+    // 存储数据
+    ResponseData<Integer> result = persistence.add(domain, id, data);
+    //通过id读取数据
+    ResponseData<String> res = persistence.get(domain, id);
+----
+
+4. delete
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.delete
+   接口定义: public ResponseData<Integer> delete(String domain, String id);
+   接口描述: 从相关存储库中删除数据
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+     - 数据存储的域
+   * - id
+     - String
+     - Y
+     - 数据的id
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Integer
+     - 返回结果
+     - 删除成功返回1，删除失败返回0
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - persistence的id不能为空
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
+   * - PERSISTENCE_EXECUTE_FAILED
+     - 160011
+     - mysql存储失败
+   * - PERSISTENCE_GET_CONNECTION_ERROR
+     - 160013
+     - 存储库连接池连接失败
+
+**调用示例**
+
+.. code-block:: java
+
+    String domain = "domain.defaultInfo";
+    String id = "123";
+    String data = "data123";
+    // 存储数据
+    ResponseData<Integer> result = persistence.add(domain, id, data);
+    //通过id删除相应数据
+    ResponseData<String> res = persistence.delete(domain, id);
+----
+
+5. update
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.update
+   接口定义: public ResponseData<Integer> update(String domain, String id, String data);
+   接口描述: 更新存储库中对应的数据
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+    - 数据存储的域
+   * - id
+     - String
+     - Y
+    - 存储数据对应的id
+   * - data
+     - String
+     - Y
+    - 更新到存储库的具体数据
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Integer
+     - 返回结果
+     - 更新数据成功为1，不成功为0
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - persistence的id不能为空
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
+   * - PERSISTENCE_EXECUTE_FAILED
+     - 160011
+     - mysql存储失败
+   * - PERSISTENCE_GET_CONNECTION_ERROR
+     - 160013
+     - 存储库连接池连接失败
+
+**调用示例**
+
+.. code-block:: java
+
+    String domain = "domain.defaultInfo";
+    String id = "123456";
+    String data = "data123456";
+    String data1 = "data12345654321"
+    //存储数据
+    ResponseData<Integer> result = persistence.add(domain, id, data);
+    //更新数据
+    ResponseData<Integer> result1 = persistence.update(domain, id, data1);
+----
+
+6. addOrUpdate
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.addOrUpdate
+   接口定义: public ResponseData<Integer> addOrUpdate(String domain, String id, String data);
+   接口描述: 更新或新增数据
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - domain
+     - String
+     - Y
+    - 数据存储的域
+   * - id
+     - String
+     - Y
+    - 存储数据对应的id
+   * - data
+     - String
+     - Y
+    - 新增或更新到存储库的具体数据
+     - 根据id查询数据是否存在或者失效，存在且未失效则进行更新 否则进行新增
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Integer
+     - 返回结果
+     - 更新或新增数据成功为1，不成功为0
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - persistence的id不能为空
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
+   * - PERSISTENCE_EXECUTE_FAILED
+     - 160011
+     - mysql存储失败
+   * - PERSISTENCE_GET_CONNECTION_ERROR
+     - 160013
+     - 存储库连接池连接失败
+   * - PERSISTENCE_DATA_EXPIRE
+     - 160015
+     - 存储库数据失效
+
+**调用示例**
+
+.. code-block:: java
+
+    String domain = "domain.defaultInfo";
+    String id = "1111";
+    String data = "data1111";
+    //存储或更新数据,根存储库中是否有对应id来判断调用add或者update接口
+    ResponseData<Integer> result = persistence.addOrUpdate(domain, id, data);
+----
+
+7. addTransaction
+~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.addTransaction
+   接口定义: public ResponseData<Integer> addTransaction(TransactionArgs transactionArgs);
+   接口描述: 新增交易数据
+
+**接口入参**\ :
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - transactionArgs
+     - TransactionArgs
+     - Y
+    - 离线交易相关参数
+     - 将离线交易存储到存储库
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Integer
+     - 返回结果
+     - 新增离线数据成功为1，不成功为0
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - PRESISTENCE_DATA_KEY_INVALID
+     - 100901
+     - persistence的id不能为空
+   * - PRESISTENCE_DOMAIN_ILLEGAL
+     - 100902
+     - domain非法
+   * - PRESISTENCE_DOMAIN_INVALID
+     - 100903
+     - domain无效
+   * - PERSISTENCE_EXECUTE_FAILED
+     - 160011
+     - mysql存储失败
+   * - PERSISTENCE_GET_CONNECTION_ERROR
+     - 160013
+     - 存储库连接池连接失败
 ----
 
 异常场景对接口的影响
 ---------------------
 
-- mysql连接异常受影响接口：Persistence相关和serialize密文。
+- mysql或redis连接异常受影响接口：Persistence相关和serialize密文。
 
 - 节点连接异常受影响接口：createWeId，createEvidence，registerAuthorityIssuer，RegisterIssuerType，RegisterCpt，VerifyCredentialWithSpecifiedPubKey，GetWeIdDocument，verifyLiteCredential。
 
