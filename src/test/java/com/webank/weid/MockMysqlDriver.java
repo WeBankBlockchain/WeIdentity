@@ -66,13 +66,13 @@ public abstract class MockMysqlDriver {
                     if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                            ErrorCode.SQL_EXECUTE_FAILED
+                            ErrorCode.PERSISTENCE_EXECUTE_FAILED
                         );
                     }
                     if (dbMap.containsKey(data[0].toString())) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                            ErrorCode.SQL_EXECUTE_FAILED
+                            ErrorCode.PERSISTENCE_EXECUTE_FAILED
                         );
                     }
                     dbMap.put(data[0].toString(), data[1]);
@@ -80,7 +80,7 @@ public abstract class MockMysqlDriver {
                     if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                            ErrorCode.SQL_EXECUTE_FAILED
+                            ErrorCode.PERSISTENCE_EXECUTE_FAILED
                         );
                     }
                     if (!dbMap.containsKey(data[0].toString())) {
@@ -94,7 +94,7 @@ public abstract class MockMysqlDriver {
                     if (!mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                            ErrorCode.SQL_EXECUTE_FAILED
+                            ErrorCode.PERSISTENCE_EXECUTE_FAILED
                         );
                     }
                     if (!dbMap.containsKey(data[3].toString())) {
@@ -108,7 +108,7 @@ public abstract class MockMysqlDriver {
                     if (mockDbMap.containsKey(tableDomain)) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                            ErrorCode.SQL_EXECUTE_FAILED
+                            ErrorCode.PERSISTENCE_EXECUTE_FAILED
                         );
                     }
                     if (!mockDbMap.containsKey(tableDomain)) {
@@ -131,7 +131,8 @@ public abstract class MockMysqlDriver {
                     map.put(DataDriverConstant.SQL_COLUMN_DATA, tableName);
                     return new ResponseData<Map<String, String>>(map, ErrorCode.SUCCESS);
                 }
-                return new ResponseData<Map<String, String>>(null, ErrorCode.SQL_EXECUTE_FAILED);
+                return new ResponseData<Map<String, String>>(null,
+                        ErrorCode.PERSISTENCE_EXECUTE_FAILED);
             }
             
             @Mock
@@ -144,7 +145,7 @@ public abstract class MockMysqlDriver {
                         return 
                             new ResponseData<Integer>(
                                 DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                                ErrorCode.PRESISTENCE_BATCH_SAVE_DATA_MISMATCH
+                                ErrorCode.PERSISTENCE_BATCH_ADD_DATA_MISMATCH
                             );  
                     }
                 }
@@ -154,7 +155,7 @@ public abstract class MockMysqlDriver {
                     if (mockDbMap.get(tableName).containsKey(idList.get(i))) {
                         return new ResponseData<Integer>(
                             DataDriverConstant.SQL_EXECUTE_FAILED_STATUS,
-                            ErrorCode.SQL_EXECUTE_FAILED
+                            ErrorCode.PERSISTENCE_EXECUTE_FAILED
                         );
                     } else {
                         mockDbMap.get(tableName)
