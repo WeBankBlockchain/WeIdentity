@@ -36,7 +36,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.RedisPersistence;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.redis.RedisDomain;
 import com.webank.weid.suite.persistence.redis.RedisExecutor;
@@ -48,7 +48,7 @@ import com.webank.weid.util.DataToolUtils;
  *
  * @author karenli
  */
-public class RedisDriver implements RedisPersistence {
+public class RedisDriver implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisDriver.class);
 
@@ -148,7 +148,8 @@ public class RedisDriver implements RedisPersistence {
                         && data.getExpire().before(new Date())) {
                     logger.error("[redis->get] the data is expire.");
                     //输出empty以及超过超时时间错误代码
-                    return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.REDIS_DATA_EXPIRE);
+                    return new ResponseData<String>(StringUtils.EMPTY,
+                            ErrorCode.PERSISTENCE_DATA_EXPIRE);
                 }
                 if (data != null && StringUtils.isNotBlank(data.getData())) {
                     result.setResult(
@@ -213,7 +214,8 @@ public class RedisDriver implements RedisPersistence {
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
         if ((StringUtils.isNotBlank(getRes.getResult())
                 && getRes.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode())
-                || getRes.getErrorCode().intValue() == ErrorCode.SQL_DATA_EXPIRE.getCode()) {
+                ||
+                getRes.getErrorCode().intValue() == ErrorCode.PERSISTENCE_DATA_EXPIRE.getCode()) {
             return this.update(domain, id, data);
         }
         return this.add(domain, id, data);
