@@ -454,10 +454,10 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 logger.info("Get block by number:{}. latestBlock is null", currentBlockNumber);
                 return;
             }
-            List<TransactionReceipt> receipts = blockTransactionReceipts
-                .getBlockTransactionReceipts().getTransactionReceipts();
             previousBlock = 0;
             try {
+                List<TransactionReceipt> receipts = blockTransactionReceipts
+                    .getBlockTransactionReceipts().getTransactionReceipts();
                 for (TransactionReceipt receipt : receipts) {
                     List<Log> logs = receipt.getLogs();
                     // A same topic will be calculated only once
