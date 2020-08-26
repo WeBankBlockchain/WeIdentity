@@ -148,7 +148,7 @@ dependencies {
                 // exclude group: "org.fisco-bcos", module: "web3sdk-weevent"
             }
             // Uncomment these two lines and exclude those above to specify web3sdk versions
-            compile("org.fisco-bcos:web3sdk:2.4.3.0816-SNAPSHOT")
+            compile("org.fisco-bcos:web3sdk:2.4.3")
             // compile("org.fisco-bcos:web3sdk-weevent:1.2.6")
             compile fileTree(dir: 'lib', include: '*.jar')
             testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval
@@ -169,7 +169,7 @@ dependencies {
                 // exclude group: "org.fisco-bcos", module: "web3sdk-weevent"
             }
             // Uncomment these two lines and exclude those above to specify web3sdk versions
-            compile("org.fisco-bcos:web3sdk:2.4.3-SNAPSHOT")
+            compile("org.fisco-bcos:web3sdk:2.4.3")
             // compile("org.fisco-bcos:web3sdk-weevent:1.2.6")
 			compile fileTree(dir: 'lib', include: '*.jar')
             testCompile logger, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval

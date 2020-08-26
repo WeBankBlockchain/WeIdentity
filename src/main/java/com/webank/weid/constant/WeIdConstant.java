@@ -241,7 +241,7 @@ public final class WeIdConstant {
     public static final String CNS_GROUP_ID = "groupId";
 
     /**
-     * When a block contains > this much txns, it will be stored in mem cache to save networking.
+     * When a block contains ge this much txns, it will be stored in mem cache to save networking.
      */
     public static final Integer RECEIPTS_COUNT_THRESHOLD = 100;
 
