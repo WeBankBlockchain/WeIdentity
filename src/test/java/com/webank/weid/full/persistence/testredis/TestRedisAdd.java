@@ -133,7 +133,7 @@ public class TestRedisAdd extends TestBaseTransportation {
                 idname,
                 "data123456");
         Assert.assertEquals(
-                ErrorCode.REDIS_EXECUTE_FAILED.getCode(),
+                ErrorCode.PERSISTENCE_EXECUTE_FAILED.getCode(),
                 res1.getErrorCode().intValue());
     }
 

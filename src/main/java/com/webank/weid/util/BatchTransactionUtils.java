@@ -19,8 +19,9 @@ import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.api.persistence.PersistenceFactory;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.params.PersistenceType;
 
 /**
  * 批量交易处理类.
@@ -51,6 +52,7 @@ public class BatchTransactionUtils {
      * persistence.
      */
     private static Persistence dataDriver;
+    private static PersistenceType persistenceType;
     private static Integer index = 0;
     private static String currentDay;
 
@@ -81,9 +83,14 @@ public class BatchTransactionUtils {
     }
 
     private static Persistence getDataDriver() {
-
+        String type = PropertyUtils.getProperty("persistence_type");
+        if (type.equals("mysql")) {
+            persistenceType = PersistenceType.Mysql;
+        } else if (type.equals("redis")) {
+            persistenceType = PersistenceType.Redis;
+        }
         if (dataDriver == null) {
-            dataDriver = new MysqlDriver();
+            dataDriver = PersistenceFactory.build(persistenceType);
         }
         return dataDriver;
     }

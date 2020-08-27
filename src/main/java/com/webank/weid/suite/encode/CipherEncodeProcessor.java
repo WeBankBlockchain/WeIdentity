@@ -44,10 +44,12 @@ import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.crypto.params.KeyGenerator;
+import com.webank.weid.suite.api.persistence.PersistenceFactory;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.api.persistence.params.PersistenceType;
 import com.webank.weid.suite.entity.EncodeData;
-import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.PropertyUtils;
 
 /**
  * 密文编解码处理器.
@@ -60,11 +62,19 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
 
     private Persistence dataDriver;
 
+    private PersistenceType persistenceType;
+
     protected AmopService amopService = new AmopServiceImpl();
 
     private Persistence getDataDriver() {
+        String type = PropertyUtils.getProperty("persistence_type");
+        if (type.equals("mysql")) {
+            persistenceType = PersistenceType.Mysql;
+        } else if (type.equals("redis")) {
+            persistenceType = PersistenceType.Redis;
+        }
         if (dataDriver == null) {
-            dataDriver = new MysqlDriver();
+            dataDriver = PersistenceFactory.build(persistenceType);
         }
         return dataDriver;
     }

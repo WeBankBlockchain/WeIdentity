@@ -69,7 +69,6 @@ public class TestRedisDelete extends TestBaseTransportation {
         ResponseData<Integer> res = persistence.delete(domain, id);
         LogUtil.info(logger, "persistence", res);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), res.getErrorCode().intValue());
-
         ResponseData<Integer> result = persistence.add(domain, id, data);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), result.getErrorCode().intValue());
