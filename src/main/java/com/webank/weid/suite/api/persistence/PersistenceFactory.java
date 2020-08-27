@@ -24,9 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.suite.api.persistence.inf.MysqlPersistence;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.api.persistence.inf.RedisPersistence;
 import com.webank.weid.suite.api.persistence.params.PersistenceType;
 import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.suite.persistence.redis.driver.RedisDriver;
@@ -40,11 +38,11 @@ public class PersistenceFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(PersistenceFactory.class);
 
-    private static MysqlPersistence newMysqlDriver() {
+    private static Persistence newMysqlDriver() {
         return new MysqlDriver();
     }
 
-    private static RedisPersistence newRedisDriver() {
+    private static Persistence newRedisDriver() {
         return new RedisDriver();
     }
 
