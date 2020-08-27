@@ -37,7 +37,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.MysqlPersistence;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.mysql.SqlDomain;
 import com.webank.weid.suite.persistence.mysql.SqlExecutor;
@@ -49,7 +49,7 @@ import com.webank.weid.util.PropertyUtils;
  *
  * @author tonychen 2019年3月18日
  */
-public class MysqlDriver implements MysqlPersistence {
+public class MysqlDriver implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(
             MysqlDriver.class);
@@ -117,7 +117,8 @@ public class MysqlDriver implements MysqlPersistence {
                     DataToolUtils.serialize(response.getResult()), DefaultValue.class);
                 if (tableData.getExpire() != null && tableData.getExpire().before(new Date())) {
                     logger.error("[mysql->get] the data is expire.");
-                    return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.SQL_DATA_EXPIRE);
+                    return new ResponseData<String>(StringUtils.EMPTY,
+                            ErrorCode.PERSISTENCE_DATA_EXPIRE);
                 }
                 if (StringUtils.isNotBlank(tableData.getData())) {
                     result.setResult(
@@ -284,7 +285,7 @@ public class MysqlDriver implements MysqlPersistence {
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
         if ((StringUtils.isNotBlank(getRes.getResult())
             && getRes.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode())
-            || getRes.getErrorCode().intValue() == ErrorCode.SQL_DATA_EXPIRE.getCode()) {
+            || getRes.getErrorCode().intValue() == ErrorCode.PERSISTENCE_DATA_EXPIRE.getCode()) {
             return this.update(domain, id, data);
         }
         return this.add(domain, id, data);
