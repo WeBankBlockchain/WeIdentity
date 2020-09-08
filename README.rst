@@ -98,7 +98,7 @@ WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestSer
             <td style="text-align:center"><a href="https://github.com/WeBankFinTech/WeIdentity">Java SDK</a></td>
             <td>
                <ul>
-                 <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-installation.html">安装部署文档</a></li>
+                 <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/one-stop-experience.html">安装部署文档</a></li>
                  <li><a href="https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-java-sdk-doc.html">SDK使用文档</a></li>
                  <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-rest.html">RestService集成文档</a></li>
                </ul>
