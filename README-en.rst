@@ -100,7 +100,7 @@ WeIdentity is running on top of FISCO-BCOS with JAVA SDK provided for developers
             <td style="text-align:center"><a href="https://github.com/WeBankFinTech/WeIdentity">JAVA SDK</a></td>
             <td>
                <ul>
-                 <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-installation.html">Installation and Deployment Guide (Chinese Version)</a></li>
+                 <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/one-stop-experience.html">Installation and Deployment Guide (Chinese Version)</a></li>
                  <li><a href="https://weidentity.readthedocs.io/projects/javasdk/zh_CN/latest/docs/weidentity-java-sdk-doc.html">SDK User Guide (Chinese Version)</a></li>
                  <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-rest.html">RestService Guide (Chinese Version)</a></li>
                </ul>
