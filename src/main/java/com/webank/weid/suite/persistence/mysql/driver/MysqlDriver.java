@@ -121,12 +121,7 @@ public class MysqlDriver implements Persistence {
                             ErrorCode.PERSISTENCE_DATA_EXPIRE);
                 }
                 if (StringUtils.isNotBlank(tableData.getData())) {
-                    result.setResult(
-                        new String(
-                            tableData.getData().getBytes(DataDriverConstant.STANDARDCHARSETS_ISO),
-                            DataDriverConstant.STANDARDCHARSETS_UTF_8
-                        )
-                    );
+                    result.setResult(tableData.getData());
                 }
             }
             result.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
