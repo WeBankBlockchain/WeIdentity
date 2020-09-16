@@ -25,7 +25,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import com.webank.weid.constant.ServiceType;
 import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
 
 /**

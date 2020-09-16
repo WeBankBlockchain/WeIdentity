@@ -19,6 +19,7 @@
 
 package com.webank.weid.suite.auth.impl;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +70,6 @@ public class WeIdAuthImpl implements WeIdAuth {
      * amop service instance.
      */
     private static AmopService amopService = new AmopServiceImpl();
-    private static Map<String, WeIdAuthObj> weIdAuthCache = new HashMap<>();
     private static WeIdAuthCallback weIdAuthCallback;
     private static WeIdAuthAmopCallback weIdAuthAmopCallback = new WeIdAuthAmopCallback();
     private static RequestVerifyChallengeCallback VerifyChallengeCallback =
@@ -167,15 +167,7 @@ public class WeIdAuthImpl implements WeIdAuth {
         ErrorCode verifyErrorCode = DataToolUtils
             .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            verifyErrorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
-            if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error(
-                    "[createMutualAuthenticatedChannel] verify challenge signature failed,"
-                        + " Error code:{}",
-                    verifyErrorCode.getCode());
-                return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
-            }
+            return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
         return new ResponseData<WeIdAuthObj>(weIdAuthObj, ErrorCode.SUCCESS);
     }
@@ -253,21 +245,13 @@ public class WeIdAuthImpl implements WeIdAuth {
         ErrorCode verifyErrorCode = DataToolUtils
             .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            verifyErrorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
-            if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error(
-                    "[createMutualAuthenticatedChannel] verify challenge signature failed, "
-                        + "Error code:{}",
-                    verifyErrorCode.getCode());
-                return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
-            }
+            return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
 
         //双向auth，发起方也需要对对手方的challenge进行签名
         String challenge1 = (String) dataMap.get(ParamKeyConstant.WEID_AUTH_CHALLENGE);
-        String signData = DataToolUtils
-            .sign(challenge1, weIdAuthentication.getWeIdPrivateKey().getPrivateKey());
+        String signData = DataToolUtils.secp256k1Sign(
+            challenge1, new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
         RequestVerifyChallengeArgs verifyChallengeArgs = new RequestVerifyChallengeArgs();
         verifyChallengeArgs.setSignData(signData);
         verifyChallengeArgs.setChallenge(Challenge.fromJson(challenge1));

@@ -221,19 +221,11 @@ public class DownTransDataService extends InnerService implements TransmissionSe
             null
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            errorCode = DataToolUtils.verifySignatureFromWeId(
-                arg.getResourceId(),
-                arg.getSignValue(),
-                domRes.getResult(),
-                null
+            logger.error(
+                "[checkAuthority] the data is be changed, this weid is {}.",
+                arg.getWeId()
             );
-            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error(
-                    "[checkAuthority] the data is be changed, this weid is {}.",
-                    arg.getWeId()
-                );
-                return false;
-            }
+            return false;
         }
         logger.info("[checkAuthority] you have the permission to get key.");
         return true;
