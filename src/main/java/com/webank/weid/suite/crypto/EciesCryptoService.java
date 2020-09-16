@@ -28,8 +28,8 @@ import com.webank.wedpr.ecies.NativeInterface;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.utils.Numeric;
 import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

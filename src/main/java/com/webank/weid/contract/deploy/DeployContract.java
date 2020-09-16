@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.deploy.v1.DeployContractV1;
 import com.webank.weid.contract.deploy.v2.DeployContractV2;
 import com.webank.weid.exception.WeIdBaseException;
 
@@ -86,7 +85,7 @@ public abstract class DeployContract {
     
     public static void deployContract(String privateKey, boolean instantEnable) {
         if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            DeployContractV1.deployContract(privateKey);
+            throw new WeIdBaseException(ErrorCode.THIS_IS_UNSUPPORTED);
         } else {
             DeployContractV2.deployContract(privateKey, fiscoConfig, instantEnable);
         } 
