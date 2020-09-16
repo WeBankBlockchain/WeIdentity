@@ -41,9 +41,9 @@ import com.webank.wedpr.selectivedisclosure.proto.Predicate;
 import com.webank.wedpr.selectivedisclosure.proto.VerificationRule;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -659,20 +659,13 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 WeIdDocument weIdDocument = innerResponseData.getResult();
                 errorCode = DataToolUtils.verifySecp256k1SignatureFromWeId(
                     rawData, credential.getSignature(), weIdDocument, weIdPublicKeyId);
-                if (errorCode != ErrorCode.SUCCESS && errorCode
-                    != ErrorCode.CREDENTIAL_VERIFY_SUCCEEDED_WITH_WRONG_PUBLIC_KEY_ID) {
-                    return DataToolUtils.verifySignatureFromWeId(
-                        rawData, credential.getSignature(), weIdDocument, weIdPublicKeyId);
-                }
                 return errorCode;
             }
         } else {
             boolean result;
             try {
                 result = DataToolUtils.verifySecp256k1Signature(rawData,
-                    credential.getSignature(), new BigInteger(publicKey)) || DataToolUtils
-                    .verifySignature(rawData,
-                        credential.getSignature(), new BigInteger(publicKey));
+                    credential.getSignature(), new BigInteger(publicKey));
 
             } catch (Exception e) {
                 logger.error("[verifyContent] verify signature fail.", e);
@@ -1625,15 +1618,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 .verifySecp256k1SignatureFromWeId(presentationE.toRawData(), signature,
                     weIdDocument, null);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            errorCode = DataToolUtils
-                .verifySignatureFromWeId(presentationE.toRawData(), signature, weIdDocument, null);
-            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error(
-                    "[verify] verify presentation signature failed, error message : {}.",
-                    errorCode.getCodeDesc()
-                );
-                return ErrorCode.PRESENTATION_SIGNATURE_MISMATCH;
-            }
+            return ErrorCode.PRESENTATION_SIGNATURE_MISMATCH;
         }
         return ErrorCode.SUCCESS;
     }
