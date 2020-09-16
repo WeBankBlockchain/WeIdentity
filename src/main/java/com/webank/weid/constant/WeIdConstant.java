@@ -213,12 +213,12 @@ public final class WeIdConstant {
     /**
      * The FISCO-BCOS Address pattern.
      */
-    public static final String FISCO_BCOS_ADDRESS_PATTERN = "0x[a-fA-f0-9]{40}";
+    public static final String FISCO_BCOS_ADDRESS_PATTERN = "0x[a-fA-F0-9]{40}";
 
     /**
      * The hash value pattern.
      */
-    public static final String HASH_VALUE_PATTERN = "0x[a-fA-f0-9]{64}";
+    public static final String HASH_VALUE_PATTERN = "0x[a-fA-F0-9]{64}";
 
     /**
      * The FISCO-BCOS Address pattern.
