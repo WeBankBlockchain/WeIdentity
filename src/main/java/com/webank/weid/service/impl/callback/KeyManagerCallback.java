@@ -149,26 +149,18 @@ public class KeyManagerCallback extends AmopCallback {
             );
             return false;
         }
-        ErrorCode errorCode = DataToolUtils.verifySignatureFromWeId(
+        ErrorCode errorCode = DataToolUtils.verifySecp256k1SignatureFromWeId(
             arg.getKeyId(),
             arg.getSignValue(),
             domRes.getResult(),
             null
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            errorCode = DataToolUtils.verifySecp256k1SignatureFromWeId(
-                arg.getKeyId(),
-                arg.getSignValue(),
-                domRes.getResult(),
-                null
+            logger.info(
+                "[checkAuthority] the data is be changed, this weid is {}.",
+                arg.getWeId()
             );
-            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.info(
-                    "[checkAuthority] the data is be changed, this weid is {}.",
-                    arg.getWeId()
-                );
-                return false;
-            }
+            return false;
         }
         return true;
     }
