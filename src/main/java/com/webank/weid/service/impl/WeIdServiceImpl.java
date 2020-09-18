@@ -931,7 +931,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         Integer pageSize,
         Integer indexInBlock,
         boolean direction
-    ){
+    ) {
         try {
             logger.info("[getWeIdList] begin get weIdList, blockNumber = {}, pageSize = {}, "
                 + "indexInBlock = {}, direction = {}", 
