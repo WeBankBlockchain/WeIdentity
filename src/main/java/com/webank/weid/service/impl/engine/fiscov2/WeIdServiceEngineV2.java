@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -50,12 +51,14 @@ import com.webank.weid.constant.WeIdConstant.PublicKeyType;
 import com.webank.weid.constant.WeIdEventConstant;
 import com.webank.weid.contract.v2.WeIdContract;
 import com.webank.weid.contract.v2.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.contract.v2.WeIdContract.WeIdHistoryEventEventResponse;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.ResolveAttributeException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.ServiceProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPojo;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
@@ -619,5 +622,200 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             logger.error("[setAttribute] set Attribute has error, Error Message：{}", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
+    }
+
+    private List<WeIdPojo> getWeIdListByBlockNumber(Integer blockNumber) {
+        // 根据块高获取当前块里面的所有weId
+        List<WeIdPojo> result = new ArrayList<WeIdPojo>();
+        BcosBlock bcosBlock = null;
+        try {
+            // 根据块高获取交易块 
+            bcosBlock = ((Web3j) getWeb3j()).getBlockByNumber(
+                new DefaultBlockParameterNumber(blockNumber), true).send();
+        } catch (IOException e) {
+            logger.error("[getWeIdListByBlockNumber] get block {} err: {}", blockNumber, e);
+        }
+        if (bcosBlock == null) {
+            logger.info("[getWeIdListByBlockNumber] get block {} err: is null", blockNumber);
+            return result;
+        }
+        // 获取块中所有交易
+        List<Transaction> transList = bcosBlock
+            .getBlock()
+            .getTransactions()
+            .stream()
+            .map(transactionResult -> (Transaction) transactionResult.get())
+            .collect(Collectors.toList());
+        try {
+            int index = 0;
+            for (Transaction transaction : transList) {
+                String transHash = transaction.getHash();
+                BcosTransactionReceipt rec1 = ((Web3j) getWeb3j())
+                    .getTransactionReceipt(transHash)
+                    .send();
+                TransactionReceipt receipt = rec1.getTransactionReceipt().get();
+                List<WeIdHistoryEventEventResponse> eventlog =
+                    weIdContract.getWeIdHistoryEventEvents(receipt);
+                if (CollectionUtils.isEmpty(eventlog)) {
+                    continue;
+                }
+                for (WeIdHistoryEventEventResponse res : eventlog) {
+                    WeIdPojo pojo = new WeIdPojo();
+                    pojo.setId(WeIdUtils.convertAddressToWeId(res.identity));
+                    pojo.setCreated(res.created.longValue());
+                    pojo.setCurrentBlockNum(blockNumber);
+                    pojo.setPreviousBlockNum(res.previousBlock.intValue());
+                    boolean isExist = weIdContract
+                        .isIdentityExist(WeIdUtils.convertWeIdToAddress(pojo.getId()))
+                        .send()
+                        .booleanValue();
+                    if (isExist) {
+                        pojo.setIndex(index);
+                        result.add(pojo);
+                        index++;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error(
+                "[getWeIdListByBlockNumber]: get WeIdList By BlockNumber :{} failed.", 
+                blockNumber, 
+                e
+            );
+            throw new ResolveAttributeException(
+                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
+                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc());
+        }
+        return result;
+    }
+
+    /**
+     * get the first blockNumber for the contract
+     * @return the blockNumber
+     * @throws Exception unknown exception
+     */
+    private Integer getFirstBlockNum() throws Exception {
+        return weIdContract.getFirstBlockNum().send().intValue();
+    }
+
+    /**
+     * get the last blockNumber for the contract.
+     * @return the blockNumber
+     * @throws Exception unknown exception
+     */
+    private Integer getLatestBlockNum() throws Exception {
+        return weIdContract.getLatestBlockNum().send().intValue();
+    }
+
+    /**
+     * get the next blockNumber by the currentBlockNumber.
+     * @param blockNumber the currentBlockNumber
+     * @return the blockNumber
+     * @throws Exception unknown exception
+     */
+    private Integer getNextBlockNum(Integer blockNumber) throws Exception {
+        return weIdContract.getNextBlockNumByBlockNum(
+                new BigInteger(String.valueOf(blockNumber))
+            ).send().intValue();
+    }
+
+    @Override
+    public ResponseData<List<WeIdPojo>> getWeIdList(
+        Integer blockNumber,
+        Integer pageSize,
+        Integer indexInBlock,
+        boolean direction
+    ) throws Exception{
+        LinkedList<WeIdPojo> result = new LinkedList<WeIdPojo>();
+        // 处理块高
+        Integer firstBlockNumer = this.getFirstBlockNum();
+        Integer latestBlockNumer = this.getLatestBlockNum();
+        if (blockNumber < firstBlockNumer) {
+            blockNumber = firstBlockNumer;
+        } else if (blockNumber > latestBlockNumer) {
+            blockNumber = latestBlockNumer;
+        }
+        // 根据当前块高查找weidList
+        Integer queryBlockNumber = blockNumber;
+        Integer beginIndex = indexInBlock;
+        boolean changeBlock = false;//是否换块
+        outer: do {
+            if (changeBlock && queryBlockNumber == 0) {
+                break;
+            }
+            List<WeIdPojo> weIdListByBlockNumber = this.getWeIdListByBlockNumber(queryBlockNumber);
+            // 根据方向判断
+            if (direction) {
+                if (weIdListByBlockNumber.size() == 0) {
+                    // 说明根据块高没有查询出数据，此时也无法向前查询了直接返回
+                    break;
+                }
+                // 如果是正向的 表示往前检索
+                if (changeBlock) { 
+                    // 表示已换块查询
+                    beginIndex = weIdListByBlockNumber.size() - 1;
+                } else {
+                    // 没换块
+                    // 如果index大于当前块最大位置 则index为当前最大位置
+                    if (beginIndex > weIdListByBlockNumber.size()) {
+                        beginIndex = weIdListByBlockNumber.size() - 1;
+                    }
+                }
+                for (int i = beginIndex; i >= 0; i--) {
+                    WeIdPojo pojo = weIdListByBlockNumber.get(i);
+                    result.add(pojo);
+                    // 指定下一个查询块
+                    queryBlockNumber = pojo.getPreviousBlockNum();
+                    if (result.size() == pageSize || queryBlockNumber == firstBlockNumer) { 
+                        // 说明够数了 或者已查询第一个块高
+                        break outer;
+                    }
+                }
+                if (beginIndex < 0) {
+                    // 指定下一个查询块
+                    queryBlockNumber = weIdListByBlockNumber.get(0).getPreviousBlockNum();
+                    if (queryBlockNumber == firstBlockNumer) { 
+                        // 说明已查询第一个块高
+                        break;
+                    }
+                }
+                // 换块
+                changeBlock = true;
+            } else {
+                if (weIdListByBlockNumber.size() == 0) {
+                    // 说明根据块高没有查询出数据
+                    // 换块
+                    queryBlockNumber = this.getNextBlockNum(queryBlockNumber);
+                    changeBlock = true;
+                    continue;
+                }
+                if (changeBlock) {
+                    beginIndex = 0; 
+                } else {
+                    if (beginIndex < 0) {
+                        beginIndex = 0;
+                    }
+                    if (beginIndex > weIdListByBlockNumber.size()) {
+                        // 换块
+                        queryBlockNumber = this.getNextBlockNum(queryBlockNumber);
+                        changeBlock = true;
+                        continue;
+                    }
+                }
+                // 如果是反向的 表示往后检索
+                for (int i = beginIndex; i < weIdListByBlockNumber.size(); i++) {
+                    WeIdPojo pojo = weIdListByBlockNumber.get(i);
+                    result.addFirst(pojo);
+                    if (result.size() == pageSize) { 
+                        // 说明够数了
+                        break outer;
+                    }
+                }
+                // 换块
+                queryBlockNumber = this.getNextBlockNum(queryBlockNumber);
+                changeBlock = true;
+            }
+        } while(true);
+        return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
 }
