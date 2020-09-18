@@ -44,7 +44,7 @@ public class WeIdPojo extends WeIdBaseInfo {
     private Integer index;
     
     /**
-     * the previous blockNum
+     * the previous blockNum.
      */
     private Integer previousBlockNum;
 }

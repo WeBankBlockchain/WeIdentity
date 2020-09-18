@@ -578,8 +578,12 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
     }
 
     @Override
-    public ResponseData<List<WeIdPojo>> getWeIdList(Integer blockNumber, Integer pageSize, Integer indexInBlock,
-            boolean direction) throws Exception {
+    public ResponseData<List<WeIdPojo>> getWeIdList(
+        Integer blockNumber, 
+        Integer pageSize, 
+        Integer indexInBlock,
+        boolean direction
+    ) throws Exception {
         return new ResponseData<>(null, ErrorCode.THIS_IS_UNSUPPORTED);
     }
 }
