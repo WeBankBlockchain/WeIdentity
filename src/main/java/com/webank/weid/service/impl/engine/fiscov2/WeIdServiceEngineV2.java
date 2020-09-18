@@ -690,7 +690,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
     }
 
     /**
-     * get the first blockNumber for the contract
+     * get the first blockNumber for the contract.
+     * 
      * @return the blockNumber
      * @throws Exception unknown exception
      */
@@ -725,7 +726,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         Integer pageSize,
         Integer indexInBlock,
         boolean direction
-    ) throws Exception{
+    ) throws Exception {
         LinkedList<WeIdPojo> result = new LinkedList<WeIdPojo>();
         // 处理块高
         Integer firstBlockNumer = this.getFirstBlockNum();
@@ -815,7 +816,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
                 queryBlockNumber = this.getNextBlockNum(queryBlockNumber);
                 changeBlock = true;
             }
-        } while(true);
+        } while (true);
         return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
 }
