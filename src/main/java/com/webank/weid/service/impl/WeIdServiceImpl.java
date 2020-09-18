@@ -37,6 +37,7 @@ import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPojo;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.AuthenticationArgs;
@@ -922,5 +923,27 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             delegateAuth.getPrivateKey(),
             weId,
             true);
+    }
+
+    @Override
+    public ResponseData<List<WeIdPojo>> getWeIdList(
+        Integer blockNumber,
+        Integer pageSize,
+        Integer indexInBlock,
+        boolean direction
+    ) {
+        try {
+            logger.info("[getWeIdList] begin get weIdList, blockNumber = {}, pageSize = {}, "
+                + "indexInBlock = {}, direction = {}", 
+                blockNumber, 
+                pageSize, 
+                indexInBlock, 
+                direction
+            );
+            return weIdServiceEngine.getWeIdList(blockNumber, pageSize, indexInBlock, direction);
+        } catch (Exception e) {
+            logger.error("[getWeIdList] get weIdList failed with exception. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }
     }
 }
