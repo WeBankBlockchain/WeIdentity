@@ -40,15 +40,19 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.PersistenceFactory;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.api.persistence.params.PersistenceType;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.PropertyUtils;
 
 public class KeyManagerCallback extends AmopCallback {
     
     private static final Logger logger =  LoggerFactory.getLogger(KeyManagerCallback.class);
 
     private Persistence dataDriver;
+
+    private PersistenceType persistenceType;
     
     private WeIdService weidService;
     
@@ -58,10 +62,16 @@ public class KeyManagerCallback extends AmopCallback {
         }
         return weidService;
     }
-    
+
     private Persistence getDataDriver() {
+        String type = PropertyUtils.getProperty("persistence_type");
+        if (type.equals("mysql")) {
+            persistenceType = PersistenceType.Mysql;
+        } else if (type.equals("redis")) {
+            persistenceType = PersistenceType.Redis;
+        }
         if (dataDriver == null) {
-            dataDriver = new MysqlDriver();
+            dataDriver = PersistenceFactory.build(persistenceType);
         }
         return dataDriver;
     }

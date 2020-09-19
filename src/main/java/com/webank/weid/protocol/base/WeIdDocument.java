@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +39,8 @@ import com.webank.weid.util.DataToolUtils;
  * @author tonychen 2018.9.29
  */
 @Data
-public class WeIdDocument implements JsonSerializer {
+@EqualsAndHashCode(callSuper = true)
+public class WeIdDocument extends WeIdBaseInfo implements JsonSerializer {
 
     private static final Logger logger = LoggerFactory.getLogger(WeIdDocument.class);
 
@@ -45,16 +48,6 @@ public class WeIdDocument implements JsonSerializer {
      *  the serialVersionUID.
      */
     private static final long serialVersionUID = 411522771907189878L;
-
-    /**
-     * Required: The id.
-     */
-    private String id;
-
-    /**
-     * Required: The created.
-     */
-    private Long created;
 
     /**
      * Required: The updated.

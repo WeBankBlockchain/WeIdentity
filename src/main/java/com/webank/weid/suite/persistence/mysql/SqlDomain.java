@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -17,9 +17,7 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.suite.persistence.sql;
-
-import java.util.Date;
+package com.webank.weid.suite.persistence.mysql;
 
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
@@ -29,10 +27,11 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.suite.persistence.BaseDomain;
 import com.webank.weid.util.PropertyUtils;
 
 @Getter
-public class SqlDomain {
+public class SqlDomain extends BaseDomain {
     
     private static final Logger logger = LoggerFactory.getLogger(SqlDomain.class);
     
@@ -42,19 +41,9 @@ public class SqlDomain {
     public static final String KEY_SPLIT_CHAR = ".";
     
     /**
-     * the split for value.
-     */
-    private static final String VALUE_SPLIT_CHAR = ":";
-    
-    /**
      * the domain prefix.
      */
     public static final String PREFIX = "domain.";
-    
-    /**
-     * default table name.
-     */
-    private static final String DEFAULT_TABLE = "default_info";
     
     /**
      * 表的默认前缀.
@@ -70,31 +59,6 @@ public class SqlDomain {
      * 表名分隔符.
      */
     private static final String TABLE_SPLIT_CHAR = "_";
-
-    /**
-     * the domain key.
-     */
-    private String key;
-    
-    /**
-     * the domain value.
-     */
-    private String value;
-    
-    /**
-     * the database domain.
-     */
-    private String baseDomain;
-    
-    /**
-     * the table domain.
-     */
-    private String tableDomain;
-    
-    /**
-     * the domain timeout.
-     */
-    private long timeout = 86400000L;
     
     public SqlDomain() {
         resolveDomain();
@@ -138,16 +102,6 @@ public class SqlDomain {
         resolveDomainTimeout();
     }
     
-    private void resolveDomainTimeout() {
-        String timeout = PropertyUtils.getProperty(this.key + ".timeout");
-        if (StringUtils.isBlank(timeout)) {
-            timeout =  PropertyUtils.getProperty(DataDriverConstant.DOMAIN_DEFAULT_INFO_TIMEOUT);
-        }
-        if (StringUtils.isNotBlank(timeout)) {
-            this.timeout = Long.parseLong(timeout);
-        }
-    }
-    
     /**
      * get the table name.
      * @return the tableName
@@ -162,18 +116,6 @@ public class SqlDomain {
             .append(ORG_ID)
             .append(TABLE_SPLIT_CHAR)
             .append(this.tableDomain).toString();
-    }
-    
-    public Date getExpire() {
-        return new Date(System.currentTimeMillis() + this.timeout);
-    }
-
-    /**
-     * get the currenttime.
-     * @return now
-     */
-    public Date getNow() {
-        return new Date();
     }
     
     /**

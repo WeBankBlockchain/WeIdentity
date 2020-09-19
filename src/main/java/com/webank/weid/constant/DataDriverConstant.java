@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018) WeBank Co., Ltd.
+ *       Copyright© (2018-2020) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,12 +19,103 @@
 
 package com.webank.weid.constant;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+
 /**
  * constant for DataDriver.
  *
  * @author tonychen 2019年3月25日
  */
 public final class DataDriverConstant {
+
+    /**
+     *encoding form.
+     */
+    public static final Charset STANDARDCHARSETS_ISO = StandardCharsets.ISO_8859_1;
+    public static final Charset STANDARDCHARSETS_UTF_8 = StandardCharsets.UTF_8;
+
+    /**
+     * redis execute status.
+     */
+    public static final int REDISSON_EXECUTE_FAILED_STATUS = 0;
+    public static final int REDISSON_EXECUTE_SUCESS_STATUS = 1;
+
+    /**
+     * redis mode name.
+     */
+    public static final String REDIS_SINGLE = "redis_single";
+    public static final String REDIS_CLUSTER = "redis_cluster";
+
+    /**
+     * redis url properties.
+     */
+    public static final String REDIS_URL = "redis.url";
+
+    /**
+     * redis user password properties.
+     */
+    public static final String PASSWORD = "redis.password";
+
+    /**
+     * redis single database properties.
+     */
+    public static final String DATABASE = "database";
+
+    /**
+     * redis cluster idle_connection_timeout properties.
+     */
+    public static final String IDLE_CONNECTION_TIMEOUT = "idle_connection_timeout";
+
+    /**
+     * redis cluster connect_timeout properties.
+     */
+    public static final String CONNECT_TIMEOUT = "connect_timeout";
+
+    /**
+     * redis cluster timeout properties.
+     */
+    public static final String TIMEOUT = "timeout";
+
+    /**
+     * redis cluster slave_connection_minimum_idle_size properties.
+     */
+    public static final String SLAVE_CONNECTION_MINIMUM_IDLE_SIZE =
+            "slave_connection_minimum_idle_size";
+
+    /**
+     * redis cluster slave_connection_pool_size properties.
+     */
+    public static final String SLAVE_CONNECTION_POOL_SIZE =
+            "slave_connection_pool_size";
+
+    /**
+     * redis cluster master_connection_minimum_idle_size properties.
+     */
+    public static final String MASTER_CONNECTION_MINIMUM_IDLE_SIZE =
+            "master_connection_minimum_idle_size";
+
+    /**
+     * redis cluster master_connection_pool_size properties.
+     */
+    public static final String MASTER_CONNECTION_POOL_SIZE =
+            "master_connection_pool_size";
+
+    /**
+     * the default value for redis single config.
+     */
+    public static final String DATABASE_DEFAULT_VALUE = "0";
+
+    /**
+     * the default value for redis cluster config.
+     */
+    public static final String IDLE_CONNECTION_TIMEOUT_DEFAULT_VALUE = "10000";
+    public static final String CONNECT_TIMEOUT_DEFAULT_VALUE = "10000";
+    public static final String TIMEOUT_DEFAULT_VALUE = "3000";
+    public static final String SLAVE_CONNECTION_MINIMUM_IDLE_SIZE_DEFAULT_VALUE = "10";
+    public static final String SLAVE_CONNECTION_POOL_SIZE_DEFAULT_VALUE = "64";
+    public static final String MASTER_CONNECTION_MINIMUM_IDLE_SIZE_DEFAULT_VALUE = "10";
+    public static final String MASTER_CONNECTION_POOL_SIZE_DEFAULT_VALUE = "64";
 
     /**
      * jdbc url properties.
@@ -62,7 +153,7 @@ public final class DataDriverConstant {
     public static final String JDBC_MIN_IDLE = "jdbc.minIdle";
 
     /**
-     * jdbc minIdle properties.
+     * jdbc maxIdle properties.
      */
     public static final String JDBC_MAX_IDLE = "jdbc.maxIdle";
 
@@ -124,7 +215,7 @@ public final class DataDriverConstant {
     /**
      * sql execute status.
      */
-    public static final Integer SQL_EXECUTE_FAILED_STATUS = 0;
+    public static final int SQL_EXECUTE_FAILED_STATUS = 0;
 
     /**
      * jdbc user password properties.
@@ -186,6 +277,11 @@ public final class DataDriverConstant {
      */
     public static final String DOMAIN_DEFAULT_INFO = "domain.defaultInfo";
     public static final String DOMAIN_DEFAULT_INFO_TIMEOUT = "domain.defaultInfo.timeout";
+
+    /**
+     * redis存储的离线交易记录.
+     */
+    public static final String DOMAIN_OFFLINE_TRANSACTION_INFO = "offline_transaction_info";
 
     /**
      * 系统domain之私钥存储domainKey.

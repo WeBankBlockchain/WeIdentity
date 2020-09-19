@@ -62,10 +62,12 @@ import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
-import com.webank.weid.suite.api.persistence.Persistence;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.api.persistence.PersistenceFactory;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.api.persistence.params.PersistenceType;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
+import com.webank.weid.util.PropertyUtils;
 import com.webank.weid.util.WeIdUtils;
 
 
@@ -82,14 +84,22 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      * persistence service.
      */
     private static Persistence dataDriver;
+
+    private static PersistenceType persistenceType;
     /**
      * credentialpojo service.
      */
     private static CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
 
     private static Persistence getDataDriver() {
+        String type = PropertyUtils.getProperty("persistence_type");
+        if (type.equals("mysql")) {
+            persistenceType = PersistenceType.Mysql;
+        } else if (type.equals("redis")) {
+            persistenceType = PersistenceType.Redis;
+        }
         if (dataDriver == null) {
-            dataDriver = new MysqlDriver();
+            dataDriver = PersistenceFactory.build(persistenceType);
         }
         return dataDriver;
     }
@@ -398,7 +408,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         //   .get(CredentialConstant.CREDENTIAL_META_KEY_ID);
         String dbKey = credentialPojo.getId();
         ResponseData<Integer> dbResponse =
-            getDataDriver().saveOrUpdate(
+            getDataDriver().addOrUpdate(
                 DataDriverConstant.DOMAIN_USER_CREDENTIAL_SIGNATURE,
                 dbKey,
                 newCredentialSignature);

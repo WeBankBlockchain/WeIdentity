@@ -88,7 +88,7 @@ public class DownTransDataService extends InnerService implements TransmissionSe
         // 数据不存在
         if (StringUtils.isBlank(responseData.getResult())) {
             logger.error("[getCodeData] the data does not exist.");
-            codeDataRes.setErrorCode(ErrorCode.SQL_DATA_DOES_NOT_EXIST);
+            codeDataRes.setErrorCode(ErrorCode.PERSISTENCE_DATA_DOES_NOT_EXIST);
             return codeDataRes;
         }
         // 解析数据
