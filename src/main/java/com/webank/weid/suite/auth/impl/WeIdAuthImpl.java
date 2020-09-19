@@ -47,11 +47,11 @@ import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.service.impl.callback.RequestVerifyChallengeCallback;
 import com.webank.weid.service.impl.callback.WeIdAuthAmopCallback;
-import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
 import com.webank.weid.suite.auth.inf.WeIdAuthCallback;
 import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
+import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -310,7 +310,7 @@ public class WeIdAuthImpl implements WeIdAuth {
 
         String weIdAuthData = DataToolUtils.serialize(weIdAuthObj);
         String channelId = weIdAuthObj.getChannelId();
-        ResponseData<Integer> dbResp = getDataDriver().saveOrUpdate(
+        ResponseData<Integer> dbResp = getDataDriver().addOrUpdate(
             DataDriverConstant.DOMAIN_WEID_AUTH,
             channelId,
             weIdAuthData);
