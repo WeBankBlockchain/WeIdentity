@@ -19,7 +19,10 @@
 
 package com.webank.weid.service.impl.engine;
 
+import java.util.List;
+
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPojo;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
@@ -79,4 +82,21 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
      * @return weid document
      */
     ResponseData<WeIdDocument> getWeIdDocument(String weId);
+
+    /**
+     * query data according to block height, index location and search direction.
+     * 
+     * @param blockNumber the query blockNumber
+     * @param pageSize the page size
+     * @param indexInBlock the beginning (including) of the current block
+     * @param direction search direction: true means forward search, false means backward search
+     * @return return the WeIdPojo List
+     * @throws Exception unknown exception
+     */
+    ResponseData<List<WeIdPojo>> getWeIdList(
+        Integer blockNumber,
+        Integer pageSize,
+        Integer indexInBlock,
+        boolean direction
+    ) throws Exception;
 }
