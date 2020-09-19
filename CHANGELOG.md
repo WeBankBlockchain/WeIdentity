@@ -1,3 +1,15 @@
+### V1.6.5 (2020-08-14)
+- Features:
+1. Significantly improve build speed when use together with build-tools.
+2. Support WeID owners to add/revoke public keys and authentications.
+3. Allow to use public key ID to verify a CredentialPojo.
+4. Authority Issuer now requires to call recognizeAuthorityIssuer() from admin/committee.
+
+- Bugfixes:
+1. Fix a minor issue in manipulating multi-group operations.
+2. Fix a minor issue in CNS configurations in multiple org cases.
+3. Orders of WeID public keys and authentications are preserved when added/removed.
+
 ### V1.6.4 (2020-06-16)
 - Bugfixes:
 1. Update all dependencies to mitigate potential security risks.
