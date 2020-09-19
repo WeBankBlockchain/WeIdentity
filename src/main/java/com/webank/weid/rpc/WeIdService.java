@@ -19,8 +19,11 @@
 
 package com.webank.weid.rpc;
 
+import java.util.List;
+
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPojo;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.AuthenticationArgs;
@@ -193,4 +196,20 @@ public interface WeIdService {
         String weId,
         AuthenticationArgs authenticationArgs,
         WeIdPrivateKey privateKey);
+
+    /**
+     * query data according to block height, index location and search direction.
+     * 
+     * @param blockNumber the query blockNumber
+     * @param pageSize the page size
+     * @param indexInBlock the beginning (including) of the current block
+     * @param direction search direction: true means forward search, false means backward search
+     * @return return the WeIdPojo List
+     */
+    ResponseData<List<WeIdPojo>> getWeIdList(
+        Integer blockNumber,
+        Integer pageSize,
+        Integer indexInBlock,
+        boolean direction
+    );
 }
