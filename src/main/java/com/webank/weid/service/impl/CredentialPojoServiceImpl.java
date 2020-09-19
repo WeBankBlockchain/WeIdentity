@@ -72,9 +72,10 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.suite.api.persistence.Persistence;
+import com.webank.weid.suite.api.persistence.PersistenceFactory;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.api.persistence.params.PersistenceType;
 import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
-import com.webank.weid.suite.persistence.sql.driver.MysqlDriver;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
 import com.webank.weid.util.CredentialPojoUtils;
@@ -82,6 +83,7 @@ import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.JsonUtil;
+import com.webank.weid.util.PropertyUtils;
 import com.webank.weid.util.TimestampUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -103,11 +105,18 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     private static WeIdService weIdService;
     private static CptService cptService;
     private static Persistence dataDriver;
+    private static PersistenceType persistenceType;
     private static PdfTransportation pdfTransportation;
 
     private static Persistence getDataDriver() {
+        String type = PropertyUtils.getProperty("persistence_type");
+        if (type.equals("mysql")) {
+            persistenceType = PersistenceType.Mysql;
+        } else if (type.equals("redis")) {
+            persistenceType = PersistenceType.Redis;
+        }
         if (dataDriver == null) {
-            dataDriver = new MysqlDriver();
+            dataDriver = PersistenceFactory.build(persistenceType);
         }
         return dataDriver;
     }
@@ -784,7 +793,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
 
         //save masterSecret and credentialSecretsBlindingFactors to persistence.
         ResponseData<Integer> dbResp = getDataDriver()
-            .saveOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
+            .addOrUpdate(DataDriverConstant.DOMAIN_USER_MASTER_SECRET, id, json);
         if (dbResp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[makeCredential] save masterSecret and blindingFactors to db failed.");

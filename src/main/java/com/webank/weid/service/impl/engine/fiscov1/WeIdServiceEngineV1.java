@@ -61,6 +61,7 @@ import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.ServiceProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPojo;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
@@ -574,5 +575,15 @@ public class WeIdServiceEngineV1 extends BaseEngine implements WeIdServiceEngine
             logger.error("Set public key timeout. Error message :{}", e);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_TIMEOUT);
         }
+    }
+
+    @Override
+    public ResponseData<List<WeIdPojo>> getWeIdList(
+        Integer blockNumber, 
+        Integer pageSize, 
+        Integer indexInBlock,
+        boolean direction
+    ) throws Exception {
+        return new ResponseData<>(null, ErrorCode.THIS_IS_UNSUPPORTED);
     }
 }
