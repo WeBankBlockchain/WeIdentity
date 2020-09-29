@@ -421,19 +421,17 @@ public final class DataToolUtils {
      *
      * @param jsonData the json data
      * @param jsonSchema the json schema
-     * @return true if yes, false otherwise
+     * @return empty if yes, not empty otherwise
      * @throws Exception the exception
      */
-    public static boolean isValidateJsonVersusSchema(String jsonData, String jsonSchema)
+    public static ProcessingReport checkJsonVersusSchema(String jsonData, String jsonSchema)
         throws Exception {
         JsonNode jsonDataNode = loadJsonObject(jsonData);
         JsonNode jsonSchemaNode = loadJsonObject(jsonSchema);
         JsonSchema schema = JsonSchemaFactory.byDefault().getJsonSchema(jsonSchemaNode);
-
         ProcessingReport report = schema.validate(jsonDataNode);
         if (report.isSuccess()) {
             logger.info(report.toString());
-            return true;
         } else {
             Iterator<ProcessingMessage> it = report.iterator();
             StringBuffer errorMsg = new StringBuffer();
@@ -441,8 +439,8 @@ public final class DataToolUtils {
                 errorMsg.append(it.next().getMessage());
             }
             logger.error("Json schema validator failed, error: {}", errorMsg.toString());
-            return false;
         }
+        return report;
     }
 
     /**
