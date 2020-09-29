@@ -20,12 +20,11 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.UUID;
 
+import com.github.fge.jsonschema.core.report.ProcessingReport;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,7 +33,6 @@ import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.Credential;
-import com.webank.weid.protocol.cpt.Cpt101;
 import com.webank.weid.protocol.cpt.Cpt103;
 
 public class TestJsonUtil {
@@ -98,8 +96,9 @@ public class TestJsonUtil {
         cpt103.setChallenge(Challenge.create("did:weid:0x11111", "abcd"));
         cpt103.setProof("aaa");
         cpt103.setId("did:weid:101:0x12221");
-        Assert.assertTrue(DataToolUtils
-            .isValidateJsonVersusSchema(DataToolUtils.objToJsonStrWithNoPretty(cpt103), cptSchema));
+        ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
+            DataToolUtils.objToJsonStrWithNoPretty(cpt103), cptSchema);
+        Assert.assertTrue(checkRes.isSuccess());
 
         cptSchema = DataToolUtils.generateDefaultCptJsonSchema(105);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));

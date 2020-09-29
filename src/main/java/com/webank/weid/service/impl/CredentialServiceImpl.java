@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.github.fge.jsonschema.core.report.ProcessingReport;
 import org.apache.commons.lang3.StringUtils;
 import org.bcos.web3j.abi.datatypes.Address;
 import org.bcos.web3j.crypto.ECKeyPair;
@@ -442,7 +443,9 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
                 return ErrorCode.CPT_JSON_SCHEMA_INVALID;
             }
-            if (!DataToolUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
+            ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
+                claimStr, cptJsonSchema);
+            if (!checkRes.isSuccess()) {
                 logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
             }

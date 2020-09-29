@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.webank.wedpr.common.Utils;
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.PredicateType;
@@ -724,7 +725,9 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 return ErrorCode.CPT_JSON_SCHEMA_INVALID;
             }
             if (!isSelectivelyDisclosed) {
-                if (!DataToolUtils.isValidateJsonVersusSchema(claimStr, cptJsonSchema)) {
+                ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
+                    claimStr, cptJsonSchema);
+                if (!checkRes.isSuccess()) {
                     logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
                     return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
                 }
@@ -2274,4 +2277,140 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         }
         return resp;
     }
+
+    @Override
+    public ResponseData<ProcessingReport> checkCredentialWithCpt(
+        CredentialPojo credential, 
+        Cpt cpt
+    ) {
+        try {
+            if (credential == null || credential.getSalt() == null 
+                || credential.getClaim() == null || credential.getType() == null) {
+                String errorMsg = ErrorCode.ILLEGAL_INPUT.getCodeDesc() + ": credential";
+                logger.error("[checkCredentialWithCpt] {}.", errorMsg);
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT.getCode(), errorMsg);
+            }
+            if (cpt == null || cpt.getCptJsonSchema() == null) {
+                String errorMsg = ErrorCode.ILLEGAL_INPUT.getCodeDesc() + ": cpt";
+                logger.error("[checkCredentialWithCpt] {}.", errorMsg);
+                return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT.getCode(), errorMsg);
+            }
+            if (credential.getCptId().intValue() != cpt.getCptId().intValue()) {
+                logger.error("[checkCredentialWithCpt] the cptId does not match.");
+                return new ResponseData<>(null, ErrorCode.CREDENTIAL_CPTID_NOTMATCH);
+            }
+            // zkp不支持检查
+            if (credential.getType().contains(CredentialType.ZKP.getName())) {
+                logger.error("[checkCredentialWithCpt] ZKP Credential DO NOT support.");
+                return new ResponseData<>(null, ErrorCode.THIS_IS_UNSUPPORTED);
+            }
+            // 如果不是lite1类型的，则判断是否为选择性披露类型
+            if (!credential.getType().contains(CredentialType.LITE1.getName())) {
+                boolean isSelectivelyDisclosed = CredentialPojoUtils.isSelectivelyDisclosed(
+                    credential.getSalt());
+                // 如果是选择性披露 则特殊处理
+                if (isSelectivelyDisclosed) {
+                    // 做特殊处理逻辑: remove不披露的字段 并判断是否为必选字段，如果是必选字段 并且为不披露则检查失败
+                    credential = DataToolUtils.clone(credential);
+                    removeDisclosedFiledMap(
+                        credential.getClaim(), 
+                        credential.getSalt(), 
+                        cpt.getCptJsonSchema()
+                    );
+                }
+            }
+           
+            String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
+            // 验证cp自身的合法性
+            if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
+                logger.error("[checkCredentialWithCpt] the cpt invalid.");
+                return new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
+            }
+            String claimStr = DataToolUtils.serialize(credential.getClaim());
+            // 验证cpt与credential的匹配性
+            ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
+                claimStr, cptJsonSchema);
+            if (!checkRes.isSuccess()) {
+                logger.error(
+                    "[checkCredentialWithCpt] check fail, ProcessingReport = {}.", checkRes);
+                ResponseData<ProcessingReport> result = new ResponseData<>(
+                    checkRes, 
+                    ErrorCode.CREDENTIAL_DOES_NOT_MATCHE_THE_CPT
+                );
+                return result;
+            }
+            return new ResponseData<>(checkRes, ErrorCode.SUCCESS);
+        } catch (WeIdBaseException e) {
+            logger.error("[checkCredentialWithCpt] check has base exception.", e);
+            return new ResponseData<>(null, e.getErrorCode().getCode(), e.getMessage());
+        } catch (Exception e) {
+            logger.error("[checkCredentialWithCpt] check has unknown exception.", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+    
+    // 移除不披露的字段
+    private void removeDisclosedFiledMap(
+        Map<String, Object> claim, 
+        Map<String, Object> salt, 
+        Map<String, Object> properties
+    ) {
+        ArrayList<String> requireds = (ArrayList<String>)properties.get("required");
+        Map<String, Object> nextProperties = (Map<String, Object>)properties.get("properties"); 
+        // 遍历claim
+        for (Map.Entry<String, Object> entry : salt.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                // 说明下一层为map
+                removeDisclosedFiledMap(
+                    (Map<String, Object>) claim.get(key), 
+                    (Map<String, Object>) value, 
+                    (Map<String, Object>) nextProperties.get(key)
+                );
+            } else if (value instanceof List) {
+                // 说明下一层是List
+                removeDisclosedFiledList(
+                    (ArrayList<Object>) claim.get(key), 
+                    (ArrayList<Object>) value, 
+                    (Map<String, Object>) nextProperties.get(key));
+            } else {
+                // 说明当前层为需要处理的层
+                // 如果当前为不披露的key
+                // 1. 如果必须的key则报错
+                // 2. 否则移除此key
+                if ("0".equals(value.toString())) {
+                    // 说明是选择性披露
+                    if (requireds != null && requireds.contains(key)) {
+                        throw new WeIdBaseException(key + " is required and disclosed.");
+                    } else {
+                        claim.remove(key);
+                    }
+                }
+            }
+        }
+    }
+    
+    private void removeDisclosedFiledList(
+        ArrayList<Object> claims, 
+        ArrayList<Object> salts, 
+        Map<String, Object> properties
+    ) {
+        for (int i = 0; i < claims.size(); i++) {
+            Object claim = claims.get(i);
+            if (claim instanceof Map) {
+                removeDisclosedFiledMap(
+                    (Map<String, Object>) claim, 
+                    (Map<String, Object>) salts.get(i), 
+                    (Map<String, Object>) properties.get("items")
+                ); 
+            } else {
+                removeDisclosedFiledList(
+                    (ArrayList<Object>) claim, 
+                    (ArrayList<Object>) salts.get(i), 
+                    (Map<String, Object>) properties.get("items")
+                );
+            }
+        }
+    } 
 }
