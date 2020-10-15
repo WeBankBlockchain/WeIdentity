@@ -96,7 +96,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         this.evidenceAddress = super.getBucket(CnsType.ORG_CONFING).get(
             fiscoConfig.getCurrentOrgId(), WeIdConstant.CNS_EVIDENCE_ADDRESS + groupId).getResult();
         if (StringUtils.isBlank(evidenceAddress)) {
-            throw new WeIdBaseException("can not found the evidence address from chain");
+            throw new WeIdBaseException("can not found the evidence address from chain, you may "
+                + "not activate the evidence contract on WeID Build Tools.");
         }
         logger.info(
             "[initEvidenceAddress] get the address from cns. address = {}",
