@@ -27,18 +27,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosBlock;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
+import org.fisco.bcos.web3j.protocol.core.methods.response.BlockTransactionReceipts;
 import org.fisco.bcos.web3j.protocol.core.methods.response.Log;
-import org.fisco.bcos.web3j.protocol.core.methods.response.Transaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +53,9 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
+import com.webank.weid.service.impl.inner.PropertiesService;
+import com.webank.weid.suite.cache.CacheManager;
+import com.webank.weid.suite.cache.CacheNode;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
 
@@ -69,20 +68,24 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV2.class);
 
+    private static CacheNode<BlockTransactionReceipts> receiptsNode =
+        CacheManager.registerCacheNode("SYS_TX_RECEIPTS", 1000 * 3600 * 24L);
+
     private EvidenceContract evidenceContract;
 
     private String evidenceAddress;
-    
+
     private Integer groupId;
 
     /**
      * 构造函数.
+     *
      * @param groupId 群组编号
      */
     public EvidenceServiceEngineV2(Integer groupId) {
         super(groupId);
         this.groupId = groupId;
-        initEvidenceAddress(); 
+        initEvidenceAddress();
         evidenceContract = getContractService(this.evidenceAddress, EvidenceContract.class);
     }
 
@@ -98,7 +101,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             throw new WeIdBaseException("can not found the evidence address from chain");
         }
         logger.info(
-            "[initEvidenceAddress] get the address from cns. address = {}", 
+            "[initEvidenceAddress] get the address from cns. address = {}",
             evidenceAddress
         );
     }
@@ -401,7 +404,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         int latestBlockNumber = 0;
         byte[] hashByte = DataToolUtils.convertHashStrIntoHashByte32Array(hash);
         try {
-            latestBlockNumber = evidenceContract.getLatestRelatedBlock(hashByte).send().intValue();
+            latestBlockNumber
+                = evidenceContract.getLatestRelatedBlock(hashByte).send().intValue();
             if (latestBlockNumber == 0) {
                 return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_NOT_EXIST);
             }
@@ -428,34 +432,34 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         int previousBlock = startBlockNumber;
         while (previousBlock != 0) {
             int currentBlockNumber = previousBlock;
-            BcosBlock latestBlock = null;
+            BlockTransactionReceipts blockTransactionReceipts = null;
             try {
-                latestBlock = ((Web3j) weServer.getWeb3j()).getBlockByNumber(
-                    new DefaultBlockParameterNumber(currentBlockNumber), true).send();
-            } catch (IOException e) {
+                blockTransactionReceipts = receiptsNode.get(String.valueOf(currentBlockNumber));
+                if (blockTransactionReceipts == null) {
+                    blockTransactionReceipts = ((Web3j) weServer.getWeb3j())
+                        .getBlockTransactionReceipts(BigInteger.valueOf(currentBlockNumber)).send();
+                    // Store big transactions into memory (bigger than 1) to avoid memory explode
+                    if (blockTransactionReceipts != null
+                        && blockTransactionReceipts.getBlockTransactionReceipts()
+                        .getTransactionReceipts().size() > WeIdConstant.RECEIPTS_COUNT_THRESHOLD) {
+                        receiptsNode
+                            .put(String.valueOf(currentBlockNumber), blockTransactionReceipts);
+                    }
+                }
+            } catch (Exception e) {
                 logger.error(
                     "Get block by number:{} failed. Exception message:{}", currentBlockNumber, e);
             }
-            if (latestBlock == null) {
+            if (blockTransactionReceipts == null) {
                 logger.info("Get block by number:{}. latestBlock is null", currentBlockNumber);
                 return;
             }
-            List<Transaction> transList = latestBlock
-                .getBlock()
-                .getTransactions()
-                .stream()
-                .map(transactionResult -> (Transaction) transactionResult.get())
-                .collect(Collectors.toList());
             previousBlock = 0;
             try {
-                for (Transaction transaction : transList) {
-                    String transHash = transaction.getHash();
-
-                    BcosTransactionReceipt rec1 = ((Web3j) weServer.getWeb3j())
-                        .getTransactionReceipt(transHash)
-                        .send();
-                    TransactionReceipt receipt = rec1.getTransactionReceipt().get();
-                    List<Log> logs = rec1.getResult().getLogs();
+                List<TransactionReceipt> receipts = blockTransactionReceipts
+                    .getBlockTransactionReceipts().getTransactionReceipts();
+                for (TransactionReceipt receipt : receipts) {
+                    List<Log> logs = receipt.getLogs();
                     // A same topic will be calculated only once
                     Set<String> topicSet = new HashSet<>();
                     for (Log log : logs) {

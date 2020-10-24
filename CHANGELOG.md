@@ -1,3 +1,7 @@
+### V1.6.3-hotfix-1 (2020-08-26)
+- Bugfixes:
+1. Use batch block transaction receipts getter to improve evidence performance.
+
 ### V1.6.5 (2020-08-14)
 - Features:
 1. Significantly improve build speed when use together with build-tools.
