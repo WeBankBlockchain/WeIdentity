@@ -51,6 +51,7 @@ import com.webank.weid.contract.v2.WeIdContract.WeIdAttributeChangedEventRespons
 import com.webank.weid.contract.v2.WeIdContract.WeIdHistoryEventEventResponse;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.ResolveAttributeException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.ServiceProperty;
@@ -149,24 +150,11 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         int previousBlock = blockNumber;
         while (previousBlock != STOP_RESOLVE_BLOCK_NUMBER) {
             int currentBlockNumber = previousBlock;
-            BlockTransactionReceipts blockTransactionReceipts = null;
-            try {
-                blockTransactionReceipts = ((Web3j)getWeb3j())
-                    .getBlockTransactionReceipts(BigInteger.valueOf(currentBlockNumber)).send();
-            } catch (IOException e) {
-                logger.error("[resolveEventHistory] get block {} err: {}", currentBlockNumber, e);
-            }
-            if (blockTransactionReceipts == null) {
-                logger.info("[resolveEventHistory] get block {} err: is null", currentBlockNumber);
-                return;
-            }
             // Fill-in blockList
             blockList.add(currentBlockNumber);
-
             previousBlock = 0;
             try {
-                List<TransactionReceipt> receipts = blockTransactionReceipts
-                    .getBlockTransactionReceipts().getTransactionReceipts();
+                List<TransactionReceipt> receipts = getTransactionReceipts(currentBlockNumber);
                 for (TransactionReceipt receipt : receipts) {
                     List<Log> logs = receipt.getLogs();
                     for (Log log : logs) {
@@ -187,7 +175,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
                     "[resolveEventHistory]: get TransactionReceipt by weId :{} failed.", weId, e);
                 throw new ResolveAttributeException(
                     ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-                    ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc());
+                    ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc(),
+                    e);
             }
         }
     }
@@ -550,12 +539,12 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
                         + "modifying weid is not allowed. we address is {}",
                     weAddress
                 );
-                return new ResponseData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
+                return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
             }
-            return new ResponseData(true, ErrorCode.SUCCESS, info);
+            return new ResponseData<>(true, ErrorCode.SUCCESS, info);
         } catch (Exception e) {
             logger.error("[createWeId] create weid has error, Error Message：{}", e);
-            return new ResponseData(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
         }
     }
 
@@ -609,23 +598,27 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         }
     }
 
+    private static List<TransactionReceipt> getTransactionReceipts(Integer blockNumber) 
+        throws IOException, DataFormatException {
+        BlockTransactionReceipts blockTransactionReceipts = null;
+        try {
+            blockTransactionReceipts = ((Web3j)getWeb3j())
+                .getBlockTransactionReceipts(BigInteger.valueOf(blockNumber)).send();
+        } catch (Exception e) {
+            logger.error("[getTransactionReceipts] get block {} err: {}", blockNumber, e);
+        }
+        if (blockTransactionReceipts == null) {
+            logger.info("[getTransactionReceipts] get block {} err: is null", blockNumber);
+            throw new WeIdBaseException("the transactionReceipts is null.");
+        }
+        return blockTransactionReceipts.getBlockTransactionReceipts().getTransactionReceipts();
+    }
+
     private List<WeIdPojo> getWeIdListByBlockNumber(Integer blockNumber) {
         // 根据块高获取当前块里面的所有weId
         List<WeIdPojo> result = new ArrayList<WeIdPojo>();
-        BlockTransactionReceipts blockTransactionReceipts = null;
         try {
-            blockTransactionReceipts = ((Web3j) weServer.getWeb3j())
-                .getBlockTransactionReceipts(BigInteger.valueOf(blockNumber)).send();
-        } catch (Exception e) {
-            logger.error("[getWeIdListByBlockNumber] get block {} err: {}", blockNumber, e);
-        }
-        if (blockTransactionReceipts == null) {
-            logger.info("[getWeIdListByBlockNumber] get block {} err: is null", blockNumber);
-            return result;
-        }
-        try {
-            List<TransactionReceipt> receipts = blockTransactionReceipts
-                .getBlockTransactionReceipts().getTransactionReceipts();
+            List<TransactionReceipt> receipts = getTransactionReceipts(blockNumber);
             int index = 0;
             for (TransactionReceipt receipt : receipts) {
                 List<WeIdHistoryEventEventResponse> eventlog =
@@ -658,7 +651,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             );
             throw new ResolveAttributeException(
                 ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc());
+                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc(),
+                e);
         }
         return result;
     }
