@@ -29,7 +29,6 @@ import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
 import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.protocol.exceptions.TransactionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +40,7 @@ import com.webank.weid.contract.v2.CptController;
 import com.webank.weid.contract.v2.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.contract.v2.WeIdContract;
 import com.webank.weid.contract.v2.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
@@ -127,7 +127,7 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
                 }
             }
         } catch (Exception e) {
-            throw new TransactionTimeoutException("Transaction receipt was not generated after "
+            throw new WeIdBaseException("Transaction receipt was not generated after "
                 + ((sumTime) / 1000
                 + " seconds for transaction: " + ethSendTransaction));
         }
