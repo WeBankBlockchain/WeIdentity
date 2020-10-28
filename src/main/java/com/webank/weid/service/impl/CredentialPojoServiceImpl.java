@@ -2300,12 +2300,11 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 return new ResponseData<>(null, ErrorCode.CREDENTIAL_CPTID_NOTMATCH);
             }
             // zkp不支持检查
-            if (credential.getType().contains(CredentialType.ZKP.getName())) {
+            if (credential.getCredentialType() == CredentialType.ZKP) {
                 logger.error("[checkCredentialWithCpt] ZKP Credential DO NOT support.");
                 return new ResponseData<>(null, ErrorCode.THIS_IS_UNSUPPORTED);
-            }
-            // 如果不是lite1类型的，则判断是否为选择性披露类型
-            if (!credential.getType().contains(CredentialType.LITE1.getName())) {
+            } else if (credential.getCredentialType() == CredentialType.ORIGINAL) {
+                // 如果不是lite1类型的，则判断是否为选择性披露类型
                 boolean isSelectivelyDisclosed = CredentialPojoUtils.isSelectivelyDisclosed(
                     credential.getSalt());
                 // 如果是选择性披露 则特殊处理
