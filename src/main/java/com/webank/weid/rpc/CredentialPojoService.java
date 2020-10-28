@@ -21,8 +21,11 @@ package com.webank.weid.rpc;
 
 import java.util.List;
 
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
+import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.PresentationE;
 import com.webank.weid.protocol.base.PresentationPolicyE;
@@ -213,5 +216,14 @@ public interface CredentialPojoService {
         Cpt101 authInfo,
         WeIdAuthentication weIdAuthentication
     );
+    
+    /**
+     * Check the credential with CPT.
+     * 
+     * @param credential the CredentialPojo
+     * @param cpt the CPT information
+     * @return return ProcessingReport
+     */
+    ResponseData<ProcessingReport> checkCredentialWithCpt(CredentialPojo credential, Cpt cpt);
 }
 
