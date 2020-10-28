@@ -280,4 +280,25 @@ public class CredentialPojo implements IProof, JsonSerializer, Hashable {
     public String getSignatureThumbprint() {
         return CredentialPojoUtils.getCredentialThumbprintWithoutSig(this, this.getSalt(), null);
     }
+
+    /**
+     * Get the CredentialType.
+     * @return the CredentialType
+     */
+    public CredentialType getCredentialType() {
+        if (this.type == null) {
+            logger.warn("[getCredentialType] the type is null.");
+            return null;
+        }
+        if (this.type.contains(CredentialType.ZKP.getName())) {
+            return CredentialType.ZKP;
+        } else if (this.type.contains(CredentialType.LITE1.getName())) {
+            return CredentialType.LITE1;
+        } else  if (this.type.contains(CredentialType.ORIGINAL.getName())) {
+            return CredentialType.ORIGINAL;
+        } else {
+            logger.warn("[getCredentialType] the type does not contain default CredentialType.");
+            return null;
+        }
+    }
 }
