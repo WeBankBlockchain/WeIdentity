@@ -1,3 +1,7 @@
+### V1.6.3-hotfix-1 (2020-08-26)
+- Bugfixes:
+1. Use batch block transaction receipts getter to improve evidence performance.
+
 ### V1.6.3 (2020-06-01)
 - Features:
 1. Multi-group deployment support to separate Evidence and other smart contracts.
