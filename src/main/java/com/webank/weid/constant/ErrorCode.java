@@ -300,6 +300,16 @@ public enum ErrorCode {
         + "verify succeeded, but the given public key ID is incorrect."),
 
     /**
+     * credential is disclosed.
+     */
+    CREDENTIAL_IS_DISCLOSED(100443, "credential is disclosed."),
+
+    /**
+     * credential does not match CPT.
+     */
+    CREDENTIAL_DOES_NOT_MATCHE_THE_CPT(100444, "credential does not match CPT."),
+
+    /**
      * Authorization WeIDs: from and to must be different.
      */
     AUTHORIZATION_FROM_TO_MUST_BE_DIFFERENT(100450,
