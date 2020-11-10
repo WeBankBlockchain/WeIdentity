@@ -145,25 +145,22 @@ List oval = [
 
 configurations {
     localDeps
+    all*.exclude group: "io.netty", module: "netty-tcnative"
 }
 
 dependencies {
 
     localDeps 'org.projectlombok:lombok:1.18.10'
+    if (!gradle.startParameter.isOffline()) {
+        compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval
+        compile("com.webank:weid-contract-java:1.2.26") {
+            exclude group: "org.slf4j", module: "slf4j-log4j12"
+        }
+        compile fileTree(dir: 'lib', include: '*.jar')
+        testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval
+    }
     if (gradleVer.startsWith("4")) {
-        if (!gradle.startParameter.isOffline()) {
-            compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval
-            compile("com.webank:weid-contract-java:1.2.24") {
-                exclude group: "org.slf4j", module: "slf4j-log4j12"
-                // exclude group: "org.fisco-bcos", module: "web3sdk"
-                // exclude group: "org.fisco-bcos", module: "web3sdk-weevent"
-            }
-            // Uncomment these two lines and exclude those above to specify web3sdk versions
-            // compile("org.fisco-bcos:web3sdk:2.4.1")
-            // compile("org.fisco-bcos:web3sdk-weevent:1.2.6")
-            compile fileTree(dir: 'lib', include: '*.jar')
-            testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval
-        } else {
+        if (gradle.startParameter.isOffline()) {
             compile fileTree(dir: 'dist/lib', include: '*.jar')
         }
     }
@@ -173,17 +170,6 @@ dependencies {
             annotationProcessor 'org.projectlombok:lombok:1.18.10'
             testAnnotationProcessor 'org.projectlombok:lombok:1.18.10'
             testCompileOnly 'org.projectlombok:lombok:1.18.10'
-            compile logger, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval
-            compile("com.webank:weid-contract-java:1.2.24") {
-                exclude group: "org.slf4j", module: "slf4j-log4j12"
-                // exclude group: "org.fisco-bcos", module: "web3sdk"
-                // exclude group: "org.fisco-bcos", module: "web3sdk-weevent"
-            }
-            // Uncomment these two lines and exclude those above to specify web3sdk versions
-            // compile("org.fisco-bcos:web3sdk:2.4.1")
-            // compile("org.fisco-bcos:web3sdk-weevent:1.2.6")
-			compile fileTree(dir: 'lib', include: '*.jar')
-            testCompile logger, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval
         } else {
             compileOnly files('dist/lib/lombok-1.18.10.jar')
             annotationProcessor files('dist/lib/lombok-1.18.10.jar')
@@ -232,14 +218,14 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 test {
-   systemProperty "jdk.tls.namedGroups", "${jdkTlsNamedGroups}"
-   jvmArgs "-javaagent:${classpath.find { it.name.contains("jmockit") }.absolutePath}"
-   doFirst {
-     copy {
+    systemProperty "jdk.tls.namedGroups", "${jdkTlsNamedGroups}"
+    jvmArgs "-javaagent:${classpath.find { it.name.contains("jmockit") }.absolutePath}"
+    doFirst {
+        copy {
             from file('src/main/resources/WeDPR_dynamic_lib')
             into 'src/test/resources/WeDPR_dynamic_lib'
         }
-   }
+    }
 }
 
 artifacts {
