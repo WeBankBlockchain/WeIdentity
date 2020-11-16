@@ -19,7 +19,6 @@
 
 package com.webank.weid.service.impl.engine.fiscov2;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +52,6 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
-import com.webank.weid.service.impl.inner.PropertiesService;
 import com.webank.weid.suite.cache.CacheManager;
 import com.webank.weid.suite.cache.CacheNode;
 import com.webank.weid.util.DataToolUtils;
