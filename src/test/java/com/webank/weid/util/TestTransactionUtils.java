@@ -25,11 +25,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.StaticArray;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -97,11 +97,5 @@ public class TestTransactionUtils {
         TransactionInfo info = new TransactionInfo(receipt);
         Assert.assertNotNull(info);
         Assert.assertNull(new TransactionInfo((TransactionReceipt) null).getBlockNumber());
-        Assert.assertNull(TransactionUtils.getTransaction(null));
-    }
-
-    @Test
-    public void testNullTransaction() throws Exception {
-        Assert.assertNull(TransactionUtils.sendTransaction(null, StringUtils.EMPTY));
     }
 }
