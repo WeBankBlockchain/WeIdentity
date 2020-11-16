@@ -20,6 +20,7 @@
 package com.webank.weid.full.evidence;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -139,7 +140,7 @@ public class TestCreateEvidence extends TestBaseService {
         // Here it should fail, since: signer's sig ! from privatekey
         Assert.assertFalse(verifyResp.getResult());
         Assert.assertEquals(verifyResp.getErrorCode().intValue(),
-            ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode());
+            ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode());
 
         //----
         credential.setId(UUID.randomUUID().toString());
@@ -340,7 +341,8 @@ public class TestCreateEvidence extends TestBaseService {
             String hash = credential.getHash();
             hashValues.add(credential.getHash());
             signatures.add(new String(DataToolUtils.base64Encode(DataToolUtils
-                .simpleSignatureSerialization(DataToolUtils.signMessage(hash, privateKey))),
+                .simpleSignatureSerialization(DataToolUtils.secp256k1SignToSignature(
+                    hash, new BigInteger(privateKey)))),
                 StandardCharsets.UTF_8));
             timestamps.add(System.currentTimeMillis());
             signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
@@ -430,7 +432,8 @@ public class TestCreateEvidence extends TestBaseService {
             List<String> argList = new ArrayList<>();
             argList.add(credential.getHash());
             argList.add(new String(DataToolUtils.base64Encode(DataToolUtils
-                .simpleSignatureSerialization(DataToolUtils.signMessage(hash, privateKey))),
+                .simpleSignatureSerialization(DataToolUtils.secp256k1SignToSignature(
+                    hash, new BigInteger(privateKey)))),
                 StandardCharsets.UTF_8));
             argList.add("test log" + i);
             argList.add(DateUtils.getNoMillisecondTimeStampString());

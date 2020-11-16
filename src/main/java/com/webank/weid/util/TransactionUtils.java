@@ -19,7 +19,6 @@
 
 package com.webank.weid.util;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -27,37 +26,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.channel.client.Service;
-import org.bcos.channel.handler.ChannelConnections;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.StaticArray;
-import org.bcos.web3j.abi.datatypes.Type;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.bcos.web3j.protocol.Web3j;
-import org.bcos.web3j.protocol.core.DefaultBlockParameterNumber;
-import org.bcos.web3j.protocol.core.methods.response.EthBlock;
-import org.bcos.web3j.protocol.core.methods.response.EthGetTransactionReceipt;
-import org.bcos.web3j.protocol.core.methods.response.EthSendTransaction;
-import org.bcos.web3j.protocol.core.methods.response.Transaction;
-import org.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.bcos.web3j.protocol.exceptions.TransactionTimeoutException;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicBytes;
+import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
+import org.fisco.bcos.web3j.abi.datatypes.Type;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.ParamKeyConstant;
@@ -66,7 +50,6 @@ import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
-import com.webank.weid.service.BaseService;
 
 /**
  * Transaction related utility functions. This class handles specific Transaction tasks, including
@@ -78,63 +61,6 @@ import com.webank.weid.service.BaseService;
 public class TransactionUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionUtils.class);
-
-    /**
-     * Send a transaction to blockchain through web3j instance using the transactionHex value.
-     *
-     * @param web3j the web3j instance to blockchain
-     * @param transactionHex the transactionHex value
-     * @return the transactionReceipt
-     * @throws Exception the exception
-     */
-    public static TransactionReceipt sendTransaction(Web3j web3j, String transactionHex)
-        throws Exception {
-        if (web3j == null || StringUtils.isEmpty(transactionHex)) {
-            return null;
-        }
-        EthSendTransaction ethSendTransaction = web3j.ethSendRawTransaction(transactionHex)
-            .sendAsync().get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
-        if (ethSendTransaction.hasError()) {
-            logger.error("Error processing transaction request: "
-                + ethSendTransaction.getError().getMessage());
-            return null;
-        }
-        Optional<TransactionReceipt> receiptOptional =
-            getTransactionReceiptRequest(web3j, ethSendTransaction.getTransactionHash());
-        int sumTime = 0;
-        try {
-            for (int i = 0; i < WeIdConstant.POLL_TRANSACTION_ATTEMPTS; i++) {
-                if (!receiptOptional.isPresent()) {
-                    Thread.sleep((long) WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION);
-                    sumTime += WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION;
-                    receiptOptional = getTransactionReceiptRequest(web3j,
-                        ethSendTransaction.getTransactionHash());
-                } else {
-                    return receiptOptional.get();
-                }
-            }
-        } catch (Exception e) {
-            throw new TransactionTimeoutException("Transaction receipt was not generated after "
-                + ((sumTime) / 1000
-                + " seconds for transaction: " + ethSendTransaction));
-        }
-        return null;
-    }
-
-    /**
-     * Get a default blocklimit for a transaction. Used by Restful API service.
-     *
-     * @return blocklimit in BigInt.
-     */
-    public static BigInteger getBlockLimit() {
-        try {
-            return ((Web3j) BaseService.getWeb3j()).ethBlockNumber().send().getBlockNumber()
-                .add(new BigInteger(String.valueOf(WeIdConstant.ADDITIVE_BLOCK_HEIGHT)));
-        } catch (Exception e) {
-            //Send a large enough block limit number
-            return new BigInteger(WeIdConstant.BIG_BLOCK_LIMIT);
-        }
-    }
 
     /**
      * Check validity and build input params for createWeId (with attributes - public key) function.
@@ -357,26 +283,6 @@ public class TransactionUtils {
     }
 
     /**
-     * Get a TransactionReceipt request from a transaction Hash.
-     *
-     * @param web3j the web3j instance to blockchain
-     * @param transactionHash the transactionHash value
-     * @return the transactionReceipt wrapper
-     * @throws Exception the exception
-     */
-    private static Optional<TransactionReceipt> getTransactionReceiptRequest(Web3j web3j,
-        String transactionHash) throws Exception {
-        EthGetTransactionReceipt transactionReceipt =
-            web3j.ethGetTransactionReceipt(transactionHash).send();
-        if (transactionReceipt.hasError()) {
-            logger.error("Error processing transaction request: "
-                + transactionReceipt.getError().getMessage());
-            return Optional.empty();
-        }
-        return transactionReceipt.getTransactionReceipt();
-    }
-
-    /**
      * Get a random Nonce for a transaction. Used by Restful API service.
      *
      * @return nonce in BigInt.
@@ -502,107 +408,5 @@ public class TransactionUtils {
         ResponseData<CptBaseInfo> responseData = new ResponseData<>(result, ErrorCode.SUCCESS,
             info);
         return responseData;
-    }
-
-    /**
-     * Get the transaction instance from blockchain. Requires an on-chain Read operation.
-     *
-     * @param info the transaction info
-     * @return the transaction
-     */
-    public static Transaction getTransaction(TransactionInfo info) {
-        if (info == null) {
-            return null;
-        }
-        Web3j web3j = (Web3j) BaseService.getWeb3j();
-        EthBlock ethBlock = null;
-        BigInteger blockNumber = info.getBlockNumber();
-        try {
-            ethBlock = web3j
-                .ethGetBlockByNumber(new DefaultBlockParameterNumber(blockNumber), true).send();
-        } catch (IOException e) {
-            logger.error("Cannot get a block with number: {}. Error: {}", blockNumber, e);
-        }
-        if (ethBlock == null) {
-            logger.error("Block number {} is null", blockNumber);
-            return null;
-        }
-        List<Transaction> transactionList;
-        try {
-            transactionList = getTransactionListFromBlock(ethBlock);
-        } catch (Exception e) {
-            logger.error(
-                "Error occurred during getting transaction list with block number: {}. Error: {}",
-                blockNumber, e);
-            return null;
-        }
-        if (transactionList.size() == 0) {
-            logger.error("Cannot get any transaction with block number: {}", blockNumber);
-            return null;
-        }
-        return getTransactionFromList(transactionList, info);
-    }
-
-    /**
-     * Build a FISCO-BCOS Service instance based on the given FISCO-BCOS config bundle.
-     *
-     * @param fiscoConfig the FiscoConfig
-     * @return Service instance client
-     */
-    public static Service buildFiscoBcosService(FiscoConfig fiscoConfig) {
-        if (!fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            logger.error("Only 1.x version FISCO-BCOS chain configurations are allowed. Abort.");
-            return null;
-        }
-        String currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
-        Service service = new Service();
-        service.setOrgID(currentOrgId);
-        service.setConnectSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkTimeout()));
-
-        // connection params
-        ChannelConnections channelConnections = new ChannelConnections();
-        channelConnections.setCaCertPath("classpath:" + fiscoConfig.getV1CaCrtPath());
-        channelConnections.setClientCertPassWord(fiscoConfig.getV1ClientCrtPassword());
-        channelConnections
-            .setClientKeystorePath("classpath:" + fiscoConfig.getV1ClientKeyStorePath());
-        channelConnections.setKeystorePassWord(fiscoConfig.getV1KeyStorePassword());
-        channelConnections.setConnectionsStr(Arrays.asList(fiscoConfig.getNodes().split(",")));
-        ConcurrentHashMap<String, ChannelConnections> allChannelConnections =
-            new ConcurrentHashMap<>();
-        allChannelConnections.put(currentOrgId, channelConnections);
-        service.setAllChannelConnections(allChannelConnections);
-
-        // thread pool params
-        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setBeanName("web3sdk");
-        pool.setCorePoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkCorePoolSize()));
-        pool.setMaxPoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkMaxPoolSize()));
-        pool.setQueueCapacity(Integer.valueOf(fiscoConfig.getWeb3sdkQueueSize()));
-        pool.setKeepAliveSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkKeepAliveSeconds()));
-        pool.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
-        pool.initialize();
-        service.setThreadPool(pool);
-        return service;
-    }
-
-    private static List<Transaction> getTransactionListFromBlock(EthBlock ethBlock) {
-        return ethBlock
-            .getBlock()
-            .getTransactions()
-            .stream()
-            .map(transactionResult -> (Transaction) transactionResult.get())
-            .collect(Collectors.toList());
-    }
-
-    private static Transaction getTransactionFromList(List<Transaction> transactionList,
-        TransactionInfo info) {
-        for (Transaction transaction : transactionList) {
-            if (transaction.getHash().equalsIgnoreCase(info.getTransactionHash())
-                && transaction.getTransactionIndex().longValue() == info.getTransactionIndex()
-                .longValue()) {
-                return transaction;
-            }
-        }
-        return null;
     }
 }

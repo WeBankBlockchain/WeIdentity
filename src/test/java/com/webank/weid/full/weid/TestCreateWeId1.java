@@ -23,8 +23,8 @@ import java.security.NoSuchProviderException;
 
 import mockit.Mock;
 import mockit.MockUp;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.Keys;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

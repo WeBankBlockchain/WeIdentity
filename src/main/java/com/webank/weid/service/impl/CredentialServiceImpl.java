@@ -21,7 +21,6 @@ package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +29,10 @@ import java.util.UUID;
 
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.crypto.Sign;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.Sign;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -504,30 +503,19 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                         .verifySecp256k1SignatureFromWeId(rawData, credential.getSignature(),
                             weIdDocument, null);
                     if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                        errorCode = DataToolUtils
-                            .verifySignatureFromWeId(rawData, signatureData, weIdDocument, null);
-                        if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                            return new ResponseData<>(false, errorCode);
-                        }
+                        return new ResponseData<>(false, errorCode);
                     }
                     return new ResponseData<>(true, ErrorCode.SUCCESS);
                 }
             } else {
                 boolean result =
                     DataToolUtils.verifySecp256k1Signature(rawData,
-                        credential.getSignature(), new BigInteger(publicKey))
-                        || DataToolUtils
-                        .verifySignature(rawData, signatureData, new BigInteger(publicKey));
+                        credential.getSignature(), new BigInteger(publicKey));
                 if (!result) {
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_VERIFY_FAIL);
                 }
                 return new ResponseData<>(true, ErrorCode.SUCCESS);
             }
-        } catch (SignatureException e) {
-            logger.error(
-                "Generic signatureException occurred during verify signature "
-                    + "when verifyCredential: ", e);
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE);
         } catch (WeIdBaseException e) {
             logger.error(
                 "Generic signatureException occurred during verify signature ", e);
