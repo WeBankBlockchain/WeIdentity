@@ -78,14 +78,10 @@ public class RequestVerifyChallengeCallback extends AmopCallback {
         ErrorCode errorCode = DataToolUtils
             .verifySecp256k1SignatureFromWeId(rawData, signData, weIdDocResp.getResult(), null);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-            errorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, signData, weIdDocResp.getResult(), null);
-            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[RequestVerifyChallengeCallback] verify challenge signature failed.");
-                result.setErrorCode(errorCode.getCode());
-                result.setErrorMessage(errorCode.getCodeDesc());
-                return result;
-            }
+            logger.error("[RequestVerifyChallengeCallback] verify challenge signature failed.");
+            result.setErrorCode(errorCode.getCode());
+            result.setErrorMessage(errorCode.getCodeDesc());
+            return result;
         }
 
         result.setErrorCode(ErrorCode.SUCCESS.getCode());

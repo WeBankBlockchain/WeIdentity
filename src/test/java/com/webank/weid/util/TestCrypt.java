@@ -19,8 +19,8 @@
 
 package com.webank.weid.util;
 
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.Keys;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;

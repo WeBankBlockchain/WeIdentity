@@ -19,12 +19,13 @@
 
 package com.webank.weid.service.impl;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -302,8 +303,8 @@ public class CptServiceImpl extends AbstractService implements CptService {
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
-        SignatureData signatureData =
-            DataToolUtils.signMessage(sb.toString(), cptPublisherPrivateKey.getPrivateKey());
+        SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
+            sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
         return DataToolUtils.convertSignatureDataToRsv(signatureData);
     }
 
