@@ -28,7 +28,7 @@ import java.util.List;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -366,33 +366,6 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
     }
 
-    private ResponseData<Boolean> verifySignatureToSigner(
-        String rawData,
-        String signerWeId,
-        SignatureData signatureData
-    ) {
-        try {
-            ResponseData<WeIdDocument> innerResponseData =
-                weIdService.getWeIdDocument(signerWeId);
-            if (innerResponseData.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error(
-                    "Error occurred when fetching WeIdentity DID document for: {}, msg: {}",
-                    signerWeId, innerResponseData.getErrorMessage());
-                return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
-            }
-            WeIdDocument weIdDocument = innerResponseData.getResult();
-            ErrorCode errorCode = DataToolUtils
-                .verifySignatureFromWeId(rawData, signatureData, weIdDocument, null);
-            if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
-                return new ResponseData<>(false, errorCode);
-            }
-            return new ResponseData<>(true, ErrorCode.SUCCESS);
-        } catch (Exception e) {
-            logger.error("error occurred during verifying signatures from chain: ", e);
-            return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
-        }
-    }
-
     /**
      * Validate whether a credential created the evidence, and this evidence is signed by this WeID
      * - will perform on-Chain key check.
@@ -487,21 +460,11 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 evidenceInfo.getCredentialHash(),
                 WeIdUtils.convertAddressToWeId(weId),
                 signature);
-            if (verifyResp.getResult()) {
-                return verifyResp;
-            } else {
-                return verifySignatureToSigner(
-                    evidenceInfo.getCredentialHash(),
-                    WeIdUtils.convertAddressToWeId(weId),
-                    signatureData
-                );
-            }
+            return verifyResp;
         } else {
             try {
                 boolean result = DataToolUtils
                     .verifySecp256k1Signature(evidenceInfo.getCredentialHash(), signature,
-                        new BigInteger(publicKey)) || DataToolUtils
-                    .verifySignature(evidenceInfo.getCredentialHash(), signatureData,
                         new BigInteger(publicKey));
 
                 if (!result) {

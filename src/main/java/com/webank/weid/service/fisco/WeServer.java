@@ -33,11 +33,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.CnsType;
-import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.rpc.callback.RegistCallBack;
-import com.webank.weid.service.fisco.v1.WeServerV1;
 import com.webank.weid.service.fisco.v2.WeServerV2;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.callback.CommonCallback;
@@ -111,12 +109,7 @@ public abstract class WeServer<W, C, S> {
             synchronized (WeServer.class) {
                 weServer = weServerContext.get(groupId);
                 if (weServer == null) {
-                    if (fiscoConfig.getVersion()
-                        .startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-                        weServer = new WeServerV1(fiscoConfig);
-                    } else {
-                        weServer = new WeServerV2(fiscoConfig);
-                    }
+                    weServer = new WeServerV2(fiscoConfig);
                     weServer.initWeb3j(groupId);
                     weServerContext.put(groupId, weServer);
                 }

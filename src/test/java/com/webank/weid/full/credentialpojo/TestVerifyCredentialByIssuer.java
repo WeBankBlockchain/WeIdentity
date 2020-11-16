@@ -19,13 +19,11 @@
 
 package com.webank.weid.full.credentialpojo;
 
-import java.security.SignatureException;
 import java.util.Map;
 
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -42,7 +40,6 @@ import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.util.DataToolUtils;
 
 /**
  * verifyCredentialPojo method for testing CredentialPojoService.
@@ -134,7 +131,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -153,7 +150,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -202,7 +199,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -253,7 +250,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredentialPojo(copyCredentialPojo);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
