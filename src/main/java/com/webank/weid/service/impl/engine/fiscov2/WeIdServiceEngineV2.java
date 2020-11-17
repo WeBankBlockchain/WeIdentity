@@ -787,4 +787,15 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         } while (true);
         return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
+
+    @Override
+    public ResponseData<Integer> getWeIdCount() {
+        try {
+            Integer total = weIdContract.getWeIdCount().send().intValue();
+            return new ResponseData<>(total, ErrorCode.SUCCESS); 
+        } catch (Exception e) {
+            logger.error("[getWeIdTotal]: get weId total has unknow error. ", e);
+            return new ResponseData<>(0, ErrorCode.UNKNOW_ERROR);
+        }
+    }
 }

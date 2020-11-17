@@ -956,4 +956,9 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
+
+    @Override
+    public ResponseData<Integer> getWeIdCount() {
+        return weIdServiceEngine.getWeIdCount();
+    }
 }
