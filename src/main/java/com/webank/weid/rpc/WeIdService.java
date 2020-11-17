@@ -212,4 +212,11 @@ public interface WeIdService {
         Integer indexInBlock,
         boolean direction
     );
+    
+    /**
+     * get total weId.
+     *
+     * @return total weid
+     */
+    ResponseData<Integer> getWeIdCount();
 }
