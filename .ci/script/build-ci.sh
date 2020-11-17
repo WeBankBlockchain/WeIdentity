@@ -122,7 +122,7 @@ function deploy_contract()
     echo "contract deployment done."
 }
 
-function  install_font()
+function install_font()
 {
     # download NotoSansCJKtc-Regular.ttf
     if [ ! -f NotoSansCJKtc-Regular.ttf ]; then

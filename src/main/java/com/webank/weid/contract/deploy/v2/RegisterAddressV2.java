@@ -133,7 +133,7 @@ public class RegisterAddressV2 {
      */
     public static boolean enableHash(CnsType cnsType, String hash, WeIdPrivateKey weIdPrivateKey) {
         logger.info("[enableHash] enable hash on chain.");
-        boolean result = getBucket(cnsType).enableHash(hash, weIdPrivateKey).getResult();
+        boolean result = getBucket(cnsType).enable(hash, weIdPrivateKey).getResult();
         logger.info("[enableHash] the result of enable. result = {}", result);
         return result;
     }
