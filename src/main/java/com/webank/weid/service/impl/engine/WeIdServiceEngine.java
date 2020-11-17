@@ -99,4 +99,11 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
         Integer indexInBlock,
         boolean direction
     ) throws Exception;
+    
+    /**
+     * get total weId.
+     *
+     * @return total weid
+     */
+    ResponseData<Integer> getWeIdCount();
 }
