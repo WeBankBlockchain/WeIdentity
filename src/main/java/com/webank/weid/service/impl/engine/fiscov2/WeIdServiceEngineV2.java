@@ -696,6 +696,12 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         boolean direction
     ) throws Exception {
         LinkedList<WeIdPojo> result = new LinkedList<WeIdPojo>();
+        if (pageSize == null || indexInBlock == null || blockNumber == null) {
+            return new ResponseData<>(result, ErrorCode.ILLEGAL_INPUT);
+        }
+        if (pageSize <= 0) {
+            return new ResponseData<>(result, ErrorCode.SUCCESS);
+        }
         // 处理块高
         Integer firstBlockNumer = this.getFirstBlockNum();
         Integer latestBlockNumer = this.getLatestBlockNum();
@@ -726,7 +732,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
                 } else {
                     // 没换块
                     // 如果index大于当前块最大位置 则index为当前最大位置
-                    if (beginIndex > weIdListByBlockNumber.size()) {
+                    if (beginIndex > weIdListByBlockNumber.size() - 1) {
                         beginIndex = weIdListByBlockNumber.size() - 1;
                     }
                 }
@@ -764,7 +770,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
                     if (beginIndex < 0) {
                         beginIndex = 0;
                     }
-                    if (beginIndex > weIdListByBlockNumber.size()) {
+                    if (beginIndex > weIdListByBlockNumber.size() - 1) {
                         // 换块
                         queryBlockNumber = this.getNextBlockNum(queryBlockNumber);
                         changeBlock = true;
