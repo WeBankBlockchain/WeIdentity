@@ -26,7 +26,7 @@ import lombok.Data;
 /**
  * The base data structure for the CPT.
  *
- * @author lingfenghe
+ * @author junqizhang
  */
 @Data
 public class Cpt {
