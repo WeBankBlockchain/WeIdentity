@@ -24,10 +24,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.WalletUtils;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.WalletUtils;
 import org.fisco.bcos.web3j.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,16 +194,6 @@ public final class WeIdUtils {
         if (addr == null) {
             return false;
         }
-        return addr.getValue().equals(BigInteger.ZERO);
-    }
-
-    /**
-     * check if the given Address is empty.
-     *
-     * @param addr given Address
-     * @return true if yes, false otherwise.
-     */
-    public static boolean isEmptyAddress(org.fisco.bcos.web3j.abi.datatypes.Address addr) {
         return addr.getValue().equals(BigInteger.ZERO);
     }
 

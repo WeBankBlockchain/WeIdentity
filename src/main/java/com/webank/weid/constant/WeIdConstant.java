@@ -234,7 +234,17 @@ public final class WeIdConstant {
      * Removed WeID authentication specified tag.
      */
     public static final String REMOVED_AUTHENTICATION_TAG = "OBSOLETEAUTH";
-    
+
+    /**
+     * Evidence Revoke attribute key.
+     */
+    public static final String EVIDENCE_REVOKE_KEY = "revoke";
+
+    /**
+     * Evidence Un-Revoke attribute key.
+     */
+    public static final String EVIDENCE_UNREVOKE_KEY = "unrevoke";
+
     /**
      * the address key in bucket.
      */
@@ -257,6 +267,9 @@ public final class WeIdConstant {
     public static final Integer ON_CHAIN_STRING_LENGTH = 2097152;
 
     public static final Integer ADD_PUBKEY_FAILURE_CODE = -1;
+
+    public static final Integer CPT_DATA_INDEX = 0;
+    public static final Integer POLICY_DATA_INDEX = 1;
 
     public static final Long RECOGNIZED_AUTHORITY_ISSUER_FLAG = 1L;
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple2;
 import org.fisco.bcos.web3j.tuples.generated.Tuple4;
@@ -71,7 +71,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
 
     @Override
     public ResponseData<Boolean> put(
-        String hash, 
+        String bucketId, 
         String key, 
         String value, 
         WeIdPrivateKey privateKey) {
@@ -79,18 +79,20 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         Bytes32 keyByte32 = DataToolUtils.bytesArrayToBytes32(key.getBytes());
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).put(
-                hash, keyByte32.getValue(), value).send();
+                bucketId, keyByte32.getValue(), value).send();
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
-                logger.info("[put] put [{}:{}] into chain success, hash is {}.", key, value, hash);
+                logger.info("[put] put [{}:{}] into chain success, bucketId is {}.", 
+                    key, value, bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
             }
-            logger.error("[put] put [{}:{}] into chain fail, hash is {}.", key, value, hash);
+            logger.error("[put] put [{}:{}] into chain fail, bucketId is {}.", 
+                key, value, bucketId);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
-            logger.error("[put] put [{}:{}] into chain has excpetion, hash is {}, exception:",
-                key, value, hash, e);
+            logger.error("[put] put [{}:{}] into chain has excpetion, bucketId is {}, exception:",
+                key, value, bucketId, e);
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
@@ -133,28 +135,30 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     }
 
     @Override
-    public ResponseData<String> get(String hash, String key) {
+    public ResponseData<String> get(String bucketId, String key) {
         Bytes32 keyByte32 = DataToolUtils.bytesArrayToBytes32(key.getBytes());
         try {
-            Tuple2<BigInteger, String> tuple = dataBucket.get(hash, keyByte32.getValue()).send();
+            Tuple2<BigInteger, String> tuple = dataBucket.get(
+                bucketId, keyByte32.getValue()).send();
             int code = tuple.getValue1().intValue();
             if (code == 102) {
-                logger.error("[get] the hash does not exits, hash is {}.", hash);
+                logger.error("[get] the bucketId does not exits, bucketId is {}.", bucketId);
                 return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.CNS_DOES_NOT_EXIST);
             }
-            logger.info("[get] get address successfully, hash: {}, key: {}, value: {}", 
-                hash, key, tuple.getValue2());
+            logger.info("[get] get address successfully, bucketId: {}, key: {}, value: {}", 
+                bucketId, key, tuple.getValue2());
             return new ResponseData<String>(tuple.getValue2(), ErrorCode.SUCCESS);  
         } catch (Exception e) {
             logger.error(
-                "[get] get data has exception, hash is {}, key is {}, exception:", hash, key, e);
+                "[get] get data has exception, bucketId is {}, key is {}, exception:", 
+                 bucketId, key, e);
             return new ResponseData<String>(StringUtils.EMPTY, ErrorCode.UNKNOW_ERROR);
         }
     }
 
     @Override
     public ResponseData<Boolean> removeExtraItem(
-        String hash, 
+        String bucketId, 
         String key, 
         WeIdPrivateKey privateKey
     ) {
@@ -165,46 +169,49 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
             keyByte32 = DataToolUtils.bytesArrayToBytes32(key.getBytes());
         }
         try {
-            logger.info("[remove] remove Extra Item, hash is {}, key is {}.", hash, key);
+            logger.info("[remove] remove Extra Item, bucketId is {}, key is {}.", bucketId, key);
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).removeExtraItem(
-                hash, keyByte32.getValue()).send();
+                bucketId, keyByte32.getValue()).send();
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
-                logger.info("[remove] remove {} from chain success, hash is {}.", key, hash);
+                logger.info("[remove] remove {} from chain success, bucketId is {}.", 
+                    key, bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
             }
-            logger.error("[remove] remove {} from chain fail, hash is {}.", key, hash);
+            logger.error("[remove] remove {} from chain fail, bucketId is {}.", key, bucketId);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
-            logger.error("[remove] remove {} from chain has excpetion, hash is {}, exception:",
-                key, hash, e);
+            logger.error("[remove] remove {} from chain has excpetion, bucketId is {}, exception:",
+                key, bucketId, e);
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
     
     @Override
     public ResponseData<Boolean> removeDataBucketItem(
-        String hash, 
+        String bucketId, 
         boolean force, 
         WeIdPrivateKey privateKey
     ) {
         try {
-            logger.info("[remove] remove Bucket Item, hash is {}, force is {}.", hash, force);
+            logger.info("[remove] remove Bucket Item, bucketId is {}, force is {}.", 
+                bucketId, force);
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
-                .removeDataBucketItem(hash, force).send();
+                .removeDataBucketItem(bucketId, force).send();
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
-                logger.info("[remove] remove Bucket Item from chain success, hash is {}.", hash);
+                logger.info("[remove] remove Bucket Item from chain success, bucketId is {}.", 
+                    bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
             }
-            logger.error("[remove] remove Bucket Item from chain fail, hash is {}.", hash);
+            logger.error("[remove] remove Bucket Item from chain fail, bucketId is {}.", bucketId);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
             logger.error(
-                "[remove] remove Bucket Item from chain has excpetion, hash is {}, exception:",
-                hash, 
+                "[remove] remove Bucket Item from chain has excpetion, bucketId is {}, exception:",
+                bucketId, 
                 e
             );
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
@@ -212,46 +219,47 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     }
     
     @Override
-    public ResponseData<Boolean> enableHash(String hash, WeIdPrivateKey privateKey) {
+    public ResponseData<Boolean> enable(String bucketId, WeIdPrivateKey privateKey) {
         try {
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).enableHash(
-                hash).send();
+            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).enable(
+                bucketId).send();
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
-                logger.info("[enableHash] enable hash success, hash is {}.", hash);
+                logger.info("[enable] enable Bucket success, bucketId is {}.", bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
             }
-            logger.error("[enableHash] enable hash fail, hash is {}.", hash);
+            logger.error("[enable] enable Bucket fail, bucketId is {}.", bucketId);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
-            logger.error("[enableHash] enable hash has excpetion, hash is {}, exception:", hash, e);
+            logger.error("[enable] enable Bucket has excpetion, bucketId is {}, exception:",
+                bucketId, e);
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
 
     @Override
-    public ResponseData<Boolean> disableHash(String hash, WeIdPrivateKey privateKey) {
+    public ResponseData<Boolean> disable(String bucketId, WeIdPrivateKey privateKey) {
         try {
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).disableHash(
-                hash).send();
+            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).disable(
+                bucketId).send();
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
-                logger.info("[disableHash] disable hash success, hash is {}.", hash);
+                logger.info("[disable] disable Bucket success, bucketId is {}.", bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
             }
-            logger.error("[disableHash] disable hash fail, hash is {}.", hash);
+            logger.error("[disable] disable Bucket fail, bucketId is {}.", bucketId);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
-            logger.error("[disableHash] disable hash has excpetion, hash is {}, exception:", 
-                hash, e);
+            logger.error("[disable] disable Bucket has excpetion, bucketId is {}, exception:", 
+                bucketId, e);
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
         }
     }
 
     @Override
-    public ResponseData<List<HashContract>> getAllHash() {
+    public ResponseData<List<HashContract>> getAllBucket() {
         int startIndex = 0;
         BigInteger num = BigInteger.valueOf(10);
         List<HashContract>  hashContractList = new ArrayList<HashContract>();
@@ -259,17 +267,17 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
             while (true) {
                 BigInteger offset = BigInteger.valueOf(startIndex);
                 Tuple4<List<String>, List<String>, List<BigInteger>, BigInteger> data = 
-                    dataBucket.getAllHash(offset, num).send();
-                List<String> hashList = data.getValue1();
+                    dataBucket.getAllBucket(offset, num).send();
+                List<String> bucketIdList = data.getValue1();
                 List<String> ownerList = data.getValue2();
                 List<BigInteger> timesList = data.getValue3();
                 BigInteger next = data.getValue4();
-                for (int i = 0; i < hashList.size(); i++) {
+                for (int i = 0; i < bucketIdList.size(); i++) {
                     if (WeIdUtils.isEmptyStringAddress(ownerList.get(i))) {
                         break;
                     }
                     HashContract hash = new HashContract();
-                    hash.setHash(hashList.get(i));
+                    hash.setHash(bucketIdList.get(i));
                     hash.setOwner(ownerList.get(i));
                     hash.setTime(timesList.get(i).longValue());
                     hashContractList.add(hash);
@@ -279,35 +287,67 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
                 }
                 startIndex = next.intValue();
             }
-            logger.info("[getAllHash] get the all hash success.");
+            logger.info("[getAllBucket] get the all Bucket success.");
             return new ResponseData<List<HashContract>>(hashContractList, ErrorCode.SUCCESS);
         } catch (Exception e) {
-            logger.error("[getAllHash] get the all hash fail.", e);
+            logger.error("[getAllBucket] get the all Bucket fail.", e);
             return new ResponseData<List<HashContract>>(hashContractList, ErrorCode.UNKNOW_ERROR);
         }
     }
     
     @Override
-    public ResponseData<Boolean> updateHashOwner(
-        String hash, 
+    public ResponseData<Boolean> updateBucketOwner(
+        String bucketId, 
         String newOwner, 
         WeIdPrivateKey privateKey
     ) {
         try {
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).updateHashOwner(
-                hash, newOwner).send();
+            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
+                .updateBucketOwner(bucketId, newOwner).send();
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
-                logger.info("[updateHashOwner] update owner success, hash is {}.", hash);
+                logger.info("[updateBucketOwner] update owner success, bucketId is {}.", bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
             }
-            logger.error("[updateHashOwner] update owner fail, hash is {}.", hash);
+            logger.error("[updateBucketOwner] update owner fail, bucketId is {}.", bucketId);
             return new ResponseData<Boolean>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         } catch (Exception e) {
-            logger.error("[updateHashOwner] update owner has excpetion, hash is {}, exception:", 
-                hash, e);
+            logger.error(
+                "[updateBucketOwner] update owner has excpetion, bucketId is {}, exception:", 
+                bucketId, e);
             return new ResponseData<Boolean>(false, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<List<String>> getActivatedUserList(String bucketId) {
+        int startIndex = 0;
+        BigInteger num = BigInteger.valueOf(10);
+        List<String> userList = new ArrayList<String>();
+        try {
+            while (true) {
+                BigInteger index = BigInteger.valueOf(startIndex);
+                Tuple2<List<String>, BigInteger> data = 
+                    dataBucket.getActivatedUserList(bucketId, index, num).send();
+                List<String> useList = data.getValue1();
+                BigInteger next = data.getValue2();
+                for (int i = 0; i < useList.size(); i++) {
+                    if (WeIdUtils.isEmptyStringAddress(useList.get(i))) {
+                        break;
+                    }
+                    userList.add(useList.get(i));
+                }
+                if (next.intValue() == 0) {
+                    break;
+                }
+                startIndex = next.intValue();
+            }
+            logger.info("[getActivatedUserList] get the use list by bucketId success.");
+            return new ResponseData<List<String>>(userList, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[getActivatedUserList] get the use list by bucketId fail.", e);
+            return new ResponseData<List<String>>(userList, ErrorCode.UNKNOW_ERROR);
         }
     }
 }

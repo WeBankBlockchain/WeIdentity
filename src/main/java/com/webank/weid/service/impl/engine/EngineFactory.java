@@ -20,35 +20,20 @@
 package com.webank.weid.service.impl.engine;
 
 import com.webank.weid.constant.CnsType;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.service.impl.engine.fiscov1.AuthorityIssuerEngineV1;
-import com.webank.weid.service.impl.engine.fiscov1.CptServiceEngineV1;
-import com.webank.weid.service.impl.engine.fiscov1.EvidenceServiceEngineV1;
-import com.webank.weid.service.impl.engine.fiscov1.RawTransactionServiceEngineV1;
-import com.webank.weid.service.impl.engine.fiscov1.WeIdServiceEngineV1;
 import com.webank.weid.service.impl.engine.fiscov2.AuthorityIssuerEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.CptServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.DataBucketServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.EvidenceServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.RawTransactionServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.WeIdServiceEngineV2;
-import com.webank.weid.util.PropertyUtils;
 
 public class EngineFactory {
-
-    /**
-     * fisco bcos version, default 1.3.x
-     */
-    private static String fiscoVersion = PropertyUtils.getProperty("bcos.version", "1.3");
 
     /**
      * create WeIdServiceEngine.
      * @return WeIdServiceEngine object
      */
     public static WeIdServiceEngine createWeIdServiceEngine() {
-        if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            return new WeIdServiceEngineV1();
-        }
         return new WeIdServiceEngineV2();
     }
 
@@ -57,9 +42,6 @@ public class EngineFactory {
      * @return CptServiceEngine object
      */
     public static CptServiceEngine createCptServiceEngine() {
-        if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            return new CptServiceEngineV1();
-        }
         return new CptServiceEngineV2();
     }
 
@@ -68,9 +50,6 @@ public class EngineFactory {
      * @return CptServiceEngine object
      */
     public static AuthorityIssuerServiceEngine createAuthorityIssuerServiceEngine() {
-        if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            return new AuthorityIssuerEngineV1();
-        }
         return new AuthorityIssuerEngineV2();
     }
 
@@ -80,9 +59,6 @@ public class EngineFactory {
      * @return EvidenceServiceEngine object
      */
     public static EvidenceServiceEngine createEvidenceServiceEngine(Integer groupId) {
-        if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            return new EvidenceServiceEngineV1();
-        }
         return new EvidenceServiceEngineV2(groupId);
     }
 
@@ -91,9 +67,6 @@ public class EngineFactory {
      * @return RawTransactionServiceEngine object
      */
     public static RawTransactionServiceEngine createRawTransactionServiceEngine() {
-        if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            return new RawTransactionServiceEngineV1();
-        }
         return new RawTransactionServiceEngineV2();
     }
     
@@ -103,9 +76,6 @@ public class EngineFactory {
      * @return DataBucketServiceEngine object
     */
     public static DataBucketServiceEngine createDataBucketServiceEngine(CnsType cnsType) {
-        if (fiscoVersion.startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
-            return null;
-        }
         return new DataBucketServiceEngineV2(cnsType);
     }
 }

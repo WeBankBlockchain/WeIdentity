@@ -213,6 +213,14 @@ public class DeployContractV2 extends AddressProcess {
                     authorityIssuerDataAddress).send();
             String cptDataAddress = cptData.getContractAddress();
 
+            CptData policyData =
+                CptData.deploy(
+                    web3j,
+                    credentials,
+                    new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                    authorityIssuerDataAddress).send();
+            String policyDataAddress = policyData.getContractAddress();
+
             CptController cptController =
                 CptController.deploy(
                     web3j,
@@ -227,7 +235,11 @@ public class DeployContractV2 extends AddressProcess {
             TransactionReceipt receipt =
                 cptController.setRoleController(roleControllerAddress).send();
             if (receipt == null) {
-                logger.error("CptController deploy exception");
+                logger.error("CptController deploy exception: role address illegal");
+            }
+            receipt = cptController.setPolicyData(policyDataAddress).send();
+            if (receipt == null) {
+                logger.error("CptController deploy exception: policy data address illegal");
             }
         } catch (Exception e) {
             logger.error("CptController deploy exception", e);

@@ -20,11 +20,10 @@
 package com.webank.weid.util;
 
 import java.math.BigInteger;
-import java.security.SignatureException;
 
 import com.lambdaworks.codec.Base64;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Sign;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -43,28 +42,18 @@ public class TestSignatureUtils {
     public void testSignatureUtils()
         throws Exception {
 
-        ECKeyPair keyPair = DataToolUtils.createKeyPair();
-        String str = "hello world...........................yes";
-        Sign.SignatureData sigData = DataToolUtils.signMessage(str, keyPair);
-        BigInteger publicKey = DataToolUtils.signatureToPublicKey(str, sigData);
-        logger.info("publicKey:{} ", publicKey);
-
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
-        Sign.SignatureData sigData2 = DataToolUtils.signMessage(str, privateKey);
-        publicKey = DataToolUtils.signatureToPublicKey(str, sigData2);
+        BigInteger publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
         logger.info("publicKey:{} ", publicKey);
 
-        boolean result = DataToolUtils.verifySignature(str, sigData2, publicKey);
-        Assert.assertTrue(result);
-
-        publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
-        logger.info("publicKey:{} ", publicKey);
-
+        ECKeyPair keyPair = DataToolUtils.createKeyPair();
         keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         logger.info("publicKey:{} ", keyPair.getPublicKey());
         logger.info("privateKey:{}", keyPair.getPrivateKey());
 
+        String str = "hello world...........................yes";
+        Sign.SignatureData sigData = DataToolUtils.secp256k1SignToSignature(str, keyPair);
         byte[] serialized = DataToolUtils.simpleSignatureSerialization(sigData);
         Sign.SignatureData newSigData = DataToolUtils.simpleSignatureDeserialization(serialized);
         logger.info(newSigData.toString());

@@ -38,17 +38,10 @@ import com.webank.weid.util.DateUtils;
 public class TestGetEvidence extends TestBaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(TestGetEvidence.class);
-    private static String evidenceAddress;
 
     @Override
     public synchronized void testInit() {
         super.testInit();
-        HashString str = new HashString(
-            DataToolUtils.sha3(DateUtils.getNoMillisecondTimeStampString()));
-        ResponseData<String> evidence = evidenceService
-            .createEvidence(str, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        Assert.assertTrue(!evidence.getResult().isEmpty());
-        evidenceAddress = evidence.getResult();
     }
 
     /**
@@ -56,6 +49,12 @@ public class TestGetEvidence extends TestBaseService {
      */
     @Test
     public void testGetEvidence_success() {
+        HashString str = new HashString(
+            DataToolUtils.sha3(DateUtils.getNoMillisecondTimeStampString()));
+        ResponseData<String> evidence = evidenceService
+            .createEvidence(str, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
+        Assert.assertTrue(!evidence.getResult().isEmpty());
+        String evidenceAddress = evidence.getResult();
         ResponseData<EvidenceInfo> responseData = evidenceService
             .getEvidence(evidenceAddress);
         logger.info("testGetEvidenceCase1 result :" + responseData);
