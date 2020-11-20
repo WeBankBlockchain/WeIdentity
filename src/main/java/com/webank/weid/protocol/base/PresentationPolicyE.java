@@ -83,12 +83,6 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
     private String policyType = "original";
 
     /**
-     * close the constructor.
-     */
-    private PresentationPolicyE() {
-    }
-
-    /**
      * create the PresentationPolicyE with policyFileName, 
      * please make sure the JSON file in your classPath.
      * 

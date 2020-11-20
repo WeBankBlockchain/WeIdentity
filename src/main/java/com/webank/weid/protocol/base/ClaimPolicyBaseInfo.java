@@ -1,5 +1,5 @@
 /*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
+ *       Copyright© (2018) WeBank Co., Ltd.
  *
  *       This file is part of weid-java-sdk.
  *
@@ -19,39 +19,23 @@
 
 package com.webank.weid.protocol.base;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.Data;
 
 /**
- * The sign information of evidence's each signer's sign attempt. Used as a mapped info against each
- * individual signer.
+ * The base data structure for the SDK API register CPT info.
  *
- * @author chaoxinhu 2020.2
- * @since v1.6.0
+ * @author junqizhang
  */
 @Data
-public class EvidenceSignInfo {
+public class ClaimPolicyBaseInfo {
 
     /**
-     * The signature of the signer onto this evidence.
+     * Required: The id for the CPT.
      */
-    private String signature;
+    private Integer claimPolicyId;
 
     /**
-     * The timestamp at which this evidence is signed.
+     * Required: The version of the CPT for the same CPT id.
      */
-    private String timestamp;
-
-    /**
-     * The extra value this signer records on chain.
-     */
-    private List<String> logs = new ArrayList<>();
-
-    /**
-     * Whether this signer revoked this evidence. This is initialized as null, and will be set
-     * appropriate values upon getEvidence().
-     */
-    private Boolean revoked = null;
+    private Integer claimPolicyVersion;
 }

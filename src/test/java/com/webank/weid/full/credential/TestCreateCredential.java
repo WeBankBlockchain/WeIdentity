@@ -394,7 +394,7 @@ public class TestCreateCredential extends TestBaseService {
         Assert.assertNotNull(response.getResult());
 
         ResponseData<Boolean> verify = credentialService.verify(response.getResult());
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             verify.getErrorCode().intValue());
     }
 
@@ -417,7 +417,7 @@ public class TestCreateCredential extends TestBaseService {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
 
         ResponseData<Boolean> verify = credentialService.verify(response.getResult());
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             verify.getErrorCode().intValue());
     }
 

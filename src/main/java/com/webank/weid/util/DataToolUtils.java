@@ -78,28 +78,29 @@ import com.github.reinert.jjschema.v1.JsonSchemaV4Factory;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.bcos.web3j.abi.datatypes.Address;
-import org.bcos.web3j.abi.datatypes.DynamicArray;
-import org.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.bcos.web3j.abi.datatypes.StaticArray;
-import org.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.bcos.web3j.abi.datatypes.generated.Int256;
-import org.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.bcos.web3j.crypto.ECKeyPair;
-import org.bcos.web3j.crypto.Hash;
-import org.bcos.web3j.crypto.Keys;
-import org.bcos.web3j.crypto.Sign;
-import org.bcos.web3j.crypto.Sign.SignatureData;
-import org.bcos.web3j.utils.Numeric;
 import org.bouncycastle.util.encoders.Base64;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
+import org.fisco.bcos.web3j.abi.datatypes.DynamicBytes;
+import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.web3j.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.web3j.crypto.ECDSASign;
 import org.fisco.bcos.web3j.crypto.ECDSASignature;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.Hash;
+import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.Sign;
+import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
 import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
+import org.fisco.bcos.web3j.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
@@ -107,6 +108,7 @@ import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.RsvSignature;
 
 /**
@@ -239,11 +241,11 @@ public final class DataToolUtils {
      * @return true if yes, false otherwise
      */
     public static String convertPrivateKeyToDefaultWeId(String privateKey) {
-        org.fisco.bcos.web3j.crypto.ECKeyPair keyPair = org.fisco.bcos.web3j.crypto.ECKeyPair
+        ECKeyPair keyPair = ECKeyPair
             .create(new BigInteger(privateKey));
         return WeIdUtils
             .convertAddressToWeId(new org.fisco.bcos.web3j.abi.datatypes.Address(
-                org.fisco.bcos.web3j.crypto.Keys.getAddress(keyPair)).toString());
+                Keys.getAddress(keyPair)).toString());
     }
 
     /**
@@ -471,6 +473,43 @@ public final class DataToolUtils {
     }
 
     /**
+     * Check if this json string is in valid format.
+     *
+     * @param json Json string
+     * @return true if yes, false otherwise
+     */
+    public static boolean isValidJsonStr(String json) {
+        if (StringUtils.isEmpty(json)) {
+            return false;
+        }
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            mapper.readTree(json);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    /**
+     * create new cpt json schema.
+     *
+     * @param args Map
+     * @return String
+     */
+    public static String cptSchemaToString(CptMapArgs args) {
+
+        Map<String, Object> cptJsonSchema = args.getCptJsonSchema();
+        Map<String, Object> cptJsonSchemaNew = new HashMap<String, Object>();
+        cptJsonSchemaNew.put(JsonSchemaConstant.SCHEMA_KEY, JsonSchemaConstant.SCHEMA_VALUE);
+        cptJsonSchemaNew.put(JsonSchemaConstant.TYPE_KEY, JsonSchemaConstant.DATA_TYPE_OBJECT);
+        cptJsonSchemaNew.putAll(cptJsonSchema);
+        String cptType = args.getCptType().getName();
+        cptJsonSchemaNew.put(CredentialConstant.CPT_TYPE_KEY, cptType);
+        return DataToolUtils.serialize(cptJsonSchemaNew);
+    }
+
+    /**
      * Generate a new Key-pair.
      *
      * @return the ECKeyPair
@@ -486,35 +525,6 @@ public final class DataToolUtils {
     }
 
     /**
-     * Sign a message based on the given key-pairs. The message passed in WILL BE HASHED.
-     *
-     * @param message the message
-     * @param keyPair the key pair
-     * @return SignatureData
-     */
-    public static Sign.SignatureData signMessage(String message, ECKeyPair keyPair) {
-        return Sign.signMessage(sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
-    }
-
-    /**
-     * Sign a message based on the given privateKey in Decimal String BigInt. The message passed in
-     * WILL BE HASHED.
-     *
-     * @param message the message
-     * @param privateKeyString the private key string
-     * @return SignatureData
-     */
-    @Deprecated
-    public static Sign.SignatureData signMessage(
-        String message,
-        String privateKeyString) {
-
-        BigInteger privateKey = new BigInteger(privateKeyString);
-        ECKeyPair keyPair = new ECKeyPair(privateKey, publicKeyFromPrivate(privateKey));
-        return Sign.signMessage(sha3(message.getBytes(StandardCharsets.UTF_8)), keyPair);
-    }
-
-    /**
      * Secp256k1 sign.
      *
      * @param rawData original raw data
@@ -522,14 +532,34 @@ public final class DataToolUtils {
      * @return base64 string for signature value
      */
     public static String secp256k1Sign(String rawData, BigInteger privateKey) {
-        ECDSASign ecdsaSign = new ECDSASign();
-        org.fisco.bcos.web3j.crypto.ECKeyPair keyPair = org.fisco.bcos.web3j.crypto.ECKeyPair
-            .create(privateKey);
-        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData = ecdsaSign
-            .secp256SignMessage(rawData.getBytes(), keyPair);
+        SignatureData sigData = secp256k1SignToSignature(rawData, privateKey);
         return secp256k1SigBase64Serialization(sigData);
     }
-
+    
+    /**
+     * Secp256k1 sign to Signature.
+     *
+     * @param rawData original raw data
+     * @param keyPair keyPair
+     * @return SignatureData for signature value
+     */
+    public static SignatureData secp256k1SignToSignature(String rawData, ECKeyPair keyPair) {
+        ECDSASign ecdsaSign = new ECDSASign();
+        return ecdsaSign.secp256SignMessage(rawData.getBytes(), keyPair);
+    }
+    
+    /**
+     * Secp256k1 sign to Signature.
+     *
+     * @param rawData original raw data
+     * @param privateKey private key in BigInteger format
+     * @return SignatureData for signature value
+     */
+    public static SignatureData secp256k1SignToSignature(String rawData, BigInteger privateKey) {
+        ECKeyPair keyPair = ECKeyPair.create(privateKey);
+        return secp256k1SignToSignature(rawData, keyPair);
+    }
+    
     /**
      * Serialize secp256k1 signature into base64 encoded, in R, S, V (0, 1) format.
      *
@@ -537,7 +567,7 @@ public final class DataToolUtils {
      * @return base64 string
      */
     public static String secp256k1SigBase64Serialization(
-        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData) {
+        SignatureData sigData) {
         byte[] sigBytes = new byte[65];
         sigBytes[64] = sigData.getV();
         System.arraycopy(sigData.getR(), 0, sigBytes, 0, 32);
@@ -551,7 +581,7 @@ public final class DataToolUtils {
      * @param signature signature base64 string
      * @return secp256k1 signature (v = 0,1)
      */
-    public static org.fisco.bcos.web3j.crypto.Sign.SignatureData secp256k1SigBase64Deserialization(
+    public static SignatureData secp256k1SigBase64Deserialization(
         String signature
     ) {
         byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
@@ -559,7 +589,7 @@ public final class DataToolUtils {
         byte[] s = new byte[32];
         System.arraycopy(sigBytes, 0, r, 0, 32);
         System.arraycopy(sigBytes, 32, s, 0, 32);
-        return new org.fisco.bcos.web3j.crypto.Sign.SignatureData(sigBytes[64], r, s);
+        return new SignatureData(sigBytes[64], r, s);
     }
 
     /**
@@ -579,7 +609,7 @@ public final class DataToolUtils {
             if (rawData == null) {
                 return false;
             }
-            org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData =
+            SignatureData sigData =
                 secp256k1SigBase64Deserialization(signatureBase64);
             ECDSASign ecdsaSign = new ECDSASign();
             byte[] hashBytes = Hash.sha3(rawData.getBytes());
@@ -598,11 +628,11 @@ public final class DataToolUtils {
      * @return WeID
      */
     public static String recoverWeIdFromMsgAndSecp256Sig(String rawData, String sigBase64) {
-        org.fisco.bcos.web3j.crypto.Sign.SignatureData sigData = secp256k1SigBase64Deserialization(
+        SignatureData sigData = secp256k1SigBase64Deserialization(
             sigBase64);
         byte[] hashBytes = Hash.sha3(rawData.getBytes());
-        org.fisco.bcos.web3j.crypto.Sign.SignatureData modifiedSigData =
-            new org.fisco.bcos.web3j.crypto.Sign.SignatureData(
+        SignatureData modifiedSigData =
+            new SignatureData(
                 (byte) (sigData.getV() + 27),
                 sigData.getR(),
                 sigData.getS());
@@ -610,28 +640,9 @@ public final class DataToolUtils {
             new ECDSASignature(
                 org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getR()),
                 org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getS()));
-        BigInteger k = org.fisco.bcos.web3j.crypto.Sign
+        BigInteger k = Sign
             .recoverFromSignature(modifiedSigData.getV() - 27, sig, hashBytes);
         return WeIdUtils.convertPublicKeyToWeId(k.toString(10));
-    }
-
-    /**
-     * Sign a object based on the given privateKey in Decimal String BigInt.
-     *
-     * @param rawData this rawData to be signed,
-     * @param privateKeyString the private key string
-     * @return String the data after signature
-     */
-    @Deprecated
-    public static String sign(
-        String rawData,
-        String privateKeyString) {
-
-        Sign.SignatureData sigData = signMessage(rawData, privateKeyString);
-        return new String(
-            base64Encode(simpleSignatureSerialization(sigData)),
-            StandardCharsets.UTF_8
-        );
     }
 
     /**
@@ -650,52 +661,8 @@ public final class DataToolUtils {
             return Sign.signedMessageToKey(sha3(message.getBytes(StandardCharsets.UTF_8)),
                     signatureData);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new SignatureException(e);
-        }
-    }
-
-    /**
-     * Verify whether the message and the Signature matches the given public Key.
-     *
-     * @param message This should be from the same plain-text source with the signature Data.
-     * @param signatureData This must be in SignatureData. Caller should call deserialize.
-     * @param publicKey This must be in BigInteger. Callseer should convert it to BigInt.
-     * @return true if yes, false otherwise
-     * @throws SignatureException Signature is the exception.
-     */
-    public static boolean verifySignature(
-        String message,
-        Sign.SignatureData signatureData,
-        BigInteger publicKey)
-        throws SignatureException {
-        if (message == null) {
-            return false;
-        }
-        BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
-        return extractedPublicKey.equals(publicKey);
-    }
-
-    /**
-     * Verify whether the message and the Signature matches the given public Key.
-     *
-     * @param message This should be from the same plain-text source with the signature Data.
-     * @param signature this is a signature string of Base64.
-     * @param publicKey This must be in BigInteger. Caller should convert it to BigInt.
-     * @return true if yes, false otherwise
-     */
-    public static boolean verifySignature(
-        String message,
-        String signature,
-        BigInteger publicKey) {
-        try {
-            if (message == null) {
-                return false;
-            }
-            Sign.SignatureData signatureData = convertBase64StringToSignatureData(signature);
-            BigInteger extractedPublicKey = signatureToPublicKey(message, signatureData);
-            return extractedPublicKey.equals(publicKey);
-        } catch (SignatureException e) {
-            return false;
         }
     }
 
@@ -889,97 +856,6 @@ public final class DataToolUtils {
                 return ErrorCode.CREDENTIAL_VERIFY_FAIL;
             }
         } catch (Exception e) {
-            logger.error("some exceptions occurred in signature verification", e);
-            return ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE;
-        }
-        if (NumberUtils.isDigits(weIdPublicKeyId)) {
-            weIdPublicKeyId = weIdDocument.getId() + "#keys-" + Integer.valueOf(weIdPublicKeyId);
-        }
-        if (!StringUtils.isEmpty(weIdPublicKeyId)
-            && !foundMatchingPubKeyId.equalsIgnoreCase(weIdPublicKeyId)) {
-            return ErrorCode.CREDENTIAL_VERIFY_SUCCEEDED_WITH_WRONG_PUBLIC_KEY_ID;
-        }
-        return ErrorCode.SUCCESS;
-    }
-
-    /**
-     * Verify a signature based on the provided raw data, and the WeID Document from chain. This
-     * will traverse each public key in the WeID Document and fetch all keys which belongs to the
-     * authentication list. Then, verify signature to each one; return true if anyone matches. This
-     * is used for object checking.
-     *
-     * @param rawData the rawData to be verified
-     * @param signature the Signature Data
-     * @param weIdDocument the WeIdDocument to be extracted
-     * @param weIdPublicKeyId the WeID public key ID
-     * @return true if yes, false otherwise with exact error codes
-     */
-    public static ErrorCode verifySignatureFromWeId(
-        String rawData,
-        String signature,
-        WeIdDocument weIdDocument,
-        String weIdPublicKeyId) {
-        Sign.SignatureData signatureData = null;
-        try {
-            signatureData = convertBase64StringToSignatureData(signature);
-        } catch (Exception e) {
-            logger.error("verify Signature failed.", e);
-            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
-        }
-        return verifySignatureFromWeId(rawData, signatureData, weIdDocument, weIdPublicKeyId);
-    }
-
-    /**
-     * Verify a signature based on the provided raw data, and the WeID Document from chain. This
-     * will traverse each public key in the WeID Document and fetch all keys which belongs to the
-     * authentication list. Then, verify signature to each one; return true if anyone matches. This
-     * is used in CredentialService and EvidenceService.
-     *
-     * @param rawData the rawData to be verified
-     * @param signatureData the Signature Data structure
-     * @param weIdDocument the WeIdDocument to be extracted
-     * @param weIdPublicKeyId the WeID public key ID
-     * @return true if yes, false otherwise with exact error codes
-     */
-    public static ErrorCode verifySignatureFromWeId(
-        String rawData,
-        Sign.SignatureData signatureData,
-        WeIdDocument weIdDocument,
-        String weIdPublicKeyId) {
-        List<String> publicKeysListToVerify = new ArrayList<String>();
-
-        // Traverse public key list indexed Authentication key list
-        for (PublicKeyProperty publicKeyProperty : weIdDocument.getPublicKey()) {
-            if (publicKeyProperty.getRevoked()) {
-                continue;
-            }
-            publicKeysListToVerify.add(publicKeyProperty.getPublicKey());
-        }
-        String foundMatchingPubKeyId = StringUtils.EMPTY;
-        try {
-            boolean result = false;
-            for (String publicKeyItem : publicKeysListToVerify) {
-                if (StringUtils.isNotEmpty(publicKeyItem)) {
-                    boolean currentResult = verifySignature(
-                        rawData, signatureData, new BigInteger(publicKeyItem));
-                    result = result || currentResult;
-                    if (currentResult) {
-                        for (PublicKeyProperty pkp : weIdDocument.getPublicKey()) {
-                            if (pkp.getRevoked()) {
-                                continue;
-                            }
-                            if (pkp.getPublicKey().equalsIgnoreCase(publicKeyItem)) {
-                                foundMatchingPubKeyId = pkp.getId();
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-            if (!result) {
-                return ErrorCode.CREDENTIAL_VERIFY_FAIL;
-            }
-        } catch (SignatureException e) {
             logger.error("some exceptions occurred in signature verification", e);
             return ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE;
         }

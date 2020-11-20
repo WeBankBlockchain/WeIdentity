@@ -25,7 +25,7 @@ import java.util.Map;
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
-import org.bcos.web3j.crypto.Sign;
+import org.fisco.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -114,7 +114,7 @@ public class TestVerifyCredential extends TestBaseService {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setContext(context);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -151,7 +151,7 @@ public class TestVerifyCredential extends TestBaseService {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setCptId(cptId);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -258,7 +258,7 @@ public class TestVerifyCredential extends TestBaseService {
         LogUtil.info(logger, "verifyCredential", response);
 
         credential.setIssuer(issuer);
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -400,7 +400,7 @@ public class TestVerifyCredential extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredential(credential);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -476,7 +476,7 @@ public class TestVerifyCredential extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredential(credentialWrapper.getCredential());
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
