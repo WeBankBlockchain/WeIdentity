@@ -19,6 +19,8 @@
 
 package com.webank.weid.rpc;
 
+import java.util.List;
+
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 
 import com.webank.weid.protocol.base.Cpt;
@@ -101,4 +103,20 @@ public interface CptService {
      * @return The updated CPT info
      */
     ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId);
+    
+    /**
+     * Get CPTIDS from chain.
+     *
+     * @param startPos start position
+     * @param num batch number
+     * @return CPTID list
+     */
+    ResponseData<List<Integer>> getCptIdList(Integer startPos, Integer num);
+    
+    /**
+     * Get CPT count.
+     *
+     * @return the cpt count
+     */
+    ResponseData<Integer> getCptCount();
 }
