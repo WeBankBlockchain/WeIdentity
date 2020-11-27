@@ -169,4 +169,10 @@ public interface AuthorityIssuerService {
      * @return WeID
      */
     ResponseData<String> getWeIdByOrgId(String orgId);
+    
+    /**
+     * get the issuer count.
+     * @return the all issuer
+     */
+    ResponseData<Integer> getIssuerCount();
 }
