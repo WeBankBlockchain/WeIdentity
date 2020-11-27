@@ -45,6 +45,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @param cptJsonSchemaNew cpt content
      * @param rsvSignature signature
      * @param privateKey private key
+     * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
      */
     ResponseData<CptBaseInfo> updateCpt(
@@ -64,6 +65,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @param cptJsonSchemaNew cpt content
      * @param rsvSignature signature
      * @param privateKey private key
+     * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
      */
     ResponseData<CptBaseInfo> registerCpt(
@@ -82,6 +84,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @param cptJsonSchemaNew cpt content
      * @param rsvSignature signature
      * @param privateKey private key
+     * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
      */
     ResponseData<CptBaseInfo> registerCpt(
@@ -96,6 +99,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * call cpt contract method to query cpt info from blockchain.
      *
      * @param cptId the id of the cpt
+     * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return cpt info
      */
     ResponseData<Cpt> queryCpt(int cptId, int dataStorageIndex);
@@ -118,5 +122,19 @@ public interface CptServiceEngine extends ReloadStaticContract {
 
     ResponseData<List<Integer>> getPolicyFromCpt(Integer cptId);
 
-    ResponseData<List<Integer>> getCptLists(int startPos, int num, int dataStorageIndex);
+    /**
+     * 分页查询cptId列表.
+     * @param startPos 起始位置
+     * @param num 查询数量
+     * @param dataStorageIndex 存储类型,0表示CPT,1表示policy
+     * @return 返回id列表
+     */
+    ResponseData<List<Integer>> getCptIdList(int startPos, int num, int dataStorageIndex);
+    
+    /**
+     * 查询cpt或者policy总数.
+     * @param dataStorageIndex 存储类型,0表示CPT,1表示policy
+     * @return 返回总数
+     */
+    ResponseData<Integer> getCptCount(int dataStorageIndex);
 }
