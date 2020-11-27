@@ -706,19 +706,42 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     }
 
     @Override
-    public ResponseData<List<Integer>> getCptLists(int startPos, int num, int dataStorageIndex) {
+    public ResponseData<List<Integer>> getCptIdList(int startPos, int num, int dataStorageIndex) {
         try {
-            List list = cptController.getCptIdList(
-                new BigInteger(String.valueOf(startPos), 10),
-                new BigInteger(String.valueOf(num), 10)).send();
+            List<?> list = null;
+            if (dataStorageIndex == WeIdConstant.CPT_DATA_INDEX) {
+                list = cptController.getCptIdList(
+                    new BigInteger(String.valueOf(startPos), 10),
+                    new BigInteger(String.valueOf(num), 10)).send();
+            } else {
+                list = cptController.getPolicyIdList(
+                    new BigInteger(String.valueOf(startPos), 10),
+                    new BigInteger(String.valueOf(num), 10)).send();
+            }
             List<Integer> cpts = new ArrayList<>();
             for (Object obj : list) {
                 cpts.add(((BigInteger) obj).intValue());
             }
             return new ResponseData<>(cpts, ErrorCode.SUCCESS);
         } catch (Exception e) {
-            logger.error("[queryCpt] query Cpt failed. exception message: ", e);
+            logger.error("[getCptIdList] query CptLists failed. exception message: ", e);
             return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<Integer> getCptCount(int dataStorageIndex) {
+        try {
+            Integer count = null;
+            if (dataStorageIndex == WeIdConstant.CPT_DATA_INDEX) {
+                count = cptController.getTotalCptId().send().intValue();
+            } else {
+                count = cptController.getTotalPolicyId().send().intValue();
+            }
+            return new ResponseData<>(count, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[getCptCount] query CptCount failed. exception message: ", e);
+            return new ResponseData<>(0, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
 }
