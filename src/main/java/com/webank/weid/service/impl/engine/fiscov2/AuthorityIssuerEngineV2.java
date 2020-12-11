@@ -37,6 +37,7 @@ import com.webank.weid.contract.v2.AuthorityIssuerController.AuthorityIssuerRetL
 import com.webank.weid.contract.v2.SpecificIssuerController;
 import com.webank.weid.contract.v2.SpecificIssuerController.SpecificIssuerRetLogEventResponse;
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -124,7 +125,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         try {
             AuthorityIssuerController authorityIssuerController = reloadContract(
                 fiscoConfig.getIssuerAddress(),
-                args.getWeIdPrivateKey().getPrivateKey(),
+                args.getWeIdPrivateKey(),
                 AuthorityIssuerController.class);
 
             TransactionReceipt receipt = authorityIssuerController.addAuthorityIssuer(
@@ -198,7 +199,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         try {
             AuthorityIssuerController authorityIssuerController = reloadContract(
                 fiscoConfig.getIssuerAddress(),
-                args.getWeIdPrivateKey().getPrivateKey(),
+                args.getWeIdPrivateKey(),
                 AuthorityIssuerController.class);
             TransactionReceipt receipt = authorityIssuerController
                 .removeAuthorityIssuer(WeIdUtils.convertWeIdToAddress(weId));
@@ -229,8 +230,11 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     }
 
     @Override
-    public ResponseData<Boolean> recognizeWeId(Boolean isRecognize, String addr,
-        String privateKey) {
+    public ResponseData<Boolean> recognizeWeId(
+        Boolean isRecognize, 
+        String addr,
+        WeIdPrivateKey privateKey
+    ) {
         try {
             AuthorityIssuerController authorityIssuerController = reloadContract(
                 fiscoConfig.getIssuerAddress(),
@@ -396,10 +400,12 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
      * #removeIssuer(java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Boolean> removeIssuer(String issuerType, String issuerAddress,
-        String privateKey) {
+    public ResponseData<Boolean> removeIssuer(
+        String issuerType, 
+        String issuerAddress,
+        WeIdPrivateKey privateKey
+    ) {
         try {
-
             SpecificIssuerController specificIssuerController = reloadContract(
                 fiscoConfig.getSpecificIssuerAddress(),
                 privateKey,
@@ -507,7 +513,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
      * #registerIssuerType(java.lang.String)
      */
     @Override
-    public ResponseData<Boolean> registerIssuerType(String issuerType, String privateKey) {
+    public ResponseData<Boolean> registerIssuerType(String issuerType, WeIdPrivateKey privateKey) {
         try {
             SpecificIssuerController specificIssuerController = reloadContract(
                 fiscoConfig.getSpecificIssuerAddress(),
@@ -533,8 +539,11 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
      * #addIssuer(java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Boolean> addIssuer(String issuerType, String issuerAddress,
-        String privateKey) {
+    public ResponseData<Boolean> addIssuer(
+        String issuerType,
+        String issuerAddress,
+        WeIdPrivateKey privateKey
+    ) {
         try {
             SpecificIssuerController specificIssuerController = reloadContract(
                 fiscoConfig.getSpecificIssuerAddress(),

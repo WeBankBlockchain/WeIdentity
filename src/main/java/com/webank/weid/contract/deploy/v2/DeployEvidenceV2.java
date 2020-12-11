@@ -19,12 +19,9 @@
 
 package com.webank.weid.contract.deploy.v2;
 
-import java.math.BigInteger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,8 +31,9 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.deploy.AddressProcess;
 import com.webank.weid.contract.v2.EvidenceContract;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 
 public class DeployEvidenceV2 extends AddressProcess {
     
@@ -54,28 +52,25 @@ public class DeployEvidenceV2 extends AddressProcess {
      *
      * @return true, if successful
      */
-    private static String initCryptoKeyPair(String inputPrivateKey) {
-        if (StringUtils.isNotBlank(inputPrivateKey)) {
+    private static WeIdPrivateKey initCryptoKeyPair(WeIdPrivateKey inputPrivateKey) {
+        if (inputPrivateKey != null && StringUtils.isNotBlank(inputPrivateKey.getPrivateKey())) {
             logger.info("[DeployEvidenceV2] begin to init credentials by privateKey..");
-            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = KeyGenerator.createKeyPair(inputPrivateKey);
         } else {
             // 此分支逻辑实际情况不会执行，因为通过build-tool进来是先给创建私钥
             logger.info("[DeployEvidenceV2] begin to init credentials..");
-            cryptoKeyPair = DataToolUtils.createKeyPair();
-            byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
-            byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
-            String privateKey = new BigInteger(1, priBytes).toString();
-            String publicKey = new BigInteger(1, pubBytes).toString();
-            writeAddressToFile(publicKey, "ecdsa_key.pub");
-            writeAddressToFile(privateKey, "ecdsa_key");
+            cryptoKeyPair = KeyGenerator.createKeyPair();
+            WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey(cryptoKeyPair.getHexPrivateKey());
+            WeIdPublicKey weIdPublicKey = new WeIdPublicKey(cryptoKeyPair.getHexPublicKey());
+            writeAddressToFile(weIdPublicKey.toBase64(), "ecdsa_key.pub");
+            writeAddressToFile(weIdPrivateKey.toBase64(), "ecdsa_key");
         }
 
         if (cryptoKeyPair == null) {
             logger.error("[DeployEvidenceV2] credentials init failed. ");
-            return StringUtils.EMPTY;
+            return null;
         }
-        byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
-        return new BigInteger(1, priBytes).toString();
+        return new WeIdPrivateKey(cryptoKeyPair.getHexPrivateKey());
     }
     
     protected static Client getClient(Integer groupId) {
@@ -84,14 +79,11 @@ public class DeployEvidenceV2 extends AddressProcess {
     
     public static String deployContract(
         FiscoConfig fiscoConfig,
-        String inputPrivateKey, 
+        WeIdPrivateKey inputPrivateKey, 
         Integer groupId, 
         boolean instantEnable
     ) {
-        String privateKey = initCryptoKeyPair(inputPrivateKey);
-        // 构建私钥对象
-        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
-        weIdPrivateKey.setPrivateKey(privateKey);
+        WeIdPrivateKey weIdPrivateKey = initCryptoKeyPair(inputPrivateKey);;
         
         String evidenceAddress = deployEvidenceContractsNew(groupId);
         // 将地址注册到cns中

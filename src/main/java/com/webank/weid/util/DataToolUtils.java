@@ -85,7 +85,6 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.crypto.hash.Keccak256;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignature;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -100,8 +99,11 @@ import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.RsvSignature;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 
 /**
  * 数据工具类.
@@ -136,6 +138,8 @@ public final class DataToolUtils {
     private static final String KEY_CLAIM = "claim";
 
     private static final String KEY_FROM_TOJSON = "$from";
+
+    private static final String REX_HEX_NUMBER = "(0[x,X])?[0-9a-f]+";
 
     private static final List<String> CONVERT_UTC_LONG_KEYLIST = new ArrayList<>();
 
@@ -224,17 +228,6 @@ public final class DataToolUtils {
             logger.error("IOException when serialize object to json", e);
         }
         return write.toString();
-    }
-
-    /**
-     * Convert a private key to its default WeID.
-     *
-     * @param privateKey the pass-in privatekey
-     * @return true if yes, false otherwise
-     */
-    public static String convertPrivateKeyToDefaultWeId(String privateKey) {
-        CryptoKeyPair keyPair = createKeyPairFromPrivate(new BigInteger(privateKey));
-        return WeIdUtils.convertAddressToWeId(keyPair.getAddress());
     }
 
     /**
@@ -499,22 +492,13 @@ public final class DataToolUtils {
     }
 
     /**
-     * Generate a new Key-pair.
-     *
-     * @return the ECKeyPair
-     */
-    public static CryptoKeyPair createKeyPair() {
-        return new ECDSAKeyPair().generateKeyPair();
-    }
-
-    /**
      * Secp256k1 sign.
      *
      * @param rawData original raw data
      * @param privateKey private key in BigInteger format
      * @return base64 string for signature value
      */
-    public static String secp256k1Sign(String rawData, BigInteger privateKey) {
+    public static String secp256k1Sign(String rawData, WeIdPrivateKey privateKey) {
         ECDSASignatureResult sigData = secp256k1SignToSignature(rawData, privateKey);
         return secp256k1SigBase64Serialization(sigData);
     }
@@ -543,9 +527,9 @@ public final class DataToolUtils {
      */
     public static ECDSASignatureResult secp256k1SignToSignature(
         String rawData, 
-        BigInteger privateKey
+        WeIdPrivateKey privateKey
     ) {
-        CryptoKeyPair keyPair = new ECDSAKeyPair().createKeyPair(privateKey);
+        CryptoKeyPair keyPair = KeyGenerator.createKeyPair(privateKey);
         return secp256k1SignToSignature(rawData, keyPair);
     }
     
@@ -593,7 +577,7 @@ public final class DataToolUtils {
     public static boolean verifySecp256k1Signature(
         String rawData,
         String signatureBase64,
-        BigInteger publicKey
+        WeIdPublicKey publicKey
     ) {
         try {
             if (rawData == null) {
@@ -603,9 +587,8 @@ public final class DataToolUtils {
                 secp256k1SigBase64Deserialization(signatureBase64);
             ECDSASignature ecdsaSign = new ECDSASignature();
             //TODO verify的hex是不帶0x的，我们的sha3是带0x
-            String hashData = sha3(rawData).substring(2);
-            String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
-            return ecdsaSign.verify(hexPublicKey, hashData, sigData.convertToString());
+            String hashData = sha3(rawData);
+            return ecdsaSign.verify(publicKey.getPublicKey(), hashData, sigData.convertToString());
         } catch (Exception e) {
             logger.error("Error occurred during secp256k1 sig verification: {}", e);
             return false;
@@ -686,27 +669,6 @@ public final class DataToolUtils {
 
         //ECCDecrypt decrypt = new ECCDecrypt(new BigInteger(privateKey));
         return data;//decrypt.decrypt(data);
-    }
-
-    /**
-     * Obtain the PublicKey from given PrivateKey.
-     *
-     * @param privateKey the private key
-     * @return publicKey
-     */
-    public static BigInteger publicKeyFromPrivate(BigInteger privateKey) {
-        String hexPublcKey = createKeyPairFromPrivate(privateKey).getHexPublicKey();
-        return new BigInteger(1, Numeric.hexStringToByteArray(hexPublcKey));
-    }
-
-    /**
-     * Obtain the WeIdPrivateKey from given PrivateKey.
-     *
-     * @param privateKey the private key
-     * @return WeIdPrivateKey
-     */
-    public static CryptoKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
-        return new ECDSAKeyPair().createKeyPair(privateKey);
     }
 
     /**
@@ -830,7 +792,7 @@ public final class DataToolUtils {
             for (String publicKeyItem : publicKeysListToVerify) {
                 if (StringUtils.isNotEmpty(publicKeyItem)) {
                     boolean currentResult = verifySecp256k1Signature(
-                        rawData, signature, new BigInteger(publicKeyItem));
+                        rawData, signature, new WeIdPublicKey(publicKeyItem));
                     result = currentResult || result;
                     if (currentResult) {
                         for (PublicKeyProperty pkp : weIdDocument.getPublicKey()) {
@@ -1940,6 +1902,10 @@ public final class DataToolUtils {
             }
         }
         return result;
+    }
+
+    public static boolean isHexNumberRex(String str) {
+        return str.matches(REX_HEX_NUMBER);
     }
 }
 

@@ -27,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -49,11 +48,13 @@ import com.webank.weid.contract.v2.EvidenceContract.EvidenceExtraAttributeChange
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 import com.webank.weid.suite.cache.CacheManager;
 import com.webank.weid.suite.cache.CacheNode;
 import com.webank.weid.util.DataToolUtils;
@@ -113,7 +114,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String signature,
         String extra,
         Long timestamp,
-        String privateKey
+        WeIdPrivateKey privateKey
     ) {
         try {
             List<byte[]> hashByteList = new ArrayList<>();
@@ -121,8 +122,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT, null);
             }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+
+            String address = KeyGenerator.createKeyPair(privateKey).getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             List<String> sigList = new ArrayList<>();
@@ -179,7 +180,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         List<String> logs,
         List<Long> timestamp,
         List<String> signers,
-        String privateKey
+        WeIdPrivateKey privateKey
     ) {
         List<Boolean> result = new ArrayList<>();
         for (int i = 0; i < hashValues.size(); i++) {
@@ -257,7 +258,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         List<Long> timestamp,
         List<String> signers,
         List<String> customKeys,
-        String privateKey
+        WeIdPrivateKey privateKey
     ) {
         List<Boolean> result = new ArrayList<>();
         for (int i = 0; i < hashValues.size(); i++) {
@@ -337,7 +338,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String sig,
         String log,
         Long timestamp,
-        String privateKey
+        WeIdPrivateKey privateKey
     ) {
         try {
             List<byte[]> hashByteList = new ArrayList<>();
@@ -351,8 +352,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             logList.add(log);
             List<BigInteger> timestampList = new ArrayList<>();
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            String address = KeyGenerator.createKeyPair(privateKey).getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             EvidenceContract evidenceContractWriter =
@@ -399,7 +399,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String log,
         Long timestamp,
         String customKey,
-        String privateKey
+        WeIdPrivateKey privateKey
     ) {
         try {
             List<byte[]> hashByteList = new ArrayList<>();
@@ -413,8 +413,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             logList.add(log);
             List<BigInteger> timestampList = new ArrayList<>();
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            String address = KeyGenerator.createKeyPair(privateKey).getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             List<String> customKeyList = new ArrayList<>();
@@ -782,15 +781,14 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String extra,
         Long timestamp,
         String extraKey,
-        String privateKey) {
+        WeIdPrivateKey privateKey) {
         try {
             List<byte[]> hashByteList = new ArrayList<>();
             if (!DataToolUtils.isValidHash(hashValue)) {
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT, null);
             }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            String address = KeyGenerator.createKeyPair(privateKey).getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             List<String> sigList = new ArrayList<>();
@@ -875,7 +873,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         String key,
         String value,
         Long timestamp,
-        String privateKey
+        WeIdPrivateKey privateKey
     ) {
         try {
             List<byte[]> hashByteList = new ArrayList<>();
@@ -889,8 +887,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             valueList.add(value);
             List<BigInteger> timestampList = new ArrayList<>();
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            String address = KeyGenerator.createKeyPair(privateKey).getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             EvidenceContract evidenceContractWriter =

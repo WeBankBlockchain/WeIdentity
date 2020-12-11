@@ -54,7 +54,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         }
     }
 
-    private DataBucket getDataBucket(String privateKey) {
+    private DataBucket getDataBucket(WeIdPrivateKey privateKey) {
         return super.reloadContract(
             getBucketByCns(cnsType).getAddress(), 
             privateKey, 
@@ -78,7 +78,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         
         Bytes32 keyByte32 = DataToolUtils.bytesArrayToBytes32(key.getBytes());
         try {
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).put(
+            TransactionReceipt receipt = getDataBucket(privateKey).put(
                 bucketId, keyByte32.getValue(), value);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
@@ -169,7 +169,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         }
         try {
             logger.info("[remove] remove Extra Item, bucketId is {}, key is {}.", bucketId, key);
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).removeExtraItem(
+            TransactionReceipt receipt = getDataBucket(privateKey).removeExtraItem(
                 bucketId, keyByte32.getValue());
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
@@ -196,7 +196,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         try {
             logger.info("[remove] remove Bucket Item, bucketId is {}, force is {}.", 
                 bucketId, force);
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
+            TransactionReceipt receipt = getDataBucket(privateKey)
                 .removeDataBucketItem(bucketId, force);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
@@ -220,7 +220,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     @Override
     public ResponseData<Boolean> enable(String bucketId, WeIdPrivateKey privateKey) {
         try {
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).enable(
+            TransactionReceipt receipt = getDataBucket(privateKey).enable(
                 bucketId);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
@@ -240,7 +240,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     @Override
     public ResponseData<Boolean> disable(String bucketId, WeIdPrivateKey privateKey) {
         try {
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).disable(
+            TransactionReceipt receipt = getDataBucket(privateKey).disable(
                 bucketId);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
@@ -301,7 +301,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         WeIdPrivateKey privateKey
     ) {
         try {
-            TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
+            TransactionReceipt receipt = getDataBucket(privateKey)
                 .updateBucketOwner(bucketId, newOwner);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {

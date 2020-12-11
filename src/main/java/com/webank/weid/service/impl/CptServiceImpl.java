@@ -19,7 +19,6 @@
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -142,7 +141,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
+                weIdPrivateKey, WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -181,7 +180,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
                 weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
+                weIdPrivateKey, WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -280,7 +279,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
                 address,
                 cptJsonSchemaNew,
                 rsvSignature,
-                weIdPrivateKey.getPrivateKey(),
+                weIdPrivateKey,
                 WeIdConstant.CPT_DATA_INDEX);
             if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                 cptCahceNode.remove(String.valueOf(cptId));
@@ -303,7 +302,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
         ECDSASignatureResult signatureData = DataToolUtils.secp256k1SignToSignature(
-            sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
+            sb.toString(), cptPublisherPrivateKey);
         return DataToolUtils.convertSignatureDataToRsv(signatureData);
     }
 

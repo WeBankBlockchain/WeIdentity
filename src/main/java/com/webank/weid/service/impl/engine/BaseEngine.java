@@ -28,7 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.exception.LoadContractException;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 
 public abstract class BaseEngine extends BaseService {
 
@@ -71,7 +73,7 @@ public abstract class BaseEngine extends BaseService {
      */
     protected <T> T reloadContract(
         String contractAddress,
-        String privateKey,
+        WeIdPrivateKey privateKey,
         Class<T> cls) {
 
         T contract = null;
@@ -80,7 +82,7 @@ public abstract class BaseEngine extends BaseService {
             contract = loadContract(
                 contractAddress,
                 masterGroupId,
-                getWeServer().createCryptoKeyPair(privateKey), 
+                KeyGenerator.createKeyPair(privateKey), 
                 cls
             );
             logger.info(cls.getSimpleName() + " init succ");
@@ -109,7 +111,7 @@ public abstract class BaseEngine extends BaseService {
     protected <T> T reloadContract(
         String contractAddress,
         Integer groupId,
-        String privateKey,
+        WeIdPrivateKey privateKey,
         Class<T> cls) {
 
         T contract = null;
@@ -118,7 +120,7 @@ public abstract class BaseEngine extends BaseService {
             contract = loadContract(
                 contractAddress, 
                 groupId,
-                getWeServer().createCryptoKeyPair(privateKey), 
+                KeyGenerator.createKeyPair(privateKey), 
                 cls
             );
             logger.info(cls.getSimpleName() + " init succ");

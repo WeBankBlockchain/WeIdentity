@@ -19,8 +19,6 @@
 
 package com.webank.weid.service;
 
-import java.io.IOException;
-
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
@@ -63,11 +61,7 @@ public abstract class BaseService {
     protected static WeServer weServer;
 
     static {
-        fiscoConfig = new FiscoConfig();
-        if (!fiscoConfig.load()) {
-            logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
-        }
-        fiscoConfig.check();
+        fiscoConfig = FiscoConfig.getInstance();
         masterGroupId = Integer.parseInt(fiscoConfig.getGroupId());
     }
 
@@ -105,31 +99,28 @@ public abstract class BaseService {
      * get current blockNumber.
      *
      * @return return blockNumber
-     * @throws IOException possible exceptions to sending transactions
      */
-    public static int getBlockNumber() throws IOException {
+    public static int getBlockNumber() {
         return getBlockNumber(masterGroupId);
     }
-    
+
     /**
      * get current blockNumber.
      *
      * @param groupId 群组编号
      * @return return blockNumber
-     * @throws IOException possible exceptions to sending transactions
      */
-    public static int getBlockNumber(Integer groupId) throws IOException {
+    public static int getBlockNumber(Integer groupId) {
         return getWeServer().getBlockNumber(groupId);
     }
-    
+
     /**
      * get FISCO-BCOS version.
      *
      * @return return nodeVersion
-     * @throws IOException possible exceptions to sending transactions
      */
-    public static String getVersion() throws IOException {
-        return getWeServer().getClient(masterGroupId).getNodeVersion().getResult().getVersion();
+    public static String getVersion() {
+        return getWeServer().getVersion();
     }
 
     /**

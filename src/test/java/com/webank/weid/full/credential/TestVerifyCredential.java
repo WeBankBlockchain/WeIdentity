@@ -477,7 +477,7 @@ public class TestVerifyCredential extends TestBaseService {
             TestBaseUtil.buildCreateCredentialArgs(createWeIdResultWithSetAttr);
         createCredentialArgs.setCptId(cptBaseInfo.getCptId());
 
-        createCredentialArgs.getWeIdPrivateKey().setPrivateKey(passwordKey.getPrivateKey());
+        createCredentialArgs.setWeIdPrivateKey(passwordKey.getPrivateKey());
         CredentialWrapper credentialWrapper = super.createCredential(createCredentialArgs);
         ResponseData<Boolean> response = super.verifyCredential(credentialWrapper.getCredential());
         LogUtil.info(logger, "verifyCredential", response);

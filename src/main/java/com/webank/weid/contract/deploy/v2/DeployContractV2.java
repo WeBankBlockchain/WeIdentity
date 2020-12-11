@@ -19,7 +19,6 @@
 
 package com.webank.weid.contract.deploy.v2;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +27,6 @@ import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +48,9 @@ import com.webank.weid.contract.v2.SpecificIssuerController;
 import com.webank.weid.contract.v2.SpecificIssuerData;
 import com.webank.weid.contract.v2.WeIdContract;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -81,13 +80,13 @@ public class DeployContractV2 extends AddressProcess {
      *
      * @return true, if successful
      */
-    private static boolean initCryptoKeyPair(String inputPrivateKey) {
-        if (StringUtils.isNotBlank(inputPrivateKey)) {
+    private static boolean initCryptoKeyPair(WeIdPrivateKey inputPrivateKey) {
+        if (inputPrivateKey != null && StringUtils.isNotBlank(inputPrivateKey.getPrivateKey())) {
             logger.info("[DeployContractV2] begin to init cryptoKeyPair by privateKey..");
-            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = KeyGenerator.createKeyPair(inputPrivateKey);
         } else {
             logger.info("[DeployContractV2] begin to init cryptoKeyPair..");
-            cryptoKeyPair = DataToolUtils.createKeyPair();
+            cryptoKeyPair = KeyGenerator.createKeyPair();
         }
 
         if (cryptoKeyPair == null) {
@@ -95,12 +94,10 @@ public class DeployContractV2 extends AddressProcess {
             return false;
         }
         
-        byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
-        byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
-        String privateKey = new BigInteger(1, priBytes).toString();
-        String publicKey = new BigInteger(1, pubBytes).toString();
-        writeAddressToFile(publicKey, "ecdsa_key.pub");
-        writeAddressToFile(privateKey, "ecdsa_key");
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey(cryptoKeyPair.getHexPrivateKey());
+        WeIdPublicKey weIdPublicKey = new WeIdPublicKey(cryptoKeyPair.getHexPublicKey());
+        writeAddressToFile(weIdPublicKey.toBase64(), "ecdsa_key.pub");
+        writeAddressToFile(weIdPrivateKey.toBase64(), "ecdsa_key");
         return true;
     }
 
@@ -121,7 +118,7 @@ public class DeployContractV2 extends AddressProcess {
      *      build-tools-web 版本点击启用时候启用
      */
     public static void deployContract(
-        String privateKey, 
+        WeIdPrivateKey privateKey, 
         FiscoConfig fiscoConfig,
         boolean instantEnable
     ) {
@@ -148,8 +145,7 @@ public class DeployContractV2 extends AddressProcess {
         boolean instantEnable
     ) {
         String privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
-        WeIdPrivateKey weIdPrivate = new WeIdPrivateKey();
-        weIdPrivate.setPrivateKey(privateKey);
+        WeIdPrivateKey weIdPrivate = new WeIdPrivateKey(privateKey);
         registerAddress(weIdPrivate, fiscoConfig, instantEnable);
     }
 

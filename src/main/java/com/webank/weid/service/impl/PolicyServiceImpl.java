@@ -1,6 +1,5 @@
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -98,7 +97,7 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         CptBaseInfo cptBaseInfo;
         try {
             cptBaseInfo = cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey(), WeIdConstant.POLICY_DATA_INDEX).getResult();
+                weIdPrivateKey, WeIdConstant.POLICY_DATA_INDEX).getResult();
         } catch (Exception e) {
             logger.error("[register policy] register failed due to unknown error. ", e);
             return new ResponseData<>(-1, ErrorCode.UNKNOW_ERROR.getCode(),
@@ -121,7 +120,7 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
         ECDSASignatureResult signatureData = DataToolUtils.secp256k1SignToSignature(
-            sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
+            sb.toString(), cptPublisherPrivateKey);
         return DataToolUtils.convertSignatureDataToRsv(signatureData);
     }
 

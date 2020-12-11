@@ -56,6 +56,8 @@ import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.ServiceProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPojo;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.response.ResolveEventLogResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
@@ -357,7 +359,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             .splitByWholeSeparator(value.replace(WeIdConstant.REMOVED_PUBKEY_TAG, ""),
                 WeIdConstant.SEPARATOR)[0];
         for (PublicKeyProperty pr : pubkeyList) {
-            if (pr.getPublicKey().contains(trimmedPubKey)) {
+            WeIdPublicKey weIdPublcKey = new WeIdPublicKey(pr.getPublicKey());
+            if (weIdPublcKey.toBase64().contains(trimmedPubKey)) {
                 // update status: revocation
                 if (!pr.getRevoked().equals(isRevoked)) {
                     pr.setRevoked(isRevoked);
@@ -390,7 +393,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         );
         String[] publicKeyData = StringUtils.splitByWholeSeparator(value, WeIdConstant.SEPARATOR);
         if (publicKeyData != null && publicKeyData.length == 2) {
-            pubKey.setPublicKey(publicKeyData[0]);
+            WeIdPublicKey publicKey = new WeIdPublicKey(publicKeyData[0]);
+            pubKey.setPublicKey(publicKey.toHex());
             String weAddress = publicKeyData[1];
             String owner = WeIdUtils.convertAddressToWeId(weAddress);
             pubKey.setOwner(owner);
@@ -418,7 +422,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         for (AuthenticationProperty ap : authList) {
             String pubKeyId = ap.getPublicKey();
             for (PublicKeyProperty pkp : keyList) {
-                if (pubKeyId.equalsIgnoreCase(pkp.getId()) && value.contains(pkp.getPublicKey())) {
+                if (pubKeyId.equalsIgnoreCase(pkp.getId()) 
+                    && value.contains(new WeIdPublicKey(pkp.getPublicKey()).toBase64())) {
                     // Found matching, now do tag resetting
                     // NOTE: 如果isRevoked为false，请注意由于pubKey此时一定已经是false（见母方法），
                     //  故无需做特别处理。但，未来如果实现分离了，就需要做特殊处理，还请留意。
@@ -440,7 +445,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         // We 2nd: create new one when no matching record is found
         AuthenticationProperty auth = new AuthenticationProperty();
         for (PublicKeyProperty r : keyList) {
-            if (value.contains(r.getPublicKey())) {
+            if (value.contains(new WeIdPublicKey(r.getPublicKey()).toBase64())) {
                 for (AuthenticationProperty ar : authList) {
                     if (StringUtils.equals(ar.getPublicKey(), r.getId())) {
                         return;
@@ -494,12 +499,12 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
     @Override
     public ResponseData<Boolean> createWeId(
         String weAddress,
-        String publicKey,
-        String privateKey,
+        WeIdPublicKey publicKey,
+        WeIdPrivateKey privateKey,
         boolean isDelegate) {
 
         String auth = new StringBuffer()
-            .append(publicKey)
+            .append(publicKey.toBase64())
             .append(WeIdConstant.SEPARATOR)
             .append(weAddress)
             .toString();
@@ -552,7 +557,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         String weAddress,
         String attributeKey,
         String value,
-        String privateKey,
+        WeIdPrivateKey privateKey,
         boolean isDelegate) {
 
         try {

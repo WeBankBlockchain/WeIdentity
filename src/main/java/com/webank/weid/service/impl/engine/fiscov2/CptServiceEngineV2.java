@@ -128,8 +128,13 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      * com.webank.weid.protocol.response.RsvSignature)
      */
     @Override
-    public ResponseData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
+    public ResponseData<CptBaseInfo> updateCpt(
+        int cptId, String address, 
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature, 
+        WeIdPrivateKey privateKey, 
+        int dataStorageIndex
+    ) {
 
         List<byte[]> byteArray = new ArrayList<>();
         TransactionReceipt transactionReceipt;
@@ -199,9 +204,14 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      * com.webank.weid.protocol.response.RsvSignature)
      */
     @Override
-    public ResponseData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
-
+    public ResponseData<CptBaseInfo> registerCpt(
+        int cptId, 
+        String address, 
+        String cptJsonSchemaNew,
+        RsvSignature rsvSignature, 
+        WeIdPrivateKey privateKey, 
+        int dataStorageIndex
+    ) {
         List<byte[]> byteArray = new ArrayList<>();
 
         TransactionReceipt transactionReceipt;
@@ -274,8 +284,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         String address,
         String cptJsonSchemaNew,
         RsvSignature rsvSignature,
-        String privateKey,
-        int dataStorageIndex) {
+        WeIdPrivateKey privateKey,
+        int dataStorageIndex
+    ) {
 
         List<byte[]> byteArray = new ArrayList<>();
         TransactionReceipt transactionReceipt;
@@ -577,14 +588,15 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     }
 
     @Override
-    public ResponseData<Integer> putPolicyIntoPresentation(List<Integer> policyIdList,
-        WeIdPrivateKey weIdPrivateKey) {
+    public ResponseData<Integer> putPolicyIntoPresentation(
+        List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey
+    ) {
         if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey) || !isPolicyIdListValid(policyIdList)) {
             return new ResponseData<>(-1, ErrorCode.ILLEGAL_INPUT);
         }
         CptController cptController =
-            reloadContract(fiscoConfig.getCptAddress(), weIdPrivateKey.getPrivateKey(),
-                CptController.class);
+            reloadContract(fiscoConfig.getCptAddress(), weIdPrivateKey, CptController.class);
         List<BigInteger> idBigIntList = new ArrayList<>();
         for (Integer policyId : policyIdList) {
             idBigIntList.add(new BigInteger(String.valueOf(policyId), 10));
@@ -643,15 +655,17 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
     }
 
     @Override
-    public ResponseData<Integer> putPolicyIntoCpt(Integer cptId, List<Integer> policyIdList,
-        WeIdPrivateKey weIdPrivateKey) {
+    public ResponseData<Integer> putPolicyIntoCpt(
+        Integer cptId, 
+        List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey
+    ) {
         if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey) || !isPolicyIdListValid(policyIdList)
             || cptId < 1) {
             return new ResponseData<>(-1, ErrorCode.ILLEGAL_INPUT);
         }
         CptController cptController =
-            reloadContract(fiscoConfig.getCptAddress(), weIdPrivateKey.getPrivateKey(),
-                CptController.class);
+            reloadContract(fiscoConfig.getCptAddress(), weIdPrivateKey, CptController.class);
         List<BigInteger> idBigIntList = new ArrayList<>();
         for (Integer policyId : policyIdList) {
             idBigIntList.add(new BigInteger(String.valueOf(policyId), 10));

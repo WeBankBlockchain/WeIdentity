@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.Asymmetrickey;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
@@ -71,67 +73,26 @@ public class TestCrypt {
         logger.info("decrypt: {}", decrypt);
         Assert.assertEquals(original, decrypt);
     }
-    
-    @Test
-    @Ignore
-    public void testEcies_withPadding() throws Exception {
-        // 外围有padding操作
-        for (int i = 0; i < 1000; i++) {
-            PasswordKey createEcKeyPair = TestBaseUtil.createEcKeyPair();
-            String publicKey = createEcKeyPair.getPublicKey();
-            String privateKey = createEcKeyPair.getPrivateKey();
-            String pubBase64 = KeyGenerator.decimalKeyToBase64(publicKey);
-            String priBase64 = KeyGenerator.decimalKeyToBase64(privateKey);
-            logger.info("pub key base64: {}", pubBase64);
-            logger.info("pri key base64: {}", priBase64);
-            String original = json;
-            String encrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES)
-                .encrypt(original, pubBase64);
-            logger.info("encrypt: {}", encrypt);
-            String decrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES)
-                .decrypt(encrypt, priBase64);
-            logger.info("decrypt: {}", decrypt);
-            Assert.assertEquals(DataToolUtils.sha3(original), DataToolUtils.sha3(decrypt));
-            Assert.assertEquals(original, decrypt);
-        } 
-    }
-    
+
     @Test
     @Ignore
     public void testEcies_noPadding() throws Exception {
         // 外围没有padding操作
         for (int i = 0; i < 1000; i++) {
             PasswordKey createEcKeyPair = TestBaseUtil.createEcKeyPair();
-            String publicKey = createEcKeyPair.getPublicKey();
-            String privateKey = createEcKeyPair.getPrivateKey();
+            WeIdPublicKey publicKey = createEcKeyPair.getPublicKey();
+            WeIdPrivateKey privateKey = createEcKeyPair.getPrivateKey();
             logger.info("pub key: {}", publicKey);
             logger.info("pri key: {}", privateKey);
             String original = json;
             String encrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES)
-                .encrypt(original, publicKey);
+                .encrypt(original, publicKey.getPublicKey());
             logger.info("encrypt: {}", encrypt);
             String decrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES)
-                .decrypt(encrypt, privateKey);
+                .decrypt(encrypt, privateKey.getPrivateKey());
             logger.info("decrypt: {}", decrypt);
             Assert.assertEquals(DataToolUtils.sha3(original), DataToolUtils.sha3(decrypt));
             Assert.assertEquals(original, decrypt);
-        } 
-    }
-    
-    @Test
-    public void testDecimalKey() throws Exception {
-        for (int i = 0; i < 1000; i++) {
-            PasswordKey createEcKeyPair = TestBaseUtil.createEcKeyPair();
-            String publicKey = createEcKeyPair.getPublicKey();
-            String privateKey = createEcKeyPair.getPrivateKey();
-            String pubBase64 = KeyGenerator.decimalKeyToBase64(publicKey);
-            String priBase64 = KeyGenerator.decimalKeyToBase64(privateKey);
-            String decimalPubKey = KeyGenerator.base64KeyTodecimal(pubBase64);
-            String decimalPriKey = KeyGenerator.base64KeyTodecimal(priBase64);
-            Assert.assertEquals(DataToolUtils.sha3(publicKey), DataToolUtils.sha3(decimalPubKey));
-            Assert.assertEquals(DataToolUtils.sha3(privateKey), DataToolUtils.sha3(decimalPriKey));
-            Assert.assertEquals(publicKey, decimalPubKey);
-            Assert.assertEquals(privateKey, decimalPriKey);
         } 
     }
 }

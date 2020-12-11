@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.protocol.base.EndpointInfo;
 import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.PropertyUtils;
 
 /**
  * Handle registered Endpoint data related functionality.

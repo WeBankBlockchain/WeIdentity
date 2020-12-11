@@ -47,6 +47,7 @@ import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.protocol.response.TransactionInfo;
@@ -84,7 +85,7 @@ public class TransactionUtils {
             logger.error("[createWeId]: input parameter publickey is null.");
             return new ResponseData<>(null, ErrorCode.WEID_PUBLICKEY_INVALID);
         }
-        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
+        String weId = WeIdUtils.convertPublicKeyToWeId(new WeIdPublicKey(publicKey));
         String addr = WeIdUtils.convertWeIdToAddress(weId);
         if (!WeIdUtils.isValidAddress(addr)) {
             logger.error("[createWeId]: input parameter publickey is invalid.");

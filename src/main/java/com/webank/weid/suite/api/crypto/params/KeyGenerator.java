@@ -28,8 +28,15 @@ import java.security.SecureRandom;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.SM2KeyPair;
 import org.fisco.bcos.sdk.utils.Numeric;
 
+import com.webank.weid.config.FiscoConfig;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.util.DataToolUtils;
 
 /**
@@ -110,5 +117,44 @@ public class KeyGenerator {
             return StringUtils.EMPTY; 
         }
         return Numeric.toBigInt(Base64.decodeBase64(base64Key)).toString();
+    }
+
+    /**
+     * Generate a new Key-pair.
+     *
+     * @return the ECKeyPair
+     */
+    public static CryptoKeyPair createKeyPair() {
+        return new CryptoSuite(FiscoConfig.getInstance().getEncryptType()).getCryptoKeyPair();
+    }
+
+    /**
+     * 根据私钥构建CryptoKeyPair.
+     * @param privateKey 私钥
+     * @return 返回CryptoKeyPair对象
+     */
+    public static CryptoKeyPair createKeyPair(WeIdPrivateKey privateKey) {
+        return createKeyPair().createKeyPair(privateKey.getPrivateKey());
+    }
+
+    /**
+     * Obtain the PublicKey from given PrivateKey.
+     *
+     * @param privateKey the private key
+     * @return publicKey
+     */
+    public static WeIdPublicKey publicKeyFromPrivate(WeIdPrivateKey privateKey) {
+        return new WeIdPublicKey(createKeyPair(privateKey).getHexPublicKey());
+    }
+
+    public static String getAddressByPublicKey(WeIdPublicKey userWeIdPublicKey) {
+        if (FiscoConfig.getInstance().getEncryptType() 
+            == org.fisco.bcos.sdk.model.CryptoType.ECDSA_TYPE) {
+            return ECDSAKeyPair.getAddressByPublicKey(userWeIdPublicKey.getPublicKey());
+        } else if (FiscoConfig.getInstance().getEncryptType() 
+            == org.fisco.bcos.sdk.model.CryptoType.SM_TYPE) {
+            return SM2KeyPair.getAddressByPublicKey(userWeIdPublicKey.getPublicKey());
+        }
+        return StringUtils.EMPTY;
     }
 }

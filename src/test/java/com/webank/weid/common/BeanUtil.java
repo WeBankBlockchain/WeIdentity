@@ -183,10 +183,10 @@ public class BeanUtil {
     }
 
     private static boolean isSimpleValueType(Object obj) {
-        Class clazz = obj.getClass();
         if (obj == null) {
             return false;
         }
+        Class<?> clazz = obj.getClass();
         if (Date.class.isAssignableFrom(clazz)) {
             return false;
         }

@@ -19,7 +19,6 @@
 
 package com.webank.weid.service.fisco;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -43,7 +42,6 @@ import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,6 +234,15 @@ public class WeServer {
     }
 
     /**
+     * get FISCO-BCOS version.
+     *
+     * @return return nodeVersion
+     */
+    public String getVersion() {
+        return this.getClient(this.masterGroupId).getNodeVersion().getResult().getVersion();
+    }
+
+    /**
      * 获取PushCallback对象，用于给使用者注册callback处理器.
      *
      * @return 返回RegistCallBack
@@ -380,15 +387,5 @@ public class WeServer {
             }
         }
         return cnsInfo;
-    }
-
-    /**
-     * 根据私钥构建CryptoKeyPair.
-     * @param privateKey 私钥
-     * @return 返回CryptoKeyPair对象
-     */
-    public CryptoKeyPair createCryptoKeyPair(String privateKey) {
-        CryptoKeyPair cryptoKeyPair = new ECDSAKeyPair();
-        return cryptoKeyPair.createKeyPair(new BigInteger(privateKey, 10));
     }
 }

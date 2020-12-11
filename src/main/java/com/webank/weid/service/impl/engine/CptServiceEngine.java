@@ -53,7 +53,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
         String address,
         String cptJsonSchemaNew,
         RsvSignature rsvSignature,
-        String privateKey,
+        WeIdPrivateKey privateKey,
         int dataStorageIndex
     );
 
@@ -73,7 +73,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
         String address,
         String cptJsonSchemaNew,
         RsvSignature rsvSignature,
-        String privateKey,
+        WeIdPrivateKey privateKey,
         int dataStorageIndex
     );
 
@@ -91,7 +91,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
         String address,
         String cptJsonSchemaNew,
         RsvSignature rsvSignature,
-        String privateKey,
+        WeIdPrivateKey privateKey,
         int dataStorageIndex
     );
 
@@ -112,13 +112,18 @@ public interface CptServiceEngine extends ReloadStaticContract {
      */
     ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId);
 
-    ResponseData<Integer> putPolicyIntoPresentation(List<Integer> policyIdList,
-        WeIdPrivateKey weIdPrivateKey);
+    ResponseData<Integer> putPolicyIntoPresentation(
+        List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey
+    );
 
     ResponseData<PresentationPolicyE> getPolicyFromPresentation(Integer presentationId);
 
-    ResponseData<Integer> putPolicyIntoCpt(Integer cptId, List<Integer> policyIdList,
-        WeIdPrivateKey weIdPrivateKey);
+    ResponseData<Integer> putPolicyIntoCpt(
+        Integer cptId, 
+        List<Integer> policyIdList,
+        WeIdPrivateKey weIdPrivateKey
+    );
 
     ResponseData<List<Integer>> getPolicyFromCpt(Integer cptId);
 

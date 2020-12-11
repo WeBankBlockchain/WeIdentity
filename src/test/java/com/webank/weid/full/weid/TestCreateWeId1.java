@@ -19,10 +19,6 @@
 
 package com.webank.weid.full.weid;
 
-import java.security.NoSuchProviderException;
-
-import mockit.Mock;
-import mockit.MockUp;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

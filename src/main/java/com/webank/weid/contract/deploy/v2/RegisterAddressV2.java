@@ -1,7 +1,5 @@
 package com.webank.weid.contract.deploy.v2;
 
-import java.math.BigInteger;
-
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
@@ -19,7 +17,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
 import com.webank.weid.service.impl.engine.fiscov2.DataBucketServiceEngineV2;
-import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 
 public class RegisterAddressV2 {
 
@@ -30,9 +28,9 @@ public class RegisterAddressV2 {
 
     private static CryptoKeyPair cryptoKeyPair;
 
-    private static CryptoKeyPair getCryptoKeyPair(String inputPrivateKey) {
+    private static CryptoKeyPair getCryptoKeyPair(WeIdPrivateKey inputPrivateKey) {
         if (cryptoKeyPair == null) {
-            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = KeyGenerator.createKeyPair(inputPrivateKey);
         }
         return cryptoKeyPair;
     }
@@ -83,7 +81,6 @@ public class RegisterAddressV2 {
             "[registerBucketToCns] begin register bucket to CNS, type = {}.", 
             cnsType.getName()
         );
-        String privateKey = weIdPrivateKey.getPrivateKey();
         CnsInfo cnsInfo = BaseService.getBucketByCns(cnsType);
         //如果地址是为空则说明是首次注册
         if (cnsInfo != null && StringUtils.isNotBlank(cnsInfo.getAddress())) {
@@ -92,9 +89,9 @@ public class RegisterAddressV2 {
         }
         try {
             //先进行地址部署
-            String bucketAddr = deployBucket(privateKey);
+            String bucketAddr = deployBucket(weIdPrivateKey);
             RetCode retCode = 
-                new CnsService(BaseService.getClient(), getCryptoKeyPair(privateKey))
+                new CnsService(BaseService.getClient(), getCryptoKeyPair(weIdPrivateKey))
                 .registerCNS(cnsType.getName(), cnsType.getVersion(), bucketAddr, DataBucket.ABI);
             if (retCode.getCode() != 1) {
                 throw new WeIdBaseException(retCode.getCode() + "-" + retCode.getMessage());
@@ -109,12 +106,13 @@ public class RegisterAddressV2 {
         }
     }
     
-    private static String deployBucket(String privateKey) throws Exception {
+    private static String deployBucket(WeIdPrivateKey privateKey) throws Exception {
         logger.info("[deployBucket] begin deploy bucket.");
         //先进行地址部署
         DataBucket dataBucket = DataBucket.deploy(
             BaseService.getClient(),
-            getCryptoKeyPair(privateKey));
+            getCryptoKeyPair(privateKey)
+        );
         return dataBucket.getContractAddress();
     }
     

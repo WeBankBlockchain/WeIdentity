@@ -199,7 +199,7 @@ public abstract class TestBaseService extends BaseTest {
         if (!isInitIssuer) {
             try {
                 issuerPrivateList = new ArrayList<String>();
-                issuerPrivateList.add(privateKey);
+                issuerPrivateList.add(privateKey.getPrivateKey());
                 initIssuer("org1.txt");
                 isInitIssuer = true;
             } catch (Exception e) {
@@ -255,7 +255,7 @@ public abstract class TestBaseService extends BaseTest {
         if (!isInitIssuer) {
             try {
                 issuerPrivateList = new ArrayList<String>();
-                issuerPrivateList.add(privateKey);
+                issuerPrivateList.add(privateKey.getPrivateKey());
                 initIssuer("org1.txt");
                 //isInitIssuer = true;
             } catch (Exception e) {
@@ -291,7 +291,7 @@ public abstract class TestBaseService extends BaseTest {
         if (!isInitIssuer) {
             try {
                 issuerPrivateList = new ArrayList<String>();
-                issuerPrivateList.add(privateKey);
+                issuerPrivateList.add(privateKey.getPrivateKey());
                 initIssuer("org1.txt");
             } catch (Exception e) {
                 logger.error("initIssuer error", e);
@@ -341,7 +341,7 @@ public abstract class TestBaseService extends BaseTest {
         if (!isInitIssuer) {
             try {
                 issuerPrivateList = new ArrayList<String>();
-                issuerPrivateList.add(privateKey);
+                issuerPrivateList.add(privateKey.getPrivateKey());
                 initIssuer("org1.txt");
                 //isInitIssuer = true;
             } catch (Exception e) {
@@ -377,12 +377,12 @@ public abstract class TestBaseService extends BaseTest {
     private void initIssuer(String fileName) {
 
         PasswordKey passwordKey = TestBaseUtil.resolvePk(fileName);
-        String publicKey = passwordKey.getPublicKey();
-        String privateKey = passwordKey.getPrivateKey();
+        WeIdPublicKey publicKey = passwordKey.getPublicKey();
+        WeIdPrivateKey privateKey = passwordKey.getPrivateKey();
 
         CreateWeIdArgs createWeIdArgs1 = TestBaseUtil.buildCreateWeIdArgs();
-        createWeIdArgs1.setPublicKey(publicKey);
-        createWeIdArgs1.getWeIdPrivateKey().setPrivateKey(privateKey);
+        createWeIdArgs1.setPublicKey(publicKey.getPublicKey());
+        createWeIdArgs1.setWeIdPrivateKey(privateKey);
         ResponseData<String> response1 = weIdService.createWeId(createWeIdArgs1);
         if (response1.getErrorCode().intValue() != ErrorCode.WEID_ALREADY_EXIST.getCode()
             && response1.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
@@ -395,8 +395,8 @@ public abstract class TestBaseService extends BaseTest {
         createResult.setWeId(weId);
         createResult.setUserWeIdPrivateKey(new WeIdPrivateKey());
         createResult.setUserWeIdPublicKey(new WeIdPublicKey());
-        createResult.getUserWeIdPrivateKey().setPrivateKey(privateKey);
-        createResult.getUserWeIdPublicKey().setPublicKey(publicKey);
+        createResult.getUserWeIdPrivateKey().setPrivateKey(privateKey.getPrivateKey());
+        createResult.getUserWeIdPublicKey().setPublicKey(publicKey.getPublicKey());
 
         this.setPublicKey(createResult, publicKey, createResult.getWeId());
         this.setAuthentication(createResult, publicKey, createResult.getWeId());
@@ -416,7 +416,7 @@ public abstract class TestBaseService extends BaseTest {
             Assert.assertTrue(false);
         }*/
 
-        issuerPrivateList.add(privateKey);
+        issuerPrivateList.add(privateKey.getPrivateKey());
         logger.info("initIssuer success");
     }
 
@@ -612,9 +612,9 @@ public abstract class TestBaseService extends BaseTest {
 
         CreateWeIdDataResult createWeId = this.createWeId();
 
-        this.setPublicKey(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
+        this.setPublicKey(createWeId, createWeId.getUserWeIdPublicKey(),
             createWeId.getWeId());
-        this.setAuthentication(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
+        this.setAuthentication(createWeId, createWeId.getUserWeIdPublicKey(),
             createWeId.getWeId());
         this.setService(createWeId, TestData.SERVICE_TYPE, TestData.SERVICE_ENDPOINT);
         return createWeId;
@@ -646,7 +646,7 @@ public abstract class TestBaseService extends BaseTest {
      */
     protected void setPublicKey(
         CreateWeIdDataResult createResult,
-        String publicKey,
+        WeIdPublicKey publicKey,
         String owner) {
 
         // No longer required, since this will be automatically set now.
@@ -697,14 +697,14 @@ public abstract class TestBaseService extends BaseTest {
      */
     protected void setAuthentication(
         CreateWeIdDataResult createResult,
-        String publicKey,
+        WeIdPublicKey publicKey,
         String owner) {
 
         // setAuthenticate for this WeIdentity DID
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createResult);
         setAuthenticationArgs.setOwner(owner);
-        setAuthenticationArgs.setPublicKey(publicKey);
+        setAuthenticationArgs.setPublicKey(publicKey.getPublicKey());
         ResponseData<Boolean> responseSetAuth =
             weIdService.setAuthentication(createResult.getWeId(), setAuthenticationArgs,
                 createResult.getUserWeIdPrivateKey());

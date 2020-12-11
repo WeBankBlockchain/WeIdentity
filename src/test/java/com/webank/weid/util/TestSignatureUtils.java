@@ -19,16 +19,17 @@
 
 package com.webank.weid.util;
 
-import java.math.BigInteger;
-
 import org.apache.commons.codec.binary.Base64;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
-import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 
 /**
  * Test SignatureUtils.
@@ -45,10 +46,11 @@ public class TestSignatureUtils {
 
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
-        BigInteger publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
-        logger.info("publicKey:{} ", publicKey);
+        WeIdPublicKey publicKey = KeyGenerator.publicKeyFromPrivate(
+            new WeIdPrivateKey(privateKey));
+        logger.info("publicKey:{} ", publicKey.getPublicKey());
 
-        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        CryptoKeyPair keyPair = KeyGenerator.createKeyPair(new WeIdPrivateKey(privateKey));
         logger.info("publicKey:{} ", keyPair.getHexPublicKey());
         logger.info("privateKey:{}", keyPair.getHexPrivateKey());
 
@@ -67,11 +69,10 @@ public class TestSignatureUtils {
         String hexPrivKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         String msg = "12345";
-        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(hexPrivKey));
-        String sig = DataToolUtils.secp256k1Sign(msg, new BigInteger(hexPrivKey, 10));
-        BigInteger bigPublicKey = 
-            new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));
-        Boolean result = DataToolUtils.verifySecp256k1Signature(msg, sig, bigPublicKey);
+        CryptoKeyPair keyPair = KeyGenerator.createKeyPair(new WeIdPrivateKey(hexPrivKey));
+        String sig = DataToolUtils.secp256k1Sign(msg, new WeIdPrivateKey(hexPrivKey));
+        Boolean result = DataToolUtils.verifySecp256k1Signature(
+            msg, sig, new WeIdPublicKey(keyPair.getHexPublicKey()));
         Assert.assertTrue(result);
     }
 }

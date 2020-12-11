@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 
 /**
  * Test WeIdUtils.
@@ -81,7 +82,7 @@ public class TestWeIdUtils {
         String publicKey =
             "4152630134607745313775653941373712642376482837388159007706431164834407808290456176"
                 + "569372213582021586381145279900416808342958821437075568109344613716670953";
-        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
+        String weId = WeIdUtils.convertPublicKeyToWeId(new WeIdPublicKey(publicKey));
         Assert.assertNotNull(weId);
         logger.info(weId);
     }
@@ -94,11 +95,14 @@ public class TestWeIdUtils {
             + "62844338994634470121084706056348088101890813246949904622670239758638712304";
         String privateKey =
             "95190837481536383166137149464958960030030752301426973662112256567139589090597";
-        boolean result = WeIdUtils.isKeypairMatch(privateKey, publicKey);
+        WeIdPublicKey weIdPublicKey = new WeIdPublicKey(publicKey);
+        WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey(privateKey);
+        boolean result = WeIdUtils.isKeypairMatch(weIdPrivateKey, weIdPublicKey);
         Assert.assertTrue(result);
 
         privateKey = "646467494548664";
-        result = WeIdUtils.isKeypairMatch(privateKey, publicKey);
+        weIdPrivateKey = new WeIdPrivateKey(privateKey);
+        result = WeIdUtils.isKeypairMatch(weIdPrivateKey, weIdPublicKey);
         Assert.assertFalse(result);
     }
 

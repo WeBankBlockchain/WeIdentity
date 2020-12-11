@@ -1,6 +1,5 @@
 package com.webank.weid.util;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.impl.AbstractService;
@@ -21,6 +21,7 @@ import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
 
@@ -38,7 +39,7 @@ public class OffLineBatchTask extends AbstractService {
 
     private static String secretKey;
 
-    private static String privateKey;
+    private static WeIdPrivateKey privateKey;
 
     /**
      * persistence.
@@ -46,9 +47,8 @@ public class OffLineBatchTask extends AbstractService {
     private static Persistence dataDriver;
 
     static {
-        BigInteger bigPrivateKey = 
-            new BigInteger(DataToolUtils.createKeyPair().getHexPrivateKey());
-        privateKey = String.valueOf(bigPrivateKey);
+        String hexPrivateKey = KeyGenerator.createKeyPair().getHexPrivateKey();
+        privateKey = new WeIdPrivateKey(hexPrivateKey);
 
     }
 
