@@ -119,11 +119,11 @@ jobs:
           mkdir -p weid-sample/libs
           cp dist/lib/*.jar weid-sample/libs/
           cp ecdsa_key weid-sample/keys/priv/
-          cp src/main/resources/fisco.properties weid-sample/src/main/resources/
-          cp src/main/resources/weidentity.properties weid-sample/src/main/resources/
-          cp .ci/ca.crt weid-sample/src/main/resources/
-          cp .ci/node.crt weid-sample/src/main/resources/
-          cp .ci/node.key weid-sample/src/main/resources/
+          cp src/main/resources/fisco.properties weid-sample/resources/
+          cp src/main/resources/weidentity.properties weid-sample/resources/
+          cp .ci/ca.crt weid-sample/resources/
+          cp .ci/node.crt weid-sample/resources/
+          cp .ci/node.key weid-sample/resources/
       - name: Run CI
         run: |
           cd weid-sample
