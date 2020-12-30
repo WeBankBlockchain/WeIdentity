@@ -33,14 +33,8 @@ jobs:
       - name: Prepare blockchain nodes and certificates
         run: |
           mkdir -p fisco && cd fisco
-          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh && chmod u+x build_chain.sh
+          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.7.1/build_chain.sh && chmod u+x build_chain.sh
           bash build_chain.sh -l "127.0.0.1:2" -p 30300,20200,8545
-          cd nodes/127.0.0.1
-          rm -rf fisco-bcos
-          curl -LO https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeIdentity/fisco-bcos.tar.gz
-          tar -zxvf fisco-bcos.tar.gz
-          chmod u+x fisco-bcos
-          cd ../..
           bash nodes/127.0.0.1/start_all.sh
           ps -ef | grep -v grep | grep fisco
           cd ..
@@ -85,14 +79,8 @@ jobs:
       - name: Prepare blockchain nodes and certificates
         run: |
           mkdir -p fisco && cd fisco
-          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh && chmod u+x build_chain.sh
+          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.7.1/build_chain.sh && chmod u+x build_chain.sh
           bash build_chain.sh -l "127.0.0.1:2" -p 30300,20200,8545
-          cd nodes/127.0.0.1
-          rm -rf fisco-bcos
-          curl -LO https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeIdentity/fisco-bcos.tar.gz
-          tar -zxvf fisco-bcos.tar.gz
-          chmod u+x fisco-bcos
-          cd ../..
           bash nodes/127.0.0.1/start_all.sh
           ps -ef | grep -v grep | grep fisco
           cd ..
@@ -119,11 +107,11 @@ jobs:
           mkdir -p weid-sample/libs
           cp dist/lib/*.jar weid-sample/libs/
           cp ecdsa_key weid-sample/keys/priv/
-          cp src/main/resources/fisco.properties weid-sample/src/main/resources/
-          cp src/main/resources/weidentity.properties weid-sample/src/main/resources/
-          cp .ci/ca.crt weid-sample/src/main/resources/
-          cp .ci/node.crt weid-sample/src/main/resources/
-          cp .ci/node.key weid-sample/src/main/resources/
+          cp src/main/resources/fisco.properties weid-sample/resources/
+          cp src/main/resources/weidentity.properties weid-sample/resources/
+          cp .ci/ca.crt weid-sample/resources/
+          cp .ci/node.crt weid-sample/resources/
+          cp .ci/node.key weid-sample/resources/
       - name: Run CI
         run: |
           cd weid-sample
@@ -155,14 +143,8 @@ jobs:
       - name: Prepare blockchain nodes and certificates
         run: |
           mkdir -p fisco && cd fisco
-          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh && chmod u+x build_chain.sh
+          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.7.1/build_chain.sh && chmod u+x build_chain.sh
           bash build_chain.sh -l "127.0.0.1:2" -p 30300,20200,8545
-          cd nodes/127.0.0.1
-          rm -rf fisco-bcos
-          curl -LO https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeIdentity/fisco-bcos.tar.gz
-          tar -zxvf fisco-bcos.tar.gz
-          chmod u+x fisco-bcos
-          cd ../..
           bash nodes/127.0.0.1/start_all.sh
           ps -ef | grep -v grep | grep fisco
           cd ..
@@ -224,14 +206,8 @@ jobs:
       - name: Prepare blockchain nodes and certificates
         run: |
           mkdir -p fisco && cd fisco
-          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.3.0/build_chain.sh && chmod u+x build_chain.sh
+          curl -LO https://github.com/FISCO-BCOS/FISCO-BCOS/releases/download/v2.7.1/build_chain.sh && chmod u+x build_chain.sh
           bash build_chain.sh -l "127.0.0.1:2" -p 30300,20200,8545
-          cd nodes/127.0.0.1
-          rm -rf fisco-bcos
-          curl -LO https://osp-1257653870.cos.ap-guangzhou.myqcloud.com/WeIdentity/fisco-bcos.tar.gz
-          tar -zxvf fisco-bcos.tar.gz
-          chmod u+x fisco-bcos
-          cd ../..
           bash nodes/127.0.0.1/start_all.sh
           ps -ef | grep -v grep | grep fisco
           cd ..
