@@ -26,7 +26,6 @@ public class TestRegisterCptStringArgs extends TestBaseService {
 
     @Override
     public synchronized void testInit() {
-
         super.testInit();
         if (createWeId == null) {
             createWeId = super.createWeId();
