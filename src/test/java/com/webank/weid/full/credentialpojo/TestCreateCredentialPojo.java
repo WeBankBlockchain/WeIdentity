@@ -322,10 +322,6 @@ public class TestCreateCredentialPojo extends TestBaseService {
         ResponseData<Boolean> resp =
             credentialPojoService.verify(liteCredential.getIssuer(), liteCredential);
         Assert.assertTrue(resp.getResult());
-        String recovererdWeId = DataToolUtils.recoverWeIdFromMsgAndSecp256Sig(
-            CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(liteCredential),
-            liteCredential.getSignature());
-        Assert.assertEquals(recovererdWeId, liteCredential.getIssuer());
 
         // LiteCredential:
         // 1. getThumbprint() -> signature (针对凭证claim内容生成thumbprint，用私钥生成签名)
@@ -965,7 +961,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
 
         // Enforce a Register/Update system CPT first
         WeIdAuthentication sdkAuthen = new WeIdAuthentication();
-        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
             .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
         sdkAuthen.setWeId(keyWeId);

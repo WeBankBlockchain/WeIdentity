@@ -782,7 +782,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
             TestBaseUtil.buildRegisterAuthorityIssuerArgs(createWeIdResult, privateKey);
         registerAuthorityIssuerArgs.getAuthorityIssuer().setName(
             String.valueOf(System.currentTimeMillis()));
-        registerAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey(issuerPrivateList.get(1));
+        registerAuthorityIssuerArgs.getWeIdPrivateKey().setPrivateKey(issuerPrivateList.get(0));
 
         ResponseData<Boolean> response =
             authorityIssuerService.registerAuthorityIssuer(registerAuthorityIssuerArgs);
