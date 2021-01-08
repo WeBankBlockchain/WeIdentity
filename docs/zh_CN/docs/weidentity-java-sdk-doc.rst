@@ -13752,7 +13752,7 @@ com.webank.weid.protocol.base.CredentialPojo
 
    // Enforce a Register/Update system CPT first
    WeIdAuthentication sdkAuthen = new WeIdAuthentication();
-   ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+   ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(privateKey);
    String keyWeId = WeIdUtils
        .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
    sdkAuthen.setWeId(keyWeId);

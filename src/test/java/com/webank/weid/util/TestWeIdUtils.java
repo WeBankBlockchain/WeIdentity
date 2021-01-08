@@ -94,11 +94,11 @@ public class TestWeIdUtils {
                 + "76569372213582021586381145279900416808342958821437075568109344613716670953";
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
-        boolean result = WeIdUtils.isKeypairMatch(privateKey, publicKey);
+        boolean result = WeIdUtils.isEcdsaKeypairMatch(privateKey, publicKey);
         Assert.assertTrue(result);
 
         privateKey = "646467494548664";
-        result = WeIdUtils.isKeypairMatch(privateKey, publicKey);
+        result = WeIdUtils.isEcdsaKeypairMatch(privateKey, publicKey);
         Assert.assertFalse(result);
     }
 
