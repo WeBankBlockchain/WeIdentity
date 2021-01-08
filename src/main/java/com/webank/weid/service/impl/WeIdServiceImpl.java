@@ -21,12 +21,13 @@ package com.webank.weid.service.impl;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,12 +72,10 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     public ResponseData<CreateWeIdDataResult> createWeId() {
 
         CreateWeIdDataResult result = new CreateWeIdDataResult();
-        ECKeyPair keyPair = null;
+        ECKeyPair keyPair = GenCredential.createKeyPair();
 
-        try {
-            keyPair = Keys.createEcKeyPair();
-        } catch (Exception e) {
-            logger.error("Create weId failed.", e);
+        if (Objects.isNull(keyPair)) {
+            logger.error("Create weId failed.");
             return new ResponseData<>(null, ErrorCode.WEID_KEYPAIR_CREATE_FAILED);
         }
 

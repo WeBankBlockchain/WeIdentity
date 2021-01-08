@@ -33,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.handler.ChannelConnections;
 import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.protocol.Web3j;
 import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.slf4j.Logger;
@@ -146,12 +147,34 @@ public class WeServerUtils {
         ChannelConnections channelConnections = new ChannelConnections();
         channelConnections.setGroupId(groupId);
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        channelConnections
-            .setCaCert(resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
-        channelConnections
-            .setSslCert(resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
-        channelConnections
-            .setSslKey(resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
+
+        if (fiscoConfig.getEncryptType().equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+            EncryptType encryptType = new EncryptType(EncryptType.ECDSA_TYPE);
+            channelConnections.setCaCert(
+                    resolver.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
+            channelConnections.setSslCert(
+                    resolver.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
+            channelConnections.setSslKey(
+                    resolver.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
+        } else {
+            EncryptType encryptType = new EncryptType(EncryptType.SM2_TYPE);
+
+            // gmca.crt
+            channelConnections.setGmCaCert(
+                    resolver.getResource("classpath:" + fiscoConfig.getGmCaCrtPath()));
+            // gmsdk.crt
+            channelConnections.setGmSslCert(
+                    resolver.getResource("classpath:" + fiscoConfig.getGmSdkCrtPath()));
+            // gmsdk.key
+            channelConnections.setGmSslKey(
+                    resolver.getResource("classpath:" + fiscoConfig.getGmSdkKeyPath()));
+            // gmensdk.crt
+            channelConnections.setGmEnSslCert(
+                    resolver.getResource("classpath:" + fiscoConfig.getGmenSdkCrtPath()));
+            // gmensdk.key
+            channelConnections.setGmEnSslKey(
+                    resolver.getResource("classpath:" + fiscoConfig.getGmenSdkKeyPath()));
+        }
 
         channelConnections.setConnectionsStr(nodeList);
         GroupChannelConnectionsConfig connectionsConfig = new GroupChannelConnectionsConfig();

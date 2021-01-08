@@ -1181,7 +1181,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         }
         String privateKey = callerAuth.getWeIdPrivateKey().getPrivateKey();
-        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
             .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
         result.setIssuer(keyWeId);
@@ -1985,7 +1985,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         CredentialPojo credential = new CredentialPojo();
         credential.setCptId(CredentialConstant.EMBEDDED_TIMESTAMP_CPT);
         String privateKey = weIdAuthentication.getWeIdPrivateKey().getPrivateKey();
-        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
             .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
         credential.setIssuer(keyWeId);
@@ -2249,7 +2249,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         args.setContext(CredentialUtils.getDefaultCredentialContext());
         args.setCptId(CredentialConstant.AUTHORIZATION_CPT);
         String privateKey = weIdAuthentication.getWeIdPrivateKey().getPrivateKey();
-        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
             .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
         args.setIssuer(keyWeId);
