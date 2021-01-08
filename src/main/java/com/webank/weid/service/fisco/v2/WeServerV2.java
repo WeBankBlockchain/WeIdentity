@@ -24,6 +24,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+
 import org.fisco.bcos.channel.client.ChannelPushCallback;
 import org.fisco.bcos.channel.client.Service;
 import org.fisco.bcos.channel.dto.ChannelRequest;
@@ -51,6 +52,7 @@ import com.webank.weid.rpc.callback.OnNotifyCallbackV2;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.fisco.WeServerUtils;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
+import com.webank.weid.util.DataToolUtils;
 
 public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
 
@@ -89,8 +91,8 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
     public Credentials createCredentials(String privateKey) {
         Credentials credentials;
         try {
-            ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-            credentials = Credentials.create(keyPair);
+            ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+            credentials = GenCredential.create(keyPair);
             return credentials;
         } catch (Exception e) {
             throw new PrivateKeyIllegalException(e);
