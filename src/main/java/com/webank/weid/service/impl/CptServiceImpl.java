@@ -21,6 +21,7 @@ package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
@@ -29,9 +30,7 @@ import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Cpt;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -371,7 +370,20 @@ public class CptServiceImpl extends AbstractService implements CptService {
      */
     @Override
     public ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId) {
-
         return cptServiceEngine.queryCredentialTemplate(cptId);
+    }
+
+
+    @Override
+    public ResponseData<List<Integer>> getCptIdList(Integer startPos, Integer num) {
+        if (startPos < 0 || num < 1) {
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        return cptServiceEngine.getCptIdList(startPos, num, WeIdConstant.CPT_DATA_INDEX);
+    }
+
+    @Override
+    public ResponseData<Integer> getCptCount() {
+        return cptServiceEngine.getCptCount(WeIdConstant.CPT_DATA_INDEX);
     }
 }

@@ -556,4 +556,15 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         }
     }
 
+    @Override
+    public ResponseData<Integer> getIssuerCount() {
+        try {
+            Integer count = authorityIssuerController.getTotalIssuer().send().intValue();
+            return new ResponseData<>(count, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[getCptCount] query CptCount failed. exception message: ", e);
+            return new ResponseData<>(0, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
 }
