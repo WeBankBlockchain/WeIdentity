@@ -535,4 +535,9 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.AUTHORITY_ISSUER_ERROR);
         }
     }
+
+    @Override
+    public ResponseData<Integer> getIssuerCount() {
+        return authEngine.getIssuerCount();
+    }
 }
