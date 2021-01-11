@@ -26,9 +26,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,12 +35,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
+import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -69,10 +67,19 @@ import com.webank.weid.util.DataToolUtils;
  */
 public class TestBaseUtil {
 
+    private static final FiscoConfig fiscoConfig;
+
     /**
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(TestBaseUtil.class);
+
+    static {
+        logger.info("[init] begin init FiscoConfig.");
+        // load fisco.properties
+        fiscoConfig = new FiscoConfig();
+        fiscoConfig.load();
+    }
 
     /**
      * build CreateCredentialArgs no cptId.
@@ -631,20 +638,30 @@ public class TestBaseUtil {
 
         PasswordKey passwordKey = new PasswordKey();
         try {
-            ECKeyPair keyPair = Keys.createEcKeyPair();
+            ECKeyPair keyPair = DataToolUtils.createKeyPair();
             String publicKey = String.valueOf(keyPair.getPublicKey());
             String privateKey = String.valueOf(keyPair.getPrivateKey());
             passwordKey.setPrivateKey(privateKey);
             passwordKey.setPublicKey(publicKey);
             LogUtil.info(logger, "createEcKeyPair", passwordKey);
-        } catch (InvalidAlgorithmParameterException e) {
-            logger.error("createEcKeyPair error:", e);
-        } catch (NoSuchAlgorithmException e) {
-            logger.error("createEcKeyPair error:", e);
-        } catch (NoSuchProviderException e) {
+        } catch (Exception e) {
             logger.error("createEcKeyPair error:", e);
         }
         return passwordKey;
+    }
+
+    /**
+     * create a new public key - private key.
+     *
+     * @return ECKeyPair
+     */
+    public static ECKeyPair createKeyPair() {
+        try {
+            return DataToolUtils.createKeyPair();
+        } catch (Exception e) {
+            logger.error("createEcKeyPair error:", e);
+        }
+        return null;
     }
 
     /**
@@ -743,7 +760,15 @@ public class TestBaseUtil {
         InputStreamReader isr = null;
         StringBuffer privateKey = new StringBuffer();
 
-        URL fileUrl = TestBaseUtil.class.getClassLoader().getResource(fileName);
+        URL fileUrl = null;
+        try {
+            PathMatchingResourcePatternResolver resolver =
+                    new PathMatchingResourcePatternResolver();
+            fileUrl = resolver.getResource("classpath:" + fileName).getFile().toURL();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // URL fileUrl = TestBaseUtil.class.getClassLoader().getResource(fileName);
         if (fileUrl == null) {
             return privateKey.toString();
         }
