@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.webank.weid.full.TestBaseUtil;
+
 /**
  * Test SignatureUtils.
  *
@@ -47,8 +49,8 @@ public class TestSignatureUtils {
         BigInteger publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
         logger.info("publicKey:{} ", publicKey);
 
-        ECKeyPair keyPair = DataToolUtils.createKeyPair();
-        keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        ECKeyPair keyPair = TestBaseUtil.createKeyPair();
+        keyPair = ECKeyPair.create(new BigInteger(privateKey));
         logger.info("publicKey:{} ", keyPair.getPublicKey());
         logger.info("privateKey:{}", keyPair.getPrivateKey());
 
@@ -68,9 +70,8 @@ public class TestSignatureUtils {
         String hexPrivKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         String msg = "12345";
-        org.fisco.bcos.web3j.crypto.ECKeyPair keyPair
-            = org.fisco.bcos.web3j.crypto.ECKeyPair.create(new BigInteger(hexPrivKey, 10));
-        String sig = DataToolUtils.secp256k1Sign(msg, new BigInteger(hexPrivKey, 10));
+        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(hexPrivKey));
+        String sig = DataToolUtils.secp256k1Sign(msg, new BigInteger(hexPrivKey));
         Boolean result = DataToolUtils.verifySecp256k1Signature(msg, sig, keyPair.getPublicKey());
         Assert.assertTrue(result);
     }

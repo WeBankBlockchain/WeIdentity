@@ -47,6 +47,7 @@ web3sdk.keep-alive-seconds=60
 #######################################################################################################
 # Fisco-Bcos 2.x params, including Group ID and Encrypt Type
 group.id=1
+# Fisco-Bcos encrypt type, 0:ECDSA 1:SM2
 encrypt.type=0
 
 
@@ -63,3 +64,10 @@ v1.key-store-password=123456
 v2.ca-crt-path=ca.crt
 v2.node-crt-path=node.crt
 v2.node-key-path=node.key
+
+# gm
+gm.ca-crt-path=gmca.crt
+gm.sdk-crt-path=gmsdk.crt
+gm.sdk-key-path=gmsdk.key
+gmen.sdk-crt-path=gmensdk.crt
+gmen.sdk-key-path=gmensdk.key
