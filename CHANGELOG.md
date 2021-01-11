@@ -1,3 +1,11 @@
+### V1.7.0
+Features: 
+1. FISCO BCOS 1.3.x support is fully removed - please use the FISCO BCOS 2.x node version respectively.
+2. Evidence and WeIdDocument query performance improved due to support batch type blockchain node data lookup.
+3. Authority Issuer can be registered by any WeID while only administrator can recognize.
+4. Greatly enhanced WeID-Build-Tools functionalities.
+5. Persistence now supports Redis as storage layer.
+
 ### V1.6.3-hotfix-1 (2020-08-26)
 - Bugfixes:
 1. Use batch block transaction receipts getter to improve evidence performance.
