@@ -20,6 +20,7 @@
 package com.webank.weid.service.impl;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -959,5 +960,21 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     @Override
     public ResponseData<Integer> getWeIdCount() {
         return weIdServiceEngine.getWeIdCount();
+    }
+
+    @Override
+    public ResponseData<List<String>> getWeIdListByPubKeyList(List<WeIdPublicKey> pubKeyList) {
+        if (pubKeyList == null || pubKeyList.size() == 0) {
+            return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
+        }
+        List<String> weIdList = new ArrayList<String>();
+        for (WeIdPublicKey weIdPublicKey : pubKeyList) {
+            if (weIdPublicKey != null && StringUtils.isNotBlank(weIdPublicKey.getPublicKey())) {
+                weIdList.add(WeIdUtils.convertPublicKeyToWeId(weIdPublicKey.getPublicKey()));
+            } else {
+                weIdList.add(StringUtils.EMPTY);
+            }
+        }
+        return new ResponseData<>(weIdList, ErrorCode.SUCCESS);
     }
 }
