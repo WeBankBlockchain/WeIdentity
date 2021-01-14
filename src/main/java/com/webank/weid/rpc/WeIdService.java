@@ -219,4 +219,11 @@ public interface WeIdService {
      * @return total weid
      */
     ResponseData<Integer> getWeIdCount();
+
+    /**
+     * get WeID list by pubKey list.
+     * @param pubKeyList the pubKey list
+     * @return return the WeID list
+     */
+    ResponseData<List<String>> getWeIdListByPubKeyList(List<WeIdPublicKey> pubKeyList);
 }
