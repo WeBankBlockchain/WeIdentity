@@ -16,6 +16,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.util.DataToolUtils;
 
 
 public class TestGetAllAuthorityIssuerList extends TestBaseService {
@@ -148,10 +149,10 @@ public class TestGetAllAuthorityIssuerList extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         List<AuthorityIssuer> authorityIssuers = response.getResult();
-
+        String sdkWeId = DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey);
         for (int i = 0; i < authorityIssuers.size(); i++) {
             String weId = authorityIssuers.get(i).getWeId();
-            if (!weId.equals(createWeId.getWeId())) {
+            if (!weId.equals(createWeId.getWeId()) && !sdkWeId.equals(weId)) {
                 RemoveAuthorityIssuerArgs removeAuthorityIssuerArgs =
                     new RemoveAuthorityIssuerArgs();
                 removeAuthorityIssuerArgs.setWeId(weId);
