@@ -19,6 +19,9 @@
 
 package com.webank.weid.full.weid;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,11 +36,13 @@ import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.response.WeIdListResult;
 
 /**
  * getWeIdDocument method for testing WeIdService.
@@ -333,5 +338,23 @@ public class TestGetWeIdDocument extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.WEID_INVALID.getCode(), weIdDoc.getErrorCode().intValue());
         Assert.assertNull(weIdDoc.getResult());
+    }
+
+    /**
+     * case: getWeIdList By publicKeyList.
+     */
+    @Test
+    public void testGetWeIdListByPubkeyList() {
+        List<WeIdPublicKey> pubKeyList = new ArrayList<>();
+        int num = 5;
+        for (int i = 0; i < num; i++) {
+            WeIdPublicKey publicKey = new WeIdPublicKey();
+            publicKey.setPublicKey(TestBaseUtil.createEcKeyPair().getPublicKey());
+            pubKeyList.add(publicKey);
+        }
+        ResponseData<WeIdListResult> weIdListRes = weIdService.getWeIdListByPubKeyList(pubKeyList);
+        LogUtil.info(logger, "getWeIdListByPubKeyList", weIdListRes);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdListRes.getErrorCode().intValue());
+        Assert.assertEquals(num, weIdListRes.getResult().getWeIdList().size());
     }
 }
