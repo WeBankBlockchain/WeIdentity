@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
@@ -48,6 +49,7 @@ import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.response.WeIdListResult;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -963,18 +965,31 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     }
 
     @Override
-    public ResponseData<List<String>> getWeIdListByPubKeyList(List<WeIdPublicKey> pubKeyList) {
+    public ResponseData<WeIdListResult> getWeIdListByPubKeyList(List<WeIdPublicKey> pubKeyList) {
         if (pubKeyList == null || pubKeyList.size() == 0) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        List<String> weIdList = new ArrayList<String>();
-        for (WeIdPublicKey weIdPublicKey : pubKeyList) {
-            if (weIdPublicKey != null && StringUtils.isNotBlank(weIdPublicKey.getPublicKey())) {
-                weIdList.add(WeIdUtils.convertPublicKeyToWeId(weIdPublicKey.getPublicKey()));
+        WeIdListResult weIdListResult = new WeIdListResult();
+        weIdListResult.setWeIdList(new ArrayList<>());
+        weIdListResult.setErrorCodeList(new ArrayList<>());
+        ResponseData<WeIdListResult> responseData = new ResponseData<WeIdListResult>();
+        pubKeyList.forEach(weIdPublicKey -> {
+            String weId = WeIdUtils.convertPublicKeyToWeId(weIdPublicKey.getPublicKey());
+            if (StringUtils.isBlank(weId)) {
+                weIdListResult.getWeIdList().add(null);
+                weIdListResult.getErrorCodeList().add(ErrorCode.WEID_PUBLICKEY_INVALID.getCode());
             } else {
-                weIdList.add(StringUtils.EMPTY);
+                if (this.isWeIdExist(weId).getResult()) {
+                    weIdListResult.getWeIdList().add(weId);
+                    weIdListResult.getErrorCodeList().add(ErrorCode.SUCCESS.getCode());
+                } else {
+                    weIdListResult.getWeIdList().add(null);
+                    weIdListResult.getErrorCodeList().add(
+                         ErrorCode.WEID_PUBLIC_KEY_NOT_EXIST.getCode());
+                }
             }
-        }
-        return new ResponseData<>(weIdList, ErrorCode.SUCCESS);
+        });
+        responseData.setResult(weIdListResult);
+        return responseData;
     }
 }
