@@ -32,6 +32,7 @@ import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.response.WeIdListResult;
 
 
 /**
@@ -223,7 +224,7 @@ public interface WeIdService {
     /**
      * get WeID list by pubKey list.
      * @param pubKeyList the pubKey list
-     * @return return the WeID list
+     * @return return the WeIDListResult
      */
-    ResponseData<List<String>> getWeIdListByPubKeyList(List<WeIdPublicKey> pubKeyList);
+    ResponseData<WeIdListResult> getWeIdListByPubKeyList(List<WeIdPublicKey> pubKeyList);
 }

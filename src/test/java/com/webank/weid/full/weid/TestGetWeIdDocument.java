@@ -42,6 +42,7 @@ import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.response.WeIdListResult;
 
 /**
  * getWeIdDocument method for testing WeIdService.
@@ -351,9 +352,9 @@ public class TestGetWeIdDocument extends TestBaseService {
             publicKey.setPublicKey(TestBaseUtil.createEcKeyPair().getPublicKey());
             pubKeyList.add(publicKey);
         }
-        ResponseData<List<String>> weIdListRes = weIdService.getWeIdListByPubKeyList(pubKeyList);
+        ResponseData<WeIdListResult> weIdListRes = weIdService.getWeIdListByPubKeyList(pubKeyList);
         LogUtil.info(logger, "getWeIdListByPubKeyList", weIdListRes);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdListRes.getErrorCode().intValue());
-        Assert.assertEquals(num, weIdListRes.getResult().size());
+        Assert.assertEquals(num, weIdListRes.getResult().getWeIdList().size());
     }
 }
