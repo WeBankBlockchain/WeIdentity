@@ -191,7 +191,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             result.setExpirationDate(newExpirationDate);
         }
         String privateKey = weIdPrivateKey.getPrivateKey();
-        ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
             .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
         if (!weIdService.isWeIdExist(keyWeId).getResult()) {

@@ -132,6 +132,26 @@ public class FiscoConfig {
     @NotNull(message = "the v2.node-key-path is undefined")
     @NotEmpty(message = "the value of v2.node-key-path is null")
     private String v2NodeKeyPath;
+
+    @NotNull(message = "the gm.ca-crt-path is undefined")
+    @NotEmpty(message = "the value of gm.ca-crt-path is null")
+    private String gmCaCrtPath;
+
+    @NotNull(message = "the gm.sdk-crt-path is undefined")
+    @NotEmpty(message = "the value of gm.sdk-crt-path is null")
+    private String gmSdkCrtPath;
+
+    @NotNull(message = "the gm.sdk-key-path is undefined")
+    @NotEmpty(message = "the value of gm.sdk-key-path is null")
+    private String gmSdkKeyPath;
+
+    @NotNull(message = "the gmen.sdk-crt-path is undefined")
+    @NotEmpty(message = "the value of gmen.sdk-crt-path is null")
+    private String gmenSdkCrtPath;
+
+    @NotNull(message = "the gmen.sdk-key-path is undefined")
+    @NotEmpty(message = "the value of gmen.sdk-key-path is null")
+    private String gmenSdkKeyPath;
     
     @NotNull(message = "the blockchain.orgid is undefined")
     @NotEmpty(message = "the value of blockchain.orgid is null")
@@ -174,6 +194,11 @@ public class FiscoConfig {
             v2CaCrtPath = PropertyUtils.getProperty("v2.ca-crt-path");
             v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
             v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
+            gmCaCrtPath = PropertyUtils.getProperty("gm.ca-crt-path");
+            gmSdkCrtPath = PropertyUtils.getProperty("gm.sdk-crt-path");
+            gmSdkKeyPath = PropertyUtils.getProperty("gm.sdk-key-path");
+            gmenSdkCrtPath = PropertyUtils.getProperty("gmen.sdk-crt-path");
+            gmenSdkKeyPath = PropertyUtils.getProperty("gmen.sdk-key-path");
             currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
             amopId = PropertyUtils.getProperty("amop.id");
             cnsContractFollow = PropertyUtils.getProperty("cns.contract.follow");

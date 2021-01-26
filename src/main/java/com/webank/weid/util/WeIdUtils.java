@@ -143,13 +143,25 @@ public final class WeIdUtils {
      * @param publicKey the WeIdentity DID publicKey key
      * @return true if the private and publicKey key is match, false otherwise.
      */
-    public static boolean isKeypairMatch(String privateKey, String publicKey) {
+    public static boolean isEcdsaKeypairMatch(String privateKey, String publicKey) {
         try {
             ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
             return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * check if the public key matchs the private key.
+     *
+     * @param privateKey the WeIdentity DID private key
+     * @param publicKey the WeIdentity DID publicKey key
+     * @return true if the private and publicKey key is match, false otherwise.
+     */
+    public static boolean isKeypairMatch(String privateKey, String publicKey) {
+        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);
     }
 
     /**
