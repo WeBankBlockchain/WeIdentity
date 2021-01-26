@@ -46,8 +46,6 @@ import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
-import com.webank.weid.protocol.request.SetAuthenticationArgs;
-import com.webank.weid.protocol.request.SetServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialUtils;
@@ -198,16 +196,12 @@ public abstract class TestBaseService extends BaseTest {
     @Override
     public synchronized void testInit() {
 
-        if (!isInitIssuer) {
-            try {
-                issuerPrivateList = new ArrayList<String>();
-                issuerPrivateList.add(privateKey);
-                initIssuer("org1.txt");
-                isInitIssuer = true;
-            } catch (Exception e) {
-                logger.error("initIssuer error", e);
-                Assert.assertTrue(false);
-            }
+        try {
+            issuerPrivateList = new ArrayList<String>();
+            issuerPrivateList.add(privateKey);
+        } catch (Exception e) {
+            logger.error("initIssuer error", e);
+            Assert.assertTrue(false);
         }
 
         if (createWeIdResult == null) {
@@ -254,16 +248,12 @@ public abstract class TestBaseService extends BaseTest {
      */
     public synchronized void testInit4MlCpt() {
 
-        if (!isInitIssuer) {
-            try {
-                issuerPrivateList = new ArrayList<String>();
-                issuerPrivateList.add(privateKey);
-                initIssuer("org1.txt");
-                //isInitIssuer = true;
-            } catch (Exception e) {
-                logger.error("initIssuer error", e);
-                Assert.assertTrue(false);
-            }
+        try {
+            issuerPrivateList = new ArrayList<String>();
+            issuerPrivateList.add(privateKey);
+        } catch (Exception e) {
+            logger.error("initIssuer error", e);
+            Assert.assertTrue(false);
         }
 
         if (createWeIdResult == null) {
@@ -290,15 +280,12 @@ public abstract class TestBaseService extends BaseTest {
      */
     public synchronized void testInit4MultiCpt() {
 
-        if (!isInitIssuer) {
-            try {
-                issuerPrivateList = new ArrayList<String>();
-                issuerPrivateList.add(privateKey);
-                initIssuer("org1.txt");
-            } catch (Exception e) {
-                logger.error("initIssuer error", e);
-                Assert.assertTrue(false);
-            }
+        try {
+            issuerPrivateList = new ArrayList<String>();
+            issuerPrivateList.add(privateKey);
+        } catch (Exception e) {
+            logger.error("initIssuer error", e);
+            Assert.assertTrue(false);
         }
 
         if (createWeIdResult == null) {
@@ -340,16 +327,12 @@ public abstract class TestBaseService extends BaseTest {
      */
     public synchronized void testInitSpecTplCpt() {
 
-        if (!isInitIssuer) {
-            try {
-                issuerPrivateList = new ArrayList<String>();
-                issuerPrivateList.add(privateKey);
-                initIssuer("org1.txt");
-                //isInitIssuer = true;
-            } catch (Exception e) {
-                logger.error("initIssuer error", e);
-                Assert.assertTrue(false);
-            }
+        try {
+            issuerPrivateList = new ArrayList<String>();
+            issuerPrivateList.add(privateKey);
+        } catch (Exception e) {
+            logger.error("initIssuer error", e);
+            Assert.assertTrue(false);
         }
 
         if (createWeIdResult == null) {

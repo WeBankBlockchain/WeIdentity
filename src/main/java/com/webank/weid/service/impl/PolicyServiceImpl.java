@@ -218,6 +218,11 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         if (startPos < 0 || num < 1) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        return cptServiceEngine.getCptLists(startPos, num, WeIdConstant.POLICY_DATA_INDEX);
+        return cptServiceEngine.getCptIdList(startPos, num, WeIdConstant.POLICY_DATA_INDEX);
+    }
+
+    @Override
+    public ResponseData<Integer> getPolicyCount() {
+        return cptServiceEngine.getCptCount(WeIdConstant.POLICY_DATA_INDEX);
     }
 }

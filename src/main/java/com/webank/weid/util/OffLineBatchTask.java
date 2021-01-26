@@ -9,7 +9,7 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +49,7 @@ public class OffLineBatchTask extends AbstractService {
     static {
 
         try {
-            ECKeyPair keyPair = Keys.createEcKeyPair();
+            ECKeyPair keyPair = GenCredential.createKeyPair();
             privateKey = String.valueOf(keyPair.getPrivateKey());
         } catch (Exception e) {
             logger.error("Create weId failed.", e);

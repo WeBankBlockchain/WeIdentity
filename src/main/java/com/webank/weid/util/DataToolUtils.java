@@ -90,10 +90,14 @@ import org.fisco.bcos.web3j.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.web3j.crypto.ECDSASign;
 import org.fisco.bcos.web3j.crypto.ECDSASignature;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.EncryptType;
 import org.fisco.bcos.web3j.crypto.Hash;
 import org.fisco.bcos.web3j.crypto.Keys;
 import org.fisco.bcos.web3j.crypto.Sign;
 import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.web3j.crypto.gm.sm2.SM2Sign;
+import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
 import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
 import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
 import org.fisco.bcos.web3j.utils.Numeric;
@@ -153,6 +157,8 @@ public final class DataToolUtils {
     //private static final ObjectReader OBJECT_READER;
     private static final ObjectWriter OBJECT_WRITER_UN_PRETTY_PRINTER;
 
+    private static final String encryptType;
+
     static {
         // sort by letter
         OBJECT_MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
@@ -171,6 +177,8 @@ public final class DataToolUtils {
         CONVERT_UTC_LONG_KEYLIST.add(KEY_CREATED);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_ISSUANCEDATE);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_EXPIRATIONDATE);
+
+        encryptType = PropertyUtils.getProperty("encrypt.type");
 
         //OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
         //OBJECT_READER = OBJECT_MAPPER.reader();
@@ -241,11 +249,15 @@ public final class DataToolUtils {
      * @return true if yes, false otherwise
      */
     public static String convertPrivateKeyToDefaultWeId(String privateKey) {
-        ECKeyPair keyPair = ECKeyPair
-            .create(new BigInteger(privateKey));
+        BigInteger publicKey;
+        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+            publicKey = Sign.publicKeyFromPrivate(new BigInteger(privateKey));
+        } else {
+            publicKey = Sign.smPublicKeyFromPrivate(new BigInteger(privateKey));
+        }
         return WeIdUtils
             .convertAddressToWeId(new org.fisco.bcos.web3j.abi.datatypes.Address(
-                Keys.getAddress(keyPair)).toString());
+                Keys.getAddress(publicKey)).toString());
     }
 
     /**
@@ -517,11 +529,15 @@ public final class DataToolUtils {
      * @throws NoSuchAlgorithmException No such algorithm.
      * @throws NoSuchProviderException No such provider.
      */
-    public static ECKeyPair createKeyPair()
-        throws InvalidAlgorithmParameterException,
-        NoSuchAlgorithmException,
-        NoSuchProviderException {
-        return Keys.createEcKeyPair();
+    public static ECKeyPair createKeyPair() throws
+            InvalidAlgorithmParameterException,
+            NoSuchAlgorithmException,
+            NoSuchProviderException {
+        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+            return Keys.createEcKeyPair();
+        } else {
+            return GenCredential.createGuomiKeyPair();
+        }
     }
 
     /**
@@ -544,8 +560,13 @@ public final class DataToolUtils {
      * @return SignatureData for signature value
      */
     public static SignatureData secp256k1SignToSignature(String rawData, ECKeyPair keyPair) {
-        ECDSASign ecdsaSign = new ECDSASign();
-        return ecdsaSign.secp256SignMessage(rawData.getBytes(), keyPair);
+        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+            ECDSASign ecdsaSign = new ECDSASign();
+            return ecdsaSign.secp256SignMessage(rawData.getBytes(), keyPair);
+        } else {
+            return SM2Sign.sign(rawData.getBytes(), keyPair);
+        }
+
     }
     
     /**
@@ -556,7 +577,7 @@ public final class DataToolUtils {
      * @return SignatureData for signature value
      */
     public static SignatureData secp256k1SignToSignature(String rawData, BigInteger privateKey) {
-        ECKeyPair keyPair = ECKeyPair.create(privateKey);
+        ECKeyPair keyPair = GenCredential.createKeyPair(privateKey.toString(16));
         return secp256k1SignToSignature(rawData, keyPair);
     }
     
@@ -581,15 +602,32 @@ public final class DataToolUtils {
      * @param signature signature base64 string
      * @return secp256k1 signature (v = 0,1)
      */
-    public static SignatureData secp256k1SigBase64Deserialization(
-        String signature
-    ) {
+    public static SignatureData secp256k1SigBase64Deserialization(String signature) {
         byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
         byte[] r = new byte[32];
         byte[] s = new byte[32];
         System.arraycopy(sigBytes, 0, r, 0, 32);
         System.arraycopy(sigBytes, 32, s, 0, 32);
         return new SignatureData(sigBytes[64], r, s);
+    }
+
+    /**
+     * De-Serialize secp256k1 signature base64 encoded string, in R, S, V (0, 1) format.
+     *
+     * @param signature signature base64 string
+     * @param publicKey publicKey
+     * @return secp256k1 signature (v = 0,1)
+     */
+    public static SignatureData secp256k1SigBase64Deserialization(
+        String signature,
+        BigInteger publicKey) {
+        byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
+        byte[] r = new byte[32];
+        byte[] s = new byte[32];
+        System.arraycopy(sigBytes, 0, r, 0, 32);
+        System.arraycopy(sigBytes, 32, s, 0, 32);
+
+        return new SignatureData(sigBytes[64], r, s, Numeric.toBytesPadded(publicKey, 64));
     }
 
     /**
@@ -609,11 +647,19 @@ public final class DataToolUtils {
             if (rawData == null) {
                 return false;
             }
-            SignatureData sigData =
-                secp256k1SigBase64Deserialization(signatureBase64);
-            ECDSASign ecdsaSign = new ECDSASign();
-            byte[] hashBytes = Hash.sha3(rawData.getBytes());
-            return ecdsaSign.secp256Verify(hashBytes, publicKey, sigData);
+            if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+                SignatureData sigData =
+                        secp256k1SigBase64Deserialization(signatureBase64);
+                byte[] hashBytes = Hash.sha3(rawData.getBytes());
+                ECDSASign ecdsaSign = new ECDSASign();
+                return ecdsaSign.secp256Verify(hashBytes, publicKey, sigData);
+            } else {
+                SM3Digest sm3Digest = new SM3Digest();
+                byte[] hashBytes = sm3Digest.hash(rawData.getBytes());
+                SignatureData sigData =
+                        secp256k1SigBase64Deserialization(signatureBase64, publicKey);
+                return SM2Sign.verify(hashBytes, sigData);
+            }
         } catch (Exception e) {
             logger.error("Error occurred during secp256k1 sig verification: {}", e);
             return false;
@@ -636,13 +682,20 @@ public final class DataToolUtils {
                 (byte) (sigData.getV() + 27),
                 sigData.getR(),
                 sigData.getS());
-        ECDSASignature sig =
-            new ECDSASignature(
-                org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getR()),
-                org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getS()));
-        BigInteger k = Sign
-            .recoverFromSignature(modifiedSigData.getV() - 27, sig, hashBytes);
-        return WeIdUtils.convertPublicKeyToWeId(k.toString(10));
+
+        BigInteger publicKey;
+        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+            ECDSASignature sig =
+                new ECDSASignature(
+                    org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getR()),
+                    org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getS()));
+            publicKey = Sign
+                .recoverFromSignature(modifiedSigData.getV() - 27, sig, hashBytes);
+        } else {
+            // not support
+            throw new WeIdBaseException("not support!");
+        }
+        return WeIdUtils.convertPublicKeyToWeId(publicKey.toString(10));
     }
 
     /**
@@ -703,7 +756,11 @@ public final class DataToolUtils {
      * @return publicKey
      */
     public static BigInteger publicKeyFromPrivate(BigInteger privateKey) {
-        return Sign.publicKeyFromPrivate(privateKey);
+        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+            return Sign.publicKeyFromPrivate(privateKey);
+        } else {
+            return Sign.smPublicKeyFromPrivate(privateKey);
+        }
     }
 
     /**
@@ -713,7 +770,11 @@ public final class DataToolUtils {
      * @return WeIdPrivateKey
      */
     public static ECKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
-        return ECKeyPair.create(privateKey);
+        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+            return GenCredential.createECDSAKeyPair(privateKey.toString(16));
+        } else {
+            return GenCredential.createGuomiKeyPair(privateKey.toString(16));
+        }
     }
 
     /**
@@ -1568,6 +1629,7 @@ public final class DataToolUtils {
     public static List<BigInteger> getParamCreatedList(int length) {
         long created = DateUtils.getNoMillisecondTimeStamp();
         List<BigInteger> createdList = new ArrayList<>();
+        createdList.add(BigInteger.ZERO);
         createdList.add(BigInteger.valueOf(created));
         return createdList;
     }

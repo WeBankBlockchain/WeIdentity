@@ -86,4 +86,11 @@ public interface PolicyService {
      * @return claim policy list
      */
     ResponseData<List<Integer>> getAllClaimPolicies(Integer startPos, Integer num);
+    
+    /**
+     * Get Policy count.
+     *
+     * @return the Policy count
+     */
+    ResponseData<Integer> getPolicyCount();
 }
