@@ -298,4 +298,28 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
         Assert.assertFalse(response.getResult());
     }
 
+    /**
+     * case: Get RetIssuerType Count.
+     */
+    @Test
+    public void testGetRetIssuerCountByIssuerType() {
+        ResponseData<Integer> responseBefore = 
+            authorityIssuerService.getSpecificTypeIssuerSize(issuerType);
+        LogUtil.info(logger, "getSpecificTypeIssuerSize", responseBefore);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseBefore.getErrorCode().intValue());
+
+        WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
+        weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey(privateKey));
+        ResponseData<Boolean> response1 = authorityIssuerService
+            .addIssuerIntoIssuerType(weIdAuthentication, issuerType, super.createWeId().getWeId());
+        LogUtil.info(logger, "addIssuerIntoIssuerType", response1);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
+        Assert.assertTrue(response1.getResult());
+
+        ResponseData<Integer> responseAfter = 
+            authorityIssuerService.getSpecificTypeIssuerSize(issuerType);
+        LogUtil.info(logger, "getSpecificTypeIssuerSize", responseAfter);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseAfter.getErrorCode().intValue());
+        Assert.assertTrue((responseAfter.getResult() - responseBefore.getResult()) == 1);
+    }
 }
