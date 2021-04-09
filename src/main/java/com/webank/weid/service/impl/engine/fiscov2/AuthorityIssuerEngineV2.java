@@ -643,7 +643,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
             for (int i = 0; i < typeNames.size(); i++) {
                 IssuerType issuerType = new IssuerType();
                 issuerType.setTypeName(new String(typeNames.get(i)).trim());
-                issuerType.setOwner(owners.get(i));
+                issuerType.setOwner(WeIdUtils.convertAddressToWeId(owners.get(i)));
                 issuerType.setCreated(createds.get(i).longValue());
                 list.add(issuerType);
             }
