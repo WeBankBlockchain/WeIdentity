@@ -153,7 +153,7 @@ dependencies {
     localDeps 'org.projectlombok:lombok:1.18.10'
     if (!gradle.startParameter.isOffline()) {
         compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval
-        compile("com.webank:weid-contract-java:1.2.29") {
+        compile("com.webank:weid-contract-java:1.2.30-rc.8-SNAPSHOT") {
             exclude group: "org.slf4j", module: "slf4j-log4j12"
         }
         compile fileTree(dir: 'lib', include: '*.jar')

@@ -22,6 +22,7 @@ package com.webank.weid.service.impl.engine;
 import java.util.List;
 
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.IssuerType;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -138,10 +139,45 @@ public interface AuthorityIssuerServiceEngine extends ReloadStaticContract {
     public ResponseData<String> getWeIdFromOrgId(String orgId);
 
     public ResponseData<Boolean> recognizeWeId(Boolean isRecognize, String addr, String privateKey);
-    
+
     /**
      * get the issuer count.
      * @return the all issuer
      */
     public ResponseData<Integer> getIssuerCount();
+
+    /**
+     * get the issuer count with Recognized.
+     * @return the all issuer with Recognized
+     */
+    public ResponseData<Integer> getRecognizedIssuerCount();
+
+    /**
+     * get the issuer size in issuerType.
+     * @param issuerType the issuerType
+     * @return the all issuer in issuerType
+     */
+    public ResponseData<Integer> getSpecificTypeIssuerSize(String issuerType);
+
+    /**
+     * get the issuer type count.
+     * @return the all issuer type
+     */
+    public ResponseData<Integer> getIssuerTypeCount();
+
+    /**
+     * remove the issuerType.
+     * @param issuerType the issuerType name
+     * @param privateKey the privateKey
+     * @return true is success, false is fail
+     */
+    public ResponseData<Boolean> removeIssuerType(String issuerType, String privateKey);
+
+    /**
+     * get the issuerType list.
+     * @param index the start index
+     * @param num the page size
+     * @return the issuerType list
+     */
+    public ResponseData<List<IssuerType>> getIssuerTypeList(Integer index, Integer num);
 }

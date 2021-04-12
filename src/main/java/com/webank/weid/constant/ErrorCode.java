@@ -687,6 +687,22 @@ public enum ErrorCode {
     ),
 
     /**
+     * The capacity has reached the upper limit.
+     */
+    SPECIFIC_ISSUER_CONTRACT_ERROR_EXCEED_MAX(
+        500503,
+        "the capacity has reached the upper limit."
+    ),
+
+    /**
+     * Has issuer in the specific issuer type.
+     */
+    SPECIFIC_ISSUER_CONTRACT_ERROR_EXIST_ISSUER(
+        500504,
+        "has issuer in the specific issuer type."
+    ),
+
+    /**
      * The weid invalid.
      */
     WEID_INVALID(100101, "the weIdentity DID is invalid."),
