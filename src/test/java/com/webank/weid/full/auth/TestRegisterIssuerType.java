@@ -19,6 +19,8 @@
 
 package com.webank.weid.full.auth;
 
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.IssuerType;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -251,4 +254,45 @@ public class TestRegisterIssuerType extends TestBaseService {
         Assert.assertFalse(response.getResult());
     }
 
+    /**
+     * case: Get RetIssuerType Count.
+     */
+    @Test
+    public void testGetRetIssuerTypeCount() {
+        ResponseData<Integer> responseBefore =  authorityIssuerService.getIssuerTypeCount();
+        LogUtil.info(logger, "getIssuerTypeCount", responseBefore);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseBefore.getErrorCode().intValue());
+        
+        String typeName = String.valueOf(System.currentTimeMillis());
+        super.registerIssuerType(typeName);
+
+        ResponseData<Integer> responseAfter =  authorityIssuerService.getIssuerTypeCount();
+        LogUtil.info(logger, "getIssuerTypeCount", responseAfter);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseAfter.getErrorCode().intValue());
+        Assert.assertTrue((responseAfter.getResult() - responseBefore.getResult()) == 1);
+
+        WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeIdNew);
+        ResponseData<Boolean> removeRes = authorityIssuerService.removeIssuerType(
+            weIdAuthentication, typeName);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), removeRes.getErrorCode().intValue());
+        Assert.assertTrue(removeRes.getResult());
+
+        responseAfter =  authorityIssuerService.getIssuerTypeCount();
+        LogUtil.info(logger, "getIssuerTypeCount", responseAfter);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseAfter.getErrorCode().intValue());
+        Assert.assertTrue(responseAfter.getResult() == responseBefore.getResult());
+    }
+
+    @Test
+    public void getIssuerTypeList() {
+        super.registerIssuerType(String.valueOf(System.currentTimeMillis()));
+        ResponseData<List<IssuerType>> response = 
+            authorityIssuerService.getIssuerTypeList(0, 1);
+        LogUtil.info(logger, "getIssuerTypeList", response);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertTrue(response.getResult().size() == 1);
+        Assert.assertNotNull(response.getResult().get(0).getOwner());
+        Assert.assertNotNull(response.getResult().get(0).getTypeName());
+        Assert.assertNotNull(response.getResult().get(0).getCreated());
+    }
 }
