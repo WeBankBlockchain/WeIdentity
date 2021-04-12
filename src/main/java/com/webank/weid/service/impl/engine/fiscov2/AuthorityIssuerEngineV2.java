@@ -27,6 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.abi.datatypes.Address;
 import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.fisco.bcos.web3j.tuples.generated.Tuple2;
+import org.fisco.bcos.web3j.tuples.generated.Tuple3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +38,7 @@ import com.webank.weid.contract.v2.AuthorityIssuerController.AuthorityIssuerRetL
 import com.webank.weid.contract.v2.SpecificIssuerController;
 import com.webank.weid.contract.v2.SpecificIssuerController.SpecificIssuerRetLogEventResponse;
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.IssuerType;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.ResponseData;
@@ -562,9 +564,94 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
             Integer count = authorityIssuerController.getTotalIssuer().send().intValue();
             return new ResponseData<>(count, ErrorCode.SUCCESS);
         } catch (Exception e) {
-            logger.error("[getCptCount] query CptCount failed. exception message: ", e);
+            logger.error("[getIssuerCount] query IssuerCount failed. exception message: ", e);
             return new ResponseData<>(0, ErrorCode.TRANSACTION_EXECUTE_ERROR);
         }
     }
 
+    @Override
+    public ResponseData<Integer> getSpecificTypeIssuerSize(String issuerType) {
+        try {
+            Integer count = specificIssuerController.getSpecificTypeIssuerSize(
+                DataToolUtils.stringToByte32Array(issuerType)).send().intValue();
+            return new ResponseData<>(count, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[getIssuerCount] query IssuerCount failed. exception message: ", e);
+            return new ResponseData<>(0, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<Integer> getRecognizedIssuerCount() {
+        try {
+            Integer count = authorityIssuerController.getRecognizedIssuerCount().send().intValue();
+            return new ResponseData<>(count, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error(
+                "[getRecognizedIssuerCount] query RecognizedIssuerCount failed. "
+                + "exception message: ", e);
+            return new ResponseData<>(0, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<Integer> getIssuerTypeCount() {
+        try {
+            Integer count = specificIssuerController.getIssuerTypeCount().send().intValue();
+            return new ResponseData<>(count, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error(
+                "[getIssuerTypeCount] query IssuerTypeCount failed. exception message: ", e);
+            return new ResponseData<>(0, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<Boolean> removeIssuerType(String issuerType, String privateKey) {
+        try {
+            SpecificIssuerController specificIssuerController = reloadContract(
+                fiscoConfig.getSpecificIssuerAddress(),
+                privateKey,
+                SpecificIssuerController.class);
+            TransactionReceipt receipt = specificIssuerController
+                .removeIssuerType(DataToolUtils.stringToByte32Array(issuerType)).send();
+
+            // pass-in empty address
+            String emptyAddress = new Address(BigInteger.ZERO).toString();
+            ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, false, emptyAddress);
+            TransactionInfo info = new TransactionInfo(receipt);
+            return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
+                errorCode, info);
+        } catch (Exception e) {
+            logger.error("remove issuer type failed.", e);
+            return new ResponseData<>(false, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
+
+    @Override
+    public ResponseData<List<IssuerType>> getIssuerTypeList(Integer index, Integer num) {
+        List<IssuerType> list = new ArrayList<IssuerType>();
+        try {
+            Tuple3<List<byte[]>, List<String>, List<BigInteger>> tuple = 
+                specificIssuerController.getIssuerTypeList(
+                    new BigInteger(index.toString()), 
+                    new BigInteger(num.toString())
+                ).send();
+            List<byte[]> typeNames = tuple.getValue1(); //typeNames
+            List<String> owners = tuple.getValue2(); //owners
+            List<BigInteger> createds = tuple.getValue3(); //createds
+            for (int i = 0; i < typeNames.size(); i++) {
+                IssuerType issuerType = new IssuerType();
+                issuerType.setTypeName(new String(typeNames.get(i)).trim());
+                issuerType.setOwner(WeIdUtils.convertAddressToWeId(owners.get(i)));
+                issuerType.setCreated(createds.get(i).longValue());
+                list.add(issuerType);
+            }
+            return new ResponseData<>(list, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error(
+                "[getIssuerTypeList] query IssuerTypeList failed. exception message: ", e);
+            return new ResponseData<>(list, ErrorCode.TRANSACTION_EXECUTE_ERROR);
+        }
+    }
 }

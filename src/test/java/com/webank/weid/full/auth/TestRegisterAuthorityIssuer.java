@@ -33,6 +33,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -1063,5 +1064,48 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
         Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
+    }
+    
+    
+    /**
+     * case: getIssuerCount.
+     */
+    @Test
+    public void testGetIssuerCount() {
+        ResponseData<Integer> responseBefore =
+            authorityIssuerService.getIssuerCount();
+        LogUtil.info(logger, "getIssuerCount", responseBefore);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseBefore.getErrorCode().intValue());
+
+        super.registerAuthorityIssuer();
+
+        ResponseData<Integer> responseAfter = authorityIssuerService.getIssuerCount();
+        LogUtil.info(logger, "getIssuerCount", responseAfter);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseAfter.getErrorCode().intValue());
+        Assert.assertTrue((responseAfter.getResult() - responseBefore.getResult()) == 1);
+    }
+
+    /**
+     * case: getRecognizedIssuerCount.
+     */
+    @Test
+    public void testGetRecognizedIssuerCount() {
+        ResponseData<Integer> responseBefore =
+            authorityIssuerService.getRecognizedIssuerCount();
+        LogUtil.info(logger, "getRecognizedIssuerCount", responseBefore);
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseBefore.getErrorCode().intValue());
+
+        CreateWeIdDataResult registerAuthorityIssuer = super.registerAuthorityIssuer();
+        ResponseData<Boolean> recognizeAuthorityIssuer = 
+            authorityIssuerService.recognizeAuthorityIssuer(
+                registerAuthorityIssuer.getWeId(), 
+                new WeIdPrivateKey(privateKey)
+            );
+        LogUtil.info(logger, "recognizeAuthorityIssuer", recognizeAuthorityIssuer);
+        Assert.assertTrue(recognizeAuthorityIssuer.getResult());
+
+        ResponseData<Integer> responseAfter = authorityIssuerService.getRecognizedIssuerCount();
+        LogUtil.info(logger, "getRecognizedIssuerCount", responseAfter);
+        Assert.assertTrue((responseAfter.getResult() - responseBefore.getResult()) == 1);
     }
 }
