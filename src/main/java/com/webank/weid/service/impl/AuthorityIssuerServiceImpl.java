@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.IssuerType;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
@@ -539,5 +540,42 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
     @Override
     public ResponseData<Integer> getIssuerCount() {
         return authEngine.getIssuerCount();
+    }
+
+    @Override
+    public ResponseData<Integer> getRecognizedIssuerCount() {
+        return authEngine.getRecognizedIssuerCount();
+    }
+
+    @Override
+    public ResponseData<Integer> getSpecificTypeIssuerSize(String issuerType) {
+        return authEngine.getSpecificTypeIssuerSize(issuerType);
+    }
+
+    @Override
+    public ResponseData<Integer> getIssuerTypeCount() {
+        return authEngine.getIssuerTypeCount();
+    }
+
+    @Override
+    public ResponseData<Boolean> removeIssuerType(
+        WeIdAuthentication callerAuth,
+        String issuerType
+    ) {
+        ErrorCode innerCode = isIssuerTypeValid(issuerType);
+        if (innerCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(false, innerCode);
+        }
+        innerCode = isCallerAuthValid(callerAuth);
+        if (innerCode != ErrorCode.SUCCESS) {
+            return new ResponseData<>(false, innerCode);
+        }
+        return authEngine.removeIssuerType(
+            issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
+    }
+
+    @Override
+    public ResponseData<List<IssuerType>> getIssuerTypeList(Integer index, Integer num) {
+        return authEngine.getIssuerTypeList(index, num);
     }
 }
