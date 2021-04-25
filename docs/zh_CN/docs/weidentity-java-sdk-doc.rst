@@ -35,10 +35,10 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 #. 查询授权机构：调用AuthorityIssuerService的queryAuthorityIssuerInfo()查阅生成的授权机构数据；
 #. 注册CPT：通过CptService的registerCpt()，通过之前生成的WeIdentity DID身份创建一个你喜欢的CPT模板；
 #. 查询CPT：调用CptService的queryCpt()查阅生成的CPT模板；
-#. 生成凭证：通过CredentialPojoService的CreateCredential()，根据CPT模板，生成一份Credential；
-#. 查询凭证：调用CredentialPojoService的Verify()，验证此Credential是否合法；
-#. 凭证存证上链：调用EvidenceService的CreateEvidence()，将之前生成的Credential生成一份Hash存证上链；
-#. 验证链上凭证存证：调用EvidenceService的VerifyEvidence()，和链上对比，验证Credential是否被篡改。
+#. 生成凭证：通过CredentialPojoService的createCredential()，根据CPT模板，生成一份Credential；
+#. 查询凭证：调用CredentialPojoService的verify()，验证此Credential是否合法；
+#. 凭证存证上链：调用EvidenceService的createEvidence()，将之前生成的Credential生成一份Hash存证上链；
+#. 验证链上凭证存证：调用EvidenceService的verifySigner()，和链上对比，验证Credential是否被篡改。
 
 代码结构说明
 ------------
@@ -9356,10 +9356,56 @@ com.webank.weid.protocol.base.EvidenceSignInfo
 .. code-block:: text
 
    接口名称:com.webank.weid.rpc.EvidenceService.verifySigner
-   接口定义:ResponseData<Boolean> verify(EvidenceInfo evidenceInfo, String weId)
-   接口描述: 根据传入的存证信息和WeID，从链上根据WeID的公钥，判断此存证是否合法。
+   接口定义:ResponseData<Boolean> verify(CredentialPojo credentialPojo, EvidenceInfo evidenceInfo, String weId)
+   接口描述: 根据传入的凭证和存证信息和WeID，从链上根据WeID的公钥，判断此存证是否合法。
 
 **接口入参**\ :
+
+com.webank.weid.protocol.base.CredentialPojo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - context
+     - String
+     -
+     -
+   * - type
+     - List<String>
+     -
+     -
+   * - id
+     - String
+     - 证书ID
+     -
+   * - cptId
+     - Integer
+     - cptId
+     -
+   * - issuer
+     - String
+     - issuer 的 WeIdentity DID
+     -
+   * - issuanceDate
+     - Long
+     - 创建日期
+     -
+   * - expirationDate
+     - Long
+     - 到期日期
+     -
+   * - claim
+     - Map<String, Object>
+     - Claim数据
+     -
+   * - proof
+     - Map<String, Object>
+     - 签名数据结构体
+     -
 
 com.webank.weid.protocol.base.EvidenceInfo
 
@@ -9486,10 +9532,56 @@ java.lang.String
 .. code-block:: text
 
    接口名称:com.webank.weid.rpc.EvidenceService.verifySigner
-   接口定义:ResponseData<Boolean> verify(EvidenceInfo evidenceInfo, String weId, String publicKey)
-   接口描述: 根据传入的存证信息和WeID，及传入的公钥，判断此WeID是否为存证的合法创建者。不需要链上交互。
+   接口定义:ResponseData<Boolean> verify(CredentialPojo credentialPojo, EvidenceInfo evidenceInfo, String weId, String publicKey)
+   接口描述: 根据传入的凭证和存证信息和WeID，及传入的公钥，判断此WeID是否为存证的合法创建者。不需要链上交互。
 
 **接口入参**\ :
+
+com.webank.weid.protocol.base.CredentialPojo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - context
+     - String
+     -
+     -
+   * - type
+     - List<String>
+     -
+     -
+   * - id
+     - String
+     - 证书ID
+     -
+   * - cptId
+     - Integer
+     - cptId
+     -
+   * - issuer
+     - String
+     - issuer 的 WeIdentity DID
+     -
+   * - issuanceDate
+     - Long
+     - 创建日期
+     -
+   * - expirationDate
+     - Long
+     - 到期日期
+     -
+   * - claim
+     - Map<String, Object>
+     - Claim数据
+     -
+   * - proof
+     - Map<String, Object>
+     - 签名数据结构体
+     -
 
 com.webank.weid.protocol.base.EvidenceInfo
 

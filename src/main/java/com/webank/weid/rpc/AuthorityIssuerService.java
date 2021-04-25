@@ -22,6 +22,7 @@ package com.webank.weid.rpc;
 import java.util.List;
 
 import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.IssuerType;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
@@ -175,4 +176,39 @@ public interface AuthorityIssuerService {
      * @return the all issuer
      */
     ResponseData<Integer> getIssuerCount();
+
+    /**
+     * get the issuer count with Recognized.
+     * @return the all issuer with Recognized
+     */
+    ResponseData<Integer> getRecognizedIssuerCount();
+
+    /**
+     * get the issuer size in issuerType.
+     * @param issuerType the issuerType
+     * @return the all issuer in issuerType
+     */
+    ResponseData<Integer> getSpecificTypeIssuerSize(String issuerType);
+
+    /**
+     * get the issuer type count.
+     * @return the all issuer type
+     */
+    ResponseData<Integer> getIssuerTypeCount();
+
+    /**
+     * remove the issuerType.
+     * @param callerAuth the caller
+     * @param issuerType the issuerType name
+     * @return true is success, false is fail
+     */
+    ResponseData<Boolean> removeIssuerType(WeIdAuthentication callerAuth, String issuerType);
+
+    /**
+     * get the issuerType list.
+     * @param index the start index
+     * @param num the page size
+     * @return the issuerType list
+     */
+    ResponseData<List<IssuerType>> getIssuerTypeList(Integer index, Integer num);
 }
