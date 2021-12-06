@@ -95,7 +95,7 @@ WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestSer
             <th width="50%">当前状态</th>
          </tr>
          <tr>
-            <td style="text-align:center"><a href="https://github.com/WeBankFinTech/WeIdentity">Java SDK</a></td>
+            <td style="text-align:center"><a href="https://github.com/WeBankBlockchain/WeIdentity">Java SDK</a></td>
             <td>
                <ul>
                  <li><a href="https://weidentity.readthedocs.io/zh_CN/latest/docs/one-stop-experience.html">安装部署文档</a></li>
@@ -104,14 +104,14 @@ WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestSer
                </ul>
             </td>
             <td>
-               <a href="https://github.com/WeBankFinTech/WeIdentity"><img src="https://github.com/WeBankFinTech/WeIdentity/workflows/CI/badge.svg?branch=master" /></a>
-               <a href="https://github.com/WeBankFinTech/WeIdentity/releases/latest"><img src="https://img.shields.io/github/release/WeBankFinTech/WeIdentity.svg" /></a>
+               <a href="https://github.com/WeBankBlockchain/WeIdentity"><img src="https://github.com/WeBankBlockchain/WeIdentity/workflows/CI/badge.svg?branch=master" /></a>
+               <a href="https://github.com/WeBankBlockchain/WeIdentity/releases/latest"><img src="https://img.shields.io/github/release/WeBankBlockchain/WeIdentity.svg" /></a>
                <a href="https://search.maven.org/search?q=g:%22com.webank%22%20AND%20a:%22weid-java-sdk%22"><img src="https://img.shields.io/maven-central/v/com.webank/weid-java-sdk.svg?label=Maven%20Central" /></a>
-               <a href="https://www.codacy.com/manual/chaoxinhu/WeIdentity?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WeBankFinTech/WeIdentity&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/37d3bc478ede4839ba16ccac469ad3f2" /></a>
-               <a href="https://www.codefactor.io/repository/github/webankfintech/weidentity"><img src="https://www.codefactor.io/repository/github/webankfintech/weidentity/badge" /></a>
-               <a href="https://codecov.io/gh/WeBankFinTech/WeIdentity"><img src="https://codecov.io/gh/WeBankFinTech/WeIdentity/branch/master/graph/badge.svg" /></a>
+               <a href="https://www.codacy.com/manual/chaoxinhu/WeIdentity?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WeBankBlockchain/WeIdentity&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/37d3bc478ede4839ba16ccac469ad3f2" /></a>
+               <a href="https://www.codefactor.io/repository/github/webankblockchain/weidentity"><img src="https://www.codefactor.io/repository/github/webankblockchain/weidentity/badge" /></a>
+               <a href="https://codecov.io/gh/WeBankBlockchain/WeIdentity"><img src="https://codecov.io/gh/WeBankBlockchain/WeIdentity/branch/master/graph/badge.svg" /></a>
                <a href="https://www.gnu.org/licenses/lgpl-3.0"><img src="https://img.shields.io/badge/license-GNU%20LGPL%20v3.0-blue.svg" /></a>
-               <a href="https://github.com/WeBankFinTech/WeIdentity"><img src="https://sloc.xyz/github/WeBankFinTech/WeIdentity" /></a>
+               <a href="https://github.com/WeBankBlockchain/WeIdentity"><img src="https://sloc.xyz/github/WeBankBlockchain/WeIdentity" /></a>
             </td>
          </tr>
       </table>
@@ -136,5 +136,5 @@ WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestSer
 * 我们所有的贡献者名单页面在 \ `这里 <./ALLCONTRIBUTOR.md>`_ 。感谢大家为WeIdentity付出的心血！
 
 *
-   详见：\ `如何贡献 <https://github.com/WeBankFinTech/WeIdentity/blob/master/.github/CONTRIBUTING.md>`_
+   详见：\ `如何贡献 <https://github.com/WeBankBlockchain/WeIdentity/blob/master/.github/CONTRIBUTING.md>`_
 
