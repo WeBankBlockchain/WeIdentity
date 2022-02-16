@@ -1,4 +1,16 @@
+// Due to a bug of spotbugs, the following lines have to be defined on top as well
+buildscript {
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:2.4.3"
+    }
+}
+plugins {
+  id 'com.github.spotbugs' version '4.7.0'
+}
+import com.github.spotbugs.snom.SpotBugsTask
+
 def gradleVer = "4"
+println "gradleVersion:" + gradle.gradleVersion
 if (gradle.gradleVersion.startsWith("6")
         || gradle.gradleVersion.startsWith("5")
         || gradle.gradleVersion.startsWith("4.10")
@@ -11,26 +23,14 @@ if (gradle.gradleVersion.startsWith("6")
     println "Gradle with version < 4.7 detected"
 }
 
-// Due to a bug of spotbugs, the following lines have to be defined on top as well
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "gradle.plugin.com.github.spotbugs:spotbugs-gradle-plugin:1.6.5"
-    }
-}
-
 apply plugin: 'maven'
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'io.spring.dependency-management'
 if (!gradle.startParameter.isOffline()) {
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
-    apply plugin: "com.github.spotbugs"
     apply plugin: 'signing'
 }
 
@@ -60,7 +60,6 @@ repositories {
             println "use default repo"
             mavenCentral()
         }
-        maven { url "https://dl.bintray.com/ethereum/maven/" }
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url "https://oss.sonatype.org/content/groups/public/" }
         maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
@@ -301,13 +300,13 @@ if (!gradle.startParameter.isOffline()) {
     spotbugs {
         ignoreFailures = true
         showProgress = true
-        toolVersion = "3.1.8"
+        toolVersion = "4.2.2"
         effort = "max"
         reportLevel = "low"
         excludeFilter = file("${project.rootDir}/config/spotbugs/spotbugs_filter.xml")
     }
 
-    tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    tasks.withType(SpotBugsTask) {
         reports {
             xml.enabled false
             html.enabled true
