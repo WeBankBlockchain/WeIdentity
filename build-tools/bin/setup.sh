@@ -67,7 +67,7 @@ function modify_config()
     
     export ORG_ID=${ORG_ID}
     export AMOP_ID=${AMOP_ID}
-	export PERSISTENCE_TYPE=${persistence_type}
+    export PERSISTENCE_TYPE=${persistence_type}
     export MYSQL_ADDRESS=${MYSQL_ADDRESS}
     export MYSQL_DATABASE=${MYSQL_DATABASE}
     export MYSQL_USERNAME=${MYSQL_USERNAME}
@@ -137,7 +137,7 @@ function gradle_build_sdk()
     
     export ORG_ID=${org_id}
     export AMOP_ID=${amop_id}
-	export PERSISTENCE_TYPE=${persistence_type}
+    export PERSISTENCE_TYPE=${persistence_type}
     export MYSQL_ADDRESS=${mysql_address}
     export MYSQL_DATABASE=${mysql_database}
     export MYSQL_USERNAME=${mysql_username}
