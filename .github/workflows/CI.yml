@@ -42,17 +42,17 @@ jobs:
       - name: Prepare gradle
         uses: eskatos/gradle-command-action@v1
         with:
-          gradle-version: 5.4.1
+          gradle-version: 5.6
       - name: source-code deployment
         run: |
           export NODE_IP=127.0.0.1:20200
           export NODE2_IP=127.0.0.1:20201
-          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          export PATH=/home/runner/gradle-installations/installs/gradle-5.6/bin:$PATH
           chmod u+x .ci/script/build-ci.sh
           .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root 127.0.0.1:6379 123456 redis
       - name: Run CI
         run: |
-          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          export PATH=/home/runner/gradle-installations/installs/gradle-5.6/bin:$PATH
           gradle check -i
           gradle jacocoTestReport
           bash <(curl -s https://codecov.io/bash)
@@ -88,12 +88,12 @@ jobs:
       - name: Prepare gradle
         uses: eskatos/gradle-command-action@v1
         with:
-          gradle-version: 5.4.1
+          gradle-version: 5.6
       - name: source-code deployment
         run: |
           export NODE_IP=127.0.0.1:20200
           export NODE2_IP=127.0.0.1:20201
-          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          export PATH=/home/runner/gradle-installations/installs/gradle-5.6/bin:$PATH
           chmod u+x .ci/script/build-ci.sh
           .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root 127.0.0.1:6379 123456 redis
       - name: Checkout and prepare
@@ -116,7 +116,7 @@ jobs:
         run: |
           cd weid-sample
           chmod u+x *.sh
-          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          export PATH=/home/runner/gradle-installations/installs/gradle-5.6/bin:$PATH
           export NODE_IP=127.0.0.1:20200
           export NODE2_IP=127.0.0.1:20201
           ./build.sh
@@ -152,12 +152,12 @@ jobs:
       - name: Prepare gradle
         uses: eskatos/gradle-command-action@v1
         with:
-          gradle-version: 5.4.1
+          gradle-version: 5.6
       - name: source-code deployment
         run: |
           export NODE_IP=127.0.0.1:20200
           export NODE2_IP=127.0.0.1:20201
-          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          export PATH=/home/runner/gradle-installations/installs/gradle-5.6/bin:$PATH
           chmod u+x .ci/script/build-ci.sh
           .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root
       - name: Checkout and prepare
@@ -180,7 +180,7 @@ jobs:
       - name: Run CI
         run: |
           cd weid-http-service/
-          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.6.1/bin:$PATH
+          export PATH=/home/runner/gradle-installations/installs/gradle-5.6.1/bin:$PATH
           ls -ll libs
           gradle clean build -i -x test
       - name: Download failed log (if any)
@@ -215,12 +215,12 @@ jobs:
       - name: Prepare gradle
         uses: eskatos/gradle-command-action@v1
         with:
-          gradle-version: 5.4.1
+          gradle-version: 5.6
       - name: source-code deployment
         run: |
           export NODE_IP=127.0.0.1:20200
           export NODE2_IP=127.0.0.1:20201
-          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          export PATH=/home/runner/gradle-installations/installs/gradle-5.6/bin:$PATH
           chmod u+x .ci/script/build-ci.sh
           .ci/script/build-ci.sh 127.0.0.1:3306 cidb root root
       - name: Checkout and prepare
@@ -237,7 +237,7 @@ jobs:
       - name: Run CI
         run: |
           cd weid-build-tools/
-          export PATH=/home/runner/gradle-provision-tmpdir/installs/gradle-5.4.1/bin:$PATH
+          export PATH=/home/runner/gradle-installations/installs/gradle-5.6/bin:$PATH
           sed -i -e '$a\org_id=test' run.config
           sed -i -e '$a\amop_id=test' run.config
           sed -i -e '$a\blockchain_address=127.0.0.1:20200' run.config
