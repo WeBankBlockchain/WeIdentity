@@ -67,13 +67,14 @@ function modify_config()
     
     export ORG_ID=${ORG_ID}
     export AMOP_ID=${AMOP_ID}
+	export PERSISTENCE_TYPE=${persistence_type}
     export MYSQL_ADDRESS=${MYSQL_ADDRESS}
     export MYSQL_DATABASE=${MYSQL_DATABASE}
     export MYSQL_USERNAME=${MYSQL_USERNAME}
     export MYSQL_PASSWORD=${MYSQL_PASSWORD}
     export BLOCKCHIAN_NODE_INFO=${BLOCKCHIAN_NODE_INFO}
     
-    NODEVAR='${ORG_ID}:${AMOP_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
+    NODEVAR='${ORG_ID}:${AMOP_ID}:${PERSISTENCE_TYPE}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
     cp ${weid_config} ${app_xml_config_dir}
     echo "modify sdk config finished..."
@@ -136,11 +137,12 @@ function gradle_build_sdk()
     
     export ORG_ID=${org_id}
     export AMOP_ID=${amop_id}
+	export PERSISTENCE_TYPE=${persistence_type}
     export MYSQL_ADDRESS=${mysql_address}
     export MYSQL_DATABASE=${mysql_database}
     export MYSQL_USERNAME=${mysql_username}
     export MYSQL_PASSWORD=${mysql_password}
-    NODEVAR='${ORG_ID}:${AMOP_ID}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
+    NODEVAR='${ORG_ID}:${AMOP_ID}:${PERSISTENCE_TYPE}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
 	
     cd ${java_source_code_dir}/
