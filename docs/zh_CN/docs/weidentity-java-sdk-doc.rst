@@ -2731,7 +2731,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
    接口名称:com.webank.weid.rpc.WeIdService.setAuthentication
    接口定义:ResponseData<Boolean> setAuthentication(String weId, SetAuthenticationArgs setAuthenticationArgs)
-   接口描述: 由**代理方**来给WeIdentity DID添加Authentication信息。仅支持联盟链管理员或委员会成员作为代理方调用。
+   接口描述: 根据WeIdentity DID添加Authentication信息。
 
 **接口入参**\ :
 
