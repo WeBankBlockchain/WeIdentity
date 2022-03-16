@@ -37,7 +37,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
 #. 查询CPT：调用CptService的queryCpt()查阅生成的CPT模板；
 #. 生成凭证：通过CredentialPojoService的createCredential()，根据CPT模板，生成一份Credential；
 #. 查询凭证：调用CredentialPojoService的verify()，验证此Credential是否合法；
-#. 凭证存证上链：调用EvidenceService的createEvidence()，将之前生成的Credential生成一份Hash存证上链；
+#. 凭证存证上链：调用EvidenceService的createEvidence()，将之前生成的Credential传入，createEvidence会将传入的Credential哈希得到的Hash值存证上链；
 #. 验证链上凭证存证：调用EvidenceService的verifySigner()，和链上对比，验证Credential是否被篡改。
 
 代码结构说明
@@ -8737,7 +8737,7 @@ Hashable java.lang.Object
      - Hashable object
      - N
      - 实现了Hashable接口的任意Object
-     - 当前支持Credential，CredentialWrapper，CredentialPojo
+     - 当前支持HashString，Credential，CredentialWrapper，CredentialPojo
 
 com.webank.weid.protocol.base.WeIdPrivateKey
 
@@ -9811,9 +9811,11 @@ T java.lang.Object
    ResponseData<CredentialWrapper> response = credentialService.createCredential(createCredentialArgs);
 
    // 直接将凭证传入generateHash
-   HashString hashString = evidenceService.generateHash(response.getResult().getCredential()).getResult();
-   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(hashString, weIdPrivateKey);
+   String hash = evidenceService.generateHash(response.getResult().getCredential()).getResult().getHash();
 
+   // 将凭证传入createEvidence()，将自动对Credential做hash并以Credential的hash上链
+   ResponseData<String> responseCreateEvidence = evidenceService.createEvidence(response.getResult().getCredential(), weIdPrivateKey);
+   // 对比hash和responseCreateEvidence.getResult()的哈希值，应为相同
 
 .. code-block:: text
 
