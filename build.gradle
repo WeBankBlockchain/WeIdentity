@@ -3,9 +3,15 @@ buildscript {
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:2.4.3"
     }
+	
+  dependencies {
+    classpath "gradle.plugin.com.hierynomus.gradle.plugins:license-gradle-plugin:0.15.0"
+  }
 }
+
 plugins {
   id 'com.github.spotbugs' version '4.7.0'
+  id "com.github.hierynomus.license" version "0.15.0"
 }
 import com.github.spotbugs.snom.SpotBugsTask
 
@@ -28,6 +34,8 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: "com.github.hierynomus.license"
+
 if (!gradle.startParameter.isOffline()) {
     apply plugin: 'checkstyle'
     apply plugin: 'jacoco'
