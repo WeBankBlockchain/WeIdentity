@@ -31,14 +31,11 @@ import java.util.Random;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.sdk.abi.datatypes.StaticArray;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.wrapper.ABIDefinition;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +67,7 @@ public class TransactionUtils {
      * @return the StaticArray
      * @throws Exception IOException
      */
-    public static ResponseData<List<Type>> buildCreateWeIdInputParameters(String inputParam)
+    public static ResponseData<List<ABIDefinition.Type>> buildCreateWeIdInputParameters(String inputParam)
         throws Exception {
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -91,7 +88,7 @@ public class TransactionUtils {
             return new ResponseData<>(null, ErrorCode.WEID_PUBLICKEY_INVALID);
         }
         // We do not check DID existence in this case since it does not really affect the outcome.
-        List<Type> result = Arrays.<Type>asList(
+        List<ABIDefinition.Type> result = Arrays.<ABIDefinition.Type>asList(
             new Address(addr),
             DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
             DataToolUtils.stringToDynamicBytes(DateUtils.getNoMillisecondTimeStampString()),
@@ -108,7 +105,7 @@ public class TransactionUtils {
      * @return the StaticArray
      * @throws Exception IOException
      */
-    public static ResponseData<List<Type>> buildAuthorityIssuerInputParameters(String inputParam)
+    public static ResponseData<List<ABIDefinition.Type>> buildAuthorityIssuerInputParameters(String inputParam)
         throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode inputParamNode = objectMapper.readTree(inputParam);
@@ -128,7 +125,7 @@ public class TransactionUtils {
             logger.error("Input cpt publisher : {} is invalid.", name);
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL);
         }
-        List<Type> result = Arrays.<Type>asList(
+        List<ABIDefinition.Type> result = Arrays.<ABIDefinition.Type>asList(
             new Address(WeIdUtils.convertWeIdToAddress(weId)),
             getParamName(name),
             getParamCreated(WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH),
@@ -364,7 +361,7 @@ public class TransactionUtils {
         BigInteger retCode,
         BigInteger cptId,
         BigInteger cptVersion,
-        org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt receipt) {
+        TransactionReceipt receipt) {
 
         TransactionInfo info = new TransactionInfo(receipt);
         // register

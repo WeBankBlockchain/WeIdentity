@@ -27,7 +27,10 @@ import java.util.Map;
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.UserClient;
 import com.webank.wedpr.selectivedisclosure.UserResult;
+import com.webank.weid.rpc.callback.*;
+import com.webank.weid.service.impl.base.AmopBaseCallback;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.amop.AmopCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +61,6 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
-import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
@@ -83,15 +85,15 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     /**
      * persistence service.
      */
-    private static Persistence dataDriver;
+    //private static Persistence dataDriver;
 
-    private static PersistenceType persistenceType;
+    //private static PersistenceType persistenceType;
     /**
      * credentialpojo service.
      */
     private static CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
 
-    private static Persistence getDataDriver() {
+    /*private static Persistence getDataDriver() {
         String type = PropertyUtils.getProperty("persistence_type");
         if (type.equals("mysql")) {
             persistenceType = PersistenceType.Mysql;
@@ -102,27 +104,33 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             dataDriver = PersistenceFactory.build(persistenceType);
         }
         return dataDriver;
-    }
+    }*/
 
     @Override
-    public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
-        String toAmopId,
+    /*public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
+            String toAmopId,
+            Integer policyId,
+            String targetUserWeId
+    ) {*/
+    public void getPolicyAndChallenge(
+        //String toAmopId,
         Integer policyId,
-        String targetUserWeId
+        String targetUserWeId,
+        GetPolicyAndChallengeCallback cb
     ) {
-        try {
-            if (StringUtils.isBlank(fiscoConfig.getAmopId())) {
+        /*try {
+            *//*if (StringUtils.isBlank(fiscoConfig.getAmopId())) {
                 logger.error("the amopId is null, policyId = {}", policyId);
                 return new ResponseData<PolicyAndChallenge>(null, ErrorCode.ILLEGAL_INPUT);
-            }
+            }*//*
             GetPolicyAndChallengeArgs args = new GetPolicyAndChallengeArgs();
-            args.setFromAmopId(fiscoConfig.getAmopId());
-            args.setToAmopId(toAmopId);
+            //args.setFromAmopId(fiscoConfig.getAmopId());
+            //args.setToAmopId(toAmopId);
+            args.setTopic("GET_POLICY_AND_CHALLENGE");
             args.setPolicyId(String.valueOf(policyId));
             args.setMessageId(super.getSeq());
             args.setTargetUserWeId(targetUserWeId);
-            ResponseData<GetPolicyAndChallengeResponse> retResponse =
-                this.getPolicyAndChallenge(toAmopId, args);
+            this.getPolicyAndChallenge(args, cb);
             if (retResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("AMOP response fail, policyId={}, errorCode={}, errorMessage={}",
                     policyId,
@@ -141,80 +149,109 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         } catch (Exception e) {
             logger.error("getPresentationPolicy failed due to system error. ", e);
             return new ResponseData<PolicyAndChallenge>(null, ErrorCode.UNKNOW_ERROR);
-        }
+        }*/
+        GetPolicyAndChallengeArgs args = new GetPolicyAndChallengeArgs();
+        //args.setFromAmopId(fiscoConfig.getAmopId());
+        //args.setToAmopId(toAmopId);
+        args.setTopic("GET_POLICY_AND_CHALLENGE");
+        args.setPolicyId(String.valueOf(policyId));
+        args.setMessageId(super.getSeq());
+        args.setTargetUserWeId(targetUserWeId);
+        this.getPolicyAndChallenge(args, cb);
     }
 
-    private ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(
-        String toAmopId,
-        GetPolicyAndChallengeArgs args) {
-        return this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+    /*private ResponseData<GetPolicyAndChallengeResponse> getPolicyAndChallenge(
+        //String toAmopId,
+        GetPolicyAndChallengeArgs args) {*/
+    private void getPolicyAndChallenge(
+            //String toAmopId,
+            GetPolicyAndChallengeArgs args,
+            GetPolicyAndChallengeCallback cb) {
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            "GET_POLICY_AND_CHALLENGE",
             args,
-            GetPolicyAndChallengeArgs.class,
-            GetPolicyAndChallengeResponse.class,
+            //GetPolicyAndChallengeArgs.class,
+            //GetPolicyAndChallengeResponse.class,
             AmopMsgType.GET_POLICY_AND_CHALLENGE,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
     }
 
     /**
      * 发送普通消息的AMOP请求接口.
      */
-    public ResponseData<AmopResponse> request(String toAmopId, AmopCommonArgs args) {
-        return this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+    //public ResponseData<AmopResponse> request(String topic, AmopCommonArgs args) {
+     public void request(String topic, AmopCommonArgs args, AmopBaseCallback cb) {
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            topic,
             args,
-            AmopCommonArgs.class,
-            AmopResponse.class,
+            //AmopCommonArgs.class,
+            //AmopResponse.class,
             AmopMsgType.TYPE_TRANSPORTATION,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
     }
 
     /**
      * 通过AMOP获取秘钥请求接口.
      */
-    public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toAmopId,
-        GetEncryptKeyArgs args) {
-        return this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+    /*public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toAmopId,
+        GetEncryptKeyArgs args) {*/
+    public void getEncryptKey(
+        GetEncryptKeyArgs args,
+        GetEncryptKeyCallback cb) {
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            "GET_ENCRYPT_KEY",
             args,
-            GetEncryptKeyArgs.class,
-            GetEncryptKeyResponse.class,
+            //GetEncryptKeyArgs.class,
+            //GetEncryptKeyResponse.class,
             AmopMsgType.GET_ENCRYPT_KEY,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
     }
 
     /**
      * 注册回调函数接口.
      */
-    public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
+    /*public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
         super.getPushCallback().registAmopCallback(directRouteMsgType, directRouteCallback);
+    }*/
+    public void registerCallback(String topicName, AmopCallback directRouteCallback) {
+        super.getSDK().getAmop().subscribePrivateTopics(topicName, fiscoConfig.getPrivateKey(), directRouteCallback);
     }
 
     /**
      * request PolicyAndPreCredential.
      *
-     * @param toAmopId toAmopId
      * @param args args
      * @return PolicyAndPreCredential
      */
-    public ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
+    /*public ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
         String toAmopId,
-        GetPolicyAndPreCredentialArgs args) {
-
-        return this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+        GetPolicyAndPreCredentialArgs args) {*/
+    public void requestPolicyAndPreCredential(
+            //String toAmopId,
+            GetPolicyAndPreCredentialArgs args,
+            GetPolicyAndChallengeCallback cb) {
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            "GET_POLICY_AND_PRE_CREDENTIAL",
             args,
-            GetPolicyAndPreCredentialArgs.class,
-            PolicyAndPreCredentialResponse.class,
+            //GetPolicyAndPreCredentialArgs.class,
+            //PolicyAndPreCredentialResponse.class,
             AmopMsgType.GET_POLICY_AND_PRE_CREDENTIAL,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
     }
 
@@ -223,17 +260,22 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      * com.webank.weid.protocol.amop.RequestIssueCredentialArgs)
      */
     @Override
-    public ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
+    /*public ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
         String toAmopId,
-        RequestIssueCredentialArgs args) {
-
+        RequestIssueCredentialArgs args) {*/
+    public void requestIssueCredential(
+        //String toAmopId,
+        RequestIssueCredentialArgs args,
+        RequestIssueCredentialCallback cb
+        ) {
         int checkErrorCode = checkIssueCredentialArgs(args).getCode();
         if (checkErrorCode != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[requestIssueCredential] prepareZkpCredential failed. error code :{}",
                 checkErrorCode);
-            return new ResponseData<RequestIssueCredentialResponse>(null,
-                ErrorCode.getTypeByErrorCode(checkErrorCode));
+            /*return new ResponseData<RequestIssueCredentialResponse>(null,
+                ErrorCode.getTypeByErrorCode(checkErrorCode));*/
+            return;
         }
 
         //1. user genenerate credential based on CPT111
@@ -250,8 +292,9 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             logger.error(
                 "[requestIssueCredential] prepareZkpCredential failed. error code :{}",
                 errCode);
-            return new ResponseData<RequestIssueCredentialResponse>(null,
-                ErrorCode.getTypeByErrorCode(errCode));
+            /*return new ResponseData<RequestIssueCredentialResponse>(null,
+                ErrorCode.getTypeByErrorCode(errCode));*/
+            return;
         }
 
         //2. prepare presentation and send amop request to verify presentation and issue credential
@@ -262,13 +305,14 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             logger.error(
                 "[requestIssueCredential] create presentation failed. error code :{}",
                 errorCode);
-            return new ResponseData<RequestIssueCredentialResponse>(null,
-                ErrorCode.getTypeByErrorCode(errorCode));
+            /*return new ResponseData<RequestIssueCredentialResponse>(null,
+                ErrorCode.getTypeByErrorCode(errorCode));*/
+            return;
         }
 
         //3. send presentataion to issuer and request issue credential.
         PresentationE presentation = presentationResp.getResult();
-        ResponseData<RequestIssueCredentialResponse> resp =
+        /*ResponseData<RequestIssueCredentialResponse> resp =
             requestIssueCredentialInner(
                 toAmopId,
                 args,
@@ -281,7 +325,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         //4. get credential response and blind signature.
         RequestIssueCredentialResponse response = resp.getResult();
         blindCredentialSignature(response, args.getAuth().getWeId());
-        return resp;
+        return resp;*/
+        requestIssueCredentialInner(
+                //toAmopId,
+                args,
+                userCredential,
+                presentation,
+                cb);
     }
 
     private ErrorCode checkIssueCredentialArgs(RequestIssueCredentialArgs args) {
@@ -309,11 +359,17 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         return ErrorCode.SUCCESS;
     }
 
-    private ResponseData<RequestIssueCredentialResponse> requestIssueCredentialInner(
+    /*private ResponseData<RequestIssueCredentialResponse> requestIssueCredentialInner(
         String toAmopId,
         RequestIssueCredentialArgs args,
         CredentialPojo userCredential,
-        PresentationE presentation) {
+        PresentationE presentation) {*/
+    private void requestIssueCredentialInner(
+            //String toAmopId,
+            RequestIssueCredentialArgs args,
+            CredentialPojo userCredential,
+            PresentationE presentation,
+            RequestIssueCredentialCallback cb) {
 
         //prepare request args
         String claimJson = args.getClaim();
@@ -328,16 +384,17 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         issueCredentialArgs.setPresentation(presentation);
 
         // AMOP request (issuer to issue credential)
-        ResponseData<RequestIssueCredentialResponse> resp = this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            "REQUEST_SIGN_CREDENTIAL",
             issueCredentialArgs,
-            IssueCredentialArgs.class,
-            RequestIssueCredentialResponse.class,
+            //IssueCredentialArgs.class,
+            //RequestIssueCredentialResponse.class,
             AmopMsgType.REQUEST_SIGN_CREDENTIAL,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
-        return resp;
     }
 
     private ResponseData<PresentationE> preparePresentation(
@@ -363,7 +420,7 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 
     /**
      * blind credential signature.
-     */
+     *//*
     private void blindCredentialSignature(RequestIssueCredentialResponse response, String userId) {
 
         CredentialPojo credentialPojo = response.getCredentialPojo();
@@ -415,28 +472,31 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         if (dbResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             throw new DatabaseException("database error!");
         }
-    }
+    }*/
 
     /* (non-Javadoc)
      * @see com.webank.weid.rpc.AmopService#getWeIdAuth(java.lang.String, java.lang.String,
      * com.webank.weid.protocol.base.Challenge)
      */
     @Override
-    public ResponseData<GetWeIdAuthResponse> getWeIdAuth(
+    /*public ResponseData<GetWeIdAuthResponse> getWeIdAuth(
         String toAmopId,
-        GetWeIdAuthArgs args) {
-
-        ResponseData<GetWeIdAuthResponse> resp = this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+        GetWeIdAuthArgs args) {*/
+    public void getWeIdAuth(
+            //String toAmopId,
+            GetWeIdAuthArgs args,
+            GetWeIdAuthCallback cb) {
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            "GET_WEID_AUTH",
             args,
-            GetWeIdAuthArgs.class,
-            GetWeIdAuthResponse.class,
+            //GetWeIdAuthArgs.class,
+            //GetWeIdAuthResponse.class,
             AmopMsgType.GET_WEID_AUTH,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
-
-        return resp;
     }
 
     /* (non-Javadoc)
@@ -444,34 +504,39 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      * com.webank.weid.protocol.amop.RequestVerifyChallengeArgs)
      */
     @Override
-    public ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(String toAmopId,
-        RequestVerifyChallengeArgs args) {
-
-        ResponseData<RequestVerifyChallengeResponse> resp = this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+    /*public ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(String toAmopId,
+        RequestVerifyChallengeArgs args) {*/
+    public void requestVerifyChallenge(
+        RequestVerifyChallengeArgs args,
+        RequestVerifyChallengeCallback cb) {
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            "REQUEST_VERIFY_CHALLENGE",
             args,
-            RequestVerifyChallengeArgs.class,
-            RequestVerifyChallengeResponse.class,
-            AmopMsgType.GET_WEID_AUTH,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            //RequestVerifyChallengeArgs.class,
+            //RequestVerifyChallengeResponse.class,
+            AmopMsgType.REQUEST_VERIFY_CHALLENGE,
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
-
-        return resp;
     }
     
     /**
      * 发送通用消息的AMOP请求接口.
      */
-    public ResponseData<AmopResponse> send(String toAmopId, AmopCommonArgs args) {
-        return this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+    //public ResponseData<AmopResponse> send(String toAmopId, AmopCommonArgs args) {
+     public void send(AmopCommonArgs args, AmopBaseCallback cb) {
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            "COMMON_REQUEST",
             args,
-            AmopCommonArgs.class,
-            AmopResponse.class,
+            //AmopCommonArgs.class,
+            //AmopResponse.class,
             AmopMsgType.COMMON_REQUEST,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
     }
 }
