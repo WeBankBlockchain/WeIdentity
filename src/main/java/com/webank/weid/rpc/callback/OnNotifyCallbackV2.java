@@ -22,9 +22,6 @@ package com.webank.weid.rpc.callback;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.fisco.bcos.channel.client.ChannelPushCallback;
-import org.fisco.bcos.channel.dto.ChannelPush;
-import org.fisco.bcos.channel.dto.ChannelResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +32,7 @@ import com.webank.weid.util.DataToolUtils;
 /**
  * Created by junqizhang on 08/07/2017.
  */
-public class OnNotifyCallbackV2 extends ChannelPushCallback implements RegistCallBack {
+/*public class OnNotifyCallbackV2 extends ChannelPushCallback implements RegistCallBack {
 
     private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallbackV2.class);
 
@@ -78,12 +75,12 @@ public class OnNotifyCallbackV2 extends ChannelPushCallback implements RegistCal
             logger.error("callOnPush error, please check the log.", e);
         }
         
-        /*
+        *//*
          * 接收到以后需要给发送端回包
-         */
+         *//*
         ChannelResponse response = new ChannelResponse();
         response.setContent(result);
         response.setErrorCode(0);
         push.sendResponse(response);
     }
-}
+}*/

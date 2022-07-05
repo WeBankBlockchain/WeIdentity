@@ -1,6 +1,8 @@
 package com.webank.weid.service.impl.callback;
 
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.*;
 /*
  *       Copyright© (2018-2019) WeBank Co., Ltd.
  *
@@ -20,12 +22,11 @@ import java.util.ArrayList;
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.webank.weid.util.JsonUtil;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.amop.AmopCallback;
+import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,6 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.suite.api.persistence.PersistenceFactory;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
@@ -77,11 +77,13 @@ public class KeyManagerCallback extends AmopCallback {
     }
     
     @Override
-    public GetEncryptKeyResponse onPush(GetEncryptKeyArgs arg) {
-        logger.info("[KeyManagerCallback.onPush] begin query key param:{}", arg);
-        GetEncryptKeyResponse encryptResponse = new GetEncryptKeyResponse(); 
+    public byte[] receiveAmopMsg(AmopMsgIn msg) {
+        logger.info("[KeyManagerCallback.receiveAmopMsg] begin query key param:{}", msg);
+        GetEncryptKeyResponse encryptResponse = new GetEncryptKeyResponse();
+        byte[] content = msg.getContent();
+        GetEncryptKeyArgs getEncryptKeyArgs = (GetEncryptKeyArgs) DataToolUtils.deserialize(content.toString(), GetEncryptKeyArgs.class);
         ResponseData<String>  keyResponse = this.getDataDriver().get(
-            DataDriverConstant.DOMAIN_ENCRYPTKEY, arg.getKeyId());
+            DataDriverConstant.DOMAIN_ENCRYPTKEY, getEncryptKeyArgs.getKeyId());
         if (keyResponse.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
             && StringUtils.isBlank(keyResponse.getResult())) {
             logger.info("[KeyManagerCallback.onPush] the encrypt key is not exists.");
@@ -93,14 +95,14 @@ public class KeyManagerCallback extends AmopCallback {
             if (keyResponse.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 encryptResponse.setErrorCode(keyResponse.getErrorCode().intValue());
                 encryptResponse.setErrorMessage(keyResponse.getErrorMessage());
-                return encryptResponse;
+                return DataToolUtils.serialize(encryptResponse).getBytes(StandardCharsets.UTF_8);
             }
             try {
                 Map<String, Object> keyMap = DataToolUtils.deserialize(
                     keyResponse.getResult(), 
                     new HashMap<String, Object>().getClass()
                 );
-                if (!checkAuthority(arg, keyMap)) { // 检查是否有权限
+                if (!checkAuthority(getEncryptKeyArgs, keyMap)) { // 检查是否有权限
                     encryptResponse.setErrorCode(ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCode());
                     encryptResponse.setErrorMessage(
                         ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCodeDesc());
@@ -115,7 +117,13 @@ public class KeyManagerCallback extends AmopCallback {
                 encryptResponse.setErrorMessage(ErrorCode.ENCRYPT_KEY_INVALID.getCodeDesc());
             }
         }
-        return encryptResponse;
+        return DataToolUtils.serialize(encryptResponse).getBytes(StandardCharsets.UTF_8);
+    }
+
+    public static byte[] subbytes(byte[] src, int begin, int count) {
+        byte[] bs = new byte[count];
+        System.arraycopy(src, begin, bs, 0, count);
+        return bs;
     }
     
     /**
