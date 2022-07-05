@@ -20,13 +20,15 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -293,8 +295,8 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
     }
 
-
-    private RsvSignature sign(
+    //原来是RsvSignature，后面换支持国密一起改上面用到这个函数的地方
+    private SignatureResult sign(
         String cptPublisher,
         String jsonSchema,
         WeIdPrivateKey cptPublisherPrivateKey) {
@@ -303,9 +305,15 @@ public class CptServiceImpl extends AbstractService implements CptService {
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
-        SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
+        Client client = (Client) this.weServer.getClient();
+
+        return client.getCryptoSuite().sign(sb.toString().getBytes(StandardCharsets.UTF_8),
+                client.getCryptoSuite().createKeyPair(cptPublisherPrivateKey.getPrivateKey()));
+
+        /*SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
             sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-        return DataToolUtils.convertSignatureDataToRsv(signatureData);
+        return DataToolUtils.convertSignatureDataToRsv(signatureData);*/
+
     }
 
     private ErrorCode validateCptArgs(

@@ -23,6 +23,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 
+import org.fisco.bcos.sdk.abi.EventEncoder;
+import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +35,12 @@ import com.webank.weid.service.BaseService;
 public abstract class BaseEngine extends BaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseEngine.class);
+
+    protected EventEncoder eventEncoder;
     
     public BaseEngine() {
         super();
+        eventEncoder = new EventEncoder(getClient().getCryptoSuite());
     }
     
     public BaseEngine(Integer groupId) {
@@ -51,12 +56,12 @@ public abstract class BaseEngine extends BaseService {
         Method method = cls.getMethod(
             "load",
             String.class,
-            getWeb3jClass(),
+            getClientClass(),
             credentials.getClass(),
             BigInteger.class,
             BigInteger.class
         );
-        Object obj = weServer.getWeb3j();
+        Object obj = weServer.getClient();
         contract = method.invoke(
             null,
             contractAddress,
