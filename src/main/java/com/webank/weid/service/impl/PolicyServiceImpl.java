@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -30,7 +30,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

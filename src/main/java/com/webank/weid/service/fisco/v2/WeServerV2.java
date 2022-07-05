@@ -21,23 +21,29 @@ package com.webank.weid.service.fisco.v2;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 
+import com.webank.weid.constant.AmopMsgType;
+import com.webank.weid.service.impl.callback.CommonCallback;
+import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import org.apache.commons.collections4.CollectionUtils;
 
-import org.fisco.bcos.channel.client.ChannelPushCallback;
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.dto.ChannelRequest;
-import org.fisco.bcos.channel.dto.ChannelResponse;
-import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BlockNumber;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.amop.Amop;
+import org.fisco.bcos.sdk.amop.AmopCallback;
+import org.fisco.bcos.sdk.amop.AmopMsgOut;
+import org.fisco.bcos.sdk.amop.AmopResponseCallback;
+import org.fisco.bcos.sdk.amop.topic.TopicType;
+import org.fisco.bcos.sdk.channel.model.ChannelRequest;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BlockNumber;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,111 +60,103 @@ import com.webank.weid.service.fisco.WeServerUtils;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
 
-public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
+public final class WeServerV2 extends WeServer<Client> {
 
     private static final Logger logger = LoggerFactory.getLogger(WeServerV2.class);
 
-    private Web3j web3j;
-    private Service service;
-    private Credentials credentials;
+    private Client client;
     private CnsService cnsService;
+    private CryptoKeyPair cryptoKeyPair;
+    private static final String configFile = "E:\\java learning projects\\bac-test\\src\\main\\resources\\config.toml";
+    private static final BcosSDK sdk = BcosSDK.build(configFile);
+    private static final String privateKey = "";
+
 
     public WeServerV2(FiscoConfig fiscoConfig) {
-        super(fiscoConfig, new OnNotifyCallbackV2());
+        super(fiscoConfig);
     }
 
     @Override
-    public Web3j getWeb3j() {
-        return web3j;
+    public Client getClient() {
+        return client;
     }
 
     @Override
-    public Class<?> getWeb3jClass() {
-        return Web3j.class;
+    public Class<?> getClientClass() {
+        return Client.class;
     }
 
     @Override
-    public Service getService() {
-        return service;
+    public CryptoKeyPair getCredentials() {
+        return cryptoKeyPair;
     }
 
     @Override
-    public Credentials getCredentials() {
-        return credentials;
-    }
-
-    @Override
-    public Credentials createCredentials(String privateKey) {
-        Credentials credentials;
+    public CryptoKeyPair createCredentials(String privateKey) {
         try {
-            ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-            credentials = GenCredential.create(keyPair);
-            return credentials;
+            return client.getCryptoSuite().getKeyPairFactory().createKeyPair(privateKey);
         } catch (Exception e) {
             throw new PrivateKeyIllegalException(e);
         }
     }
 
     @Override
-    protected void initWeb3j(Integer groupId) {
-        logger.info("[WeServiceImplV2] begin to init web3j instance..");
-        service = buildFiscoBcosService(fiscoConfig, groupId);
-        topicListener(groupId);
-        try {
-            service.run();
-        } catch (Exception e) {
-            logger.error("[WeServiceImplV2] Service init failed. ", e);
-            throw new InitWeb3jException(e);
+    protected void initClient(Integer groupId) {
+        logger.info("[WeServiceImplV2] begin to init Fisco client..");
+        client = sdk.getClient(Integer.valueOf(groupId));
+        if (client == null) {
+            logger.error("[WeServiceImplV2] Fisco client failed. ");
+            throw new InitWeb3jException("Fisco client failed.");
         }
-        
-        ChannelEthereumService channelEthereumService = WeServerUtils
-            .buildChannelEthereumService(service);
-        web3j = Web3j.build(channelEthereumService, service.getGroupId());
-        if (web3j == null) {
-            logger.error("[WeServiceImplV2] web3j init failed. ");
-            throw new InitWeb3jException("web3j init failed.");
-        }
-        credentials = GenCredential.create();
-        if (credentials == null) {
-            logger.error("[WeServiceImplV2] the credentials for web3j init failed. ");
-            throw new InitWeb3jException("the credentials for web3j init failed.");
-        }
-        cnsService = new CnsService(web3j, credentials);
-        logger.info("[WeServiceImplV2] init web3j instance success..");
-    }
+        cryptoKeyPair = client.getCryptoSuite().createKeyPair();
 
-    private void topicListener(Integer groupId) {
-        // 如果为主群组
-        if (fiscoConfig.getGroupId().equals(String.valueOf(groupId))) {
-            service.setPushCallback((ChannelPushCallback) pushCallBack);
-            // Set topics for AMOP
-            service.setTopics(super.getTopic());
-        }
-    }
-
-    private Service buildFiscoBcosService(FiscoConfig fiscoConfig, Integer groupId) {
-
-        Service service = new Service();
-        service.setOrgID(fiscoConfig.getCurrentOrgId());
-        service.setConnectSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkTimeout()));
-        // group info
-        service.setGroupId(groupId);
-        
-        // 根据群组获取节点列表
-        List<String> nodeList = WeServerUtils.getGroupMapping().get(groupId.toString());
-        if (CollectionUtils.isEmpty(nodeList)) {
-            logger.error("[WeServiceImplV2] the groupId does not exist, please check.");
-            throw new InitWeb3jException("the groupId does not exist, groupId = " + groupId + ".");
-        }
-        GroupChannelConnectionsConfig connectionsConfig = WeServerUtils
-            .buildGroupChannelConnectionsConfig(groupId, fiscoConfig, nodeList);
-        service.setAllChannelConnections(connectionsConfig);
-        // thread pool params
-        service.setThreadPool(super.initializePool(groupId));
-        return service;
+        cnsService = new CnsService(client, cryptoKeyPair);
+        logger.info("[WeServiceImplV2] init Fisco client success..");
     }
 
     @Override
+    public Set<String> getTopic() {
+        Amop amop = sdk.getAmop();
+        return amop.getSubTopics();
+    }
+
+    /**
+     * 获取bcos sdk对象，用于给使用者注册callback处理器.
+     *
+     * @return 返回SDK
+     */
+    @Override
+    public BcosSDK getSDK() {
+        return sdk;
+    }
+
+    @Override
+    protected void setDefaultCallback() {
+        Amop amop = sdk.getAmop();
+        amop.subscribePrivateTopics(
+                "GET_ENCRYPT_KEY",
+                privateKey,
+                new  KeyManagerCallback()
+        );
+        amop.subscribePrivateTopics(
+                "COMMON_REQUEST",
+                privateKey,
+                new CommonCallback()
+        );
+    }
+
+    @Override
+    public void sendChannelMessage(AmopCommonArgs amopCommonArgs, int timeOut, AmopResponseCallback cb) {
+        Amop amop = sdk.getAmop();
+        AmopMsgOut out = new AmopMsgOut();
+        out.setType(TopicType.PRIVATE_TOPIC);
+        out.setContent(amopCommonArgs.getMessage().getBytes(StandardCharsets.UTF_8));
+        out.setTimeout(super.getTimeOut(timeOut));
+        out.setTopic(amopCommonArgs.getTopic());
+        amop.sendAmopMsg(out, cb);
+    }
+
+    /*@Override
     public AmopResponse sendChannelMessage(AmopCommonArgs amopCommonArgs, int timeOut) {
 
         ChannelRequest request = new ChannelRequest();
@@ -175,24 +173,25 @@ public final class WeServerV2 extends WeServer<Web3j, Credentials, Service> {
         amopResponse.setResult(response.getContent());
         amopResponse.setErrorMessage(response.getErrorMessage());
         return amopResponse;
-    }
+    }*/
+
 
     @Override
     public int getBlockNumber() throws IOException {
-        BlockNumber response = this.getWeb3j().getBlockNumber().send();
+        BlockNumber response = this.getClient().getBlockNumber();
         return response.getBlockNumber().intValue();
     }
 
     @Override
     public String getVersion() throws IOException {
-        return this.getWeb3j().getNodeVersion().send().getNodeVersion().getVersion();
+        return this.getClient().getNodeVersion().getNodeVersion().getVersion();
     }
 
     @Override
     protected CnsInfo queryCnsInfo(CnsType cnsType) throws WeIdBaseException {
         try {
             logger.info("[queryBucketFromCns] query address by type = {}.", cnsType.getName());
-            List<CnsInfo> cnsInfoList = cnsService.queryCnsByName(cnsType.getName());
+            List<CnsInfo> cnsInfoList = cnsService.selectByName(cnsType.getName());
             if (cnsInfoList != null) {
                 // 获取当前cnsType的大版本前缀
                 String cnsTypeVersion = cnsType.getVersion();

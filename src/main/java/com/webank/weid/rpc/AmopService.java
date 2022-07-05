@@ -32,61 +32,95 @@ import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
 import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.callback.AmopCallback;
+import com.webank.weid.rpc.callback.*;
+import com.webank.weid.service.impl.base.AmopBaseCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
+import org.fisco.bcos.sdk.amop.AmopCallback;
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
 public interface AmopService {
 
-    void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback);
+    //void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback);
+    void registerCallback(String topicName, AmopCallback directRouteCallback);
 
-    ResponseData<AmopResponse> request(String toAmopId, AmopCommonArgs args);
+    //ResponseData<AmopResponse> request(String toAmopId, AmopCommonArgs args);
+    void request(String topic, AmopCommonArgs args, AmopBaseCallback cb);
 
-    ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
+    /*ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
         String amopId,
         Integer policyId,
         String targetUserWeId
+    );*/
+    void getPolicyAndChallenge(
+        //String amopId,
+        Integer policyId,
+        String targetUserWeId,
+        GetPolicyAndChallengeCallback cb
     );
 
-    ResponseData<GetEncryptKeyResponse> getEncryptKey(
+    /*ResponseData<GetEncryptKeyResponse> getEncryptKey(
         String toAmopId,
         GetEncryptKeyArgs args
+    );*/
+    void getEncryptKey(
+        //String toAmopId,
+        GetEncryptKeyArgs args,
+        GetEncryptKeyCallback cb
     );
 
-    ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
+    /*ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
         String toAmopId,
         GetPolicyAndPreCredentialArgs args
+    );*/
+    void requestPolicyAndPreCredential(
+        //String toAmopId,
+        GetPolicyAndPreCredentialArgs args,
+        GetPolicyAndChallengeCallback cb
     );
 
-    ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
+    /*ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
         String toAmopId,
         RequestIssueCredentialArgs args
+    );*/
+    void requestIssueCredential(
+        //String toAmopId,
+        RequestIssueCredentialArgs args,
+        RequestIssueCredentialCallback cb
     );
     
-    ResponseData<AmopResponse> send(String toAmopId, AmopCommonArgs args);
+    //ResponseData<AmopResponse> send(String toAmopId, AmopCommonArgs args);
+    void send(AmopCommonArgs args, AmopBaseCallback cb);
 
     /**
      * get weIdAuth object.
-     * @param toAmopId target organization id
      * @param args random number
      * @return return the GetWeIdAuthResponse
      */
-    ResponseData<GetWeIdAuthResponse> getWeIdAuth(
+    /*ResponseData<GetWeIdAuthResponse> getWeIdAuth(
         String toAmopId,
         GetWeIdAuthArgs args
+    );*/
+    void getWeIdAuth(
+        //String toAmopId,
+        GetWeIdAuthArgs args,
+        GetWeIdAuthCallback cb
     );
 
     /**
      * verify challenge signature.
-     * @param toAmopId target organization id
      * @param args verify args
      * @return return the RequestVerifyChallengeResponse
      */
-    ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(
+    /*ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(
         String toAmopId,
         RequestVerifyChallengeArgs args
+    );*/
+    void requestVerifyChallenge(
+            //String toAmopId,
+            RequestVerifyChallengeArgs args,
+            RequestVerifyChallengeCallback cb
     );
 
 }
