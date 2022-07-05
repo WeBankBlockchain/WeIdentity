@@ -21,8 +21,13 @@ package com.webank.weid.service;
 
 import java.io.IOException;
 
+import com.webank.weid.rpc.callback.AmopNotifyMsgCallback;
+import com.webank.weid.service.impl.base.AmopBaseCallback;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
+
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +65,7 @@ public abstract class BaseService {
 
     protected static Integer masterGroupId;
 
-    protected WeServer<?, ?, ?> weServer;
+    protected WeServer<?> weServer;
 
     static {
         fiscoConfig = new FiscoConfig();
@@ -87,7 +92,7 @@ public abstract class BaseService {
         weServer = getWeServer(groupId);
     }
 
-    private static WeServer<?, ?, ?> getWeServer(Integer groupId) {
+    private static WeServer<?> getWeServer(Integer groupId) {
         return WeServer.getInstance(fiscoConfig, groupId);
     }
 
@@ -96,31 +101,31 @@ public abstract class BaseService {
     }
 
     /**
-     * Gets the web3j.
+     * Gets the Fisco client.
      *
-     * @return the web3j
+     * @return the Fisco client
      */
-    public static Object getWeb3j() {
-        return getWeb3j(masterGroupId);
+    public static Client getClient() {
+        return getClient(masterGroupId);
     }
 
     /**
-     * Gets the web3j .
+     * Gets the Fisco client.
      * 
      * @param groupId 群组ID
-     * @return the web3j
+     * @return the Fisco client
      */
-    public static Object getWeb3j(Integer groupId) {
-        return getWeServer(groupId).getWeb3j();
+    public static Client getClient(Integer groupId) {
+        return (Client) getWeServer(groupId).getClient();
     }
 
     /**
-     * Gets the web3j class.
+     * Gets the client class.
      *
-     * @return the web3j
+     * @return the client class
      */
-    protected Class<?> getWeb3jClass() {
-        return weServer.getWeb3jClass();
+    protected Class<?> getClientClass() {
+        return weServer.getClientClass();
     }
 
     /**
@@ -203,44 +208,54 @@ public abstract class BaseService {
      *
      * @return the RegistCallBack
      */
-    protected RegistCallBack getPushCallback() {
+    /*protected RegistCallBack getPushCallback() {
         return weServer.getPushCallback();
+    }*/
+
+    protected BcosSDK getSDK() {
+        return weServer.getSDK();
     }
 
     /**
      * the checkDirectRouteMsgHealth。.
      *
-     * @param toAmopId target amopId.
      * @param arg the message
      * @return return the health result
      */
-    public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(
-        String toAmopId,
-        CheckAmopMsgHealthArgs arg) {
+    //public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(
+     public void checkDirectRouteMsgHealth(
+        //String toAmopId,
+        CheckAmopMsgHealthArgs arg,
+        AmopNotifyMsgCallback cb) {
 
-        return this.getImpl(
-            fiscoConfig.getAmopId(),
-            toAmopId,
+        this.getImpl(
+            //fiscoConfig.getAmopId(),
+            //toAmopId,
+            "TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH",
             arg,
-            CheckAmopMsgHealthArgs.class,
-            AmopNotifyMsgResult.class,
+            //CheckAmopMsgHealthArgs.class,
+            //AmopNotifyMsgResult.class,
             AmopMsgType.TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH,
-            WeServer.AMOP_REQUEST_TIMEOUT
+            WeServer.AMOP_REQUEST_TIMEOUT,
+            cb
         );
     }
 
-    protected <T, F extends AmopBaseMsgArgs> ResponseData<T> getImpl(
-        String fromAmopId,
-        String toAmopId,
+    //protected <T, F extends AmopBaseMsgArgs> ResponseData<T> getImpl(
+    protected <F extends AmopBaseMsgArgs> void getImpl(
+        //String fromAmopId,
+        //String toAmopId,
+        String topic,
         F arg,
-        Class<F> argsClass,
-        Class<T> resultClass,
+        //Class<F> argsClass,
+        //Class<T> resultClass,
         AmopMsgType msgType,
-        int timeOut
+        int timeOut,
+        AmopBaseCallback cb
     ) {
-        arg.setFromAmopId(fromAmopId);
-        arg.setToAmopId(toAmopId);
-
+        //arg.setFromAmopId(fromAmopId);
+        //arg.setToAmopId(toAmopId);
+        arg.setTopic(topic);
         String msgBody = DataToolUtils.serialize(arg);
         AmopRequestBody amopRequestBody = new AmopRequestBody();
         amopRequestBody.setMsgType(msgType);
@@ -248,13 +263,14 @@ public abstract class BaseService {
         String requestBodyStr = DataToolUtils.serialize(amopRequestBody);
 
         AmopCommonArgs amopCommonArgs = new AmopCommonArgs();
-        amopCommonArgs.setToAmopId(toAmopId);
+        //amopCommonArgs.setToAmopId(toAmopId);
+        amopCommonArgs.setTopic("COMMON_REQUEST");
         amopCommonArgs.setMessage(requestBodyStr);
         amopCommonArgs.setMessageId(getSeq());
         logger.info("direct route request, seq : {}, body ：{}", amopCommonArgs.getMessageId(),
             requestBodyStr);
-        AmopResponse response = weServer.sendChannelMessage(amopCommonArgs, timeOut);
-        logger.info("direct route response, seq : {}, errorCode : {}, errorMsg : {}, body : {}",
+        weServer.sendChannelMessage(amopCommonArgs, timeOut, cb);
+        /*logger.info("direct route response, seq : {}, errorCode : {}, errorMsg : {}, body : {}",
             response.getMessageId(),
             response.getErrorCode(),
             response.getErrorMessage(),
@@ -274,8 +290,9 @@ public abstract class BaseService {
             responseStruct.setErrorCode(ErrorCode.UNKNOW_ERROR);
         }
         responseStruct.setResult(msgBodyObj);
-        return responseStruct;
+        return responseStruct;*/
     }
+
 
     /**
      * 重新拉取合约地址 并且重新加载相关合约.

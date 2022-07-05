@@ -25,10 +25,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
-import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
+import org.fisco.bcos.sdk.client.protocol.response.SendTransaction;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,23 +104,22 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     public static TransactionReceipt sendTransaction(String transactionHex)
         throws Exception {
 
-        Web3j web3j = (Web3j) getWeb3j();
-        SendTransaction ethSendTransaction = web3j.sendRawTransaction(transactionHex)
-            .sendAsync().get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+        Client client = (Client) getClient();
+        SendTransaction ethSendTransaction = client.sendRawTransaction(transactionHex);
         if (ethSendTransaction.hasError()) {
             logger.error("Error processing transaction request: "
                 + ethSendTransaction.getError().getMessage());
             return null;
         }
         Optional<TransactionReceipt> receiptOptional =
-            getTransactionReceiptRequest(web3j, ethSendTransaction.getTransactionHash());
+            getTransactionReceiptRequest(client, ethSendTransaction.getTransactionHash());
         int sumTime = 0;
         try {
             for (int i = 0; i < WeIdConstant.POLL_TRANSACTION_ATTEMPTS; i++) {
                 if (!receiptOptional.isPresent()) {
                     Thread.sleep((long) WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION);
                     sumTime += WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION;
-                    receiptOptional = getTransactionReceiptRequest(web3j,
+                    receiptOptional = getTransactionReceiptRequest(client,
                         ethSendTransaction.getTransactionHash());
                 } else {
                     return receiptOptional.get();
@@ -137,15 +136,15 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     /**
      * Get a TransactionReceipt request from a transaction Hash.
      *
-     * @param web3j the web3j instance to blockchain
+     * @param client the client instance to blockchain
      * @param transactionHash the transactionHash value
      * @return the transactionReceipt wrapper
      * @throws Exception the exception
      */
-    private static Optional<TransactionReceipt> getTransactionReceiptRequest(Web3j web3j,
+    private static Optional<TransactionReceipt> getTransactionReceiptRequest(Client client,
         String transactionHash) throws Exception {
         BcosTransactionReceipt transactionReceipt =
-            web3j.getTransactionReceipt(transactionHash).send();
+            client.getTransactionReceipt(transactionHash);
         if (transactionReceipt.hasError()) {
             logger.error("Error processing transaction request: "
                 + transactionReceipt.getError().getMessage());

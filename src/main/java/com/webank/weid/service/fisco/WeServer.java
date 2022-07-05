@@ -25,10 +25,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.amop.AmopResponseCallback;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
+
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
@@ -42,7 +46,7 @@ import com.webank.weid.service.impl.callback.CommonCallback;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.PropertyUtils;
 
-public abstract class WeServer<W, C, S> {
+public abstract class WeServer<C> {
 
     /*
      * Maximum Timeout period in milliseconds.
@@ -59,7 +63,7 @@ public abstract class WeServer<W, C, S> {
     /**
      * WeServer对象上下文.
      */
-    private static ConcurrentHashMap<Integer, WeServer<?, ?, ?>>  weServerContext = 
+    private static ConcurrentHashMap<Integer, WeServer<?>>  weServerContext =
         new ConcurrentHashMap<>();
 
     /**
@@ -74,20 +78,25 @@ public abstract class WeServer<W, C, S> {
     protected FiscoConfig fiscoConfig;
 
     /**
+     * 获取Client对象所属的类型,此处是为了给动态加载合约使用.
+     *
+     * @return Client的Class
+     */
+    public abstract Class<?> getClientClass();
+
+    /**
      * AMOP回调处理注册器.
      */
-    protected RegistCallBack pushCallBack;
+    //protected RegistCallBack pushCallBack;
 
     /**
      * 构造WeServer对象,此时仅为初始化做准备.
      *
      * @param fiscoConfig FISCO配置对象
-     * @param pushCallBack 默认的AMOP回调处理类对象
      */
-    protected WeServer(FiscoConfig fiscoConfig, RegistCallBack pushCallBack) {
+    protected WeServer(FiscoConfig fiscoConfig) {
         this.fiscoConfig = fiscoConfig;
-        this.pushCallBack = pushCallBack;
-        registDefaultCallback();
+        setDefaultCallback();
     }
 
     /**
@@ -95,33 +104,31 @@ public abstract class WeServer<W, C, S> {
      *
      * @param fiscoConfig FISCO配置对象
      * @param groupId 群组ID
-     * @param <W> Web3j对象
-     * @param <C> Credential对象
-     * @param <S> Service 对象
+     * @param <C> Client对象
      * @return 返回WeServer对象
      */
-    public static synchronized <W, C, S> WeServer<W, C, S> getInstance(
+    public static synchronized <C> WeServer<C> getInstance(
         FiscoConfig fiscoConfig, 
         Integer groupId
     ) {
-        WeServer<?, ?, ?> weServer = weServerContext.get(groupId);
+        WeServer<?> weServer = weServerContext.get(groupId);
         if (weServer == null) {
             synchronized (WeServer.class) {
                 weServer = weServerContext.get(groupId);
                 if (weServer == null) {
                     weServer = new WeServerV2(fiscoConfig);
-                    weServer.initWeb3j(groupId);
+                    weServer.initClient(groupId);
                     weServerContext.put(groupId, weServer);
                 }
             }
         }
-        return (WeServer<W, C, S>)weServer;
+        return (WeServer<C>)weServer;
     }
 
     /**
      * 注册默认的callback.
      */
-    private void registDefaultCallback() {
+    /*private void registDefaultCallback() {
         pushCallBack.registAmopCallback(
             AmopMsgType.GET_ENCRYPT_KEY.getValue(),
             new KeyManagerCallback()
@@ -130,34 +137,18 @@ public abstract class WeServer<W, C, S> {
             AmopMsgType.COMMON_REQUEST.getValue(),
             new CommonCallback()
         );
-    }
+    }*/
+
+    protected abstract void setDefaultCallback();
 
     /**
      * 获取PushCallback对象，用于给使用者注册callback处理器.
      *
      * @return 返回RegistCallBack
      */
-    public RegistCallBack getPushCallback() {
+    /*public RegistCallBack getPushCallback() {
         return pushCallBack;
-    }
-
-    /**
-     * 初始化Web3sdk线程池信息.
-     *
-     * @param groupId 群组编号
-     * @return 返回线程池对象
-     */
-    protected ThreadPoolTaskExecutor initializePool(Integer groupId) {
-        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setBeanName("web3sdk-group" + groupId);
-        pool.setCorePoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkCorePoolSize()));
-        pool.setMaxPoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkMaxPoolSize()));
-        pool.setQueueCapacity(Integer.valueOf(fiscoConfig.getWeb3sdkQueueSize()));
-        pool.setKeepAliveSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkKeepAliveSeconds()));
-        pool.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
-        pool.initialize();
-        return pool;
-    }
+    }*/
 
     /**
      * 获取超时时间，如果超时时间非法，则返回默认的超时时间.
@@ -173,64 +164,44 @@ public abstract class WeServer<W, C, S> {
             return timeOut;
         }
     }
-    
+
     /**
      * 获取AMOP监听的topic.
      *
      * @return 返回topic集合，目前sdk只支持单topic监听
      */
-    protected Set<String> getTopic() {
-        Set<String> topics = new HashSet<String>();
-        if (StringUtils.isNotBlank(FiscoConfig.topic)) {
-            topics.add(fiscoConfig.getAmopId() + "_" + FiscoConfig.topic);
-        } else {
-            topics.add(fiscoConfig.getAmopId());
-        }
-        return topics;
-    }
-    
-    /**
-     * 获取Web3j对象.
-     *
-     * @return 返回Web3j对象
-     */
-    public abstract W getWeb3j();
+    public abstract Set<String> getTopic();
+
+    public abstract BcosSDK getSDK();
 
     /**
-     * 获取Web3j对象所属的类型,此处是为了给动态加载合约使用.
-     * 
-     * @return Web3j的Class
-     */
-    public abstract Class<?> getWeb3jClass();
-
-    /**
-     * 获取Service对象.
+     * 根据传入的私钥(16进制数字私钥)，进行动态创建Credentials对象.
      *
-     * @return 返回Service对象
+     * @param privateKey 数字私钥
+     * @return 返回Credentials对象
      */
-    public abstract S getService();
+    public abstract CryptoKeyPair createCredentials(String privateKey);
 
     /**
      * 获取Credentials对象.
      *
      * @return 返回Credentials对象
      */
-    public abstract C getCredentials();
+    public abstract CryptoKeyPair getCredentials();
 
     /**
-     * 根据传入的私钥(10进制数字私钥)，进行动态创建Credentials对象.
+     * 获取Client对象.
      *
-     * @param privateKey 数字私钥
-     * @return 返回Credentials对象
+     * @return 返回Client对象
      */
-    public abstract C createCredentials(String privateKey);
+    public abstract C getClient();
 
     /**
-     * 初始化Web3j.
-     * 
+     * 初始化Fisco client.
+     *
      * @param groupId 群组Id
      */
-    protected abstract void initWeb3j(Integer groupId);
+    protected abstract void initClient(Integer groupId);
 
     /**
      * 发送AMOP消息.
@@ -239,7 +210,7 @@ public abstract class WeServer<W, C, S> {
      * @param timeOut AMOP请求超时时间
      * @return 返回AMOP响应体.
      */
-    public abstract AmopResponse sendChannelMessage(AmopCommonArgs amopCommonArgs, int timeOut);
+    public abstract void sendChannelMessage(AmopCommonArgs amopCommonArgs, int timeOut, AmopResponseCallback cb);
 
     /**
      * 获取当前块高.

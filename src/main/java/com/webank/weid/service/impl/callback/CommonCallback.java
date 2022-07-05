@@ -19,6 +19,10 @@
 
 package com.webank.weid.service.impl.callback;
 
+import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
+import org.fisco.bcos.sdk.amop.AmopCallback;
+import org.fisco.bcos.sdk.amop.topic.AmopMsgIn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +31,13 @@ import com.webank.weid.constant.ServiceType;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.inner.DownTransDataService;
 import com.webank.weid.suite.transmission.TransmissionService;
 import com.webank.weid.suite.transmission.TransmissionServiceCenter;
 import com.webank.weid.util.DataToolUtils;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * AMOP公共回调处理.
@@ -67,10 +72,12 @@ public class CommonCallback extends AmopCallback {
     }
 
     @Override
-    public AmopResponse onPush(AmopCommonArgs arg) {
-        logger.info("[CommonCallBack] request param: {}.", arg);
-        String serviceType = arg.getServiceType();
-        String messageId = arg.getMessageId();
+    public byte[] receiveAmopMsg(AmopMsgIn msg) {
+        logger.info("[CommonCallBack.receiveAmopMsg] request param: {}.", msg);
+        byte[] content = msg.getContent();
+        AmopCommonArgs amopCommonArgs = (AmopCommonArgs) DataToolUtils.deserialize(content.toString(), AmopCommonArgs.class);
+        String serviceType = amopCommonArgs.getServiceType();
+        String messageId = amopCommonArgs.getMessageId();
         try {
             TransmissionService<?> service = TransmissionServiceCenter.getService(serviceType);
             if (service == null) {
@@ -78,8 +85,11 @@ public class CommonCallback extends AmopCallback {
                     "[CommonCallBack] no found the service for {}, messageId:{}.", 
                     serviceType,
                     messageId
-                ); 
-                return super.onPush(arg);
+                );
+                AmopResponse amopResponse = new AmopResponse();
+                amopResponse.setErrorCode(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCode());
+                amopResponse.setErrorMessage(ErrorCode.AMOP_MSG_CALLBACK_SERVER_SIDE_NO_HANDLE.getCodeDesc());
+                return DataToolUtils.serialize(amopResponse).getBytes(StandardCharsets.UTF_8);
             }
             // 此处暂时不走认证模式
             /*
@@ -100,7 +110,7 @@ public class CommonCallback extends AmopCallback {
                     .decrypt(arg.getMessage(), weIdAuth.getSymmetricKey());
             */
             logger.info("[CommonCallBack] begin request the service, messageId : {}", messageId);
-            AmopResponse amopResponse = buildAmopResponse(service.service(arg.getMessage()), arg);
+            AmopResponse amopResponse = buildAmopResponse(service.service(amopCommonArgs.getMessage()), amopCommonArgs);
             logger.info("[CommonCallBack] begin encrypt the data, messageId : {}", messageId);
             /*
             // 数据暂时不走认证模式
@@ -112,13 +122,13 @@ public class CommonCallback extends AmopCallback {
             amopResponse.setResult(originalData);
             */
             logger.info("[CommonCallBack] onPush finish and the reponse : {}", amopResponse);
-            return amopResponse;
+            return DataToolUtils.serialize(amopResponse).getBytes(StandardCharsets.UTF_8);
         } catch (WeIdBaseException e) {
             logger.error("[CommonCallBack] callback fail, messageId:{}", messageId, e);
-            return new AmopResponse(e.getErrorCode());
+            return DataToolUtils.serialize(new AmopResponse(e.getErrorCode())).getBytes(StandardCharsets.UTF_8);
         } catch (Exception e) {
             logger.error("[CommonCallBack] has unknow error, messageId:{}.", messageId, e);
-            return new AmopResponse(ErrorCode.UNKNOW_ERROR);
+            return DataToolUtils.serialize(new AmopResponse(ErrorCode.UNKNOW_ERROR)).getBytes(StandardCharsets.UTF_8);
         }
     }
 
