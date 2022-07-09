@@ -48,7 +48,7 @@ public class AmopBaseMsgArgs implements IArgs {
     /**
      * 来源AmopId.
      */
-    //protected String fromAmopId;
+    protected String fromAmopId;
 
     /**
      * topic.
