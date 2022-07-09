@@ -44,6 +44,8 @@ import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.request.Transaction;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 
@@ -86,7 +88,9 @@ import com.webank.weid.util.WeIdUtils;
 public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV2.class);
-    //private static final String CREDENTIAL_TEMPLATE_EVENT;
+    private static final String CREDENTIAL_TEMPLATE_EVENT = new EventEncoder(
+            getWeServer().getClient().getCryptoSuite()
+    ).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
     private static CptController cptController;
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
@@ -539,7 +543,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 List<TransactionReceipt.Logs> logs = rec1.getResult().getLogs();
                 for (TransactionReceipt.Logs log : logs) {
 
-                    if (StringUtils.equals(log.getTopics().get(0), this.eventEncoder.encode(CptController.CREDENTIALTEMPLATE_EVENT))) {
+                    if (StringUtils.equals(log.getTopics().get(0), CREDENTIAL_TEMPLATE_EVENT)) {
                         List<CredentialTemplateEventResponse> event = cptController
                             .getCredentialTemplateEvents(receipt);
                         CredentialTemplateEventResponse eventResponse = event.get(0);

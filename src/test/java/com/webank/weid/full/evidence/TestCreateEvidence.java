@@ -650,14 +650,21 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertTrue(evidenceService.generateHash(selectiveCredentialPojo).getResult()
             .getHash().equalsIgnoreCase(selectiveCredentialPojo.getHash()));
         // Test file
-        File file = new ClassPathResource("test-template.pdf").getFile();
+        //File file = new ClassPathResource("test-template.pdf").getFile();
+        String path = TestCreateEvidence.class
+                .getClassLoader().getResource("test-template.pdf").getPath();
+        File file = new File(path);
         String fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
         // Support GBK and UTF-8 encoding here - they will yield different hash values, though
-        file = new ClassPathResource("org1.txt").getFile();
+        //file = new ClassPathResource("org1.txt").getFile();
+        path = TestCreateEvidence.class.getClassLoader().getResource("org1.txt").getPath();
+        file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
-        file = new ClassPathResource("test-hash-pic.png").getFile();
+        //file = new ClassPathResource("test-hash-pic.png").getFile();
+        path = TestCreateEvidence.class.getClassLoader().getResource("test-hash-pic.png").getPath();
+        file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
         // Non-existent file - uncreated with createNewFile()

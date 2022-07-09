@@ -24,11 +24,10 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.crypto.WalletUtils;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +100,9 @@ public final class WeIdUtils {
      */
     public static String convertPublicKeyToWeId(String publicKey) {
         try {
-            String address = Keys.getAddress(new BigInteger(publicKey));
+            //String address = Keys.getAddress(new BigInteger(publicKey));
+            String address = new ECDSAKeyPair().getAddress(
+                    Numeric.toHexStringNoPrefix(new BigInteger(publicKey).toByteArray()).substring(2));
             return buildWeIdByAddress(address);
         } catch (Exception e) {
             logger.error("convert publicKey to weId error.", e);
@@ -145,8 +146,12 @@ public final class WeIdUtils {
      */
     public static boolean isEcdsaKeypairMatch(String privateKey, String publicKey) {
         try {
-            ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-            return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);
+            /*ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+            return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);*/
+            CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(
+                    new BigInteger(privateKey));
+            byte[] bytePub = Numeric.hexStringToByteArray(keyPair.getHexPublicKey());
+            return StringUtils.equals(new BigInteger(1, bytePub).toString(), publicKey);
         } catch (Exception e) {
             return false;
         }
@@ -160,8 +165,12 @@ public final class WeIdUtils {
      * @return true if the private and publicKey key is match, false otherwise.
      */
     public static boolean isKeypairMatch(String privateKey, String publicKey) {
-        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);
+        /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);*/
+        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(
+                new BigInteger(privateKey));
+        byte[] bytePub = Numeric.hexStringToByteArray(keyPair.getHexPublicKey());
+        return StringUtils.equals(new BigInteger(1, bytePub).toString(), publicKey);
     }
 
     /**
@@ -176,7 +185,10 @@ public final class WeIdUtils {
             return false;
         }
         try {
-            return WalletUtils.isValidAddress(addr);
+            //return WalletUtils.isValidAddress(addr);
+            //TODO java-sdk去掉了WalletUtils.isValidAddress, 此处为先将原逻辑迁移出来
+            String addressNoPrefix = Numeric.cleanHexPrefix(addr);
+            return addressNoPrefix.length() == 40;
         } catch (Exception e) {
             return false;
         }
@@ -232,7 +244,9 @@ public final class WeIdUtils {
         try {
             BigInteger publicKey = DataToolUtils
                 .publicKeyFromPrivate(new BigInteger(privateKey.getPrivateKey()));
-            String address1 = "0x" + Keys.getAddress(publicKey);
+            //String address1 = "0x" + Keys.getAddress(publicKey);
+            String hexPub = Numeric.toHexStringNoPrefix(publicKey.toByteArray()).substring(2);
+            String address1 = new ECDSAKeyPair().getAddress(hexPub);
             String address2 = WeIdUtils.convertWeIdToAddress(weId);
             if (address1.equals(address2)) {
                 isMatch = true;

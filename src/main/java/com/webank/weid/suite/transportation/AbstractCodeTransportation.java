@@ -62,7 +62,7 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
     ) {
         GetTransDataArgs args = new GetTransDataArgs();
         args.setResourceId(codeData.getId());
-        args.setToAmopId(codeData.getAmopId());
+        args.setTopic(codeData.getAmopId());
         args.setFromAmopId(fiscoConfig.getAmopId());
         args.setWeId(weIdAuthentication.getWeId());
         args.setClassName(codeData.getClass().getName());

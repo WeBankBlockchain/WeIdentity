@@ -31,7 +31,6 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
@@ -43,6 +42,7 @@ import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 
 /**
  * The Class CredentialUtils.

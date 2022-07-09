@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -119,7 +120,8 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
-        SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
+        //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
+        ECDSASignatureResult signatureData = DataToolUtils.secp256k1SignToSignature(
             sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
         return DataToolUtils.convertSignatureDataToRsv(signatureData);
     }
