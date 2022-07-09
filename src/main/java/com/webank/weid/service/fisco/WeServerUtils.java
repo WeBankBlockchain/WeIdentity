@@ -30,16 +30,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.fisco.bcos.channel.client.Service;
-import org.fisco.bcos.channel.handler.ChannelConnections;
-import org.fisco.bcos.channel.handler.GroupChannelConnectionsConfig;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.channel.ChannelEthereumService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.WeIdConstant;
@@ -50,11 +42,11 @@ import com.webank.weid.exception.InitWeb3jException;
  * @author yanggang
  *
  */
-public class WeServerUtils {
+/*public class WeServerUtils {
 
-    /**
+    *//**
      * log4j.
-     */
+     *//*
     private static final Logger logger = LoggerFactory.getLogger(WeServerUtils.class);
     // 存放每个一个节点的web3j对象，用于获取当前节点所属的群组，key : ipPort, value : Web3j对象  
     private static final Map<String, Web3j> WEB3J_MAP = new ConcurrentHashMap<String, Web3j>();
@@ -131,13 +123,13 @@ public class WeServerUtils {
         return Web3j.build(channelEthereumService, DEFAULT_GROUP_ID);
     }
     
-    /**
+    *//**
      * 构建GroupChannelConnectionsConfig.
      * @param groupId 群组编号
      * @param fiscoConfig fisco配置
      * @param nodeList 节点列表
      * @return 返回GroupChannelConnectionsConfig对象
-     */
+     *//*
     public static GroupChannelConnectionsConfig buildGroupChannelConnectionsConfig(
         Integer groupId,
         FiscoConfig fiscoConfig,
@@ -182,11 +174,11 @@ public class WeServerUtils {
         return connectionsConfig;
     }
 
-    /**
+    *//**
      * 构建ChannelEthereumService.
      * @param service Web3sdk中的 Service对象
      * @return 返回ChannelEthereumService对象
-     */
+     *//*
     public static ChannelEthereumService buildChannelEthereumService(Service service) {
         ChannelEthereumService channelEthereumService = new ChannelEthereumService();
         channelEthereumService.setChannelService(service);
@@ -243,9 +235,9 @@ public class WeServerUtils {
         }
     }
 
-    /**
+    *//**
      * 启动监听, 定时刷新配置.
-     */
+     *//*
     private static void startMonitor() {
         Long intevalPeriod = DEFAULT_INTEVAL_PERIOD;
         TimerTask task = new TimerTask() {
@@ -258,21 +250,21 @@ public class WeServerUtils {
         timer.scheduleAtFixedRate(task, intevalPeriod, intevalPeriod);
     }
     
-    /**
+    *//**
      * 获取群组到节点的映射关系.
      * 
      * @return 返回群组到节点的映射关系
-     */
+     *//*
     public static Map<String, List<String>> getGroupMapping() {
         return new HashMap<String, List<String>>(GROUP_NODE_MAP);
     }
 
-    /**
+    *//**
      * 获取群组集合.
      * 
      * @return 返回群组列表
-     */
+     *//*
     public static List<String> getGroupList() {
         return new ArrayList<String>(GROUP_NODE_MAP.keySet());
     }
-}
+}*/

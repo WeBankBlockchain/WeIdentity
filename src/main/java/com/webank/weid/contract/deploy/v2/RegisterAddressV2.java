@@ -3,12 +3,11 @@ package com.webank.weid.contract.deploy.v2;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
-import org.fisco.bcos.web3j.precompile.cns.CnsService;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.model.RetCode;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +31,20 @@ public class RegisterAddressV2 {
      */
     private static final Logger logger = LoggerFactory.getLogger(RegisterAddressV2.class);
 
-    private static Credentials credentials;
+    //private static Credentials credentials;
+    private static CryptoKeyPair cryptoKeyPair;
 
-    private static Credentials getCredentials(String inputPrivateKey) {
+    /*private static Credentials getCredentials(String inputPrivateKey) {
         if (credentials == null) {
             credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));
         }
         return credentials;
+    }*/
+    private static CryptoKeyPair getCryptoKeyPair(String inputPrivateKey) {
+        if (cryptoKeyPair == null) {
+            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+        }
+        return cryptoKeyPair;
     }
 
     private static DataBucketServiceEngine getBucket(CnsType cnsType) {
@@ -97,12 +103,17 @@ public class RegisterAddressV2 {
         try {
             //先进行地址部署
             String bucketAddr = deployBucket(privateKey);
-            String resultJson = 
+            /*String resultJson =
                 new CnsService((Web3j)BaseService.getWeb3j(), getCredentials(privateKey))
                 .registerCns(cnsType.getName(), cnsType.getVersion(), bucketAddr, DataBucket.ABI);
             CnsResponse result = DataToolUtils.deserialize(resultJson, CnsResponse.class);
             if (result.getCode() != 0) {
-                throw new WeIdBaseException(result.getCode() + "-" + result.getMsg());
+                throw new WeIdBaseException(result.getCode() + "-" + result.getMsg());*/
+            RetCode retCode =
+                    new CnsService(BaseService.getClient(), getCryptoKeyPair(privateKey))
+                            .registerCNS(cnsType.getName(), cnsType.getVersion(), bucketAddr, DataBucket.ABI);
+            if (retCode.getCode() != 1) {
+                throw new WeIdBaseException(retCode.getCode() + "-" + retCode.getMessage());
             }
             logger.info("[registerBucketToCns] the bucket register successfully.");
         } catch (WeIdBaseException e) {
@@ -118,9 +129,11 @@ public class RegisterAddressV2 {
         logger.info("[deployBucket] begin deploy bucket.");
         //先进行地址部署
         DataBucket dataBucket = DataBucket.deploy(
-            (Web3j)BaseService.getWeb3j(),
+            /*(Web3j)BaseService.getWeb3j(),
             getCredentials(privateKey), 
-            new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)).send();
+            new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)).send();*/
+            BaseService.getClient(),
+            getCryptoKeyPair(privateKey));
         return dataBucket.getContractAddress();
     }
     

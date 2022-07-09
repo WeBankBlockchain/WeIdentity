@@ -46,13 +46,13 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,7 +133,7 @@ public class HttpClient {
      * @throws Exception any exception
      */
     public static CloseableHttpClient createHttpClient(String proxyHost, int proxyPort,
-        String proxyUsername, String proxyPassword) throws Exception {
+                                                       String proxyUsername, String proxyPassword) throws Exception {
         try {
             HttpHost proxy = null;
             if (StringUtils.isNotEmpty(proxyHost)) {
