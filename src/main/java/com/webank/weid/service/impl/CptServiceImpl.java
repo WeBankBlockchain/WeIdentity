@@ -20,15 +20,13 @@
 package com.webank.weid.service.impl;
 
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +56,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
     //获取CPT缓存节点
     private static CacheNode<ResponseData<Cpt>> cptCahceNode =
-        CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
+            CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
 
     /**
      * Register a new CPT with a pre-set CPT ID, to the blockchain.
@@ -70,14 +68,14 @@ public class CptServiceImpl extends AbstractService implements CptService {
     public ResponseData<CptBaseInfo> registerCpt(CptStringArgs args, Integer cptId) {
         if (args == null || cptId == null || cptId <= 0) {
             logger.error(
-                "[registerCpt1] input argument is illegal");
+                    "[registerCpt1] input argument is illegal");
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
         try {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             Map<String, Object> cptJsonSchemaMap =
-                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
+                    DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
             cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs, cptId);
         } catch (Exception e) {
@@ -98,14 +96,14 @@ public class CptServiceImpl extends AbstractService implements CptService {
         try {
             if (args == null) {
                 logger.error(
-                    "[registerCpt1]input CptStringArgs is null");
+                        "[registerCpt1]input CptStringArgs is null");
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
 
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             Map<String, Object> cptJsonSchemaMap =
-                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
+                    DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
             cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs);
         } catch (Exception e) {
@@ -128,10 +126,10 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
         try {
             ErrorCode errorCode =
-                this.validateCptArgs(
-                    args.getWeIdAuthentication(),
-                    args.getCptJsonSchema()
-                );
+                    this.validateCptArgs(
+                            args.getWeIdAuthentication(),
+                            args.getCptJsonSchema()
+                    );
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null, errorCode);
             }
@@ -140,12 +138,12 @@ public class CptServiceImpl extends AbstractService implements CptService {
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
-                weId,
-                cptJsonSchemaNew,
-                weIdPrivateKey);
+                    weId,
+                    cptJsonSchemaNew,
+                    weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
+                    weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -166,10 +164,10 @@ public class CptServiceImpl extends AbstractService implements CptService {
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
             ErrorCode validateResult =
-                this.validateCptArgs(
-                    args.getWeIdAuthentication(),
-                    args.getCptJsonSchema()
-                );
+                    this.validateCptArgs(
+                            args.getWeIdAuthentication(),
+                            args.getCptJsonSchema()
+                    );
 
             if (validateResult.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null, validateResult);
@@ -179,12 +177,12 @@ public class CptServiceImpl extends AbstractService implements CptService {
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
-                weId,
-                cptJsonSchemaNew,
-                weIdPrivateKey);
+                    weId,
+                    cptJsonSchemaNew,
+                    weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
+                    weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -235,7 +233,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             cptMapArgs.setCptJsonSchema(
-                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
+                    DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
             return this.updateCpt(cptMapArgs, cptId);
         } catch (Exception e) {
             logger.error("[updateCpt1] update cpt failed due to unkown error. ", e);
@@ -261,10 +259,10 @@ public class CptServiceImpl extends AbstractService implements CptService {
                 return new ResponseData<>(null, ErrorCode.CPT_ID_ILLEGAL);
             }
             ErrorCode errorCode =
-                this.validateCptArgs(
-                    args.getWeIdAuthentication(),
-                    args.getCptJsonSchema()
-                );
+                    this.validateCptArgs(
+                            args.getWeIdAuthentication(),
+                            args.getCptJsonSchema()
+                    );
 
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null, errorCode);
@@ -274,17 +272,17 @@ public class CptServiceImpl extends AbstractService implements CptService {
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
-                weId,
-                cptJsonSchemaNew,
-                weIdPrivateKey);
+                    weId,
+                    cptJsonSchemaNew,
+                    weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(
-                cptId,
-                address,
-                cptJsonSchemaNew,
-                rsvSignature,
-                weIdPrivateKey.getPrivateKey(),
-                WeIdConstant.CPT_DATA_INDEX);
+                    cptId,
+                    address,
+                    cptJsonSchemaNew,
+                    rsvSignature,
+                    weIdPrivateKey.getPrivateKey(),
+                    WeIdConstant.CPT_DATA_INDEX);
             if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                 cptCahceNode.remove(String.valueOf(cptId));
             }
@@ -295,30 +293,25 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
     }
 
-    //原来是RsvSignature，后面换支持国密一起改上面用到这个函数的地方
-    private SignatureResult sign(
-        String cptPublisher,
-        String jsonSchema,
-        WeIdPrivateKey cptPublisherPrivateKey) {
+
+    private RsvSignature sign(
+            String cptPublisher,
+            String jsonSchema,
+            WeIdPrivateKey cptPublisherPrivateKey) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
-        Client client = (Client) this.weServer.getClient();
-
-        return client.getCryptoSuite().sign(sb.toString().getBytes(StandardCharsets.UTF_8),
-                client.getCryptoSuite().createKeyPair(cptPublisherPrivateKey.getPrivateKey()));
-
-        /*SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
-            sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-        return DataToolUtils.convertSignatureDataToRsv(signatureData);*/
-
+        //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
+        ECDSASignatureResult signatureData = DataToolUtils.secp256k1SignToSignature(
+                sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
+        return DataToolUtils.convertSignatureDataToRsv(signatureData);
     }
 
     private ErrorCode validateCptArgs(
-        WeIdAuthentication weIdAuthentication,
-        Map<String, Object> cptJsonSchemaMap) throws Exception {
+            WeIdAuthentication weIdAuthentication,
+            Map<String, Object> cptJsonSchemaMap) throws Exception {
 
         if (weIdAuthentication == null) {
             logger.error("Input cpt weIdAuthentication is invalid.");
@@ -342,10 +335,10 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
         WeIdPrivateKey weIdPrivateKey = weIdAuthentication.getWeIdPrivateKey();
         if (weIdPrivateKey == null
-            || StringUtils.isEmpty(weIdPrivateKey.getPrivateKey())) {
+                || StringUtils.isEmpty(weIdPrivateKey.getPrivateKey())) {
             logger.error(
-                "Input cpt publisher private key : {} is in valid.",
-                weIdPrivateKey
+                    "Input cpt publisher private key : {} is in valid.",
+                    weIdPrivateKey
             );
             return ErrorCode.WEID_PRIVATEKEY_INVALID;
         }
@@ -357,7 +350,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
     }
 
     private ErrorCode validateCptJsonSchemaMap(
-        Map<String, Object> cptJsonSchemaMap) throws Exception {
+            Map<String, Object> cptJsonSchemaMap) throws Exception {
         if (cptJsonSchemaMap == null || cptJsonSchemaMap.isEmpty()) {
             logger.error("Input cpt json schema is invalid.");
             return ErrorCode.CPT_JSON_SCHEMA_INVALID;

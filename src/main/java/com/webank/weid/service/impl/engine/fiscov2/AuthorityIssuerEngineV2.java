@@ -574,8 +574,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     @Override
     public ResponseData<Integer> getSpecificTypeIssuerSize(String issuerType) {
         try {
-            //这里这么改不一定对
-            Integer count = specificIssuerData.getSpecificTypeIssuerLength(
+            Integer count = specificIssuerController.getSpecificTypeIssuerSize(
                 DataToolUtils.stringToByte32Array(issuerType)).intValue();
             return new ResponseData<>(count, ErrorCode.SUCCESS);
         } catch (Exception e) {
@@ -617,7 +616,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 privateKey,
                 SpecificIssuerController.class);
             TransactionReceipt receipt = specificIssuerController
-                .removeIssuerType(DataToolUtils.stringToByte32Array(issuerType)).send();
+                .removeIssuerType(DataToolUtils.stringToByte32Array(issuerType));
 
             // pass-in empty address
             String emptyAddress = new Address(BigInteger.ZERO).toString();
@@ -639,7 +638,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 specificIssuerController.getIssuerTypeList(
                     new BigInteger(index.toString()), 
                     new BigInteger(num.toString())
-                ).send();
+                );
             List<byte[]> typeNames = tuple.getValue1(); //typeNames
             List<String> owners = tuple.getValue2(); //owners
             List<BigInteger> createds = tuple.getValue3(); //createds

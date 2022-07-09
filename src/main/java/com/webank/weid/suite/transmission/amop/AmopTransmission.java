@@ -117,7 +117,7 @@ public class AmopTransmission extends AbstractTransmission implements Transmissi
         args.setServiceType(request.getServiceType());
         args.setFromAmopId(amopTransmissionPoxy.getCurrentAmopId());
         args.setMessage(super.getOriginalData(request.getArgs()));
-        args.setToAmopId(request.getAmopId());
+        args.setTopic(request.getAmopId());
         args.setMessageId(DataToolUtils.getUuId32());
         return args;
     }

@@ -33,8 +33,10 @@ import java.util.zip.DataFormatException;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.EventEncoder;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +78,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
     /**
      * The topic map.
      */
-    //private HashMap<String, String> topicMap;
+    private static final HashMap<String, String> topicMap;
 
     /**
      * Block number for stopping parsing.
@@ -88,15 +90,18 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      */
     private static WeIdContract weIdContract;
 
-    /*static {
+    static {
         // initialize the event topic
         topicMap = new HashMap<String, String>();
 
         topicMap.put(
-            EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
+            //EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
+                new EventEncoder(getWeServer().getClient().getCryptoSuite()).encode(
+                        WeIdContract.WEIDATTRIBUTECHANGED_EVENT
+                ),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
         );
-    }*/
+    }
 
     /**
      * 构造函数.
@@ -179,20 +184,14 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         }
     }
 
-    private ResolveEventLogResult resolveSingleEventLog(
-        String weId,
-        TransactionReceipt.Logs log,
-        TransactionReceipt receipt,
-        int currentBlockNumber,
-        Map<Integer, List<WeIdAttributeChangedEventResponse>> blockEventMap
+    private static ResolveEventLogResult resolveSingleEventLog(
+            String weId,
+            TransactionReceipt.Logs log,
+            TransactionReceipt receipt,
+            int currentBlockNumber,
+            Map<Integer, List<WeIdAttributeChangedEventResponse>> blockEventMap
     ) {
         String topic = log.getTopics().get(0);
-        HashMap<String, String> topicMap = new HashMap<String, String>();
-
-        topicMap.put(
-                this.eventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
-                WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
-        );
         String event = topicMap.get(topic);
 
         if (StringUtils.isNotBlank(event)) {
