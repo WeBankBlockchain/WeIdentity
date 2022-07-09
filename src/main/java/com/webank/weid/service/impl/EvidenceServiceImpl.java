@@ -84,7 +84,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
      * @param groupId 群组编号
      */
     public EvidenceServiceImpl(ProcessingMode processingMode, Integer groupId) {
-        super(groupId);
+        //super(groupId);
         this.processingMode = processingMode;
         initEvidenceServiceEngine(groupId);
     }
@@ -619,10 +619,10 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (!DataToolUtils.isValidBase64String(signature)) {
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN);
         }
-        SignatureData signatureData =
+        /*SignatureData signatureData =
             DataToolUtils.simpleSignatureDeserialization(
                 DataToolUtils.base64Decode(signature.getBytes(StandardCharsets.UTF_8))
-            );
+            );*/
 
         // Firstly, we check the secp256k1 style signature
         if (StringUtils.isEmpty(publicKey)) {

@@ -83,10 +83,10 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
      * @param groupId 群组编号
      */
     public EvidenceServiceEngineV2(Integer groupId) {
-        super(groupId);
+        //super(groupId);
         this.groupId = groupId;
         initEvidenceAddress();
-        evidenceContract = getContractService(this.evidenceAddress, EvidenceContract.class);
+        evidenceContract = getContractService(this.evidenceAddress, this.groupId, EvidenceContract.class);
     }
 
     private void initEvidenceAddress() {
@@ -134,6 +134,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
+                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -207,6 +208,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
+                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -286,6 +288,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
+                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -355,6 +358,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
+                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -418,6 +422,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
+                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -799,6 +804,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
+                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -890,6 +896,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
+                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );

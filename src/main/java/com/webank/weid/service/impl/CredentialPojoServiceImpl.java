@@ -41,6 +41,7 @@ import com.webank.wedpr.selectivedisclosure.proto.Predicate;
 import com.webank.wedpr.selectivedisclosure.proto.VerificationRule;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1178,9 +1179,11 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         }
         String privateKey = callerAuth.getWeIdPrivateKey().getPrivateKey();
-        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
-            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());*/
+        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
         result.setIssuer(keyWeId);
         result.addType(CredentialConstant.DEFAULT_CREDENTIAL_TYPE);
 
@@ -1982,9 +1985,11 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         CredentialPojo credential = new CredentialPojo();
         credential.setCptId(CredentialConstant.EMBEDDED_TIMESTAMP_CPT);
         String privateKey = weIdAuthentication.getWeIdPrivateKey().getPrivateKey();
-        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
-            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());*/
+        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
         credential.setIssuer(keyWeId);
         credential.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
         credential.setId(UUID.randomUUID().toString());
@@ -2246,9 +2251,11 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         args.setContext(CredentialUtils.getDefaultCredentialContext());
         args.setCptId(CredentialConstant.AUTHORIZATION_CPT);
         String privateKey = weIdAuthentication.getWeIdPrivateKey().getPrivateKey();
-        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
-            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());*/
+        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
         args.setIssuer(keyWeId);
         args.setIssuanceDate(DateUtils.getNoMillisecondTimeStamp());
         args.setExpirationDate(args.getIssuanceDate() + authInfo.getDuration());

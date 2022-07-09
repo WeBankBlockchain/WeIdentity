@@ -26,9 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -961,9 +961,11 @@ public class TestCreateCredentialPojo extends TestBaseService {
 
         // Enforce a Register/Update system CPT first
         WeIdAuthentication sdkAuthen = new WeIdAuthentication();
-        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        //ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
-            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+            //.convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+                .convertAddressToWeId(keyPair.getAddress());
         sdkAuthen.setWeId(keyWeId);
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
         weIdPrivateKey.setPrivateKey(privateKey);
@@ -971,7 +973,10 @@ public class TestCreateCredentialPojo extends TestBaseService {
         if (!weIdService.isWeIdExist(keyWeId).getResult()) {
             CreateWeIdArgs wargs = new CreateWeIdArgs();
             wargs.setWeIdPrivateKey(weIdPrivateKey);
-            wargs.setPublicKey(keyPair.getPublicKey().toString(10));
+            //wargs.setPublicKey(keyPair.getPublicKey().toString(10));
+            BigInteger publicKey =
+                    new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));
+            wargs.setPublicKey(publicKey.toString(10));
             weIdService.createWeId(wargs);
         }
         String cptJsonSchema = DataToolUtils

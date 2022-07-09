@@ -54,13 +54,11 @@ import com.webank.weid.exception.InitWeb3jException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
-import com.webank.weid.rpc.callback.OnNotifyCallbackV2;
 import com.webank.weid.service.fisco.WeServer;
-import com.webank.weid.service.fisco.WeServerUtils;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
 
-public final class WeServerV2 extends WeServer<Client> {
+/*public final class WeServerV2 extends WeServer {
 
     private static final Logger logger = LoggerFactory.getLogger(WeServerV2.class);
 
@@ -120,11 +118,11 @@ public final class WeServerV2 extends WeServer<Client> {
         return amop.getSubTopics();
     }
 
-    /**
+    *//**
      * 获取bcos sdk对象，用于给使用者注册callback处理器.
      *
      * @return 返回SDK
-     */
+     *//*
     @Override
     public BcosSDK getSDK() {
         return sdk;
@@ -136,7 +134,7 @@ public final class WeServerV2 extends WeServer<Client> {
         amop.subscribePrivateTopics(
                 "GET_ENCRYPT_KEY",
                 privateKey,
-                new  KeyManagerCallback()
+                new KeyManagerCallback()
         );
         amop.subscribePrivateTopics(
                 "COMMON_REQUEST",
@@ -156,7 +154,7 @@ public final class WeServerV2 extends WeServer<Client> {
         amop.sendAmopMsg(out, cb);
     }
 
-    /*@Override
+    *//*@Override
     public AmopResponse sendChannelMessage(AmopCommonArgs amopCommonArgs, int timeOut) {
 
         ChannelRequest request = new ChannelRequest();
@@ -173,7 +171,7 @@ public final class WeServerV2 extends WeServer<Client> {
         amopResponse.setResult(response.getContent());
         amopResponse.setErrorMessage(response.getErrorMessage());
         return amopResponse;
-    }*/
+    }*//*
 
 
     @Override
@@ -212,4 +210,4 @@ public final class WeServerV2 extends WeServer<Client> {
             throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
         }
     }
-}
+}*/

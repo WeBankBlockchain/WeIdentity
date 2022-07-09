@@ -23,6 +23,7 @@ import java.math.BigInteger;
 
 import lombok.Data;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 
 /**
@@ -38,7 +39,7 @@ public class TransactionInfo {
     /**
      * The block number.
      */
-    private String blockNumber;
+    private BigInteger blockNumber;
 
     /**
      * The transaction hash value.
@@ -48,7 +49,7 @@ public class TransactionInfo {
     /**
      * The transaction index.
      */
-    private String transactionIndex;
+    private BigInteger transactionIndex;
 
     /**
      * Constructor from a transactionReceipt.
@@ -57,9 +58,12 @@ public class TransactionInfo {
      */
     public TransactionInfo(TransactionReceipt receipt) {
         if (receipt != null) {
-            this.blockNumber = receipt.getBlockNumber();
+            //this.blockNumber = receipt.getBlockNumber();
+            this.blockNumber = new BigInteger(Numeric.cleanHexPrefix(receipt.getBlockNumber()), 16);
             this.transactionHash = receipt.getTransactionHash();
-            this.transactionIndex = receipt.getTransactionIndex();
+            //this.transactionIndex = receipt.getTransactionIndex();
+            this.transactionIndex = new BigInteger(
+                    Numeric.cleanHexPrefix(receipt.getTransactionIndex()), 16);
         }
     }
 
@@ -70,9 +74,9 @@ public class TransactionInfo {
      * @param transactionHash transactionHash
      * @param transactionIndex transactionIndex
      */
-    public TransactionInfo(String blockNumber,
+    public TransactionInfo(BigInteger blockNumber,
         String transactionHash,
-        String transactionIndex) {
+        BigInteger transactionIndex) {
         this.blockNumber = blockNumber;
         this.transactionHash = transactionHash;
         this.transactionIndex = transactionIndex;

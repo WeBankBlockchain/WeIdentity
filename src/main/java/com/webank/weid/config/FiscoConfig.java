@@ -49,7 +49,7 @@ public class FiscoConfig {
     private static final Logger logger = LoggerFactory.getLogger(FiscoConfig.class);
     private static final Validator validator = new Validator();
     // 配置topic
-    //public static String topic;
+    public static String topic;
     
     // Note that all keys are appended with a colon ":" to support regex auto-loading
 
@@ -157,9 +157,9 @@ public class FiscoConfig {
     @NotEmpty(message = "the value of blockchain.orgid is null")
     private String currentOrgId;
     
-    /*@NotNull(message = "the amop.id is undefined")
+    @NotNull(message = "the amop.id is undefined")
     @NotEmpty(message = "the value of amop.id is null")
-    private String amopId;*/
+    private String amopId;
     
     private String cnsContractFollow;
 
