@@ -1,0 +1,27 @@
+{
+  "$schema" : "http://json-schema.org/draft-06/schema#",
+  "type" : "object",
+  "title": "Metadata CPT",
+  "description": "User request issuer to sign credential",
+  "properties" : {
+    "context" : {
+      "type" : "string"
+    },
+    "cptId" : {
+      "type" : "integer"
+    },
+    "credentialId" : {
+      "type" : "string"
+    },
+    "expirationDate" : {
+      "type" : "integer"
+    },
+    "issuanceDate" : {
+      "type" : "integer"
+    },
+    "issuer" : {
+      "type" : "string"
+    }
+  },
+  "required": ["issuer","issuanceDate","expirationDate","credentialId","cptId","context"]
+}
