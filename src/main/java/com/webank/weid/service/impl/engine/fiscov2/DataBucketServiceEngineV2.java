@@ -5,14 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.tuples.generated.Tuple2;
-import org.fisco.bcos.web3j.tuples.generated.Tuple4;
-import org.fisco.bcos.web3j.tx.txdecode.InputAndOutputResult;
-import org.fisco.bcos.web3j.tx.txdecode.ResultEntity;
-import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoder;
-import org.fisco.bcos.web3j.tx.txdecode.TransactionDecoderFactory;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple4;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
+import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +33,14 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     private DataBucket dataBucket;
     private CnsType cnsType;
 
-    private static TransactionDecoder txDecodeSampleDecoder;
+    private TransactionDecoderService txDecoder;
+
+    /*private static TransactionDecoder txDecodeSampleDecoder;
 
     static {
         txDecodeSampleDecoder = TransactionDecoderFactory.buildTransactionDecoder(
                 DataBucket.ABI, DataBucket.BINARY);
-    }
+    }*/
 
     /**
      * 构造函数.
@@ -79,7 +79,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         Bytes32 keyByte32 = DataToolUtils.bytesArrayToBytes32(key.getBytes());
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).put(
-                bucketId, keyByte32.getValue(), value).send();
+                bucketId, keyByte32.getValue(), value);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
                 logger.info("[put] put [{}:{}] into chain success, bucketId is {}.", 
@@ -100,11 +100,15 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     private ErrorCode analysisErrorCode(TransactionReceipt receipt) {
         ErrorCode errorCode = ErrorCode.UNKNOW_ERROR;
         try {
-            InputAndOutputResult objectResult = txDecodeSampleDecoder.decodeOutputReturnObject(
+            //这里暂且认为是回执状态码
+            txDecoder = new TransactionDecoderService(getClient().getCryptoSuite());
+            TransactionResponse response = txDecoder.decodeReceiptStatus(receipt);
+            /*InputAndOutputResult objectResult = txDecodeSampleDecoder.decodeOutputReturnObject(
                 receipt.getInput(), receipt.getOutput());
             List<ResultEntity> result = objectResult.getResult();
-            Integer code = Integer.parseInt(result.get(0).getData().toString());
-            switch (code.intValue()) {
+            Integer code = Integer.parseInt(result.get(0).getData().toString());*/
+            Integer code = response.getReturnCode();
+                    switch (code.intValue()) {
                 case 100:
                     errorCode = ErrorCode.SUCCESS;
                     break;
@@ -139,7 +143,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         Bytes32 keyByte32 = DataToolUtils.bytesArrayToBytes32(key.getBytes());
         try {
             Tuple2<BigInteger, String> tuple = dataBucket.get(
-                bucketId, keyByte32.getValue()).send();
+                bucketId, keyByte32.getValue());
             int code = tuple.getValue1().intValue();
             if (code == 102) {
                 logger.error("[get] the bucketId does not exits, bucketId is {}.", bucketId);
@@ -171,7 +175,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         try {
             logger.info("[remove] remove Extra Item, bucketId is {}, key is {}.", bucketId, key);
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).removeExtraItem(
-                bucketId, keyByte32.getValue()).send();
+                bucketId, keyByte32.getValue());
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
                 logger.info("[remove] remove {} from chain success, bucketId is {}.", 
@@ -198,7 +202,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
             logger.info("[remove] remove Bucket Item, bucketId is {}, force is {}.", 
                 bucketId, force);
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
-                .removeDataBucketItem(bucketId, force).send();
+                .removeDataBucketItem(bucketId, force);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
                 logger.info("[remove] remove Bucket Item from chain success, bucketId is {}.", 
@@ -222,7 +226,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     public ResponseData<Boolean> enable(String bucketId, WeIdPrivateKey privateKey) {
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).enable(
-                bucketId).send();
+                bucketId);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
                 logger.info("[enable] enable Bucket success, bucketId is {}.", bucketId);
@@ -242,7 +246,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     public ResponseData<Boolean> disable(String bucketId, WeIdPrivateKey privateKey) {
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).disable(
-                bucketId).send();
+                bucketId);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
                 logger.info("[disable] disable Bucket success, bucketId is {}.", bucketId);
@@ -266,8 +270,8 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         try {
             while (true) {
                 BigInteger offset = BigInteger.valueOf(startIndex);
-                Tuple4<List<String>, List<String>, List<BigInteger>, BigInteger> data = 
-                    dataBucket.getAllBucket(offset, num).send();
+                Tuple4<List<String>, List<String>, List<BigInteger>, BigInteger> data =
+                    dataBucket.getAllBucket(offset, num);
                 List<String> bucketIdList = data.getValue1();
                 List<String> ownerList = data.getValue2();
                 List<BigInteger> timesList = data.getValue3();
@@ -303,7 +307,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     ) {
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
-                .updateBucketOwner(bucketId, newOwner).send();
+                .updateBucketOwner(bucketId, newOwner);
             if (StringUtils
                 .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
                 logger.info("[updateBucketOwner] update owner success, bucketId is {}.", bucketId);
@@ -329,7 +333,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
             while (true) {
                 BigInteger index = BigInteger.valueOf(startIndex);
                 Tuple2<List<String>, BigInteger> data = 
-                    dataBucket.getActivatedUserList(bucketId, index, num).send();
+                    dataBucket.getActivatedUserList(bucketId, index, num);
                 List<String> useList = data.getValue1();
                 BigInteger next = data.getValue2();
                 for (int i = 0; i < useList.size(); i++) {

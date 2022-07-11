@@ -211,8 +211,8 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         GetEncryptKeyArgs args = new GetEncryptKeyArgs();
         args.setKeyId(encodeData.getId());
         args.setMessageId(DataToolUtils.getUuId32());
-        args.setToAmopId(encodeData.getAmopId());
-        args.setFromAmopId(fiscoConfig.getAmopId());
+        //args.setToAmopId(encodeData.getAmopId());
+        //args.setFromAmopId(fiscoConfig.getAmopId());
         if (encodeData.getWeIdAuthentication() != null) {
             String signValue = DataToolUtils.secp256k1Sign(
                 encodeData.getId(),
