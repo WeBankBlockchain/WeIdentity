@@ -9,7 +9,6 @@ Created by https://www.gitignore.io/api/vim,java,maven,gradle,java-web,intellij,
 .idea/**/tasks.xml
 .idea/dictionaries
 .idea/checkstyle-idea.xml
-
 # Sensitive or high-churn files:
 .idea/**/dataSources/
 .idea/**/dataSources.ids
@@ -191,3 +190,6 @@ doc/bak/
 .settings/
 .project
 .classpath
+
+/.idea/
+/dist/
