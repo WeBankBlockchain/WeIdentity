@@ -63,7 +63,7 @@ public class CommonCallback extends AmopCallback {
     }
 
     private static void register(String serviceType, TransmissionService<?> service) {
-        TransmissionServiceCenter.registerService(serviceType, service); 
+        TransmissionServiceCenter.registerService(serviceType, service);
     }
 
     @Override
@@ -75,10 +75,10 @@ public class CommonCallback extends AmopCallback {
             TransmissionService<?> service = TransmissionServiceCenter.getService(serviceType);
             if (service == null) {
                 logger.error(
-                    "[CommonCallBack] no found the service for {}, messageId:{}.", 
-                    serviceType,
-                    messageId
-                ); 
+                        "[CommonCallBack] no found the service for {}, messageId:{}.",
+                        serviceType,
+                        messageId
+                );
                 return super.onPush(arg);
             }
             // 此处暂时不走认证模式
@@ -94,7 +94,7 @@ public class CommonCallback extends AmopCallback {
                 return new AmopResponse(ErrorCode.WEID_AUTH_CHANNELID_INVALID);
             }
             //解密数据
-            String message = 
+            String message =
                 CryptServiceFactory
                     .getCryptService(CryptType.AES)
                     .decrypt(arg.getMessage(), weIdAuth.getSymmetricKey());
@@ -105,7 +105,7 @@ public class CommonCallback extends AmopCallback {
             /*
             // 数据暂时不走认证模式
             //加密响应数据
-            String originalData = 
+            String originalData =
                 CryptServiceFactory
                     .getCryptService(CryptType.AES)
                     .encrypt(amopResponse.getResult(), weIdAuth.getSymmetricKey());
@@ -124,7 +124,7 @@ public class CommonCallback extends AmopCallback {
 
     /**
      * 根据业务响应和请求构建AMOP响应.
-     * 
+     *
      * @param <T> 业务响应实体数据类型
      * @param response 业务响应
      * @param arg AMOP请求

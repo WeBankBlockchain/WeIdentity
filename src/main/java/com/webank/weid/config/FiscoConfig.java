@@ -163,6 +163,8 @@ public class FiscoConfig {
     
     private String cnsContractFollow;
 
+    private String privateKey;
+
     /**
      * load configuration without Spring context required.
      *
@@ -200,7 +202,8 @@ public class FiscoConfig {
             gmenSdkCrtPath = PropertyUtils.getProperty("gmen.sdk-crt-path");
             gmenSdkKeyPath = PropertyUtils.getProperty("gmen.sdk-key-path");
             currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
-            amopId = PropertyUtils.getProperty("amop.id");
+            //amopId = PropertyUtils.getProperty("amop.id");
+            privateKey = PropertyUtils.getProperty("amop.privateKey");
             cnsContractFollow = PropertyUtils.getProperty("cns.contract.follow");
             return true;
         } catch (Exception e) {

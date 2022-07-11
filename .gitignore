@@ -191,3 +191,4 @@ doc/bak/
 .settings/
 .project
 .classpath
+.idea/
