@@ -51,9 +51,9 @@ public class AmopBaseMsgArgs implements IArgs {
     protected String fromAmopId;
 
     /**
-     * 目的AmopId.
+     * topic.
      */
-    protected String toAmopId;
+    protected String topic;
     
     /**
      * 业务类型.
@@ -64,4 +64,6 @@ public class AmopBaseMsgArgs implements IArgs {
      * 通道编号.
      */
     protected String channelId;
+
+
 }

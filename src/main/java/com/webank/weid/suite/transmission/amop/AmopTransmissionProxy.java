@@ -58,7 +58,7 @@ public class AmopTransmissionProxy extends BaseService {
      * @return 返回AMOP处理结果
      */
     public ResponseData<AmopResponse> send(AmopCommonArgs amopCommonArgs) {
-        return getAmopService().send(amopCommonArgs.getToAmopId(), amopCommonArgs);
+        return getAmopService().send(amopCommonArgs.getTopic(), amopCommonArgs);
     }
     
     /**
