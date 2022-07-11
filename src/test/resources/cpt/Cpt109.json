@@ -1,0 +1,25 @@
+{
+  "$schema" : "http://json-schema.org/draft-06/schema#",
+  "type" : "object",
+  "title": "Trusted Timestamp",
+  "description": "Trusted Timestamp from authorized 3rd-party, or chain consensus",
+  "properties" : {
+    "claimHash" : {
+      "type" : "string",
+      "description": "calculate the hash from the entire list rather than from any single credential"
+    },
+    "hashKey" : {
+      "type" : "string",
+      "description": "hashKey = hash(claimHash + timestamp) hashKey will be the key in the smart contract"
+    },
+    "signatureList" : {
+      "type" : "string",
+      "description": "signed by Timestamp authority signature = sign( hashKey )"
+    },
+    "timestamp" : {
+      "type" : "integer",
+      "description": "trusted timestamp provided by the trusted third party or by the consensus of each node in the consortium chain"
+    }
+  },
+  "required": ["claimHash","hashKey","signatureList","timestamp"]
+}
