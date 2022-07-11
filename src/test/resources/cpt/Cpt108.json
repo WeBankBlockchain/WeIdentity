@@ -1,0 +1,69 @@
+{
+  "$schema" : "http://json-schema.org/draft-06/schema#",
+  "definitions" : {
+    "Map(String,Object)" : {
+      "type" : "object"
+    }
+  },
+  "type" : "object",
+  "title": "Trusted timestamping",
+  "description": "Trusted timestamping envelope",
+  "properties" : {
+    "authoritySignature" : {
+      "type" : "string",
+      "description": "Signature value from Authority, signed by Timestamp authority. authoritySignature = sign( hashKey )"
+    },
+    "claimHash" : {
+      "type" : "string",
+      "description": "calculate the hash from the credentials."
+    },
+    "credentialList" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "claim" : {
+            "$ref" : "#/definitions/Map(String,Object)"
+          },
+          "context" : {
+            "type" : "string"
+          },
+          "cptId" : {
+            "type" : "integer"
+          },
+          "expirationDate" : {
+            "type" : "integer"
+          },
+          "id" : {
+            "type" : "string"
+          },
+          "issuanceDate" : {
+            "type" : "integer"
+          },
+          "issuer" : {
+            "type" : "string"
+          },
+          "proof" : {
+            "$ref" : "#/definitions/Map(String,Object)"
+          },
+          "type" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        }
+      },
+      "description": "Original credential list to be signed"
+    },
+    "timestamp" : {
+      "type" : "integer",
+      "description": "trusted timestamping provided by the trusted third party or by the consensus of each node in the consortium chain"
+    },
+    "timestampAuthority" : {
+      "type" : "string",
+      "description": "information about timestamp authority"
+    }
+  },
+  "required": ["authoritySignature","claimHash","credentialList","timestamp","timestampAuthority"]
+}

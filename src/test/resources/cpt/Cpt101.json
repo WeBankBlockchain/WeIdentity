@@ -1,0 +1,29 @@
+{
+  "$schema" : "http://json-schema.org/draft-06/schema#",
+  "type" : "object",
+  "title": "Data Authorization Token",
+  "description": "Authorize data between WeIDs via the exposed Service Endpoint",
+  "properties" : {
+    "duration" : {
+      "type" : "integer",
+      "description": "Authorize to this WeID"
+    },
+    "fromWeId" : {
+      "type" : "string",
+      "description": "Authorize from this WeID"
+    },
+    "resourceId" : {
+      "type" : "string",
+      "description": "Authorized Resource ID"
+    },
+    "serviceUrl" : {
+      "type" : "string",
+      "description": "Service Endpoint URL"
+    },
+    "toWeId" : {
+      "type" : "string",
+      "description": "Duration of Validity in seconds"
+    }
+  },
+  "required": ["duration","fromWeId","resourceId","serviceUrl","toWeId"]
+}
