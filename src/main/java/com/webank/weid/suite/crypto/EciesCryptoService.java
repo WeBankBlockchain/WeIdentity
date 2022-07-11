@@ -26,10 +26,10 @@ import java.nio.charset.StandardCharsets;
 import com.webank.wedpr.ecies.EciesResult;
 import com.webank.wedpr.ecies.NativeInterface;
 
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,9 @@ public class EciesCryptoService implements CryptoService {
         if (StringUtils.isNumeric(key)) {
             //如果为10进制数字
             BigInteger bigInt = new BigInteger(key);
-            pubValue = Numeric.toHexStringNoPrefixZeroPadded(bigInt, Keys.PUBLIC_KEY_LENGTH_IN_HEX);
+            //pubValue = Numeric.toHexStringNoPrefixZeroPadded(bigInt, Keys.PUBLIC_KEY_LENGTH_IN_HEX);
+            pubValue = Numeric.toHexStringNoPrefixZeroPadded(
+                    bigInt, KeyGenerator.PUBLIC_KEY_LENGTH_IN_HEX);
         } else {
             if (!DataToolUtils.isValidBase64String(key)) {
                 String errorMessage = "input publicKey is not a valid Base64 string.";
@@ -93,7 +95,8 @@ public class EciesCryptoService implements CryptoService {
             //如果为10进制数字
             BigInteger bigInt = new BigInteger(key);
             priValue = Numeric.toHexStringNoPrefixZeroPadded(
-                bigInt, Keys.PRIVATE_KEY_LENGTH_IN_HEX);
+                    bigInt, KeyGenerator.PRIVATE_KEY_LENGTH_IN_HEX);
+                //bigInt, Keys.PRIVATE_KEY_LENGTH_IN_HEX);
         } else {
             if (!DataToolUtils.isValidBase64String(key)) {
                 String errorMessage = "input privateKey is not a valid Base64 string.";

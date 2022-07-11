@@ -28,8 +28,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,15 +76,17 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     public ResponseData<CreateWeIdDataResult> createWeId() {
 
         CreateWeIdDataResult result = new CreateWeIdDataResult();
-        ECKeyPair keyPair = GenCredential.createKeyPair();
+        Client client = getWeServer().getClient();
+        CryptoKeyPair keyPair = client.getCryptoSuite().createKeyPair();
+        //ECKeyPair keyPair = GenCredential.createKeyPair();
 
         if (Objects.isNull(keyPair)) {
             logger.error("Create weId failed.");
             return new ResponseData<>(null, ErrorCode.WEID_KEYPAIR_CREATE_FAILED);
         }
 
-        String publicKey = String.valueOf(keyPair.getPublicKey());
-        String privateKey = String.valueOf(keyPair.getPrivateKey());
+        String publicKey = String.valueOf(keyPair.getHexPublicKey());
+        String privateKey = String.valueOf(keyPair.getHexPrivateKey());
         WeIdPublicKey userWeIdPublicKey = new WeIdPublicKey();
         userWeIdPublicKey.setPublicKey(publicKey);
         result.setUserWeIdPublicKey(userWeIdPublicKey);

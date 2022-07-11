@@ -45,26 +45,26 @@ public interface AmopService {
     ResponseData<AmopResponse> request(String toAmopId, AmopCommonArgs args);
 
     ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
-        String amopId,
-        Integer policyId,
-        String targetUserWeId
+            String amopId,
+            Integer policyId,
+            String targetUserWeId
     );
 
     ResponseData<GetEncryptKeyResponse> getEncryptKey(
-        String toAmopId,
-        GetEncryptKeyArgs args
+            String toAmopId,
+            GetEncryptKeyArgs args
     );
 
     ResponseData<PolicyAndPreCredentialResponse> requestPolicyAndPreCredential(
-        String toAmopId,
-        GetPolicyAndPreCredentialArgs args
+            String toAmopId,
+            GetPolicyAndPreCredentialArgs args
     );
 
     ResponseData<RequestIssueCredentialResponse> requestIssueCredential(
-        String toAmopId,
-        RequestIssueCredentialArgs args
+            String toAmopId,
+            RequestIssueCredentialArgs args
     );
-    
+
     ResponseData<AmopResponse> send(String toAmopId, AmopCommonArgs args);
 
     /**
@@ -74,8 +74,8 @@ public interface AmopService {
      * @return return the GetWeIdAuthResponse
      */
     ResponseData<GetWeIdAuthResponse> getWeIdAuth(
-        String toAmopId,
-        GetWeIdAuthArgs args
+            String toAmopId,
+            GetWeIdAuthArgs args
     );
 
     /**
@@ -85,8 +85,8 @@ public interface AmopService {
      * @return return the RequestVerifyChallengeResponse
      */
     ResponseData<RequestVerifyChallengeResponse> requestVerifyChallenge(
-        String toAmopId,
-        RequestVerifyChallengeArgs args
+            String toAmopId,
+            RequestVerifyChallengeArgs args
     );
 
 }

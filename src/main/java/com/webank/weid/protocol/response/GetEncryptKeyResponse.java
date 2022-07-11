@@ -26,4 +26,5 @@ public class GetEncryptKeyResponse {
      * 错误信息.
      */
     protected String errorMessage;
+
 }

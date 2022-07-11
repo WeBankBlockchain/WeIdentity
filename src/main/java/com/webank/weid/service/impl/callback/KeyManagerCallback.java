@@ -47,15 +47,15 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
 
 public class KeyManagerCallback extends AmopCallback {
-    
+
     private static final Logger logger =  LoggerFactory.getLogger(KeyManagerCallback.class);
 
     private Persistence dataDriver;
 
     private PersistenceType persistenceType;
-    
+
     private WeIdService weidService;
-    
+
     private WeIdService getWeIdService() {
         if (weidService == null) {
             weidService = new WeIdServiceImpl();
@@ -75,15 +75,15 @@ public class KeyManagerCallback extends AmopCallback {
         }
         return dataDriver;
     }
-    
+
     @Override
     public GetEncryptKeyResponse onPush(GetEncryptKeyArgs arg) {
         logger.info("[KeyManagerCallback.onPush] begin query key param:{}", arg);
-        GetEncryptKeyResponse encryptResponse = new GetEncryptKeyResponse(); 
+        GetEncryptKeyResponse encryptResponse = new GetEncryptKeyResponse();
         ResponseData<String>  keyResponse = this.getDataDriver().get(
-            DataDriverConstant.DOMAIN_ENCRYPTKEY, arg.getKeyId());
+                DataDriverConstant.DOMAIN_ENCRYPTKEY, arg.getKeyId());
         if (keyResponse.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
-            && StringUtils.isBlank(keyResponse.getResult())) {
+                && StringUtils.isBlank(keyResponse.getResult())) {
             logger.info("[KeyManagerCallback.onPush] the encrypt key is not exists.");
             encryptResponse.setEncryptKey(StringUtils.EMPTY);
             encryptResponse.setErrorCode(ErrorCode.ENCRYPT_KEY_NOT_EXISTS.getCode());
@@ -97,17 +97,17 @@ public class KeyManagerCallback extends AmopCallback {
             }
             try {
                 Map<String, Object> keyMap = DataToolUtils.deserialize(
-                    keyResponse.getResult(), 
-                    new HashMap<String, Object>().getClass()
+                        keyResponse.getResult(),
+                        new HashMap<String, Object>().getClass()
                 );
                 if (!checkAuthority(arg, keyMap)) { // 检查是否有权限
                     encryptResponse.setErrorCode(ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCode());
                     encryptResponse.setErrorMessage(
-                        ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCodeDesc());
+                            ErrorCode.ENCRYPT_KEY_NO_PERMISSION.getCodeDesc());
                 } else {
                     encryptResponse.setEncryptKey((String)keyMap.get(ParamKeyConstant.KEY_DATA));
                     encryptResponse.setErrorCode(ErrorCode.SUCCESS.getCode());
-                    encryptResponse.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());  
+                    encryptResponse.setErrorMessage(ErrorCode.SUCCESS.getCodeDesc());
                 }
             } catch (DataTypeCastException e) {
                 logger.error("[KeyManagerCallback.onPush]  deserialize the data error.", e);
@@ -117,7 +117,7 @@ public class KeyManagerCallback extends AmopCallback {
         }
         return encryptResponse;
     }
-    
+
     /**
      * 检查是否有权限获取秘钥数据.
      * @param arg 请求秘钥对应的参数
@@ -131,12 +131,12 @@ public class KeyManagerCallback extends AmopCallback {
         }
         List<String> verifiers = (ArrayList<String>)keyMap.get(ParamKeyConstant.KEY_VERIFIERS);
         // 如果verifiers为empty,或者传入的weId为空，或者weId不在指定列表中，则无权限获取秘钥数据
-        if (CollectionUtils.isEmpty(verifiers) 
-            || StringUtils.isBlank(arg.getWeId()) 
-            || !verifiers.contains(arg.getWeId())) {
+        if (CollectionUtils.isEmpty(verifiers)
+                || StringUtils.isBlank(arg.getWeId())
+                || !verifiers.contains(arg.getWeId())) {
             logger.info(
-                "[checkAuthority] no access to get the data, this weid is {}.",
-                arg.getWeId()
+                    "[checkAuthority] no access to get the data, this weid is {}.",
+                    arg.getWeId()
             );
             return false;
         }
@@ -144,21 +144,21 @@ public class KeyManagerCallback extends AmopCallback {
         ResponseData<WeIdDocument> domRes = this.getWeIdService().getWeIdDocument(arg.getWeId());
         if (domRes.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
             logger.info(
-                "[checkAuthority] can not get the WeIdDocument, this weid is {}.",
-                arg.getWeId()
+                    "[checkAuthority] can not get the WeIdDocument, this weid is {}.",
+                    arg.getWeId()
             );
             return false;
         }
         ErrorCode errorCode = DataToolUtils.verifySecp256k1SignatureFromWeId(
-            arg.getKeyId(),
-            arg.getSignValue(),
-            domRes.getResult(),
-            null
+                arg.getKeyId(),
+                arg.getSignValue(),
+                domRes.getResult(),
+                null
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.info(
-                "[checkAuthority] the data is be changed, this weid is {}.",
-                arg.getWeId()
+                    "[checkAuthority] the data is be changed, this weid is {}.",
+                    arg.getWeId()
             );
             return false;
         }

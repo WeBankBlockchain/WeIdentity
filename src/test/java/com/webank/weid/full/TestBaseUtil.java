@@ -24,6 +24,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -34,7 +35,9 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.utils.Numeric;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -637,7 +640,7 @@ public class TestBaseUtil {
     public static PasswordKey createEcKeyPair() {
 
         PasswordKey passwordKey = new PasswordKey();
-        try {
+        /*try {
             ECKeyPair keyPair = DataToolUtils.createKeyPair();
             String publicKey = String.valueOf(keyPair.getPublicKey());
             String privateKey = String.valueOf(keyPair.getPrivateKey());
@@ -646,7 +649,18 @@ public class TestBaseUtil {
             LogUtil.info(logger, "createEcKeyPair", passwordKey);
         } catch (Exception e) {
             logger.error("createEcKeyPair error:", e);
-        }
+        }*/
+        CryptoKeyPair keyPair = DataToolUtils.createKeyPair();
+        BigInteger bigPublicKey =
+                new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));
+        BigInteger bigPrivateKey =
+                new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPrivateKey()));
+
+        String publicKey = String.valueOf(bigPublicKey);
+        String privateKey = String.valueOf(bigPrivateKey);
+        passwordKey.setPrivateKey(privateKey);
+        passwordKey.setPublicKey(publicKey);
+        LogUtil.info(logger, "createEcKeyPair", passwordKey);
         return passwordKey;
     }
 
@@ -655,7 +669,7 @@ public class TestBaseUtil {
      *
      * @return ECKeyPair
      */
-    public static ECKeyPair createKeyPair() {
+    public static CryptoKeyPair createKeyPair() {
         try {
             return DataToolUtils.createKeyPair();
         } catch (Exception e) {
