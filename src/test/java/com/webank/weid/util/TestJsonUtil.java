@@ -33,7 +33,7 @@ import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.Credential;
-import com.webank.weid.protocol.cpt.Cpt103;
+import com.webank.weid.protocol.cpt.v2.Cpt103;
 
 public class TestJsonUtil {
 
