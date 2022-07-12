@@ -17,7 +17,7 @@
  *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.webank.weid.protocol.cpt;
+package com.webank.weid.protocol.cpt.old;
 
 import lombok.Data;
 
