@@ -14,53 +14,68 @@
 
 package com.webank.weid.full.cpt;
 
-import com.webank.weid.protocol.cpt.Cpt11;
+import com.webank.weid.protocol.cpt.v2.*;
 import com.webank.weid.util.DataToolUtils;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.junit.Test;
 
 public class TestGenerateSchema {
 
+    @Test
+    public void testJjschema() throws IOException {
+        String Cpt101 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt101.class);
+        String Cpt102 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt102.class);
+        String Cpt103 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt103.class);
+        String Cpt104 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt104.class);
+        String Cpt105 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt105.class);
+        String Cpt106 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt106.class);
+        String Cpt107 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt107.class);
+        String Cpt108 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt108.class);
+        String Cpt109 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt109.class);
+        String Cpt110 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt110.class);
+        String Cpt111 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt111.class);
+        String Cpt11 = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt11.class);
+        String Cpt11Salt = DataToolUtils.generateDefaultCptJsonSchema(
+            com.webank.weid.protocol.cpt.v2.Cpt11Salt.class);
 
-//    @Test
-//    public void testGenerate() throws IOException {
-//        SchemaGeneratorConfigBuilder configBuilder = new SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_6, OptionPreset.PLAIN_JSON);
-//        SchemaGeneratorConfigPart<FieldScope> requiredCheck = configBuilder.forFields().withRequiredCheck(filed -> true);
-////        configBuilder
-//        SchemaGeneratorConfig config = configBuilder.build();
-//
-//        SchemaGenerator generator = new SchemaGenerator(config);
-//        JsonNode Cpt101 = generator.generateSchema(Cpt101.class);
-//        JsonNode Cpt103 = generator.generateSchema(Cpt103.class);
-//        JsonNode Cpt105 = generator.generateSchema(Cpt105.class);
-//        JsonNode Cpt106 = generator.generateSchema(Cpt106.class);
-//        JsonNode Cpt107 = generator.generateSchema(Cpt107.class);
-//        JsonNode Cpt108 = generator.generateSchema(Cpt108.class);
-//        JsonNode Cpt109 = generator.generateSchema(Cpt109.class);
-//        JsonNode Cpt110 = generator.generateSchema(Cpt110.class);
-//        JsonNode Cpt111 = generator.generateSchema(Cpt111.class);
-//        JsonNode Cpt11 = generator.generateSchema(Cpt11.class);
-//        JsonNode Cpt11Salt = generator.generateSchema(Cpt11Salt.class);
-//        JsonNode newCpt11Salt = generator.generateSchema(com.webank.weid.protocol.cpt.v2.Cpt11Salt.class);
-//
-////        String path = "D:\\projects\\weid\\WeIdentity\\src\\test\\resources\\cpt_new\\";
-////        Files.write(Paths.get(path + "Cpt101" + ".json"), Cpt101.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt103" + ".json"), Cpt103.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt105" + ".json"), Cpt105.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt106" + ".json"), Cpt106.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt107" + ".json"), Cpt107.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt108" + ".json"), Cpt108.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt109" + ".json"), Cpt109.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt110" + ".json"), Cpt110.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt111" + ".json"), Cpt111.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt11" + ".json"), Cpt11.toPrettyString().getBytes());
-////        Files.write(Paths.get(path + "Cpt11Salt" + ".json"), Cpt11Salt.toPrettyString().getBytes());
-//        System.out.println(newCpt11Salt.toPrettyString());
-//    }
+        String path = "D:\\projects\\weid\\WeIdentity\\src\\test\\resources\\default_cpt\\";
+        Files.write(Paths.get(path + "Cpt101" + ".json"), Cpt101.getBytes());
+        Files.write(Paths.get(path + "Cpt102" + ".json"), Cpt102.getBytes());
+        Files.write(Paths.get(path + "Cpt103" + ".json"), Cpt103.getBytes());
+        Files.write(Paths.get(path + "Cpt104" + ".json"), Cpt104.getBytes());
+        Files.write(Paths.get(path + "Cpt105" + ".json"), Cpt105.getBytes());
+        Files.write(Paths.get(path + "Cpt106" + ".json"), Cpt106.getBytes());
+        Files.write(Paths.get(path + "Cpt107" + ".json"), Cpt107.getBytes());
+        Files.write(Paths.get(path + "Cpt108" + ".json"), Cpt108.getBytes());
+        Files.write(Paths.get(path + "Cpt109" + ".json"), Cpt109.getBytes());
+        Files.write(Paths.get(path + "Cpt110" + ".json"), Cpt110.getBytes());
+        Files.write(Paths.get(path + "Cpt111" + ".json"), Cpt111.getBytes());
+        Files.write(Paths.get(path + "Cpt11" + ".json"), Cpt11.getBytes());
+        Files.write(Paths.get(path + "Cpt11Salt" + ".json"), Cpt11Salt.getBytes());
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(Cpt101).append("\n").append(Cpt102).append("\n").append(Cpt103).append("\n").append(Cpt104).append("\n").append(Cpt105)
+//            .append("\n").append(Cpt106).append("\n").append(Cpt107).append("\n").append(Cpt108).append("\n").append(Cpt109).append("\n").append(Cpt110)
+//            .append("\n").append(Cpt111).append("\n").append(Cpt11).append("\n").append(Cpt11Salt);
+//        System.out.println(sb.toString());
+        System.out.println("end");
+    }
 
     @Test
-    public void testJjschema() {
-        String result = DataToolUtils.generateDefaultCptJsonSchema(Cpt11.class);
-        System.out.println(result);
+    public void testGenerateByPojo() {
 
     }
 
