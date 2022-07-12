@@ -1,8 +1,7 @@
-package com.webank.weid.protocol.cpt.v2;
 
-import java.util.ArrayList;
+package com.webank.weid.protocol.cpt;
+
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -15,123 +14,69 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 
 /**
- * test cpt
+ * test CPT
  * <p>
- * Reserved CPT 11
+ * Reserved CPT 11Salt
  * 
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
     "cptId",
-    "gender",
-    "tags",
     "userId",
     "userName"
 })
 @Generated("jsonschema2pojo")
-public class Cpt11 {
+public class Cpt11Salt {
 
     /**
-     * 
+     * CPT ID
      * (Required)
      * 
      */
     @JsonProperty("cptId")
-    private Integer cptId;
+    @JsonPropertyDescription("CPT ID")
+    private String cptId;
     /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("gender")
-    private String gender;
-    /**
-     * Registered Tags
-     * (Required)
-     * 
-     */
-    @JsonProperty("tags")
-    @JsonPropertyDescription("Registered Tags")
-    private List<String> tags = new ArrayList<String>();
-    /**
-     * 
+     * User ID
      * (Required)
      * 
      */
     @JsonProperty("userId")
+    @JsonPropertyDescription("User ID")
     private String userId;
     /**
-     * 
+     * User Name
      * (Required)
      * 
      */
     @JsonProperty("userName")
+    @JsonPropertyDescription("User Name")
     private String userName;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     /**
-     * 
+     * CPT ID
      * (Required)
      * 
      */
     @JsonProperty("cptId")
-    public Integer getCptId() {
+    public String getCptId() {
         return cptId;
     }
 
     /**
-     * 
+     * CPT ID
      * (Required)
      * 
      */
     @JsonProperty("cptId")
-    public void setCptId(Integer cptId) {
+    public void setCptId(String cptId) {
         this.cptId = cptId;
     }
 
     /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("gender")
-    public String getGender() {
-        return gender;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("gender")
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    /**
-     * Registered Tags
-     * (Required)
-     * 
-     */
-    @JsonProperty("tags")
-    public List<String> getTags() {
-        return tags;
-    }
-
-    /**
-     * Registered Tags
-     * (Required)
-     * 
-     */
-    @JsonProperty("tags")
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
-    /**
-     * 
+     * User ID
      * (Required)
      * 
      */
@@ -141,7 +86,7 @@ public class Cpt11 {
     }
 
     /**
-     * 
+     * User ID
      * (Required)
      * 
      */
@@ -151,7 +96,7 @@ public class Cpt11 {
     }
 
     /**
-     * 
+     * User Name
      * (Required)
      * 
      */
@@ -161,7 +106,7 @@ public class Cpt11 {
     }
 
     /**
-     * 
+     * User Name
      * (Required)
      * 
      */
@@ -183,18 +128,10 @@ public class Cpt11 {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(Cpt11 .class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
+        sb.append(Cpt11Salt.class.getName()).append('@').append(Integer.toHexString(System.identityHashCode(this))).append('[');
         sb.append("cptId");
         sb.append('=');
         sb.append(((this.cptId == null)?"<null>":this.cptId));
-        sb.append(',');
-        sb.append("gender");
-        sb.append('=');
-        sb.append(((this.gender == null)?"<null>":this.gender));
-        sb.append(',');
-        sb.append("tags");
-        sb.append('=');
-        sb.append(((this.tags == null)?"<null>":this.tags));
         sb.append(',');
         sb.append("userId");
         sb.append('=');
@@ -219,12 +156,10 @@ public class Cpt11 {
     @Override
     public int hashCode() {
         int result = 1;
-        result = ((result* 31)+((this.gender == null)? 0 :this.gender.hashCode()));
-        result = ((result* 31)+((this.cptId == null)? 0 :this.cptId.hashCode()));
         result = ((result* 31)+((this.additionalProperties == null)? 0 :this.additionalProperties.hashCode()));
         result = ((result* 31)+((this.userName == null)? 0 :this.userName.hashCode()));
+        result = ((result* 31)+((this.cptId == null)? 0 :this.cptId.hashCode()));
         result = ((result* 31)+((this.userId == null)? 0 :this.userId.hashCode()));
-        result = ((result* 31)+((this.tags == null)? 0 :this.tags.hashCode()));
         return result;
     }
 
@@ -233,11 +168,11 @@ public class Cpt11 {
         if (other == this) {
             return true;
         }
-        if ((other instanceof Cpt11) == false) {
+        if ((other instanceof Cpt11Salt) == false) {
             return false;
         }
-        Cpt11 rhs = ((Cpt11) other);
-        return (((((((this.gender == rhs.gender)||((this.gender!= null)&&this.gender.equals(rhs.gender)))&&((this.cptId == rhs.cptId)||((this.cptId!= null)&&this.cptId.equals(rhs.cptId))))&&((this.additionalProperties == rhs.additionalProperties)||((this.additionalProperties!= null)&&this.additionalProperties.equals(rhs.additionalProperties))))&&((this.userName == rhs.userName)||((this.userName!= null)&&this.userName.equals(rhs.userName))))&&((this.userId == rhs.userId)||((this.userId!= null)&&this.userId.equals(rhs.userId))))&&((this.tags == rhs.tags)||((this.tags!= null)&&this.tags.equals(rhs.tags))));
+        Cpt11Salt rhs = ((Cpt11Salt) other);
+        return (((((this.additionalProperties == rhs.additionalProperties)||((this.additionalProperties!= null)&&this.additionalProperties.equals(rhs.additionalProperties)))&&((this.userName == rhs.userName)||((this.userName!= null)&&this.userName.equals(rhs.userName))))&&((this.cptId == rhs.cptId)||((this.cptId!= null)&&this.cptId.equals(rhs.cptId))))&&((this.userId == rhs.userId)||((this.userId!= null)&&this.userId.equals(rhs.userId))));
     }
 
 }

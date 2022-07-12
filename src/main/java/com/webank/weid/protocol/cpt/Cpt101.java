@@ -1,4 +1,4 @@
-package com.webank.weid.protocol.cpt.v2;
+package com.webank.weid.protocol.cpt;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -36,7 +36,7 @@ public class Cpt101 {
      */
     @JsonProperty("duration")
     @JsonPropertyDescription("Authorize to this WeID")
-    private Integer duration;
+    private Long duration;
     /**
      * Authorize from this WeID
      * (Required)
@@ -78,7 +78,7 @@ public class Cpt101 {
      * 
      */
     @JsonProperty("duration")
-    public Integer getDuration() {
+    public Long getDuration() {
         return duration;
     }
 
@@ -88,7 +88,7 @@ public class Cpt101 {
      * 
      */
     @JsonProperty("duration")
-    public void setDuration(Integer duration) {
+    public void setDuration(Long duration) {
         this.duration = duration;
     }
 
