@@ -23,7 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.cpt.Cpt103;
+import com.webank.weid.protocol.cpt.v2.*;
 import com.webank.weid.suite.cache.CacheManager;
 import com.webank.weid.suite.cache.CacheNode;
 
