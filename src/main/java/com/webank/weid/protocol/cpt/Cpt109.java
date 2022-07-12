@@ -35,12 +35,12 @@ import lombok.Data;
 public class Cpt109 {
 
     /**
-     * caculate the hash from the entire list rather than from any single credential.
+     * calculate the hash from the entire list rather than from any single credential.
      */
     String claimHash;
 
     /**
-     * trusted timestamping provided by the trusted third party or by the consensus of each node in
+     * trusted timestamp provided by the trusted third party or by the consensus of each node in
      * the consortium chain.
      */
     Long timestamp;
