@@ -1,4 +1,4 @@
-package com.webank.weid.protocol.cpt.v2;
+package com.webank.weid.protocol.cpt;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

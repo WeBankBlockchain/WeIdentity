@@ -14,7 +14,6 @@
 
 package com.webank.weid.full.cpt;
 
-import com.webank.weid.protocol.cpt.v2.*;
 import com.webank.weid.util.DataToolUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,31 +25,31 @@ public class TestGenerateSchema {
     @Test
     public void testJjschema() throws IOException {
         String Cpt101 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt101.class);
+            com.webank.weid.protocol.cpt.Cpt101.class);
         String Cpt102 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt102.class);
+            com.webank.weid.protocol.cpt.Cpt102.class);
         String Cpt103 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt103.class);
+            com.webank.weid.protocol.cpt.Cpt103.class);
         String Cpt104 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt104.class);
+            com.webank.weid.protocol.cpt.Cpt104.class);
         String Cpt105 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt105.class);
+            com.webank.weid.protocol.cpt.Cpt105.class);
         String Cpt106 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt106.class);
+            com.webank.weid.protocol.cpt.Cpt106.class);
         String Cpt107 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt107.class);
+            com.webank.weid.protocol.cpt.Cpt107.class);
         String Cpt108 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt108.class);
+            com.webank.weid.protocol.cpt.Cpt108.class);
         String Cpt109 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt109.class);
+            com.webank.weid.protocol.cpt.Cpt109.class);
         String Cpt110 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt110.class);
+            com.webank.weid.protocol.cpt.Cpt110.class);
         String Cpt111 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt111.class);
+            com.webank.weid.protocol.cpt.Cpt111.class);
         String Cpt11 = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt11.class);
+            com.webank.weid.protocol.cpt.Cpt11.class);
         String Cpt11Salt = DataToolUtils.generateDefaultCptJsonSchema(
-            com.webank.weid.protocol.cpt.v2.Cpt11Salt.class);
+            com.webank.weid.protocol.cpt.Cpt11Salt.class);
 
         String path = "D:\\projects\\weid\\WeIdentity\\src\\test\\resources\\default_cpt\\";
         Files.write(Paths.get(path + "Cpt101" + ".json"), Cpt101.getBytes());

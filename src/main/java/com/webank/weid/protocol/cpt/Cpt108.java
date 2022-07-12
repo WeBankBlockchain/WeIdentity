@@ -1,4 +1,4 @@
-package com.webank.weid.protocol.cpt.v2;
+package com.webank.weid.protocol.cpt;
 
 import com.webank.weid.protocol.base.CredentialPojo;
 import java.util.ArrayList;
