@@ -22,6 +22,9 @@ Created by https://www.gitignore.io/api/vim,java,maven,gradle,java-web,intellij,
 .idea/**/gradle.xml
 .idea/**/libraries
 
+.idea/*.xml
+.idea/vcs.xml
+
 # CMake
 cmake-build-debug/
 
