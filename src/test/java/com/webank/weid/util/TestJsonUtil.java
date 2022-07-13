@@ -19,12 +19,13 @@
 
 package com.webank.weid.util;
 
+import com.networknt.schema.ValidationMessage;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Set;
 import java.util.UUID;
 
-import com.github.fge.jsonschema.core.report.ProcessingReport;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -96,9 +97,9 @@ public class TestJsonUtil {
         cpt103.setChallenge(Challenge.create("did:weid:0x11111", "abcd"));
         cpt103.setProof("aaa");
         cpt103.setId("did:weid:101:0x12221");
-        ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
+        Set<ValidationMessage> checkRes = DataToolUtils.checkJsonVersusSchema(
             DataToolUtils.objToJsonStrWithNoPretty(cpt103), cptSchema);
-        Assert.assertTrue(checkRes.isSuccess());
+        Assert.assertTrue(checkRes.size() == 0);
 
         cptSchema = DataToolUtils.generateDefaultCptJsonSchema(105);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));
