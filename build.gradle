@@ -111,13 +111,11 @@ List json = [
         "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
         "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jackson_version",
         "com.fasterxml.jackson.module:jackson-module-jsonSchema:$jackson_version",
-        "com.github.fge:json-schema-validator:2.2.6",  //LGPL
+        "org.jsonschema2pojo:jsonschema2pojo-core:1.1.2",
+        "org.jsonschema2pojo:jsonschema2pojo-gradle-plugin:1.1.2",
+        "com.networknt:json-schema-validator:1.0.71",
+//        "com.github.fge:json-schema-validator:2.2.6",  //LGPL
 //        "com.github.reinert:jjschema:1.16",  //LGPL
-        "org.jsonschema2pojo:jsonschema2pojo-core:1.1.2", //apache
-        "org.jsonschema2pojo:jsonschema2pojo-gradle-plugin:1.1.2", //apache
-        "com.networknt:json-schema-validator:1.0.71", // apache
-//        "com.github.victools:jsonschema-generator:4.25.0", // generate schema from java
-
 ]
 
 List mysql_driver = [
@@ -161,12 +159,6 @@ configurations {
 }
 
 dependencies {
-    compile ("uk.co.gresearch.siembol:siembol-common:2.5.0") {
-        exclude group: "com.github.java-json-tools"
-        exclude group: "org.apache.kafka"
-    }
-
-
     localDeps 'org.projectlombok:lombok:1.18.10'
     if (!gradle.startParameter.isOffline()) {
         compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval
@@ -397,15 +389,15 @@ jsonSchema2Pojo {
 
     // Location of the JSON Schema file(s). This may refer to a single file or a directory of files.
 //    source = files("${sourceSets.main.output.resourcesDir}/json")
-    source = files("D:\\projects\\weid\\WeIdentity\\src\\test\\resources\\cpt")
+    source = files("D:\\projects\\weid\\WeIdentity\\src\\test\\resources\\default_cpt")
 
     // Target directory for generated Java source files. The plugin will add this directory to the
     // java source set so the compiler will find and compile the newly generated source files.
-    targetDirectory = file("${project.buildDir}/generated-sources/js2p")
+    targetDirectory = file("${project.buildDir}/generated-sources/new/js2p")
 
     // Package name used for generated Java classes (for types where a fully qualified name has not
     // been supplied in the schema using the 'javaType' property).
-    targetPackage = ''
+    targetPackage = 'com.webank.weid.protocol.cpt.v2'
 
 }
 
