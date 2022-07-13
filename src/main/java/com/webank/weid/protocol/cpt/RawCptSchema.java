@@ -14,6 +14,8 @@
 
 package com.webank.weid.protocol.cpt;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author marsli
  */
@@ -33,4 +35,32 @@ public final class RawCptSchema {
     public final static String CPT11 = "{\"type\":\"object\",\"description\":\"Reserved CPT 11\",\"title\":\"test CPT\",\"properties\":{\"cptId\":{\"type\":\"integer\",\"description\":\"CPT ID\",\"minimum\":1},\"gender\":{\"type\":\"string\",\"description\":\"Gender\",\"enum\":[\"MALE\",\"FEMALE\"]},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"Registered Tags\",\"minItems\":1},\"userId\":{\"type\":\"string\",\"description\":\"User ID\"},\"userName\":{\"type\":\"string\",\"description\":\"User Name\",\"maxLength\":30}},\"required\":[\"cptId\",\"gender\",\"tags\",\"userId\",\"userName\"],\"$schema\":\"http://json-schema.org/draft-04/schema#\"}";
     public final static String CPT11Salt = "{\"type\":\"object\",\"description\":\"Reserved CPT 11Salt\",\"title\":\"test CPT\",\"properties\":{\"cptId\":{\"type\":\"string\",\"description\":\"CPT ID\",\"minimum\":1},\"userId\":{\"type\":\"string\",\"description\":\"User ID\"},\"userName\":{\"type\":\"string\",\"description\":\"User Name\",\"maxLength\":30}},\"required\":[\"cptId\",\"userId\",\"userName\"],\"$schema\":\"http://json-schema.org/draft-04/schema#\"}";
 
+    public static String getCptSchema(Integer cptId) {
+        switch (cptId) {
+            case 101:
+                return CPT101;
+            case 102:
+                return CPT102;
+            case 103:
+                return CPT103;
+            case 104:
+                return CPT104;
+            case 105:
+                return CPT105;
+            case 106:
+                return CPT106;
+            case 107:
+                return CPT107;
+            case 108:
+                return CPT108;
+            case 109:
+                return CPT109;
+            case 110:
+                return CPT110;
+            case 111:
+                return CPT111;
+            default:
+                return StringUtils.EMPTY;
+        }
+    }
 }

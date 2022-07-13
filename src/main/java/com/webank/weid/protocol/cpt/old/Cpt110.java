@@ -19,7 +19,6 @@
 
 package com.webank.weid.protocol.cpt.old;
 
-import com.github.reinert.jjschema.Attributes;
 import lombok.Data;
 
 /**
@@ -28,39 +27,39 @@ import lombok.Data;
  * @author tonychen
  */
 @Data
-@Attributes(title = "metadata CPT", description = "Reserved CPT 110")
+//@Attributes(title = "metadata CPT", description = "Reserved CPT 110")
 public class Cpt110 {
 
-    @Attributes(required = true, description = "CPT ID")
+//    @Attributes(required = true, description = "CPT ID")
     private Integer cptId;
 
     /**
      * credential id.
      */
-    @Attributes(required = true, description = "credential ID")
+//    @Attributes(required = true, description = "credential ID")
     private String credentialId;
 
     /**
      * Required: The context field.
      */
-    @Attributes(required = true, description = "context")
+//    @Attributes(required = true, description = "context")
     private String context;
 
     /**
      * Required: The issuer WeIdentity DID.
      */
-    @Attributes(required = true, description = "issuer weid")
+//    @Attributes(required = true, description = "issuer weid")
     private String issuer;
 
     /**
      * Required: The create date.
      */
-    @Attributes(required = true, description = "issuanceDate")
+//    @Attributes(required = true, description = "issuanceDate")
     private Long issuanceDate;
 
     /**
      * Required: The expire date.
      */
-    @Attributes(required = true, description = "expirationDate")
+//    @Attributes(required = true, description = "expirationDate")
     private Long expirationDate;
 }

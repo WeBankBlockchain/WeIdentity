@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.web3j.crypto.ECKeyPair;
 import org.slf4j.Logger;
@@ -239,7 +238,7 @@ public class TestBaseUtil {
     public static HashMap<String, Object> buildCptJsonSchemaDataFromFile() throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -254,7 +253,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-singlelevel-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -269,7 +268,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-multilevel-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -284,7 +283,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-spectpl-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -385,7 +384,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/json-schema-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/json-schema-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -404,7 +403,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-multilevel-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -424,7 +423,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-singlelevel-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -444,7 +443,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-spectpl-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 

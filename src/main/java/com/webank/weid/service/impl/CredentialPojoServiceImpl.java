@@ -1,35 +1,7 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
 
 package com.webank.weid.service.impl;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.networknt.schema.ValidationMessage;
 import com.webank.wedpr.common.Utils;
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.PredicateType;
@@ -39,14 +11,6 @@ import com.webank.wedpr.selectivedisclosure.VerifierClient;
 import com.webank.wedpr.selectivedisclosure.VerifierResult;
 import com.webank.wedpr.selectivedisclosure.proto.Predicate;
 import com.webank.wedpr.selectivedisclosure.proto.VerificationRule;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
@@ -87,6 +51,22 @@ import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.PropertyUtils;
 import com.webank.weid.util.TimestampUtils;
 import com.webank.weid.util.WeIdUtils;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.web3j.abi.datatypes.Address;
+import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.web3j.crypto.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -718,9 +698,9 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                 return ErrorCode.CPT_JSON_SCHEMA_INVALID;
             }
             if (!isSelectivelyDisclosed) {
-                ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
+                Set<ValidationMessage>  checkRes = DataToolUtils.checkJsonVersusSchema(
                     claimStr, cptJsonSchema);
-                if (!checkRes.isSuccess()) {
+                if (checkRes.size() != 0) {
                     logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
                     return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
                 }
@@ -2264,7 +2244,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     }
 
     @Override
-    public ResponseData<ProcessingReport> checkCredentialWithCpt(
+    public ResponseData<Set<ValidationMessage>> checkCredentialWithCpt(
         CredentialPojo credential, 
         Cpt cpt
     ) {
@@ -2312,12 +2292,12 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             }
             String claimStr = DataToolUtils.serialize(credential.getClaim());
             // 验证cpt与credential的匹配性
-            ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
+            Set<ValidationMessage>  checkRes = DataToolUtils.checkJsonVersusSchema(
                 claimStr, cptJsonSchema);
-            if (!checkRes.isSuccess()) {
+            if (checkRes.size() != 0) {
                 logger.error(
                     "[checkCredentialWithCpt] check fail, ProcessingReport = {}.", checkRes);
-                ResponseData<ProcessingReport> result = new ResponseData<>(
+                ResponseData<Set<ValidationMessage>> result = new ResponseData<>(
                     checkRes, 
                     ErrorCode.CREDENTIAL_DOES_NOT_MATCHE_THE_CPT
                 );
