@@ -19,12 +19,9 @@
 
 package com.webank.weid.protocol.cpt.old;
 
-import java.util.List;
-
-import com.github.reinert.jjschema.Attributes;
-import lombok.Data;
-
 import com.webank.weid.protocol.base.CredentialPojo;
+import java.util.List;
+import lombok.Data;
 
 /**
  * Multiple signature to a CredentialPojo.
@@ -33,9 +30,9 @@ import com.webank.weid.protocol.base.CredentialPojo;
  */
 
 @Data
-@Attributes(title = "Embedded Signature", description = "Embedded Signature object for multi-sign")
+//@Attributes(title = "Embedded Signature", description = "Embedded Signature object for multi-sign")
 public class Cpt107 {
 
-    @Attributes(required = true, description = "Original credential list to be signed")
+//    @Attributes(required = true, description = "Original credential list to be signed")
     List<CredentialPojo> credentialList;
 }

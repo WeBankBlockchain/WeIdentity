@@ -972,8 +972,8 @@ public class TestCreateCredentialPojo extends TestBaseService {
             wargs.setPublicKey(keyPair.getPublicKey().toString(10));
             weIdService.createWeId(wargs);
         }
-        String cptJsonSchema = DataToolUtils
-            .generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));
+//        String cptJsonSchema = DataToolUtils.generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));
+        String cptJsonSchema = DataToolUtils.generateDefaultCptJsonSchema(101);
         CptStringArgs args = new CptStringArgs();
         args.setCptJsonSchema(cptJsonSchema);
         args.setWeIdAuthentication(sdkAuthen);
