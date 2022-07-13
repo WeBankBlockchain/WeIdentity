@@ -19,8 +19,6 @@
 
 package com.webank.weid.protocol.cpt.old;
 
-import com.github.reinert.jjschema.Attributes;
-
 import lombok.Data;
 
 /**
@@ -30,8 +28,7 @@ import lombok.Data;
  */
 
 @Data
-@Attributes(title = "Trusted Timestamp", 
-    description = "Trusted Timestamp from authorized 3rd-party, or chain consensus")
+//@Attributes(title = "Trusted Timestamp", description = "Trusted Timestamp from authorized 3rd-party, or chain consensus")
 public class Cpt109 {
 
     /**

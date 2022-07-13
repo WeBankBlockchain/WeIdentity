@@ -19,7 +19,6 @@
 
 package com.webank.weid.protocol.cpt.old;
 
-import com.github.reinert.jjschema.Attributes;
 import lombok.Data;
 
 /**
@@ -28,13 +27,13 @@ import lombok.Data;
  * @author tonychen
  */
 @Data
-@Attributes(title = "User CPT", description = "Reserved CPT 111")
+//@Attributes(title = "User CPT", description = "Reserved CPT 111")
 public class Cpt111 {
 
-    @Attributes(required = true, description = "CPT ID")
+//    @Attributes(required = true, description = "CPT ID")
     private String cptId;
-    @Attributes(required = true, description = "credential Signature Request", minimum = 1)
+//    @Attributes(required = true, description = "credential Signature Request", minimum = 1)
     private String credentialSignatureRequest;
-    @Attributes(required = true, description = "User Nonce")
+//    @Attributes(required = true, description = "User Nonce")
     private String userNonce;
 }

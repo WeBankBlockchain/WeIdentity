@@ -19,12 +19,12 @@
 
 package com.webank.weid.protocol.base;
 
+import com.webank.weid.util.DataToolUtils;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.github.fge.jackson.JsonLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +59,7 @@ public class CredentialPojoList extends ArrayList<CredentialPojo> implements Jso
      */
     public static CredentialPojoList fromJson(String json) {
         try {
-            JsonNode jsonNode = JsonLoader.fromString(json);
+            JsonNode jsonNode = DataToolUtils.loadJsonObject(json);
             ArrayNode arrayNode = (ArrayNode)jsonNode;
             CredentialPojoList result = new CredentialPojoList();
             arrayNode.forEach(node -> result.add(CredentialPojo.fromJson(node.toString())));
