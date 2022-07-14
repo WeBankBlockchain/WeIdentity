@@ -584,8 +584,7 @@ public class TestRegisterCptArgsWithId extends TestBaseService {
         Assert.assertNotNull(responseData.getResult());
 
         ResponseData<CptBaseInfo> errResponse = cptService.registerCpt(registerCptArgs, null);
-        Assert
-            .assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), errResponse.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), errResponse.getErrorCode().intValue());
     }
 
     /**

@@ -94,10 +94,12 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
             JsonNode jsonNode = null;
             //获取policyJson文件 转换成JsonNode
             File file = new File(policyFileName);
+            logger.info("create policy file path:{}|{}", file.getAbsolutePath(), policyFileName);
             if (file.exists()) {
-                jsonNode = DataToolUtils.loadJsonObjectFromFile(file);  //todo check
+                jsonNode = DataToolUtils.loadJsonObjectFromFile(file);
             } else {
-                jsonNode = DataToolUtils.loadJsonObjectFromResource("/" + policyFileName); //todo check
+                // 去除了 / 开头 ("/" + policyFileName)
+                jsonNode = DataToolUtils.loadJsonObjectFromResource(policyFileName);
             }
 
             if (jsonNode == null) {
