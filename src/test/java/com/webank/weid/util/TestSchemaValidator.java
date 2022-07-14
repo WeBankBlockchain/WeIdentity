@@ -14,9 +14,6 @@
 
 package com.webank.weid.util;
 
-import static org.junit.Assert.assertThat;
-import static sun.nio.cs.Surrogate.is;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,8 +21,14 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion.VersionFlag;
 import com.networknt.schema.ValidationMessage;
+import com.webank.weid.protocol.cpt.Cpt101;
+import com.webank.weid.protocol.cpt.RawCptSchema;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Set;
 import org.junit.Test;
+import org.springframework.util.Assert;
 
 public class TestSchemaValidator {
 
@@ -34,33 +37,41 @@ public class TestSchemaValidator {
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance(VersionFlag.V4);
         ObjectMapper mapper = new ObjectMapper();
         JsonSchema schema = factory.getSchema("{\"enum\":[1, 2, 3, 4],\"enumErrorCode\":\"Not in the list\",}");
+
         JsonNode node = mapper.readTree("7");
+        JsonNode node2 = mapper.readTree("3");
+
         Set<ValidationMessage> errors = schema.validate(node);
         // 如果validate通过，则Set为1
         System.out.println(errors.size());
         System.out.println(errors.iterator().next().getCode());
-        System.out.println(errors.iterator().next().getMessage());
-        System.out.println(errors.iterator().next().getDetails());
+
         // 如果validate通过，则Set为空
-        JsonNode node2 = mapper.readTree("3");
         Set<ValidationMessage> errors2 = schema.validate(node2);
         System.out.println(errors2.size());
-        System.out.println(errors2.iterator().next().toString());
-
-        // With automatic version detection
-//        JsonNode schemaNode = mapper.readTree(
-//            "{\"$schema\": \"http://json-schema.org/draft-06/schema#\", \"properties\": { \"id\": {\"type\": \"number\"}}}");
-//        JsonSchema schema1 = factory.getSchema(schemaNode);
-//
-//        schema1.initializeValidators(); // by default all schemas are loaded lazily. You can load them eagerly via
-//        // initializeValidators()
-//
-//        JsonNode node1 = mapper.readTree("{\"id\": \"2\"}");
-//        Set<ValidationMessage> errors1 = schema1.validate(node1);
-//        System.out.println(errors1.size());
-//        System.out.println(errors1.iterator().next().toString());
+        System.out.println(errors2.iterator().next().getCode());
 
     }
 
+    @Test
+    public void testLoadJson() throws IOException {
+        JsonNode jsonNodeResource =DataToolUtils.loadJsonObjectFromResource("policy.json");
+        File file = new File("src/test/resources/policy.json");
+        System.out.println(file.getAbsolutePath());
+        JsonNode jsonNodeFile =DataToolUtils.loadJsonObjectFromFile(file);
+
+        Assert.notNull(jsonNodeResource, "read null");
+        Assert.notNull(jsonNodeFile, "read null");
+
+    }
+
+    @Test
+    public void testCheckCptDefaultSchema() {
+        for (int i = 101; i <= 111; i++) {
+            System.out.println(RawCptSchema.getCptSchema(i));
+        }
+        System.out.println(RawCptSchema.getCptSchema(11));
+
+    }
 
 }
