@@ -19,6 +19,26 @@
 
 package com.webank.weid.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.IntNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.POJONode;
+import com.fasterxml.jackson.databind.node.TextNode;
+import com.sun.codemodel.ClassType;
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JCodeModel;
+import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JFieldVar;
+import com.sun.codemodel.JType;
+import com.webank.wedpr.selectivedisclosure.PredicateType;
+import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.JsonSchemaConstant;
+import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.protocol.base.ClaimPolicy;
+import com.webank.weid.protocol.base.CredentialPojo;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
@@ -35,23 +55,6 @@ import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
-
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.IntNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.POJONode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.github.fge.jackson.JsonLoader;
-import com.google.common.collect.Lists;
-import com.sun.codemodel.ClassType;
-import com.sun.codemodel.JClass;
-import com.sun.codemodel.JCodeModel;
-import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JFieldVar;
-import com.sun.codemodel.JType;
-import com.webank.wedpr.selectivedisclosure.PredicateType;
 import org.apache.commons.lang3.StringUtils;
 import org.jsonschema2pojo.DefaultGenerationConfig;
 import org.jsonschema2pojo.GenerationConfig;
@@ -60,11 +63,6 @@ import org.jsonschema2pojo.SchemaGenerator;
 import org.jsonschema2pojo.SchemaMapper;
 import org.jsonschema2pojo.SchemaStore;
 import org.jsonschema2pojo.rules.RuleFactory;
-
-import com.webank.weid.constant.CredentialConstant;
-import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.CredentialPojo;
 
 public class JsonUtil {
 
@@ -108,8 +106,8 @@ public class JsonUtil {
             //將map拍平成一级json
             String value = jsonToMonolayer(DataToolUtils.serialize(result), 10);
             //提取平级Json中key的集合
-            JsonLoader.fromString(value)
-                .fieldNames().forEachRemaining(fieldName -> resultList.add(fieldName));
+            toJsonNode(value)
+                .fieldNames().forEachRemaining(resultList::add);
         }
         return resultList;
     }
@@ -186,7 +184,7 @@ public class JsonUtil {
      */
     private static void fixArray(Map<String, Object> resultMap, String key) {
 
-        ArrayList<Object> objList = Lists.newArrayList();
+        ArrayList<Object> objList = new ArrayList<>();
         IntStream.range(0, maxArraySize()).forEach(i -> objList.add(resultMap.get(key)));
         resultMap.put(key, objList);
     }
@@ -217,7 +215,7 @@ public class JsonUtil {
         throws IOException {
 
         Map<String, Object> result = replenishMeta(credential.getClaim(), credential);
-        ObjectNode objectNode = (ObjectNode) JsonLoader.fromString(DataToolUtils.serialize(result));
+        ObjectNode objectNode = (ObjectNode) toJsonNode(DataToolUtils.serialize(result));
         return monolayerToMap(jsonToMonolayer(objectNode, maxArraySize(), 10));
     }
 
@@ -228,7 +226,7 @@ public class JsonUtil {
 
     private static Map<String, String> monolayerToMap(String json) throws IOException {
 
-        JsonNode resultNode = JsonLoader.fromString(json);
+        JsonNode resultNode = toJsonNode(json);
         Map<String, String> resultMap = new HashMap<String, String>();
         resultNode.fields()
             .forEachRemaining(node -> resultMap.put(node.getKey(), node.getValue().asText()));
@@ -244,7 +242,7 @@ public class JsonUtil {
      */
     public static String claimPolicyToMonolayer(ClaimPolicy claimPolicy) throws IOException {
 
-        ObjectNode objectNode = (ObjectNode) JsonLoader.fromString(
+        ObjectNode objectNode = (ObjectNode) toJsonNode(
             claimPolicy.getFieldsToBeDisclosed());
         return jsonToMonolayer(objectNode, maxArraySize(), 0);
     }
@@ -259,7 +257,7 @@ public class JsonUtil {
      */
     public static String jsonToMonolayer(String json, int radix) throws IOException {
 
-        return jsonToMonolayer(JsonLoader.fromString(json), -1, radix);
+        return jsonToMonolayer(toJsonNode(json), -1, radix);
     }
 
     /**
@@ -523,12 +521,11 @@ public class JsonUtil {
     /*
      * 将字符串转换成JsonNode.
      */
-    private static JsonNode toJsonNode(String jsonString) {
-
+    private static JsonNode toJsonNode(String jsonString)  {
         try {
             return MAPPER.readTree(jsonString);
-        } catch (IOException e) {
-            return null;
+        } catch (JsonProcessingException e) {
+            throw new DataTypeCastException(e);
         }
     }
 
@@ -591,7 +588,7 @@ public class JsonUtil {
      */
     public static String monolayerToJson(String json, int radix) throws IOException {
 
-        return monolayerToJson(JsonLoader.fromString(json), radix);
+        return monolayerToJson(toJsonNode(json), radix);
     }
 
     /**
@@ -746,5 +743,6 @@ public class JsonUtil {
     private enum ConvertType {
         STRING_TO_DECIMAL, DECIMAL_TO_STRING
     }
+
 
 }
