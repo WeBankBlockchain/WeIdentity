@@ -183,7 +183,7 @@ public class TestUpdateCpt extends TestBaseService {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, null);
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(), 
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
@@ -200,7 +200,7 @@ public class TestUpdateCpt extends TestBaseService {
         ResponseData<CptBaseInfo> response = cptService.updateCpt(cptMapArgs, -1);
         LogUtil.info(logger, "updateCpt", response);
 
-        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(), 
+        Assert.assertEquals(ErrorCode.CPT_ID_ILLEGAL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
     }
