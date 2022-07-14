@@ -407,27 +407,3 @@ jsonSchema2Pojo {
     targetPackage = 'com.webank.weid.protocol.cpt.v2'
 
 }
-
-
-//downloadLicenses {
-//    ext.apacheTwo = license('Apache License, Version 2.0', 'http://opensource.org/licenses/Apache-2.0')
-//    ext.bsd = license('BSD License', 'http://www.opensource.org/licenses/bsd-license.php')
-//
-//    includeProjectDependencies = true
-//    licenses = [
-//            (group('com.myproject.foo')) : license('My Company License'),
-//            'org.apache.james:apache-mime4j:0.6' : apacheTwo,
-//            'org.some-bsd:project:1.0' : bsd
-//    ]
-//
-//    aliases = [
-//            (apacheTwo) : ['The Apache Software License, Version 2.0', 'Apache 2', 'Apache License Version 2.0', 'Apache License, Version 2.0', 'Apache License 2.0', license('Apache License', 'http://www.apache.org/licenses/LICENSE-2.0')],
-//            (bsd) : ['BSD', license('New BSD License', 'http://www.opensource.org/licenses/bsd-license.php')]
-//    ]
-//
-//    excludeDependencies = [
-//            'com.some-other-project.bar:foobar:1.0'
-//    ]
-//
-//    dependencyConfiguration = 'compile'
-//}
