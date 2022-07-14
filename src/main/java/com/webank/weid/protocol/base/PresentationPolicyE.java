@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.slf4j.Logger;
@@ -95,12 +94,14 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
             JsonNode jsonNode = null;
             //获取policyJson文件 转换成JsonNode
             File file = new File(policyFileName);
+            logger.info("create policy file path:{}|{}", file.getAbsolutePath(), policyFileName);
             if (file.exists()) {
-                jsonNode = JsonLoader.fromFile(file);
+                jsonNode = DataToolUtils.loadJsonObjectFromFile(file);
             } else {
-                jsonNode = JsonLoader.fromResource("/" + policyFileName);
+                // 去除了 / 开头 ("/" + policyFileName)
+                jsonNode = DataToolUtils.loadJsonObjectFromResource(policyFileName);
             }
-           
+
             if (jsonNode == null) {
                 logger.error("can not find the {} file in your classpath.", policyFileName);
                 return policy;

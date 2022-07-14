@@ -19,21 +19,6 @@
 
 package com.webank.weid.full.evidence;
 
-import java.io.File;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
-
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
@@ -49,6 +34,18 @@ import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.OffLineBatchTask;
+import java.io.File;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test CreateEvidence.
@@ -650,19 +647,16 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertTrue(evidenceService.generateHash(selectiveCredentialPojo).getResult()
             .getHash().equalsIgnoreCase(selectiveCredentialPojo.getHash()));
         // Test file
-        //File file = new ClassPathResource("test-template.pdf").getFile();
         String path = TestCreateEvidence.class
                 .getClassLoader().getResource("test-template.pdf").getPath();
         File file = new File(path);
         String fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
         // Support GBK and UTF-8 encoding here - they will yield different hash values, though
-        //file = new ClassPathResource("org1.txt").getFile();
         path = TestCreateEvidence.class.getClassLoader().getResource("org1.txt").getPath();
         file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
-        //file = new ClassPathResource("test-hash-pic.png").getFile();
         path = TestCreateEvidence.class.getClassLoader().getResource("test-hash-pic.png").getPath();
         file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();

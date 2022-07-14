@@ -50,8 +50,6 @@ import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
-import com.webank.weid.protocol.request.SetAuthenticationArgs;
-import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialPojoUtils;
@@ -979,8 +977,8 @@ public class TestCreateCredentialPojo extends TestBaseService {
             wargs.setPublicKey(publicKey.toString(10));
             weIdService.createWeId(wargs);
         }
-        String cptJsonSchema = DataToolUtils
-            .generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));
+//        String cptJsonSchema = DataToolUtils.generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));
+        String cptJsonSchema = DataToolUtils.generateDefaultCptJsonSchema(101);
         CptStringArgs args = new CptStringArgs();
         args.setCptJsonSchema(cptJsonSchema);
         args.setWeIdAuthentication(sdkAuthen);
