@@ -1,26 +1,40 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
 
 package com.webank.weid.util;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.networknt.schema.SpecVersion.VersionFlag;
+import com.networknt.schema.ValidationMessage;
+import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.constant.JsonSchemaConstant;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.base.PublicKeyProperty;
+import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.cpt.RawCptSchema;
+import com.webank.weid.protocol.request.CptMapArgs;
+import com.webank.weid.protocol.response.RsvSignature;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -48,33 +62,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.report.ProcessingMessage;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchema;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.github.reinert.jjschema.v1.JsonSchemaV4Factory;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -96,17 +88,6 @@ import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.webank.weid.constant.CredentialConstant;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.exception.DataTypeCastException;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.PublicKeyProperty;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.request.CptMapArgs;
-import com.webank.weid.protocol.response.RsvSignature;
 
 /**
  * 数据工具类.
@@ -152,6 +133,8 @@ public final class DataToolUtils {
 
     private static final String encryptType;
 
+    private static final com.networknt.schema.JsonSchemaFactory JSON_SCHEMA_FACTORY;
+
     static {
         // sort by letter
         OBJECT_MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
@@ -175,6 +158,8 @@ public final class DataToolUtils {
 
         //OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
         //OBJECT_READER = OBJECT_MAPPER.reader();
+
+        JSON_SCHEMA_FACTORY = com.networknt.schema.JsonSchemaFactory.getInstance(VersionFlag.V4);
     }
 
     /**
@@ -422,9 +407,29 @@ public final class DataToolUtils {
      * @return JsonNode
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static JsonNode loadJsonObject(String jsonString) throws IOException {
-        return JsonLoader.fromString(jsonString);
+    public static JsonNode loadJsonObject(String jsonString) throws JsonProcessingException {
+        return OBJECT_MAPPER.readTree(jsonString);
+
     }
+
+    public static JsonNode loadJsonObjectFromResource(String path) throws IOException {
+        try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
+            if (inputStream == null) {
+                throw new DataTypeCastException("open path to inputStream get null!");
+            }
+            return OBJECT_MAPPER.readTree(inputStream);
+        }
+    }
+
+    public static JsonNode loadJsonObjectFromFile(File file) throws IOException {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return OBJECT_MAPPER.readTree(inputStream);
+        } catch (FileNotFoundException e) {
+            logger.error("file not found when load jsonObject:{}", file.getPath());
+            throw new DataTypeCastException(e);
+        }
+    }
+
 
     /**
      * Validate Json Data versus Json Schema.
@@ -434,23 +439,38 @@ public final class DataToolUtils {
      * @return empty if yes, not empty otherwise
      * @throws Exception the exception
      */
-    public static ProcessingReport checkJsonVersusSchema(String jsonData, String jsonSchema)
+    public static Set<ValidationMessage> checkJsonVersusSchema(String jsonData, String jsonSchema)
         throws Exception {
         JsonNode jsonDataNode = loadJsonObject(jsonData);
         JsonNode jsonSchemaNode = loadJsonObject(jsonSchema);
-        JsonSchema schema = JsonSchemaFactory.byDefault().getJsonSchema(jsonSchemaNode);
-        ProcessingReport report = schema.validate(jsonDataNode);
-        if (report.isSuccess()) {
+        // use new validator
+        com.networknt.schema.JsonSchema schema = JSON_SCHEMA_FACTORY.getSchema(jsonSchemaNode);
+        Set<ValidationMessage> report = schema.validate(jsonDataNode);
+        if (report.size() == 0) {
             logger.info(report.toString());
         } else {
-            Iterator<ProcessingMessage> it = report.iterator();
+            Iterator<ValidationMessage> it = report.iterator();
             StringBuffer errorMsg = new StringBuffer();
             while (it.hasNext()) {
-                errorMsg.append(it.next().getMessage());
+                ValidationMessage msg = it.next();
+                errorMsg.append(msg.getCode()).append(":").append(msg.getMessage());
             }
             logger.error("Json schema validator failed, error: {}", errorMsg.toString());
         }
         return report;
+//        JsonSchema schema = JsonSchemaFactory.byDefault().getJsonSchema(jsonSchemaNode);
+//        ProcessingReport report = schema.validate(jsonDataNode);
+//        if (report.isSuccess()) {
+//            logger.info(report.toString());
+//        } else {
+//            Iterator<ProcessingMessage> it = report.iterator();
+//            StringBuffer errorMsg = new StringBuffer();
+//            while (it.hasNext()) {
+//                errorMsg.append(it.next().getMessage());
+//            }
+//            logger.error("Json schema validator failed, error: {}", errorMsg.toString());
+//        }
+//        return report;
     }
 
     /**
@@ -460,12 +480,12 @@ public final class DataToolUtils {
      * @return true if yes, false otherwise
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static boolean isValidJsonSchema(String jsonSchema) throws IOException {
-        return JsonSchemaFactory
-            .byDefault()
-            .getSyntaxValidator()
-            .schemaIsValid(loadJsonObject(jsonSchema));
-    }
+//    public static boolean isValidJsonSchema(String jsonSchema) {
+//        return JsonSchemaFactory
+//            .byDefault()
+//            .getSyntaxValidator()
+//            .schemaIsValid(loadJsonObject(jsonSchema));
+//    }
 
     /**
      * validate Cpt Json Schema validity .
@@ -476,7 +496,7 @@ public final class DataToolUtils {
      */
     public static boolean isCptJsonSchemaValid(String cptJsonSchema) throws IOException {
         return StringUtils.isNotEmpty(cptJsonSchema)
-            && isValidJsonSchema(cptJsonSchema)
+//            && isValidJsonSchema(cptJsonSchema)
             && cptJsonSchema.length() <= WeIdConstant.JSON_SCHEMA_MAX_LENGTH;
     }
 
@@ -1534,37 +1554,19 @@ public final class DataToolUtils {
     }
 
     /**
-     * Generate Default CPT Json Schema based on a given CPT ID.
-     *
+//     * Generate Default CPT Json Schema based on a given CPT ID.
+     * get Default CPT Json Schema from default constant class by given CPT ID
      * @param cptId the CPT ID
      * @return CPT Schema in Json String
      */
     public static String generateDefaultCptJsonSchema(Integer cptId) {
-        String cptClassStr = "com.webank.weid.protocol.cpt.Cpt" + cptId;
         try {
-            return generateDefaultCptJsonSchema(Class.forName(cptClassStr));
+            return RawCptSchema.getCptSchema(cptId);
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
     }
 
-    /**
-     * Generate Default CPT Json Schema based on a given class, to support external invocation.
-     *
-     * @param myClass the CPT ID
-     * @return CPT Schema in Json String
-     */
-    public static String generateDefaultCptJsonSchema(Class myClass) {
-        try {
-            com.github.reinert.jjschema.v1.JsonSchemaFactory schemaFactory
-                = new JsonSchemaV4Factory();
-            schemaFactory.setAutoPutDollarSchema(true);
-            JsonNode cptSchema = schemaFactory.createSchema(myClass);
-            return DataToolUtils.objToJsonStrWithNoPretty(cptSchema);
-        } catch (Exception e) {
-            return StringUtils.EMPTY;
-        }
-    }
 
     /**
      * Generate unformatted CPT which allows any format, to support external invocation.
