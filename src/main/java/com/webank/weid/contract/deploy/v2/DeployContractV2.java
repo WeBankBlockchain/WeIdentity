@@ -54,13 +54,11 @@ public class DeployContractV2 extends AddressProcess {
     /**
      * The cryptoKeyPair.
      */
-    //private static Credentials credentials;
     private static CryptoKeyPair cryptoKeyPair;
 
     /**
      * client object.
      */
-    //private static Web3j web3j;
     private static Client client;
 
     /**
@@ -68,7 +66,6 @@ public class DeployContractV2 extends AddressProcess {
      *
      * @return true, if successful
      */
-    //private static boolean initCredentials(String inputPrivateKey) {
     private static boolean initCryptoKeyPair(String inputPrivateKey) {
         if (StringUtils.isNotBlank(inputPrivateKey)) {
             /*logger.info("[DeployContractV2] begin to init credentials by privateKey..");
@@ -76,8 +73,7 @@ public class DeployContractV2 extends AddressProcess {
             logger.info("[DeployContractV2] begin to init cryptoKeyPair by privateKey..");
             cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
         } else {
-            /*logger.info("[DeployContractV2] begin to init credentials..");
-            credentials = GenCredential.create();*/
+
             logger.info("[DeployContractV2] begin to init cryptoKeyPair..");
             cryptoKeyPair = DataToolUtils.createKeyPair();
         }
@@ -102,12 +98,9 @@ public class DeployContractV2 extends AddressProcess {
     /**
      * Inits the client.
      */
-    /*protected static void initWeb3j() {
-        if (web3j == null) {
-            web3j = (Web3j) BaseService.getWeb3j();*/
     protected static void initClient() {
         if (client == null) {
-            client =  BaseService.getClient();
+            client = (Client) BaseService.getClient();
         }
     }
 

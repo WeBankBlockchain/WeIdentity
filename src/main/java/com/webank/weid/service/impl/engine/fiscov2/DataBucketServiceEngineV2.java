@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple4;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
@@ -101,7 +102,7 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         ErrorCode errorCode = ErrorCode.UNKNOW_ERROR;
         try {
             //这里暂且认为是回执状态码
-            txDecoder = new TransactionDecoderService(getClient().getCryptoSuite());
+            txDecoder = new TransactionDecoderService(((Client)getClient()).getCryptoSuite());
             TransactionResponse response = txDecoder.decodeReceiptStatus(receipt);
             /*InputAndOutputResult objectResult = txDecodeSampleDecoder.decodeOutputReturnObject(
                 receipt.getInput(), receipt.getOutput());

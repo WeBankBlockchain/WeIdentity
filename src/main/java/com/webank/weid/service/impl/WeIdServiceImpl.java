@@ -59,7 +59,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     public ResponseData<CreateWeIdDataResult> createWeId() {
 
         CreateWeIdDataResult result = new CreateWeIdDataResult();
-        Client client = getWeServer().getClient();
+        Client client = ((Client)getClient());
         CryptoKeyPair keyPair = client.getCryptoSuite().createKeyPair();
         //ECKeyPair keyPair = GenCredential.createKeyPair();
 
