@@ -77,10 +77,13 @@ public class FiscoConfig {
     @NotEmpty(message = "the value of web3sdk.keep-alive-seconds is null")
     @MatchPattern(pattern = "\\d+", message = "the value of web3sdk.keep-alive-seconds is invalid")
     private String web3sdkKeepAliveSeconds;
-    
+
+    /**
+     * 3.0后groupId支持为string
+     */
     @NotNull(message = "the group.id is undefined")
     @NotEmpty(message = "the value of group.id is null")
-    @MatchPattern(pattern = "\\d+", message = "the value of group.id is invalid")
+//    @MatchPattern(pattern = "\\d+", message = "the value of group.id is invalid")
     private String groupId;
     
     @NotNull(message = "the encrypt.type is undefined")

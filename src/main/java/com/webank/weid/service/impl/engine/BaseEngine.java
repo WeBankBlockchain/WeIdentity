@@ -39,7 +39,7 @@ public abstract class BaseEngine extends BaseService {
         super();
     }
 
-    public BaseEngine(Integer groupId) {
+    public BaseEngine(String groupId) {
         super(groupId);
     }
 

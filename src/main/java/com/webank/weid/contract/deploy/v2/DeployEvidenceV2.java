@@ -68,14 +68,14 @@ public class DeployEvidenceV2 extends AddressProcess {
         return new BigInteger(1, priBytes).toString();
     }
 
-    protected static Client getClient(Integer groupId) {
+    protected static Client getClient(String groupId) {
         return (Client) BaseService.getClient(groupId);
     }
     
     public static String deployContract(
         FiscoConfig fiscoConfig,
-        String inputPrivateKey, 
-        Integer groupId, 
+        String inputPrivateKey,
+        String groupId,
         boolean instantEnable
     ) {
         //String privateKey = initCredentials(inputPrivateKey);
@@ -128,7 +128,7 @@ public class DeployEvidenceV2 extends AddressProcess {
         return hash;
     }
     
-    private static String deployEvidenceContractsNew(Integer groupId) {
+    private static String deployEvidenceContractsNew(String groupId) {
         try {
             EvidenceContract evidenceContract =
                 EvidenceContract.deploy(
