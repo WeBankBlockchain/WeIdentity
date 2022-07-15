@@ -42,7 +42,8 @@ import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.PropertyUtils;
 
 /**
- * Client,CryptoKeyPair,Service
+ * BcosSDK,Client,CryptoKeyPair
+ * @param <B>
  * @param <W>
  * @param <C>
  */
@@ -99,6 +100,7 @@ public abstract class WeServer<B, W, C> {
      *
      * @param fiscoConfig FISCO配置对象
      * @param groupId 群组ID
+     * @param <B> BcosSDK
      * @param <W> Web3j对象
      * @param <C> Credential对象
      * @return 返回WeServer对象
