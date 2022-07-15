@@ -1,38 +1,7 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.networknt.schema.ValidationMessage;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
@@ -54,6 +23,17 @@ import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service implementations for operations on Credential.
@@ -441,9 +421,9 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
                 return ErrorCode.CPT_JSON_SCHEMA_INVALID;
             }
-            ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
-                    claimStr, cptJsonSchema);
-            if (!checkRes.isSuccess()) {
+            Set<ValidationMessage> checkRes = DataToolUtils.checkJsonVersusSchema(
+                claimStr, cptJsonSchema);
+            if (checkRes.size() != 0) {
                 logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
             }
