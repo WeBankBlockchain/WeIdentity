@@ -24,6 +24,7 @@ import org.fisco.bcos.sdk.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,9 +227,9 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
     private ConfigProperty loadConfigProperty(FiscoConfig fiscoConfig) {
         ConfigProperty configProperty = new ConfigProperty();
         // init account
-        initAccount(configProperty, fiscoConfig);
+//        initAccount(configProperty, fiscoConfig);
         // init amop topic
-        initAmopTopic(configProperty, fiscoConfig);
+//        initAmopTopic(configProperty, fiscoConfig);
         // init netWork
         initNetWork(configProperty, fiscoConfig);
         // init ThreadPool
@@ -251,6 +252,11 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         logger.info("[initAmopTopic] the amopId: {}", fiscoConfig.getAmopId());
         AmopTopic amopTopic = new AmopTopic();
         amopTopic.setTopicName(fiscoConfig.getAmopId());
+        // todo 需要配置amop用到的私钥文件, KeyTool加载
+        CryptoKeyPair temp = new CryptoSuite(0).createKeyPair();
+        amopTopic.setPrivateKey(temp.getHexPrivateKey());
+        amopTopic.setPublicKeys(Arrays.asList(temp.getHexPublicKey()));
+        amopTopic.setPassword("");
         List<AmopTopic> amop = new ArrayList<AmopTopic>();
         amop.add(amopTopic);
         configProperty.setAmop(amop);
@@ -289,14 +295,20 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     private void initCryptoMaterial(ConfigProperty configProperty, FiscoConfig fiscoConfig) {
         Map<String, Object> cryptoMaterial = new HashMap<String, Object>();
-        cryptoMaterial.put("caCert",
-            FiscoConfig.class.getResource("/").getPath() + fiscoConfig.getV2CaCrtPath());
-        cryptoMaterial.put("sslCert",
-            FiscoConfig.class.getResource("/").getPath() + fiscoConfig.getV2NodeCrtPath());
-        cryptoMaterial.put("sslKey",
-            FiscoConfig.class.getResource("/").getPath() + fiscoConfig.getV2NodeKeyPath());
+        cryptoMaterial.put("certPath", "D:\\projects\\weid\\WeIdentity\\out\\test\\resources");
+        cryptoMaterial.put("certPath", "D:\\projects\\weid\\WeIdentity\\out\\production\\resources");
+//        logger.info("path:{}", FiscoConfig.class.getResource("classpath:").getPath());
+//        cryptoMaterial.put("certPath", ThreadLocal.class.getResource("classpath:").getPath());
+//        cryptoMaterial.put("useSMCrypto", false);
+//        cryptoMaterial.put("caCert",
+//            FiscoConfig.class.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
+//        cryptoMaterial.put("sslCert",
+//            FiscoConfig.class.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
+//        cryptoMaterial.put("sslKey",
+//            FiscoConfig.class.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
         logger.info("[initThreadPool] the cryptoMaterial: {}.", cryptoMaterial);
         configProperty.setCryptoMaterial(cryptoMaterial);
+        // todo support guomi ssl
     }
 
     private void initBcosSdk(ConfigProperty configProperty) {

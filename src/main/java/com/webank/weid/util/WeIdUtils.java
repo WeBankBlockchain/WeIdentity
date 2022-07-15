@@ -8,8 +8,13 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.utils.AddressUtils;
+import org.fisco.bcos.sdk.utils.Hex;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,8 +89,7 @@ public final class WeIdUtils {
     public static String convertPublicKeyToWeId(String publicKey) {
         try {
             //String address = Keys.getAddress(new BigInteger(publicKey));
-            String address = new ECDSAKeyPair().getAddress(
-                    Numeric.toHexStringNoPrefix(new BigInteger(publicKey).toByteArray()).substring(2));
+            String address = ECDSAKeyPair.getAddressByPublicKey(publicKey); //todo 支持国密
             return buildWeIdByAddress(address);
         } catch (Exception e) {
             logger.error("convert publicKey to weId error.", e);
