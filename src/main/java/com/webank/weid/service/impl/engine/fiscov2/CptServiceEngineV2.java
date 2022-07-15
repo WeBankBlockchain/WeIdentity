@@ -72,8 +72,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV2.class);
     private static final String CREDENTIAL_TEMPLATE_EVENT = new EventEncoder(
-            getWeServer().getClient().getCryptoSuite()
-    ).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
+        ((Client)getClient()).getCryptoSuite()).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
     private static CptController cptController;
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
