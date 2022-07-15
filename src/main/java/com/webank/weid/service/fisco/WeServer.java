@@ -19,13 +19,13 @@
 
 package com.webank.weid.service.fisco;
 
+import com.webank.weid.service.fisco.entity.CnsInfo;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -254,7 +254,11 @@ public abstract class WeServer<B, W, C> {
      */
     protected abstract CnsInfo queryCnsInfo(CnsType cnsType) throws WeIdBaseException;
 
-    public abstract Set<Integer> getGroupList();
+    /**
+     * 获取链上群组列表
+     * @return
+     */
+    public abstract Set<String> getGroupList();
 
 
     /**
