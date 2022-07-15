@@ -48,7 +48,7 @@ public abstract class DeployEvidence {
         }
 
         String groupStr = args[0];
-        Integer groupId = Integer.parseInt(groupStr);
+        String groupId = groupStr;
 
         String privateKey = null;
         if (args != null && args.length > 1) {
@@ -67,7 +67,7 @@ public abstract class DeployEvidence {
      * @param instantEnable 是否即时启用
      * @return 返回部署的hash值
      */
-    public static String deployContract(String privateKey, Integer groupId, boolean instantEnable) {
+    public static String deployContract(String privateKey, String groupId, boolean instantEnable) {
         return DeployEvidenceV2.deployContract(fiscoConfig, privateKey, groupId, instantEnable);
     }
 }

@@ -49,7 +49,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private EvidenceServiceEngine evidenceServiceEngine;
 
-    private Integer groupId;
+    private String groupId;
 
     public EvidenceServiceImpl() {
         super();
@@ -62,13 +62,13 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
      * @param processingMode 上链模式
      * @param groupId 群组编号
      */
-    public EvidenceServiceImpl(ProcessingMode processingMode, Integer groupId) {
+    public EvidenceServiceImpl(ProcessingMode processingMode, String groupId) {
         //super(groupId);
         this.processingMode = processingMode;
         initEvidenceServiceEngine(groupId);
     }
 
-    private void initEvidenceServiceEngine(Integer groupId) {
+    private void initEvidenceServiceEngine(String groupId) {
         evidenceServiceEngine = EngineFactory.createEvidenceServiceEngine(groupId);
         this.groupId = groupId;
     }
