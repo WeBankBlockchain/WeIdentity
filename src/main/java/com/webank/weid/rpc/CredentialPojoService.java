@@ -1,28 +1,7 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
 
 package com.webank.weid.rpc;
 
-import java.util.List;
-
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-
+import com.networknt.schema.ValidationMessage;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.Cpt;
@@ -34,6 +13,8 @@ import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.cpt.Cpt101;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Service inf for operations on Credentials.
@@ -224,6 +205,6 @@ public interface CredentialPojoService {
      * @param cpt the CPT information
      * @return return ProcessingReport
      */
-    ResponseData<ProcessingReport> checkCredentialWithCpt(CredentialPojo credential, Cpt cpt);
+    ResponseData<Set<ValidationMessage>> checkCredentialWithCpt(CredentialPojo credential, Cpt cpt);
 }
 
