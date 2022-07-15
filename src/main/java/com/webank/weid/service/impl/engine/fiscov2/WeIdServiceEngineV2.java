@@ -2,28 +2,6 @@
 
 package com.webank.weid.service.impl.engine.fiscov2;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-import java.util.zip.DataFormatException;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.EventEncoder;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
@@ -48,6 +26,23 @@ import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.DataFormatException;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.EventEncoder;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * WeIdServiceEngine call weid contract which runs on FISCO BCOS 2.0.
@@ -79,7 +74,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
 
         topicMap.put(
             //EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
-                new EventEncoder(getWeServer().getClient().getCryptoSuite()).encode(
+                new EventEncoder(((Client)getClient()).getCryptoSuite()).encode(
                         WeIdContract.WEIDATTRIBUTECHANGED_EVENT
                 ),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
@@ -588,7 +583,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         throws IOException, DataFormatException {
         BcosTransactionReceiptsDecoder bcosTransactionReceiptsDecoder = null;
         try {
-            bcosTransactionReceiptsDecoder = ((Client) weServer.getClient())
+            bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
                     .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(blockNumber), "0", "-1");
         } catch (Exception e) {
             logger.error("[getTransactionReceipts] get block {} err: {}", blockNumber, e);

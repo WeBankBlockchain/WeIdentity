@@ -58,6 +58,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     /**
      * 重新加载静态合约对象.
      */
+    @Override
     public void reload() {
         authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
             AuthorityIssuerController.class);

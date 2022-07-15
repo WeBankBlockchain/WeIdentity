@@ -69,7 +69,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
         //super(groupId);
         this.groupId = groupId;
         initEvidenceAddress();
-        evidenceContract = getContractService(this.evidenceAddress, this.groupId, EvidenceContract.class);
+        evidenceContract = getContractService(this.evidenceAddress, EvidenceContract.class);
     }
 
     private void initEvidenceAddress() {
@@ -117,7 +117,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -191,7 +190,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -271,7 +269,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -341,7 +338,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -405,7 +401,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -502,7 +497,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             try {
                 bcosTransactionReceiptsDecoder = receiptsNode.get(String.valueOf(currentBlockNumber));
                 if (bcosTransactionReceiptsDecoder == null) {
-                    bcosTransactionReceiptsDecoder = ((Client) weServer.getClient())
+                    bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
                         .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(currentBlockNumber), "0", "-1");
                     // Store big transactions into memory (bigger than 1) to avoid memory explode
                     if (bcosTransactionReceiptsDecoder != null
@@ -787,7 +782,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -879,7 +873,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
