@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,18 +53,15 @@ public abstract class BaseEngine extends BaseService {
             "load",
             String.class,
             getWeb3jClass(),
-            credentials.getClass(),
-            BigInteger.class,
-            BigInteger.class
+            CryptoKeyPair.class
+//            credentials.getClass(), todo 为啥拿到的是ECDSACryptoKeyPair.class
         );
         Object obj = weServer.getWeb3j();
         contract = method.invoke(
             null,
             contractAddress,
             obj,
-            credentials,
-            WeIdConstant.GAS_PRICE,
-            WeIdConstant.GAS_LIMIT
+            credentials
         );
         return (T) contract;
     }
