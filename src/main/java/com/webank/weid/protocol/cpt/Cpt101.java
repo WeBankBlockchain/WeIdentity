@@ -75,7 +75,7 @@ public class Cpt101 {
     /**
      * Authorize to this WeID
      * (Required)
-     * 
+     * @return Long
      */
     @JsonProperty("duration")
     public Long getDuration() {
@@ -85,7 +85,7 @@ public class Cpt101 {
     /**
      * Authorize to this WeID
      * (Required)
-     * 
+     * @param duration
      */
     @JsonProperty("duration")
     public void setDuration(Long duration) {
@@ -95,7 +95,7 @@ public class Cpt101 {
     /**
      * Authorize from this WeID
      * (Required)
-     * 
+     *
      */
     @JsonProperty("fromWeId")
     public String getFromWeId() {
