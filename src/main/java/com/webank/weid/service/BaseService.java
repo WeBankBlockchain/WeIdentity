@@ -17,13 +17,13 @@ import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.WeServer;
+import com.webank.weid.service.fisco.entity.CnsInfo;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.util.DataToolUtils;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
