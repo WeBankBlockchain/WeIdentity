@@ -30,7 +30,6 @@ public class DeployEvidenceV2 extends AddressProcess {
     /**
      * The cryptoKeyPair.
      */
-    //private static Credentials credentials;
     private static CryptoKeyPair cryptoKeyPair;
     
     /**
@@ -68,12 +67,9 @@ public class DeployEvidenceV2 extends AddressProcess {
         byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
         return new BigInteger(1, priBytes).toString();
     }
-    
-    /*protected static Web3j getWeb3j(Integer groupId) {
-        return (Web3j) BaseService.getWeb3j(groupId);
-    }*/
+
     protected static Client getClient(Integer groupId) {
-        return BaseService.getClient(groupId);
+        return (Client) BaseService.getClient(groupId);
     }
     
     public static String deployContract(
