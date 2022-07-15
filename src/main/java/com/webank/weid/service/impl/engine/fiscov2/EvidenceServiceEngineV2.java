@@ -58,22 +58,22 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
 
     private String evidenceAddress;
 
-    private Integer groupId;
+    private String groupId;
 
     /**
      * 构造函数.
      *
      * @param groupId 群组编号
      */
-    public EvidenceServiceEngineV2(Integer groupId) {
-        //super(groupId);
+    public EvidenceServiceEngineV2(String groupId) {
+        super(groupId);
         this.groupId = groupId;
         initEvidenceAddress();
         evidenceContract = getContractService(this.evidenceAddress, EvidenceContract.class);
     }
 
     private void initEvidenceAddress() {
-        if (groupId == null || masterGroupId.intValue() == groupId.intValue()) {
+        if (groupId == null || masterGroupId.equals(groupId)) {
             logger.info("[initEvidenceAddress] the groupId is master.");
             this.evidenceAddress = fiscoConfig.getEvidenceAddress();
             return;

@@ -64,7 +64,7 @@ public abstract class WeServer<B, W, C> {
     /**
      * WeServer对象上下文.
      */
-    private static ConcurrentHashMap<Integer, WeServer<?, ?, ?>>  weServerContext =
+    private static ConcurrentHashMap<String, WeServer<?, ?, ?>>  weServerContext =
         new ConcurrentHashMap<>();
 
     /**
@@ -107,7 +107,7 @@ public abstract class WeServer<B, W, C> {
      */
     public static synchronized <B, W, C> WeServer<B, W, C> getInstance (
         FiscoConfig fiscoConfig,
-        Integer groupId
+        String groupId
     ) {
         WeServer<?, ?, ?> weServer = weServerContext.get(groupId);
         if (weServer == null) {
@@ -218,7 +218,7 @@ public abstract class WeServer<B, W, C> {
      *
      * @param groupId 群组Id
      */
-    protected abstract void initWeb3j(Integer groupId);
+    protected abstract void initWeb3j(String groupId);
 
     /**
      * 发送AMOP消息.
