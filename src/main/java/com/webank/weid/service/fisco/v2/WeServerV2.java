@@ -77,7 +77,7 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
      */
     public WeServerV2(FiscoConfig fiscoConfig) {
         super(fiscoConfig, new OnNotifyCallbackV2());
-        initWeb3j(Integer.parseInt(fiscoConfig.getGroupId()));
+        initWeb3j(fiscoConfig.getGroupId());
     }
 
     /**
@@ -90,8 +90,9 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         return client;
     }
 
-    public Client getWeb3j(Integer groupId) {
-        return bcosSdk.getClient(groupId);
+    public Client getWeb3j(String groupId) {
+        logger.debug("getWeb3j groupId{}", groupId);
+        return bcosSdk.getClient(Integer.parseInt(groupId));
     }
 
 
@@ -102,7 +103,7 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     @Override
     public CryptoKeyPair getCredentials() {
-        Client client = this.getWeb3j(Integer.parseInt(fiscoConfig.getGroupId()));
+        Client client = this.getWeb3j(fiscoConfig.getGroupId());
         return client.getCryptoSuite().getCryptoKeyPair();
     }
 
@@ -112,7 +113,7 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
     }
 
     @Override
-    public void initWeb3j(Integer masterGroupId) {
+    public void initWeb3j(String masterGroupId) {
         this.pushCallBack = new OnNotifyCallbackV2();
         logger.info("[WeServer] begin load property.");
         ConfigProperty configProperty = loadConfigProperty(fiscoConfig);
@@ -175,7 +176,7 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     @Override
     public int getBlockNumber() {
-        return this.getWeb3j(Integer.parseInt(fiscoConfig.getGroupId())).getBlockNumber().getBlockNumber().intValue();
+        return this.getWeb3j(fiscoConfig.getGroupId()).getBlockNumber().getBlockNumber().intValue();
     }
 
     /**
@@ -351,7 +352,7 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
     }
 
     private void initCnsService() {
-        Client client = this.getWeb3j(Integer.parseInt(fiscoConfig.getGroupId()));
+        Client client = this.getWeb3j(fiscoConfig.getGroupId());
         this.cnsService = new CnsService(client, client.getCryptoSuite().getCryptoKeyPair());
     }
 
