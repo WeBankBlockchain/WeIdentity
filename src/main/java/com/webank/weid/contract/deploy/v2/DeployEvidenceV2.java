@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.contract.deploy.v2;
 
@@ -47,7 +30,6 @@ public class DeployEvidenceV2 extends AddressProcess {
     /**
      * The cryptoKeyPair.
      */
-    //private static Credentials credentials;
     private static CryptoKeyPair cryptoKeyPair;
     
     /**
@@ -85,12 +67,9 @@ public class DeployEvidenceV2 extends AddressProcess {
         byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
         return new BigInteger(1, priBytes).toString();
     }
-    
-    /*protected static Web3j getWeb3j(Integer groupId) {
-        return (Web3j) BaseService.getWeb3j(groupId);
-    }*/
+
     protected static Client getClient(Integer groupId) {
-        return BaseService.getClient(groupId);
+        return (Client) BaseService.getClient(groupId);
     }
     
     public static String deployContract(
