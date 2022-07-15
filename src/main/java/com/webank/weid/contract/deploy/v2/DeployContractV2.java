@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.contract.deploy.v2;
 
@@ -71,13 +54,11 @@ public class DeployContractV2 extends AddressProcess {
     /**
      * The cryptoKeyPair.
      */
-    //private static Credentials credentials;
     private static CryptoKeyPair cryptoKeyPair;
 
     /**
      * client object.
      */
-    //private static Web3j web3j;
     private static Client client;
 
     /**
@@ -85,7 +66,6 @@ public class DeployContractV2 extends AddressProcess {
      *
      * @return true, if successful
      */
-    //private static boolean initCredentials(String inputPrivateKey) {
     private static boolean initCryptoKeyPair(String inputPrivateKey) {
         if (StringUtils.isNotBlank(inputPrivateKey)) {
             /*logger.info("[DeployContractV2] begin to init credentials by privateKey..");
@@ -93,8 +73,7 @@ public class DeployContractV2 extends AddressProcess {
             logger.info("[DeployContractV2] begin to init cryptoKeyPair by privateKey..");
             cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
         } else {
-            /*logger.info("[DeployContractV2] begin to init credentials..");
-            credentials = GenCredential.create();*/
+
             logger.info("[DeployContractV2] begin to init cryptoKeyPair..");
             cryptoKeyPair = DataToolUtils.createKeyPair();
         }
@@ -119,12 +98,9 @@ public class DeployContractV2 extends AddressProcess {
     /**
      * Inits the client.
      */
-    /*protected static void initWeb3j() {
-        if (web3j == null) {
-            web3j = (Web3j) BaseService.getWeb3j();*/
     protected static void initClient() {
         if (client == null) {
-            client =  BaseService.getClient();
+            client = (Client) BaseService.getClient();
         }
     }
 

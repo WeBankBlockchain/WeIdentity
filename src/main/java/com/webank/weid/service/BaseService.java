@@ -1,35 +1,6 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service;
-
-import java.io.IOException;
-
-import com.webank.weid.rpc.callback.AmopNotifyMsgCallback;
-import com.webank.weid.service.impl.base.AmopBaseCallback;
-import org.apache.commons.lang3.StringUtils;
-
-import org.fisco.bcos.sdk.BcosSDK;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.webank.weid.config.ContractConfig;
 import com.webank.weid.config.FiscoConfig;
@@ -50,6 +21,11 @@ import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.util.DataToolUtils;
+import java.io.IOException;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The BaseService for other RPC classes.
@@ -64,7 +40,7 @@ public abstract class BaseService {
 
     protected static Integer masterGroupId;
 
-    protected static WeServer weServer;
+    protected WeServer<?, ?, ?> weServer;
 
     static {
         fiscoConfig = new FiscoConfig();
@@ -78,15 +54,21 @@ public abstract class BaseService {
     /**
      * Constructor.
      */
-    /*public BaseService() {
+    public BaseService() {
         weServer = getWeServer(masterGroupId);
-    }*/
+    }
 
-    protected static WeServer getWeServer() {
-        if (weServer == null) {
-            weServer = WeServer.getInstance(fiscoConfig);
-        }
-        return weServer;
+    /**
+     * Constructor.
+     *
+     * @param groupId 群组编号
+     */
+    public BaseService(Integer groupId) {
+        weServer = getWeServer(groupId);
+    }
+
+    protected static WeServer<?, ?, ?> getWeServer(Integer groupId) {
+        return WeServer.getInstance(fiscoConfig, groupId);
     }
 
     protected static DataBucketServiceEngine getBucket(CnsType cnsType) {
@@ -98,18 +80,22 @@ public abstract class BaseService {
      *
      * @return the Fisco client
      */
-    public static Client getClient() {
+    public static Object getClient() {
         return getClient(masterGroupId);
     }
 
     /**
      * Gets the Fisco client.
-     * 
+     *
      * @param groupId 群组ID
      * @return the Fisco client
      */
-    public static Client getClient(Integer groupId) {
-        return getWeServer().getClient(groupId);
+    public static Object getClient(Integer groupId) {
+        return getWeServer(groupId).getWeb3j();
+    }
+
+    protected Object getBcosSDK() {
+        return weServer.getBcosSDK();
     }
 
     /**
@@ -117,8 +103,8 @@ public abstract class BaseService {
      *
      * @return the client class
      */
-    protected Class<?> getClientClass() {
-        return weServer.getClientClass();
+    protected Class<?> getWeb3jClass() {
+        return weServer.getWeb3jClass();
     }
 
     /**
@@ -130,7 +116,7 @@ public abstract class BaseService {
     public static int getBlockNumber() throws IOException {
         return getBlockNumber(masterGroupId);
     }
-    
+
     /**
      * get current blockNumber.
      *
@@ -139,10 +125,9 @@ public abstract class BaseService {
      * @throws IOException possible exceptions to sending transactions
      */
     public static int getBlockNumber(Integer groupId) throws IOException {
-        //return getWeServer(groupId).getBlockNumber();
-        return getWeServer().getBlockNumber(groupId);
+        return getWeServer(groupId).getBlockNumber();
     }
-    
+
     /**
      * get FISCO-BCOS version.
      *
@@ -150,32 +135,30 @@ public abstract class BaseService {
      * @throws IOException possible exceptions to sending transactions
      */
     public static String getVersion() throws IOException {
-        //return getWeServer(masterGroupId).getVersion();
-        return getWeServer().getClient(masterGroupId).getNodeVersion().getResult().getVersion();
+        return getWeServer(masterGroupId).getVersion();
     }
 
     /**
      * 查询bucket地址信息.
-     * 
+     *
      * @param cnsType cns类型枚举对象
      * @return 返回bucket地址
      */
     public static CnsInfo getBucketByCns(CnsType cnsType) {
-        //return getWeServer(masterGroupId).getBucketByCns(cnsType);
-        return getWeServer().getBucketByCns(cnsType);
+        return getWeServer(masterGroupId).getBucketByCns(cnsType);
     }
 
     /**
      * 检查群组是否存在.
-     * 
+     *
      * @param groupId 被检查群组
      * @return true表示群组存在，false表示群组不存在
      */
     public static boolean checkGroupId(Integer groupId) {
-        //return WeServerUtils.getGroupList().contains(String.valueOf(groupId));
-        return getWeServer().getGroupList().contains(groupId);
+        return getWeServer(groupId).getGroupList().contains(groupId);
     }
-    
+
+
     /**
      * Get the Sequence parameter.
      *
@@ -206,13 +189,9 @@ public abstract class BaseService {
      * @return the RegistCallBack
      */
     protected RegistCallBack getPushCallback() {
-        //return weServer.getPushCallback();
-        return getWeServer().getPushCallback();
+        return weServer.getPushCallback();
     }
 
-    protected BcosSDK getSDK() {
-        return weServer.getSDK();
-    }
 
     /**
      * the checkDirectRouteMsgHealth。.
@@ -260,7 +239,7 @@ public abstract class BaseService {
         amopCommonArgs.setMessageId(getSeq());
         logger.info("direct route request, seq : {}, body ：{}", amopCommonArgs.getMessageId(),
                 requestBodyStr);
-        AmopResponse response = getWeServer().sendChannelMessage(amopCommonArgs, timeOut);
+        AmopResponse response = weServer.sendChannelMessage(amopCommonArgs, timeOut);
         logger.info("direct route response, seq : {}, errorCode : {}, errorMsg : {}, body : {}",
                 response.getMessageId(),
                 response.getErrorCode(),
@@ -295,7 +274,7 @@ public abstract class BaseService {
         String  weIdAddress = getAddress(cnsType, module, WeIdConstant.CNS_WEID_ADDRESS);
         String  issuerAddress = getAddress(cnsType, module, WeIdConstant.CNS_AUTH_ADDRESS);
         String  specificAddress = getAddress(cnsType, module, WeIdConstant.CNS_SPECIFIC_ADDRESS);
-        String  evidenceAddress = getAddress(cnsType, module, WeIdConstant.CNS_EVIDENCE_ADDRESS); 
+        String  evidenceAddress = getAddress(cnsType, module, WeIdConstant.CNS_EVIDENCE_ADDRESS);
         String  cptAddress = getAddress(cnsType, module, WeIdConstant.CNS_CPT_ADDRESS);
         String  chainId = getAddress(cnsType, module, WeIdConstant.CNS_CHAIN_ID);
         fiscoConfig.setChainId(chainId);
@@ -303,7 +282,7 @@ public abstract class BaseService {
         fiscoConfig.setCptAddress(cptAddress);
         fiscoConfig.setIssuerAddress(issuerAddress);
         fiscoConfig.setSpecificIssuerAddress(specificAddress);
-        fiscoConfig.setEvidenceAddress(evidenceAddress); 
+        fiscoConfig.setEvidenceAddress(evidenceAddress);
         if (!fiscoConfig.checkAddress()) {
             throw new WeIdBaseException(
                 "can not found the contract address, please enable by admin. ");
@@ -313,7 +292,7 @@ public abstract class BaseService {
     private static String getAddress(CnsType cnsType, String hash, String key) {
         return getBucket(cnsType).get(hash, key).getResult();
     }
-    
+
     /**
      * 获取chainId.
      * @return 返回chainId
