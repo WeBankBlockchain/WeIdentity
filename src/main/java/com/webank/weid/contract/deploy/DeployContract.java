@@ -2,6 +2,7 @@
 
 package com.webank.weid.contract.deploy;
 
+import com.webank.weid.contract.deploy.v3.DeployContractV3;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,8 +71,10 @@ public abstract class DeployContract {
     public static void deployContract(String privateKey, boolean instantEnable) {
         if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             throw new WeIdBaseException(ErrorCode.THIS_IS_UNSUPPORTED);
-        } else {
+        } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             DeployContractV2.deployContract(privateKey, fiscoConfig, instantEnable);
-        } 
+        } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_3_X_VERSION_PREFIX)) {
+            DeployContractV3.deployContract(privateKey, fiscoConfig, instantEnable);
+        }
     }
 }
