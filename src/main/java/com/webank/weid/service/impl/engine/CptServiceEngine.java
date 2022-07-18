@@ -36,7 +36,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
         int cptId,
         String address,
         String cptJsonSchemaNew,
-        SignatureResult signatureResult,
+        RsvSignature rsvSignature,
         String privateKey,
         int dataStorageIndex
     );
@@ -56,7 +56,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
         int cptId,
         String address,
         String cptJsonSchemaNew,
-        SignatureResult signatureResult,
+        RsvSignature rsvSignature,
         String privateKey,
         int dataStorageIndex
     );
@@ -74,7 +74,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
     ResponseData<CptBaseInfo> registerCpt(
         String address,
         String cptJsonSchemaNew,
-        SignatureResult signatureResult,
+        RsvSignature rsvSignature,
         String privateKey,
         int dataStorageIndex
     );
