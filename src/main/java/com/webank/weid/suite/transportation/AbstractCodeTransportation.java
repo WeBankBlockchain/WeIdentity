@@ -18,6 +18,7 @@ import com.webank.weid.suite.entity.TransBaseData;
 import com.webank.weid.suite.entity.TransCodeBaseData;
 import com.webank.weid.suite.transmission.TransmissionRequest;
 import com.webank.weid.util.DataToolUtils;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 
 /**
@@ -55,8 +56,10 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
             codeData.getId(),
             new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
         );*/
-        SignatureResult signatureResult = DataToolUtils.signToSignature(codeData.getId(), BaseService.getClient(),
-                BaseService.getClient().getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
+        //TODO 所有getClient()需要适配V3
+        Client client = (Client) getClient();
+        SignatureResult signatureResult = DataToolUtils.signToSignature(codeData.getId(), client,
+                client.getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
         String signValue = signatureResult.convertToString();
         args.setSignValue(signValue);
         return args;
