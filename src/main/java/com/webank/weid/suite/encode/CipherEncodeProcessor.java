@@ -27,6 +27,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -214,11 +215,14 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         //args.setToAmopId(encodeData.getAmopId());
         //args.setFromAmopId(fiscoConfig.getAmopId());
         if (encodeData.getWeIdAuthentication() != null) {
-            String signValue = DataToolUtils.secp256k1Sign(
+            /*String signValue = DataToolUtils.secp256k1Sign(
                 encodeData.getId(),
                 new BigInteger(
                     encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
-            );
+            );*/
+            SignatureResult signatureResult = DataToolUtils.signToSignature(encodeData.getId(), BaseService.getClient(),
+                    BaseService.getClient().getCryptoSuite().createKeyPair(encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey()));
+            String signValue = signatureResult.convertToString();
             args.setSignValue(signValue);
             args.setWeId(encodeData.getWeIdAuthentication().getWeId());
         }

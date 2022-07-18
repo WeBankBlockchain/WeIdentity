@@ -34,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.pdfbox.cos.COSName;
@@ -1315,7 +1316,7 @@ public class PdfTransportationImpl
         //使用web3j中的sha3算法：keccak-256
         /*SHA3Digest digestSha3 = new SHA3Digest();
         byte[] digest = digestSha3.hash(pdfFileByte);*/
-        byte[] digest = DataToolUtils.sha3(pdfFileByte);
+        byte[] digest = BaseService.getClient().getCryptoSuite().hash(pdfFileByte);
         return Numeric.toHexString(digest);
     }
 

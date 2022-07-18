@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -149,10 +150,11 @@ public class KeyManagerCallback extends AmopCallback {
             );
             return false;
         }
-        ErrorCode errorCode = DataToolUtils.verifySecp256k1SignatureFromWeId(
+        ErrorCode errorCode = DataToolUtils.verifySignatureFromWeId(
                 arg.getKeyId(),
                 arg.getSignValue(),
                 domRes.getResult(),
+                BaseService.getClient(),
                 null
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {

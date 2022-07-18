@@ -29,6 +29,7 @@ import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 
 /**
  * 针对不同版本的FISCO BCOS，做不同的CPT合约接口调用和数据处理 目前分为支持FISCO BCOS 1.3.x和FISCO BCOS 2.0版本.
@@ -43,7 +44,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @param cptId cptid
      * @param address publisher's address
      * @param cptJsonSchemaNew cpt content
-     * @param rsvSignature signature
+     * @param signatureResult signature
      * @param privateKey private key
      * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
@@ -52,7 +53,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
         int cptId,
         String address,
         String cptJsonSchemaNew,
-        RsvSignature rsvSignature,
+        SignatureResult signatureResult,
         String privateKey,
         int dataStorageIndex
     );
@@ -63,7 +64,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @param cptId cptid
      * @param address publisher's address
      * @param cptJsonSchemaNew cpt content
-     * @param rsvSignature signature
+     * @param signatureResult signature
      * @param privateKey private key
      * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
@@ -72,7 +73,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
         int cptId,
         String address,
         String cptJsonSchemaNew,
-        RsvSignature rsvSignature,
+        SignatureResult signatureResult,
         String privateKey,
         int dataStorageIndex
     );
@@ -82,7 +83,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      *
      * @param address publisher's address
      * @param cptJsonSchemaNew cpt content
-     * @param rsvSignature signature
+     * @param signatureResult signature
      * @param privateKey private key
      * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
@@ -90,7 +91,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
     ResponseData<CptBaseInfo> registerCpt(
         String address,
         String cptJsonSchemaNew,
-        RsvSignature rsvSignature,
+        SignatureResult signatureResult,
         String privateKey,
         int dataStorageIndex
     );

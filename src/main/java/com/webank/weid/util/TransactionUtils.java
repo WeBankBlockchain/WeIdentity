@@ -30,6 +30,7 @@ import java.util.Random;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.fisco.bcos.sdk.abi.datatypes.DynamicBytes;
@@ -38,8 +39,15 @@ import org.fisco.bcos.sdk.abi.datatypes.Type;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Int256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 
+import org.fisco.bcos.sdk.utils.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -199,15 +207,26 @@ public class TransactionUtils {
         }
 
         String cptSignature = cptSignatureNode.textValue();
-        if (!DataToolUtils.isValidBase64String(cptSignature)) {
+        /*if (!DataToolUtils.isValidBase64String(cptSignature)) {
             logger.error("Input cpt signature invalid: {}", cptSignature);
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
         RsvSignature rsvSignature =
             DataToolUtils.convertSignatureDataToRsv(
                 DataToolUtils.convertBase64StringToSignatureData(cptSignature)
-            );
-
+            );*/
+        Uint8 v = new Uint8(0);
+        if(BaseService.getClient().getCryptoType() == CryptoType.ECDSA_TYPE){
+            ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(cptSignature);
+            v = new Uint8(ecdsaSignatureResult.getV());
+        }
+        byte[] signatureBytes = Hex.decode(cptSignature);
+        byte[] rI = new byte[32];
+        byte[] sI = new byte[32];
+        System.arraycopy(signatureBytes, 0, rI, 0, 32);
+        System.arraycopy(signatureBytes, 32, sI, 0, 32);
+        Bytes32 r = new Bytes32(rI);
+        Bytes32 s = new Bytes32(sI);
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
@@ -216,9 +235,9 @@ public class TransactionUtils {
             getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
             bytes32Array,
             getParamJsonSchema(cptJsonSchemaNew),
-            rsvSignature.getV(),
-            rsvSignature.getR(),
-            rsvSignature.getS());
+            v,
+            r,
+            s);
         return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
 
