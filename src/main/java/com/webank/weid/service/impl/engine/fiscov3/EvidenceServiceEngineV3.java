@@ -1,26 +1,6 @@
 
 
-package com.webank.weid.service.impl.engine.fiscov2;
-
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.webank.weid.service.impl.engine.fiscov3;
 
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
@@ -41,15 +21,33 @@ import com.webank.weid.suite.cache.CacheManager;
 import com.webank.weid.suite.cache.CacheNode;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * EvidenceServiceEngine calls evidence contract which runs on FISCO BCOS 2.0.
  *
  * @author yanggang, chaoxinhu
  */
-public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServiceEngine {
+public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServiceEngine {
 
-    private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceEngineV2.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        EvidenceServiceEngineV3.class);
 
     private static CacheNode<BcosTransactionReceiptsDecoder> receiptsNode =
         CacheManager.registerCacheNode("SYS_TX_RECEIPTS", 1000 * 3600 * 24L);
@@ -65,7 +63,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
      *
      * @param groupId 群组编号
      */
-    public EvidenceServiceEngineV2(String groupId) {
+    public EvidenceServiceEngineV3(String groupId) {
         super(groupId);
         this.groupId = groupId;
         initEvidenceAddress();
