@@ -117,13 +117,12 @@ public class RegisterAddressV3 {
     }
     
     private static String deployBucket(String privateKey) throws Exception {
-//        logger.info("[deployBucket] begin deploy bucket.");
-//        //先进行地址部署
-//        DataBucket dataBucket = DataBucket.deploy( // todo 3.0的合约类
-//            (Client) BaseService.getClient(),
-//            getCryptoKeyPair(privateKey));
-//        return dataBucket.getContractAddress();
-        return "";
+        logger.info("[deployBucket] begin deploy bucket.");
+        //先进行地址部署
+        DataBucket dataBucket = DataBucket.deploy(
+            (Client) BaseService.getClient(),
+            getCryptoKeyPair(privateKey));
+        return dataBucket.getContractAddress();
     }
     
     /**
