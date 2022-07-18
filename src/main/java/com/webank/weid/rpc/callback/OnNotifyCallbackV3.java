@@ -47,7 +47,7 @@ public class OnNotifyCallbackV3
      */
     @Override
     public void onRequest(String endpoint, String seq, byte[] data) {
-         // todo amop.response
+         // todo amop.response 先发data，然后callback一个值result，把result返回
 //        String content = new String(amopMsgIn.getContent());
 //        logger.info("received ChannelPush v2 msg : " + content);
 //        if (0 == amopCallBackMap.size()) {
