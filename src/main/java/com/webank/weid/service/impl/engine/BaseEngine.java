@@ -53,8 +53,7 @@ public abstract class BaseEngine extends BaseService {
             "load",
             String.class,
             getWeb3jClass(),
-            CryptoKeyPair.class
-//            credentials.getClass(), todo 为啥拿到的是ECDSACryptoKeyPair.class
+            credentials.getClass() // todo 为啥拿到的是ECDSACryptoKeyPair.class
         );
         Object obj = weServer.getWeb3j();
         contract = method.invoke(
