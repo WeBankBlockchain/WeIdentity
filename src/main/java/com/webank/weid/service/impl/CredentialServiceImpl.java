@@ -1,38 +1,7 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.networknt.schema.ValidationMessage;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
@@ -54,6 +23,18 @@ import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service implementations for operations on Credential.
@@ -63,6 +44,9 @@ import com.webank.weid.util.WeIdUtils;
 public class CredentialServiceImpl extends BaseService implements CredentialService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialServiceImpl.class);
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
 
     private CptService cptService = new CptServiceImpl();
 
@@ -193,7 +177,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         String keyWeId = WeIdUtils
                 .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());*/
         //CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        CryptoKeyPair keyPair = getWeServer().createCryptoKeyPair(privateKey);
+        CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
         String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
         if (!weIdService.isWeIdExist(keyWeId).getResult()) {
             return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
@@ -444,9 +428,9 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 logger.error(ErrorCode.CPT_JSON_SCHEMA_INVALID.getCodeDesc());
                 return ErrorCode.CPT_JSON_SCHEMA_INVALID;
             }
-            ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
-                    claimStr, cptJsonSchema);
-            if (!checkRes.isSuccess()) {
+            Set<ValidationMessage> checkRes = DataToolUtils.checkJsonVersusSchema(
+                claimStr, cptJsonSchema);
+            if (checkRes.size() != 0) {
                 logger.error(ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL.getCodeDesc());
                 return ErrorCode.CREDENTIAL_CLAIM_DATA_ILLEGAL;
             }
@@ -504,7 +488,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     //替换国密
                     ErrorCode errorCode = DataToolUtils
                             .verifySignatureFromWeId(rawData, credential.getSignature(),
-                                    weIdDocument, getClient(), null);
+                                    weIdDocument, client, null);
                     if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                         return new ResponseData<>(false, errorCode);
                     }
@@ -513,7 +497,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             } else {
                 boolean result =
                         DataToolUtils.verifySignature(rawData,
-                                credential.getSignature(), getClient(), new BigInteger(publicKey));
+                                credential.getSignature(), client, new BigInteger(publicKey));
                 if (!result) {
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_VERIFY_FAIL);
                 }

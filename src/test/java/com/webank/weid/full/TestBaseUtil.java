@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full;
 
@@ -33,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -242,7 +224,7 @@ public class TestBaseUtil {
     public static HashMap<String, Object> buildCptJsonSchemaDataFromFile() throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -257,7 +239,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-singlelevel-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -272,7 +254,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-multilevel-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -287,7 +269,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-spectpl-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -388,7 +370,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/json-schema-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/json-schema-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -407,7 +389,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-multilevel-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -427,7 +409,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-singlelevel-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -447,7 +429,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("/test-spectpl-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 

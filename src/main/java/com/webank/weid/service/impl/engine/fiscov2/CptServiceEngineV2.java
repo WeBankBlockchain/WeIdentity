@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl.engine.fiscov2;
 
@@ -90,9 +73,10 @@ import com.webank.weid.util.WeIdUtils;
 public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV2.class);
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
     private static final String CREDENTIAL_TEMPLATE_EVENT = new EventEncoder(
-            getWeServer().getClient().getCryptoSuite()
-    ).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
+        client.getCryptoSuite()).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
     private static CptController cptController;
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
@@ -142,7 +126,8 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             CptController cptController =
                 reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             BigInteger v = new BigInteger("0");
-            if(getWeServer().getClient().getCryptoType() == CryptoType.ECDSA_TYPE){
+            //TODO 需要适配V3的getCryptoSuite
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
                 ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
                 v = BigInteger.valueOf(ecdsaSignatureResult.getV());
             }
@@ -225,7 +210,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             CptController cptController =
                 reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             BigInteger v = new BigInteger("0");
-            if(getWeServer().getClient().getCryptoType() == CryptoType.ECDSA_TYPE){
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
                 ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
                 v = BigInteger.valueOf(ecdsaSignatureResult.getV());
             }
@@ -310,7 +295,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             CptController cptController =
                 reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
             BigInteger v = new BigInteger("0");
-            if(getWeServer().getClient().getCryptoType() == CryptoType.ECDSA_TYPE){
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
                 ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
                 v = BigInteger.valueOf(ecdsaSignatureResult.getV());
             }
@@ -523,7 +508,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                         DataToolUtils.simpleSignatureSerialization(signatureResult)),
                     StandardCharsets.UTF_8
                 );*/
-            if(getWeServer().getClient().getCryptoType() == CryptoType.ECDSA_TYPE){
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
                 byte[] signature = new byte[65];
                 System.arraycopy(signatureBytes, 0, signature, 0, 64);
                 signature[64] = (byte) v;
