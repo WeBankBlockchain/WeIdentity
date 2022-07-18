@@ -6,7 +6,7 @@ import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.deploy.AddressProcess;
-import com.webank.weid.contract.v2.EvidenceContract;
+import com.webank.weid.contract.v3.EvidenceContract;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.util.DataToolUtils;
@@ -36,7 +36,6 @@ public class DeployEvidenceV3 extends AddressProcess {
      *
      * @return true, if successful
      */
-    //private static String initCredentials(String inputPrivateKey) {
     private static String initCryptoKeyPair(String inputPrivateKey) {
         if (StringUtils.isNotBlank(inputPrivateKey)) {
             logger.info("[DeployEvidenceV2] begin to init credentials by privateKey..");
@@ -52,7 +51,7 @@ public class DeployEvidenceV3 extends AddressProcess {
                 .getKeyPairFactory().generateKeyPair();
             byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
             byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
-            String privateKey = new BigInteger(1, priBytes).toString();
+            String privateKey = new BigInteger(1, priBytes).toString(); // todo 检查
             String publicKey = new BigInteger(1, pubBytes).toString();
             writeAddressToFile(publicKey, "ecdsa_key.pub");
             writeAddressToFile(privateKey, "ecdsa_key");
@@ -130,18 +129,13 @@ public class DeployEvidenceV3 extends AddressProcess {
     
     private static String deployEvidenceContractsNew(String groupId) {
         try {
-//            EvidenceContract evidenceContract =
-//                EvidenceContract.deploy(
-//                    /*getWeb3j(groupId),
-//                    credentials,
-//                    new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)
-//                ).send();*/
-//                    getClient(groupId),
-//                    cryptoKeyPair
-//                );
-//            String evidenceContractAddress = evidenceContract.getContractAddress();
-//            return evidenceContractAddress;
-            return "";
+            EvidenceContract evidenceContract =
+                EvidenceContract.deploy(
+                    getClient(groupId),
+                    cryptoKeyPair
+                );
+            String evidenceContractAddress = evidenceContract.getContractAddress();
+            return evidenceContractAddress;
         } catch (Exception e) {
             logger.error("EvidenceFactory deploy exception", e);
         }
