@@ -169,6 +169,11 @@ public final class WeIdConstant {
     public static final Integer POLL_TRANSACTION_ATTEMPTS = 5;
 
     /**
+     * transaction poll total time
+     */
+    public static final Integer POLL_TRANSACTION_TOTAL_DURATION = POLL_TRANSACTION_SLEEP_DURATION * POLL_TRANSACTION_ATTEMPTS;
+
+    /**
      * The additive block height.
      */
     public static final Integer ADDITIVE_BLOCK_HEIGHT = 500;
