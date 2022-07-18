@@ -24,9 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -165,7 +167,7 @@ public class WeIdAuthImpl implements WeIdAuth {
         }
         WeIdDocument weIdDocument = weIdDoc.getResult();
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
+            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, BaseService.getClient(), null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
@@ -243,15 +245,18 @@ public class WeIdAuthImpl implements WeIdAuth {
 
         //验证对手方对challenge的签名
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
+            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, BaseService.getClient(), null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
 
         //双向auth，发起方也需要对对手方的challenge进行签名
         String challenge1 = (String) dataMap.get(ParamKeyConstant.WEID_AUTH_CHALLENGE);
-        String signData = DataToolUtils.secp256k1Sign(
-            challenge1, new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
+        /*String signData = DataToolUtils.secp256k1Sign(
+            challenge1, new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));*/
+        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, BaseService.getClient(),
+                BaseService.getClient().getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
+        String signData = signatureResult.convertToString();
         RequestVerifyChallengeArgs verifyChallengeArgs = new RequestVerifyChallengeArgs();
         verifyChallengeArgs.setSignData(signData);
         verifyChallengeArgs.setChallenge(Challenge.fromJson(challenge1));

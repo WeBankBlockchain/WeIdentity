@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
@@ -67,7 +68,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->add] the id of the data is empty.");
             return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = BaseService.getClient().getCryptoSuite().hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             Date date = new Date();
@@ -93,7 +94,7 @@ public class RedisDriver implements Persistence {
                     logger.error("[redis->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
-                idHashList.add(DataToolUtils.getHash(id));
+                idHashList.add(BaseService.getClient().getCryptoSuite().hash(id));
                 dataList.add(data);
             }
             RedisDomain redisDomain = new RedisDomain(domain);
@@ -130,7 +131,7 @@ public class RedisDriver implements Persistence {
             return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
         //dataKey:id的hash值
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = BaseService.getClient().getCryptoSuite().hash(id);
         try {
             ResponseData<String> result = new ResponseData<String>();
             //设置result初始值为空字符串
@@ -178,7 +179,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->delete] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = BaseService.getClient().getCryptoSuite().hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             return new RedisExecutor(redisDomain).executeDelete(dataKey, client);
@@ -195,7 +196,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = BaseService.getClient().getCryptoSuite().hash(id);
         Date date = new Date();
         try {
             RedisDomain redisDomain = new RedisDomain(domain);

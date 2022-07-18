@@ -26,8 +26,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,7 +212,7 @@ public final class CredentialPojoUtils {
      * @return Hash value in String.
      */
     public static String getCredentialPojoHash(CredentialPojo credentialPojo,
-        Map<String, Object> disclosures) {
+           Map<String, Object> disclosures) {
         String rawData = getCredentialPojoRawDataWithProofWithoutSalt(
             credentialPojo,
             credentialPojo.getSalt(),
@@ -219,7 +221,7 @@ public final class CredentialPojoUtils {
             return StringUtils.EMPTY;
         }
         // System.out.println(rawData);
-        return DataToolUtils.sha3(rawData);
+        return BaseService.getClient().getCryptoSuite().hash(rawData);
     }
 
     /**
@@ -240,7 +242,7 @@ public final class CredentialPojoUtils {
             credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credentialPojo));
             String rawData = DataToolUtils.mapToCompactJson(credMap);
             //System.out.println("LiteCredential's Pre-Hash for evidence: " + rawData);
-            return DataToolUtils.sha3(rawData);
+            return BaseService.getClient().getCryptoSuite().hash(rawData);
         } catch (Exception e) {
             logger.error("get Credential Thumbprint error.", e);
             return StringUtils.EMPTY;
@@ -645,7 +647,7 @@ public final class CredentialPojoUtils {
      * @return the hash value
      */
     public static String getFieldSaltHash(String field, String salt) {
-        return DataToolUtils.sha3(String.valueOf(field) + String.valueOf(salt));
+        return BaseService.getClient().getCryptoSuite().hash(String.valueOf(field) + String.valueOf(salt));
     }
 
     /**

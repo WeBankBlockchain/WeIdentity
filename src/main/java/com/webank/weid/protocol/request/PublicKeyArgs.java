@@ -34,7 +34,7 @@ public class PublicKeyArgs {
     /**
      * Required: The type.
      */
-    private PublicKeyType type = PublicKeyType.SECP256K1;
+    private PublicKeyType type = PublicKeyType.ECDSA;
 
     /**
      * Required: The owner.

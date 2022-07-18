@@ -25,9 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -198,11 +200,14 @@ public class PresentationE implements RawSerializer, IProof {
             return false;
         }
         // 更新proof里面的签名
-        String signature = 
+        /*String signature =
             DataToolUtils.secp256k1Sign(
                 this.toRawData(),
                 new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
-            );
+            );*/
+        SignatureResult signatureResult = DataToolUtils.signToSignature(this.toRawData(), BaseService.getClient(),
+                BaseService.getClient().getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
+        String signature = signatureResult.convertToString();
         this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
         logger.info("[commit] commit credential with weIdAuthentication is success.");
         return true;
