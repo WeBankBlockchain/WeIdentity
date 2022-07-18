@@ -207,6 +207,8 @@ public final class WeIdConstant {
      * The FISCO-BCOS Address pattern.
      */
     public static final String FISCO_BCOS_1_X_VERSION_PREFIX = "1";
+    public static final String FISCO_BCOS_2_X_VERSION_PREFIX = "2";
+    public static final String FISCO_BCOS_3_X_VERSION_PREFIX = "3";
 
     /**
      * Removed WeID public key specified tag.

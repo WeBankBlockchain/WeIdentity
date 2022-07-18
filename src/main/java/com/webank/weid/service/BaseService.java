@@ -48,7 +48,6 @@ public abstract class BaseService {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
         }
         fiscoConfig.check();
-//        masterGroupId = Integer.parseInt(fiscoConfig.getGroupId());
         masterGroupId = fiscoConfig.getGroupId();
     }
 
