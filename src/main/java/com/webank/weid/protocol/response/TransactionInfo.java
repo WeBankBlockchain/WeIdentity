@@ -51,6 +51,21 @@ public class TransactionInfo {
     }
 
     /**
+     * Constructor from a transactionReceipt.  v3
+     *
+     * @param receipt the transaction receipt
+     */
+    public TransactionInfo(org.fisco.bcos.sdk.v3.model.TransactionReceipt receipt) {
+        if (receipt != null) {
+            this.blockNumber = new BigInteger(receipt.getBlockNumber());
+            this.transactionHash = receipt.getTransactionHash();
+            //this.transactionIndex = receipt.getTransactionIndex(); todo 3.0的链中去除了这个index值
+//            this.transactionIndex = new BigInteger(
+//                    Numeric.cleanHexPrefix(receipt.getTransactionIndex()), 16);
+        }
+    }
+
+    /**
      * Constructor.
      *
      * @param blockNumber blockNumber
