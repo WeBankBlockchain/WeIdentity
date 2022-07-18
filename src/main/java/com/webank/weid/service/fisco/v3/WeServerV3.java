@@ -222,11 +222,17 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
                 for (int i = versionInfoList.size() - 1; i >= 0; i--) {
                     BfsInfo versionInfo = versionInfoList.get(i);
                     String version = versionInfo.getFileName();
+                    List<String> addressAndAbi = versionInfo.getExt();
+                    if (addressAndAbi.size() != 2) {
+                        logger.info("bfs return ext of address and abi is invalid, {}", versionInfo);
+                        throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
+                    }
                     // 读取真正的地址
-                    String address = bfsService.readlink("/apps/" + cnsType.getName() + "/" + version);
+                    String address = addressAndAbi.get(0);
+                    String abi = addressAndAbi.get(1);
                     if (version.startsWith(preV)) {
                         logger.info("[queryBucketFromCns] query address form CNS successfully.");
-                        return new CnsInfo(cnsType.getName(), version, address, ""); // todo abi
+                        return new CnsInfo(cnsType.getName(), version, address, abi);
                     }
                 }
             }
@@ -235,8 +241,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         } catch (Exception e) {
             logger.error("[queryBucketFromCns] query address has error.", e);
             throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
-        } todo cns read link
-        return null;
+        }
     }
 
 
