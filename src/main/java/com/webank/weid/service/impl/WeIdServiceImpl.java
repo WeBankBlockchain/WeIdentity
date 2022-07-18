@@ -50,6 +50,9 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceImpl.class);
 
+    //TODO 所有getClient()需要适配V3
+    Client client = (Client) getClient();
+
     /**
      * Create a WeIdentity DID with null input param.
      *
@@ -59,7 +62,6 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     public ResponseData<CreateWeIdDataResult> createWeId() {
 
         CreateWeIdDataResult result = new CreateWeIdDataResult();
-        Client client = ((Client)getClient());
         CryptoKeyPair keyPair = client.getCryptoSuite().createKeyPair();
         //ECKeyPair keyPair = GenCredential.createKeyPair();
         if (Objects.isNull(keyPair)) {
@@ -114,7 +116,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         String publicKey = createWeIdArgs.getPublicKey();
         if (StringUtils.isNotBlank(publicKey)) {
             //替换国密
-            if (!WeIdUtils.isKeypairMatch(getWeServer().createCryptoKeyPair(privateKey), publicKey)) {
+            if (!WeIdUtils.isKeypairMatch((CryptoKeyPair) weServer.createCredentials(privateKey), publicKey)) {
                 return new ResponseData<>(
                     StringUtils.EMPTY,
                     ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED

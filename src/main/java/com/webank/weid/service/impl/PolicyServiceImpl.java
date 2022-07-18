@@ -7,8 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +42,9 @@ import com.webank.weid.util.WeIdUtils;
 public class PolicyServiceImpl extends AbstractService implements PolicyService {
 
     private static final Logger logger = LoggerFactory.getLogger(PolicyServiceImpl.class);
+
+    //TODO 所有getClient()需要适配V3
+    Client client =  (Client) getClient();
 
     /**
      * Register Claim Policy on blockchain and assign it under a CPT ID.
@@ -97,8 +105,19 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
             weIdPrivateKey);
         String address = WeIdUtils.convertWeIdToAddress(auth.getWeId());
         CptBaseInfo cptBaseInfo;
+        RsvSignature rsvSignature = null;
+        Bytes32 R = new Bytes32(signatureResult.getR());
+        rsvSignature.setR(R);
+        Bytes32 S = new Bytes32(signatureResult.getS());
+        rsvSignature.setS(S);
+        if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+            ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+            rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+        } else {
+            rsvSignature.setV(new Uint8(0));
+        }
         try {
-            cptBaseInfo = cptServiceEngine.registerCpt(address, cptJsonSchemaNew, signatureResult,
+            cptBaseInfo = cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
                 weIdPrivateKey.getPrivateKey(), WeIdConstant.POLICY_DATA_INDEX).getResult();
         } catch (Exception e) {
             logger.error("[register policy] register failed due to unknown error. ", e);
@@ -123,8 +142,8 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         sb.append(jsonSchema);
         //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
         return DataToolUtils.signToSignature(
-            sb.toString(), getClient(),
-            getWeServer().createCryptoKeyPair(cptPublisherPrivateKey.getPrivateKey()));
+            sb.toString(), client,
+            (CryptoKeyPair) weServer.createCredentials(cptPublisherPrivateKey.getPrivateKey()));
     }
 
     /**

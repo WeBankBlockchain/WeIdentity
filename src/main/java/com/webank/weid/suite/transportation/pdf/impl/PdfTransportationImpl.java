@@ -32,6 +32,7 @@ import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
 
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,6 +102,9 @@ public class PdfTransportationImpl
     private static final String PDF_ATTRIBUTE_TEMPLATE_ID = "pdfTemplateId";
 
     private static CptService cptService = new CptServiceImpl();
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
 
     /**
      * 根据Claim和Salt把需要显示的数据写入到disclosureInfo中.
@@ -1299,7 +1303,7 @@ public class PdfTransportationImpl
         //使用web3j中的sha3算法：keccak-256
         /*SHA3Digest digestSha3 = new SHA3Digest();
         byte[] digest = digestSha3.hash(pdfFileByte);*/
-        byte[] digest = BaseService.getClient().getCryptoSuite().hash(pdfFileByte);
+        byte[] digest = client.getCryptoSuite().hash(pdfFileByte);
         return Numeric.toHexString(digest);
     }
 
