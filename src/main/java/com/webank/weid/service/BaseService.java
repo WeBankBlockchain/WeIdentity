@@ -17,13 +17,13 @@ import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.callback.RegistCallBack;
 import com.webank.weid.service.fisco.WeServer;
+import com.webank.weid.service.fisco.entity.CnsInfo;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.util.DataToolUtils;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public abstract class BaseService {
 
     protected static FiscoConfig fiscoConfig;
 
-    protected static Integer masterGroupId;
+    protected static String masterGroupId;
 
     protected WeServer<?, ?, ?> weServer;
 
@@ -48,7 +48,8 @@ public abstract class BaseService {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
         }
         fiscoConfig.check();
-        masterGroupId = Integer.parseInt(fiscoConfig.getGroupId());
+//        masterGroupId = Integer.parseInt(fiscoConfig.getGroupId());
+        masterGroupId = fiscoConfig.getGroupId();
     }
 
     /**
@@ -63,11 +64,11 @@ public abstract class BaseService {
      *
      * @param groupId 群组编号
      */
-    public BaseService(Integer groupId) {
+    public BaseService(String groupId) {
         weServer = getWeServer(groupId);
     }
 
-    protected static WeServer<?, ?, ?> getWeServer(Integer groupId) {
+    protected static WeServer<?, ?, ?> getWeServer(String groupId) {
         return WeServer.getInstance(fiscoConfig, groupId);
     }
 
@@ -90,7 +91,7 @@ public abstract class BaseService {
      * @param groupId 群组ID
      * @return the Fisco client
      */
-    public static Object getClient(Integer groupId) {
+    public static Object getClient(String groupId) {
         return getWeServer(groupId).getWeb3j();
     }
 
@@ -124,7 +125,7 @@ public abstract class BaseService {
      * @return return blockNumber
      * @throws IOException possible exceptions to sending transactions
      */
-    public static int getBlockNumber(Integer groupId) throws IOException {
+    public static int getBlockNumber(String groupId) throws IOException {
         return getWeServer(groupId).getBlockNumber();
     }
 
@@ -154,7 +155,7 @@ public abstract class BaseService {
      * @param groupId 被检查群组
      * @return true表示群组存在，false表示群组不存在
      */
-    public static boolean checkGroupId(Integer groupId) {
+    public static boolean checkGroupId(String groupId) {
         return getWeServer(groupId).getGroupList().contains(groupId);
     }
 

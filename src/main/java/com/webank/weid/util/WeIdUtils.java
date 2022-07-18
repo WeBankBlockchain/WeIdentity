@@ -2,9 +2,13 @@
 
 package com.webank.weid.util;
 
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.service.BaseService;
 import java.math.BigInteger;
+import java.security.KeyPair;
 import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
@@ -13,11 +17,6 @@ import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.service.BaseService;
 
 /**
  * The WeIdentity DID Utils.
@@ -84,8 +83,7 @@ public final class WeIdUtils {
     public static String convertPublicKeyToWeId(String publicKey) {
         try {
             //String address = Keys.getAddress(new BigInteger(publicKey));
-            String address = new ECDSAKeyPair().getAddress(
-                    Numeric.toHexStringNoPrefix(new BigInteger(publicKey).toByteArray()).substring(2));
+            String address = ECDSAKeyPair.getAddressByPublicKey(publicKey); //todo 支持国密
             return buildWeIdByAddress(address);
         } catch (Exception e) {
             logger.error("convert publicKey to weId error.", e);
