@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.auth.impl;
 
@@ -28,6 +11,7 @@ import com.webank.weid.service.BaseService;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +66,9 @@ public class WeIdAuthImpl implements WeIdAuth {
      * specify who has right to get weid auth.
      */
     private static List<String> whitelistWeId;
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) BaseService.getClient();
 
     static {
         amopService.registerCallback(
@@ -166,8 +153,9 @@ public class WeIdAuthImpl implements WeIdAuth {
                 ErrorCode.getTypeByErrorCode(weidDocErrorCode));
         }
         WeIdDocument weIdDocument = weIdDoc.getResult();
+        //TODO 所有getClient()需要适配V3
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, BaseService.getClient(), null);
+            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, client, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
@@ -245,7 +233,7 @@ public class WeIdAuthImpl implements WeIdAuth {
 
         //验证对手方对challenge的签名
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, BaseService.getClient(), null);
+            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, client, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
@@ -254,8 +242,9 @@ public class WeIdAuthImpl implements WeIdAuth {
         String challenge1 = (String) dataMap.get(ParamKeyConstant.WEID_AUTH_CHALLENGE);
         /*String signData = DataToolUtils.secp256k1Sign(
             challenge1, new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));*/
-        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, BaseService.getClient(),
-                BaseService.getClient().getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
+        //TODO 需要适配V3的getCryptoSuite
+        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client,
+                client.getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
         String signData = signatureResult.convertToString();
         RequestVerifyChallengeArgs verifyChallengeArgs = new RequestVerifyChallengeArgs();
         verifyChallengeArgs.setSignData(signData);

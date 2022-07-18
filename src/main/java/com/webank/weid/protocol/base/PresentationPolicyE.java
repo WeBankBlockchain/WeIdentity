@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.protocol.base;
 
@@ -26,7 +9,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.slf4j.Logger;
@@ -95,12 +77,14 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
             JsonNode jsonNode = null;
             //获取policyJson文件 转换成JsonNode
             File file = new File(policyFileName);
+            logger.info("create policy file path:{}|{}", file.getAbsolutePath(), policyFileName);
             if (file.exists()) {
-                jsonNode = JsonLoader.fromFile(file);
+                jsonNode = DataToolUtils.loadJsonObjectFromFile(file);
             } else {
-                jsonNode = JsonLoader.fromResource("/" + policyFileName);
+                // 去除了 / 开头 ("/" + policyFileName)
+                jsonNode = DataToolUtils.loadJsonObjectFromResource(policyFileName);
             }
-           
+
             if (jsonNode == null) {
                 logger.error("can not find the {} file in your classpath.", policyFileName);
                 return policy;

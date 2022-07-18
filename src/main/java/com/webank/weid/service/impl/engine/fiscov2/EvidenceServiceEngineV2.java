@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl.engine.fiscov2;
 
@@ -76,22 +59,22 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
 
     private String evidenceAddress;
 
-    private Integer groupId;
+    private String groupId;
 
     /**
      * 构造函数.
      *
      * @param groupId 群组编号
      */
-    public EvidenceServiceEngineV2(Integer groupId) {
-        //super(groupId);
+    public EvidenceServiceEngineV2(String groupId) {
+        super(groupId);
         this.groupId = groupId;
         initEvidenceAddress();
-        evidenceContract = getContractService(this.evidenceAddress, this.groupId, EvidenceContract.class);
+        evidenceContract = getContractService(this.evidenceAddress, EvidenceContract.class);
     }
 
     private void initEvidenceAddress() {
-        if (groupId == null || masterGroupId.intValue() == groupId.intValue()) {
+        if (groupId == null || masterGroupId.equals(groupId)) {
             logger.info("[initEvidenceAddress] the groupId is master.");
             this.evidenceAddress = fiscoConfig.getEvidenceAddress();
             return;
@@ -122,7 +105,8 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT, null);
             }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
-            CryptoKeyPair keyPair = getWeServer().createCryptoKeyPair(privateKey);
+            //TODO 所有的getWeserver后CryptoKeyPair都要适配V3
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
             String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
@@ -135,7 +119,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -209,7 +192,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -289,7 +271,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -354,14 +335,13 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
             /*String address = WeIdUtils
                 .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));*/
-            CryptoKeyPair keyPair = getWeServer().createCryptoKeyPair(privateKey);
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
             String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -418,7 +398,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
             /*String address = WeIdUtils
                 .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));*/
-            CryptoKeyPair keyPair = getWeServer().createCryptoKeyPair(privateKey);
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
             String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
@@ -427,7 +407,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -524,7 +503,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             try {
                 bcosTransactionReceiptsDecoder = receiptsNode.get(String.valueOf(currentBlockNumber));
                 if (bcosTransactionReceiptsDecoder == null) {
-                    bcosTransactionReceiptsDecoder = ((Client) weServer.getClient())
+                    bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
                         .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(currentBlockNumber), "0", "-1");
                     // Store big transactions into memory (bigger than 1) to avoid memory explode
                     if (bcosTransactionReceiptsDecoder != null
@@ -796,7 +775,7 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
             /*String address = WeIdUtils
                 .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));*/
-            CryptoKeyPair keyPair = getWeServer().createCryptoKeyPair(privateKey);
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
             String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
@@ -811,7 +790,6 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );
@@ -898,14 +876,13 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
             /*String address = WeIdUtils
                 .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));*/
-            CryptoKeyPair keyPair = getWeServer().createCryptoKeyPair(privateKey);
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
             String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             EvidenceContract evidenceContractWriter =
                 reloadContract(
                     this.evidenceAddress,
-                    this.groupId,
                     privateKey,
                     EvidenceContract.class
                 );

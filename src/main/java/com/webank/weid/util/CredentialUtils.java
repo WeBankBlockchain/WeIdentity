@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.util;
 
@@ -54,6 +37,9 @@ import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
  * @author chaoxinhu 2019.1
  */
 public final class CredentialUtils {
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) BaseService.getClient();
 
     /**
      * Concat all fields of Credential info, without Proof, in Json format. This should be invoked
@@ -273,7 +259,8 @@ public final class CredentialUtils {
      * @return hash value.
      */
     public static String getFieldHash(Object field) {
-        return BaseService.getClient().getCryptoSuite().hash(String.valueOf(field));
+        //TODO 需要适配V3的getCryptoSuite
+        return client.getCryptoSuite().hash(String.valueOf(field));
     }
 
     /**
@@ -318,8 +305,8 @@ public final class CredentialUtils {
            String privateKey, Map<String, Object> disclosureMap) {
         String rawData = CredentialUtils
             .getCredentialThumbprintWithoutSig(credential, disclosureMap);
-        CryptoKeyPair keyPair = BaseService.getClient().getCryptoSuite().createKeyPair(privateKey);
-        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, BaseService.getClient(), keyPair);
+        CryptoKeyPair keyPair = client.getCryptoSuite().createKeyPair(privateKey);
+        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client, keyPair);
         //这里直接转为String，原来是用base64来加密，得到加密后的字符串
         return signatureResult.convertToString();
     }
@@ -337,7 +324,8 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        return BaseService.getClient().getCryptoSuite().hash(rawData);
+        //TODO 需要适配V3的getCryptoSuite
+        return client.getCryptoSuite().hash(rawData);
     }
 
     /**
@@ -352,7 +340,8 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        return BaseService.getClient().getCryptoSuite().hash(rawData);
+        //TODO 需要适配V3的getCryptoSuite
+        return client.getCryptoSuite().hash(rawData);
     }
 
     /**

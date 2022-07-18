@@ -1,22 +1,3 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package com.webank.weid.service.impl.engine.fiscov2;
 
 import java.io.IOException;
@@ -27,24 +8,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.zip.DataFormatException;
 
 import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.EventEncoder;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
@@ -70,6 +45,7 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
 
+
 /**
  * WeIdServiceEngine call weid contract which runs on FISCO BCOS 2.0.
  *
@@ -94,13 +70,16 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      */
     private static WeIdContract weIdContract;
 
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
+
     static {
         // initialize the event topic
         topicMap = new HashMap<String, String>();
 
         topicMap.put(
             //EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
-                new EventEncoder(getWeServer().getClient().getCryptoSuite()).encode(
+                new EventEncoder((client).getCryptoSuite()).encode(
                         WeIdContract.WEIDATTRIBUTECHANGED_EVENT
                 ),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
@@ -353,7 +332,8 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
 
         String type;
-        if(BaseService.getClient().getCryptoType() == CryptoType.ECDSA_TYPE){
+        //TODO 需要适配V3的getCryptoType
+        if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
             type = PublicKeyType.ECDSA.getTypeName();
         } else {
             type = PublicKeyType.SM2.getTypeName();
@@ -614,7 +594,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         throws IOException, DataFormatException {
         BcosTransactionReceiptsDecoder bcosTransactionReceiptsDecoder = null;
         try {
-            bcosTransactionReceiptsDecoder = ((Client) weServer.getClient())
+            bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
                     .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(blockNumber), "0", "-1");
         } catch (Exception e) {
             logger.error("[getTransactionReceipts] get block {} err: {}", blockNumber, e);

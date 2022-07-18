@@ -1,9 +1,10 @@
 package com.webank.weid.contract.deploy.v2;
 
+import com.webank.weid.service.fisco.entity.CnsInfo;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.RetCode;
@@ -31,19 +32,16 @@ public class RegisterAddressV2 {
      */
     private static final Logger logger = LoggerFactory.getLogger(RegisterAddressV2.class);
 
-    //private static Credentials credentials;
     private static CryptoKeyPair cryptoKeyPair;
 
-    /*private static Credentials getCredentials(String inputPrivateKey) {
-        if (credentials == null) {
-            credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));
-        }
-        return credentials;
-    }*/
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) BaseService.getClient();
+
     private static CryptoKeyPair getCryptoKeyPair(String inputPrivateKey) {
         if (cryptoKeyPair == null) {
             //cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
-            cryptoKeyPair = BaseService.getClient().getCryptoSuite().createKeyPair(inputPrivateKey);
+            //TODO 需要适配V3的getCryptoSuite
+            cryptoKeyPair = client.getCryptoSuite().createKeyPair(inputPrivateKey);
         }
         return cryptoKeyPair;
     }
@@ -111,7 +109,7 @@ public class RegisterAddressV2 {
             if (result.getCode() != 0) {
                 throw new WeIdBaseException(result.getCode() + "-" + result.getMsg());*/
             RetCode retCode =
-                    new CnsService(BaseService.getClient(), getCryptoKeyPair(privateKey))
+                    new CnsService((Client) BaseService.getClient(), getCryptoKeyPair(privateKey))
                             .registerCNS(cnsType.getName(), cnsType.getVersion(), bucketAddr, DataBucket.ABI);
             if (retCode.getCode() != 1) {
                 throw new WeIdBaseException(retCode.getCode() + "-" + retCode.getMessage());
@@ -130,10 +128,7 @@ public class RegisterAddressV2 {
         logger.info("[deployBucket] begin deploy bucket.");
         //先进行地址部署
         DataBucket dataBucket = DataBucket.deploy(
-            /*(Web3j)BaseService.getWeb3j(),
-            getCredentials(privateKey), 
-            new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)).send();*/
-            BaseService.getClient(),
+            (Client) BaseService.getClient(),
             getCryptoKeyPair(privateKey));
         return dataBucket.getContractAddress();
     }
