@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl;
 
@@ -26,6 +9,8 @@ import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
@@ -55,6 +40,9 @@ import com.webank.weid.util.WeIdUtils;
 public class CptServiceImpl extends AbstractService implements CptService {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
     //获取CPT缓存节点
     private static CacheNode<ResponseData<Cpt>> cptCahceNode =
             CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
@@ -306,8 +294,8 @@ public class CptServiceImpl extends AbstractService implements CptService {
         sb.append(jsonSchema);
         //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
         return DataToolUtils.signToSignature(
-                sb.toString(), getClient(),
-                getWeServer().createCryptoKeyPair(cptPublisherPrivateKey.getPrivateKey()));
+                sb.toString(), client,
+                (CryptoKeyPair) weServer.createCredentials(cptPublisherPrivateKey.getPrivateKey()));
     }
 
     private ErrorCode validateCptArgs(

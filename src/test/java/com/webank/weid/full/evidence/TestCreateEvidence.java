@@ -1,38 +1,6 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.evidence;
-
-import java.io.File;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
@@ -49,6 +17,18 @@ import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.OffLineBatchTask;
+import java.io.File;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test CreateEvidence.
@@ -650,19 +630,16 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertTrue(evidenceService.generateHash(selectiveCredentialPojo).getResult()
             .getHash().equalsIgnoreCase(selectiveCredentialPojo.getHash()));
         // Test file
-        //File file = new ClassPathResource("test-template.pdf").getFile();
         String path = TestCreateEvidence.class
                 .getClassLoader().getResource("test-template.pdf").getPath();
         File file = new File(path);
         String fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
         // Support GBK and UTF-8 encoding here - they will yield different hash values, though
-        //file = new ClassPathResource("org1.txt").getFile();
         path = TestCreateEvidence.class.getClassLoader().getResource("org1.txt").getPath();
         file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
-        //file = new ClassPathResource("test-hash-pic.png").getFile();
         path = TestCreateEvidence.class.getClassLoader().getResource("test-hash-pic.png").getPath();
         file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();

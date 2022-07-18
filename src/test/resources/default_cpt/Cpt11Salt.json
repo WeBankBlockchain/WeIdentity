@@ -1,0 +1,1 @@
+{"type":"object","description":"Reserved CPT 11Salt","title":"test CPT","properties":{"cptId":{"type":"string","description":"CPT ID","minimum":1},"userId":{"type":"string","description":"User ID"},"userName":{"type":"string","description":"User Name","maxLength":30}},"required":["cptId","userId","userName"],"$schema":"http://json-schema.org/draft-04/schema#"}
