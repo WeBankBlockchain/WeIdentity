@@ -125,6 +125,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             credentialWrapper.setDisclosure(disclosureMap);
 
             // Construct Credential Proof
+            //替换国密
             Map<String, String> credentialProof = CredentialUtils.buildCredentialProof(
                     result,
                     args.getWeIdPrivateKey().getPrivateKey(),
@@ -191,7 +192,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         String keyWeId = WeIdUtils
                 .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());*/
-        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        //CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        CryptoKeyPair keyPair = getWeServer().createCryptoKeyPair(privateKey);
         String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
         if (!weIdService.isWeIdExist(keyWeId).getResult()) {
             return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
@@ -216,6 +218,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         Map<String, Object> claim = new HashMap<>();
         claim.put("credentialList", trimmedCredentialList);
         result.setClaim(claim);
+        //替换国密
         Map<String, String> credentialProof = CredentialUtils
                 .buildCredentialProof(result, privateKey, null);
         result.setProof(credentialProof);
@@ -498,9 +501,10 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
                 } else {
                     WeIdDocument weIdDocument = innerResponseData.getResult();
+                    //替换国密
                     ErrorCode errorCode = DataToolUtils
-                            .verifySecp256k1SignatureFromWeId(rawData, credential.getSignature(),
-                                    weIdDocument, null);
+                            .verifySignatureFromWeId(rawData, credential.getSignature(),
+                                    weIdDocument, getClient(), null);
                     if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                         return new ResponseData<>(false, errorCode);
                     }
@@ -508,8 +512,8 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                 }
             } else {
                 boolean result =
-                        DataToolUtils.verifySecp256k1Signature(rawData,
-                                credential.getSignature(), new BigInteger(publicKey));
+                        DataToolUtils.verifySignature(rawData,
+                                credential.getSignature(), getClient(), new BigInteger(publicKey));
                 if (!result) {
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_VERIFY_FAIL);
                 }

@@ -27,6 +27,7 @@ import java.util.Map;
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -137,12 +138,12 @@ public class CptServiceImpl extends AbstractService implements CptService {
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
-            RsvSignature rsvSignature = sign(
+            SignatureResult signatureResult = sign(
                     weId,
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
+            return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, signatureResult,
                     weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
@@ -176,12 +177,12 @@ public class CptServiceImpl extends AbstractService implements CptService {
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
-            RsvSignature rsvSignature = sign(
+            SignatureResult signatureResult = sign(
                     weId,
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
+            return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, signatureResult,
                     weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
@@ -271,7 +272,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
-            RsvSignature rsvSignature = sign(
+            SignatureResult signatureResult = sign(
                     weId,
                     cptJsonSchemaNew,
                     weIdPrivateKey);
@@ -280,7 +281,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
                     cptId,
                     address,
                     cptJsonSchemaNew,
-                    rsvSignature,
+                    signatureResult,
                     weIdPrivateKey.getPrivateKey(),
                     WeIdConstant.CPT_DATA_INDEX);
             if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
@@ -293,8 +294,8 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
     }
 
-
-    private RsvSignature sign(
+    //替换国密
+    private SignatureResult sign(
             String cptPublisher,
             String jsonSchema,
             WeIdPrivateKey cptPublisherPrivateKey) {
@@ -304,9 +305,9 @@ public class CptServiceImpl extends AbstractService implements CptService {
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
         //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
-        ECDSASignatureResult signatureData = DataToolUtils.secp256k1SignToSignature(
-                sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-        return DataToolUtils.convertSignatureDataToRsv(signatureData);
+        return DataToolUtils.signToSignature(
+                sb.toString(), getClient(),
+                getWeServer().createCryptoKeyPair(cptPublisherPrivateKey.getPrivateKey()));
     }
 
     private ErrorCode validateCptArgs(
