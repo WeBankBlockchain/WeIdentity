@@ -9,10 +9,13 @@ import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,7 +134,18 @@ public class CptServiceImpl extends AbstractService implements CptService {
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, signatureResult,
+            RsvSignature rsvSignature = null;
+            Bytes32 R = new Bytes32(signatureResult.getR());
+            rsvSignature.setR(R);
+            Bytes32 S = new Bytes32(signatureResult.getS());
+            rsvSignature.setS(S);
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+                ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+                rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+            } else {
+                rsvSignature.setV(new Uint8(0));
+            }
+            return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
                     weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
@@ -170,7 +184,18 @@ public class CptServiceImpl extends AbstractService implements CptService {
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, signatureResult,
+            RsvSignature rsvSignature = null;
+            Bytes32 R = new Bytes32(signatureResult.getR());
+            rsvSignature.setR(R);
+            Bytes32 S = new Bytes32(signatureResult.getS());
+            rsvSignature.setS(S);
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+                ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+                rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+            } else {
+                rsvSignature.setV(new Uint8(0));
+            }
+            return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
                     weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
@@ -265,11 +290,22 @@ public class CptServiceImpl extends AbstractService implements CptService {
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
+            RsvSignature rsvSignature = null;
+            Bytes32 R = new Bytes32(signatureResult.getR());
+            rsvSignature.setR(R);
+            Bytes32 S = new Bytes32(signatureResult.getS());
+            rsvSignature.setS(S);
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+                ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+                rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+            } else {
+                rsvSignature.setV(new Uint8(0));
+            }
             ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(
                     cptId,
                     address,
                     cptJsonSchemaNew,
-                    signatureResult,
+                    rsvSignature,
                     weIdPrivateKey.getPrivateKey(),
                     WeIdConstant.CPT_DATA_INDEX);
             if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
