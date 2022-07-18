@@ -2,7 +2,7 @@ package com.webank.weid.contract.deploy.v3;
 
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.contract.v2.DataBucket;
+import com.webank.weid.contract.v3.DataBucket;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
