@@ -38,6 +38,7 @@ import java.util.zip.DataFormatException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.v3.client.protocol.model.Transaction;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.TransactionResult;
@@ -71,6 +72,8 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
      * WeIdentity DID contract object, for calling weIdentity DID contract.
      */
     private static WeIdContract weIdContract;
+
+    private static Client client =  (Client) getClient();
 
     static {
         // initialize the event topic
@@ -330,7 +333,14 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
             + "result:{}", value, weId, result);
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
 
-        String type = PublicKeyType.SECP256K1.getTypeName();
+        //String type = PublicKeyType.SECP256K1.getTypeName();
+        String type;
+        //TODO 需要适配V3的getCryptoType
+        if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+            type = PublicKeyType.ECDSA.getTypeName();
+        } else {
+            type = PublicKeyType.SM2.getTypeName();
+        }
         // Identify explicit type from key
         if (!StringUtils.isEmpty(key)) {
             String[] keyArray = StringUtils.splitByWholeSeparator(key, "/");
