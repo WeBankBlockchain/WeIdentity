@@ -43,7 +43,8 @@ public abstract class DeployContract {
      * @param args the arguments
      */
     public static void main(String[] args) {
-        
+        //此处初始化读取main resource的配置文件，可修改chainId为101。并修改fisco.properties:profile.active=prd101
+//        String chainId = "101";
         String chainId = args[0];
         String privateKey = null;
         if (args != null && args.length > 2) {

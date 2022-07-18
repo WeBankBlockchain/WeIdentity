@@ -135,7 +135,8 @@ public abstract class AddressProcess {
         return DataToolUtils.getHash(address.toString());
     }
     
-    public static String getHashForShare(Integer groupId, String evidenceAddress) {
+//    public static String getHashForShare(Integer groupId, String evidenceAddress) { todo 设置String groupId后是否影响hash
+    public static String getHashForShare(String groupId, String evidenceAddress) {
         StringBuffer address = new StringBuffer();
         address.append("share").append(groupId).append(evidenceAddress);
         return DataToolUtils.getHash(address.toString());
