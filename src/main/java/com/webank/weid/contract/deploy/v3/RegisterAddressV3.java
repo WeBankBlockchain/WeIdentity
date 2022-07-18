@@ -1,42 +1,39 @@
-package com.webank.weid.contract.deploy.v2;
-
-import com.webank.weid.service.fisco.entity.CnsInfo;
-import java.math.BigInteger;
-
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsService;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.model.RetCode;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package com.webank.weid.contract.deploy.v3;
 
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.DataBucket;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.response.CnsResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
+import com.webank.weid.service.fisco.entity.CnsInfo;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
 import com.webank.weid.service.impl.engine.fiscov2.DataBucketServiceEngineV2;
 import com.webank.weid.util.DataToolUtils;
+import java.math.BigInteger;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSService;
+import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.model.RetCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class RegisterAddressV2 {
+public class RegisterAddressV3 {
 
     /**
      * log4j.
      */
-    private static final Logger logger = LoggerFactory.getLogger(RegisterAddressV2.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        RegisterAddressV3.class);
 
     private static CryptoKeyPair cryptoKeyPair;
 
     private static CryptoKeyPair getCryptoKeyPair(String inputPrivateKey) {
         if (cryptoKeyPair == null) {
-            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = ((Client) BaseService.getClient()).getCryptoSuite()
+                .getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
         }
         return cryptoKeyPair;
     }
@@ -104,8 +101,8 @@ public class RegisterAddressV2 {
             if (result.getCode() != 0) {
                 throw new WeIdBaseException(result.getCode() + "-" + result.getMsg());*/
             RetCode retCode =
-                    new CnsService((Client) BaseService.getClient(), getCryptoKeyPair(privateKey))
-                            .registerCNS(cnsType.getName(), cnsType.getVersion(), bucketAddr, DataBucket.ABI);
+                    new BFSService((Client) BaseService.getClient(), getCryptoKeyPair(privateKey))
+                            .link(cnsType.getName(), cnsType.getVersion(), bucketAddr, DataBucket.ABI);
             if (retCode.getCode() != 1) {
                 throw new WeIdBaseException(retCode.getCode() + "-" + retCode.getMessage());
             }
@@ -120,12 +117,13 @@ public class RegisterAddressV2 {
     }
     
     private static String deployBucket(String privateKey) throws Exception {
-        logger.info("[deployBucket] begin deploy bucket.");
-        //先进行地址部署
-        DataBucket dataBucket = DataBucket.deploy(
-            (Client) BaseService.getClient(),
-            getCryptoKeyPair(privateKey));
-        return dataBucket.getContractAddress();
+//        logger.info("[deployBucket] begin deploy bucket.");
+//        //先进行地址部署
+//        DataBucket dataBucket = DataBucket.deploy( // todo 3.0的合约类
+//            (Client) BaseService.getClient(),
+//            getCryptoKeyPair(privateKey));
+//        return dataBucket.getContractAddress();
+        return "";
     }
     
     /**
@@ -149,7 +147,8 @@ public class RegisterAddressV2 {
     public static void registerAllCns(WeIdPrivateKey privateKey) {
         for (CnsType cnsType : CnsType.values()) {
             // 注册cns
-            RegisterAddressV2.registerBucketToCns(cnsType, privateKey);
+            RegisterAddressV3
+                .registerBucketToCns(cnsType, privateKey);
         }
     }
     
@@ -167,7 +166,7 @@ public class RegisterAddressV2 {
         WeIdPrivateKey privateKey
     ) {
         // 默认将主合约hash注册到机构配置cns中
-        RegisterAddressV2.registerAddress(
+        RegisterAddressV3.registerAddress(
             CnsType.ORG_CONFING,
             module, 
             value, 

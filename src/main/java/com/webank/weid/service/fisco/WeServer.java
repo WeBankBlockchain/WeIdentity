@@ -19,13 +19,13 @@
 
 package com.webank.weid.service.fisco;
 
+import com.webank.weid.service.fisco.entity.CnsInfo;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.contract.precompiled.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,8 @@ import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.PropertyUtils;
 
 /**
- * Client,CryptoKeyPair,Service
+ * BcosSDK,Client,CryptoKeyPair
+ * @param <B>
  * @param <W>
  * @param <C>
  */
@@ -63,7 +64,7 @@ public abstract class WeServer<B, W, C> {
     /**
      * WeServer对象上下文.
      */
-    private static ConcurrentHashMap<Integer, WeServer<?, ?, ?>>  weServerContext =
+    private static ConcurrentHashMap<String, WeServer<?, ?, ?>>  weServerContext =
         new ConcurrentHashMap<>();
 
     /**
@@ -99,13 +100,14 @@ public abstract class WeServer<B, W, C> {
      *
      * @param fiscoConfig FISCO配置对象
      * @param groupId 群组ID
+     * @param <B> BcosSDK
      * @param <W> Web3j对象
      * @param <C> Credential对象
      * @return 返回WeServer对象
      */
     public static synchronized <B, W, C> WeServer<B, W, C> getInstance (
         FiscoConfig fiscoConfig,
-        Integer groupId
+        String groupId
     ) {
         WeServer<?, ?, ?> weServer = weServerContext.get(groupId);
         if (weServer == null) {
@@ -216,7 +218,7 @@ public abstract class WeServer<B, W, C> {
      *
      * @param groupId 群组Id
      */
-    protected abstract void initWeb3j(Integer groupId);
+    protected abstract void initWeb3j(String groupId);
 
     /**
      * 发送AMOP消息.
@@ -252,7 +254,11 @@ public abstract class WeServer<B, W, C> {
      */
     protected abstract CnsInfo queryCnsInfo(CnsType cnsType) throws WeIdBaseException;
 
-    public abstract Set<Integer> getGroupList();
+    /**
+     * 获取链上群组列表
+     * @return
+     */
+    public abstract Set<String> getGroupList();
 
 
     /**
