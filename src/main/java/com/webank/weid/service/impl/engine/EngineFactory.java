@@ -10,6 +10,9 @@ import com.webank.weid.service.impl.engine.fiscov2.EvidenceServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.RawTransactionServiceEngineV2;
 import com.webank.weid.service.impl.engine.fiscov2.WeIdServiceEngineV2;
 
+/**
+ * 加上V2
+ */
 public class EngineFactory {
 
     /**
@@ -41,7 +44,7 @@ public class EngineFactory {
      * @param groupId 群组编号
      * @return EvidenceServiceEngine object
      */
-    public static EvidenceServiceEngine createEvidenceServiceEngine(Integer groupId) {
+    public static EvidenceServiceEngine createEvidenceServiceEngine(String groupId) {
         return new EvidenceServiceEngineV2(groupId);
     }
 
