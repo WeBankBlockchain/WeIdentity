@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,14 +91,14 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
         WeIdPrivateKey weIdPrivateKey = auth.getWeIdPrivateKey();
         String cptJsonSchemaNew = DataToolUtils.serialize(cptMapArgs.getCptJsonSchema());
-        RsvSignature rsvSignature = sign(
+        SignatureResult signatureResult = sign(
             auth.getWeId(),
             cptJsonSchemaNew,
             weIdPrivateKey);
         String address = WeIdUtils.convertWeIdToAddress(auth.getWeId());
         CptBaseInfo cptBaseInfo;
         try {
-            cptBaseInfo = cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
+            cptBaseInfo = cptServiceEngine.registerCpt(address, cptJsonSchemaNew, signatureResult,
                 weIdPrivateKey.getPrivateKey(), WeIdConstant.POLICY_DATA_INDEX).getResult();
         } catch (Exception e) {
             logger.error("[register policy] register failed due to unknown error. ", e);
@@ -111,7 +112,7 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         }
     }
 
-    private RsvSignature sign(
+    private SignatureResult sign(
         String cptPublisher,
         String jsonSchema,
         WeIdPrivateKey cptPublisherPrivateKey) {
@@ -121,9 +122,9 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
         //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
-        ECDSASignatureResult signatureData = DataToolUtils.secp256k1SignToSignature(
-            sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-        return DataToolUtils.convertSignatureDataToRsv(signatureData);
+        return DataToolUtils.signToSignature(
+            sb.toString(), getClient(),
+            getWeServer().createCryptoKeyPair(cptPublisherPrivateKey.getPrivateKey()));
     }
 
     /**

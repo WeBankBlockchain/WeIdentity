@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -53,9 +54,10 @@ public class OffLineBatchTask extends AbstractService {
         } catch (Exception e) {
             logger.error("Create weId failed.", e);
         }*/
-        BigInteger bigPrivateKey =
+        /*BigInteger bigPrivateKey =
                 new BigInteger(DataToolUtils.createKeyPair().getHexPrivateKey());
-        privateKey = String.valueOf(bigPrivateKey);
+        privateKey = String.valueOf(bigPrivateKey);*/
+        privateKey = BaseService.getClient().getCryptoSuite().createKeyPair().getHexPrivateKey();
     }
 
     private static Persistence getDataDriver() {
