@@ -16,15 +16,20 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.RawTransactionServiceEngine;
+import com.webank.weid.service.impl.engine.fiscov3.callback.RawTxCallbackV3;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.TransactionUtils;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.client.Client;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosTransactionReceipt;
 import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.utils.Hex;
+import org.fisco.bcos.sdk.v3.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,35 +90,24 @@ public class RawTransactionServiceEngineV3 extends BaseEngine implements
         throws Exception {
 
         Client client = (Client) getClient();
-        TransactionReceipt ethSendTransaction = client
-            .sendTransaction(transactionHex, true)
-            .getTransactionReceipt();
-        if (ethSendTransaction.isStatusOK()) {
-            logger.error("Error processing transaction request: "
-                + ethSendTransaction.getMessage());
-            return null;
-        }
-        TransactionReceipt receiptOptional =
-            getTransactionReceiptRequest(client, ethSendTransaction.getTransactionHash());
-        int sumTime = 0;
+//        TransactionReceipt ethSendTransaction = client
+//            .sendTransaction(transactionHex, true).getTransactionReceipt();
+        String transHash = "0x" + Hex.toHexString(
+            client.getCryptoSuite().hash(Hex.decode(Numeric.cleanHexPrefix(transactionHex))));
+        CompletableFuture<TransactionReceipt> futureRawTx = new CompletableFuture<>();
+        client.sendTransactionAsync(transactionHex, true,
+            new RawTxCallbackV3(futureRawTx));
+
         try {
-            for (int i = 0; i < WeIdConstant.POLL_TRANSACTION_ATTEMPTS; i++) {
-                if (receiptOptional == null || receiptOptional.getBlockNumber() == null) { // todo
-                    Thread.sleep((long) WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION);
-                    sumTime += WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION;
-                    receiptOptional = getTransactionReceiptRequest(client,
-                        ethSendTransaction.getTransactionHash());
-                } else {
-                    return receiptOptional;
-                }
-            }
+            return futureRawTx.get(
+                WeIdConstant.POLL_TRANSACTION_TOTAL_DURATION, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             throw new WeIdBaseException("Transaction receipt was not generated after "
-                + ((sumTime) / 1000
-                + " seconds for transaction: " + ethSendTransaction));
+                + ((WeIdConstant.POLL_TRANSACTION_TOTAL_DURATION) / 1000
+                + " seconds for transaction: " + transHash));
         }
-        return null;
     }
+
 
     /**
      * Get a TransactionReceipt request from a transaction Hash.
