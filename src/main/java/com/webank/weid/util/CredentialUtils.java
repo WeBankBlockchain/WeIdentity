@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.CredentialConstant;
@@ -43,6 +44,9 @@ import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 
 /**
  * The Class CredentialUtils.
@@ -102,7 +106,7 @@ public final class CredentialUtils {
      * Build the credential Proof.
      *
      * @param credential the credential
-     * @param privateKey the privatekey
+     * @param privateKey
      * @param disclosureMap the disclosureMap
      * @return the Proof structure
      */
@@ -269,7 +273,7 @@ public final class CredentialUtils {
      * @return hash value.
      */
     public static String getFieldHash(Object field) {
-        return DataToolUtils.sha3(String.valueOf(field));
+        return BaseService.getClient().getCryptoSuite().hash(String.valueOf(field));
     }
 
     /**
@@ -306,15 +310,18 @@ public final class CredentialUtils {
      * creation is the credential thumbprint result based on an empty signature value filled in.
      *
      * @param credential target credential object
-     * @param privateKey the privatekey for signing
+     * @param privateKey
      * @param disclosureMap the disclosure map
      * @return the String signature value
      */
-    public static String getCredentialSignature(Credential credential, String privateKey,
-        Map<String, Object> disclosureMap) {
+    public static String getCredentialSignature(Credential credential,
+           String privateKey, Map<String, Object> disclosureMap) {
         String rawData = CredentialUtils
             .getCredentialThumbprintWithoutSig(credential, disclosureMap);
-        return DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
+        CryptoKeyPair keyPair = BaseService.getClient().getCryptoSuite().createKeyPair(privateKey);
+        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, BaseService.getClient(), keyPair);
+        //这里直接转为String，原来是用base64来加密，得到加密后的字符串
+        return signatureResult.convertToString();
     }
 
     /**
@@ -330,7 +337,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        return DataToolUtils.sha3(rawData);
+        return BaseService.getClient().getCryptoSuite().hash(rawData);
     }
 
     /**
@@ -345,7 +352,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        return DataToolUtils.sha3(rawData);
+        return BaseService.getClient().getCryptoSuite().hash(rawData);
     }
 
     /**

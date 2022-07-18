@@ -31,12 +31,16 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.zip.DataFormatException;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.EventEncoder;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -348,7 +352,12 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             + "result:{}", value, weId, result);
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
 
-        String type = PublicKeyType.SECP256K1.getTypeName();
+        String type;
+        if(BaseService.getClient().getCryptoType() == CryptoType.ECDSA_TYPE){
+            type = PublicKeyType.ECDSA.getTypeName();
+        } else {
+            type = PublicKeyType.SM2.getTypeName();
+        }
         // Identify explicit type from key
         if (!StringUtils.isEmpty(key)) {
             String[] keyArray = StringUtils.splitByWholeSeparator(key, "/");

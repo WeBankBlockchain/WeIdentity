@@ -60,14 +60,16 @@ public class DeployEvidenceV2 extends AddressProcess {
         if (StringUtils.isNotBlank(inputPrivateKey)) {
             logger.info("[DeployEvidenceV2] begin to init credentials by privateKey..");
             //credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));
-            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            //cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = BaseService.getClient().getCryptoSuite().createKeyPair(inputPrivateKey);
         } else {
             // 此分支逻辑实际情况不会执行，因为通过build-tool进来是先给创建私钥
             logger.info("[DeployEvidenceV2] begin to init credentials..");
             /*credentials = GenCredential.create();
             String privateKey = credentials.getEcKeyPair().getPrivateKey().toString();
             String publicKey = credentials.getEcKeyPair().getPublicKey().toString();*/
-            cryptoKeyPair = DataToolUtils.createKeyPair();
+            //cryptoKeyPair = DataToolUtils.createKeyPair();
+            cryptoKeyPair = BaseService.getClient().getCryptoSuite().createKeyPair();
             byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
             byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
             String privateKey = new BigInteger(1, priBytes).toString();

@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,12 +133,12 @@ public abstract class AddressProcess {
             .append(cptAddress)
             .append(specificAddress)
             .append(evidenceAddress);
-        return DataToolUtils.getHash(address.toString());
+        return BaseService.getClient().getCryptoSuite().hash(address.toString());
     }
     
     public static String getHashForShare(Integer groupId, String evidenceAddress) {
         StringBuffer address = new StringBuffer();
         address.append("share").append(groupId).append(evidenceAddress);
-        return DataToolUtils.getHash(address.toString());
+        return BaseService.getClient().getCryptoSuite().hash(address.toString());
     }
 }

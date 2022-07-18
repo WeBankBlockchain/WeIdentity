@@ -79,7 +79,6 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         Client client = getWeServer().getClient();
         CryptoKeyPair keyPair = client.getCryptoSuite().createKeyPair();
         //ECKeyPair keyPair = GenCredential.createKeyPair();
-
         if (Objects.isNull(keyPair)) {
             logger.error("Create weId failed.");
             return new ResponseData<>(null, ErrorCode.WEID_KEYPAIR_CREATE_FAILED);
@@ -93,6 +92,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         WeIdPrivateKey userWeIdPrivateKey = new WeIdPrivateKey();
         userWeIdPrivateKey.setPrivateKey(privateKey);
         result.setUserWeIdPrivateKey(userWeIdPrivateKey);
+        //替换国密
         String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
         result.setWeId(weId);
 
@@ -130,7 +130,8 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         String privateKey = createWeIdArgs.getWeIdPrivateKey().getPrivateKey();
         String publicKey = createWeIdArgs.getPublicKey();
         if (StringUtils.isNotBlank(publicKey)) {
-            if (!WeIdUtils.isKeypairMatch(privateKey, publicKey)) {
+            //替换国密
+            if (!WeIdUtils.isKeypairMatch(getWeServer().createCryptoKeyPair(privateKey), publicKey)) {
                 return new ResponseData<>(
                     StringUtils.EMPTY,
                     ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED
@@ -655,7 +656,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     private boolean isPublicKeyStringValid(String pubKey) {
         // Allow base64, rsa (alphaNum) and bigInt
         return (DataToolUtils.isValidBase64String(pubKey)
-            || StringUtils.isAlphanumeric(pubKey)
+        //    || StringUtils.isAlphanumeric(pubKey)
             || NumberUtils.isDigits(pubKey));
     }
 

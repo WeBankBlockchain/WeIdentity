@@ -87,16 +87,21 @@ public class DeployContractV2 extends AddressProcess {
      */
     //private static boolean initCredentials(String inputPrivateKey) {
     private static boolean initCryptoKeyPair(String inputPrivateKey) {
+        if (client == null) {
+            initClient();
+        }
         if (StringUtils.isNotBlank(inputPrivateKey)) {
             /*logger.info("[DeployContractV2] begin to init credentials by privateKey..");
             credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));*/
             logger.info("[DeployContractV2] begin to init cryptoKeyPair by privateKey..");
-            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            //cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = client.getCryptoSuite().createKeyPair(inputPrivateKey);
         } else {
             /*logger.info("[DeployContractV2] begin to init credentials..");
             credentials = GenCredential.create();*/
             logger.info("[DeployContractV2] begin to init cryptoKeyPair..");
-            cryptoKeyPair = DataToolUtils.createKeyPair();
+            //cryptoKeyPair = DataToolUtils.createKeyPair();
+            cryptoKeyPair = client.getCryptoSuite().createKeyPair();
         }
 
         /*if (credentials == null) {

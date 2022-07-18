@@ -42,7 +42,8 @@ public class RegisterAddressV2 {
     }*/
     private static CryptoKeyPair getCryptoKeyPair(String inputPrivateKey) {
         if (cryptoKeyPair == null) {
-            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            //cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = BaseService.getClient().getCryptoSuite().createKeyPair(inputPrivateKey);
         }
         return cryptoKeyPair;
     }
