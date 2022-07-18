@@ -12,10 +12,10 @@ import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.v2.CptController;
-import com.webank.weid.contract.v2.CptController.CredentialTemplateEventResponse;
-import com.webank.weid.contract.v2.CptController.RegisterCptRetLogEventResponse;
-import com.webank.weid.contract.v2.CptController.UpdateCptRetLogEventResponse;
+import com.webank.weid.contract.v3.CptController;
+import com.webank.weid.contract.v3.CptController.CredentialTemplateEventResponse;
+import com.webank.weid.contract.v3.CptController.RegisterCptRetLogEventResponse;
+import com.webank.weid.contract.v3.CptController.UpdateCptRetLogEventResponse;
 import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.Cpt;
@@ -44,14 +44,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.EventEncoder;
-import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
-import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple7;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosTransactionReceipt;
+import org.fisco.bcos.sdk.v3.codec.EventEncoder;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple7;
+import org.fisco.bcos.sdk.v3.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -339,8 +339,8 @@ public class CptServiceEngineV3 extends BaseEngine implements CptServiceEngine {
                 new BigInteger(String.valueOf(cptId)),
                 template.getPublicKey().getCredentialPublicKey().getBytes(),
                 template.getCredentialKeyCorrectnessProof().getBytes());
-            if (!StringUtils
-                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+            if (receipt.getStatus() == ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS_V3) {
+
                 logger.error("[processTemplate] put credential template to blockchain failed.");
                 return ErrorCode.CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR;
             }
@@ -409,7 +409,7 @@ public class CptServiceEngineV3 extends BaseEngine implements CptServiceEngine {
 
         try {
             Tuple7<String, List<BigInteger>, List<byte[]>, List<byte[]>,
-                            BigInteger, byte[], byte[]> valueList;
+                                        BigInteger, byte[], byte[]> valueList;
             if (dataStorageIndex == WeIdConstant.CPT_DATA_INDEX) {
                 valueList = cptController
                     .queryCpt(new BigInteger(String.valueOf(cptId)));
@@ -496,7 +496,7 @@ public class CptServiceEngineV3 extends BaseEngine implements CptServiceEngine {
         }
         BcosBlock bcosBlock = null;
         bcosBlock = ((Client) getClient())
-            .getBlockByNumber(BigInteger.valueOf(blockNum), true);
+            .getBlockByNumber(BigInteger.valueOf(blockNum), false, false);
         if (bcosBlock == null) {
             logger.info(
                 "[queryCredentialTemplate]:get block by number :{} . latestBlock is null",
@@ -513,9 +513,10 @@ public class CptServiceEngineV3 extends BaseEngine implements CptServiceEngine {
             for (String transHash : transList) {
                 //String transHash = transaction.getHash();
 
-                BcosTransactionReceipt rec1 = ((Client) getClient()).getTransactionReceipt(transHash);
-                TransactionReceipt receipt = rec1.getTransactionReceipt().get();
-                List<TransactionReceipt.Logs> logs = rec1.getResult().getLogs();
+                TransactionReceipt receipt = ((Client) getClient())
+                    .getTransactionReceipt(transHash, true)
+                    .getTransactionReceipt();
+                List<TransactionReceipt.Logs> logs = receipt.getLogEntries();
                 for (TransactionReceipt.Logs log : logs) {
 
                     if (StringUtils.equals(log.getTopics().get(0), CREDENTIAL_TEMPLATE_EVENT)) {
