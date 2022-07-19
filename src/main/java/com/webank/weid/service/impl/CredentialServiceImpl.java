@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +42,6 @@ import org.slf4j.LoggerFactory;
 public class CredentialServiceImpl extends BaseService implements CredentialService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialServiceImpl.class);
-
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) getClient();
 
     private CptService cptService = new CptServiceImpl();
 
@@ -177,8 +172,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         String keyWeId = WeIdUtils
                 .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());*/
         //CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
-        String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
+        String keyWeId = WeIdUtils.convertAddressToWeId(DataToolUtils.cryptoSuite.createKeyPair(privateKey).getAddress());
         if (!weIdService.isWeIdExist(keyWeId).getResult()) {
             return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         }
@@ -488,7 +482,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
                     //替换国密
                     ErrorCode errorCode = DataToolUtils
                             .verifySignatureFromWeId(rawData, credential.getSignature(),
-                                    weIdDocument, client, null);
+                                    weIdDocument, null);
                     if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                         return new ResponseData<>(false, errorCode);
                     }
@@ -497,7 +491,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
             } else {
                 boolean result =
                         DataToolUtils.verifySignature(rawData,
-                                credential.getSignature(), client, new BigInteger(publicKey));
+                                credential.getSignature(), new BigInteger(publicKey));
                 if (!result) {
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_VERIFY_FAIL);
                 }

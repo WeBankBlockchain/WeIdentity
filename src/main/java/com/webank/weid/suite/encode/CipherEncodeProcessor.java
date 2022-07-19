@@ -10,8 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +49,6 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
     private PersistenceType persistenceType;
 
     protected AmopService amopService = new AmopServiceImpl();
-
-    //TODO 所有getClient()需要适配V3
-    Client client = (Client) getClient();
 
     private Persistence getDataDriver() {
         String type = PropertyUtils.getProperty("persistence_type");
@@ -207,10 +203,10 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
                 new BigInteger(
                     encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
             );*/
-            SignatureResult signatureResult = DataToolUtils.signToSignature(encodeData.getId(), client,
-                    client.getCryptoSuite().createKeyPair(encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey()));
-            String signValue = signatureResult.convertToString();
-            args.setSignValue(signValue);
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(encodeData.getId(), encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
+            );
+            args.setSignValue(signature);
             args.setWeId(encodeData.getWeIdAuthentication().getWeId());
         }
         ResponseData<GetEncryptKeyResponse> resResponse =
