@@ -6,9 +6,9 @@ import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.v2.EvidenceContract;
-import com.webank.weid.contract.v2.EvidenceContract.EvidenceAttributeChangedEventResponse;
-import com.webank.weid.contract.v2.EvidenceContract.EvidenceExtraAttributeChangedEventResponse;
+import com.webank.weid.contract.v3.EvidenceContract;
+import com.webank.weid.contract.v3.EvidenceContract.EvidenceAttributeChangedEventResponse;
+import com.webank.weid.contract.v3.EvidenceContract.EvidenceExtraAttributeChangedEventResponse;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.EvidenceSignInfo;
@@ -31,11 +31,13 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.TransactionResult;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Uint256;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +51,7 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
     private static final Logger logger = LoggerFactory.getLogger(
         EvidenceServiceEngineV3.class);
 
-    private static CacheNode<BcosTransactionReceiptsDecoder> receiptsNode =
+    private static CacheNode<List<TransactionReceipt>> receiptsNode =
         CacheManager.registerCacheNode("SYS_TX_RECEIPTS", 1000 * 3600 * 24L);
 
     private EvidenceContract evidenceContract;
@@ -491,34 +493,41 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
         int previousBlock = startBlockNumber;
         while (previousBlock != 0) {
             int currentBlockNumber = previousBlock;
-            BcosTransactionReceiptsDecoder bcosTransactionReceiptsDecoder = null;
+            List<TransactionReceipt> receiptList = new ArrayList<>();
+
             try {
-                bcosTransactionReceiptsDecoder = receiptsNode.get(String.valueOf(currentBlockNumber));
-                if (bcosTransactionReceiptsDecoder == null) {
-                    bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
-                        .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(currentBlockNumber), "0", "-1");
+                List<TransactionReceipt> checkReceitList = receiptsNode.get(String.valueOf(currentBlockNumber));
+                if (checkReceitList == null) {
+                    BcosBlock bcosBlockOnlyHash = ((Client) weServer.getWeb3j()).getBlockByNumber(BigInteger.valueOf(currentBlockNumber),
+                        false, true);
+                    List<TransactionResult> transHashList = bcosBlockOnlyHash.getBlock().getTransactions();
+                    for (TransactionResult t : transHashList) {
+                        JsonTransactionResponse trans = (JsonTransactionResponse) t;
+                        receiptList.add(((Client) weServer.getWeb3j())
+                            .getTransactionReceipt(trans.getHash(), true).getTransactionReceipt());
+                    }
+//                    bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
+//                        .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(currentBlockNumber), "0", "-1");
                     // Store big transactions into memory (bigger than 1) to avoid memory explode
-                    if (bcosTransactionReceiptsDecoder != null
-                        && bcosTransactionReceiptsDecoder.decodeTransactionReceiptsInfo()
-                        .getTransactionReceipts().size() > WeIdConstant.RECEIPTS_COUNT_THRESHOLD) {
+                    if (receiptList.size() > WeIdConstant.RECEIPTS_COUNT_THRESHOLD) {
                         receiptsNode
-                            .put(String.valueOf(currentBlockNumber), bcosTransactionReceiptsDecoder);
+                            .put(String.valueOf(currentBlockNumber), receiptList);
                     }
                 }
             } catch (Exception e) {
                 logger.error(
                     "Get block by number:{} failed. Exception message:{}", currentBlockNumber, e);
+                // 如果add一半报错了，clear重来
+                receiptList.clear();
             }
-            if (bcosTransactionReceiptsDecoder == null) {
+            if (receiptList.isEmpty()) {
                 logger.info("Get block by number:{}. latestBlock is null", currentBlockNumber);
                 return;
             }
             previousBlock = 0;
             try {
-                List<TransactionReceipt> receipts = bcosTransactionReceiptsDecoder
-                    .decodeTransactionReceiptsInfo().getTransactionReceipts();
-                for (TransactionReceipt receipt : receipts) {
-                    List<TransactionReceipt.Logs> logs = receipt.getLogs();
+                for (TransactionReceipt receipt : receiptList) {
+                    List<TransactionReceipt.Logs> logs = receipt.getLogEntries();
                     // A same topic will be calculated only once
                     Set<String> topicSet = new HashSet<>();
                     for (TransactionReceipt.Logs log : logs) {

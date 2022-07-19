@@ -4,12 +4,12 @@ package com.webank.weid.service.impl.engine.fiscov3;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.v2.AuthorityIssuerController;
-import com.webank.weid.contract.v2.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
-import com.webank.weid.contract.v2.CptController;
-import com.webank.weid.contract.v2.CptController.RegisterCptRetLogEventResponse;
-import com.webank.weid.contract.v2.WeIdContract;
-import com.webank.weid.contract.v2.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.contract.v3.AuthorityIssuerController;
+import com.webank.weid.contract.v3.AuthorityIssuerController.AuthorityIssuerRetLogEventResponse;
+import com.webank.weid.contract.v3.CptController;
+import com.webank.weid.contract.v3.CptController.RegisterCptRetLogEventResponse;
+import com.webank.weid.contract.v3.WeIdContract;
+import com.webank.weid.contract.v3.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
@@ -22,10 +22,9 @@ import java.util.List;
 import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
-import org.fisco.bcos.sdk.client.protocol.response.SendTransaction;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosTransactionReceipt;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +66,7 @@ public class RawTransactionServiceEngineV3 extends BaseEngine implements
     /**
      * 重新加载静态合约对象.
      */
+    @Override
     public void reload() {
         weIdContract = getContractService(fiscoConfig.getWeIdAddress(), WeIdContract.class);
         authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(), 
@@ -85,24 +85,26 @@ public class RawTransactionServiceEngineV3 extends BaseEngine implements
         throws Exception {
 
         Client client = (Client) getClient();
-        SendTransaction ethSendTransaction = client.sendRawTransaction(transactionHex);
-        if (ethSendTransaction.hasError()) {
+        TransactionReceipt ethSendTransaction = client
+            .sendTransaction(transactionHex, true)
+            .getTransactionReceipt();
+        if (ethSendTransaction.isStatusOK()) {
             logger.error("Error processing transaction request: "
-                + ethSendTransaction.getError().getMessage());
+                + ethSendTransaction.getMessage());
             return null;
         }
-        Optional<TransactionReceipt> receiptOptional =
+        TransactionReceipt receiptOptional =
             getTransactionReceiptRequest(client, ethSendTransaction.getTransactionHash());
         int sumTime = 0;
         try {
             for (int i = 0; i < WeIdConstant.POLL_TRANSACTION_ATTEMPTS; i++) {
-                if (!receiptOptional.isPresent()) {
+                if (receiptOptional == null || receiptOptional.getBlockNumber() == null) { // todo
                     Thread.sleep((long) WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION);
                     sumTime += WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION;
                     receiptOptional = getTransactionReceiptRequest(client,
                         ethSendTransaction.getTransactionHash());
                 } else {
-                    return receiptOptional.get();
+                    return receiptOptional;
                 }
             }
         } catch (Exception e) {
@@ -121,15 +123,15 @@ public class RawTransactionServiceEngineV3 extends BaseEngine implements
      * @return the transactionReceipt wrapper
      * @throws Exception the exception
      */
-    private static Optional<TransactionReceipt> getTransactionReceiptRequest(Client client,
+    private static TransactionReceipt getTransactionReceiptRequest(Client client,
         String transactionHash) throws Exception {
         BcosTransactionReceipt transactionReceipt =
-            client.getTransactionReceipt(transactionHash);
-        if (transactionReceipt.hasError()) {
-            logger.error("Error processing transaction request: "
-                + transactionReceipt.getError().getMessage());
-            return Optional.empty();
-        }
+            client.getTransactionReceipt(transactionHash, true);
+//        if (transactionReceipt.hasError()) {
+//            logger.error("Error processing transaction request: "
+//                + transactionReceipt.getError().getMessage());
+//            return Optional.empty();
+//        }
         return transactionReceipt.getTransactionReceipt();
     }
 
