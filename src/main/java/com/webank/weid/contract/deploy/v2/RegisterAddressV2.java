@@ -1,6 +1,6 @@
 package com.webank.weid.contract.deploy.v2;
 
-import com.webank.weid.service.fisco.entity.CnsInfo;
+import com.webank.weid.protocol.response.CnsInfo;
 import java.math.BigInteger;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,11 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.v2.DataBucket;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.response.CnsResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
