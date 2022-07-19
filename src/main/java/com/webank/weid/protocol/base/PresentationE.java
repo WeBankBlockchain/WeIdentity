@@ -192,10 +192,9 @@ public class PresentationE implements RawSerializer, IProof {
                 this.toRawData(),
                 new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
             );*/
-        //TODO 需要适配V3的getCryptoSuite
-        SignatureResult signatureResult = DataToolUtils.signToSignature(this.toRawData(), client,
-                client.getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
-        String signature = signatureResult.convertToString();
+        String signature = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(this.toRawData(), weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
+        );
         this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
         logger.info("[commit] commit credential with weIdAuthentication is success.");
         return true;
