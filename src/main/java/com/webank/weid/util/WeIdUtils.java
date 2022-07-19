@@ -12,6 +12,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -29,6 +30,9 @@ public final class WeIdUtils {
      * log4j object, for recording log.
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) BaseService.getClient();
 
     private static String getChainId() {
         return BaseService.getChainId();
@@ -83,7 +87,9 @@ public final class WeIdUtils {
     public static String convertPublicKeyToWeId(String publicKey) {
         try {
             //String address = Keys.getAddress(new BigInteger(publicKey));
-            String address = ECDSAKeyPair.getAddressByPublicKey(publicKey); //todo 支持国密
+            //TODO 需要适配V3的getCryptoSuite
+            String address = client.getCryptoSuite().createKeyPair().getAddress(
+                    Numeric.toHexStringNoPrefix(new BigInteger(publicKey).toByteArray()).substring(2));
             return buildWeIdByAddress(address);
         } catch (Exception e) {
             logger.error("convert publicKey to weId error.", e);
@@ -125,10 +131,10 @@ public final class WeIdUtils {
      * @param publicKey the WeIdentity DID publicKey key
      * @return true if the private and publicKey key is match, false otherwise.
      */
-    public static boolean isEcdsaKeypairMatch(String privateKey, String publicKey) {
+    /*public static boolean isEcdsaKeypairMatch(String privateKey, String publicKey) {
         try {
-            /*ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-            return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);*/
+            *//*ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+            return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);*//*
             CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(
                     new BigInteger(privateKey));
             byte[] bytePub = Numeric.hexStringToByteArray(keyPair.getHexPublicKey());
@@ -136,20 +142,19 @@ public final class WeIdUtils {
         } catch (Exception e) {
             return false;
         }
-    }
+    }*/
 
     /**
      * check if the public key matchs the private key.
      *
-     * @param privateKey the WeIdentity DID private key
+     * @param keyPair the keyPair create from private key
      * @param publicKey the WeIdentity DID publicKey key
      * @return true if the private and publicKey key is match, false otherwise.
      */
-    public static boolean isKeypairMatch(String privateKey, String publicKey) {
+    public static boolean isKeypairMatch(CryptoKeyPair keyPair, String publicKey) {
         /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);*/
-        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(
-                new BigInteger(privateKey));
+        //CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(privateKey);
         byte[] bytePub = Numeric.hexStringToByteArray(keyPair.getHexPublicKey());
         return StringUtils.equals(new BigInteger(1, bytePub).toString(), publicKey);
     }
@@ -223,11 +228,13 @@ public final class WeIdUtils {
         boolean isMatch = false;
 
         try {
-            BigInteger publicKey = DataToolUtils
-                .publicKeyFromPrivate(new BigInteger(privateKey.getPrivateKey()));
+            /*BigInteger publicKey = DataToolUtils
+                .publicKeyFromPrivate(new BigInteger(privateKey.getPrivateKey()));*/
+            CryptoKeyPair keyPair = client.getCryptoSuite().createKeyPair(privateKey.getPrivateKey());
+            String address1 = keyPair.getAddress();
             //String address1 = "0x" + Keys.getAddress(publicKey);
-            String hexPub = Numeric.toHexStringNoPrefix(publicKey.toByteArray()).substring(2);
-            String address1 = new ECDSAKeyPair().getAddress(hexPub);
+            //String hexPub = Numeric.toHexStringNoPrefix(publicKey.toByteArray()).substring(2);
+            //String address1 = new ECDSAKeyPair().getAddress(hexPub);
             String address2 = WeIdUtils.convertWeIdToAddress(weId);
             if (address1.equals(address2)) {
                 isMatch = true;
@@ -248,9 +255,10 @@ public final class WeIdUtils {
      */
     public static String getWeIdFromPrivateKey(String privateKey) {
 
-        BigInteger publicKey = DataToolUtils
-            .publicKeyFromPrivate(new BigInteger(privateKey));
-        return convertPublicKeyToWeId(String.valueOf(publicKey));
+        /*BigInteger publicKey = DataToolUtils
+            .publicKeyFromPrivate(new BigInteger(privateKey));*/
+        String publicKey = client.getCryptoSuite().createKeyPair(privateKey).getHexPublicKey();
+        return convertPublicKeyToWeId(publicKey);
     }
 
     /**

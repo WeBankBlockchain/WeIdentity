@@ -169,6 +169,11 @@ public final class WeIdConstant {
     public static final Integer POLL_TRANSACTION_ATTEMPTS = 5;
 
     /**
+     * transaction poll total time
+     */
+    public static final Integer POLL_TRANSACTION_TOTAL_DURATION = POLL_TRANSACTION_SLEEP_DURATION * POLL_TRANSACTION_ATTEMPTS;
+
+    /**
      * The additive block height.
      */
     public static final Integer ADDITIVE_BLOCK_HEIGHT = 500;
@@ -207,6 +212,8 @@ public final class WeIdConstant {
      * The FISCO-BCOS Address pattern.
      */
     public static final String FISCO_BCOS_1_X_VERSION_PREFIX = "1";
+    public static final String FISCO_BCOS_2_X_VERSION_PREFIX = "2";
+    public static final String FISCO_BCOS_3_X_VERSION_PREFIX = "3";
 
     /**
      * Removed WeID public key specified tag.
@@ -257,8 +264,9 @@ public final class WeIdConstant {
     public static final Long RECOGNIZED_AUTHORITY_ISSUER_FLAG = 1L;
 
     public static enum PublicKeyType {
-        RSA("RSA"),
-        SECP256K1("Secp256k1");
+        SM2("SM2"),
+        //RSA("RSA"),
+        ECDSA("ECDSA");
 
         /**
          * The Type Name of the Credential Proof.

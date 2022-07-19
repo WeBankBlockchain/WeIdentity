@@ -34,9 +34,14 @@ public class RegisterAddressV2 {
 
     private static CryptoKeyPair cryptoKeyPair;
 
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) BaseService.getClient();
+
     private static CryptoKeyPair getCryptoKeyPair(String inputPrivateKey) {
         if (cryptoKeyPair == null) {
-            cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            //cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
+            //TODO 需要适配V3的getCryptoSuite
+            cryptoKeyPair = client.getCryptoSuite().createKeyPair(inputPrivateKey);
         }
         return cryptoKeyPair;
     }
