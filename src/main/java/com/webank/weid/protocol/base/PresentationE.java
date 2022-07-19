@@ -8,9 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +40,9 @@ public class PresentationE implements RawSerializer, IProof {
      * the serialVersionUID.
      */
     private static final long serialVersionUID = -595605743843891841L;
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) BaseService.getClient();
 
     /**
      * Required: The context field.
@@ -181,11 +187,15 @@ public class PresentationE implements RawSerializer, IProof {
             return false;
         }
         // 更新proof里面的签名
-        String signature = 
+        /*String signature =
             DataToolUtils.secp256k1Sign(
                 this.toRawData(),
                 new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
-            );
+            );*/
+        //TODO 需要适配V3的getCryptoSuite
+        SignatureResult signatureResult = DataToolUtils.signToSignature(this.toRawData(), client,
+                client.getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
+        String signature = signatureResult.convertToString();
         this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
         logger.info("[commit] commit credential with weIdAuthentication is success.");
         return true;

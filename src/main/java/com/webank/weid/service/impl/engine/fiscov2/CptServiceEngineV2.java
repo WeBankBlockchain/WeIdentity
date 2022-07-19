@@ -28,10 +28,12 @@ import org.fisco.bcos.sdk.client.protocol.request.Transaction;
 import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 
+import org.fisco.bcos.sdk.utils.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,8 +73,10 @@ import com.webank.weid.util.WeIdUtils;
 public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV2.class);
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
     private static final String CREDENTIAL_TEMPLATE_EVENT = new EventEncoder(
-        ((Client)getClient()).getCryptoSuite()).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
+        client.getCryptoSuite()).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
     private static CptController cptController;
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
@@ -114,13 +118,14 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      */
     @Override
     public ResponseData<CptBaseInfo> updateCpt(int cptId, String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
+           RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
 
         List<byte[]> byteArray = new ArrayList<>();
         TransactionReceipt transactionReceipt;
         try {
             CptController cptController =
                 reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
+            BigInteger v = new BigInteger("0");
             if (dataStorageIndex == WeIdConstant.CPT_DATA_INDEX) {
                 transactionReceipt = cptController.updateCpt(
                     BigInteger.valueOf(Long.valueOf(cptId)),
@@ -135,9 +140,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     ),
                     DataToolUtils.stringToByte32ArrayList(
                         cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
-                    rsvSignature.getV().getValue(),
-                    rsvSignature.getR().getValue(),
-                    rsvSignature.getS().getValue()
+                        rsvSignature.getV().getValue(),
+                        rsvSignature.getR().getValue(),
+                        rsvSignature.getS().getValue()
                 );
             } else {
                 transactionReceipt = cptController.updatePolicy(
@@ -153,9 +158,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     ),
                     DataToolUtils.stringToByte32ArrayList(
                         cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
-                    rsvSignature.getV().getValue(),
-                    rsvSignature.getR().getValue(),
-                    rsvSignature.getS().getValue()
+                        rsvSignature.getV().getValue(),
+                        rsvSignature.getR().getValue(),
+                        rsvSignature.getS().getValue()
                 );
             }
 
@@ -185,7 +190,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
      */
     @Override
     public ResponseData<CptBaseInfo> registerCpt(int cptId, String address, String cptJsonSchemaNew,
-        RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
+           RsvSignature rsvSignature, String privateKey, int dataStorageIndex) {
 
         List<byte[]> byteArray = new ArrayList<>();
 
@@ -207,9 +212,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     ),
                     DataToolUtils.stringToByte32ArrayList(
                         cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
-                    rsvSignature.getV().getValue(),
-                    rsvSignature.getR().getValue(),
-                    rsvSignature.getS().getValue()
+                        rsvSignature.getV().getValue(),
+                        rsvSignature.getR().getValue(),
+                        rsvSignature.getS().getValue()
                 );
             } else {
                 transactionReceipt = cptController.registerPolicy(
@@ -225,9 +230,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     ),
                     DataToolUtils.stringToByte32ArrayList(
                         cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
-                    rsvSignature.getV().getValue(),
-                    rsvSignature.getR().getValue(),
-                    rsvSignature.getS().getValue()
+                        rsvSignature.getV().getValue(),
+                        rsvSignature.getR().getValue(),
+                        rsvSignature.getS().getValue()
                 );
             }
 
@@ -267,7 +272,6 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
         try {
             CptController cptController =
                 reloadContract(fiscoConfig.getCptAddress(), privateKey, CptController.class);
-
             if (dataStorageIndex == WeIdConstant.CPT_DATA_INDEX) {
                 transactionReceipt = cptController.registerCpt(
                     address,
@@ -281,9 +285,10 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     ),
                     DataToolUtils.stringToByte32ArrayList(
                         cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
-                    rsvSignature.getV().getValue(),
-                    rsvSignature.getR().getValue(),
-                    rsvSignature.getS().getValue());
+                        rsvSignature.getV().getValue(),
+                        rsvSignature.getR().getValue(),
+                        rsvSignature.getS().getValue()
+                );
             } else {
                 transactionReceipt = cptController.registerPolicy(
                     address,
@@ -297,9 +302,10 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                     ),
                     DataToolUtils.stringToByte32ArrayList(
                         cptJsonSchemaNew, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH),
-                    rsvSignature.getV().getValue(),
-                    rsvSignature.getR().getValue(),
-                    rsvSignature.getS().getValue());
+                        rsvSignature.getV().getValue(),
+                        rsvSignature.getR().getValue(),
+                        rsvSignature.getS().getValue()
+                );
             }
 
             ResponseData<CptBaseInfo> response = processRegisterEventLog(cptController,
@@ -458,15 +464,26 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
             int v = valueList.getValue5().intValue();
             byte[] r = valueList.getValue6();
             byte[] s = valueList.getValue7();
-            ECDSASignatureResult signatureResult = DataToolUtils
+            byte[] signatureBytes = new byte[64];
+            System.arraycopy(r, 0, signatureBytes, 0, 32);
+            System.arraycopy(s, 0, signatureBytes, 32, 32);
+            /*ECDSASignatureResult signatureResult = DataToolUtils
                 .rawSignatureDeserialization(v, r, s);
             String cptSignature =
                 new String(
                     DataToolUtils.base64Encode(
                         DataToolUtils.simpleSignatureSerialization(signatureResult)),
                     StandardCharsets.UTF_8
-                );
-            cpt.setCptSignature(cptSignature);
+                );*/
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+                byte[] signature = new byte[65];
+                System.arraycopy(signatureBytes, 0, signature, 0, 64);
+                signature[64] = (byte) v;
+                cpt.setCptSignature(Hex.toHexString(signature));
+            } else {
+                cpt.setCptSignature(Hex.toHexString(signatureBytes));
+            }
+            //cpt.setCptSignature(cptSignature);
 
             ResponseData<Cpt> responseData = new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS);
             return responseData;
