@@ -33,7 +33,7 @@ public class TestSignatureUtils {
 
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
-        CryptoKeyPair keyPair = BaseService.getClient().getCryptoSuite().createKeyPair(privateKey);
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair(privateKey);
         //logger.info("publicKey:{} ", keyPair.getHexPublicKey());
         //BigInteger publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
         String publicKey = keyPair.getHexPublicKey();
@@ -49,7 +49,7 @@ public class TestSignatureUtils {
         String str = "hello world...........................yes";
         //Sign.SignatureData sigData = DataToolUtils.secp256k1SignToSignature(str, keyPair);
         //ECDSASignatureResult sigData = DataToolUtils.secp256k1SignToSignature(str, keyPair);
-        SignatureResult signatureResult = DataToolUtils.signToSignature(str, BaseService.getClient(), keyPair);
+        SignatureResult signatureResult = DataToolUtils.signToSignature(str, privateKey);
         //byte[] serialized = DataToolUtils.simpleSignatureSerialization(sigData);
         //Sign.SignatureData newSigData = DataToolUtils.simpleSignatureDeserialization(serialized);
         //ECDSASignatureResult newSigData = DataToolUtils.simpleSignatureDeserialization(serialized);
@@ -69,14 +69,14 @@ public class TestSignatureUtils {
         String msg = "12345";
         //ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(hexPrivKey));
         //CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(hexPrivKey));
-        CryptoKeyPair keyPair = BaseService.getClient().getCryptoSuite().createKeyPair(hexPrivKey);
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair(hexPrivKey);
         //String sig = DataToolUtils.secp256k1Sign(msg, new BigInteger(hexPrivKey));
-        SignatureResult signatureResult = DataToolUtils.signToSignature(msg, BaseService.getClient(), keyPair);
+        SignatureResult signatureResult = DataToolUtils.signToSignature(msg, hexPrivKey);
         String sig = signatureResult.convertToString();
         //Boolean result = DataToolUtils.verifySecp256k1Signature(msg, sig, keyPair.getPublicKey());
         BigInteger bigPublicKey =
                 new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));
-        Boolean result = DataToolUtils.verifySignature(msg, sig, BaseService.getClient(), bigPublicKey);
+        Boolean result = DataToolUtils.verifySignature(msg, sig, bigPublicKey);
         Assert.assertTrue(result);
     }
 }
