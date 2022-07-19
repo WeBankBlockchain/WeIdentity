@@ -79,7 +79,8 @@ public final class ParamKeyConstant {
     public static final String WEID_AUTH_CHALLENGE = "challenge";
 
     public static final String TRNSACTION_RECEIPT_STATUS_SUCCESS = "0x0";
-    
+    public static final Integer TRNSACTION_RECEIPT_STATUS_SUCCESS_V3 = 0;
+
     /**
      * 内置配置Key.
      */
