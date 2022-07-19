@@ -47,9 +47,6 @@ web3sdk.keep-alive-seconds=60
 #######################################################################################################
 # Fisco-Bcos 2.x params, including Group ID and Encrypt Type
 group.id=1
-# Fisco-Bcos encrypt type, 0:ECDSA 1:SM2
-encrypt.type=0
-
 
 #######################################################################################################
 #                                                                                                     #
@@ -61,10 +58,21 @@ v1.ca-crt-path=ca.crt
 v1.client-crt-password=123456
 v1.client-key-store-path=client.keystore
 v1.key-store-password=123456
+# v2 fisco config
+# Fisco-Bcos sdk SSL encrypt type, false:ECDSA, true:SM2
+sdk.sm-crypto=false
+# fisco-bcos sdk cert path contains[ca.crt,sdk.crt,sdk.key]
+# if sdk.sm-crypto is true, contains [gm] directory, and gm dir contains [gmca.crt,gmsdk.crt,gmsdk.key,gmensdk.crt,gmensdk.key]
+sdk.cert-path=conf
+
+# amop public key of pem and private key of p12 configuration
+amop.pub-path=conf/amop/consumer_public_key.pem
+amop.pri-path=conf/amop/consumer_private_key.p12
+amop.p12-password=123456
+
 v2.ca-crt-path=ca.crt
 v2.node-crt-path=node.crt
 v2.node-key-path=node.key
-
 # gm
 gm.ca-crt-path=gmca.crt
 gm.sdk-crt-path=gmsdk.crt

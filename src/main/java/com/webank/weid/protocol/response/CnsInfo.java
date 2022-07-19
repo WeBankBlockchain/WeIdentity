@@ -12,7 +12,7 @@
  * the License.
  *
  */
-package com.webank.weid.service.fisco.entity;
+package com.webank.weid.protocol.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Objects;
