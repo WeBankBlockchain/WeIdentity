@@ -393,4 +393,64 @@ public class TransactionUtils {
             info);
         return responseData;
     }
+
+
+    /**
+     * Resolve CPT Event.
+     *
+     * @param retCode the retCode
+     * @param cptId the CptId
+     * @param cptVersion the CptVersion
+     * @param receipt receipt
+     * @return the result
+     */
+    public static ResponseData<CptBaseInfo> getResultByResolveEvent(
+        BigInteger retCode,
+        BigInteger cptId,
+        BigInteger cptVersion,
+        org.fisco.bcos.sdk.v3.model.TransactionReceipt receipt) {
+
+        TransactionInfo info = new TransactionInfo(receipt);
+        // register
+        if (retCode.intValue()
+            == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
+            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}",
+                retCode.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
+        }
+
+        if (retCode.intValue() == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST, info);
+        }
+
+        if (retCode.intValue() == ErrorCode.CPT_NO_PERMISSION.getCode()) {
+            logger.error("[getResultByResolveEvent] no permission. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION, info);
+        }
+
+        // register and update
+        if (retCode.intValue() == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
+        }
+
+        // update
+        if (retCode.intValue() == ErrorCode.CPT_NOT_EXISTS.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
+        }
+
+        CptBaseInfo result = new CptBaseInfo();
+        result.setCptId(cptId.intValue());
+        result.setCptVersion(cptVersion.intValue());
+
+        ResponseData<CptBaseInfo> responseData = new ResponseData<>(result, ErrorCode.SUCCESS,
+            info);
+        return responseData;
+    }
 }
