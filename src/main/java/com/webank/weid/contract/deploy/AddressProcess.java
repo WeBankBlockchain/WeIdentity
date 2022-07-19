@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +24,9 @@ public abstract class AddressProcess {
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(AddressProcess.class);
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) BaseService.getClient();
     
     protected static void writeAddressToFile(
         String contractAddress,
@@ -132,13 +137,15 @@ public abstract class AddressProcess {
             .append(cptAddress)
             .append(specificAddress)
             .append(evidenceAddress);
-        return DataToolUtils.getHash(address.toString());
+        //TODO 需要适配V3的getCryptoSuite
+        return client.getCryptoSuite().hash(address.toString());
     }
     
 //    public static String getHashForShare(Integer groupId, String evidenceAddress) { todo 设置String groupId后是否影响hash
     public static String getHashForShare(String groupId, String evidenceAddress) {
         StringBuffer address = new StringBuffer();
         address.append("share").append(groupId).append(evidenceAddress);
-        return DataToolUtils.getHash(address.toString());
+        //TODO 需要适配V3的getCryptoSuite
+        return client.getCryptoSuite().hash(address.toString());
     }
 }

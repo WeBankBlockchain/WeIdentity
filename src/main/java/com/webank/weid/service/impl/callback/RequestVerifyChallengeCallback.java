@@ -2,7 +2,9 @@
 
 package com.webank.weid.service.impl.callback;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +60,10 @@ public class RequestVerifyChallengeCallback extends AmopCallback {
         }
         String rawData = challenge.toJson();
         ResponseData<WeIdDocument> weIdDocResp = weIdService.getWeIdDocument(weId);
+        //TODO 所有getClient()需要适配V3
         ErrorCode errorCode = DataToolUtils
-            .verifySecp256k1SignatureFromWeId(rawData, signData, weIdDocResp.getResult(), null);
+            .verifySignatureFromWeId(rawData, signData, weIdDocResp.getResult(),
+                    (Client) BaseService.getClient(), null);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[RequestVerifyChallengeCallback] verify challenge signature failed.");
             result.setErrorCode(errorCode.getCode());
