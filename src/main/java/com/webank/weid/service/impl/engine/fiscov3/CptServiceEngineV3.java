@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.utils.Hex;
 import org.fisco.bcos.sdk.v3.client.Client;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosTransactionReceipt;
@@ -69,6 +71,7 @@ public class CptServiceEngineV3 extends BaseEngine implements CptServiceEngine {
     private static CptController cptController;
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
+    private static Client client =  (Client) getClient();
 
     /**
      * 构造函数.
@@ -451,15 +454,26 @@ public class CptServiceEngineV3 extends BaseEngine implements CptServiceEngine {
             int v = valueList.getValue5().intValue();
             byte[] r = valueList.getValue6();
             byte[] s = valueList.getValue7();
-            ECDSASignatureResult signatureResult = DataToolUtils
+            /*ECDSASignatureResult signatureResult = DataToolUtils
                 .rawSignatureDeserialization(v, r, s);
             String cptSignature =
                 new String(
                     DataToolUtils.base64Encode(
                         DataToolUtils.simpleSignatureSerialization(signatureResult)),
                     StandardCharsets.UTF_8
-                );
-            cpt.setCptSignature(cptSignature);
+                );*/
+            byte[] signatureBytes = new byte[64];
+            System.arraycopy(r, 0, signatureBytes, 0, 32);
+            System.arraycopy(s, 0, signatureBytes, 32, 32);
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+                byte[] signature = new byte[65];
+                System.arraycopy(signatureBytes, 0, signature, 0, 64);
+                signature[64] = (byte) v;
+                cpt.setCptSignature(Hex.toHexString(signature));
+            } else {
+                cpt.setCptSignature(Hex.toHexString(signatureBytes));
+            }
+            //cpt.setCptSignature(cptSignature);
 
             ResponseData<Cpt> responseData = new ResponseData<Cpt>(cpt, ErrorCode.SUCCESS);
             return responseData;

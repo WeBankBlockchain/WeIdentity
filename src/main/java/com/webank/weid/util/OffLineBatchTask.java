@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,9 @@ public class OffLineBatchTask extends AbstractService {
 
     private static String privateKey;
 
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
+
     /**
      * persistence.
      */
@@ -53,9 +58,10 @@ public class OffLineBatchTask extends AbstractService {
         } catch (Exception e) {
             logger.error("Create weId failed.", e);
         }*/
-        BigInteger bigPrivateKey =
+        /*BigInteger bigPrivateKey =
                 new BigInteger(DataToolUtils.createKeyPair().getHexPrivateKey());
-        privateKey = String.valueOf(bigPrivateKey);
+        privateKey = String.valueOf(bigPrivateKey);*/
+        privateKey = client.getCryptoSuite().createKeyPair().getHexPrivateKey();
     }
 
     private static Persistence getDataDriver() {

@@ -1,7 +1,25 @@
-
-
 package com.webank.weid.service.impl.engine.fiscov2;
 
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.DataFormatException;
+
+import com.webank.weid.service.BaseService;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.EventEncoder;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
@@ -26,23 +44,7 @@ import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.DataFormatException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.EventEncoder;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 /**
  * WeIdServiceEngine call weid contract which runs on FISCO BCOS 2.0.
@@ -68,13 +70,16 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      */
     private static WeIdContract weIdContract;
 
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
+
     static {
         // initialize the event topic
         topicMap = new HashMap<String, String>();
 
         topicMap.put(
             //EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
-                new EventEncoder(((Client)getClient()).getCryptoSuite()).encode(
+                new EventEncoder((client).getCryptoSuite()).encode(
                         WeIdContract.WEIDATTRIBUTECHANGED_EVENT
                 ),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
@@ -326,7 +331,13 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
             + "result:{}", value, weId, result);
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
 
-        String type = PublicKeyType.SECP256K1.getTypeName();
+        String type;
+        //TODO 需要适配V3的getCryptoType
+        if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+            type = PublicKeyType.ECDSA.getTypeName();
+        } else {
+            type = PublicKeyType.SM2.getTypeName();
+        }
         // Identify explicit type from key
         if (!StringUtils.isEmpty(key)) {
             String[] keyArray = StringUtils.splitByWholeSeparator(key, "/");
