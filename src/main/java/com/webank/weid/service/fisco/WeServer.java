@@ -19,7 +19,7 @@
 
 package com.webank.weid.service.fisco;
 
-import com.webank.weid.service.fisco.entity.CnsInfo;
+import com.webank.weid.protocol.response.CnsInfo;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
