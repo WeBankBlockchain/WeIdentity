@@ -3,7 +3,7 @@ package com.webank.weid.service.impl.engine.fiscov3;
 import com.webank.weid.constant.CnsType;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.contract.v2.DataBucket;
+import com.webank.weid.contract.v3.DataBucket;
 import com.webank.weid.protocol.base.HashContract;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.ResponseData;
@@ -16,12 +16,12 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
-import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple4;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
-import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple4;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.transaction.codec.decode.TransactionDecoderService;
+import org.fisco.bcos.sdk.v3.transaction.model.dto.TransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,14 +33,11 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
     private DataBucket dataBucket;
     private CnsType cnsType;
 
-    private TransactionDecoderService txDecoder;
-
-    /*private static TransactionDecoder txDecodeSampleDecoder;
+    private static TransactionDecoderService txDecoder;
 
     static {
-        txDecodeSampleDecoder = TransactionDecoderFactory.buildTransactionDecoder(
-                DataBucket.ABI, DataBucket.BINARY);
-    }*/
+        txDecoder = new TransactionDecoderService(((Client)getClient()).getCryptoSuite(), false);
+    }
 
     /**
      * 构造函数.
@@ -80,8 +77,7 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).put(
                 bucketId, keyByte32.getValue(), value);
-            if (StringUtils
-                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+            if (receipt.getStatus() == ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS_V3) {
                 logger.info("[put] put [{}:{}] into chain success, bucketId is {}.", 
                     key, value, bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
@@ -101,7 +97,6 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
         ErrorCode errorCode = ErrorCode.UNKNOW_ERROR;
         try {
             //这里暂且认为是回执状态码
-            txDecoder = new TransactionDecoderService(((Client)getClient()).getCryptoSuite());
             TransactionResponse response = txDecoder.decodeReceiptStatus(receipt);
             /*InputAndOutputResult objectResult = txDecodeSampleDecoder.decodeOutputReturnObject(
                 receipt.getInput(), receipt.getOutput());
@@ -176,8 +171,8 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
             logger.info("[remove] remove Extra Item, bucketId is {}, key is {}.", bucketId, key);
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).removeExtraItem(
                 bucketId, keyByte32.getValue());
-            if (StringUtils
-                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+            if (receipt.getStatus() == ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS_V3) {
+
                 logger.info("[remove] remove {} from chain success, bucketId is {}.", 
                     key, bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
@@ -203,8 +198,8 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
                 bucketId, force);
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
                 .removeDataBucketItem(bucketId, force);
-            if (StringUtils
-                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+            if (receipt.getStatus() == ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS_V3) {
+
                 logger.info("[remove] remove Bucket Item from chain success, bucketId is {}.", 
                     bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
@@ -227,8 +222,8 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).enable(
                 bucketId);
-            if (StringUtils
-                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+            if (receipt.getStatus() == ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS_V3) {
+
                 logger.info("[enable] enable Bucket success, bucketId is {}.", bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
@@ -247,8 +242,8 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey()).disable(
                 bucketId);
-            if (StringUtils
-                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+            if (receipt.getStatus() == ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS_V3) {
+
                 logger.info("[disable] disable Bucket success, bucketId is {}.", bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);
@@ -308,8 +303,7 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
         try {
             TransactionReceipt receipt = getDataBucket(privateKey.getPrivateKey())
                 .updateBucketOwner(bucketId, newOwner);
-            if (StringUtils
-                .equals(receipt.getStatus(), ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS)) {
+            if (receipt.getStatus() == ParamKeyConstant.TRNSACTION_RECEIPT_STATUS_SUCCESS_V3) {
                 logger.info("[updateBucketOwner] update owner success, bucketId is {}.", bucketId);
                 ErrorCode  code = analysisErrorCode(receipt);
                 return new ResponseData<Boolean>(code == ErrorCode.SUCCESS, code);

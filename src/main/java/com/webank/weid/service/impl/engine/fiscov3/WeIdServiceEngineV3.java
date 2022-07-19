@@ -7,9 +7,9 @@ import com.webank.weid.constant.ResolveEventLogStatus;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.constant.WeIdConstant.PublicKeyType;
 import com.webank.weid.constant.WeIdEventConstant;
-import com.webank.weid.contract.v2.WeIdContract;
-import com.webank.weid.contract.v2.WeIdContract.WeIdAttributeChangedEventResponse;
-import com.webank.weid.contract.v2.WeIdContract.WeIdHistoryEventEventResponse;
+import com.webank.weid.contract.v3.WeIdContract;
+import com.webank.weid.contract.v3.WeIdContract.WeIdAttributeChangedEventResponse;
+import com.webank.weid.contract.v3.WeIdContract.WeIdHistoryEventEventResponse;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.ResolveAttributeException;
 import com.webank.weid.exception.WeIdBaseException;
@@ -37,10 +37,13 @@ import java.util.Map;
 import java.util.zip.DataFormatException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.EventEncoder;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.client.protocol.model.Transaction;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.TransactionResult;
+import org.fisco.bcos.sdk.v3.codec.EventEncoder;
+import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,7 +141,7 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
             try {
                 List<TransactionReceipt> receipts = getTransactionReceipts(currentBlockNumber);
                 for (TransactionReceipt receipt : receipts) {
-                    List<TransactionReceipt.Logs> logs = receipt.getLogs();
+                    List<TransactionReceipt.Logs> logs = receipt.getLogEntries();
                     for (TransactionReceipt.Logs log : logs) {
                         ResolveEventLogResult returnValue =
                             resolveSingleEventLog(weId, log, receipt, currentBlockNumber,
@@ -152,7 +155,7 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
                         }
                     }
                 }
-            } catch (IOException | DataTypeCastException | DataFormatException e) {
+            } catch (DataTypeCastException e) {
                 logger.error(
                     "[resolveEventHistory]: get TransactionReceipt by weId :{} failed.", weId, e);
                 throw new ResolveAttributeException(
@@ -580,20 +583,29 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
         }
     }
 
-    private List<TransactionReceipt> getTransactionReceipts(Integer blockNumber)
-        throws IOException, DataFormatException {
-        BcosTransactionReceiptsDecoder bcosTransactionReceiptsDecoder = null;
+    private List<TransactionReceipt> getTransactionReceipts(Integer blockNumber) {
+        List<TransactionReceipt> receiptList = new ArrayList<>();
         try {
-            bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
-                    .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(blockNumber), "0", "-1");
+            BcosBlock bcosBlockOnlyHash = ((Client) weServer.getWeb3j()).getBlockByNumber(BigInteger.valueOf(blockNumber),
+                false, true);
+            List<TransactionResult> transHashList = bcosBlockOnlyHash.getBlock().getTransactions();
+            for (TransactionResult t : transHashList) {
+                JsonTransactionResponse trans = (JsonTransactionResponse) t;
+                receiptList.add(((Client) weServer.getWeb3j())
+                    .getTransactionReceipt(trans.getHash(), true).getTransactionReceipt());
+            }
+//            bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
+//                    .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(blockNumber), "0", "-1");
         } catch (Exception e) {
             logger.error("[getTransactionReceipts] get block {} err: {}", blockNumber, e);
+            // 如果add一半报错了，clear重来
+            receiptList.clear();
         }
-        if (bcosTransactionReceiptsDecoder == null) {
+        if (receiptList.isEmpty()) {
             logger.info("[getTransactionReceipts] get block {} err: is null", blockNumber);
             throw new WeIdBaseException("the transactionReceipts is null.");
         }
-        return bcosTransactionReceiptsDecoder.decodeTransactionReceiptsInfo().getTransactionReceipts();
+        return receiptList;
     }
 
     private List<WeIdPojo> getWeIdListByBlockNumber(Integer blockNumber) {
