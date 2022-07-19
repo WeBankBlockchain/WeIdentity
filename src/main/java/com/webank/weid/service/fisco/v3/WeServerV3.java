@@ -15,8 +15,10 @@ import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.callback.CommonCallback;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,7 +113,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     @Override
     public CryptoKeyPair createCredentials(String privateKey) {
-        return this.client.getCryptoSuite().getKeyPairFactory().createKeyPair(privateKey);
+        return this.client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
     }
 
     @Override
@@ -404,7 +406,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
      */
     public CryptoKeyPair createCryptoKeyPair(String privateKey) {
         try {
-            return client.getCryptoSuite().getKeyPairFactory().createKeyPair(privateKey);
+            return client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
         } catch (Exception e) {
             throw new PrivateKeyIllegalException(e);
         }

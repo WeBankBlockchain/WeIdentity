@@ -19,17 +19,17 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.networknt.schema.SpecVersion.VersionFlag;
 import com.networknt.schema.ValidationMessage;
+import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
-import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.cpt.RawCptSchema;
 import com.webank.weid.protocol.request.CptMapArgs;
-import com.webank.weid.protocol.response.RsvSignature;
+import com.webank.weid.service.BaseService;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -51,9 +51,6 @@ import java.net.SocketException;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,9 +77,9 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Int256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.Signature;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
@@ -130,9 +127,32 @@ public final class DataToolUtils {
     //private static final ObjectReader OBJECT_READER;
     private static final ObjectWriter OBJECT_WRITER_UN_PRETTY_PRINTER;
 
-    private static final String encryptType;
-
     private static final com.networknt.schema.JsonSchemaFactory JSON_SCHEMA_FACTORY;
+    /**
+     * The Fisco Config bundle.
+     */
+    protected static final FiscoConfig fiscoConfig;
+    public static final CryptoSuite cryptoSuite;
+
+    static {
+        fiscoConfig = new FiscoConfig();
+        if (!fiscoConfig.load()) {
+            logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
+            System.exit(1);
+        }
+    }
+
+    static {
+        if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+            cryptoSuite = new CryptoSuite(((Client) BaseService.getClient()).getCryptoType());
+
+        } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_3_X_VERSION_PREFIX)) {
+            cryptoSuite = new CryptoSuite(((org.fisco.bcos.sdk.v3.client.Client) BaseService.getClient()).getCryptoType());
+        } else {
+            logger.error("fisco version error");
+            cryptoSuite = new CryptoSuite(0);
+        }
+    }
 
     static {
         // sort by letter
@@ -152,8 +172,6 @@ public final class DataToolUtils {
         CONVERT_UTC_LONG_KEYLIST.add(KEY_CREATED);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_ISSUANCEDATE);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_EXPIRATIONDATE);
-
-        encryptType = PropertyUtils.getProperty("encrypt.type");
 
         //OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
         //OBJECT_READER = OBJECT_MAPPER.reader();
@@ -224,19 +242,24 @@ public final class DataToolUtils {
      * @param privateKey the pass-in privatekey
      * @return true if yes, false otherwise
      */
-    /*public static String convertPrivateKeyToDefaultWeId(String privateKey) {
-        BigInteger publicKey;
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            publicKey = Sign.publicKeyFromPrivate(new BigInteger(privateKey));
-        } else {
-            publicKey = Sign.smPublicKeyFromPrivate(new BigInteger(privateKey));
-        }
-        return WeIdUtils
-            .convertAddressToWeId(new org.fisco.bcos.web3j.abi.datatypes.Address(
-                Keys.getAddress(publicKey)).toString());
-        CryptoKeyPair keyPair = createKeyPairFromPrivate(new BigInteger(privateKey));
-        return WeIdUtils.convertAddressToWeId(keyPair.getAddress());
-    }*/
+    public static String convertPrivateKeyToDefaultWeId(String privateKey) {
+        CryptoKeyPair cryptoKeyPair = new CryptoSuite(0)
+            .getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        return new BigInteger(Numeric
+            .hexStringToByteArray(cryptoKeyPair.getHexPublicKey()))
+            .toString(10); // todo 获取suite
+//        BigInteger publicKey;
+//        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+//            publicKey = Sign.publicKeyFromPrivate(new BigInteger(privateKey));
+//        } else {
+//            publicKey = Sign.smPublicKeyFromPrivate(new BigInteger(privateKey));
+//        }
+//        return WeIdUtils
+//            .convertAddressToWeId(new org.fisco.bcos.web3j.abi.datatypes.Address(
+//                Keys.getAddress(publicKey)).toString());
+//        CryptoKeyPair keyPair = createKeyPairFromPrivate(new BigInteger(privateKey));
+//        return WeIdUtils.convertAddressToWeId(keyPair.getAddress());
+    }
 
     /**
      * Check whether the String is a valid hash.
@@ -618,7 +641,6 @@ public final class DataToolUtils {
             Client client,
             CryptoKeyPair keyPair
     ) {
-        //CryptoKeyPair keyPair = new ECDSAKeyPair().createKeyPair(privateKey);
         String messageHash = client.getCryptoSuite().hash(rawData);
         return client.getCryptoSuite().sign(messageHash, keyPair);
         //return secp256k1SignToSignature(rawData, keyPair);
@@ -835,9 +857,6 @@ public final class DataToolUtils {
         } else {
             return GenCredential.createGuomiKeyPair(privateKey.toString(16));
         }
-    }*/
-    /*public static CryptoKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
-        return new ECDSAKeyPair().createKeyPair(privateKey);
     }*/
 
     /**
