@@ -1,5 +1,3 @@
-
-
 package com.webank.weid.service.impl.callback;
 
 import com.webank.weid.constant.AmopMsgType;
