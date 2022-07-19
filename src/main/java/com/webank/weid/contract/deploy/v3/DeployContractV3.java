@@ -60,23 +60,22 @@ public class DeployContractV3 extends AddressProcess {
 
     /**
      * Inits the cryptoKeyPair.
-     * todo 此处是十六进制还是十进制
+     * @param inputPrivateKey 十进制
      * @return true, if successful
      */
     private static boolean initCryptoKeyPair(String inputPrivateKey) {
         if (StringUtils.isNotBlank(inputPrivateKey)) {
-            logger.info("[DeployContractV2] begin to init cryptoKeyPair by privateKey..");
+            logger.info("[DeployContractV3] begin to init cryptoKeyPair by privateKey..");
             cryptoKeyPair = ((Client) BaseService.getClient()).getCryptoSuite()
                 .getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
         } else {
-
-            logger.info("[DeployContractV2] begin to init cryptoKeyPair..");
+            logger.info("[DeployContractV3] begin to init cryptoKeyPair..");
             cryptoKeyPair = ((Client) BaseService.getClient()).getCryptoSuite()
                 .getKeyPairFactory().generateKeyPair();
         }
 
         if (cryptoKeyPair == null) {
-            logger.error("[DeployContractV2] cryptoKeyPair init failed. ");
+            logger.error("[DeployContractV3] cryptoKeyPair init failed. ");
             return false;
         }
         byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
@@ -109,8 +108,6 @@ public class DeployContractV3 extends AddressProcess {
         FiscoConfig fiscoConfig,
         boolean instantEnable
     ) {
-        /*initWeb3j();
-        initCredentials(privateKey);*/
         initClient();
         initCryptoKeyPair(privateKey);
         String roleControllerAddress = deployRoleControllerContracts();

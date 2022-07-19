@@ -17,7 +17,7 @@ public class AuthenticationProperty {
     /**
      * Required: The type.
      */
-    private String type = PublicKeyType.SECP256K1.getTypeName();
+    private String type = PublicKeyType.ECDSA.getTypeName();
 
     /**
      * Required: The public key.
