@@ -9,7 +9,13 @@ import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +43,9 @@ import com.webank.weid.util.WeIdUtils;
 public class CptServiceImpl extends AbstractService implements CptService {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
+
+    //TODO 所有getClient()需要适配V3
+    private static Client client =  (Client) getClient();
     //获取CPT缓存节点
     private static CacheNode<ResponseData<Cpt>> cptCahceNode =
             CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
@@ -120,11 +129,22 @@ public class CptServiceImpl extends AbstractService implements CptService {
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
-            RsvSignature rsvSignature = sign(
+            SignatureResult signatureResult = sign(
                     weId,
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
+            RsvSignature rsvSignature = null;
+            Bytes32 R = new Bytes32(signatureResult.getR());
+            rsvSignature.setR(R);
+            Bytes32 S = new Bytes32(signatureResult.getS());
+            rsvSignature.setS(S);
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+                ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+                rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+            } else {
+                rsvSignature.setV(new Uint8(0));
+            }
             return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
                     weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
@@ -159,11 +179,22 @@ public class CptServiceImpl extends AbstractService implements CptService {
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
-            RsvSignature rsvSignature = sign(
+            SignatureResult signatureResult = sign(
                     weId,
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
+            RsvSignature rsvSignature = null;
+            Bytes32 R = new Bytes32(signatureResult.getR());
+            rsvSignature.setR(R);
+            Bytes32 S = new Bytes32(signatureResult.getS());
+            rsvSignature.setS(S);
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+                ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+                rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+            } else {
+                rsvSignature.setV(new Uint8(0));
+            }
             return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
                     weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
@@ -254,11 +285,22 @@ public class CptServiceImpl extends AbstractService implements CptService {
             String weId = args.getWeIdAuthentication().getWeId();
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
-            RsvSignature rsvSignature = sign(
+            SignatureResult signatureResult = sign(
                     weId,
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
+            RsvSignature rsvSignature = null;
+            Bytes32 R = new Bytes32(signatureResult.getR());
+            rsvSignature.setR(R);
+            Bytes32 S = new Bytes32(signatureResult.getS());
+            rsvSignature.setS(S);
+            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+                ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+                rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+            } else {
+                rsvSignature.setV(new Uint8(0));
+            }
             ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(
                     cptId,
                     address,
@@ -276,8 +318,8 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
     }
 
-
-    private RsvSignature sign(
+    //替换国密
+    private SignatureResult sign(
             String cptPublisher,
             String jsonSchema,
             WeIdPrivateKey cptPublisherPrivateKey) {
@@ -287,9 +329,9 @@ public class CptServiceImpl extends AbstractService implements CptService {
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
         //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
-        ECDSASignatureResult signatureData = DataToolUtils.secp256k1SignToSignature(
-                sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-        return DataToolUtils.convertSignatureDataToRsv(signatureData);
+        return DataToolUtils.signToSignature(
+                sb.toString(), client,
+                (CryptoKeyPair) weServer.createCredentials(cptPublisherPrivateKey.getPrivateKey()));
     }
 
     private ErrorCode validateCptArgs(

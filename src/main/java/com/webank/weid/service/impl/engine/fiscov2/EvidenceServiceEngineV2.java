@@ -18,6 +18,7 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceiptsDecoder;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,8 +105,9 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT, null);
             }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            //TODO 所有的getWeserver后CryptoKeyPair都要适配V3
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
+            String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             List<String> sigList = new ArrayList<>();
@@ -331,8 +333,10 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             logList.add(log);
             List<BigInteger> timestampList = new ArrayList<>();
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            /*String address = WeIdUtils
+                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));*/
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
+            String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             EvidenceContract evidenceContractWriter =
@@ -392,8 +396,10 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             logList.add(log);
             List<BigInteger> timestampList = new ArrayList<>();
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            /*String address = WeIdUtils
+                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));*/
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
+            String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             List<String> customKeyList = new ArrayList<>();
@@ -767,8 +773,10 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT, null);
             }
             hashByteList.add(DataToolUtils.convertHashStrIntoHashByte32Array(hashValue));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            /*String address = WeIdUtils
+                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));*/
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
+            String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             List<String> sigList = new ArrayList<>();
@@ -866,8 +874,10 @@ public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServi
             valueList.add(value);
             List<BigInteger> timestampList = new ArrayList<>();
             timestampList.add(new BigInteger(String.valueOf(timestamp), 10));
-            String address = WeIdUtils
-                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            /*String address = WeIdUtils
+                .convertWeIdToAddress(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));*/
+            CryptoKeyPair keyPair = (CryptoKeyPair) weServer.createCredentials(privateKey);
+            String address = keyPair.getAddress();
             List<String> signerList = new ArrayList<>();
             signerList.add(address);
             EvidenceContract evidenceContractWriter =
