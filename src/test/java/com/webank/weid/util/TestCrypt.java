@@ -3,17 +3,19 @@
 package com.webank.weid.util;
 
 import com.webank.weid.common.PasswordKey;
+import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.service.BaseService;
+import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
+import com.webank.weid.suite.api.crypto.params.Asymmetrickey;
+import com.webank.weid.suite.api.crypto.params.CryptoType;
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
-import com.webank.weid.suite.api.crypto.params.Asymmetrickey;
-import com.webank.weid.suite.api.crypto.params.CryptoType;
-import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 
 public class TestCrypt {
     
@@ -25,7 +27,10 @@ public class TestCrypt {
             + "\"type\":\"lite1\"}";
     
     private static final String original = "{\"name\":\"zhangsan\",age:12}";
-    
+
+    private static final CryptoSuite cryptoSuite = ((Client) BaseService.getClient()).getCryptoSuite();
+
+
     @Test
     public void testAes() {
         String key = KeyGenerator.getKey();
@@ -77,7 +82,7 @@ public class TestCrypt {
             String decrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES)
                 .decrypt(encrypt, priBase64);
             logger.info("decrypt: {}", decrypt);
-            Assert.assertEquals(DataToolUtils.sha3(original), DataToolUtils.sha3(decrypt));
+            Assert.assertEquals(cryptoSuite.hash(original), cryptoSuite.hash(decrypt));
             Assert.assertEquals(original, decrypt);
         } 
     }
@@ -102,7 +107,7 @@ public class TestCrypt {
             String decrypt = CryptoServiceFactory.getCryptoService(CryptoType.ECIES)
                 .decrypt(encrypt, privateKey);
             logger.info("decrypt: {}", decrypt);
-            Assert.assertEquals(DataToolUtils.sha3(original), DataToolUtils.sha3(decrypt));
+            Assert.assertEquals(cryptoSuite.hash(original), cryptoSuite.hash(decrypt));
             Assert.assertEquals(original, decrypt);
         } 
     }
@@ -120,8 +125,8 @@ public class TestCrypt {
             String priBase64 = KeyGenerator.decimalKeyToBase64(privateKey);
             String decimalPubKey = KeyGenerator.base64KeyTodecimal(pubBase64);
             String decimalPriKey = KeyGenerator.base64KeyTodecimal(priBase64);
-            Assert.assertEquals(DataToolUtils.sha3(publicKey), DataToolUtils.sha3(decimalPubKey));
-            Assert.assertEquals(DataToolUtils.sha3(privateKey), DataToolUtils.sha3(decimalPriKey));
+            Assert.assertEquals(cryptoSuite.hash(publicKey), cryptoSuite.hash(decimalPubKey));
+            Assert.assertEquals(cryptoSuite.hash(privateKey), cryptoSuite.hash(decimalPriKey));
             Assert.assertEquals(publicKey, decimalPubKey);
             Assert.assertEquals(privateKey, decimalPriKey);
         } 

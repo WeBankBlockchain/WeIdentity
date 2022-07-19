@@ -121,7 +121,7 @@ public class TestGetWeIdDocument extends TestBaseService {
         PublicKeyArgs publicKeyArgs = new PublicKeyArgs();
         publicKeyArgs.setPublicKey("bcabu298t876Buc");
         publicKeyArgs.setOwner(createWeIdResult.getWeId());
-        publicKeyArgs.setType(PublicKeyType.RSA);
+        publicKeyArgs.setType(PublicKeyType.ECDSA); // todo 原来是RSA
         weIdService.addPublicKey(createWeIdResult.getWeId(), publicKeyArgs,
             createWeIdResult.getUserWeIdPrivateKey());
         ResponseData<WeIdDocument> weIdDoc = weIdService
@@ -130,7 +130,7 @@ public class TestGetWeIdDocument extends TestBaseService {
         Assert.assertTrue(weIdDoc.getResult().getPublicKey().get(1).getType().equals("RSA"));
         // test delegate
         publicKeyArgs.setPublicKey("abcabac123123");
-        publicKeyArgs.setType(PublicKeyType.RSA);
+        publicKeyArgs.setType(PublicKeyType.ECDSA);
         ResponseData<Integer> resp = weIdService
             .delegateAddPublicKey(createWeIdResult.getWeId(), publicKeyArgs,
                 new WeIdPrivateKey(privateKey));

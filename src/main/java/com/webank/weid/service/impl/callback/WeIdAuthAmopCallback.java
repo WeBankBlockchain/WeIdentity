@@ -67,7 +67,7 @@ public class WeIdAuthAmopCallback extends AmopCallback {
         //TODO 所有getClient()需要适配V3
         Client client =  (Client) BaseService.getClient();
         SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client,
-                client.getCryptoSuite().createKeyPair(privateKey));
+                client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey)));
         String challengeSign = signatureResult.convertToString();
         dataMap.put(ParamKeyConstant.WEID_AUTH_SIGN_DATA, challengeSign);
 
