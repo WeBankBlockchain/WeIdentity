@@ -264,8 +264,9 @@ public final class WeIdConstant {
     public static final Long RECOGNIZED_AUTHORITY_ISSUER_FLAG = 1L;
 
     public static enum PublicKeyType {
-        RSA("RSA"),
-        SECP256K1("Secp256k1");
+        SM2("SM2"),
+        //RSA("RSA"),
+        ECDSA("ECDSA");
 
         /**
          * The Type Name of the Credential Proof.
