@@ -114,7 +114,7 @@ public abstract class WeServer<B, W, C> {
             synchronized (WeServer.class) {
                 weServer = weServerContext.get(groupId);
                 if (weServer == null) {
-                    weServer = new WeServerV2(fiscoConfig);
+                    weServer = new WeServerV2(fiscoConfig); //todo 判断v3
                     weServer.initWeb3j(groupId);
                     weServerContext.put(groupId, weServer);
                 }
@@ -214,7 +214,7 @@ public abstract class WeServer<B, W, C> {
     public abstract C createCredentials(String privateKey);
 
     /**
-     * 初始化Web3j.
+     * 初始化Web3j. todo 不用初始化多个bcosSDK
      *
      * @param groupId 群组Id
      */

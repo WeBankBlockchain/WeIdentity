@@ -86,14 +86,14 @@ public class FiscoConfig {
 //    @MatchPattern(pattern = "\\d+", message = "the value of group.id is invalid")
     private String groupId;
     
-    @NotNull(message = "the encrypt.type is undefined")
-    @NotEmpty(message = "the value of encrypt.type is null")
-    @MatchPattern(pattern = "[0,1]", message = "the value of encrypt.type should be in [0,1]")
-    private String encryptType;
+//    @NotNull(message = "the encrypt.type is undefined")
+//    @NotEmpty(message = "the value of encrypt.type is null")
+//    @MatchPattern(pattern = "[0,1]", message = "the value of encrypt.type should be in [0,1]")
+//    private String encryptType;
 
     @NotNull(message = "the sdk.sm-crypto is undefined")
     @NotEmpty(message = "the value of sdk.sm-crypto is null")
-    @MatchPattern(pattern = "[false,true]", message = "the value of sdk.sm-crypto should be [true] or [false]")
+//    @MatchPattern(pattern = "[\"false\",\"true\"]", message = "the value of sdk.sm-crypto should be [true] or [false]")
     private String sdkSMCrypto;
 
     @NotNull(message = "the sdk.cert-path is undefined")
@@ -195,7 +195,7 @@ public class FiscoConfig {
             web3sdkQueueSize = PropertyUtils.getProperty("web3sdk.queue-capacity");
             web3sdkKeepAliveSeconds = PropertyUtils.getProperty("web3sdk.keep-alive-seconds");
             groupId = PropertyUtils.getProperty("group.id");
-            encryptType = PropertyUtils.getProperty("encrypt.type");
+//            encryptType = PropertyUtils.getProperty("encrypt.type");
             sdkSMCrypto = PropertyUtils.getProperty("sdk.sm-crypto");
             sdkCertPath = PropertyUtils.getProperty("sdk.cert-path");
             amopPubPath = PropertyUtils.getProperty("amop.pub-path");
