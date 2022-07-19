@@ -305,7 +305,7 @@ public final class CredentialUtils {
            String privateKey, Map<String, Object> disclosureMap) {
         String rawData = CredentialUtils
             .getCredentialThumbprintWithoutSig(credential, disclosureMap);
-        CryptoKeyPair keyPair = client.getCryptoSuite().createKeyPair(privateKey);
+        CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
         SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client, keyPair);
         //这里直接转为String，原来是用base64来加密，得到加密后的字符串
         return signatureResult.convertToString();

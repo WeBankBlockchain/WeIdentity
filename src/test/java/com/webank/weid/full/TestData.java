@@ -15,7 +15,7 @@ public class TestData {
      * you may need to add public key after you create WeIdentity DID,This property is the public
      * key type,but for now the value is fixed and you don't need to modify it.
      */
-    public static final String PUBLIC_KEY_TYPE = PublicKeyType.SECP256K1.getTypeName();
+    public static final String PUBLIC_KEY_TYPE = PublicKeyType.ECDSA.getTypeName();
 
     /**
      * after you create WeIdentity DID,you may need to add service information which indicates the
