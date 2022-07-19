@@ -79,13 +79,11 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Int256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.hash.Hash;
-import org.fisco.bcos.sdk.crypto.hash.Keccak256;
+import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignature;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.Signature;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -169,24 +167,22 @@ public final class DataToolUtils {
      * @param utfString the utfString
      * @return hash value as hex encoded string
      */
-    public static String sha3(String utfString) {
+    /*public static String sha3(String utfString) {
         return Numeric.toHexString(sha3(utfString.getBytes(StandardCharsets.UTF_8)));
-    }
+    }*/
 
     /**
      * Sha 3.
-     *
-     * @param input the input
      * @return the byte[]
      */
-    public static byte[] sha3(byte[] input) {
+    /*public static byte[] sha3(byte[] input) {
         //return Hash.sha3(input, 0, input.length);
         return new Keccak256().hash(input);
-    }
+    }*/
 
-    public static String getHash(String hexInput) {
+    /*public static String getHash(String hexInput) {
         return sha3(hexInput);
-    }
+    }*/
 
     /**
      * generate random string.
@@ -228,8 +224,8 @@ public final class DataToolUtils {
      * @param privateKey the pass-in privatekey
      * @return true if yes, false otherwise
      */
-    public static String convertPrivateKeyToDefaultWeId(String privateKey) {
-        /*BigInteger publicKey;
+    /*public static String convertPrivateKeyToDefaultWeId(String privateKey) {
+        BigInteger publicKey;
         if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
             publicKey = Sign.publicKeyFromPrivate(new BigInteger(privateKey));
         } else {
@@ -237,10 +233,10 @@ public final class DataToolUtils {
         }
         return WeIdUtils
             .convertAddressToWeId(new org.fisco.bcos.web3j.abi.datatypes.Address(
-                Keys.getAddress(publicKey)).toString());*/
+                Keys.getAddress(publicKey)).toString());
         CryptoKeyPair keyPair = createKeyPairFromPrivate(new BigInteger(privateKey));
         return WeIdUtils.convertAddressToWeId(keyPair.getAddress());
-    }
+    }*/
 
     /**
      * Check whether the String is a valid hash.
@@ -573,14 +569,14 @@ public final class DataToolUtils {
      * Secp256k1 sign.
      *
      * @param rawData original raw data
-     * @param privateKey private key in BigInteger format
+     * @param privateKey
      * @return base64 string for signature value
      */
-    public static String secp256k1Sign(String rawData, BigInteger privateKey) {
+    /*public static String secp256k1Sign(String rawData, String privateKey) {
         //SignatureData sigData = secp256k1SignToSignature(rawData, privateKey);
         ECDSASignatureResult sigData = secp256k1SignToSignature(rawData, privateKey);
         return secp256k1SigBase64Serialization(sigData);
-    }
+    }*/
     
     /**
      * Secp256k1 sign to Signature.
@@ -597,31 +593,35 @@ public final class DataToolUtils {
             return SM2Sign.sign(rawData.getBytes(), keyPair);
         }
     }*/
-    public static ECDSASignatureResult secp256k1SignToSignature(
+    /*public static ECDSASignatureResult secp256k1SignToSignature(
             String rawData,
             CryptoKeyPair keyPair
     ) {
         ECDSASignature ecdsaSign = new ECDSASignature();
         return (ECDSASignatureResult)ecdsaSign.sign(sha3(rawData.getBytes()), keyPair);
-    }
+    }*/
     
     /**
      * Secp256k1 sign to Signature.
      *
      * @param rawData original raw data
-     * @param privateKey private key in BigInteger format
+     * @param client
+     * @param keyPair
      * @return SignatureData for signature value
      */
     /*public static SignatureData secp256k1SignToSignature(String rawData, BigInteger privateKey) {
         ECKeyPair keyPair = GenCredential.createKeyPair(privateKey.toString(16));
         return secp256k1SignToSignature(rawData, keyPair);
     }*/
-    public static ECDSASignatureResult secp256k1SignToSignature(
+    public static SignatureResult signToSignature(
             String rawData,
-            BigInteger privateKey
+            Client client,
+            CryptoKeyPair keyPair
     ) {
-        CryptoKeyPair keyPair = new ECDSAKeyPair().createKeyPair(privateKey);
-        return secp256k1SignToSignature(rawData, keyPair);
+        //CryptoKeyPair keyPair = new ECDSAKeyPair().createKeyPair(privateKey);
+        String messageHash = client.getCryptoSuite().hash(rawData);
+        return client.getCryptoSuite().sign(messageHash, keyPair);
+        //return secp256k1SignToSignature(rawData, keyPair);
     }
     
     /**
@@ -630,14 +630,14 @@ public final class DataToolUtils {
      * @param sigData secp256k1 signature (v = 0,1)
      * @return base64 string
      */
-    public static String secp256k1SigBase64Serialization(
+    /*public static String secp256k1SigBase64Serialization(
             ECDSASignatureResult sigData) {
         byte[] sigBytes = new byte[65];
         sigBytes[64] = sigData.getV();
         System.arraycopy(sigData.getR(), 0, sigBytes, 0, 32);
         System.arraycopy(sigData.getS(), 0, sigBytes, 32, 32);
         return new String(base64Encode(sigBytes), StandardCharsets.UTF_8);
-    }
+    }*/
 
     /**
      * De-Serialize secp256k1 signature base64 encoded string, in R, S, V (0, 1) format.
@@ -645,14 +645,14 @@ public final class DataToolUtils {
      * @param signature signature base64 string
      * @return secp256k1 signature (v = 0,1)
      */
-    public static ECDSASignatureResult  secp256k1SigBase64Deserialization(String signature) {
+    /*public static ECDSASignatureResult  secp256k1SigBase64Deserialization(String signature) {
         byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
         byte[] r = new byte[32];
         byte[] s = new byte[32];
         System.arraycopy(sigBytes, 0, r, 0, 32);
         System.arraycopy(sigBytes, 32, s, 0, 32);
         return new ECDSASignatureResult (sigBytes[64], r, s);
-    }
+    }*/
 
     /**
      * De-Serialize secp256k1 signature base64 encoded string, in R, S, V (0, 1) format.
@@ -677,13 +677,15 @@ public final class DataToolUtils {
      * Verify secp256k1 signature.
      *
      * @param rawData original raw data
-     * @param signatureBase64 signature base64 string
+     * @param signature signature string
+     * @param client
      * @param publicKey in BigInteger format
      * @return return boolean result, true is success and false is fail
      */
-    public static boolean verifySecp256k1Signature(
+    public static boolean verifySignature(
         String rawData,
-        String signatureBase64,
+        String signature,
+        Client client,
         BigInteger publicKey
     ) {
         try {
@@ -703,13 +705,17 @@ public final class DataToolUtils {
                         secp256k1SigBase64Deserialization(signatureBase64, publicKey);
                 return SM2Sign.verify(hashBytes, sigData);
             }*/
-            ECDSASignatureResult sigData =
+            /*ECDSASignatureResult sigData =
                     secp256k1SigBase64Deserialization(signatureBase64);
             ECDSASignature ecdsaSign = new ECDSASignature();
             //TODO verify的hex是不帶0x的，我们的sha3是带0x
             String hashData = sha3(rawData).substring(2);
             String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
-            return ecdsaSign.verify(hexPublicKey, hashData, sigData.convertToString());
+            return ecdsaSign.verify(hexPublicKey, hashData, sigData.convertToString());*/
+            String messageHash = client.getCryptoSuite().hash(rawData);
+            //这里注意publicKey要不要带0x
+            String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
+            return client.getCryptoSuite().verify(hexPublicKey, messageHash, signature);
         } catch (Exception e) {
             logger.error("Error occurred during secp256k1 sig verification: {}", e);
             return false;
@@ -807,15 +813,15 @@ public final class DataToolUtils {
      * @param privateKey the private key
      * @return publicKey
      */
-    public static BigInteger publicKeyFromPrivate(BigInteger privateKey) {
-        /*if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+    /*public static BigInteger publicKeyFromPrivate(BigInteger privateKey) {
+        *//*if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
             return Sign.publicKeyFromPrivate(privateKey);
         } else {
             return Sign.smPublicKeyFromPrivate(privateKey);
-        }*/
+        }*//*
         String hexPublcKey = createKeyPairFromPrivate(privateKey).getHexPublicKey();
         return new BigInteger(1, Numeric.hexStringToByteArray(hexPublcKey));
-    }
+    }*/
 
     /**
      * Obtain the WeIdPrivateKey from given PrivateKey.
@@ -830,9 +836,9 @@ public final class DataToolUtils {
             return GenCredential.createGuomiKeyPair(privateKey.toString(16));
         }
     }*/
-    public static CryptoKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
+    /*public static CryptoKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
         return new ECDSAKeyPair().createKeyPair(privateKey);
-    }
+    }*/
 
     /**
      * The Base64 encode/decode class.
@@ -874,13 +880,13 @@ public final class DataToolUtils {
      * @param signatureData the signature data
      * @return the byte[]
      */
-    public static byte[] simpleSignatureSerialization(ECDSASignatureResult signatureData) {
+    /*public static byte[] simpleSignatureSerialization(ECDSASignatureResult signatureData) {
         byte[] serializedSignatureData = new byte[65];
         serializedSignatureData[0] = signatureData.getV();
         System.arraycopy(signatureData.getR(), 0, serializedSignatureData, 1, 32);
         System.arraycopy(signatureData.getS(), 0, serializedSignatureData, 33, 32);
         return serializedSignatureData;
-    }
+    }*/
 
 
     /**
@@ -890,7 +896,7 @@ public final class DataToolUtils {
      * @param serializedSignatureData the serialized signature data
      * @return the sign. signature data
      */
-    public static ECDSASignatureResult simpleSignatureDeserialization(
+    /*public static ECDSASignatureResult simpleSignatureDeserialization(
         byte[] serializedSignatureData) {
         if (SERIALIZED_SIGNATUREDATA_LENGTH != serializedSignatureData.length) {
             throw new WeIdBaseException("signature data illegal");
@@ -902,7 +908,7 @@ public final class DataToolUtils {
         System.arraycopy(serializedSignatureData, 33, s, 0, 32);
         ECDSASignatureResult signatureData = new ECDSASignatureResult(v, r, s);
         return signatureData;
-    }
+    }*/
 
     /**
      * The De-Serialization class of Signatures accepting raw values of v, r, and s. Note: due to
@@ -914,32 +920,34 @@ public final class DataToolUtils {
      * @param s the s
      * @return the sign. signature data
      */
-    public static ECDSASignatureResult rawSignatureDeserialization(int v, byte[] r, byte[] s) {
+    /*public static ECDSASignatureResult rawSignatureDeserialization(int v, byte[] r, byte[] s) {
         byte valueByte = (byte) v;
         return new ECDSASignatureResult(valueByte, r, s);
-    }
+    }*/
 
     /**
-     * Verify a secp256k1 signature (base64).
+     * Verify a signature (base64).
      *
      * @param rawData the rawData to be verified
      * @param signature the Signature Data in secp256k1 style
      * @param weIdDocument the WeIdDocument to be extracted
+     * @param client
      * @param weIdPublicKeyId the WeID public key ID
      * @return true if yes, false otherwise with exact error codes
      */
-    public static ErrorCode verifySecp256k1SignatureFromWeId(
+    public static ErrorCode verifySignatureFromWeId(
         String rawData,
         String signature,
         WeIdDocument weIdDocument,
+        Client client,
         String weIdPublicKeyId) {
         List<String> publicKeysListToVerify = new ArrayList<String>();
 
-        try {
+        /*try {
             secp256k1SigBase64Deserialization(signature);
         } catch (Exception e) {
             return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
-        }
+        }*/
 
         // Traverse public key list indexed Authentication key list
 
@@ -954,8 +962,8 @@ public final class DataToolUtils {
             boolean result = false;
             for (String publicKeyItem : publicKeysListToVerify) {
                 if (StringUtils.isNotEmpty(publicKeyItem)) {
-                    boolean currentResult = verifySecp256k1Signature(
-                        rawData, signature, new BigInteger(publicKeyItem));
+                    boolean currentResult = verifySignature(
+                        rawData, signature, client, new BigInteger(publicKeyItem));
                     result = currentResult || result;
                     if (currentResult) {
                         for (PublicKeyProperty pkp : weIdDocument.getPublicKey()) {
@@ -993,7 +1001,7 @@ public final class DataToolUtils {
      * @param signatureData the signature data
      * @return rsvSignature the rsv signature structure
      */
-    public static RsvSignature convertSignatureDataToRsv(
+    /*public static RsvSignature convertSignatureDataToRsv(
         //SignatureData signatureData) {
         ECDSASignatureResult signatureData) {
         Uint8 v = intToUnt8(Integer.valueOf(signatureData.getV()));
@@ -1004,7 +1012,7 @@ public final class DataToolUtils {
         rsvSignature.setR(r);
         rsvSignature.setS(s);
         return rsvSignature;
-    }
+    }*/
 
     /**
      * Convert an off-chain Base64 signature String to signatureData format.
@@ -1013,11 +1021,11 @@ public final class DataToolUtils {
      * @return signatureData structure
      */
     //public static SignatureData convertBase64StringToSignatureData(String base64Signature) {
-    public static ECDSASignatureResult convertBase64StringToSignatureData(String base64Signature) {
+    /*public static ECDSASignatureResult convertBase64StringToSignatureData(String base64Signature) {
         return simpleSignatureDeserialization(
             base64Decode(base64Signature.getBytes(StandardCharsets.UTF_8))
         );
-    }
+    }*/
 
     /**
      * Get the UUID and remove the '-'.
