@@ -3,7 +3,10 @@
 package com.webank.weid.contract.deploy;
 
 import com.webank.weid.contract.deploy.v3.DeployContractV3;
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

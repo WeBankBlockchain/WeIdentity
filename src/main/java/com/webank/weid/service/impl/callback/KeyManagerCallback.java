@@ -10,7 +10,6 @@ import java.util.Map;
 import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,8 +137,6 @@ public class KeyManagerCallback extends AmopCallback {
                 arg.getKeyId(),
                 arg.getSignValue(),
                 domRes.getResult(),
-                //TODO 所有getClient()需要适配V3
-                (Client) BaseService.getClient(),
                 null
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
