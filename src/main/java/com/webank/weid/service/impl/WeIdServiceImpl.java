@@ -11,9 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +47,6 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceImpl.class);
 
-    //TODO 所有getClient()需要适配V3
-    Client client = (Client) getClient();
-
     /**
      * Create a WeIdentity DID with null input param.
      *
@@ -61,27 +55,12 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     @Override
     public ResponseData<CreateWeIdDataResult> createWeId() {
 
-        CreateWeIdDataResult result = new CreateWeIdDataResult();
-        CryptoKeyPair keyPair = client.getCryptoSuite().createKeyPair();
-        //ECKeyPair keyPair = GenCredential.createKeyPair();
-        if (Objects.isNull(keyPair)) {
+        CreateWeIdDataResult result = WeIdUtils.createWeId();
+        if (Objects.isNull(result)) {
             logger.error("Create weId failed.");
             return new ResponseData<>(null, ErrorCode.WEID_KEYPAIR_CREATE_FAILED);
         }
-
-        String publicKey = String.valueOf(keyPair.getHexPublicKey());
-        String privateKey = String.valueOf(keyPair.getHexPrivateKey());
-        WeIdPublicKey userWeIdPublicKey = new WeIdPublicKey();
-        userWeIdPublicKey.setPublicKey(publicKey);
-        result.setUserWeIdPublicKey(userWeIdPublicKey);
-        WeIdPrivateKey userWeIdPrivateKey = new WeIdPrivateKey();
-        userWeIdPrivateKey.setPrivateKey(privateKey);
-        result.setUserWeIdPrivateKey(userWeIdPrivateKey);
-        //替换国密
-        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
-        result.setWeId(weId);
-
-        ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey, false);
+        ResponseData<Boolean> innerResp = processCreateWeId(result.getWeId(), result.getUserWeIdPublicKey().getPublicKey(), result.getUserWeIdPrivateKey().getPrivateKey(), false);
         if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[createWeId] Create weId failed. error message is :{}",
@@ -116,7 +95,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         String publicKey = createWeIdArgs.getPublicKey();
         if (StringUtils.isNotBlank(publicKey)) {
             //替换国密
-            if (!WeIdUtils.isKeypairMatch((CryptoKeyPair) weServer.createCredentials(privateKey), publicKey)) {
+            if (!WeIdUtils.isKeypairMatch(DataToolUtils.cryptoSuite.createKeyPair(privateKey), publicKey)) {
                 return new ResponseData<>(
                     StringUtils.EMPTY,
                     ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED
