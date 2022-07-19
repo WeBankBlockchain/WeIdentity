@@ -11,7 +11,6 @@ import java.util.Map;
 
 import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,9 +44,6 @@ public class RedisDriver implements Persistence {
 
     RedissonClient client = redissonConfig.redismodelRecognition();
 
-    //TODO 所有getClient()需要适配V3
-    Client fiscoClient = (Client) BaseService.getClient();
-
     @Override
     public ResponseData<Integer> add(String domain, String id, String data) {
 
@@ -55,7 +51,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->add] the id of the data is empty.");
             return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = fiscoClient.getCryptoSuite().hash(id);
+        String dataKey = DataToolUtils.cryptoSuite.hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             Date date = new Date();
@@ -81,7 +77,7 @@ public class RedisDriver implements Persistence {
                     logger.error("[redis->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
-                idHashList.add(fiscoClient.getCryptoSuite().hash(id));
+                idHashList.add(DataToolUtils.cryptoSuite.hash(id));
                 dataList.add(data);
             }
             RedisDomain redisDomain = new RedisDomain(domain);
@@ -118,7 +114,7 @@ public class RedisDriver implements Persistence {
             return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
         //dataKey:id的hash值
-        String dataKey = fiscoClient.getCryptoSuite().hash(id);
+        String dataKey = DataToolUtils.cryptoSuite.hash(id);
         try {
             ResponseData<String> result = new ResponseData<String>();
             //设置result初始值为空字符串
@@ -166,7 +162,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->delete] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = fiscoClient.getCryptoSuite().hash(id);
+        String dataKey = DataToolUtils.cryptoSuite.hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             return new RedisExecutor(redisDomain).executeDelete(dataKey, client);
@@ -183,7 +179,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = fiscoClient.getCryptoSuite().hash(id);
+        String dataKey = DataToolUtils.cryptoSuite.hash(id);
         Date date = new Date();
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
