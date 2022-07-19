@@ -59,7 +59,7 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
         //TODO 所有getClient()需要适配V3
         Client client = (Client) getClient();
         SignatureResult signatureResult = DataToolUtils.signToSignature(codeData.getId(), client,
-                client.getCryptoSuite().createKeyPair(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
+                client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())));
         String signValue = signatureResult.convertToString();
         args.setSignValue(signValue);
         return args;

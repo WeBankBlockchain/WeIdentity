@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Assert;
@@ -309,7 +310,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         String thumbprint = CredentialPojoUtils
             .getLiteCredentialThumbprintWithoutSig(liteCredential);
         System.out.println("Lite Credential Thumbprint: " + thumbprint + ", Thumbprint hash: "
-            + DataToolUtils.sha3(thumbprint) + ", signature: " + liteCredential.getSignature());
+            + new CryptoSuite(0).hash(thumbprint) + ", signature: " + liteCredential.getSignature());
         // 2. getHash() -> createEvidence (对凭证完整内容包括签名内容进行hash，claim支持选择性披露)
         System.out.println("Lite Credential Hash: "
             + CredentialPojoUtils.getLiteCredentialPojoHash(liteCredential));
@@ -943,10 +944,8 @@ public class TestCreateCredentialPojo extends TestBaseService {
         // Enforce a Register/Update system CPT first
         WeIdAuthentication sdkAuthen = new WeIdAuthentication();
         //ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        String keyWeId = WeIdUtils
-            //.convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
-                .convertAddressToWeId(keyPair.getAddress());
+        CryptoKeyPair keyPair = new CryptoSuite(0).getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
         sdkAuthen.setWeId(keyWeId);
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
         weIdPrivateKey.setPrivateKey(privateKey);

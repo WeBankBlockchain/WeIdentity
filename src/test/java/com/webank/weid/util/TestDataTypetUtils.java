@@ -15,6 +15,7 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Int256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -212,7 +213,7 @@ public class TestDataTypetUtils {
 
     @Test
     public void testHashConversion() {
-        String hash = DataToolUtils.sha3(UUID.randomUUID().toString());
+        String hash = new CryptoSuite(0).hash(UUID.randomUUID().toString());
         byte[] convertedHash = DataToolUtils.convertHashStrIntoHashByte32Array(hash);
         Assert.assertEquals(convertedHash.length, WeIdConstant.BYTES32_FIXED_LENGTH.intValue());
         String convertedBackStr = DataToolUtils
