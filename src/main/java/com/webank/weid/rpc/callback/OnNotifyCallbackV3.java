@@ -15,8 +15,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by junqizhang on 08/07/2017.
  */
-/*public class OnNotifyCallbackV2 extends ChannelPushCallback implements RegistCallBack {*/
-    // todo 支持amop callback
 public class OnNotifyCallbackV3
         implements AmopRequestCallback, RegistCallBack {
 
@@ -47,41 +45,31 @@ public class OnNotifyCallbackV3
      */
     @Override
     public void onRequest(String endpoint, String seq, byte[] data) {
-         // todo amop.response 先发data，然后callback一个值result，把result返回
-//        String content = new String(amopMsgIn.getContent());
-//        logger.info("received ChannelPush v2 msg : " + content);
-//        if (0 == amopCallBackMap.size()) {
-//            /*ChannelResponse response = new ChannelResponse();
-//            response.setContent("directRouteCallback is null on server side!");
-//            response.setErrorCode(0);
-//            push.sendResponse(response);
-//            return;*/
+         // todo 支持amop callback, 怎么返回result
+        String content = new String(data);
+        logger.info("received ChannelPush v2 from:{},seq:{},msg:{} ", endpoint, seq, content);
+        if (0 == amopCallBackMap.size()) {
+            logger.warn("directRouteCallback is null on server side!");
+            return;
 //            return "directRouteCallback is null on server side!".getBytes();
-//        }
-//
-//        AmopRequestBody amopRequestBody = DataToolUtils.deserialize(content, AmopRequestBody.class);
-//            //DataToolUtils.deserialize(push.getContent(), AmopRequestBody.class);
-//        AmopMsgType msgType = amopRequestBody.getMsgType();
-//        AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
-//        if (amopCallBack == null) {
-//            amopCallBack = defaultAmopCallBack;
-//        }
-//        String messageBody = amopRequestBody.getMsgBody();
-//        String result = null;
-//        try {
-//            //result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
-//            result = msgType.callOnPush(amopCallBack, amopMsgIn.getMessageID(), messageBody);
-//        } catch (Exception e) {
-//            logger.error("callOnPush error, please check the log.", e);
-//        }
-//
-//
-//         /* //接收到以后需要给发送端回包
-//
-//        ChannelResponse response = new ChannelResponse();
-//        response.setContent(result);
-//        response.setErrorCode(0);
-//        push.sendResponse(response);*/
+        }
+
+        AmopRequestBody amopRequestBody = DataToolUtils.deserialize(content, AmopRequestBody.class);
+        AmopMsgType msgType = amopRequestBody.getMsgType();
+        AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
+        if (amopCallBack == null) {
+            amopCallBack = defaultAmopCallBack;
+        }
+        String messageBody = amopRequestBody.getMsgBody();
+        String result = null;
+        try {
+            result = msgType.callOnPush(amopCallBack, null, messageBody);
+        } catch (Exception e) {
+            logger.error("callOnPush error, please check the log.", e);
+        }
+
+
+        //接收到以后需要给发送端回包 todo
 //        return result.getBytes();
     }
 

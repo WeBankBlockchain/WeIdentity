@@ -482,7 +482,7 @@ public class TestUpdateCpt extends TestBaseService {
      * case： privateKey is xxxxxxx.
      */
     @Test
-    public void  () {
+    public void testUpdateCptCase19() {
 
         CptMapArgs cptMapArgs =
             TestBaseUtil.buildCptArgs(createWeIdResultWithSetAttr);
