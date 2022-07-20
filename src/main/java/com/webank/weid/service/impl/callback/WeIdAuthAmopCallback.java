@@ -1,5 +1,3 @@
-
-
 package com.webank.weid.service.impl.callback;
 
 import java.math.BigInteger;
@@ -9,8 +7,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.webank.weid.service.BaseService;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,11 +60,9 @@ public class WeIdAuthAmopCallback extends AmopCallback {
         String rawData = challenge.toJson();
         String privateKey = weIdAuth.getWeIdPrivateKey().getPrivateKey();
         //String challengeSign = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
-        //TODO 所有getClient()需要适配V3
-        Client client =  (Client) BaseService.getClient();
-        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client,
-                client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey)));
-        String challengeSign = signatureResult.convertToString();
+        String challengeSign = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(rawData, privateKey)
+        );
         dataMap.put(ParamKeyConstant.WEID_AUTH_SIGN_DATA, challengeSign);
 
         ResponseData<WeIdDocument> weIdDocResp = weIdService.getWeIdDocument(fromWeId);

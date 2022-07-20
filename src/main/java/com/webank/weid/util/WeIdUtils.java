@@ -2,17 +2,23 @@
 
 package com.webank.weid.util;
 
+import com.webank.weid.config.FiscoConfig;
+import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.deploy.v3.DeployContractV3;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
+import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
 import java.math.BigInteger;
 import java.security.KeyPair;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
-import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -31,11 +37,26 @@ public final class WeIdUtils {
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-
     private static String getChainId() {
         return BaseService.getChainId();
+    }
+
+    public static CreateWeIdDataResult createWeId() {
+        CreateWeIdDataResult result = new CreateWeIdDataResult();
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair();
+        //ECKeyPair keyPair = GenCredential.createKeyPair();
+        String publicKey = String.valueOf(keyPair.getHexPublicKey());
+        String privateKey = String.valueOf(keyPair.getHexPrivateKey());
+        WeIdPublicKey userWeIdPublicKey = new WeIdPublicKey();
+        userWeIdPublicKey.setPublicKey(publicKey);
+        result.setUserWeIdPublicKey(userWeIdPublicKey);
+        WeIdPrivateKey userWeIdPrivateKey = new WeIdPrivateKey();
+        userWeIdPrivateKey.setPrivateKey(privateKey);
+        result.setUserWeIdPrivateKey(userWeIdPrivateKey);
+        //替换国密
+        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
+        result.setWeId(weId);
+        return result;
     }
 
     /**
@@ -88,7 +109,7 @@ public final class WeIdUtils {
         try {
             //String address = Keys.getAddress(new BigInteger(publicKey));
             //TODO 需要适配V3的getCryptoSuite
-            String address = client.getCryptoSuite().createKeyPair().getAddress(
+            String address = DataToolUtils.cryptoSuite.createKeyPair().getAddress(
                     Numeric.toHexStringNoPrefix(new BigInteger(publicKey).toByteArray()).substring(2));
             return buildWeIdByAddress(address);
         } catch (Exception e) {
@@ -230,7 +251,7 @@ public final class WeIdUtils {
         try {
             /*BigInteger publicKey = DataToolUtils
                 .publicKeyFromPrivate(new BigInteger(privateKey.getPrivateKey()));*/
-            CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey.getPrivateKey()));
+            CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair(privateKey.getPrivateKey());
             String address1 = keyPair.getAddress();
             //String address1 = "0x" + Keys.getAddress(publicKey);
             //String hexPub = Numeric.toHexStringNoPrefix(publicKey.toByteArray()).substring(2);
@@ -254,8 +275,9 @@ public final class WeIdUtils {
      * @return address
      */
     public static String getWeIdFromPrivateKey(String privateKey) {
-
-        String publicKey = client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey)).getHexPublicKey();
+        /*BigInteger publicKey = DataToolUtils
+            .publicKeyFromPrivate(new BigInteger(privateKey));*/
+        String publicKey = DataToolUtils.cryptoSuite.createKeyPair(privateKey).getHexPublicKey();
         return convertPublicKeyToWeId(publicKey);
     }
 

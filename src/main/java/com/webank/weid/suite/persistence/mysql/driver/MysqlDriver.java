@@ -13,7 +13,6 @@ import java.util.Set;
 
 import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +37,6 @@ public class MysqlDriver implements Persistence {
 
     private static final Logger logger = LoggerFactory.getLogger(
             MysqlDriver.class);
-
-    //TODO 所有getClient()需要适配V3
-    Client client = (Client) BaseService.getClient();
 
     private static final String CHECK_TABLE_SQL =
         "SELECT table_name "
@@ -92,7 +88,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->get] the id of the data is empty.");
             return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
-        String dataKey = client.getCryptoSuite().hash(id);
+        String dataKey = DataToolUtils.cryptoSuite.hash(id);
         try {
             ResponseData<String> result = new ResponseData<String>();
             result.setResult(StringUtils.EMPTY);
@@ -130,7 +126,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->add] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = client.getCryptoSuite().hash(id);
+        String dataKey = DataToolUtils.cryptoSuite.hash(id);
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
             Date now = sqlDomain.getNow();
@@ -159,7 +155,7 @@ public class MysqlDriver implements Persistence {
                     logger.error("[mysql->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
-                idHashList.add(client.getCryptoSuite().hash(id));
+                idHashList.add(DataToolUtils.cryptoSuite.hash(id));
                 dataList.add(data);
             }
             SqlDomain sqlDomain = new SqlDomain(domain);
@@ -197,7 +193,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->delete] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = client.getCryptoSuite().hash(id);
+        String dataKey = DataToolUtils.cryptoSuite.hash(id);
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
             return new SqlExecutor(sqlDomain).execute(SqlExecutor.SQL_DELETE, dataKey);
@@ -217,7 +213,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = client.getCryptoSuite().hash(id);
+        String dataKey = DataToolUtils.cryptoSuite.hash(id);
         Date date = new Date();
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
