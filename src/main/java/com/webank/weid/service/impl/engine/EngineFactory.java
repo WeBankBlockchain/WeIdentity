@@ -20,7 +20,7 @@ public class EngineFactory {
      * @return WeIdServiceEngine object
      */
     public static WeIdServiceEngine createWeIdServiceEngine() {
-        return new WeIdServiceEngineV2();
+        return new WeIdServiceEngineV2(); // todo 判断v3
     }
 
     /**

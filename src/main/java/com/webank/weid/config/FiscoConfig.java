@@ -86,11 +86,32 @@ public class FiscoConfig {
 //    @MatchPattern(pattern = "\\d+", message = "the value of group.id is invalid")
     private String groupId;
     
-    @NotNull(message = "the encrypt.type is undefined")
-    @NotEmpty(message = "the value of encrypt.type is null")
-    @MatchPattern(pattern = "[0,1]", message = "the value of encrypt.type should be in [0,1]")
-    private String encryptType;
-    
+//    @NotNull(message = "the encrypt.type is undefined")
+//    @NotEmpty(message = "the value of encrypt.type is null")
+//    @MatchPattern(pattern = "[0,1]", message = "the value of encrypt.type should be in [0,1]")
+//    private String encryptType;
+
+    @NotNull(message = "the sdk.sm-crypto is undefined")
+    @NotEmpty(message = "the value of sdk.sm-crypto is null")
+//    @MatchPattern(pattern = "[\"false\",\"true\"]", message = "the value of sdk.sm-crypto should be [true] or [false]")
+    private String sdkSMCrypto;
+
+    @NotNull(message = "the sdk.cert-path is undefined")
+    @NotEmpty(message = "the value of sdk.cert-path is null")
+    private String sdkCertPath;
+
+    @NotNull(message = "the amop.pub-path is undefined")
+    @NotEmpty(message = "the value of amop.pub-path is null")
+    private String amopPubPath;
+
+    @NotNull(message = "the amop.pri-path is undefined")
+    @NotEmpty(message = "the value of amop.pri-path is null")
+    private String amopPriPath;
+
+    @NotNull(message = "the amop.p12-password is undefined")
+    @NotEmpty(message = "the value of amop.p12-password is null")
+    private String amopP12Password;
+
     @NotNull(message = "the v1.ca-crt-path is undefined")
     @NotEmpty(message = "the value of v1.ca-crt-path is null")
     private String v1CaCrtPath;
@@ -107,37 +128,37 @@ public class FiscoConfig {
     @NotEmpty(message = "the value of v1.key-store-password is null")
     private String v1KeyStorePassword;
     
-    @NotNull(message = "the v2.ca-crt-path is undefined")
-    @NotEmpty(message = "the value of v2.ca-crt-path is null")
-    private String v2CaCrtPath;
-    
-    @NotNull(message = "the v2.node-crt-path is undefined")
-    @NotEmpty(message = "the value of v2.node-crt-path is null")
-    private String v2NodeCrtPath;
-    
-    @NotNull(message = "the v2.node-key-path is undefined")
-    @NotEmpty(message = "the value of v2.node-key-path is null")
-    private String v2NodeKeyPath;
-
-    @NotNull(message = "the gm.ca-crt-path is undefined")
-    @NotEmpty(message = "the value of gm.ca-crt-path is null")
-    private String gmCaCrtPath;
-
-    @NotNull(message = "the gm.sdk-crt-path is undefined")
-    @NotEmpty(message = "the value of gm.sdk-crt-path is null")
-    private String gmSdkCrtPath;
-
-    @NotNull(message = "the gm.sdk-key-path is undefined")
-    @NotEmpty(message = "the value of gm.sdk-key-path is null")
-    private String gmSdkKeyPath;
-
-    @NotNull(message = "the gmen.sdk-crt-path is undefined")
-    @NotEmpty(message = "the value of gmen.sdk-crt-path is null")
-    private String gmenSdkCrtPath;
-
-    @NotNull(message = "the gmen.sdk-key-path is undefined")
-    @NotEmpty(message = "the value of gmen.sdk-key-path is null")
-    private String gmenSdkKeyPath;
+//    @NotNull(message = "the v2.ca-crt-path is undefined")
+//    @NotEmpty(message = "the value of v2.ca-crt-path is null")
+//    private String v2CaCrtPath;
+//
+//    @NotNull(message = "the v2.node-crt-path is undefined")
+//    @NotEmpty(message = "the value of v2.node-crt-path is null")
+//    private String v2NodeCrtPath;
+//
+//    @NotNull(message = "the v2.node-key-path is undefined")
+//    @NotEmpty(message = "the value of v2.node-key-path is null")
+//    private String v2NodeKeyPath;
+//
+//    @NotNull(message = "the gm.ca-crt-path is undefined")
+//    @NotEmpty(message = "the value of gm.ca-crt-path is null")
+//    private String gmCaCrtPath;
+//
+//    @NotNull(message = "the gm.sdk-crt-path is undefined")
+//    @NotEmpty(message = "the value of gm.sdk-crt-path is null")
+//    private String gmSdkCrtPath;
+//
+//    @NotNull(message = "the gm.sdk-key-path is undefined")
+//    @NotEmpty(message = "the value of gm.sdk-key-path is null")
+//    private String gmSdkKeyPath;
+//
+//    @NotNull(message = "the gmen.sdk-crt-path is undefined")
+//    @NotEmpty(message = "the value of gmen.sdk-crt-path is null")
+//    private String gmenSdkCrtPath;
+//
+//    @NotNull(message = "the gmen.sdk-key-path is undefined")
+//    @NotEmpty(message = "the value of gmen.sdk-key-path is null")
+//    private String gmenSdkKeyPath;
     
     @NotNull(message = "the blockchain.orgid is undefined")
     @NotEmpty(message = "the value of blockchain.orgid is null")
@@ -174,19 +195,24 @@ public class FiscoConfig {
             web3sdkQueueSize = PropertyUtils.getProperty("web3sdk.queue-capacity");
             web3sdkKeepAliveSeconds = PropertyUtils.getProperty("web3sdk.keep-alive-seconds");
             groupId = PropertyUtils.getProperty("group.id");
-            encryptType = PropertyUtils.getProperty("encrypt.type");
+//            encryptType = PropertyUtils.getProperty("encrypt.type");
+            sdkSMCrypto = PropertyUtils.getProperty("sdk.sm-crypto");
+            sdkCertPath = PropertyUtils.getProperty("sdk.cert-path");
+            amopPubPath = PropertyUtils.getProperty("amop.pub-path");
+            amopPriPath = PropertyUtils.getProperty("amop.pri-path");
+            amopP12Password = PropertyUtils.getProperty("amop.p12-password");
             v1CaCrtPath = PropertyUtils.getProperty("v1.ca-crt-path");
             v1ClientCrtPassword = PropertyUtils.getProperty("v1.client-crt-password");
             v1ClientKeyStorePath = PropertyUtils.getProperty("v1.client-key-store-path");
             v1KeyStorePassword = PropertyUtils.getProperty("v1.key-store-password");
-            v2CaCrtPath = PropertyUtils.getProperty("v2.ca-crt-path");
-            v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
-            v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
-            gmCaCrtPath = PropertyUtils.getProperty("gm.ca-crt-path");
-            gmSdkCrtPath = PropertyUtils.getProperty("gm.sdk-crt-path");
-            gmSdkKeyPath = PropertyUtils.getProperty("gm.sdk-key-path");
-            gmenSdkCrtPath = PropertyUtils.getProperty("gmen.sdk-crt-path");
-            gmenSdkKeyPath = PropertyUtils.getProperty("gmen.sdk-key-path");
+//            v2CaCrtPath = PropertyUtils.getProperty("v2.ca-crt-path");
+//            v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
+//            v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
+//            gmCaCrtPath = PropertyUtils.getProperty("gm.ca-crt-path");
+//            gmSdkCrtPath = PropertyUtils.getProperty("gm.sdk-crt-path");
+//            gmSdkKeyPath = PropertyUtils.getProperty("gm.sdk-key-path");
+//            gmenSdkCrtPath = PropertyUtils.getProperty("gmen.sdk-crt-path");
+//            gmenSdkKeyPath = PropertyUtils.getProperty("gmen.sdk-key-path");
             currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
             amopId = PropertyUtils.getProperty("amop.id");
             privateKey = PropertyUtils.getProperty("amop.privateKey");
