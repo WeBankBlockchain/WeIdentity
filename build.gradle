@@ -294,7 +294,7 @@ if (!gradle.startParameter.isOffline()) {
 
     checkstyle {
 //        ignoreFailures false
-        ignoreFailures true
+        ignoreFailures true  //todo
         showViolations true
         toolVersion '8.12'
         configProperties.projectDir = project.projectDir
@@ -318,7 +318,7 @@ if (!gradle.startParameter.isOffline()) {
     }
 
     spotbugs {
-        ignoreFailures = true
+        ignoreFailures = true  // todo
         showProgress = true
         toolVersion = "4.2.2"
         effort = "max"
@@ -361,8 +361,8 @@ if (!gradle.startParameter.isOffline()) {
 
                     licenses {
                         license {
-                            name 'GNU Lesser General Public License version 3'
-                            url 'https://opensource.org/licenses/LGPL-3.0'
+                            name 'Apache License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
                             distribution 'repo'
                         }
                     }
