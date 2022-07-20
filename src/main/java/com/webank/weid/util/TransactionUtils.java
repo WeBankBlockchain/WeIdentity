@@ -199,13 +199,6 @@ public class TransactionUtils {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
         RsvSignature rsvSignature = DataToolUtils.SigBase64Deserialization(cptSignature);
-//        byte[] signatureBytes = Hex.decode(cptSignature);
-//        byte[] rI = new byte[32];
-//        byte[] sI = new byte[32];
-//        System.arraycopy(signatureBytes, 0, rI, 0, 32);
-//        System.arraycopy(signatureBytes, 32, sI, 0, 32);
-//        Bytes32 r = new Bytes32(rI);
-//        Bytes32 s = new Bytes32(sI);
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
