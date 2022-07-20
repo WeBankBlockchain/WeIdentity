@@ -170,7 +170,7 @@ public final class WeIdUtils {
      *
      * @param keyPair the keyPair create from private key
      * @param publicKey the WeIdentity DID publicKey key
-     * @return true if the private and publicKey key is match, false otherwise.
+     * @return true if the private and publicKey key is match, false otherwise. todo key pair match
      */
     public static boolean isKeypairMatch(CryptoKeyPair keyPair, String publicKey) {
         /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
@@ -275,7 +275,6 @@ public final class WeIdUtils {
      * @return address
      */
     public static String getWeIdFromPrivateKey(String privateKey) {
-
         /*BigInteger publicKey = DataToolUtils
             .publicKeyFromPrivate(new BigInteger(privateKey));*/
         String publicKey = DataToolUtils.cryptoSuite.createKeyPair(privateKey).getHexPublicKey();
