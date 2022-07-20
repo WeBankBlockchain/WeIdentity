@@ -1299,7 +1299,7 @@ public class PdfTransportationImpl
         //使用web3j中的sha3算法：keccak-256
         /*SHA3Digest digestSha3 = new SHA3Digest();
         byte[] digest = digestSha3.hash(pdfFileByte);*/
-        byte[] digest = DataToolUtils.cryptoSuite.hash(pdfFileByte);
+        byte[] digest = DataToolUtils.hash(pdfFileByte);
         return Numeric.toHexString(digest);
     }
 

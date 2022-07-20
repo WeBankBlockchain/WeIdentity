@@ -51,7 +51,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->add] the id of the data is empty.");
             return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.cryptoSuite.hash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             Date date = new Date();
@@ -77,7 +77,7 @@ public class RedisDriver implements Persistence {
                     logger.error("[redis->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
-                idHashList.add(DataToolUtils.cryptoSuite.hash(id));
+                idHashList.add(DataToolUtils.hash(id));
                 dataList.add(data);
             }
             RedisDomain redisDomain = new RedisDomain(domain);
@@ -114,7 +114,7 @@ public class RedisDriver implements Persistence {
             return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
         //dataKey:id的hash值
-        String dataKey = DataToolUtils.cryptoSuite.hash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             ResponseData<String> result = new ResponseData<String>();
             //设置result初始值为空字符串
@@ -162,7 +162,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->delete] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.cryptoSuite.hash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             return new RedisExecutor(redisDomain).executeDelete(dataKey, client);
@@ -179,7 +179,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.cryptoSuite.hash(id);
+        String dataKey = DataToolUtils.hash(id);
         Date date = new Date();
         try {
             RedisDomain redisDomain = new RedisDomain(domain);

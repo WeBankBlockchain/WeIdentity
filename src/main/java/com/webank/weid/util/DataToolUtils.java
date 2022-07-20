@@ -6,7 +6,14 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -18,12 +25,47 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
+import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.cpt.RawCptSchema;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.service.BaseService;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -38,23 +80,12 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.math.BigInteger;
-import java.net.*;
-import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * 数据工具类.
@@ -103,6 +134,10 @@ public final class DataToolUtils {
      * The Fisco Config bundle.
      */
     protected static final FiscoConfig fiscoConfig;
+    /**
+     * use this to create key pair of v2 or v3
+     * WARN: create keyPair must use BigInteger of privateKey or decimal String of privateKey
+     */
     public static final CryptoSuite cryptoSuite;
 
     static {
@@ -151,29 +186,6 @@ public final class DataToolUtils {
     }
 
     /**
-     * Keccak-256 hash function.
-     *
-     * @param utfString the utfString
-     * @return hash value as hex encoded string
-     */
-    /*public static String sha3(String utfString) {
-        return Numeric.toHexString(sha3(utfString.getBytes(StandardCharsets.UTF_8)));
-    }*/
-
-    /**
-     * Sha 3.
-     * @return the byte[]
-     */
-    /*public static byte[] sha3(byte[] input) {
-        //return Hash.sha3(input, 0, input.length);
-        return new Keccak256().hash(input);
-    }*/
-
-    /*public static String getHash(String hexInput) {
-        return sha3(hexInput);
-    }*/
-
-    /**
      * generate random string.
      *
      * @return random string
@@ -185,6 +197,31 @@ public final class DataToolUtils {
         String salt = RandomStringUtils.random(saltLength, true, true);
         return salt;
     }
+
+    /**
+     * Keccak-256 hash function.
+     *
+     * @param utfString the utfString
+     * @return hash value as hex encoded string
+     */
+    public static String hash(String utfString) {
+        return Numeric.toHexString(hash(utfString.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    /**
+     * Sha 3.
+     *
+     * @param input the input
+     * @return the byte[]
+     */
+    public static byte[] hash(byte[] input) {
+        return cryptoSuite.hash(input);
+    }
+
+    public static String getHash(String hexInput) {
+        return hash(hexInput);
+    }
+
 
     /**
      * serialize a class instance to Json String.
@@ -213,12 +250,8 @@ public final class DataToolUtils {
      * @param privateKey the pass-in privatekey
      * @return true if yes, false otherwise
      */
-    public static String convertPrivateKeyToDefaultWeId(String privateKey) {
-        CryptoKeyPair cryptoKeyPair = new CryptoSuite(0)
-            .getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
-        return new BigInteger(Numeric
-            .hexStringToByteArray(cryptoKeyPair.getHexPublicKey()))
-            .toString(10); // todo 获取suite
+    public static String convertPrivateKeyToDefaultWeId(BigInteger privateKey) {
+        return publicKeyStrFromPrivate(privateKey);
 //        BigInteger publicKey;
 //        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
 //            publicKey = Sign.publicKeyFromPrivate(new BigInteger(privateKey));
@@ -540,15 +573,7 @@ public final class DataToolUtils {
         return DataToolUtils.serialize(cptJsonSchemaNew);
     }
 
-    /**
-     * Generate a new Key-pair.
-     *
-     * @return the ECKeyPair
-     */
-    public static CryptoKeyPair createKeyPair() {
-        return cryptoSuite.createKeyPair();
-    }
-    
+
     /**
      * Secp256k1 sign to Signature.
      *
@@ -556,21 +581,12 @@ public final class DataToolUtils {
      * @param privateKey
      * @return SignatureData for signature value
      */
-    /*public static SignatureData secp256k1SignToSignature(String rawData, BigInteger privateKey) {
-        ECKeyPair keyPair = GenCredential.createKeyPair(privateKey.toString(16));
-        return secp256k1SignToSignature(rawData, keyPair);
-    }*/
-    public static SignatureResult signToSignature(
-            String rawData,
-            String privateKey
-    ) {
-        String messageHash = cryptoSuite.hash(rawData);
-        return cryptoSuite.sign(messageHash, cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey)));
-    }
-
     public static RsvSignature signToRsvSignature(String rawData, String privateKey) {
-        SignatureResult signatureResult = signToSignature(rawData, privateKey);
-        RsvSignature rsvSignature = null;
+        String messageHash = cryptoSuite.hash(rawData);
+        SignatureResult signatureResult = cryptoSuite.sign(messageHash,
+            cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey)));
+
+        RsvSignature rsvSignature = new RsvSignature();
         Bytes32 R = new Bytes32(signatureResult.getR());
         rsvSignature.setR(R);
         Bytes32 S = new Bytes32(signatureResult.getS());
@@ -594,8 +610,8 @@ public final class DataToolUtils {
             RsvSignature sigData) {
         byte[] sigBytes = new byte[65];
         sigBytes[64] = sigData.getV().getValue().byteValue();
-        System.arraycopy(sigData.getR(), 0, sigBytes, 0, 32);
-        System.arraycopy(sigData.getS(), 0, sigBytes, 32, 32);
+        System.arraycopy(sigData.getR().getValue(), 0, sigBytes, 0, 32);
+        System.arraycopy(sigData.getS().getValue(), 0, sigBytes, 32, 32);
         return new String(base64Encode(sigBytes), StandardCharsets.UTF_8);
     }
 
@@ -607,11 +623,14 @@ public final class DataToolUtils {
      */
     public static RsvSignature  SigBase64Deserialization(String signature) {
         byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
+        if (SERIALIZED_SIGNATUREDATA_LENGTH != sigBytes.length) {
+            throw new WeIdBaseException("signature data illegal");
+        }
         byte[] r = new byte[32];
         byte[] s = new byte[32];
         System.arraycopy(sigBytes, 0, r, 0, 32);
         System.arraycopy(sigBytes, 32, s, 0, 32);
-        RsvSignature rsvSignature = null;
+        RsvSignature rsvSignature = new RsvSignature();
         rsvSignature.setR(new Bytes32(r));
         rsvSignature.setS(new Bytes32(s));
         rsvSignature.setV(new Uint8(sigBytes[64]));
@@ -742,7 +761,7 @@ public final class DataToolUtils {
     }*/
 
     /**
-     * eecrypt the data.
+     * eecrypt the data. todo
      *
      * @param data the data to encrypt
      * @param publicKey public key
@@ -759,7 +778,7 @@ public final class DataToolUtils {
 
 
     /**
-     * decrypt the data.
+     * decrypt the data. todo
      *
      * @param data the data to decrypt
      * @param privateKey private key
@@ -773,35 +792,57 @@ public final class DataToolUtils {
         return data;
     }
 
+
+    /**
+     * hexString of pub or private key convert to decimal string
+     * @param keyInHex
+     * @return
+     */
+    public static String hexStr2DecStr(String keyInHex) {
+        byte[] keyBytes = Numeric.hexStringToByteArray(keyInHex);
+        return new BigInteger(1, keyBytes).toString(10);
+    }
+
     /**
      * Obtain the PublicKey from given PrivateKey.
      *
      * @param privateKey the private key
      * @return publicKey
      */
-    /*public static BigInteger publicKeyFromPrivate(BigInteger privateKey) {
-        *//*if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            return Sign.publicKeyFromPrivate(privateKey);
-        } else {
-            return Sign.smPublicKeyFromPrivate(privateKey);
-        }*//*
-        String hexPublcKey = createKeyPairFromPrivate(privateKey).getHexPublicKey();
-        return new BigInteger(1, Numeric.hexStringToByteArray(hexPublcKey));
-    }*/
+    public static BigInteger publicKeyFromPrivate(BigInteger privateKey) {
+        return new BigInteger(publicKeyStrFromPrivate(privateKey));
+    }
 
     /**
-     * Obtain the WeIdPrivateKey from given PrivateKey.
+     * Obtain the PublicKey from given PrivateKey.
      *
      * @param privateKey the private key
-     * @return WeIdPrivateKey
+     * @return publicKey decimal
      */
-    /*public static ECKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            return GenCredential.createECDSAKeyPair(privateKey.toString(16));
-        } else {
-            return GenCredential.createGuomiKeyPair(privateKey.toString(16));
-        }
-    }*/
+    public static String publicKeyStrFromPrivate(BigInteger privateKey) {
+        return hexStr2DecStr(cryptoSuite.getKeyPairFactory().createKeyPair(privateKey).getHexPublicKey());
+    }
+
+    /**
+     * Obtain the PublicKey from given PrivateKey.
+     *
+     * @param privateKey the private key
+     * @return publicKey
+     */
+    public static String addressFromPrivate(BigInteger privateKey) {
+        return cryptoSuite.getKeyPairFactory().createKeyPair(privateKey).getAddress();
+    }
+
+    /**
+     * Obtain the PublicKey from given PrivateKey.
+     *
+     * @param publicKey the public key
+     * @return publicKey
+     */
+    public static String addressFromPublic(BigInteger publicKey) {
+        return Numeric.toHexString(cryptoSuite.getKeyPairFactory().getAddress(publicKey));
+    }
+
 
     /**
      * The Base64 encode/decode class.
