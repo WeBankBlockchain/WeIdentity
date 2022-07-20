@@ -19,7 +19,10 @@
 
 package com.webank.weid.service.fisco;
 
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.deploy.v2.DeployContractV2;
 import com.webank.weid.protocol.response.CnsInfo;
+import com.webank.weid.service.fisco.v3.WeServerV3;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
@@ -114,11 +117,17 @@ public abstract class WeServer<B, W, C> {
             synchronized (WeServer.class) {
                 weServer = weServerContext.get(groupId);
                 if (weServer == null) {
-                    weServer = new WeServerV2(fiscoConfig); //todo 判断v3
-                    weServer.initWeb3j(groupId);
-                    weServerContext.put(groupId, weServer);
+                    if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+                        weServer = new WeServerV2(fiscoConfig);
+                        weServer.initWeb3j(groupId);
+                        weServerContext.put(groupId, weServer);
+                    } else {
+                        // v3
+                        weServer = new WeServerV3(fiscoConfig);
+                        weServer.initWeb3j(groupId);
+                        weServerContext.put(groupId, weServer);
+                    }
                 }
-            }
         }
         return (WeServer<B, W, C>) weServer;
     }
@@ -208,7 +217,7 @@ public abstract class WeServer<B, W, C> {
     /**
      * 根据传入的私钥(10进制数字私钥)，进行动态创建Credentials对象.
      *
-     * @param privateKey 数字私钥
+     * @param privateKey 数字私钥 decimal
      * @return 返回Credentials对象
      */
     public abstract C createCredentials(String privateKey);

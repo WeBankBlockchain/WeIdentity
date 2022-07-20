@@ -2,41 +2,12 @@
 
 package com.webank.weid.service.impl.engine.fiscov2;
 
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.IssuerClient;
 import com.webank.wedpr.selectivedisclosure.IssuerResult;
 import com.webank.wedpr.selectivedisclosure.proto.AttributeTemplate;
 import com.webank.wedpr.selectivedisclosure.proto.AttributeTemplate.Builder;
 import com.webank.wedpr.selectivedisclosure.proto.TemplatePublicKey;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.abi.EventEncoder;
-import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
-import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple7;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.client.protocol.request.Transaction;
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
-
-import org.fisco.bcos.sdk.utils.Hex;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
@@ -64,6 +35,25 @@ import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.PropertyUtils;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.abi.EventEncoder;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple7;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * CptServiceEngine calls cpt contract which runs on FISCO BCOS 2.0.
@@ -73,10 +63,8 @@ import com.webank.weid.util.WeIdUtils;
 public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceEngineV2.class);
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) getClient();
     private static final String CREDENTIAL_TEMPLATE_EVENT = new EventEncoder(
-        client.getCryptoSuite()).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
+        ((Client) getClient()).getCryptoSuite()).encode(CptController.CREDENTIALTEMPLATE_EVENT);;
     private static CptController cptController;
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
@@ -475,7 +463,7 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                         DataToolUtils.simpleSignatureSerialization(signatureResult)),
                     StandardCharsets.UTF_8
                 );*/
-            if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+            if(DataToolUtils.cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE){
                 byte[] signature = new byte[65];
                 System.arraycopy(signatureBytes, 0, signature, 0, 64);
                 signature[64] = (byte) v;

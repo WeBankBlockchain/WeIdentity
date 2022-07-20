@@ -127,7 +127,7 @@ public class TestGetWeIdDocument extends TestBaseService {
         ResponseData<WeIdDocument> weIdDoc = weIdService
             .getWeIdDocument(createWeIdResult.getWeId());
         Assert.assertEquals(weIdDoc.getResult().getPublicKey().size(), 2);
-        Assert.assertTrue(weIdDoc.getResult().getPublicKey().get(1).getType().equals("RSA"));
+        Assert.assertTrue(weIdDoc.getResult().getPublicKey().get(1).getType().equals("ECDSA"));
         // test delegate
         publicKeyArgs.setPublicKey("abcabac123123");
         publicKeyArgs.setType(PublicKeyType.ECDSA);

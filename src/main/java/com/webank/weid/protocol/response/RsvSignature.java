@@ -30,4 +30,9 @@ public class RsvSignature {
      * The s value.
      */
     private Bytes32 s;
+
+    /**
+     * todo support sm2
+     */
+//    private Bytes32 pub;
 }

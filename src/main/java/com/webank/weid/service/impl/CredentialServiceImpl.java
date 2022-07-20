@@ -172,7 +172,7 @@ public class CredentialServiceImpl extends BaseService implements CredentialServ
         String keyWeId = WeIdUtils
                 .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());*/
         //CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        String keyWeId = WeIdUtils.convertAddressToWeId(DataToolUtils.cryptoSuite.createKeyPair(privateKey).getAddress());
+        String keyWeId = WeIdUtils.convertAddressToWeId(DataToolUtils.addressFromPrivate(new BigInteger(privateKey)));
         if (!weIdService.isWeIdExist(keyWeId).getResult()) {
             return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         }

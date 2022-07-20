@@ -32,9 +32,6 @@ public class DeployEvidenceV2 extends AddressProcess {
      */
     private static CryptoKeyPair cryptoKeyPair;
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-    
     /**
      * Inits the cryptoKeyPair.
      *
@@ -43,13 +40,12 @@ public class DeployEvidenceV2 extends AddressProcess {
     private static String initCryptoKeyPair(String inputPrivateKey) {
         if (StringUtils.isNotBlank(inputPrivateKey)) {
             logger.info("[DeployEvidenceV2] begin to init credentials by privateKey..");
-            cryptoKeyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = ((Client) BaseService.getClient()).getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
         } else {
             // 此分支逻辑实际情况不会执行，因为通过build-tool进来是先给创建私钥
             logger.info("[DeployEvidenceV2] begin to init credentials..");
 
-            //cryptoKeyPair = DataToolUtils.createKeyPair();
-            cryptoKeyPair = client.getCryptoSuite().createKeyPair();
+            cryptoKeyPair = ((Client) BaseService.getClient()).getCryptoSuite().createKeyPair();
             byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
             byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
             String privateKey = new BigInteger(1, priBytes).toString(10);

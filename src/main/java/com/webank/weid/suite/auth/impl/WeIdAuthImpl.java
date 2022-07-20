@@ -148,7 +148,6 @@ public class WeIdAuthImpl implements WeIdAuth {
                 ErrorCode.getTypeByErrorCode(weidDocErrorCode));
         }
         WeIdDocument weIdDocument = weIdDoc.getResult();
-        //TODO 所有getClient()需要适配V3
         ErrorCode verifyErrorCode = DataToolUtils
             .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
