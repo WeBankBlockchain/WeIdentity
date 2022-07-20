@@ -2,6 +2,7 @@
 
 package com.webank.weid.service.impl;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +96,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         String publicKey = createWeIdArgs.getPublicKey();
         if (StringUtils.isNotBlank(publicKey)) {
             //替换国密
-            if (!WeIdUtils.isKeypairMatch(DataToolUtils.cryptoSuite.createKeyPair(privateKey), publicKey)) {
+            if (!WeIdUtils.isKeypairMatch(new BigInteger(privateKey), publicKey)) {
                 return new ResponseData<>(
                     StringUtils.EMPTY,
                     ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED

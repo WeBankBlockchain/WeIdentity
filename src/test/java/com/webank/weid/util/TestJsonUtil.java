@@ -3,21 +3,19 @@
 package com.webank.weid.util;
 
 import com.networknt.schema.ValidationMessage;
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.cpt.Cpt103;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class TestJsonUtil {
 

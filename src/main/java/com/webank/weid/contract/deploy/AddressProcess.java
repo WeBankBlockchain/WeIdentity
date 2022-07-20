@@ -25,9 +25,6 @@ public abstract class AddressProcess {
      */
     private static final Logger logger = LoggerFactory.getLogger(AddressProcess.class);
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-    
     protected static void writeAddressToFile(
         String contractAddress,
         String fileName) {
@@ -137,15 +134,15 @@ public abstract class AddressProcess {
             .append(cptAddress)
             .append(specificAddress)
             .append(evidenceAddress);
-        //TODO 需要适配V3的getCryptoSuite
-        return client.getCryptoSuite().hash(address.toString());
+        return DataToolUtils.getHash(address.toString());
     }
-    
-//    public static String getHashForShare(Integer groupId, String evidenceAddress) { todo 设置String groupId后是否影响hash
+
+    /**
+     * todo 设置String groupId后是否影响hash
+     */
     public static String getHashForShare(String groupId, String evidenceAddress) {
         StringBuffer address = new StringBuffer();
         address.append("share").append(groupId).append(evidenceAddress);
-        //TODO 需要适配V3的getCryptoSuite
-        return client.getCryptoSuite().hash(address.toString());
+        return DataToolUtils.getHash(address.toString());
     }
 }

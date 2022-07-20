@@ -2,11 +2,6 @@
 
 package com.webank.weid.service.impl.callback;
 
-import com.webank.weid.service.BaseService;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.amop.RequestVerifyChallengeArgs;
 import com.webank.weid.protocol.base.Challenge;
@@ -20,6 +15,9 @@ import com.webank.weid.suite.auth.impl.WeIdAuthImpl;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
 import com.webank.weid.suite.auth.protocol.WeIdAuthObj;
 import com.webank.weid.util.DataToolUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -59,7 +57,6 @@ public class RequestVerifyChallengeCallback extends AmopCallback {
         }
         String rawData = challenge.toJson();
         ResponseData<WeIdDocument> weIdDocResp = weIdService.getWeIdDocument(weId);
-        //TODO 所有getClient()需要适配V3
         ErrorCode errorCode = DataToolUtils
             .verifySignatureFromWeId(rawData, signData, weIdDocResp.getResult(), null);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {

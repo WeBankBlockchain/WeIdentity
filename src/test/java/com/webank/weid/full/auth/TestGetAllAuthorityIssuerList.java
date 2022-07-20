@@ -152,7 +152,7 @@ public class TestGetAllAuthorityIssuerList extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         List<AuthorityIssuer> authorityIssuers = response.getResult();
-        String sdkWeId = DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey);
+        String sdkWeId = DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey));
 
         for (int i = 0; i < authorityIssuers.size(); i++) {
             String weId = authorityIssuers.get(i).getWeId();
