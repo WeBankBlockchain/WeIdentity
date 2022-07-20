@@ -44,9 +44,8 @@ public final class WeIdUtils {
     public static CreateWeIdDataResult createWeId() {
         CreateWeIdDataResult result = new CreateWeIdDataResult();
         CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair();
-        //ECKeyPair keyPair = GenCredential.createKeyPair();
-        String publicKey = String.valueOf(keyPair.getHexPublicKey());
-        String privateKey = String.valueOf(keyPair.getHexPrivateKey());
+        String publicKey = DataToolUtils.hexStr2DecStr(keyPair.getHexPublicKey());
+        String privateKey = DataToolUtils.hexStr2DecStr(keyPair.getHexPrivateKey());
         WeIdPublicKey userWeIdPublicKey = new WeIdPublicKey();
         userWeIdPublicKey.setPublicKey(publicKey);
         result.setUserWeIdPublicKey(userWeIdPublicKey);
@@ -102,15 +101,13 @@ public final class WeIdUtils {
     /**
      * Convert a public key to a WeIdentity DID.
      *
-     * @param publicKey the public key
+     * @param publicKey the public key (decimal)
      * @return WeIdentity DID
      */
     public static String convertPublicKeyToWeId(String publicKey) {
         try {
             //String address = Keys.getAddress(new BigInteger(publicKey));
-            //TODO 需要适配V3的getCryptoSuite
-            String address = DataToolUtils.cryptoSuite.createKeyPair().getAddress(
-                    Numeric.toHexStringNoPrefix(new BigInteger(publicKey).toByteArray()).substring(2));
+            String address = DataToolUtils.addressFromPublic(new BigInteger(publicKey));
             return buildWeIdByAddress(address);
         } catch (Exception e) {
             logger.error("convert publicKey to weId error.", e);
@@ -168,16 +165,15 @@ public final class WeIdUtils {
     /**
      * check if the public key matchs the private key.
      *
-     * @param keyPair the keyPair create from private key
+     * @param privateKey BigInt of decimal private key
      * @param publicKey the WeIdentity DID publicKey key
      * @return true if the private and publicKey key is match, false otherwise. todo key pair match
      */
-    public static boolean isKeypairMatch(CryptoKeyPair keyPair, String publicKey) {
+    public static boolean isKeypairMatch(BigInteger privateKey, String publicKey) {
         /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
         return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);*/
-        //CryptoKeyPair keyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(privateKey);
-        byte[] bytePub = Numeric.hexStringToByteArray(keyPair.getHexPublicKey());
-        return StringUtils.equals(new BigInteger(1, bytePub).toString(), publicKey);
+        String pubFromPri = DataToolUtils.publicKeyStrFromPrivate(privateKey);
+        return StringUtils.equals(pubFromPri, publicKey);
     }
 
     /**
@@ -249,20 +245,14 @@ public final class WeIdUtils {
         boolean isMatch = false;
 
         try {
-            /*BigInteger publicKey = DataToolUtils
-                .publicKeyFromPrivate(new BigInteger(privateKey.getPrivateKey()));*/
-            CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair(privateKey.getPrivateKey());
-            String address1 = keyPair.getAddress();
-            //String address1 = "0x" + Keys.getAddress(publicKey);
-            //String hexPub = Numeric.toHexStringNoPrefix(publicKey.toByteArray()).substring(2);
-            //String address1 = new ECDSAKeyPair().getAddress(hexPub);
+            String address1 = DataToolUtils.addressFromPrivate(new BigInteger(privateKey.getPrivateKey()));
             String address2 = WeIdUtils.convertWeIdToAddress(weId);
             if (address1.equals(address2)) {
                 isMatch = true;
             }
         } catch (Exception e) {
             logger.error("Validate private key We Id matches failed. Error message :{}", e);
-            return isMatch;
+            return false;
         }
 
         return isMatch;
@@ -277,7 +267,7 @@ public final class WeIdUtils {
     public static String getWeIdFromPrivateKey(String privateKey) {
         /*BigInteger publicKey = DataToolUtils
             .publicKeyFromPrivate(new BigInteger(privateKey));*/
-        String publicKey = DataToolUtils.cryptoSuite.createKeyPair(privateKey).getHexPublicKey();
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privateKey));
         return convertPublicKeyToWeId(publicKey);
     }
 
