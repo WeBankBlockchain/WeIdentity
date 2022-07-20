@@ -259,8 +259,7 @@ public final class CredentialUtils {
      * @return hash value.
      */
     public static String getFieldHash(Object field) {
-        //TODO 需要适配V3的getCryptoSuite
-        return client.getCryptoSuite().hash(String.valueOf(field));
+        return DataToolUtils.hash(String.valueOf(field));
     }
 
     /**
@@ -321,8 +320,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        //TODO 需要适配V3的getCryptoSuite
-        return client.getCryptoSuite().hash(rawData);
+        return DataToolUtils.hash(rawData);
     }
 
     /**
@@ -337,8 +335,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        //TODO 需要适配V3的getCryptoSuite
-        return client.getCryptoSuite().hash(rawData);
+        return DataToolUtils.hash(rawData);
     }
 
     /**

@@ -93,7 +93,7 @@ public class RawTransactionServiceEngineV3 extends BaseEngine implements
 //        TransactionReceipt ethSendTransaction = client
 //            .sendTransaction(transactionHex, true).getTransactionReceipt();
         String transHash = "0x" + Hex.toHexString(
-            client.getCryptoSuite().hash(Hex.decode(Numeric.cleanHexPrefix(transactionHex))));
+            DataToolUtils.hash(Hex.decode(Numeric.cleanHexPrefix(transactionHex))));
         CompletableFuture<TransactionReceipt> futureRawTx = new CompletableFuture<>();
         client.sendTransactionAsync(transactionHex, true,
             new RawTxCallbackV3(futureRawTx));
