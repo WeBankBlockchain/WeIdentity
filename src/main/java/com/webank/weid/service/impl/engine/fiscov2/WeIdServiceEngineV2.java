@@ -70,16 +70,13 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
      */
     private static WeIdContract weIdContract;
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) getClient();
-
     static {
         // initialize the event topic
         topicMap = new HashMap<String, String>();
 
         topicMap.put(
             //EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
-                new EventEncoder((client).getCryptoSuite()).encode(
+                new EventEncoder(((Client) BaseService.getClient()).getCryptoSuite()).encode(
                         WeIdContract.WEIDATTRIBUTECHANGED_EVENT
                 ),
             WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
@@ -332,8 +329,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         List<PublicKeyProperty> pubkeyList = result.getPublicKey();
 
         String type;
-        //TODO 需要适配V3的getCryptoType
-        if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+        if(((Client) BaseService.getClient()).getCryptoType() == CryptoType.ECDSA_TYPE){
             type = PublicKeyType.ECDSA.getTypeName();
         } else {
             type = PublicKeyType.SM2.getTypeName();

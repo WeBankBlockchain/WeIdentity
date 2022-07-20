@@ -41,9 +41,6 @@ public class PresentationE implements RawSerializer, IProof {
      */
     private static final long serialVersionUID = -595605743843891841L;
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-
     /**
      * Required: The context field.
      */

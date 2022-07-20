@@ -282,7 +282,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         configProperty.setAmop(amop);
     }
 
-    /** todo 是否去除
+    /**
      * 注册默认的callback.
      */
     /*private void registDefaultCallback() {
@@ -360,7 +360,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
             AmopMsgType.COMMON_REQUEST.getValue(),
             new CommonCallback()
         );
-        // todo
+        // todo check
         bcosSdk.getAmop().setCallback((AmopRequestCallback) pushCallBack);
         bcosSdk.getAmop().subscribeTopic(getTopic(fiscoConfig), (AmopRequestCallback) pushCallBack);
 
