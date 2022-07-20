@@ -443,7 +443,7 @@ public class TestVerifyCredentialByIssuer extends TestBaseService {
      * case: signature by 122324324324.
      */
     @Test
-    public void testVerifyCredential_signatureRnadom() {
+    public void testVerifyCredential_signatureRandom() {
 
         CredentialPojo newCredentialPojo = copyCredentialPojo(credentialPojo);
         Map<String, Object> proof = newCredentialPojo.getProof();
