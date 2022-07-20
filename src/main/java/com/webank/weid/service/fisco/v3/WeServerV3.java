@@ -9,14 +9,17 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
+import com.webank.weid.protocol.response.CnsInfo;
 import com.webank.weid.rpc.callback.OnNotifyCallbackV2;
 import com.webank.weid.service.fisco.WeServer;
-import com.webank.weid.service.fisco.entity.CnsInfo;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.callback.CommonCallback;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
+import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
 import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,7 +31,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.amop.AmopCallback;
 import org.fisco.bcos.sdk.jni.amop.AmopRequestCallback;
 import org.fisco.bcos.sdk.jni.amop.AmopResponseCallback;
 import org.fisco.bcos.sdk.jni.common.Response;
@@ -39,7 +41,6 @@ import org.fisco.bcos.sdk.v3.config.model.AmopTopic;
 import org.fisco.bcos.sdk.v3.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSPrecompiled.BfsInfo;
 import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSService;
-import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +113,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     @Override
     public CryptoKeyPair createCredentials(String privateKey) {
-        return this.client.getCryptoSuite().getKeyPairFactory().createKeyPair(privateKey);
+        return this.client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
     }
 
     @Override
@@ -151,8 +152,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
                 amopResponse.setErrorCode(response.getErrorCode());
                 amopResponse.setErrorMessage(response.getErrorMessage());
                 if (response.getData() != null) {
-                    // todo byte[] is hex or not
-                    amopResponse.setResult(new String(response.getData()));
+                    amopResponse.setResult(new String(response.getData(), StandardCharsets.UTF_8));
                 }
                 queue.add(amopResponse);
             }
@@ -250,7 +250,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         // init account
 //        initAccount(configProperty, fiscoConfig);
         // init amop topic
-//        initAmopTopic(configProperty, fiscoConfig);
+        initAmopTopic(configProperty, fiscoConfig);
         // init netWork
         initNetWork(configProperty, fiscoConfig);
         // init ThreadPool
@@ -260,30 +260,29 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         return configProperty;
     }
 
-    private void initAccount(ConfigProperty configProperty, FiscoConfig fiscoConfig) {
-        Map<String, Object> account = new HashMap<String, Object>();
-        account.put("keyStoreDir", "account");
-        account.put("accountFileFormat", "pem");
-        logger.info("[initAccount] the account: {}.", account);
-        configProperty.setAccount(account);
-    }
+//    private void initAccount(ConfigProperty configProperty, FiscoConfig fiscoConfig) {
+//        Map<String, Object> account = new HashMap<String, Object>();
+//        account.put("keyStoreDir", "account");
+//        account.put("accountFileFormat", "pem");
+//        logger.info("[initAccount] the account: {}.", account);
+//        configProperty.setAccount(account);
+//    }
 
     //这里暂时只注册一个topic
     private void initAmopTopic(ConfigProperty configProperty, FiscoConfig fiscoConfig) {
         logger.info("[initAmopTopic] the amopId: {}", fiscoConfig.getAmopId());
         AmopTopic amopTopic = new AmopTopic();
         amopTopic.setTopicName(fiscoConfig.getAmopId());
-        // todo 需要配置amop用到的私钥文件, KeyTool加载
-        CryptoKeyPair temp = new CryptoSuite(0).getKeyPairFactory().generateKeyPair();
-        amopTopic.setPrivateKey(temp.getHexPrivateKey());
-        amopTopic.setPublicKeys(Arrays.asList(temp.getHexPublicKey()));
-        amopTopic.setPassword("");
+        // 配置amop用到的私钥文件，写入的是public keys的路径和p12私钥的路径及p12密码
+        amopTopic.setPublicKeys(Arrays.asList(fiscoConfig.getAmopPubPath()));
+        amopTopic.setPrivateKey(fiscoConfig.getPrivateKey());
+        amopTopic.setPassword(fiscoConfig.getAmopP12Password());
         List<AmopTopic> amop = new ArrayList<AmopTopic>();
         amop.add(amopTopic);
         configProperty.setAmop(amop);
     }
 
-    /** todo是否去除
+    /** todo 是否去除
      * 注册默认的callback.
      */
     /*private void registDefaultCallback() {
@@ -316,20 +315,14 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     private void initCryptoMaterial(ConfigProperty configProperty, FiscoConfig fiscoConfig) {
         Map<String, Object> cryptoMaterial = new HashMap<String, Object>();
+        cryptoMaterial.put("useSMCrypto", fiscoConfig.getSdkSMCrypto());
+        cryptoMaterial.put("certPath", fiscoConfig.getSdkCertPath());
+        logger.info("path:{} before", cryptoMaterial.get("certPath"));
         cryptoMaterial.put("certPath", "D:\\projects\\weid\\WeIdentity\\out\\test\\resources");
+        logger.info("path:{}", cryptoMaterial.get("certPath"));
         cryptoMaterial.put("certPath", "D:\\projects\\weid\\WeIdentity\\out\\production\\resources");
-//        logger.info("path:{}", FiscoConfig.class.getResource("classpath:").getPath());
-//        cryptoMaterial.put("certPath", ThreadLocal.class.getResource("classpath:").getPath());
-//        cryptoMaterial.put("useSMCrypto", false);
-//        cryptoMaterial.put("caCert",
-//            FiscoConfig.class.getResource("classpath:" + fiscoConfig.getV2CaCrtPath()));
-//        cryptoMaterial.put("sslCert",
-//            FiscoConfig.class.getResource("classpath:" + fiscoConfig.getV2NodeCrtPath()));
-//        cryptoMaterial.put("sslKey",
-//            FiscoConfig.class.getResource("classpath:" + fiscoConfig.getV2NodeKeyPath()));
         logger.info("[initThreadPool] the cryptoMaterial: {}.", cryptoMaterial);
         configProperty.setCryptoMaterial(cryptoMaterial);
-        // todo support guomi ssl
     }
 
     private void initBcosSdk(ConfigProperty configProperty) {
@@ -413,7 +406,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
      */
     public CryptoKeyPair createCryptoKeyPair(String privateKey) {
         try {
-            return client.getCryptoSuite().getKeyPairFactory().createKeyPair(privateKey);
+            return client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
         } catch (Exception e) {
             throw new PrivateKeyIllegalException(e);
         }

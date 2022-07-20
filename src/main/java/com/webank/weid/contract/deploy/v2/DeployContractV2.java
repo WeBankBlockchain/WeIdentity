@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
@@ -71,20 +72,13 @@ public class DeployContractV2 extends AddressProcess {
             initClient();
         }
         if (StringUtils.isNotBlank(inputPrivateKey)) {
-            /*logger.info("[DeployContractV2] begin to init credentials by privateKey..");
-            credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));*/
-            logger.info("[DeployContractV2] begin to init cryptoKeyPair by privateKey..");
-            //cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
-            cryptoKeyPair = client.getCryptoSuite().createKeyPair(inputPrivateKey);
+            logger.info("[DeployContractV2] begin to init cryptoKeyPair by privateKey.{}", inputPrivateKey);
+            cryptoKeyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
         } else {
-
             logger.info("[DeployContractV2] begin to init cryptoKeyPair..");
-            //cryptoKeyPair = DataToolUtils.createKeyPair();
             cryptoKeyPair = client.getCryptoSuite().createKeyPair();
         }
 
-        /*if (credentials == null) {
-            logger.error("[DeployContractV2] credentials init failed. ");*/
         if (cryptoKeyPair == null) {
             logger.error("[DeployContractV2] cryptoKeyPair init failed. ");
             return false;
@@ -93,8 +87,9 @@ public class DeployContractV2 extends AddressProcess {
         String publicKey = credentials.getEcKeyPair().getPublicKey().toString();*/
         byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
         byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
-        String privateKey = new BigInteger(1, priBytes).toString();
-        String publicKey = new BigInteger(1, pubBytes).toString();
+        String privateKey = new BigInteger(1, priBytes).toString(10);
+        String publicKey = new BigInteger(1, pubBytes).toString(10);
+        logger.info("store private key");
         writeAddressToFile(publicKey, "ecdsa_key.pub");
         writeAddressToFile(privateKey, "ecdsa_key");
         return true;
@@ -121,8 +116,6 @@ public class DeployContractV2 extends AddressProcess {
         FiscoConfig fiscoConfig,
         boolean instantEnable
     ) {
-        /*initWeb3j();
-        initCredentials(privateKey);*/
         initClient();
         initCryptoKeyPair(privateKey);
         String roleControllerAddress = deployRoleControllerContracts();
