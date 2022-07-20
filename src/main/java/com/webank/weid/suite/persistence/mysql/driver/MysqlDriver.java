@@ -88,7 +88,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->get] the id of the data is empty.");
             return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.cryptoSuite.hash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             ResponseData<String> result = new ResponseData<String>();
             result.setResult(StringUtils.EMPTY);
@@ -126,7 +126,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->add] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.cryptoSuite.hash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
             Date now = sqlDomain.getNow();
@@ -155,7 +155,7 @@ public class MysqlDriver implements Persistence {
                     logger.error("[mysql->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
-                idHashList.add(DataToolUtils.cryptoSuite.hash(id));
+                idHashList.add(DataToolUtils.hash(id));
                 dataList.add(data);
             }
             SqlDomain sqlDomain = new SqlDomain(domain);
@@ -193,7 +193,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->delete] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.cryptoSuite.hash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
             return new SqlExecutor(sqlDomain).execute(SqlExecutor.SQL_DELETE, dataKey);
@@ -213,7 +213,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.cryptoSuite.hash(id);
+        String dataKey = DataToolUtils.hash(id);
         Date date = new Date();
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
