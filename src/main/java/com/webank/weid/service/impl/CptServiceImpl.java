@@ -285,7 +285,6 @@ public class CptServiceImpl extends AbstractService implements CptService {
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
-        //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
         return DataToolUtils.signToRsvSignature(
                 sb.toString(), cptPublisherPrivateKey.getPrivateKey());
     }

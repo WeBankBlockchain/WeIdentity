@@ -213,7 +213,8 @@ public class TestDataTypetUtils {
 
     @Test
     public void testHashConversion() {
-        String hash = new CryptoSuite(0).hash(UUID.randomUUID().toString());
+        String hash = DataToolUtils.hash(UUID.randomUUID().toString());
+        logger.info("hash {}", hash);
         byte[] convertedHash = DataToolUtils.convertHashStrIntoHashByte32Array(hash);
         Assert.assertEquals(convertedHash.length, WeIdConstant.BYTES32_FIXED_LENGTH.intValue());
         String convertedBackStr = DataToolUtils

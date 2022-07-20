@@ -259,8 +259,7 @@ public final class CredentialUtils {
      * @return hash value.
      */
     public static String getFieldHash(Object field) {
-        //TODO 需要适配V3的getCryptoSuite
-        return client.getCryptoSuite().hash(String.valueOf(field));
+        return DataToolUtils.hash(String.valueOf(field));
     }
 
     /**
@@ -305,9 +304,7 @@ public final class CredentialUtils {
            String privateKey, Map<String, Object> disclosureMap) {
         String rawData = CredentialUtils
             .getCredentialThumbprintWithoutSig(credential, disclosureMap);
-        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, privateKey);
-        //这里直接转为String，原来是用base64来加密，得到加密后的字符串
-        return signatureResult.convertToString();
+        return DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(rawData, privateKey));
     }
 
     /**
@@ -323,8 +320,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        //TODO 需要适配V3的getCryptoSuite
-        return client.getCryptoSuite().hash(rawData);
+        return DataToolUtils.hash(rawData);
     }
 
     /**
@@ -339,8 +335,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        //TODO 需要适配V3的getCryptoSuite
-        return client.getCryptoSuite().hash(rawData);
+        return DataToolUtils.hash(rawData);
     }
 
     /**

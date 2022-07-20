@@ -32,12 +32,9 @@ public class RegisterAddressV2 {
 
     private static CryptoKeyPair cryptoKeyPair;
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-
     private static CryptoKeyPair getCryptoKeyPair(String inputPrivateKey) {
         if (cryptoKeyPair == null) {
-            cryptoKeyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
+            cryptoKeyPair = ((Client) BaseService.getClient()).getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
         }
         return cryptoKeyPair;
     }

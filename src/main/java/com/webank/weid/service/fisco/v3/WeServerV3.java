@@ -11,6 +11,7 @@ import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.CnsInfo;
 import com.webank.weid.rpc.callback.OnNotifyCallbackV2;
+import com.webank.weid.rpc.callback.OnNotifyCallbackV3;
 import com.webank.weid.service.fisco.WeServer;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.callback.CommonCallback;
@@ -80,7 +81,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
      * @param fiscoConfig FISCO配置对象
      */
     public WeServerV3(FiscoConfig fiscoConfig) {
-        super(fiscoConfig, new OnNotifyCallbackV2());
+        super(fiscoConfig, new OnNotifyCallbackV3());
         initWeb3j(fiscoConfig.getGroupId());
     }
 
@@ -118,7 +119,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     @Override
     public void initWeb3j(String masterGroupId) {
-        this.pushCallBack = new OnNotifyCallbackV2();
+        this.pushCallBack = new OnNotifyCallbackV3();
         logger.info("[WeServer] begin load property.");
         ConfigProperty configProperty = loadConfigProperty(fiscoConfig);
         logger.info("[WeServer] begin init bcos sdk.");
@@ -282,7 +283,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         configProperty.setAmop(amop);
     }
 
-    /** todo 是否去除
+    /**
      * 注册默认的callback.
      */
     /*private void registDefaultCallback() {
@@ -360,7 +361,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
             AmopMsgType.COMMON_REQUEST.getValue(),
             new CommonCallback()
         );
-        // todo
+        // todo check
         bcosSdk.getAmop().setCallback((AmopRequestCallback) pushCallBack);
         bcosSdk.getAmop().subscribeTopic(getTopic(fiscoConfig), (AmopRequestCallback) pushCallBack);
 

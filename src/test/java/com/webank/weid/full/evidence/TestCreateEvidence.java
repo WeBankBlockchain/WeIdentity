@@ -376,16 +376,14 @@ public class TestCreateEvidence extends TestBaseService {
         List<String> logs = new ArrayList<>();
         List<String> customKeys = new ArrayList<>();
         int batchSize = 100;
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
         for (int i = 0; i < batchSize; i++) {
             CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
             credential.setId(UUID.randomUUID().toString());
             String hash = credential.getHash();
             hashValues.add(credential.getHash());
-            signatures.add(cryptoSuite.sign(hash,  // todo data tool中的根据十进制私钥签名的接口要保留
-                cryptoKeyPair).convertToString());
+            signatures.add(DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(hash, privateKey)));
             timestamps.add(System.currentTimeMillis());
-            signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
             logs.add("test log" + i);
             if (i % 2 == 1) {
                 customKeys.add(String.valueOf(System.currentTimeMillis()));
@@ -467,7 +465,7 @@ public class TestCreateEvidence extends TestBaseService {
             argList.add(cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
             argList.add("test log" + i);
             argList.add(DateUtils.getNoMillisecondTimeStampString());
-            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
             if (i % 2 == 1) {
                 argList.add("2");
             }
