@@ -59,6 +59,8 @@ public final class RawCptSchema {
                 return CPT110;
             case 111:
                 return CPT111;
+            case 11:
+                return CPT11;
             default:
                 return StringUtils.EMPTY;
         }

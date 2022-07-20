@@ -81,6 +81,7 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
@@ -673,33 +674,35 @@ public final class DataToolUtils {
             if (rawData == null) {
                 return false;
             }
-            /*ECDSASignatureResult sigData =
-                    secp256k1SigBase64Deserialization(signatureBase64);
-            ECDSASignature ecdsaSign = new ECDSASignature();
-            //TODO verify的hex是不帶0x的，我们的sha3是带0x
-            String hashData = sha3(rawData).substring(2);
-            String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
-            return ecdsaSign.verify(hexPublicKey, hashData, sigData.convertToString());*/
             RsvSignature rsvSignature = SigBase64Deserialization(signatureBase64);
-            if(cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE){
-                byte[] sigBytes = new byte[65];
-                sigBytes[64] = rsvSignature.getV().getValue().byteValue();
-                System.arraycopy(rsvSignature.getR(), 0, sigBytes, 0, 32);
-                System.arraycopy(rsvSignature.getS(), 0, sigBytes, 32, 32);
-                String messageHash = cryptoSuite.hash(rawData);
+            if(cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE) {
+                ECDSASignatureResult signatureResult = new ECDSASignatureResult(
+                    rsvSignature.getV().getValue().byteValueExact(),
+                    rsvSignature.getR().getValue(),
+                    rsvSignature.getS().getValue());
+
+//                byte[] sigBytes = new byte[65];
+//                sigBytes[64] = rsvSignature.getV().getValue().byteValue();
+//                System.arraycopy(rsvSignature.getR().getValue(), 0, sigBytes, 0, 32);
+//                System.arraycopy(rsvSignature.getS().getValue(), 0, sigBytes, 32, 32);
+                String messageHash = Numeric.toHexStringNoPrefix(cryptoSuite.hash(rawData.getBytes()));
                 //这里注意publicKey要不要带0x
                 String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
 
-                return cryptoSuite.verify(hexPublicKey, messageHash, sigBytes.toString());
+                return cryptoSuite.verify(hexPublicKey, messageHash, signatureResult.convertToString());
             } else {
-                byte[] sigBytes = new byte[64];
-                System.arraycopy(rsvSignature.getR(), 0, sigBytes, 0, 32);
-                System.arraycopy(rsvSignature.getS(), 0, sigBytes, 32, 32);
-                String messageHash = cryptoSuite.hash(rawData);
+//                byte[] sigBytes = new byte[64];
+//                System.arraycopy(rsvSignature.getR(), 0, sigBytes, 0, 32);
+//                System.arraycopy(rsvSignature.getS(), 0, sigBytes, 32, 32);
+                SM2SignatureResult signatureResult = new SM2SignatureResult(
+                    publicKey.toByteArray(), //todo pub of sm2 sig
+                    rsvSignature.getR().getValue(),
+                    rsvSignature.getS().getValue());
+                String messageHash = Numeric.toHexStringNoPrefix(cryptoSuite.hash(rawData.getBytes()));
                 //这里注意publicKey要不要带0x
                 String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
 
-                return cryptoSuite.verify(hexPublicKey, messageHash, sigBytes.toString());
+                return cryptoSuite.verify(hexPublicKey, messageHash, signatureResult.convertToString());
             }
         } catch (Exception e) {
             logger.error("Error occurred during secp256k1 sig verification: {}", e);
