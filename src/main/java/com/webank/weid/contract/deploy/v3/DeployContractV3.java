@@ -80,8 +80,8 @@ public class DeployContractV3 extends AddressProcess {
         }
         byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
         byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
-        String privateKey = new BigInteger(1, priBytes).toString();
-        String publicKey = new BigInteger(1, pubBytes).toString();
+        String privateKey = new BigInteger(1, priBytes).toString(10);
+        String publicKey = new BigInteger(1, pubBytes).toString(10);
         writeAddressToFile(publicKey, "ecdsa_key.pub");
         writeAddressToFile(privateKey, "ecdsa_key");
         return true;

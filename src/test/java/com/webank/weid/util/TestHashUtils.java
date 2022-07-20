@@ -4,6 +4,7 @@ package com.webank.weid.util;
 
 import java.nio.charset.StandardCharsets;
 
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -28,8 +29,9 @@ public class TestHashUtils {
             rawBytes,
             new String(rawBytes, StandardCharsets.UTF_8)
         );
-        String hashedString = DataToolUtils.sha3(rawString);
-        byte[] hashedBytes = DataToolUtils.sha3(rawBytes);
+        CryptoSuite cryptoSuite = new CryptoSuite(0);
+        String hashedString = cryptoSuite.hash(rawString);
+        byte[] hashedBytes = cryptoSuite.hash(rawBytes);
         // use assert here to verify the String to be 64 bit and Bytes[] to be
         // 32 bit
         logger.info(

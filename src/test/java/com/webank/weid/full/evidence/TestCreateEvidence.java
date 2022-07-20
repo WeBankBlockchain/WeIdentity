@@ -12,6 +12,7 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
@@ -25,6 +26,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -40,6 +46,8 @@ public class TestCreateEvidence extends TestBaseService {
     private static final Logger logger = LoggerFactory.getLogger(TestCreateEvidence.class);
 
     private static volatile Credential credential = null;
+
+    private static final CryptoSuite cryptoSuite = ((Client) BaseService.getClient()).getCryptoSuite();
 
     @Override
     public synchronized void testInit() {
@@ -368,12 +376,14 @@ public class TestCreateEvidence extends TestBaseService {
         List<String> logs = new ArrayList<>();
         List<String> customKeys = new ArrayList<>();
         int batchSize = 100;
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
         for (int i = 0; i < batchSize; i++) {
             CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
             credential.setId(UUID.randomUUID().toString());
             String hash = credential.getHash();
             hashValues.add(credential.getHash());
-            signatures.add(DataToolUtils.secp256k1Sign(hash, new BigInteger(privateKey)));
+            signatures.add(cryptoSuite.sign(hash,  // todo data tool中的根据十进制私钥签名的接口要保留
+                cryptoKeyPair).convertToString());
             timestamps.add(System.currentTimeMillis());
             signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
             logs.add("test log" + i);
@@ -445,6 +455,7 @@ public class TestCreateEvidence extends TestBaseService {
     public void testBatchCreateMultiGroup() {
         int batchSize = 100;
         List<TransactionArgs> transactionArgsList = new ArrayList<>();
+        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
         for (int i = 0; i < batchSize; i++) {
             CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
             credential.setId(UUID.randomUUID().toString());
@@ -453,10 +464,7 @@ public class TestCreateEvidence extends TestBaseService {
             args.setMethod("createEvidence");
             List<String> argList = new ArrayList<>();
             argList.add(credential.getHash());
-            argList.add(new String(DataToolUtils.base64Encode(DataToolUtils
-                .simpleSignatureSerialization(DataToolUtils.secp256k1SignToSignature(
-                    hash, new BigInteger(privateKey)))),
-                StandardCharsets.UTF_8));
+            argList.add(cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
             argList.add("test log" + i);
             argList.add(DateUtils.getNoMillisecondTimeStampString());
             argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
