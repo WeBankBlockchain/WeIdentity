@@ -385,7 +385,7 @@ public class TestCreateEvidence extends TestBaseService {
             signatures.add(cryptoSuite.sign(hash,  // todo data tool中的根据十进制私钥签名的接口要保留
                 cryptoKeyPair).convertToString());
             timestamps.add(System.currentTimeMillis());
-            signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
             logs.add("test log" + i);
             if (i % 2 == 1) {
                 customKeys.add(String.valueOf(System.currentTimeMillis()));
@@ -467,7 +467,7 @@ public class TestCreateEvidence extends TestBaseService {
             argList.add(cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
             argList.add("test log" + i);
             argList.add(DateUtils.getNoMillisecondTimeStampString());
-            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
             if (i % 2 == 1) {
                 argList.add("2");
             }
