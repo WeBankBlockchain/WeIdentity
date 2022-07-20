@@ -208,7 +208,7 @@ public abstract class WeServer<B, W, C> {
     /**
      * 根据传入的私钥(10进制数字私钥)，进行动态创建Credentials对象.
      *
-     * @param privateKey 数字私钥
+     * @param privateKey 数字私钥 decimal
      * @return 返回Credentials对象
      */
     public abstract C createCredentials(String privateKey);

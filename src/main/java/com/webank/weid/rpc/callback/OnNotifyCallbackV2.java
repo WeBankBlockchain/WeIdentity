@@ -36,23 +36,14 @@ public class OnNotifyCallbackV2
     }
     
     @Override
-    /*public void onPush(ChannelPush push) {
-
-        logger.info("received ChannelPush v2 msg : " + push.getContent());*/
     public byte[] receiveAmopMsg(AmopMsgIn amopMsgIn) {
         String content = new String(amopMsgIn.getContent());
         logger.info("received ChannelPush v2 msg : " + content);
         if (0 == amopCallBackMap.size()) {
-            /*ChannelResponse response = new ChannelResponse();
-            response.setContent("directRouteCallback is null on server side!");
-            response.setErrorCode(0);
-            push.sendResponse(response);
-            return;*/
             return "directRouteCallback is null on server side!".getBytes();
         }
 
         AmopRequestBody amopRequestBody = DataToolUtils.deserialize(content, AmopRequestBody.class);
-            //DataToolUtils.deserialize(push.getContent(), AmopRequestBody.class);
         AmopMsgType msgType = amopRequestBody.getMsgType();
         AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
         if (amopCallBack == null) {
@@ -65,15 +56,8 @@ public class OnNotifyCallbackV2
             result = msgType.callOnPush(amopCallBack, amopMsgIn.getMessageID(), messageBody);
         } catch (Exception e) {
             logger.error("callOnPush error, please check the log.", e);
+            return null;
         }
-        
-
-         /* //接收到以后需要给发送端回包
-
-        ChannelResponse response = new ChannelResponse();
-        response.setContent(result);
-        response.setErrorCode(0);
-        push.sendResponse(response);*/
-        return result.getBytes();
+         return result.getBytes();
     }
 }

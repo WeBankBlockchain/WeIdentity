@@ -83,8 +83,6 @@ public class DeployContractV2 extends AddressProcess {
             logger.error("[DeployContractV2] cryptoKeyPair init failed. ");
             return false;
         }
-        /*String privateKey = credentials.getEcKeyPair().getPrivateKey().toString();
-        String publicKey = credentials.getEcKeyPair().getPublicKey().toString();*/
         byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
         byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
         String privateKey = new BigInteger(1, priBytes).toString(10);

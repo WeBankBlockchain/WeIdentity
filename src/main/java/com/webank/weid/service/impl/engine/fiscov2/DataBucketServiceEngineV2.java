@@ -34,14 +34,12 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
     private DataBucket dataBucket;
     private CnsType cnsType;
 
-    private TransactionDecoderService txDecoder;
+    private static TransactionDecoderService txDecoder;
 
-    /*private static TransactionDecoder txDecodeSampleDecoder;
 
     static {
-        txDecodeSampleDecoder = TransactionDecoderFactory.buildTransactionDecoder(
-                DataBucket.ABI, DataBucket.BINARY);
-    }*/
+        txDecoder = new TransactionDecoderService(((Client)getClient()).getCryptoSuite());
+    }
 
     /**
      * 构造函数.
@@ -102,7 +100,6 @@ public class DataBucketServiceEngineV2 extends BaseEngine implements DataBucketS
         ErrorCode errorCode = ErrorCode.UNKNOW_ERROR;
         try {
             //这里暂且认为是回执状态码
-            txDecoder = new TransactionDecoderService(((Client)getClient()).getCryptoSuite());
             TransactionResponse response = txDecoder.decodeReceiptStatus(receipt);
             /*InputAndOutputResult objectResult = txDecodeSampleDecoder.decodeOutputReturnObject(
                 receipt.getInput(), receipt.getOutput());
