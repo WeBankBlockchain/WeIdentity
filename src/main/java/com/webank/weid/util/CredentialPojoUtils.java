@@ -208,7 +208,7 @@ public final class CredentialPojoUtils {
             return StringUtils.EMPTY;
         }
         // System.out.println(rawData);
-        return client.getCryptoSuite().hash(rawData);
+        return DataToolUtils.hash(rawData);
     }
 
     /**
@@ -229,7 +229,7 @@ public final class CredentialPojoUtils {
             credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credentialPojo));
             String rawData = DataToolUtils.mapToCompactJson(credMap);
             //System.out.println("LiteCredential's Pre-Hash for evidence: " + rawData);
-            return client.getCryptoSuite().hash(rawData);
+            return DataToolUtils.hash(rawData);
         } catch (Exception e) {
             logger.error("get Credential Thumbprint error.", e);
             return StringUtils.EMPTY;
@@ -634,7 +634,7 @@ public final class CredentialPojoUtils {
      * @return the hash value
      */
     public static String getFieldSaltHash(String field, String salt) {
-        return client.getCryptoSuite().hash(String.valueOf(field) + String.valueOf(salt));
+        return DataToolUtils.hash(String.valueOf(field) + String.valueOf(salt));
     }
 
     /**

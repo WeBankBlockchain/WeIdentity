@@ -579,7 +579,7 @@ public final class DataToolUtils {
      * Secp256k1 sign to Signature.
      *
      * @param rawData original raw data
-     * @param privateKey
+     * @param privateKey decimal
      * @return SignatureData for signature value
      */
     public static RsvSignature signToRsvSignature(String rawData, String privateKey) {
