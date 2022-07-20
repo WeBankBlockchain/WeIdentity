@@ -6,14 +6,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -25,50 +18,11 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
-import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.cpt.RawCptSchema;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.RsvSignature;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
 import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -85,14 +39,22 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.Signature;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.math.BigInteger;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * 数据工具类.
@@ -136,14 +98,12 @@ public final class DataToolUtils {
     //private static final ObjectReader OBJECT_READER;
     private static final ObjectWriter OBJECT_WRITER_UN_PRETTY_PRINTER;
 
-    private static final String encryptType;
-
     private static final com.networknt.schema.JsonSchemaFactory JSON_SCHEMA_FACTORY;
-
     /**
      * The Fisco Config bundle.
      */
     protected static final FiscoConfig fiscoConfig;
+    public static final CryptoSuite cryptoSuite;
 
     static {
         fiscoConfig = new FiscoConfig();
@@ -152,8 +112,6 @@ public final class DataToolUtils {
             System.exit(1);
         }
     }
-
-    public static final CryptoSuite cryptoSuite;
 
     static {
         if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
@@ -185,8 +143,6 @@ public final class DataToolUtils {
         CONVERT_UTC_LONG_KEYLIST.add(KEY_CREATED);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_ISSUANCEDATE);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_EXPIRATIONDATE);
-
-        encryptType = PropertyUtils.getProperty("encrypt.type");
 
         //OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
         //OBJECT_READER = OBJECT_MAPPER.reader();
@@ -257,19 +213,24 @@ public final class DataToolUtils {
      * @param privateKey the pass-in privatekey
      * @return true if yes, false otherwise
      */
-    /*public static String convertPrivateKeyToDefaultWeId(String privateKey) {
-        BigInteger publicKey;
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            publicKey = Sign.publicKeyFromPrivate(new BigInteger(privateKey));
-        } else {
-            publicKey = Sign.smPublicKeyFromPrivate(new BigInteger(privateKey));
-        }
-        return WeIdUtils
-            .convertAddressToWeId(new org.fisco.bcos.web3j.abi.datatypes.Address(
-                Keys.getAddress(publicKey)).toString());
-        CryptoKeyPair keyPair = createKeyPairFromPrivate(new BigInteger(privateKey));
-        return WeIdUtils.convertAddressToWeId(keyPair.getAddress());
-    }*/
+    public static String convertPrivateKeyToDefaultWeId(String privateKey) {
+        CryptoKeyPair cryptoKeyPair = new CryptoSuite(0)
+            .getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        return new BigInteger(Numeric
+            .hexStringToByteArray(cryptoKeyPair.getHexPublicKey()))
+            .toString(10); // todo 获取suite
+//        BigInteger publicKey;
+//        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
+//            publicKey = Sign.publicKeyFromPrivate(new BigInteger(privateKey));
+//        } else {
+//            publicKey = Sign.smPublicKeyFromPrivate(new BigInteger(privateKey));
+//        }
+//        return WeIdUtils
+//            .convertAddressToWeId(new org.fisco.bcos.web3j.abi.datatypes.Address(
+//                Keys.getAddress(publicKey)).toString());
+//        CryptoKeyPair keyPair = createKeyPairFromPrivate(new BigInteger(privateKey));
+//        return WeIdUtils.convertAddressToWeId(keyPair.getAddress());
+    }
 
     /**
      * Check whether the String is a valid hash.
@@ -604,7 +565,7 @@ public final class DataToolUtils {
             String privateKey
     ) {
         String messageHash = cryptoSuite.hash(rawData);
-        return cryptoSuite.sign(messageHash, cryptoSuite.createKeyPair(privateKey));
+        return cryptoSuite.sign(messageHash, cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey)));
     }
 
     public static RsvSignature signToRsvSignature(String rawData, String privateKey) {
@@ -840,9 +801,6 @@ public final class DataToolUtils {
         } else {
             return GenCredential.createGuomiKeyPair(privateKey.toString(16));
         }
-    }*/
-    /*public static CryptoKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
-        return new ECDSAKeyPair().createKeyPair(privateKey);
     }*/
 
     /**

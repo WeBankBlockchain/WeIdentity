@@ -51,8 +51,8 @@ public class DeployEvidenceV3 extends AddressProcess {
                 .getKeyPairFactory().generateKeyPair();
             byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
             byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
-            String privateKey = new BigInteger(1, priBytes).toString(); // todo 检查
-            String publicKey = new BigInteger(1, pubBytes).toString();
+            String privateKey = new BigInteger(1, priBytes).toString(10);
+            String publicKey = new BigInteger(1, pubBytes).toString(10);
             writeAddressToFile(publicKey, "ecdsa_key.pub");
             writeAddressToFile(privateKey, "ecdsa_key");
         }
@@ -64,7 +64,7 @@ public class DeployEvidenceV3 extends AddressProcess {
         }
         //return credentials.getEcKeyPair().getPrivateKey().toString();
         byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
-        return new BigInteger(1, priBytes).toString();
+        return new BigInteger(1, priBytes).toString(10);
     }
 
     protected static Client getClient(String groupId) {

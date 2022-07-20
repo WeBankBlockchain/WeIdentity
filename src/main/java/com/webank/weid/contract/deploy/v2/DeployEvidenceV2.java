@@ -40,26 +40,20 @@ public class DeployEvidenceV2 extends AddressProcess {
      *
      * @return true, if successful
      */
-    //private static String initCredentials(String inputPrivateKey) {
     private static String initCryptoKeyPair(String inputPrivateKey) {
         if (StringUtils.isNotBlank(inputPrivateKey)) {
             logger.info("[DeployEvidenceV2] begin to init credentials by privateKey..");
-            //credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));
-            //cryptoKeyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(inputPrivateKey));
-            //TODO 需要适配V3的getCryptoSuite
-            cryptoKeyPair = client.getCryptoSuite().createKeyPair(inputPrivateKey);
+            cryptoKeyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
         } else {
             // 此分支逻辑实际情况不会执行，因为通过build-tool进来是先给创建私钥
             logger.info("[DeployEvidenceV2] begin to init credentials..");
-            /*credentials = GenCredential.create();
-            String privateKey = credentials.getEcKeyPair().getPrivateKey().toString();
-            String publicKey = credentials.getEcKeyPair().getPublicKey().toString();*/
+
             //cryptoKeyPair = DataToolUtils.createKeyPair();
             cryptoKeyPair = client.getCryptoSuite().createKeyPair();
             byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
             byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
-            String privateKey = new BigInteger(1, priBytes).toString();
-            String publicKey = new BigInteger(1, pubBytes).toString();
+            String privateKey = new BigInteger(1, priBytes).toString(10);
+            String publicKey = new BigInteger(1, pubBytes).toString(10);
             writeAddressToFile(publicKey, "ecdsa_key.pub");
             writeAddressToFile(privateKey, "ecdsa_key");
         }
@@ -71,7 +65,7 @@ public class DeployEvidenceV2 extends AddressProcess {
         }
         //return credentials.getEcKeyPair().getPrivateKey().toString();
         byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
-        return new BigInteger(1, priBytes).toString();
+        return new BigInteger(1, priBytes).toString(10);
     }
 
     protected static Client getClient(String groupId) {
