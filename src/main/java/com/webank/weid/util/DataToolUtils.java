@@ -150,14 +150,14 @@ public final class DataToolUtils {
     }
 
     static {
-        if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+        if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
+            logger.error("fisco version not support v1");
+            System.exit(1);
+            cryptoSuite = null;
+        } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
             cryptoSuite = new CryptoSuite(((Client) BaseService.getClient()).getCryptoType());
-
-        } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_3_X_VERSION_PREFIX)) {
-            cryptoSuite = new CryptoSuite(((org.fisco.bcos.sdk.v3.client.Client) BaseService.getClient()).getCryptoType());
         } else {
-            logger.error("fisco version error");
-            cryptoSuite = new CryptoSuite(0);
+            cryptoSuite = new CryptoSuite(((org.fisco.bcos.sdk.v3.client.Client) BaseService.getClient()).getCryptoType());
         }
     }
 
@@ -948,11 +948,11 @@ public final class DataToolUtils {
         String weIdPublicKeyId) {
         List<String> publicKeysListToVerify = new ArrayList<String>();
 
-        /*try {
-            secp256k1SigBase64Deserialization(signature);
+        try {
+            SigBase64Deserialization(signature);
         } catch (Exception e) {
             return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
-        }*/
+        }
 
         // Traverse public key list indexed Authentication key list
 
