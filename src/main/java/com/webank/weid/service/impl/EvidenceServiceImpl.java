@@ -408,7 +408,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 logger.error("Failed to convert file into String: {}", ((File) object).getName());
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
-            return new ResponseData<>(new HashString(DataToolUtils.cryptoSuite.hash(rawData)),
+            return new ResponseData<>(new HashString(DataToolUtils.hash(rawData)),
                 ErrorCode.SUCCESS);
         }
         if (object instanceof String) {
@@ -416,7 +416,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 logger.error("Input String is blank, ignored..");
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
-            return new ResponseData<>(new HashString(DataToolUtils.cryptoSuite.hash((String) object)),
+            return new ResponseData<>(new HashString(DataToolUtils.hash((String) object)),
                 ErrorCode.SUCCESS);
         }
         logger.error("Unsupported input object type: {}", object.getClass().getCanonicalName());
@@ -487,7 +487,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
                     .append(this.groupId).toString();
                 //替换国密
-                String hash = DataToolUtils.cryptoSuite.hash(rawData);
+                String hash = DataToolUtils.hash(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
                     .writeTransaction(requestId, "createEvidence", args, StringUtils.EMPTY);
@@ -579,7 +579,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         // 1st: verify hash (accept both thumbprint hash or credential.getHash())
         if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(credentialPojo.getHash())) {
             if (CredentialPojoUtils.isLiteCredential(credentialPojo)) {
-                if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(DataToolUtils.cryptoSuite.hash(
+                if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(DataToolUtils.hash(
                     CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(credentialPojo)))) {
                     logger.error("Evidence hash mismatches the lite credential hash or thumbprint");
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
@@ -591,7 +591,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
                 } else {
                     if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(
-                            DataToolUtils.cryptoSuite.hash(
+                            DataToolUtils.hash(
                             CredentialPojoUtils.getCredentialThumbprintWithoutSig(credentialPojo,
                                 credentialPojo.getSalt(), null)))) {
                         logger.error("Evidence hash mismatches the non-embedded credential hash or"
@@ -738,7 +738,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     .append(customKey)
                     .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
                     .append(this.groupId).toString();
-                String hash = DataToolUtils.cryptoSuite.hash(rawData);
+                String hash = DataToolUtils.hash(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
                     .writeTransaction(requestId, "createEvidenceWithCustomKey", args,

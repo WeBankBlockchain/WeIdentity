@@ -21,11 +21,9 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion.VersionFlag;
 import com.networknt.schema.ValidationMessage;
-import com.webank.weid.protocol.cpt.Cpt101;
 import com.webank.weid.protocol.cpt.RawCptSchema;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Set;
 import org.apache.http.util.Asserts;
 import org.junit.Test;
@@ -33,10 +31,10 @@ import org.junit.Test;
 public class TestSchemaValidator {
 
     @Test
-    public void test() throws JsonProcessingException {
+    public void testValidator() throws JsonProcessingException {
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance(VersionFlag.V4);
         ObjectMapper mapper = new ObjectMapper();
-        JsonSchema schema = factory.getSchema("{\"enum\":[1, 2, 3, 4],\"enumErrorCode\":\"Not in the list\",}");
+        JsonSchema schema = factory.getSchema("{\"enum\":[1, 2, 3, 4],\"enumErrorCode\":\"Not in the list\"}");
 
         JsonNode node = mapper.readTree("7");
         JsonNode node2 = mapper.readTree("3");
@@ -49,7 +47,6 @@ public class TestSchemaValidator {
         // 如果validate通过，则Set为空
         Set<ValidationMessage> errors2 = schema.validate(node2);
         System.out.println(errors2.size());
-        System.out.println(errors2.iterator().next().getCode());
 
     }
 

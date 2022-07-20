@@ -73,8 +73,6 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
      */
     private static WeIdContract weIdContract;
 
-    private static Client client =  (Client) getClient();
-
     static {
         // initialize the event topic
         topicMap = new HashMap<String, String>();
@@ -335,8 +333,7 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
 
         //String type = PublicKeyType.SECP256K1.getTypeName();
         String type;
-        //TODO 需要适配V3的getCryptoType
-        if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
+        if(((Client) getClient()).getCryptoType() == CryptoType.ECDSA_TYPE){
             type = PublicKeyType.ECDSA.getTypeName();
         } else {
             type = PublicKeyType.SM2.getTypeName();

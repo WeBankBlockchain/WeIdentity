@@ -194,27 +194,11 @@ public class TransactionUtils {
         }
 
         String cptSignature = cptSignatureNode.textValue();
-        /*if (!DataToolUtils.isValidBase64String(cptSignature)) {
+        if (!DataToolUtils.isValidBase64String(cptSignature)) {
             logger.error("Input cpt signature invalid: {}", cptSignature);
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        RsvSignature rsvSignature =
-            DataToolUtils.convertSignatureDataToRsv(
-                DataToolUtils.convertBase64StringToSignatureData(cptSignature)
-            );*/
-        Uint8 v = new Uint8(0);
-        //TODO 需要适配V3的getCryptoType
-        if(client.getCryptoType() == CryptoType.ECDSA_TYPE){
-            ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(cptSignature);
-            v = new Uint8(ecdsaSignatureResult.getV());
-        }
-        byte[] signatureBytes = Hex.decode(cptSignature);
-        byte[] rI = new byte[32];
-        byte[] sI = new byte[32];
-        System.arraycopy(signatureBytes, 0, rI, 0, 32);
-        System.arraycopy(signatureBytes, 32, sI, 0, 32);
-        Bytes32 r = new Bytes32(rI);
-        Bytes32 s = new Bytes32(sI);
+        RsvSignature rsvSignature = DataToolUtils.SigBase64Deserialization(cptSignature);
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
@@ -223,9 +207,9 @@ public class TransactionUtils {
             getParamCreated(WeIdConstant.CPT_LONG_ARRAY_LENGTH),
             bytes32Array,
             getParamJsonSchema(cptJsonSchemaNew),
-            v,
-            r,
-            s);
+            rsvSignature.getV(),
+            rsvSignature.getR(),
+            rsvSignature.getS());
         return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
 

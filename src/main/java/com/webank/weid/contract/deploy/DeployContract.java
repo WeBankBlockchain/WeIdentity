@@ -54,6 +54,7 @@ public abstract class DeployContract {
             privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
         }
         fiscoConfig.setChainId(chainId);
+        logger.info("deploy contract fisco version is [{},{}]", fiscoConfig.getVersion(), fiscoConfig.getNodes());
         try {
             deployContract(privateKey, true);
         } catch (WeIdBaseException e) {
@@ -71,8 +72,10 @@ public abstract class DeployContract {
         if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             throw new WeIdBaseException(ErrorCode.THIS_IS_UNSUPPORTED);
         } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+            logger.info("deployContract v2");
             DeployContractV2.deployContract(privateKey, fiscoConfig, instantEnable);
         } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_3_X_VERSION_PREFIX)) {
+            logger.info("deployContract v3");
             DeployContractV3.deployContract(privateKey, fiscoConfig, instantEnable);
         }
     }
