@@ -6,14 +6,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -29,41 +22,8 @@ import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.cpt.RawCptSchema;
 import com.webank.weid.protocol.request.CptMapArgs;
+import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.service.BaseService;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -79,11 +39,22 @@ import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.math.BigInteger;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * 数据工具类.
@@ -574,62 +545,15 @@ public final class DataToolUtils {
      *
      * @return the ECKeyPair
      */
-    /*public static ECKeyPair createKeyPair() throws
-            InvalidAlgorithmParameterException,
-            NoSuchAlgorithmException,
-            NoSuchProviderException {
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            return Keys.createEcKeyPair();
-        } else {
-            return GenCredential.createGuomiKeyPair();
-        }
-    }*/
     public static CryptoKeyPair createKeyPair() {
-        return new ECDSAKeyPair().generateKeyPair();
+        return cryptoSuite.createKeyPair();
     }
-
+    
     /**
-     * Secp256k1 sign.
+     * Secp256k1 sign to Signature.
      *
      * @param rawData original raw data
      * @param privateKey
-     * @return base64 string for signature value
-     */
-    /*public static String secp256k1Sign(String rawData, String privateKey) {
-        //SignatureData sigData = secp256k1SignToSignature(rawData, privateKey);
-        ECDSASignatureResult sigData = secp256k1SignToSignature(rawData, privateKey);
-        return secp256k1SigBase64Serialization(sigData);
-    }*/
-    
-    /**
-     * Secp256k1 sign to Signature.
-     *
-     * @param rawData original raw data
-     * @param keyPair keyPair
-     * @return SignatureData for signature value
-     */
-    /*public static SignatureData secp256k1SignToSignature(String rawData, ECKeyPair keyPair) {
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            ECDSASign ecdsaSign = new ECDSASign();
-            return ecdsaSign.secp256SignMessage(rawData.getBytes(), keyPair);
-        } else {
-            return SM2Sign.sign(rawData.getBytes(), keyPair);
-        }
-    }*/
-    /*public static ECDSASignatureResult secp256k1SignToSignature(
-            String rawData,
-            CryptoKeyPair keyPair
-    ) {
-        ECDSASignature ecdsaSign = new ECDSASignature();
-        return (ECDSASignatureResult)ecdsaSign.sign(sha3(rawData.getBytes()), keyPair);
-    }*/
-    
-    /**
-     * Secp256k1 sign to Signature.
-     *
-     * @param rawData original raw data
-     * @param client
-     * @param keyPair
      * @return SignatureData for signature value
      */
     /*public static SignatureData secp256k1SignToSignature(String rawData, BigInteger privateKey) {
@@ -638,28 +562,42 @@ public final class DataToolUtils {
     }*/
     public static SignatureResult signToSignature(
             String rawData,
-            Client client,
-            CryptoKeyPair keyPair
+            String privateKey
     ) {
-        String messageHash = client.getCryptoSuite().hash(rawData);
-        return client.getCryptoSuite().sign(messageHash, keyPair);
-        //return secp256k1SignToSignature(rawData, keyPair);
+        String messageHash = cryptoSuite.hash(rawData);
+        return cryptoSuite.sign(messageHash, cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey)));
     }
-    
+
+    public static RsvSignature signToRsvSignature(String rawData, String privateKey) {
+        SignatureResult signatureResult = signToSignature(rawData, privateKey);
+        RsvSignature rsvSignature = null;
+        Bytes32 R = new Bytes32(signatureResult.getR());
+        rsvSignature.setR(R);
+        Bytes32 S = new Bytes32(signatureResult.getS());
+        rsvSignature.setS(S);
+        if(cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE){
+            ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+            rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+        } else {
+            rsvSignature.setV(new Uint8(0));
+        }
+        return rsvSignature;
+    }
+
     /**
      * Serialize secp256k1 signature into base64 encoded, in R, S, V (0, 1) format.
      *
      * @param sigData secp256k1 signature (v = 0,1)
      * @return base64 string
      */
-    /*public static String secp256k1SigBase64Serialization(
-            ECDSASignatureResult sigData) {
+    public static String SigBase64Serialization(
+            RsvSignature sigData) {
         byte[] sigBytes = new byte[65];
-        sigBytes[64] = sigData.getV();
+        sigBytes[64] = sigData.getV().getValue().byteValue();
         System.arraycopy(sigData.getR(), 0, sigBytes, 0, 32);
         System.arraycopy(sigData.getS(), 0, sigBytes, 32, 32);
         return new String(base64Encode(sigBytes), StandardCharsets.UTF_8);
-    }*/
+    }
 
     /**
      * De-Serialize secp256k1 signature base64 encoded string, in R, S, V (0, 1) format.
@@ -667,14 +605,18 @@ public final class DataToolUtils {
      * @param signature signature base64 string
      * @return secp256k1 signature (v = 0,1)
      */
-    /*public static ECDSASignatureResult  secp256k1SigBase64Deserialization(String signature) {
+    public static RsvSignature  SigBase64Deserialization(String signature) {
         byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
         byte[] r = new byte[32];
         byte[] s = new byte[32];
         System.arraycopy(sigBytes, 0, r, 0, 32);
         System.arraycopy(sigBytes, 32, s, 0, 32);
-        return new ECDSASignatureResult (sigBytes[64], r, s);
-    }*/
+        RsvSignature rsvSignature = null;
+        rsvSignature.setR(new Bytes32(r));
+        rsvSignature.setS(new Bytes32(s));
+        rsvSignature.setV(new Uint8(sigBytes[64]));
+        return rsvSignature;
+    }
 
     /**
      * De-Serialize secp256k1 signature base64 encoded string, in R, S, V (0, 1) format.
@@ -699,34 +641,19 @@ public final class DataToolUtils {
      * Verify secp256k1 signature.
      *
      * @param rawData original raw data
-     * @param signature signature string
-     * @param client
+     * @param signatureBase64 signature string
      * @param publicKey in BigInteger format
      * @return return boolean result, true is success and false is fail
      */
     public static boolean verifySignature(
         String rawData,
-        String signature,
-        Client client,
+        String signatureBase64,
         BigInteger publicKey
     ) {
         try {
             if (rawData == null) {
                 return false;
             }
-            /*if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-                SignatureData sigData =
-                        secp256k1SigBase64Deserialization(signatureBase64);
-                byte[] hashBytes = Hash.sha3(rawData.getBytes());
-                ECDSASign ecdsaSign = new ECDSASign();
-                return ecdsaSign.secp256Verify(hashBytes, publicKey, sigData);
-            } else {
-                SM3Digest sm3Digest = new SM3Digest();
-                byte[] hashBytes = sm3Digest.hash(rawData.getBytes());
-                SignatureData sigData =
-                        secp256k1SigBase64Deserialization(signatureBase64, publicKey);
-                return SM2Sign.verify(hashBytes, sigData);
-            }*/
             /*ECDSASignatureResult sigData =
                     secp256k1SigBase64Deserialization(signatureBase64);
             ECDSASignature ecdsaSign = new ECDSASignature();
@@ -734,10 +661,27 @@ public final class DataToolUtils {
             String hashData = sha3(rawData).substring(2);
             String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
             return ecdsaSign.verify(hexPublicKey, hashData, sigData.convertToString());*/
-            String messageHash = client.getCryptoSuite().hash(rawData);
-            //这里注意publicKey要不要带0x
-            String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
-            return client.getCryptoSuite().verify(hexPublicKey, messageHash, signature);
+            RsvSignature rsvSignature = SigBase64Deserialization(signatureBase64);
+            if(cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE){
+                byte[] sigBytes = new byte[65];
+                sigBytes[64] = rsvSignature.getV().getValue().byteValue();
+                System.arraycopy(rsvSignature.getR(), 0, sigBytes, 0, 32);
+                System.arraycopy(rsvSignature.getS(), 0, sigBytes, 32, 32);
+                String messageHash = cryptoSuite.hash(rawData);
+                //这里注意publicKey要不要带0x
+                String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
+
+                return cryptoSuite.verify(hexPublicKey, messageHash, sigBytes.toString());
+            } else {
+                byte[] sigBytes = new byte[64];
+                System.arraycopy(rsvSignature.getR(), 0, sigBytes, 0, 32);
+                System.arraycopy(rsvSignature.getS(), 0, sigBytes, 32, 32);
+                String messageHash = cryptoSuite.hash(rawData);
+                //这里注意publicKey要不要带0x
+                String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
+
+                return cryptoSuite.verify(hexPublicKey, messageHash, sigBytes.toString());
+            }
         } catch (Exception e) {
             logger.error("Error occurred during secp256k1 sig verification: {}", e);
             return false;
@@ -950,7 +894,6 @@ public final class DataToolUtils {
      * @param rawData the rawData to be verified
      * @param signature the Signature Data in secp256k1 style
      * @param weIdDocument the WeIdDocument to be extracted
-     * @param client
      * @param weIdPublicKeyId the WeID public key ID
      * @return true if yes, false otherwise with exact error codes
      */
@@ -958,7 +901,6 @@ public final class DataToolUtils {
         String rawData,
         String signature,
         WeIdDocument weIdDocument,
-        Client client,
         String weIdPublicKeyId) {
         List<String> publicKeysListToVerify = new ArrayList<String>();
 
@@ -982,7 +924,7 @@ public final class DataToolUtils {
             for (String publicKeyItem : publicKeysListToVerify) {
                 if (StringUtils.isNotEmpty(publicKeyItem)) {
                     boolean currentResult = verifySignature(
-                        rawData, signature, client, new BigInteger(publicKeyItem));
+                        rawData, signature, new BigInteger(publicKeyItem));
                     result = currentResult || result;
                     if (currentResult) {
                         for (PublicKeyProperty pkp : weIdDocument.getPublicKey()) {
