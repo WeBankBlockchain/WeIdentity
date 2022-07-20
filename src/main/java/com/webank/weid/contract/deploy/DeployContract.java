@@ -2,17 +2,15 @@
 
 package com.webank.weid.contract.deploy;
 
-import com.webank.weid.contract.deploy.v3.DeployContractV3;
-import java.math.BigInteger;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.contract.deploy.v2.DeployContractV2;
+import com.webank.weid.contract.deploy.v3.DeployContractV3;
 import com.webank.weid.exception.WeIdBaseException;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The Class DeployContract.

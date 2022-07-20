@@ -15,9 +15,6 @@ import com.webank.weid.service.BaseService;
 import jodd.cli.Cli;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.CredentialConstant;
@@ -95,9 +92,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
     private static PdfTransportation pdfTransportation;
-
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) getClient();
 
     private static Persistence getDataDriver() {
         String type = PropertyUtils.getProperty("persistence_type");
@@ -648,14 +642,14 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             } else {
                 WeIdDocument weIdDocument = innerResponseData.getResult();
                 errorCode = DataToolUtils.verifySignatureFromWeId(
-                    rawData, credential.getSignature(), weIdDocument, client, weIdPublicKeyId);
+                    rawData, credential.getSignature(), weIdDocument, weIdPublicKeyId);
                 return errorCode;
             }
         } else {
             boolean result;
             try {
                 result = DataToolUtils.verifySignature(rawData,
-                    credential.getSignature(), client, new BigInteger(publicKey));
+                    credential.getSignature(), new BigInteger(publicKey));
 
             } catch (Exception e) {
                 logger.error("[verifyContent] verify signature fail.", e);
@@ -925,8 +919,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             boolean result;
             try {
                 // For Lite CredentialPojo, we begin to use Secp256k1 verify to fit external type
-                result = DataToolUtils.verifySignature(rawData, credential.getSignature(),
-                        client, new BigInteger(publicKey));
+                result = DataToolUtils.verifySignature(rawData, credential.getSignature(), new BigInteger(publicKey));
             } catch (Exception e) {
                 logger.error("[verifyContent] verify signature fail.", e);
                 return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_SIGNATURE_BROKEN);
@@ -951,7 +944,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         } else {
             WeIdDocument weIdDocument = innerResponseData.getResult();
             ErrorCode verifyErrorCode = DataToolUtils.verifySignatureFromWeId(
-                rawData, credential.getSignature(), weIdDocument, client, weIdPublicKeyId);
+                rawData, credential.getSignature(), weIdDocument, weIdPublicKeyId);
             if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<Boolean>(false, verifyErrorCode);
             }
@@ -1086,8 +1079,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             //替换国密
             //String signature = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
-            SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client, (CryptoKeyPair) weServer.createCredentials(privateKey));
-            String signature = signatureResult.convertToString();
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(rawData, privateKey)
+            );
             result.putProofValue(ParamKeyConstant.PROOF_CREATED, result.getIssuanceDate());
 
             String weIdPublicKeyId = args.getWeIdAuthentication().getWeIdPublicKeyId();
@@ -1117,8 +1111,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         // For Lite CredentialPojo, we begin to use Secp256k1 format signature to fit external type
         //替换国密
         //String signature = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey, 10));
-        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client, (CryptoKeyPair) weServer.createCredentials(privateKey));
-        String signature = signatureResult.convertToString();
+        String signature = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(rawData, privateKey)
+        );
         String proofType = CredentialProofType.ECDSA.getTypeName();
         credentialPojo.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
         credentialPojo.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
@@ -1199,8 +1194,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             .getEmbeddedCredentialThumbprintWithoutSig(credentialList);
         //替换国密
         //String signature = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
-        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client, (CryptoKeyPair) weServer.createCredentials(privateKey));
-        String signature = signatureResult.convertToString();
+        String signature = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(rawData, privateKey)
+        );
         result.putProofValue(ParamKeyConstant.PROOF_CREATED, result.getIssuanceDate());
 
         String weIdPublicKeyId = callerAuth.getWeIdPublicKeyId();
@@ -1616,7 +1612,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         errorCode =
             DataToolUtils
                 .verifySignatureFromWeId(presentationE.toRawData(), signature,
-                    weIdDocument, client, null);
+                    weIdDocument, null);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return ErrorCode.PRESENTATION_SIGNATURE_MISMATCH;
         }
@@ -1956,9 +1952,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
                 presentation.toRawData(),
                 new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
             );*/
-        SignatureResult signatureResult = DataToolUtils.signToSignature(presentation.toRawData(), client,
-                (CryptoKeyPair) weServer.createCredentials(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
-        String signature = signatureResult.convertToString();
+        String signature = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(presentation.toRawData(), weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
+        );;
         presentation.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
     }
 
@@ -2021,8 +2017,9 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Map<String, Object> saltMap = DataToolUtils.clone(claim);
         CredentialPojoUtils.clearMap(saltMap);
         //String signature = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
-        SignatureResult signatureResult = DataToolUtils.signToSignature(rawData, client, (CryptoKeyPair) weServer.createCredentials(privateKey));
-        String signature = signatureResult.convertToString();
+        String signature = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(rawData, privateKey)
+        );
 
         credential.putProofValue(ParamKeyConstant.PROOF_CREATED, credential.getIssuanceDate());
 

@@ -10,7 +10,6 @@ import java.util.Map;
 import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -203,8 +202,6 @@ public class DownTransDataService extends InnerService implements TransmissionSe
             arg.getResourceId(),
             arg.getSignValue(),
             domRes.getResult(),
-            //TODO 需要适配V3的getClient
-            (Client) BaseService.getClient(),
             null
         );
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
