@@ -272,7 +272,7 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         configProperty.setAmop(amop);
     }
 
-    /** todo 是否去除
+    /**
      * 注册默认的callback.
      */
 //    private void registDefaultCallback() {

@@ -25,9 +25,6 @@ public abstract class AddressProcess {
      */
     private static final Logger logger = LoggerFactory.getLogger(AddressProcess.class);
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-    
     protected static void writeAddressToFile(
         String contractAddress,
         String fileName) {
@@ -141,7 +138,7 @@ public abstract class AddressProcess {
     }
 
     /**
-     * todo 设置String groupId后是否影响hashR
+     * todo 设置String groupId后是否影响hash
      */
     public static String getHashForShare(String groupId, String evidenceAddress) {
         StringBuffer address = new StringBuffer();
