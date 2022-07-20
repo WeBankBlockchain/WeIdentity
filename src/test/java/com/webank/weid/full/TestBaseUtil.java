@@ -632,7 +632,7 @@ public class TestBaseUtil {
         } catch (Exception e) {
             logger.error("createEcKeyPair error:", e);
         }*/
-        CryptoKeyPair keyPair = DataToolUtils.createKeyPair();
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair();
         BigInteger bigPublicKey =
                 new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));
         BigInteger bigPrivateKey =
@@ -653,7 +653,7 @@ public class TestBaseUtil {
      */
     public static CryptoKeyPair createKeyPair() {
         try {
-            return DataToolUtils.createKeyPair();
+            return DataToolUtils.cryptoSuite.createKeyPair();
         } catch (Exception e) {
             logger.error("createEcKeyPair error:", e);
         }
