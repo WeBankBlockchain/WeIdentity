@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 
 
 /**
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "version"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt105 {
 
     /**
@@ -80,132 +82,20 @@ public class Cpt105 {
     private String version;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
-
     /**
-     * Argument types in sequence
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("argType")
-    public List<String> getArgType() {
-        return argType;
-    }
-
-    /**
-     * Argument types in sequence
-     * (Required)
-     * 
-     */
-    @JsonProperty("argType")
-    public void setArgType(List<String> argType) {
-        this.argType = argType;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("description")
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("description")
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("endpointName")
-    public String getEndpointName() {
-        return endpointName;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("endpointName")
-    public void setEndpointName(String endpointName) {
-        this.endpointName = endpointName;
-    }
-
-    /**
-     * Network host and port
-     * (Required)
-     * 
-     */
-    @JsonProperty("hostport")
-    public String getHostport() {
-        return hostport;
-    }
-
-    /**
-     * Network host and port
-     * (Required)
-     * 
-     */
-    @JsonProperty("hostport")
-    public void setHostport(String hostport) {
-        this.hostport = hostport;
-    }
-
-    /**
-     * Owner WeIdentity DID
-     * (Required)
-     * 
-     */
-    @JsonProperty("id")
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * Owner WeIdentity DID
-     * (Required)
-     * 
-     */
-    @JsonProperty("id")
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * API Version
-     * (Required)
-     * 
-     */
-    @JsonProperty("version")
-    public String getVersion() {
-        return version;
-    }
-
-    /**
-     * API Version
-     * (Required)
-     * 
-     */
-    @JsonProperty("version")
-    public void setVersion(String version) {
-        this.version = version;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);

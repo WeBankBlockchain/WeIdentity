@@ -92,7 +92,7 @@ public final class CredentialUtils {
      * Build the credential Proof.
      *
      * @param credential the credential
-     * @param privateKey
+     * @param privateKey private key decimal
      * @param disclosureMap the disclosureMap
      * @return the Proof structure
      */
@@ -296,7 +296,7 @@ public final class CredentialUtils {
      * creation is the credential thumbprint result based on an empty signature value filled in.
      *
      * @param credential target credential object
-     * @param privateKey
+     * @param privateKey decimal
      * @param disclosureMap the disclosure map
      * @return the String signature value
      */

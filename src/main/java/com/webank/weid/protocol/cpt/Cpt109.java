@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 
 
 /**
@@ -26,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "timestamp"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt109 {
 
     /**
@@ -64,90 +66,19 @@ public class Cpt109 {
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     /**
-     * calculate the hash from the entire list rather than from any single credential
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("claimHash")
-    public String getClaimHash() {
-        return claimHash;
-    }
-
-    /**
-     * calculate the hash from the entire list rather than from any single credential
-     * (Required)
-     * 
-     */
-    @JsonProperty("claimHash")
-    public void setClaimHash(String claimHash) {
-        this.claimHash = claimHash;
-    }
-
-    /**
-     * hashKey = hash(claimHash + timestamp) hashKey will be the key in the smart contract
-     * (Required)
-     * 
-     */
-    @JsonProperty("hashKey")
-    public String getHashKey() {
-        return hashKey;
-    }
-
-    /**
-     * hashKey = hash(claimHash + timestamp) hashKey will be the key in the smart contract
-     * (Required)
-     * 
-     */
-    @JsonProperty("hashKey")
-    public void setHashKey(String hashKey) {
-        this.hashKey = hashKey;
-    }
-
-    /**
-     * signed by Timestamp authority signature = sign( hashKey )
-     * (Required)
-     * 
-     */
-    @JsonProperty("signatureList")
-    public String getSignatureList() {
-        return signatureList;
-    }
-
-    /**
-     * signed by Timestamp authority signature = sign( hashKey )
-     * (Required)
-     * 
-     */
-    @JsonProperty("signatureList")
-    public void setSignatureList(String signatureList) {
-        this.signatureList = signatureList;
-    }
-
-    /**
-     * trusted timestamp provided by the trusted third party or by the consensus of each node in the consortium chain
-     * (Required)
-     * 
-     */
-    @JsonProperty("timestamp")
-    public Integer getTimestamp() {
-        return timestamp;
-    }
-
-    /**
-     * trusted timestamp provided by the trusted third party or by the consensus of each node in the consortium chain
-     * (Required)
-     * 
-     */
-    @JsonProperty("timestamp")
-    public void setTimestamp(Integer timestamp) {
-        this.timestamp = timestamp;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
