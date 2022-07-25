@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 
 
 /**
@@ -30,6 +31,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "timestampAuthority"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt108 {
 
     /**
@@ -76,110 +78,19 @@ public class Cpt108 {
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     /**
-     * Signature value from Authority, signed by Timestamp authority. authoritySignature = sign( hashKey )
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("authoritySignature")
-    public String getAuthoritySignature() {
-        return authoritySignature;
-    }
-
-    /**
-     * Signature value from Authority, signed by Timestamp authority. authoritySignature = sign( hashKey )
-     * (Required)
-     * 
-     */
-    @JsonProperty("authoritySignature")
-    public void setAuthoritySignature(String authoritySignature) {
-        this.authoritySignature = authoritySignature;
-    }
-
-    /**
-     * calculate the hash from the credentials.
-     * (Required)
-     * 
-     */
-    @JsonProperty("claimHash")
-    public String getClaimHash() {
-        return claimHash;
-    }
-
-    /**
-     * calculate the hash from the credentials.
-     * (Required)
-     * 
-     */
-    @JsonProperty("claimHash")
-    public void setClaimHash(String claimHash) {
-        this.claimHash = claimHash;
-    }
-
-    /**
-     * Original credential list to be signed
-     * (Required)
-     * 
-     */
-    @JsonProperty("credentialList")
-    public List<CredentialPojo> getCredentialList() {
-        return credentialList;
-    }
-
-    /**
-     * Original credential list to be signed
-     * (Required)
-     * 
-     */
-    @JsonProperty("credentialList")
-    public void setCredentialList(List<CredentialPojo> credentialList) {
-        this.credentialList = credentialList;
-    }
-
-    /**
-     * trusted timestamping provided by the trusted third party or by the consensus of each node in the consortium chain
-     * (Required)
-     * 
-     */
-    @JsonProperty("timestamp")
-    public Integer getTimestamp() {
-        return timestamp;
-    }
-
-    /**
-     * trusted timestamping provided by the trusted third party or by the consensus of each node in the consortium chain
-     * (Required)
-     * 
-     */
-    @JsonProperty("timestamp")
-    public void setTimestamp(Integer timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    /**
-     * information about timestamp authority
-     * (Required)
-     * 
-     */
-    @JsonProperty("timestampAuthority")
-    public String getTimestampAuthority() {
-        return timestampAuthority;
-    }
-
-    /**
-     * information about timestamp authority
-     * (Required)
-     * 
-     */
-    @JsonProperty("timestampAuthority")
-    public void setTimestampAuthority(String timestampAuthority) {
-        this.timestampAuthority = timestampAuthority;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);

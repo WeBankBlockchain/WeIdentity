@@ -1,8 +1,5 @@
 package com.webank.weid.protocol.cpt;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,6 +7,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import javax.annotation.Generated;
+import lombok.Data;
 
 
 /**
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "userNonce"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt111 {
 
     /**
@@ -53,70 +55,19 @@ public class Cpt111 {
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     /**
-     * 
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("cptId")
-    public String getCptId() {
-        return cptId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("cptId")
-    public void setCptId(String cptId) {
-        this.cptId = cptId;
-    }
-
-    /**
-     * credential Signature Request
-     * (Required)
-     * 
-     */
-    @JsonProperty("credentialSignatureRequest")
-    public String getCredentialSignatureRequest() {
-        return credentialSignatureRequest;
-    }
-
-    /**
-     * credential Signature Request
-     * (Required)
-     *
-     */
-    @JsonProperty("credentialSignatureRequest")
-    public void setCredentialSignatureRequest(String credentialSignatureRequest) {
-        this.credentialSignatureRequest = credentialSignatureRequest;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("userNonce")
-    public String getUserNonce() {
-        return userNonce;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("userNonce")
-    public void setUserNonce(String userNonce) {
-        this.userNonce = userNonce;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);

@@ -67,7 +67,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
      * @param groupId 群组编号
      */
     public EvidenceServiceImpl(ProcessingMode processingMode, String groupId) {
-        //super(groupId);
+        super(groupId);
         this.processingMode = processingMode;
         initEvidenceServiceEngine(groupId);
     }
