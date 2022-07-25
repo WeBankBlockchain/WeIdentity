@@ -439,9 +439,9 @@ public final class DataToolUtils {
 
     /**
      * load json from resource
-     * @param path
-     * @return
-     * @throws IOException
+     * @param path class path file path
+     * @return json node
+     * @throws IOException load error
      */
     public static JsonNode loadJsonObjectFromResource(String path) throws IOException {
         try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
@@ -454,9 +454,9 @@ public final class DataToolUtils {
 
     /**
      * load json from file
-     * @param file
-     * @return
-     * @throws IOException
+     * @param file file of json
+     * @return json node
+     * @throws IOException file not found
      */
     public static JsonNode loadJsonObjectFromFile(File file) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(file)) {
@@ -798,8 +798,8 @@ public final class DataToolUtils {
 
     /**
      * hexString of pub or private key convert to decimal string
-     * @param keyInHex
-     * @return
+     * @param keyInHex private key or pub key in hex string
+     * @return decimal string
      */
     public static String hexStr2DecStr(String keyInHex) {
         byte[] keyBytes = Numeric.hexStringToByteArray(keyInHex);
