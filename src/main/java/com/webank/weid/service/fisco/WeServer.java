@@ -46,9 +46,9 @@ import com.webank.weid.util.PropertyUtils;
 
 /**
  * BcosSDK,Client,CryptoKeyPair
- * @param <B>
- * @param <W>
- * @param <C>
+ * @param <B> BcosSDK
+ * @param <W> client
+ * @param <C> cryptoKeyPair
  */
 public abstract class WeServer<B, W, C> {
 
@@ -117,7 +117,8 @@ public abstract class WeServer<B, W, C> {
             synchronized (WeServer.class) {
                 weServer = weServerContext.get(groupId);
                 if (weServer == null) {
-                    if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+                    if (fiscoConfig.getVersion()
+                        .startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
                         weServer = new WeServerV2(fiscoConfig);
                         weServer.initWeb3j(groupId);
                         weServerContext.put(groupId, weServer);
@@ -128,6 +129,7 @@ public abstract class WeServer<B, W, C> {
                         weServerContext.put(groupId, weServer);
                     }
                 }
+            }
         }
         return (WeServer<B, W, C>) weServer;
     }
@@ -194,7 +196,7 @@ public abstract class WeServer<B, W, C> {
 
     /**
      * 返回Bcos SDK 实例
-     * @return
+     * @return BcosSDK
      */
     public abstract B getBcosSDK();
 
@@ -265,7 +267,7 @@ public abstract class WeServer<B, W, C> {
 
     /**
      * 获取链上群组列表
-     * @return
+     * @return groupList
      */
     public abstract Set<String> getGroupList();
 
