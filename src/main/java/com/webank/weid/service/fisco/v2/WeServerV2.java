@@ -243,13 +243,6 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         return configProperty;
     }
 
-//    private void initAccount(ConfigProperty configProperty, FiscoConfig fiscoConfig) {
-//        Map<String, Object> account = new HashMap<String, Object>();
-//        account.put("keyStoreDir", "account");
-//        account.put("accountFileFormat", "pem");
-//        logger.info("[initAccount] the account: {}.", account);
-//        configProperty.setAccount(account);
-//    }
 
     /**
      * 这里暂时只注册一个topic
@@ -263,7 +256,7 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 //        amopTopic.setPublicKeys(Arrays.asList(fiscoConfig.getAmopPubPath()));
 //        amopTopic.setPrivateKey(fiscoConfig.getPrivateKey());
 //        amopTopic.setPassword(fiscoConfig.getAmopP12Password());
-
+        // todo
         amopTopic.setPublicKeys(Arrays.asList("D:\\projects\\weid\\WeIdentity\\out\\production\\resources\\consumer_public_key.pem"));
         amopTopic.setPrivateKey("D:\\projects\\weid\\WeIdentity\\out\\production\\resources\\consumer_private_key.p12");
         amopTopic.setPassword(fiscoConfig.getAmopP12Password());
@@ -272,19 +265,6 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         configProperty.setAmop(amop);
     }
 
-    /**
-     * 注册默认的callback.
-     */
-//    private void registDefaultCallback() {
-//        pushCallBack.registAmopCallback(
-//            AmopMsgType.GET_ENCRYPT_KEY.getValue(),
-//            new KeyManagerCallback()
-//        );
-//        pushCallBack.registAmopCallback(
-//            AmopMsgType.COMMON_REQUEST.getValue(),
-//            new CommonCallback()
-//        );
-//    }
 
     private void initNetWork(ConfigProperty configProperty, FiscoConfig fiscoConfig) {
         List<String> nodeList = Arrays.asList(fiscoConfig.getNodes().split(","));
