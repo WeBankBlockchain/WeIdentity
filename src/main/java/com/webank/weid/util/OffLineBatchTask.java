@@ -42,26 +42,13 @@ public class OffLineBatchTask extends AbstractService {
 
     private static String privateKey;
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) getClient();
-
     /**
      * persistence.
      */
     private static Persistence dataDriver;
 
     static {
-
-        /*try {
-            ECKeyPair keyPair = GenCredential.createKeyPair();
-            privateKey = String.valueOf(keyPair.getPrivateKey());
-        } catch (Exception e) {
-            logger.error("Create weId failed.", e);
-        }*/
-        /*BigInteger bigPrivateKey =
-                new BigInteger(DataToolUtils.createKeyPair().getHexPrivateKey());
-        privateKey = String.valueOf(bigPrivateKey);*/
-        privateKey = client.getCryptoSuite().createKeyPair().getHexPrivateKey();
+        privateKey = DataToolUtils.generatePrivateKey();
     }
 
     private static Persistence getDataDriver() {

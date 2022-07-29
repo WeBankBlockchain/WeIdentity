@@ -38,9 +38,6 @@ import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
  */
 public final class CredentialUtils {
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-
     /**
      * Concat all fields of Credential info, without Proof, in Json format. This should be invoked
      * when calculating Credential Signature as the raw message. Return null if credential format is
