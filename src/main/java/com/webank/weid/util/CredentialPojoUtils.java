@@ -49,9 +49,6 @@ public final class CredentialPojoUtils {
     private static Integer NOT_DISCLOSED =
         CredentialFieldDisclosureValue.NOT_DISCLOSED.getStatus();
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-
     /**
      * Concat all fields of Credential info, without Signature, in Json format. This should be
      * invoked when calculating Credential Signature. Return null if credential format is illegal.

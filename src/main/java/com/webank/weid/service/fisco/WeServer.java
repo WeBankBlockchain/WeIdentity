@@ -284,6 +284,8 @@ public abstract class WeServer<B, W, C> {
             cnsInfo = this.queryCnsInfo(cnsType);
             if (cnsInfo != null) {
                 bucketAddressMap.put(cnsType.toString(), cnsInfo);
+            } else {
+                logger.error("getBucketByCns cnsInfo is still null of [{}]", cnsType.toString());
             }
         }
         return cnsInfo;

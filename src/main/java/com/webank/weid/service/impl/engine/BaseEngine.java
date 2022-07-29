@@ -48,12 +48,13 @@ public abstract class BaseEngine extends BaseService {
         Object credentials,
         Class<T> cls) throws NoSuchMethodException, IllegalAccessException,
         InvocationTargetException {
+        Class clazz = "2".equals(BaseService.fiscoConfig.getVersion()) ? CryptoKeyPair.class : org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair.class;
         Object contract;
         Method method = cls.getMethod(
             "load",
             String.class,
             getWeb3jClass(),
-            CryptoKeyPair.class // todo v3的CryptoKeyPair class
+            clazz // 获取ECDSAKeyPair或者SM2KeyPair的父类CryptoKeyPair
         );
         Object obj = weServer.getWeb3j();
         contract = method.invoke(
