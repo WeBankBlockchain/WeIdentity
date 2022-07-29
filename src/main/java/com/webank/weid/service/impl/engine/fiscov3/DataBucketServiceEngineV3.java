@@ -16,7 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.codec.ContractCodec;
 import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple4;
 import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
@@ -34,8 +36,11 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
     private CnsType cnsType;
 
     private static TransactionDecoderService txDecoder;
+    private static ContractCodec contractCodec;
 
     static {
+        contractCodec = new ContractCodec(((Client)getClient()).getCryptoSuite(), false);
+
         txDecoder = new TransactionDecoderService(((Client)getClient()).getCryptoSuite(), false);
     }
 
@@ -97,13 +102,12 @@ public class DataBucketServiceEngineV3 extends BaseEngine implements DataBucketS
         ErrorCode errorCode = ErrorCode.UNKNOW_ERROR;
         try {
             //这里暂且认为是回执状态码
-            TransactionResponse response = txDecoder.decodeReceiptStatus(receipt);
-            /*InputAndOutputResult objectResult = txDecodeSampleDecoder.decodeOutputReturnObject(
-                receipt.getInput(), receipt.getOutput());
-            List<ResultEntity> result = objectResult.getResult();
-            Integer code = Integer.parseInt(result.get(0).getData().toString());*/
-            Integer code = response.getReturnCode();
-                    switch (code.intValue()) {
+            List<String> outputResponse = contractCodec
+                .decodeMethodByIdToString(DataBucket.getABI(),
+                    Numeric.hexStringToByteArray(receipt.getInput().substring(0, 10)),
+                    Numeric.hexStringToByteArray(receipt.getOutput()));
+            Integer code = Integer.parseInt(outputResponse.get(0));
+            switch (code) {
                 case 100:
                     errorCode = ErrorCode.SUCCESS;
                     break;
