@@ -773,9 +773,10 @@ public final class DataToolUtils {
      */
     public static byte[] encrypt(String data, String publicKey)
         throws Exception {
-
-        /*ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
-        return encrypt.encrypt(data.getBytes());*/
+//
+//        cryptoSuite.
+//        ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
+//        return encrypt.encrypt(data.getBytes());*/
         return data.getBytes();
     }
 
@@ -804,6 +805,14 @@ public final class DataToolUtils {
     public static String hexStr2DecStr(String keyInHex) {
         byte[] keyBytes = Numeric.hexStringToByteArray(keyInHex);
         return new BigInteger(1, keyBytes).toString(10);
+    }
+
+    /**
+     * generate private key
+     * @return decimal private key
+     */
+    public static String generatePrivateKey() {
+        return hexStr2DecStr(cryptoSuite.getKeyPairFactory().generateKeyPair().getHexPrivateKey());
     }
 
     /**
