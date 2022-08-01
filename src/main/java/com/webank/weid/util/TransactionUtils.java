@@ -55,8 +55,6 @@ public class TransactionUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionUtils.class);
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
 
     /**
      * Check validity and build input params for createWeId (with attributes - public key) function.

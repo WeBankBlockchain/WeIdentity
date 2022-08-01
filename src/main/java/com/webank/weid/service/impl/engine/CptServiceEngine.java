@@ -27,7 +27,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @param cptId cptid
      * @param address publisher's address
      * @param cptJsonSchemaNew cpt content
-     * @param signatureResult signature
+     * @param rsvSignature signature
      * @param privateKey private key
      * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
@@ -47,7 +47,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      * @param cptId cptid
      * @param address publisher's address
      * @param cptJsonSchemaNew cpt content
-     * @param signatureResult signature
+     * @param rsvSignature signature
      * @param privateKey private key
      * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
@@ -66,7 +66,7 @@ public interface CptServiceEngine extends ReloadStaticContract {
      *
      * @param address publisher's address
      * @param cptJsonSchemaNew cpt content
-     * @param signatureResult signature
+     * @param rsvSignature signature
      * @param privateKey private key
      * @param dataStorageIndex 0 is cpt, 1 is policy
      * @return result
