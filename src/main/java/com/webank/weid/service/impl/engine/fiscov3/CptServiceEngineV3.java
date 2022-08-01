@@ -163,7 +163,7 @@ public class CptServiceEngineV3 extends BaseEngine implements CptServiceEngine {
             ErrorCode errorCode = processTemplate(cptId, cptJsonSchemaNew);
             int code = errorCode.getCode();
             if (code != ErrorCode.SUCCESS.getCode()) {
-                logger.error("[registerCpt]register cpt failed, error code is {}", code);
+                logger.error("[updateCpt]register cpt failed, error code is {}", code);
                 return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code));
             }
             return response;
