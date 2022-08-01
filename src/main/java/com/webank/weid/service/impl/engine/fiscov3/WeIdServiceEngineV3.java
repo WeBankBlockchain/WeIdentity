@@ -37,8 +37,8 @@ import java.util.Map;
 import java.util.zip.DataFormatException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.v3.client.protocol.model.Transaction;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.TransactionResult;
@@ -594,7 +594,7 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
         List<TransactionReceipt> receiptList = new ArrayList<>();
         try {
             BcosBlock bcosBlockOnlyHash = ((Client) weServer.getWeb3j()).getBlockByNumber(BigInteger.valueOf(blockNumber),
-                false, true);
+                false, false);
             List<TransactionResult> transHashList = bcosBlockOnlyHash.getBlock().getTransactions();
             for (TransactionResult t : transHashList) {
                 JsonTransactionResponse trans = (JsonTransactionResponse) t;

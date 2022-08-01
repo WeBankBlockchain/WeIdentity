@@ -404,7 +404,7 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(booleans.size(), hashValues.size());
         Boolean result = true;
         for (int i = 0; i < booleans.size(); i++) {
-            result = result && booleans.get(i).booleanValue();
+            result = result && booleans.get(i);
         }
         Assert.assertTrue(result);
 
