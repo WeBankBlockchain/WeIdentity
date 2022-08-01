@@ -38,7 +38,7 @@ public class FiscoConfig {
 
     @NotNull(message = "the bcos.version is undefined")
     @NotEmpty(message = "the value of bcos.version is null")
-    @MatchPattern(pattern = "[0-9]+(\\.\\w*)?", message = "the value of bcos.version is invalid")
+    @MatchPattern(pattern = "[2,3]+(\\.\\w*)?", message = "the value of bcos.version is invalid, only support 2,3")
     private String version;
     
     @NotNull(message = "the nodes is undefined")
