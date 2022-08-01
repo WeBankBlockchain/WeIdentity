@@ -121,7 +121,7 @@ public class TestGetWeIdDocument extends TestBaseService {
         PublicKeyArgs publicKeyArgs = new PublicKeyArgs();
         publicKeyArgs.setPublicKey("bcabu298t876Buc");
         publicKeyArgs.setOwner(createWeIdResult.getWeId());
-        publicKeyArgs.setType(PublicKeyType.ECDSA); // todo 原来是RSA
+        publicKeyArgs.setType(PublicKeyType.ECDSA);
         weIdService.addPublicKey(createWeIdResult.getWeId(), publicKeyArgs,
             createWeIdResult.getUserWeIdPrivateKey());
         ResponseData<WeIdDocument> weIdDoc = weIdService

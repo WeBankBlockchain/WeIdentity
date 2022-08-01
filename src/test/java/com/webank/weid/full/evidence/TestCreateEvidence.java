@@ -19,6 +19,7 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.OffLineBatchTask;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,10 +28,10 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -46,8 +47,6 @@ public class TestCreateEvidence extends TestBaseService {
     private static final Logger logger = LoggerFactory.getLogger(TestCreateEvidence.class);
 
     private static volatile Credential credential = null;
-
-    private static final CryptoSuite cryptoSuite = ((Client) BaseService.getClient()).getCryptoSuite();
 
     @Override
     public synchronized void testInit() {
@@ -405,7 +404,7 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(booleans.size(), hashValues.size());
         Boolean result = true;
         for (int i = 0; i < booleans.size(); i++) {
-            result = result && booleans.get(i).booleanValue();
+            result = result && booleans.get(i);
         }
         Assert.assertTrue(result);
 
@@ -450,27 +449,55 @@ public class TestCreateEvidence extends TestBaseService {
     /**
      * This test can only be invoked when using multi-group with group = 1 and 2.
      */
-    public void testBatchCreateMultiGroup() {
+    public void testBatchCreateMultiGroup() throws IOException {
         int batchSize = 100;
         List<TransactionArgs> transactionArgsList = new ArrayList<>();
-        CryptoKeyPair cryptoKeyPair = cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
-        for (int i = 0; i < batchSize; i++) {
-            CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-            credential.setId(UUID.randomUUID().toString());
-            String hash = credential.getHash();
-            TransactionArgs args = new TransactionArgs();
-            args.setMethod("createEvidence");
-            List<String> argList = new ArrayList<>();
-            argList.add(credential.getHash());
-            argList.add(cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
-            argList.add("test log" + i);
-            argList.add(DateUtils.getNoMillisecondTimeStampString());
-            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
-            if (i % 2 == 1) {
-                argList.add("2");
+        if ("2".equals(BaseService.getVersion())) {
+            CryptoKeyPair cryptoKeyPair = DataToolUtils.cryptoSuite.getKeyPairFactory()
+                .createKeyPair(new BigInteger(privateKey));
+            for (int i = 0; i < batchSize; i++) {
+                CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+                credential.setId(UUID.randomUUID().toString());
+                String hash = credential.getHash();
+                TransactionArgs args = new TransactionArgs();
+                args.setMethod("createEvidence");
+                List<String> argList = new ArrayList<>();
+                argList.add(credential.getHash());
+                argList.add(DataToolUtils.cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
+                argList.add("test log" + i);
+                argList.add(DateUtils.getNoMillisecondTimeStampString());
+                argList
+                    .add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
+                if (i % 2 == 1) {
+                    argList.add("2");
+                }
+                args.setArgs(String.join(",", argList));
+                transactionArgsList.add(args);
             }
-            args.setArgs(String.join(",", argList));
-            transactionArgsList.add(args);
+        } else {
+            CryptoSuite cryptoSuite = new CryptoSuite(DataToolUtils.cryptoSuite.getCryptoTypeConfig());
+            org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair cryptoKeyPair =
+                cryptoSuite.getKeyPairFactory()
+                .createKeyPair(new BigInteger(privateKey));
+            for (int i = 0; i < batchSize; i++) {
+                CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+                credential.setId(UUID.randomUUID().toString());
+                String hash = credential.getHash();
+                TransactionArgs args = new TransactionArgs();
+                args.setMethod("createEvidence");
+                List<String> argList = new ArrayList<>();
+                argList.add(credential.getHash());
+                argList.add(cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
+                argList.add("test log" + i);
+                argList.add(DateUtils.getNoMillisecondTimeStampString());
+                argList
+                    .add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
+                if (i % 2 == 1) {
+                    argList.add("2");
+                }
+                args.setArgs(String.join(",", argList));
+                transactionArgsList.add(args);
+            }
         }
         OffLineBatchTask task = new OffLineBatchTask();
         task.sendBatchTransaction(transactionArgsList);
