@@ -38,9 +38,6 @@ import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
  */
 public final class CredentialUtils {
 
-    //TODO 所有getClient()需要适配V3
-    private static Client client =  (Client) BaseService.getClient();
-
     /**
      * Concat all fields of Credential info, without Proof, in Json format. This should be invoked
      * when calculating Credential Signature as the raw message. Return null if credential format is
@@ -92,7 +89,7 @@ public final class CredentialUtils {
      * Build the credential Proof.
      *
      * @param credential the credential
-     * @param privateKey
+     * @param privateKey private key decimal
      * @param disclosureMap the disclosureMap
      * @return the Proof structure
      */
@@ -296,7 +293,7 @@ public final class CredentialUtils {
      * creation is the credential thumbprint result based on an empty signature value filled in.
      *
      * @param credential target credential object
-     * @param privateKey
+     * @param privateKey decimal
      * @param disclosureMap the disclosure map
      * @return the String signature value
      */

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 
 
 /**
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "issuer"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt110 {
 
     /**
@@ -75,130 +77,19 @@ public class Cpt110 {
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     /**
-     * 
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("context")
-    public String getContext() {
-        return context;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("context")
-    public void setContext(String context) {
-        this.context = context;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("cptId")
-    public Integer getCptId() {
-        return cptId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("cptId")
-    public void setCptId(Integer cptId) {
-        this.cptId = cptId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("credentialId")
-    public String getCredentialId() {
-        return credentialId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("credentialId")
-    public void setCredentialId(String credentialId) {
-        this.credentialId = credentialId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("expirationDate")
-    public Integer getExpirationDate() {
-        return expirationDate;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("expirationDate")
-    public void setExpirationDate(Integer expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("issuanceDate")
-    public Integer getIssuanceDate() {
-        return issuanceDate;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("issuanceDate")
-    public void setIssuanceDate(Integer issuanceDate) {
-        this.issuanceDate = issuanceDate;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("issuer")
-    public String getIssuer() {
-        return issuer;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("issuer")
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);

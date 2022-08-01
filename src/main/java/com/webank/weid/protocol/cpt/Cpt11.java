@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 
 
 /**
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "userName"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt11 {
 
     /**
@@ -71,110 +73,19 @@ public class Cpt11 {
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     /**
-     * 
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("cptId")
-    public Integer getCptId() {
-        return cptId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("cptId")
-    public void setCptId(Integer cptId) {
-        this.cptId = cptId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("gender")
-    public String getGender() {
-        return gender;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("gender")
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    /**
-     * Registered Tags
-     * (Required)
-     * 
-     */
-    @JsonProperty("tags")
-    public List<String> getTags() {
-        return tags;
-    }
-
-    /**
-     * Registered Tags
-     * (Required)
-     * 
-     */
-    @JsonProperty("tags")
-    public void setTags(List<String> tags) {
-        this.tags = tags;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("userId")
-    public String getUserId() {
-        return userId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("userId")
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("userName")
-    public String getUserName() {
-        return userName;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("userName")
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);

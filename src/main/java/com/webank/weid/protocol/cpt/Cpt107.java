@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 
 
 /**
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "credentialList"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt107 {
 
     /**
@@ -36,32 +38,20 @@ public class Cpt107 {
     private List<CredentialPojo> credentialList = new ArrayList<CredentialPojo>();
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
-
     /**
-     * 
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("credentialList")
-    public List<CredentialPojo> getCredentialList() {
-        return credentialList;
-    }
-
-    /**
-     * 
-     * (Required)
-     * 
-     */
-    @JsonProperty("credentialList")
-    public void setCredentialList(List<CredentialPojo> credentialList) {
-        this.credentialList = credentialList;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);
