@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
+import org.junit.experimental.theories.DataPoints;
 
 
 /**
@@ -26,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "userName"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt11Salt {
 
     /**
@@ -56,70 +59,19 @@ public class Cpt11Salt {
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     /**
-     * CPT ID
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("cptId")
-    public String getCptId() {
-        return cptId;
-    }
-
-    /**
-     * CPT ID
-     * (Required)
-     * 
-     */
-    @JsonProperty("cptId")
-    public void setCptId(String cptId) {
-        this.cptId = cptId;
-    }
-
-    /**
-     * User ID
-     * (Required)
-     * 
-     */
-    @JsonProperty("userId")
-    public String getUserId() {
-        return userId;
-    }
-
-    /**
-     * User ID
-     * (Required)
-     * 
-     */
-    @JsonProperty("userId")
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    /**
-     * User Name
-     * (Required)
-     * 
-     */
-    @JsonProperty("userName")
-    public String getUserName() {
-        return userName;
-    }
-
-    /**
-     * User Name
-     * (Required)
-     * 
-     */
-    @JsonProperty("userName")
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);

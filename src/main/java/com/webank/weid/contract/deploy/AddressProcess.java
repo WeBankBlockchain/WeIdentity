@@ -139,6 +139,9 @@ public abstract class AddressProcess {
 
     /**
      * todo 设置String groupId后是否影响hash
+     * @param groupId groupId
+     * @param evidenceAddress evidenceAddress
+     * @return hash
      */
     public static String getHashForShare(String groupId, String evidenceAddress) {
         StringBuffer address = new StringBuffer();
