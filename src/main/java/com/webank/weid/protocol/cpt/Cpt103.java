@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -19,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "proof"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt103 {
 
     /**
@@ -47,72 +49,20 @@ public class Cpt103 {
     private String proof;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
-
     /**
-     * The challenge
-     * (Required)
-     * 
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("challenge")
-    public Challenge getChallenge() {
-        return challenge;
-    }
-
-    /**
-     * The challenge
-     * (Required)
-     * 
-     */
-    @JsonProperty("challenge")
-    public void setChallenge(Challenge challenge) {
-        this.challenge = challenge;
-    }
-
-    /**
-     * The entity's weidentity did
-     * (Required)
-     * 
-     */
-    @JsonProperty("id")
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * The entity's weidentity did
-     * (Required)
-     * 
-     */
-    @JsonProperty("id")
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    /**
-     * The proof
-     * (Required)
-     * 
-     */
-    @JsonProperty("proof")
-    public String getProof() {
-        return proof;
-    }
-
-    /**
-     * The proof
-     * (Required)
-     * 
-     */
-    @JsonProperty("proof")
-    public void setProof(String proof) {
-        this.proof = proof;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);

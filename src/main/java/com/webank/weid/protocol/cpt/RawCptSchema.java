@@ -21,6 +21,9 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class RawCptSchema {
 
+    /**
+     * all attributes of this schema is required
+     */
     public final static String CPT101 = "{\"type\":\"object\",\"description\":\"Authorize data between WeIDs via the exposed Service Endpoint\",\"title\":\"Data Authorization Token\",\"properties\":{\"duration\":{\"type\":\"integer\",\"description\":\"Duration of Validity in seconds\"},\"fromWeId\":{\"type\":\"string\",\"description\":\"Authorize from this WeID\"},\"resourceId\":{\"type\":\"string\",\"description\":\"Authorized Resource ID\"},\"serviceUrl\":{\"type\":\"string\",\"description\":\"Service Endpoint URL\"},\"toWeId\":{\"type\":\"string\",\"description\":\"Authorize to this WeID\"}},\"required\":[\"duration\",\"fromWeId\",\"resourceId\",\"serviceUrl\",\"toWeId\"],\"$schema\":\"http://json-schema.org/draft-04/schema#\"}";;
     public final static String CPT102 = "{\"type\":\"object\",\"$schema\":\"http://json-schema.org/draft-04/schema#\"}";
     public final static String CPT103 = "{\"type\":\"object\",\"description\":\"Answer to meet the challenge\",\"title\":\"Authentication Answer\",\"properties\":{\"challenge\":{\"type\":\"object\",\"properties\":{\"nonce\":{\"type\":\"string\"},\"version\":{\"type\":\"integer\"},\"weId\":{\"type\":\"string\"}},\"description\":\"The challenge\"},\"id\":{\"type\":\"string\",\"description\":\"The entity's weidentity did\"},\"proof\":{\"type\":\"string\",\"description\":\"The proof\"}},\"required\":[\"challenge\",\"id\",\"proof\"],\"$schema\":\"http://json-schema.org/draft-04/schema#\"}";
