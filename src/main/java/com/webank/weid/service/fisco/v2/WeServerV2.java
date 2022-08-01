@@ -230,8 +230,6 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     private ConfigProperty loadConfigProperty(FiscoConfig fiscoConfig) {
         ConfigProperty configProperty = new ConfigProperty();
-        // init account
-//        initAccount(configProperty, fiscoConfig);
         // init amop topic
         initAmopTopic(configProperty, fiscoConfig);
         // init netWork
