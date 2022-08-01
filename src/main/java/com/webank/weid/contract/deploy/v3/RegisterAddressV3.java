@@ -9,7 +9,7 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.service.BaseService;
 import com.webank.weid.protocol.response.CnsInfo;
 import com.webank.weid.service.impl.engine.DataBucketServiceEngine;
-import com.webank.weid.service.impl.engine.fiscov2.DataBucketServiceEngineV2;
+import com.webank.weid.service.impl.engine.fiscov3.DataBucketServiceEngineV3;
 import java.math.BigInteger;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.v3.client.Client;
@@ -38,7 +38,7 @@ public class RegisterAddressV3 {
     }
 
     private static DataBucketServiceEngine getBucket(CnsType cnsType) {
-        return new DataBucketServiceEngineV2(cnsType);
+        return new DataBucketServiceEngineV3(cnsType);
     }
 
     /**
@@ -63,7 +63,7 @@ public class RegisterAddressV3 {
         }
         ResponseData<Boolean> result = getBucket(cnsType).put(hash, key, address, privateKey);
         if (!result.getResult()) {
-            logger.error("[registerAddress] register address fail, please check the log.");
+            logger.error("[registerAddress] register address fail, please check the log, result:{}", result);
             throw new WeIdBaseException(ErrorCode.getTypeByErrorCode(result.getErrorCode()));
         }
         logger.info("[registerAddress] register address successfully.");
@@ -102,7 +102,7 @@ public class RegisterAddressV3 {
             RetCode retCode =
                     new BFSService((Client) BaseService.getClient(), getCryptoKeyPair(privateKey))
                             .link(cnsType.getName(), cnsType.getVersion(), bucketAddr, DataBucket.ABI);
-            if (retCode.getCode() != 1) {
+            if (retCode.getCode() != 0) {
                 throw new WeIdBaseException(retCode.getCode() + "-" + retCode.getMessage());
             }
             logger.info("[registerBucketToCns] the bucket register successfully.");

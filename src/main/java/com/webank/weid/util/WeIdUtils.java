@@ -166,12 +166,10 @@ public final class WeIdUtils {
      * check if the public key matchs the private key.
      *
      * @param privateKey BigInt of decimal private key
-     * @param publicKey the WeIdentity DID publicKey key
-     * @return true if the private and publicKey key is match, false otherwise. todo key pair match
+     * @param publicKey the WeIdentity DID publicKey key decimal
+     * @return true if the private and publicKey key is match, false otherwise.
      */
     public static boolean isKeypairMatch(BigInteger privateKey, String publicKey) {
-        /*ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);*/
         String pubFromPri = DataToolUtils.publicKeyStrFromPrivate(privateKey);
         return StringUtils.equals(pubFromPri, publicKey);
     }
@@ -188,8 +186,8 @@ public final class WeIdUtils {
             return false;
         }
         try {
-            //return WalletUtils.isValidAddress(addr);
-            //TODO java-sdk去掉了WalletUtils.isValidAddress, 此处为先将原逻辑迁移出来
+            // return WalletUtils.isValidAddress(addr);
+            // java-sdk去掉了WalletUtils.isValidAddress, 此处为先将原逻辑迁移出来
             String addressNoPrefix = Numeric.cleanHexPrefix(addr);
             return addressNoPrefix.length() == 40;
         } catch (Exception e) {

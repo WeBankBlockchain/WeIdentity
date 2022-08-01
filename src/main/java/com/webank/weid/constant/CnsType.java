@@ -30,6 +30,7 @@ public enum CnsType {
     ORG_CONFING("orgConfig", "v3.3");
 
     private static final String SPLIT_CHAR = "/";
+    private static final String SPLIT_CHAR_V3 = "_";
 
     private String name;
 
@@ -42,8 +43,14 @@ public enum CnsType {
 
     private String getCnsName(String name) {
         String profile = PropertyUtils.getProperty("cns.profile.active");
+        String chainVersion = PropertyUtils.getProperty("bcos.version");
         if (StringUtils.isNotBlank(profile)) {
-            return profile + SPLIT_CHAR + name;
+            if ("2".equals(chainVersion)) {
+                return profile + SPLIT_CHAR + name;
+            } else {
+                // v3使用BFS，不能使用斜线
+                return profile + SPLIT_CHAR_V3 + name;
+            }
         }
         return name;
     }

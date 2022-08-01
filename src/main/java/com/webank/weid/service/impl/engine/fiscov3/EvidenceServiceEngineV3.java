@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.v3.client.Client;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
@@ -506,7 +506,7 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
                 List<TransactionReceipt> checkReceitList = receiptsNode.get(String.valueOf(currentBlockNumber));
                 if (checkReceitList == null) {
                     BcosBlock bcosBlockOnlyHash = ((Client) weServer.getWeb3j()).getBlockByNumber(BigInteger.valueOf(currentBlockNumber),
-                        false, true);
+                        false, false);
                     List<TransactionResult> transHashList = bcosBlockOnlyHash.getBlock().getTransactions();
                     for (TransactionResult t : transHashList) {
                         JsonTransactionResponse trans = (JsonTransactionResponse) t;
