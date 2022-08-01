@@ -230,7 +230,6 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
                     BfsInfo versionInfo = versionInfoList.get(i);
                     String version = versionInfo.getFileName();
                     if (version.startsWith(preV)) {
-//                        String address = bfsService.readlink("/apps/" + cnsType.getName() + "/" + version);
                         List<BfsInfo> cnsInfoList = bfsService.list("/apps/" + cnsType.getName() + "/" + version);
                         if (!cnsInfoList.isEmpty()) {
                             BfsInfo cnsInfo = cnsInfoList.iterator().next();
