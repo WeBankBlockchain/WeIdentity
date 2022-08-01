@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.fisco.bcos.sdk.v3.codec.datatypes.StaticArray;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Bytes32;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -195,3 +195,6 @@ doc/bak/
 .classpath
 .idea/
 /dist/
+
+secring.gpg
+gradle.properties

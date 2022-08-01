@@ -38,10 +38,9 @@ public class OnNotifyCallbackV3
     /**
      * recieve amop request message
      *
-     * @param endpoint
-     * @param seq
-     * @param data
-     * @return void
+     * @param endpoint nodeIpPort
+     * @param seq 序列号
+     * @param data 数据
      */
     @Override
     public void onRequest(String endpoint, String seq, byte[] data) {

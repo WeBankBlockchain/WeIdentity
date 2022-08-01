@@ -28,7 +28,7 @@ public class TestCrypt {
     
     private static final String original = "{\"name\":\"zhangsan\",age:12}";
 
-    private static final CryptoSuite cryptoSuite = ((Client) BaseService.getClient()).getCryptoSuite();
+    private static final CryptoSuite cryptoSuite = DataToolUtils.cryptoSuite;
 
 
     @Test
