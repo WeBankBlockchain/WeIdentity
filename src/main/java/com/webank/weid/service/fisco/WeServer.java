@@ -128,6 +128,7 @@ public abstract class WeServer<B, W, C> {
                         weServerContext.put(groupId, weServer);
                     }
                 }
+            }
         }
         return (WeServer<B, W, C>) weServer;
     }

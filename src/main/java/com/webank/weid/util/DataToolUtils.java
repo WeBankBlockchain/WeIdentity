@@ -936,7 +936,7 @@ public final class DataToolUtils {
      * Verify a signature (base64).
      *
      * @param rawData the rawData to be verified
-     * @param signature the Signature Data in secp256k1 style
+     * @param signature the Signature Data in Base64 style
      * @param weIdDocument the WeIdDocument to be extracted
      * @param weIdPublicKeyId the WeID public key ID
      * @return true if yes, false otherwise with exact error codes
@@ -948,11 +948,11 @@ public final class DataToolUtils {
         String weIdPublicKeyId) {
         List<String> publicKeysListToVerify = new ArrayList<String>();
 
-        try {
+        /*try {
             SigBase64Deserialization(signature);
         } catch (Exception e) {
             return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
-        }
+        }*/
 
         // Traverse public key list indexed Authentication key list
 

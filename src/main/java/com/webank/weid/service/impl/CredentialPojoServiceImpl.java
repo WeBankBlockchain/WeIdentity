@@ -1077,7 +1077,6 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             String rawData = CredentialPojoUtils
                 .getCredentialThumbprintWithoutSig(result, saltMap, null);
 
-            //替换国密
             //String signature = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
             String signature = DataToolUtils.SigBase64Serialization(
                     DataToolUtils.signToRsvSignature(rawData, privateKey)
@@ -1086,7 +1085,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
             String weIdPublicKeyId = args.getWeIdAuthentication().getWeIdPublicKeyId();
             result.putProofValue(ParamKeyConstant.PROOF_CREATOR, weIdPublicKeyId);
-            //替换国密
+            //TODO：目前CredentialProofType只有ECDSA类型，需要添加SM2
             String proofType = CredentialProofType.ECDSA.getTypeName();
             result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
             result.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
