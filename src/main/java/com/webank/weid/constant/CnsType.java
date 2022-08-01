@@ -17,12 +17,12 @@ public enum CnsType {
     /**
      * 默认的cns定义，此cns用于weid主合约存储.
      */
-    DEFAULT("allOrg", "v3.3"),
+    DEFAULT("allOrg", "v3.1"),
 
     /**
      * 共享cns定义，此cns可作为机构共享数据存储.
      */
-    SHARE("share", "v3.3"),
+    SHARE("share", "v3.1"),
     
     /**
      * 机构配置CNS定义.
