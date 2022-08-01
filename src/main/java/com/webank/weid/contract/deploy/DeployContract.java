@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
+
 /**
  * The Class DeployContract.
  *
@@ -51,7 +53,8 @@ public abstract class DeployContract {
             privateKey = args[1];
         }
         if (StringUtils.isBlank(privateKey)) {
-            privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
+            //privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
+            privateKey = AddressProcess.getAddressFromFile("private_key");
         }
         fiscoConfig.setChainId(chainId);
         logger.info("deploy contract fisco version is [{},{}]", fiscoConfig.getVersion(), fiscoConfig.getNodes());

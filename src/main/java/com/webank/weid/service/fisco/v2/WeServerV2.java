@@ -264,8 +264,8 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 //        amopTopic.setPrivateKey(fiscoConfig.getPrivateKey());
 //        amopTopic.setPassword(fiscoConfig.getAmopP12Password());
 
-        amopTopic.setPublicKeys(Arrays.asList("D:\\projects\\weid\\WeIdentity\\out\\production\\resources\\consumer_public_key.pem"));
-        amopTopic.setPrivateKey("D:\\projects\\weid\\WeIdentity\\out\\production\\resources\\consumer_private_key.p12");
+        amopTopic.setPublicKeys(Arrays.asList("E:\\weid-afee\\WeIdentity\\out\\production\\resources\\consumer_public_key.pem"));
+        amopTopic.setPrivateKey("E:\\weid-afee\\WeIdentity\\out\\production\\resources\\consumer_private_key.p12");
         amopTopic.setPassword(fiscoConfig.getAmopP12Password());
         List<AmopTopic> amop = new ArrayList<AmopTopic>();
         amop.add(amopTopic);
@@ -308,8 +308,8 @@ public class WeServerV2 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         cryptoMaterial.put("useSMCrypto", fiscoConfig.getSdkSMCrypto());
         cryptoMaterial.put("certPath", fiscoConfig.getSdkCertPath());
         logger.info("path:{} before", cryptoMaterial.get("certPath"));
-        cryptoMaterial.put("certPath", "D:\\projects\\weid\\WeIdentity\\out\\test\\resources");
-        cryptoMaterial.put("certPath", "D:\\projects\\weid\\WeIdentity\\out\\production\\resources");
+        cryptoMaterial.put("certPath", "E:\\weid-afee\\WeIdentity\\out\\test\\resources");
+        cryptoMaterial.put("certPath", "E:\\weid-afee\\WeIdentity\\out\\production\\resources");
         logger.info("path:{}", cryptoMaterial.get("certPath"));
 //        cryptoMaterial.put("certPath", this.getClass().getResource("classpath:").getPath());
 //        cryptoMaterial.put("caCert",
