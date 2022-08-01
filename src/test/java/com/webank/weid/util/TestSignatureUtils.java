@@ -29,7 +29,6 @@ public class TestSignatureUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(TestSignatureUtils.class);
 
-    private static final Client client = ((Client)BaseService.getClient());
 
     @Test
     public void testSignatureUtils()

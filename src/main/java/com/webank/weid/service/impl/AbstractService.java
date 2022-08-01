@@ -32,9 +32,9 @@ public abstract class AbstractService extends BaseService {
         super();
     }
     
-    /*public AbstractService(Integer groupId) {
+    public AbstractService(String groupId) {
         super(groupId);
-    }*/
+    }
 
     protected void reloadContract() {
         reloadAddress();

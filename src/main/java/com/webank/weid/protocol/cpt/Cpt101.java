@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import lombok.Data;
 
 
 /**
@@ -27,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "toWeId"
 })
 @Generated("jsonschema2pojo")
+@Data
 public class Cpt101 {
 
     /**
@@ -56,7 +58,7 @@ public class Cpt101 {
     /**
      * Service Endpoint URL
      * (Required)
-     * 
+     *
      */
     @JsonProperty("serviceUrl")
     @JsonPropertyDescription("Service Endpoint URL")
@@ -73,110 +75,19 @@ public class Cpt101 {
     private Map<String, Object> additionalProperties = new LinkedHashMap<String, Object>();
 
     /**
-     * Authorize to this WeID
-     * (Required)
-     * @return Long
+     * getAdditionalProperties
+     * @return additionalProperties
      */
-    @JsonProperty("duration")
-    public Long getDuration() {
-        return duration;
-    }
-
-    /**
-     * Authorize to this WeID
-     * (Required)
-     * @param duration
-     */
-    @JsonProperty("duration")
-    public void setDuration(Long duration) {
-        this.duration = duration;
-    }
-
-    /**
-     * Authorize from this WeID
-     * (Required)
-     *
-     */
-    @JsonProperty("fromWeId")
-    public String getFromWeId() {
-        return fromWeId;
-    }
-
-    /**
-     * Authorize from this WeID
-     * (Required)
-     * 
-     */
-    @JsonProperty("fromWeId")
-    public void setFromWeId(String fromWeId) {
-        this.fromWeId = fromWeId;
-    }
-
-    /**
-     * Authorized Resource ID
-     * (Required)
-     * 
-     */
-    @JsonProperty("resourceId")
-    public String getResourceId() {
-        return resourceId;
-    }
-
-    /**
-     * Authorized Resource ID
-     * (Required)
-     * 
-     */
-    @JsonProperty("resourceId")
-    public void setResourceId(String resourceId) {
-        this.resourceId = resourceId;
-    }
-
-    /**
-     * Service Endpoint URL
-     * (Required)
-     * 
-     */
-    @JsonProperty("serviceUrl")
-    public String getServiceUrl() {
-        return serviceUrl;
-    }
-
-    /**
-     * Service Endpoint URL
-     * (Required)
-     * 
-     */
-    @JsonProperty("serviceUrl")
-    public void setServiceUrl(String serviceUrl) {
-        this.serviceUrl = serviceUrl;
-    }
-
-    /**
-     * Duration of Validity in seconds
-     * (Required)
-     * 
-     */
-    @JsonProperty("toWeId")
-    public String getToWeId() {
-        return toWeId;
-    }
-
-    /**
-     * Duration of Validity in seconds
-     * (Required)
-     * 
-     */
-    @JsonProperty("toWeId")
-    public void setToWeId(String toWeId) {
-        this.toWeId = toWeId;
-    }
-
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return this.additionalProperties;
     }
 
+    /**
+     *
+     * @param name name
+     * @param value value
+     */
     @JsonAnySetter
     public void setAdditionalProperty(String name, Object value) {
         this.additionalProperties.put(name, value);

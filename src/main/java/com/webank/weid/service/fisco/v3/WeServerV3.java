@@ -43,6 +43,7 @@ import org.fisco.bcos.sdk.v3.config.model.ConfigProperty;
 import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSPrecompiled.BfsInfo;
 import org.fisco.bcos.sdk.v3.contract.precompiled.bfs.BFSService;
 import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -209,31 +210,42 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
     @Override
     protected CnsInfo queryCnsInfo(CnsType cnsType) throws WeIdBaseException {
         try {
-            logger.info("[queryBucketFromCns] query address by type = {}.", cnsType.getName());
+            logger.info("[queryBucketFromCns] query address by type = {}", cnsType.getName());
             // /apps/helloworld/1.0
-            List<BfsInfo> bfsInfoList = bfsService.list("/apps/" + cnsType.getName());
+            List<BfsInfo> bfsInfoList = null;
+            try {
+                bfsInfoList = bfsService.list("/apps/" + cnsType.getName());
+            } catch (ContractException ex) {
+                bfsInfoList = new ArrayList<>();
+            }
             // 获取 /apps/helloworld下所有的版本记录，1.0 2.0
             List<BfsInfo> versionInfoList = bfsInfoList.stream().filter(bfs
                 -> "link".equals(bfs.getFileType())).collect(Collectors.toList());
-            if (versionInfoList != null && !versionInfoList.isEmpty()) {
+            if (!versionInfoList.isEmpty()) {
                 // 获取当前cnsType的大版本前缀
                 String cnsTypeVersion = cnsType.getVersion();
                 String preV = cnsTypeVersion.substring(0, cnsTypeVersion.indexOf(".") + 1);
-                //从后往前找到相应大版本的数据
+                // 从后往前找到相应大版本的数据
                 for (int i = versionInfoList.size() - 1; i >= 0; i--) {
                     BfsInfo versionInfo = versionInfoList.get(i);
                     String version = versionInfo.getFileName();
-                    List<String> addressAndAbi = versionInfo.getExt();
-                    if (addressAndAbi.size() != 2) {
-                        logger.info("bfs return ext of address and abi is invalid, {}", versionInfo);
-                        throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
-                    }
-                    // 读取真正的地址
-                    String address = addressAndAbi.get(0);
-                    String abi = addressAndAbi.get(1);
                     if (version.startsWith(preV)) {
-                        logger.info("[queryBucketFromCns] query address form CNS successfully.");
-                        return new CnsInfo(cnsType.getName(), version, address, abi);
+                        List<BfsInfo> cnsInfoList = bfsService.list("/apps/" + cnsType.getName() + "/" + version);
+                        if (!cnsInfoList.isEmpty()) {
+                            BfsInfo cnsInfo = cnsInfoList.iterator().next();
+                            List<String> addressAndAbi = cnsInfo.getExt();
+                            if (addressAndAbi.size() != 2) {
+                                logger.info("bfs return ext of address and abi is invalid, {}",
+                                    versionInfo);
+                                throw new WeIdBaseException(ErrorCode.UNKNOW_ERROR);
+                            }
+                            // 读取真正的地址
+                            String address = addressAndAbi.get(0);
+                            String abi = addressAndAbi.get(1);
+                            logger
+                                .info("[queryBucketFromCns] query address form CNS successfully.");
+                            return new CnsInfo(cnsType.getName(), version, address, abi);
+                        }
                     }
                 }
             }
