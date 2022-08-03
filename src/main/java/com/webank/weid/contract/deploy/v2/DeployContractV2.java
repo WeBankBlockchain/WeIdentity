@@ -88,8 +88,10 @@ public class DeployContractV2 extends AddressProcess {
         String privateKey = new BigInteger(1, priBytes).toString(10);
         String publicKey = new BigInteger(1, pubBytes).toString(10);
         logger.info("store private key");
-        writeAddressToFile(publicKey, "ecdsa_key.pub");
-        writeAddressToFile(privateKey, "ecdsa_key");
+        /*writeAddressToFile(publicKey, "ecdsa_key.pub");
+        writeAddressToFile(privateKey, "ecdsa_key");*/
+        writeAddressToFile(publicKey, "public_key");
+        writeAddressToFile(privateKey, "private_key");
         return true;
     }
 
@@ -136,7 +138,7 @@ public class DeployContractV2 extends AddressProcess {
         FiscoConfig fiscoConfig,
         boolean instantEnable
     ) {
-        String privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
+        String privateKey = AddressProcess.getAddressFromFile("private_key");
         WeIdPrivateKey weIdPrivate = new WeIdPrivateKey();
         weIdPrivate.setPrivateKey(privateKey);
         registerAddress(weIdPrivate, fiscoConfig, instantEnable);
