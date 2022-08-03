@@ -36,6 +36,7 @@ import com.webank.weid.util.PropertyUtils;
 import com.webank.weid.util.TransactionUtils;
 import com.webank.weid.util.WeIdUtils;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.util.encoders.Base64;
 import org.fisco.bcos.sdk.abi.EventEncoder;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple7;
@@ -467,9 +469,9 @@ public class CptServiceEngineV2 extends BaseEngine implements CptServiceEngine {
                 byte[] signature = new byte[65];
                 System.arraycopy(signatureBytes, 0, signature, 0, 64);
                 signature[64] = (byte) v;
-                cpt.setCptSignature(Hex.toHexString(signature));
+                cpt.setCptSignature(new String(Base64.encode(signature), StandardCharsets.UTF_8));
             } else {
-                cpt.setCptSignature(Hex.toHexString(signatureBytes));
+                cpt.setCptSignature(new String(Base64.encode(signatureBytes), StandardCharsets.UTF_8));
             }
             //cpt.setCptSignature(cptSignature);
 

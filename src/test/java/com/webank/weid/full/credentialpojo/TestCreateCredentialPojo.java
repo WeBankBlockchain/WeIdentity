@@ -944,7 +944,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         // Enforce a Register/Update system CPT first
         WeIdAuthentication sdkAuthen = new WeIdAuthentication();
         //ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        CryptoKeyPair keyPair = new CryptoSuite(0).getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
         String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
         sdkAuthen.setWeId(keyWeId);
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
