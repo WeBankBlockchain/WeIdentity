@@ -27,7 +27,7 @@ public enum CnsType {
     /**
      * 机构配置CNS定义.
      */
-    ORG_CONFING("orgConfig", "v3.1");
+    ORG_CONFING("orgConfig", "v3.3");
 
     private static final String SPLIT_CHAR = "/";
     private static final String SPLIT_CHAR_V3 = "_";

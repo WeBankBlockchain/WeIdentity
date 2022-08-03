@@ -819,7 +819,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
      * one WeId can not register one more AuthorityIssuer with diferent name.
      */
     @Test
-    public void testRegisterAuthorityIssuer_registerIssers() {
+    public void testRegisterAuthorityIssuer_registerIssuers() {
 
         CreateWeIdDataResult createWeId = super.createWeId();
 
