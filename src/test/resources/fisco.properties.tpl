@@ -53,12 +53,6 @@ group.id=1
 #         fisco bcos node cert related config                                                         #
 #                                                                                                     #
 #######################################################################################################
-# config files params
-v1.ca-crt-path=ca.crt
-v1.client-crt-password=123456
-v1.client-key-store-path=client.keystore
-v1.key-store-password=123456
-# v2 fisco config
 # Fisco-Bcos sdk SSL encrypt type, false:ECDSA, true:SM2
 sdk.sm-crypto=false
 # fisco-bcos sdk cert path contains[ca.crt,sdk.crt,sdk.key]
@@ -69,13 +63,3 @@ sdk.cert-path=conf
 amop.pub-path=conf/amop/consumer_public_key.pem
 amop.pri-path=conf/amop/consumer_private_key.p12
 amop.p12-password=123456
-
-v2.ca-crt-path=ca.crt
-v2.node-crt-path=node.crt
-v2.node-key-path=node.key
-# gm
-gm.ca-crt-path=gmca.crt
-gm.sdk-crt-path=gmsdk.crt
-gm.sdk-key-path=gmsdk.key
-gmen.sdk-crt-path=gmensdk.crt
-gmen.sdk-key-path=gmensdk.key

@@ -3,6 +3,7 @@
 package com.webank.weid.full.evidence;
 
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -33,8 +34,8 @@ public class TestGetEvidence extends TestBaseService {
      */
     @Test
     public void testGetEvidence_success() {
-        HashString str = new HashString(
-            new CryptoSuite(0).hash(DateUtils.getNoMillisecondTimeStampString()));
+        String hashStr = new CryptoSuite(0).hash(DateUtils.getNoMillisecondTimeStampString());
+        HashString str = new HashString(Numeric.prependHexPrefix(hashStr));
         ResponseData<String> evidence = evidenceService
             .createEvidence(str, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         Assert.assertTrue(!evidence.getResult().isEmpty());
