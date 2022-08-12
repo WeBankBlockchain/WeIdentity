@@ -48,7 +48,7 @@ public class TestRegisterCptArgsWithId extends TestBaseService {
         if (createWeId == null) {
             createWeId = super.createWeId();
             super.registerAuthorityIssuer(createWeId);
-            authorityIssuerService
+            ResponseData<Boolean> responseData = authorityIssuerService
                 .recognizeAuthorityIssuer(createWeId.getWeId(), new WeIdPrivateKey(privateKey));
         }
     }

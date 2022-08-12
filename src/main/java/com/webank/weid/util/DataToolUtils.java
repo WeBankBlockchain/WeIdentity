@@ -251,7 +251,7 @@ public final class DataToolUtils {
      * @param privateKey the pass-in privatekey
      * @return true if yes, false otherwise
      */
-    public static String convertPrivateKeyToDefaultWeId(BigInteger privateKey) {
+    /*public static String convertPrivateKeyToDefaultWeId(BigInteger privateKey) {
         return publicKeyStrFromPrivate(privateKey);
 //        BigInteger publicKey;
 //        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
@@ -264,7 +264,7 @@ public final class DataToolUtils {
 //                Keys.getAddress(publicKey)).toString());
 //        CryptoKeyPair keyPair = createKeyPairFromPrivate(new BigInteger(privateKey));
 //        return WeIdUtils.convertAddressToWeId(keyPair.getAddress());
-    }
+    }*/
 
     /**
      * Check whether the String is a valid hash.
