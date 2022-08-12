@@ -3,6 +3,7 @@ package com.webank.weid.full.auth;
 import java.math.BigInteger;
 import java.util.List;
 
+import com.webank.weid.util.WeIdUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
@@ -152,7 +153,7 @@ public class TestGetAllAuthorityIssuerList extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         List<AuthorityIssuer> authorityIssuers = response.getResult();
-        String sdkWeId = DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey));
+        String sdkWeId = WeIdUtils.getWeIdFromPrivateKey(privateKey);
 
         for (int i = 0; i < authorityIssuers.size(); i++) {
             String weId = authorityIssuers.get(i).getWeId();

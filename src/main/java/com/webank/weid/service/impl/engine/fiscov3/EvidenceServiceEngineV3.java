@@ -21,19 +21,10 @@ import com.webank.weid.suite.cache.CacheManager;
 import com.webank.weid.suite.cache.CacheNode;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.v3.client.Client;
+import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Bytes32;
@@ -41,6 +32,9 @@ import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Uint256;
 import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * EvidenceServiceEngine calls evidence contract which runs on FISCO BCOS 2.0.
