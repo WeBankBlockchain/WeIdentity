@@ -2,6 +2,7 @@
 
 package com.webank.weid.full.auth;
 
+import com.webank.weid.util.DataToolUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -16,6 +17,8 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+
+import java.math.BigInteger;
 
 /**
  * isAuthorityIssuer method for testing AuthorityIssuerService.
@@ -51,7 +54,6 @@ public class TestIsAuthorityIssuer extends TestBaseService {
         AuthorityIssuer authorityIssuer =
             authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId()).getResult();
         Assert.assertFalse(authorityIssuer.isRecognized());
-
         response = authorityIssuerService.recognizeAuthorityIssuer(createWeId.getWeId(),
             new WeIdPrivateKey(privateKey));
         Assert.assertTrue(response.getResult());
