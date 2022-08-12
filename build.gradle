@@ -93,7 +93,7 @@ List logger = [
 
 // junit test
 List junit = [
-        "junit:junit:4.12"
+        "junit:junit:4.13.1"
 ]
 
 List apache_commons = [
@@ -116,6 +116,11 @@ List json = [
         "com.networknt:json-schema-validator:1.0.71",
 ]
 
+def gson_version = "2.8.9"
+List gson = [
+        "com.google.code.gson:gson:$gson_version"
+]
+
 List mysql_driver = [
         "mysql:mysql-connector-java:8.0.20", // todo runtime
         "org.apache.commons:commons-dbcp2:2.5.0"
@@ -136,11 +141,11 @@ List rpc = [
 ]
 
 List pdfbox = [
-        "org.apache.pdfbox:pdfbox:2.0.16"
+        "org.apache.pdfbox:pdfbox:2.0.24"
 ]
 
 List protobuf = [
-        "com.google.protobuf:protobuf-java:3.9.1"
+        "com.google.protobuf:protobuf-java:3.19.2"
 ]
 
 List caffeine = [
@@ -160,11 +165,15 @@ configurations {
     all*.exclude group: "io.netty", module: "netty-tcnative"
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 dependencies {
     localDeps 'org.projectlombok:lombok:1.18.10'
     if (!gradle.startParameter.isOffline()) {
-        compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval
-        compile("com.webank:weid-contract-java:1.3.0-rc.2-SNAPSHOT")
+        compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval, gson
+        compile("com.webank:weid-contract-java:1.3.0-rc.4-SNAPSHOT")
 
         compile fileTree(dir: 'lib', include: '*.jar')
         implementation 'com.google.guava:guava:31.1-jre'
@@ -173,7 +182,7 @@ dependencies {
         implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.15'
         annotationProcessor lombok
 
-        testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval, spring
+        testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval, spring, gson
         testAnnotationProcessor lombok
     }
     if (gradleVer.startsWith("4")) {
