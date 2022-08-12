@@ -109,7 +109,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     @Override
     public CryptoKeyPair getCredentials() {
-        Client client = this.getWeb3j(fiscoConfig.getGroupId());
+        Client client = this.getWeb3j();
         return client.getCryptoSuite().getCryptoKeyPair();
     }
 
@@ -181,7 +181,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     @Override
     public int getBlockNumber() {
-        return this.getWeb3j(fiscoConfig.getGroupId()).getBlockNumber().getBlockNumber().intValue();
+        return this.getWeb3j().getBlockNumber().getBlockNumber().intValue();
     }
 
     /**
@@ -331,10 +331,10 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
         cryptoMaterial.put("useSMCrypto", fiscoConfig.getSdkSMCrypto());
         cryptoMaterial.put("certPath", fiscoConfig.getSdkCertPath());
         logger.info("path:{} before", cryptoMaterial.get("certPath"));
-        cryptoMaterial.put("certPath", "D:\\projects\\weid\\WeIdentity\\out\\test\\resources");
-        logger.info("path:{}", cryptoMaterial.get("certPath"));
-        cryptoMaterial.put("certPath", "D:\\projects\\weid\\WeIdentity\\out\\production\\resources");
-        logger.info("[initThreadPool] the cryptoMaterial: {}.", cryptoMaterial);
+        //cryptoMaterial.put("certPath", "E:\\weid-afee\\WeIdentity\\out\\test\\resources");
+        //logger.info("path:{}", cryptoMaterial.get("certPath"));
+        //cryptoMaterial.put("certPath", "E:\\weid-afee\\WeIdentity\\out\\production\\resources");
+        //logger.info("[initThreadPool] the cryptoMaterial: {}.", cryptoMaterial);
         configProperty.setCryptoMaterial(cryptoMaterial);
     }
 
@@ -380,7 +380,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
     }
 
     private void initCnsService() {
-        Client client = this.getWeb3j(fiscoConfig.getGroupId());
+        Client client = this.getWeb3j();
         this.bfsService = new BFSService(client, client.getCryptoSuite().getCryptoKeyPair());
     }
 
@@ -388,7 +388,7 @@ public class WeServerV3 extends WeServer<BcosSDK, Client, CryptoKeyPair> {
 
     @Override
     public Set<String> getGroupList() {
-        List<String> groupStrList = bcosSdk.getClient().getGroupList().getResult().getGroupList();
+        List<String> groupStrList = this.getWeb3j().getGroupList().getResult().getGroupList();
         Set<String> groupList = new HashSet<>(groupStrList);
         return groupList;
     }
