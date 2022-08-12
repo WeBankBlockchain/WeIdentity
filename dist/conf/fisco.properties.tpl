@@ -2,7 +2,7 @@
 
 #######################################################################################################
 #                                                                                                     #
-#         fisco bcos version config                                                                   #
+#         fisco bcos 2 or 3 version config                                                                   #
 #                                                                                                     #
 #######################################################################################################
 # Version
@@ -53,8 +53,8 @@ group.id=1
 #         fisco bcos node cert related config                                                         #
 #                                                                                                     #
 #######################################################################################################
-# Fisco-Bcos sdk SSL encrypt type, false:ECDSA, true:SM2
-sdk.sm-crypto=false
+# Fisco-Bcos sdk SSL encrypt type, false:ECDSA, true:SaM2
+sdk.sm-crypto=${SDK_SM_CRYPTO}
 # fisco-bcos sdk cert path contains[ca.crt,sdk.crt,sdk.key]
 # if sdk.sm-crypto is true, contains [gm] directory, and gm dir contains [gmca.crt,gmsdk.crt,gmsdk.key,gmensdk.crt,gmensdk.key]
 sdk.cert-path=conf

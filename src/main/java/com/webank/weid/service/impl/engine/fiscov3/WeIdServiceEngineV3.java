@@ -39,7 +39,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
-import org.fisco.bcos.sdk.v3.client.protocol.model.Transaction;
+//import org.fisco.bcos.sdk.v3.client.protocol.model.Transaction;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
 import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.TransactionResult;
 import org.fisco.bcos.sdk.v3.codec.EventEncoder;

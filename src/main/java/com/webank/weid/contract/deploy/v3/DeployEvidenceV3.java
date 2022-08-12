@@ -53,8 +53,8 @@ public class DeployEvidenceV3 extends AddressProcess {
             byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
             String privateKey = new BigInteger(1, priBytes).toString(10);
             String publicKey = new BigInteger(1, pubBytes).toString(10);
-            writeAddressToFile(publicKey, "ecdsa_key.pub");
-            writeAddressToFile(privateKey, "ecdsa_key");
+            writeAddressToFile(publicKey, "public_key");
+            writeAddressToFile(privateKey, "private_key");
         }
 
         //if (credentials == null) {
