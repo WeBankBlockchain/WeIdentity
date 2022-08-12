@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+
+import com.webank.weid.util.WeIdUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -382,7 +384,7 @@ public class TestCreateEvidence extends TestBaseService {
             hashValues.add(credential.getHash());
             signatures.add(DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(hash, privateKey)));
             timestamps.add(System.currentTimeMillis());
-            signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
+            signers.add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
             logs.add("test log" + i);
             if (i % 2 == 1) {
                 customKeys.add(String.valueOf(System.currentTimeMillis()));
@@ -467,7 +469,7 @@ public class TestCreateEvidence extends TestBaseService {
                 argList.add("test log" + i);
                 argList.add(DateUtils.getNoMillisecondTimeStampString());
                 argList
-                    .add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
+                    .add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
                 if (i % 2 == 1) {
                     argList.add("2");
                 }
@@ -491,7 +493,7 @@ public class TestCreateEvidence extends TestBaseService {
                 argList.add("test log" + i);
                 argList.add(DateUtils.getNoMillisecondTimeStampString());
                 argList
-                    .add(DataToolUtils.convertPrivateKeyToDefaultWeId(new BigInteger(privateKey)));
+                    .add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
                 if (i % 2 == 1) {
                     argList.add("2");
                 }
