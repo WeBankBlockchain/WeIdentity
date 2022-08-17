@@ -197,5 +197,4 @@ doc/bak/
 /dist/
 
 secring.gpg
-gradle.properties
 *.address
