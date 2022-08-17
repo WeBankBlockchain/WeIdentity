@@ -198,3 +198,4 @@ doc/bak/
 
 secring.gpg
 gradle.properties
+*.address
