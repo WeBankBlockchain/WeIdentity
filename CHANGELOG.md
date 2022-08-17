@@ -1,4 +1,11 @@
-### V1.7.0
+### V1.8.5 (2022-08-16)
+Features:
+1. Replace the web3sdk with fisco-bcos-java-sdk
+2. Support the OSCCA-approved(SM2/SM3) cryptography algorithm
+3. Support the FISCO BCOS 3.0.0 (rc4 version)
+4. Upgrade the functionality of WeID-Build-Tools to accommodate the new version of weid-java-sdk 
+
+### V1.7.0 (2021-01-08)
 Features: 
 1. FISCO BCOS 1.3.x support is fully removed - please use the FISCO BCOS 2.x node version respectively.
 2. Evidence and WeIdDocument query performance improved due to support batch type blockchain node data lookup.
