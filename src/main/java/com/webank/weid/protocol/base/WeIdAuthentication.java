@@ -18,9 +18,9 @@ public class WeIdAuthentication {
     private String weId;
     
     /**
-     * the public key Id.
+     * the method Id.
      */
-    private String weIdPublicKeyId;
+    private String authenticationMethodId;
 
     /**
      * Required: The private key or The weIdentity DID.
@@ -46,10 +46,10 @@ public class WeIdAuthentication {
      * Constructor with weId, privateKey and weIdPublicKeyId. 
      * @param weId the weId
      * @param privateKey the privateKey
-     * @param weIdPublicKeyId the weIdPublicKeyId
+     * @param authenticationMethodId the weIdPublicKeyId
      */
-    public WeIdAuthentication(String weId, String privateKey, String weIdPublicKeyId) {
+    public WeIdAuthentication(String weId, String privateKey, String authenticationMethodId) {
         this(weId, privateKey);
-        this.weIdPublicKeyId = weIdPublicKeyId;
+        this.authenticationMethodId = authenticationMethodId;
     }
 }

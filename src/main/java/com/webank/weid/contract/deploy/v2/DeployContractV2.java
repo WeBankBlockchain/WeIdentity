@@ -119,7 +119,7 @@ public class DeployContractV2 extends AddressProcess {
         initClient();
         initCryptoKeyPair(privateKey);
         String roleControllerAddress = deployRoleControllerContracts();
-        String weIdContractAddress = deployWeIdContract(roleControllerAddress);
+        String weIdContractAddress = deployWeIdContract();
         Map<String, String> addrList = deployIssuerContracts(roleControllerAddress);
         if (addrList.containsKey("AuthorityIssuerData")) {
             String authorityIssuerDataAddress = addrList.get("AuthorityIssuerData");
@@ -169,7 +169,7 @@ public class DeployContractV2 extends AddressProcess {
         }
     }
 
-    private static String deployWeIdContract(String roleControllerAddress) {
+    private static String deployWeIdContract() {
         /*if (web3j == null) {
             initWeb3j();*/
         if (client == null) {
@@ -183,8 +183,7 @@ public class DeployContractV2 extends AddressProcess {
                 credentials,
                 new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),*/
                 client,
-                cryptoKeyPair,
-                roleControllerAddress);
+                cryptoKeyPair);
         } catch (Exception e) {
             logger.error("WeIdContract deploy error.", e);
             return StringUtils.EMPTY;

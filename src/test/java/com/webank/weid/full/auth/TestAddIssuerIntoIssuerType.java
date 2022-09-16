@@ -230,7 +230,7 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
 
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey(privateKey));
-        weIdAuthentication.setWeIdPublicKeyId(null);
+        weIdAuthentication.setAuthenticationMethodId(null);
 
         ResponseData<Boolean> response = authorityIssuerService
             .addIssuerIntoIssuerType(weIdAuthentication, issuerType, super.createWeId().getWeId());
@@ -251,7 +251,7 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
         for (int i = 0; i < chars.length; i++) {
             chars[i] = (char) (i % 127);
         }
-        weIdAuthentication.setWeIdPublicKeyId(String.valueOf(chars));
+        weIdAuthentication.setAuthenticationMethodId(String.valueOf(chars));
         weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey(privateKey));
 
         ResponseData<Boolean> response = authorityIssuerService
