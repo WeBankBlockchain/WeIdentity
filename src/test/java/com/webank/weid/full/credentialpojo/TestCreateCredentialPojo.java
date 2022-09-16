@@ -94,7 +94,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         // Add new public key to this guy
         PasswordKey pwKey = TestBaseUtil.createEcKeyPair();
         AuthenticationArgs arg = new AuthenticationArgs();
-        arg.setOwner(cwdr.getWeId());
+        arg.setController(cwdr.getWeId());
         arg.setPublicKey(pwKey.getPublicKey());
         ResponseData<Boolean> addResp = weIdService.setAuthentication(cwdr.getWeId(),
             arg, cwdr.getUserWeIdPrivateKey());
@@ -104,7 +104,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
         weIdPrivateKey.setPrivateKey(pwKey.getPrivateKey());
         weIdAuth.setWeIdPrivateKey(weIdPrivateKey);
-        weIdAuth.setWeIdPublicKeyId(cwdr.getUserWeIdPublicKey().getPublicKey() + "#keys-1");
+        weIdAuth.setAuthenticationMethodId(cwdr.getUserWeIdPublicKey().getPublicKey() + "#keys-1");
         createCredentialPojoArgs.setWeIdAuthentication(weIdAuth);
 
         ResponseData<CredentialPojo> createResp =
@@ -435,7 +435,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
 
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
-        weIdAuthentication.setWeIdPublicKeyId(
+        weIdAuthentication.setAuthenticationMethodId(
             createWeIdResultWithSetAttr.getUserWeIdPublicKey().getPublicKey());
         weIdAuthentication.setWeIdPrivateKey(
             createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
@@ -852,7 +852,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
-        weIdAuthentication.setWeIdPublicKeyId(
+        weIdAuthentication.setAuthenticationMethodId(
             createWeIdResultWithSetAttr.getUserWeIdPublicKey().getPublicKey());
         createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
@@ -877,7 +877,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
         weIdAuthentication.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        weIdAuthentication.setWeIdPublicKeyId(
+        weIdAuthentication.setAuthenticationMethodId(
             createWeIdResultWithSetAttr.getUserWeIdPublicKey().getPublicKey() + "56");
         createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
@@ -904,7 +904,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdNew.getWeId());
-        weIdAuthentication.setWeIdPublicKeyId(createWeIdNew.getUserWeIdPublicKey().getPublicKey());
+        weIdAuthentication.setAuthenticationMethodId(createWeIdNew.getUserWeIdPublicKey().getPublicKey());
         weIdAuthentication.setWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
         createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
@@ -981,7 +981,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
         weIdAuthentication.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        weIdAuthentication.setWeIdPublicKeyId(createWeIdResultWithSetAttr.getWeId() + "#keys-0");
+        weIdAuthentication.setAuthenticationMethodId(createWeIdResultWithSetAttr.getWeId() + "#keys-0");
 
         // Create and check
         ResponseData<CredentialPojo> authTokenCredResp = credentialPojoService

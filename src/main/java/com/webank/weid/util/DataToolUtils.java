@@ -26,6 +26,7 @@ import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.cpt.RawCptSchema;
@@ -947,47 +948,25 @@ public final class DataToolUtils {
      * @param rawData the rawData to be verified
      * @param signature the Signature Data in Base64 style
      * @param weIdDocument the WeIdDocument to be extracted
-     * @param weIdPublicKeyId the WeID public key ID
+     * @param methodId the WeID public key ID
      * @return true if yes, false otherwise with exact error codes
      */
     public static ErrorCode verifySignatureFromWeId(
         String rawData,
         String signature,
         WeIdDocument weIdDocument,
-        String weIdPublicKeyId) {
-        List<String> publicKeysListToVerify = new ArrayList<String>();
+        String methodId) {
 
-        /*try {
-            SigBase64Deserialization(signature);
-        } catch (Exception e) {
-            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
-        }*/
-
-        // Traverse public key list indexed Authentication key list
-
-        for (PublicKeyProperty publicKeyProperty : weIdDocument.getPublicKey()) {
-            if (publicKeyProperty.getRevoked()) {
-                continue;
-            }
-            publicKeysListToVerify.add(publicKeyProperty.getPublicKey());
-        }
-        String foundMatchingPubKeyId = StringUtils.EMPTY;
+        String foundMatchingMethodId = StringUtils.EMPTY;
         try {
             boolean result = false;
-            for (String publicKeyItem : publicKeysListToVerify) {
-                if (StringUtils.isNotEmpty(publicKeyItem)) {
+            for (AuthenticationProperty authenticationProperty : weIdDocument.getAuthentication()) {
+                if (StringUtils.isNotEmpty(authenticationProperty.getPublicKeyMultibase())) {
                     boolean currentResult = verifySignature(
-                        rawData, signature, new BigInteger(publicKeyItem));
+                        rawData, signature, new BigInteger(authenticationProperty.getPublicKeyMultibase()));
                     result = currentResult || result;
                     if (currentResult) {
-                        for (PublicKeyProperty pkp : weIdDocument.getPublicKey()) {
-                            if (pkp.getRevoked()) {
-                                continue;
-                            }
-                            if (pkp.getPublicKey().equalsIgnoreCase(publicKeyItem)) {
-                                foundMatchingPubKeyId = pkp.getId();
-                            }
-                        }
+                        foundMatchingMethodId = authenticationProperty.getId();
                         break;
                     }
                 }
@@ -999,11 +978,8 @@ public final class DataToolUtils {
             logger.error("some exceptions occurred in signature verification", e);
             return ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE;
         }
-        if (NumberUtils.isDigits(weIdPublicKeyId)) {
-            weIdPublicKeyId = weIdDocument.getId() + "#keys-" + Integer.valueOf(weIdPublicKeyId);
-        }
-        if (!StringUtils.isEmpty(weIdPublicKeyId)
-            && !foundMatchingPubKeyId.equalsIgnoreCase(weIdPublicKeyId)) {
+        if (!StringUtils.isEmpty(methodId)
+            && !foundMatchingMethodId.equalsIgnoreCase(methodId)) {
             return ErrorCode.CREDENTIAL_VERIFY_SUCCEEDED_WITH_WRONG_PUBLIC_KEY_ID;
         }
         return ErrorCode.SUCCESS;

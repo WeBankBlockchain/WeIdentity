@@ -55,7 +55,6 @@ public class TestGetWeIdDocumentJson extends TestBaseService {
         WeIdDocument weIdDocument = WeIdDocument.fromJson(weIdDoc.getResult());
         Assert.assertEquals(1, weIdDocument.getService().size());
         Assert.assertEquals(1, weIdDocument.getAuthentication().size());
-        Assert.assertEquals(1, weIdDocument.getPublicKey().size());
     }
 
     /**
@@ -72,7 +71,6 @@ public class TestGetWeIdDocumentJson extends TestBaseService {
         WeIdDocument weIdDocument = WeIdDocument.fromJson(weIdDoc.getResult());
         Assert.assertEquals(0, weIdDocument.getService().size());
         Assert.assertEquals(1, weIdDocument.getAuthentication().size());
-        Assert.assertEquals(1, weIdDocument.getPublicKey().size());
     }
 
     /**
@@ -152,9 +150,6 @@ public class TestGetWeIdDocumentJson extends TestBaseService {
     @Test
     public void testGetWeIdDocumentJsonCase2() {
 
-        super.setPublicKey(createWeIdForGetJson,
-            TestBaseUtil.createEcKeyPair().getPublicKey(),
-            createWeIdNew.getWeId());
         super.setAuthentication(createWeIdForGetJson,
             TestBaseUtil.createEcKeyPair().getPublicKey(),
             createWeIdForGetJson.getWeId());

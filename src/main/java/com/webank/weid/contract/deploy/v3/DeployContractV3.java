@@ -164,8 +164,7 @@ public class DeployContractV3 extends AddressProcess {
         try {
             weIdContract = WeIdContract.deploy(
                 client,
-                cryptoKeyPair,
-                roleControllerAddress);
+                cryptoKeyPair);
         } catch (Exception e) {
             logger.error("WeIdContract deploy error.", e);
             return StringUtils.EMPTY;

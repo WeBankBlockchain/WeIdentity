@@ -14,7 +14,7 @@ import lombok.ToString;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class WeIdPojo extends WeIdBaseInfo {
+public class WeIdPojo extends WeIdDocumentMetadata {
     
     /**
      * the blockNum for the WeIdentity DID.

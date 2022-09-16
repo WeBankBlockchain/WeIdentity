@@ -380,9 +380,9 @@ public enum ErrorCode {
     ),
 
     /**
-     * the publicKeyId is invalid.
+     * the authentication method id is invalid.
      */
-    PRESENTATION_WEID_PUBLICKEY_ID_INVALID(100604, "the publicKeyId is invalid."),
+    PRESENTATION_AUTHENTICATION_METHOD_ID_INVALID(100604, "the authentication method id is invalid."),
 
     /**
      * the nonce of challenge does not match the nonce of presentation.
@@ -786,7 +786,7 @@ public enum ErrorCode {
     /**
      * weid pubkey already exists, used in add case.
      */
-    WEID_PUBLIC_KEY_ALREADY_EXISTS(
+    WEID_HAS_BEEN_DEACTIVATED(
         100116,
         "this public key already exists and is not revoked."
     ),
@@ -797,6 +797,38 @@ public enum ErrorCode {
     WEID_PUBLIC_KEY_NOT_EXIST(
         100117,
         "this public key does not exist, or is already revoked."
+    ),
+
+    /**
+     * Authentication with PublicKeyMultibase exists.
+     */
+    AUTHENTICATION_PUBLIC_KEY_MULTIBASE_EXISTS(
+            100118,
+            "the Authentication with PublicKeyMultibase exists."
+    ),
+
+    /**
+     * Authentication with method id exists.
+     */
+    AUTHENTICATION_METHOD_ID_EXISTS(
+            100119,
+            "the Authentication with method id exists."
+    ),
+
+    /**
+     * Authentication method not exists.
+     */
+    AUTHENTICATION_METHOD_NOT_EXISTS(
+            100120,
+            "the Authentication method not exists."
+    ),
+
+    /**
+     * Authentication with method id exists.
+     */
+    SERVICE_METHOD_ID_EXISTS(
+            100121,
+            "the service with id exists."
     ),
 
     /**
