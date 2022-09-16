@@ -368,7 +368,6 @@ public abstract class TestBaseService extends BaseTest {
         createResult.getUserWeIdPrivateKey().setPrivateKey(privateKey);
         createResult.getUserWeIdPublicKey().setPublicKey(publicKey);
 
-        this.setPublicKey(createResult, publicKey, createResult.getWeId());
         this.setAuthentication(createResult, publicKey, createResult.getWeId());
 
         CreateWeIdDataResult createWeId = new CreateWeIdDataResult();
@@ -582,8 +581,6 @@ public abstract class TestBaseService extends BaseTest {
 
         CreateWeIdDataResult createWeId = this.createWeId();
 
-        this.setPublicKey(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
-            createWeId.getWeId());
         this.setAuthentication(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
             createWeId.getWeId());
         this.setService(createWeId, TestData.SERVICE_TYPE, TestData.SERVICE_ENDPOINT);
@@ -605,32 +602,6 @@ public abstract class TestBaseService extends BaseTest {
         Assert.assertNotNull(createWeIdDataResult.getResult());
 
         return createWeIdDataResult.getResult();
-    }
-
-    /**
-     * addPublicKey default.
-     *
-     * @param createResult createResult
-     * @param publicKey publicKey
-     * @param owner owner
-     */
-    protected void setPublicKey(
-        CreateWeIdDataResult createResult,
-        String publicKey,
-        String owner) {
-
-        // No longer required, since this will be automatically set now.
-
-        // SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createResult);
-        // setPublicKeyArgs.setPublicKey(publicKey);
-        // setPublicKeyArgs.setOwner(owner);
-
-        // ResponseData<Integer> responseSetPub = weIdService.addPublicKey(setPublicKeyArgs);
-        // LogUtil.info(logger, "addPublicKey", responseSetPub);
-
-        // Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
-        //     responseSetPub.getErrorCode().intValue());
-        // Assert.assertNotEquals(0, responseSetPub.getResult().intValue());
     }
 
     /**
@@ -673,15 +644,15 @@ public abstract class TestBaseService extends BaseTest {
         // setAuthenticate for this WeIdentity DID
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createResult);
-        setAuthenticationArgs.setOwner(owner);
+        setAuthenticationArgs.setController(owner);
         setAuthenticationArgs.setPublicKey(publicKey);
         ResponseData<Boolean> responseSetAuth =
             weIdService.setAuthentication(createResult.getWeId(), setAuthenticationArgs,
                 createResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setAuthentication", responseSetAuth);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetAuth.getErrorCode().intValue());
-        Assert.assertEquals(true, responseSetAuth.getResult());
+        Assert.assertEquals(ErrorCode.AUTHENTICATION_PUBLIC_KEY_MULTIBASE_EXISTS.getCode(), responseSetAuth.getErrorCode().intValue());
+        Assert.assertEquals(false, responseSetAuth.getResult());
     }
 
     protected CredentialPojo copyCredentialPojo(CredentialPojo credentialPojo) {

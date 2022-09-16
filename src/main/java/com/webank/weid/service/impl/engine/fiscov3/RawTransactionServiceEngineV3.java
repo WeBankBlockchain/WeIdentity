@@ -9,7 +9,6 @@ import com.webank.weid.contract.v3.AuthorityIssuerController.AuthorityIssuerRetL
 import com.webank.weid.contract.v3.CptController;
 import com.webank.weid.contract.v3.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.contract.v3.WeIdContract;
-import com.webank.weid.contract.v3.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
@@ -190,8 +189,8 @@ public class RawTransactionServiceEngineV3 extends BaseEngine implements
     public ResponseData<String> createWeId(String transactionHex) {
         try {
             TransactionReceipt transactionReceipt = sendTransaction(transactionHex);
-            List<WeIdAttributeChangedEventResponse> response =
-                weIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
+            List<WeIdContract.CreateWeIdEventResponse> response =
+                weIdContract.getCreateWeIdEvents(transactionReceipt);
             TransactionInfo info = new TransactionInfo(transactionReceipt);
             if (!CollectionUtils.isEmpty(response)) {
                 return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS, info);

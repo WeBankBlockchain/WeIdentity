@@ -1083,8 +1083,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             );
             result.putProofValue(ParamKeyConstant.PROOF_CREATED, result.getIssuanceDate());
 
-            String weIdPublicKeyId = args.getWeIdAuthentication().getWeIdPublicKeyId();
-            result.putProofValue(ParamKeyConstant.PROOF_CREATOR, weIdPublicKeyId);
+            String creator = args.getWeIdAuthentication().getWeId();
+            result.putProofValue(ParamKeyConstant.PROOF_CREATOR, creator);
             //TODO：目前CredentialProofType只有ECDSA类型，需要添加SM2
             String proofType = CredentialProofType.ECDSA.getTypeName();
             result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
@@ -1194,8 +1194,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         );
         result.putProofValue(ParamKeyConstant.PROOF_CREATED, result.getIssuanceDate());
 
-        String weIdPublicKeyId = callerAuth.getWeIdPublicKeyId();
-        result.putProofValue(ParamKeyConstant.PROOF_CREATOR, weIdPublicKeyId);
+        String creator = callerAuth.getWeId();
+        result.putProofValue(ParamKeyConstant.PROOF_CREATOR, creator);
 
         String proofType = CredentialProofType.ECDSA.getTypeName();
         result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
@@ -1827,8 +1827,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
             && !challenge.getWeId().equals(weIdAuthentication.getWeId())) {
             return ErrorCode.PRESENTATION_CHALLENGE_WEID_MISMATCH;
         }
-        if (StringUtils.isBlank(weIdAuthentication.getWeIdPublicKeyId())) {
-            return ErrorCode.PRESENTATION_WEID_PUBLICKEY_ID_INVALID;
+        if (StringUtils.isBlank(weIdAuthentication.getAuthenticationMethodId())) {
+            return ErrorCode.PRESENTATION_AUTHENTICATION_METHOD_ID_INVALID;
         }
         return validateClaimPolicy(credentialList, presentationPolicyE);
     }
@@ -1939,8 +1939,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         Long proofCreated = DateUtils.getNoMillisecondTimeStamp();
         presentation.putProofValue(ParamKeyConstant.PROOF_CREATED, proofCreated);
 
-        String weIdPublicKeyId = weIdAuthentication.getWeIdPublicKeyId();
-        presentation.putProofValue(ParamKeyConstant.PROOF_VERIFICATION_METHOD, weIdPublicKeyId);
+        String methodId = weIdAuthentication.getAuthenticationMethodId();
+        presentation.putProofValue(ParamKeyConstant.PROOF_VERIFICATION_METHOD_ID, methodId);
         presentation.putProofValue(ParamKeyConstant.PROOF_NONCE, challenge.getNonce());
         /*String signature =
             DataToolUtils.secp256k1Sign(
@@ -2013,8 +2013,8 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
 
         credential.putProofValue(ParamKeyConstant.PROOF_CREATED, credential.getIssuanceDate());
 
-        String weIdPublicKeyId = weIdAuthentication.getWeIdPublicKeyId();
-        credential.putProofValue(ParamKeyConstant.PROOF_CREATOR, weIdPublicKeyId);
+        String creator = weIdAuthentication.getWeId();
+        credential.putProofValue(ParamKeyConstant.PROOF_CREATOR, creator);
 
         String proofType = CredentialProofType.ECDSA.getTypeName();
         credential.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);

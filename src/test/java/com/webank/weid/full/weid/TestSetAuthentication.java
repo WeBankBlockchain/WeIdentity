@@ -71,14 +71,14 @@ public class TestSetAuthentication extends TestBaseService {
 
         AuthenticationArgs setAuthenticationArgs1 =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdNew);
-        setAuthenticationArgs1.setOwner(createWeIdResult.getWeId());
+        setAuthenticationArgs1.setController(createWeIdResult.getWeId());
         ResponseData<Boolean> response1 = weIdService.setAuthentication(
             createWeIdNew.getWeId(),
             setAuthenticationArgs1,
             createWeIdNew.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setAuthentication", response1);
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
-        Assert.assertEquals(true, response1.getResult());
+        Assert.assertEquals(ErrorCode.AUTHENTICATION_PUBLIC_KEY_MULTIBASE_EXISTS.getCode(), response1.getErrorCode().intValue());
+        Assert.assertEquals(false, response1.getResult());
 
         ResponseData<WeIdDocument> weIdDoc =
             weIdService.getWeIdDocument(createWeIdNew.getWeId());
@@ -350,7 +350,7 @@ public class TestSetAuthentication extends TestBaseService {
 
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setOwner(createWeIdResult.getWeId());
+        setAuthenticationArgs.setController(createWeIdResult.getWeId());
 
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResult.getWeId(), setAuthenticationArgs,
@@ -369,7 +369,7 @@ public class TestSetAuthentication extends TestBaseService {
 
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setOwner(createWeIdNew.getWeId());
+        setAuthenticationArgs.setController(createWeIdNew.getWeId());
 
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResult.getWeId(), setAuthenticationArgs,
@@ -390,7 +390,7 @@ public class TestSetAuthentication extends TestBaseService {
             DateUtils.getNoMillisecondTimeStampString());
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setOwner(weId);
+        setAuthenticationArgs.setController(weId);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResult.getWeId(), setAuthenticationArgs,
@@ -412,7 +412,7 @@ public class TestSetAuthentication extends TestBaseService {
         CreateWeIdDataResult createWeIdResultWithSetAttr = super.createWeId();
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResultWithSetAttr);
-        setAuthenticationArgs.setOwner(weid1);
+        setAuthenticationArgs.setController(weid1);
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResultWithSetAttr.getWeId(),
             setAuthenticationArgs,
@@ -423,7 +423,7 @@ public class TestSetAuthentication extends TestBaseService {
 
         AuthenticationArgs setAuthenticationArgs1 =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResultWithSetAttr);
-        setAuthenticationArgs1.setOwner(weid2);
+        setAuthenticationArgs1.setController(weid2);
         setAuthenticationArgs1.setPublicKey("12345678");
         ResponseData<Boolean> res = weIdService.setAuthentication(
             createWeIdResultWithSetAttr.getWeId(),
@@ -436,7 +436,6 @@ public class TestSetAuthentication extends TestBaseService {
             weIdService.getWeIdDocument(createWeIdResultWithSetAttr.getWeId());
         LogUtil.info(logger, "setAuthentication", weIdDoc);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(2, weIdDoc.getResult().getPublicKey().size());
         Assert.assertEquals(2, weIdDoc.getResult().getAuthentication().size());
     }
 
@@ -448,7 +447,7 @@ public class TestSetAuthentication extends TestBaseService {
 
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setOwner("xxxxxxxxxxxxxxxxx");
+        setAuthenticationArgs.setController("xxxxxxxxxxxxxxxxx");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResult.getWeId(), setAuthenticationArgs,
@@ -468,7 +467,7 @@ public class TestSetAuthentication extends TestBaseService {
         final CreateWeIdDataResult weId = super.createWeId();
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(weId);
-        setAuthenticationArgs.setOwner(null);
+        setAuthenticationArgs.setController(null);
 
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResult.getWeId(), setAuthenticationArgs,
@@ -494,7 +493,7 @@ public class TestSetAuthentication extends TestBaseService {
 
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setOwner("");
+        setAuthenticationArgs.setController("");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResult.getWeId(), setAuthenticationArgs,
@@ -513,7 +512,7 @@ public class TestSetAuthentication extends TestBaseService {
 
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createWeIdResult);
-        setAuthenticationArgs.setOwner("~!@#$%^&*()——+=？》《，<>aq10");
+        setAuthenticationArgs.setController("~!@#$%^&*()——+=？》《，<>aq10");
 
         ResponseData<Boolean> response = weIdService.setAuthentication(
             createWeIdResult.getWeId(), setAuthenticationArgs,
@@ -539,27 +538,4 @@ public class TestSetAuthentication extends TestBaseService {
         Assert.assertEquals(false, response.getResult());
     }
 
-    @Test
-    public void testDelegateSetAuth_weIdIsNotExist() {
-
-        PasswordKey passwordKey = TestBaseUtil.createEcKeyPair();
-        String pubKey = passwordKey.getPublicKey();
-        String weId = createWeId().getWeId();
-        weId = weId.replace(weId.substring(weId.length() - 4, weId.length()), "ffff");
-        LogUtil.info(logger, "weid", weId);
-
-        AuthenticationArgs authenticationArgs = new AuthenticationArgs();
-        authenticationArgs.setPublicKey(pubKey);
-
-        String delegateWeId = createWeIdNew.getWeId();
-        String delegatePrivateKey = this.privateKey;
-
-        ResponseData<Boolean> response = weIdService
-            .delegateSetAuthentication(weId, authenticationArgs,
-                new WeIdPrivateKey(delegatePrivateKey));
-        LogUtil.info(logger, "response", response);
-        Assert.assertTrue(ErrorCode.WEID_DOES_NOT_EXIST.getCode() == response.getErrorCode()
-            || ErrorCode.WEID_INVALID.getCode() == response.getErrorCode());
-        Assert.assertEquals(Boolean.FALSE, response.getResult());
-    }
 }

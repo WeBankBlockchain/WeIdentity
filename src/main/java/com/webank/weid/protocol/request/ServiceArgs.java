@@ -12,6 +12,12 @@ import lombok.Data;
 @Data
 public class ServiceArgs {
 
+    //用户可以指定service id，也可以由系统指定
+    /**
+     * Required: The service id.
+     */
+    private String id;
+
     /**
      * Required: service type.
      */

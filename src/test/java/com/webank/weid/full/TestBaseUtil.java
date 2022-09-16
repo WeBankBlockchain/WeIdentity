@@ -208,7 +208,7 @@ public class TestBaseUtil {
     public static WeIdAuthentication buildWeIdAuthentication(CreateWeIdDataResult weIdData) {
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(weIdData.getWeId());
-        weIdAuthentication.setWeIdPublicKeyId(weIdData.getWeId() + "#keys-0");
+        weIdAuthentication.setAuthenticationMethodId(weIdData.getWeId() + "#keys-0");
         weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
         weIdAuthentication.getWeIdPrivateKey().setPrivateKey(
             weIdData.getUserWeIdPrivateKey().getPrivateKey());
