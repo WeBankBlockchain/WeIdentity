@@ -42,7 +42,7 @@ public class TestPolicyServices extends TestBaseService {
         WeIdAuthentication auth = new WeIdAuthentication();
         CreateWeIdDataResult cwdr = createWeIdWithSetAttr();
         auth.setWeId(cwdr.getWeId());
-        auth.setWeIdPublicKeyId(cwdr.getUserWeIdPublicKey().getPublicKey() + "#keys-0");
+        auth.setAuthenticationMethodId(cwdr.getUserWeIdPublicKey().getPublicKey() + "#keys-0");
         auth.setWeIdPrivateKey(cwdr.getUserWeIdPrivateKey());
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed("{\"name\":0,\"gender\":0,\"age\":0,\"id\":0}");

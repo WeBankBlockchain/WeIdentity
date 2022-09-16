@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.webank.weid.protocol.base.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.slf4j.Logger;
@@ -19,12 +20,6 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
-import com.webank.weid.protocol.base.PublicKeyProperty;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdPojo;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.PublicKeyArgs;
@@ -61,7 +56,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             logger.error("Create weId failed.");
             return new ResponseData<>(null, ErrorCode.WEID_KEYPAIR_CREATE_FAILED);
         }
-        ResponseData<Boolean> innerResp = processCreateWeId(result.getWeId(), result.getUserWeIdPublicKey().getPublicKey(), result.getUserWeIdPrivateKey().getPrivateKey(), false);
+        ResponseData<Boolean> innerResp = processCreateWeId(result.getWeId(), result.getUserWeIdPublicKey().getPublicKey(), result.getUserWeIdPrivateKey().getPrivateKey());
         if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[createWeId] Create weId failed. error message is :{}",
@@ -109,7 +104,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                     .error("[createWeId]: create weid failed, the weid :{} is already exist", weId);
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
-            ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey, false);
+            ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[createWeId]: create weid failed. error message is :{}, public key is {}",
@@ -142,6 +137,23 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
         ResponseData<WeIdDocument> weIdDocResp = weIdServiceEngine.getWeIdDocument(weId);
+        return weIdDocResp;
+    }
+
+    /**
+     * Get a WeIdentity DID Document Metadata.
+     *
+     * @param weId the WeIdentity DID
+     * @return the WeIdentity DID document
+     */
+    @Override
+    public ResponseData<WeIdDocumentMetadata> getWeIdDocumentMetadata(String weId) {
+
+        if (!WeIdUtils.isWeIdValid(weId)) {
+            logger.error("Input weId : {} is invalid.", weId);
+            return new ResponseData<>(null, ErrorCode.WEID_INVALID);
+        }
+        ResponseData<WeIdDocumentMetadata> weIdDocResp = weIdServiceEngine.getWeIdDocumentMetadata(weId);
         return weIdDocResp;
     }
 
@@ -188,186 +200,6 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     }
 
     /**
-     * Remove a public key enlisted in WeID document together with the its authentication.
-     *
-     * @param weId the WeID to delete public key from
-     * @param publicKeyArgs the public key args
-     * @param privateKey the private key to send blockchain transaction
-     * @return true if succeeds, false otherwise
-     */
-    @Override
-    public ResponseData<Boolean> revokePublicKeyWithAuthentication(
-        String weId,
-        PublicKeyArgs publicKeyArgs,
-        WeIdPrivateKey privateKey) {
-        if (!verifyPublicKeyArgs(publicKeyArgs)) {
-            logger.error("[removePublicKey]: input parameter setPublicKeyArgs is illegal.");
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
-        }
-        if (!WeIdUtils.isPrivateKeyValid(privateKey)) {
-            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
-        }
-
-        // TODO check this weid document that this pubkey MUST exist first
-        String removedPubKeyToWeId = WeIdUtils
-            .convertPublicKeyToWeId(publicKeyArgs.getPublicKey());
-        if (removedPubKeyToWeId.equalsIgnoreCase(weId)) {
-            logger.error("Cannot remove the owning public key of this WeID: {}", weId);
-            return new ResponseData<>(false,
-                ErrorCode.WEID_CANNOT_REMOVE_ITS_OWN_PUB_KEY_WITHOUT_BACKUP);
-        }
-        ResponseData<WeIdDocument> responseData = this.getWeIdDocument(weId);
-        if (responseData.getResult() == null) {
-            return new ResponseData<>(false,
-                ErrorCode.getTypeByErrorCode(responseData.getErrorCode())
-            );
-        }
-        List<PublicKeyProperty> publicKeys = responseData.getResult().getPublicKey();
-        for (PublicKeyProperty pk : publicKeys) {
-            // 这一段代码目前不会被执行到，是为了未来支持WeID authorization引入的功能
-            if (pk.getPublicKey().equalsIgnoreCase(publicKeyArgs.getPublicKey())) {
-                if (publicKeys.size() == 1) {
-                    logger.error("Cannot remove the last public key of this WeID: {}", weId);
-                    return new ResponseData<>(false,
-                        ErrorCode.WEID_CANNOT_REMOVE_ITS_OWN_PUB_KEY_WITHOUT_BACKUP);
-                }
-            }
-        }
-
-        // Add correct tag by externally call revokeAuthentication once
-        AuthenticationArgs authenticationArgs = new AuthenticationArgs();
-        authenticationArgs.setPublicKey(publicKeyArgs.getPublicKey());
-        authenticationArgs.setOwner(publicKeyArgs.getOwner());
-        ResponseData<Boolean> removeAuthResp = this.revokeAuthentication(
-            weId, authenticationArgs, privateKey);
-        if (!removeAuthResp.getResult()) {
-            logger.error("Failed to remove authentication: " + removeAuthResp.getErrorMessage());
-            return removeAuthResp;
-        }
-
-        String owner = publicKeyArgs.getOwner();
-        String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-
-        if (StringUtils.isEmpty(owner)) {
-            owner = weAddress;
-        } else {
-            if (WeIdUtils.isWeIdValid(owner)) {
-                owner = WeIdUtils.convertWeIdToAddress(owner);
-            } else {
-                logger.error("removePublicKey: owner : {} is invalid.", owner);
-                return new ResponseData<>(false, ErrorCode.WEID_INVALID);
-            }
-        }
-        try {
-            String attributeKey =
-                new StringBuffer()
-                    .append(WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)
-                    .append("/")
-                    .append(publicKeyArgs.getType())
-                    .append("/")
-                    .append("base64")
-                    .toString();
-            String publicKey = publicKeyArgs.getPublicKey();
-            String attrValue = new StringBuffer()
-                .append(publicKey)
-                .append(WeIdConstant.REMOVED_PUBKEY_TAG).append(WeIdConstant.SEPARATOR)
-                .append(owner)
-                .toString();
-            return weIdServiceEngine.setAttribute(
-                weAddress,
-                attributeKey,
-                attrValue,
-                privateKey.getPrivateKey(),
-                false);
-        } catch (PrivateKeyIllegalException e) {
-            logger.error("[removePublicKey] set PublicKey failed because privateKey is illegal. ",
-                e);
-            return new ResponseData<>(false, e.getErrorCode());
-        } catch (Exception e) {
-            logger.error("[removePublicKey] set PublicKey failed with exception. ", e);
-            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
-        }
-    }
-
-    /**
-     * Add a public key in the WeIdentity DID Document. If this key is already revoked, then it will
-     * be un-revoked.
-     *
-     * @param weId the WeID to add public key to
-     * @param publicKeyArgs the public key args
-     * @param privateKey the private key to send blockchain transaction
-     * @return the public key ID, -1 if any error occurred
-     */
-    @Override
-    public ResponseData<Integer> addPublicKey(
-        String weId,
-        PublicKeyArgs publicKeyArgs,
-        WeIdPrivateKey privateKey) {
-
-        if (!verifyPublicKeyArgs(publicKeyArgs)) {
-            logger.error("[addPublicKey]: input parameter setPublicKeyArgs is illegal.");
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                ErrorCode.ILLEGAL_INPUT);
-        }
-        if (!WeIdUtils.isPrivateKeyValid(privateKey)) {
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                ErrorCode.WEID_PRIVATEKEY_INVALID);
-        }
-
-        String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-        if (StringUtils.isEmpty(weAddress)) {
-            logger.error("addPublicKey: weId : {} is invalid.", weId);
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE, ErrorCode.WEID_INVALID);
-        }
-        ResponseData<WeIdDocument> weIdDocResp = this.getWeIdDocument(weId);
-        if (weIdDocResp.getResult() == null) {
-            logger.error("Failed to fetch WeID document for WeID: {}", weId);
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
-        }
-        String owner = publicKeyArgs.getOwner();
-        if (StringUtils.isEmpty(owner)) {
-            owner = weAddress;
-        } else {
-            if (WeIdUtils.isWeIdValid(owner)) {
-                owner = WeIdUtils.convertWeIdToAddress(owner);
-            } else {
-                logger.error("addPublicKey: owner : {} is invalid.", owner);
-                return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                    ErrorCode.WEID_INVALID);
-            }
-        }
-        String pubKey = publicKeyArgs.getPublicKey();
-        int currentPubKeyId = weIdDocResp.getResult().getPublicKey().size();
-        for (PublicKeyProperty pkp : weIdDocResp.getResult().getPublicKey()) {
-            if (pkp.getPublicKey().equalsIgnoreCase(pubKey)) {
-                if (pkp.getRevoked()) {
-                    currentPubKeyId = Integer
-                        .valueOf(pkp.getId().substring(pkp.getId().length() - 1));
-                    logger.info("Updating revocation for WeID {}, ID: {}", weId, currentPubKeyId);
-                } else {
-                    // Already exists and is not revoked, hence return "already exists" error
-                    return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                        ErrorCode.WEID_PUBLIC_KEY_ALREADY_EXISTS);
-                }
-            }
-        }
-        ResponseData<Boolean> processResp = processSetPubKey(
-            publicKeyArgs.getType().getTypeName(),
-            weAddress,
-            owner,
-            pubKey,
-            privateKey.getPrivateKey(),
-            false);
-        if (!processResp.getResult()) {
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                processResp.getErrorCode(), processResp.getErrorMessage());
-        } else {
-            return new ResponseData<>(currentPubKeyId, ErrorCode.SUCCESS);
-        }
-    }
-
-    /**
      * Set service properties.
      *
      * @param weId the WeID to set service to
@@ -385,18 +217,12 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         if (!WeIdUtils.isPrivateKeyValid(privateKey)) {
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
-        if (!verifyServiceType(serviceArgs.getType())) {
-            logger.error("[setService]: the length of service type is overlimit");
-            return new ResponseData<>(false, ErrorCode.WEID_SERVICE_TYPE_OVERLIMIT);
-        }
         String serviceType = serviceArgs.getType();
         String serviceEndpoint = serviceArgs.getServiceEndpoint();
         return processSetService(
             privateKey.getPrivateKey(),
             weId,
-            serviceType,
-            serviceEndpoint,
-            false);
+            serviceArgs);
 
     }
 
@@ -413,6 +239,21 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
         return weIdServiceEngine.isWeIdExist(weId);
+    }
+
+    /**
+     * Check if WeIdentity DID is deactivated on Chain.
+     *
+     * @param weId the WeIdentity DID
+     * @return true if is deactivated, false otherwise
+     */
+    @Override
+    public ResponseData<Boolean> isDeactivated(String weId) {
+        if (!WeIdUtils.isWeIdValid(weId)) {
+            logger.error("[isWeIdExist] check weid failed. weid : {} is invalid.", weId);
+            return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+        }
+        return weIdServiceEngine.isDeactivated(weId);
     }
 
     /**
@@ -437,49 +278,80 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         return processSetAuthentication(
-            authenticationArgs.getOwner(),
-            authenticationArgs.getPublicKey(),
+            authenticationArgs,
             privateKey.getPrivateKey(),
-            weId,
-            false);
+            weId);
     }
 
     private ResponseData<Boolean> processSetAuthentication(
-        String owner,
-        String publicKey,
+        AuthenticationArgs authenticationArgs,
         String privateKey,
-        String weId,
-        boolean isDelegate) {
+        String weId) {
         if (WeIdUtils.isWeIdValid(weId)) {
+            //检查目标WeId是否存在和是否被注销
             ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
             if (isWeIdExistResp.getResult() == null || !isWeIdExistResp.getResult()) {
                 logger.error("[setAuthentication]: failed, the weid :{} does not exist",
                     weId);
                 return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
             }
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-            if (StringUtils.isEmpty(owner)) {
-                owner = weAddress;
-            } else {
-                if (WeIdUtils.isWeIdValid(owner)) {
-                    owner = WeIdUtils.convertWeIdToAddress(owner);
-                } else {
-                    logger.error("[setAuthentication]: owner : {} is invalid.", owner);
-                    return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+            ResponseData<Boolean> isDeactivatedResp = this.isDeactivated(weId);
+            if (isDeactivatedResp.getResult() == null || isDeactivatedResp.getResult()) {
+                logger.error("[setAuthentication]: failed, the weid :{} has been deactivated",
+                        weId);
+                //TODO：改ErrorCode
+                return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
+            }
+            //检查authentication的controller WeId是否存在和是否被注销
+            if (StringUtils.isEmpty(authenticationArgs.getController())) {
+                authenticationArgs.setController(weId);
+            }
+            if (!WeIdUtils.isWeIdValid(authenticationArgs.getController())) {
+                logger.error("[setAuthentication]: controller : {} is invalid.", authenticationArgs.getController());
+                return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+            }
+            isWeIdExistResp = this.isWeIdExist(authenticationArgs.getController());
+            if (isWeIdExistResp.getResult() == null || !isWeIdExistResp.getResult()) {
+                logger.error("[setAuthentication]: failed, the controller weid :{} does not exist",
+                        authenticationArgs.getController());
+                return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
+            }
+            isDeactivatedResp = this.isDeactivated(authenticationArgs.getController());
+            if (isDeactivatedResp.getResult() == null || isDeactivatedResp.getResult()) {
+                logger.error("[setAuthentication]: failed, the controller weid :{} has been deactivated",
+                        authenticationArgs.getController());
+                return new ResponseData<>(false, ErrorCode.WEID_HAS_BEEN_DEACTIVATED);
+            }
+            WeIdDocument weIdDocument = this.getWeIdDocument(weId).getResult();
+            for(int i=0; i<weIdDocument.getAuthentication().size(); i++){
+                if(authenticationArgs.getPublicKey().equals(weIdDocument.getAuthentication().get(i).getPublicKeyMultibase())){
+                    logger.error("[setAuthentication]: failed, the Authentication with PublicKeyMultibase :{} exists",
+                            authenticationArgs.getPublicKey());
+                    return new ResponseData<>(false, ErrorCode.AUTHENTICATION_PUBLIC_KEY_MULTIBASE_EXISTS);
+                }
+                if(authenticationArgs.getId().equals(weIdDocument.getAuthentication().get(i).getId())){
+                    logger.error("[setAuthentication]: failed, the Authentication with id :{} exists",
+                            authenticationArgs.getId());
+                    return new ResponseData<>(false, ErrorCode.AUTHENTICATION_METHOD_ID_EXISTS);
                 }
             }
+            AuthenticationProperty authenticationProperty = new AuthenticationProperty();
+            //如果用户没有指定method id，则系统分配
+            authenticationProperty.setId(authenticationArgs.getId());
+            if(StringUtils.isBlank(authenticationArgs.getId())){
+                authenticationProperty.setId(weId + "#keys-" + DataToolUtils.hash(authenticationArgs.getPublicKey()));
+            }
+            authenticationProperty.setController(authenticationArgs.getController());
+            authenticationProperty.setPublicKeyMultibase(authenticationArgs.getPublicKey());
+
+            List<AuthenticationProperty> authentication = weIdDocument.getAuthentication();
+            authentication.add(authenticationProperty);
+            weIdDocument.setAuthentication(authentication);
             try {
-                String attrValue = new StringBuffer()
-                    .append(publicKey)
-                    .append(WeIdConstant.SEPARATOR)
-                    .append(owner)
-                    .toString();
                 return weIdServiceEngine
-                    .setAttribute(weAddress,
-                        WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX,
-                        attrValue,
-                        privateKey,
-                        isDelegate);
+                    .updateWeId(weIdDocument,
+                        WeIdUtils.convertWeIdToAddress(weId),
+                        privateKey);
             } catch (PrivateKeyIllegalException e) {
                 logger.error("Set authenticate with private key exception. Error message :{}", e);
                 return new ResponseData<>(false, e.getErrorCode());
@@ -518,45 +390,60 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         if (WeIdUtils.isWeIdValid(weId)) {
             ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
             if (isWeIdExistResp.getResult() == null || !isWeIdExistResp.getResult()) {
-                logger.error("[SetAuthentication]: failed, the weid :{} does not exist", weId);
+                logger.error("[revokeAuthentication]: failed, the weid :{} does not exist", weId);
                 return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
             }
             String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-
-            String owner = authenticationArgs.getOwner();
-            if (StringUtils.isEmpty(owner)) {
-                owner = weAddress;
-            } else {
-                if (WeIdUtils.isWeIdValid(owner)) {
-                    owner = WeIdUtils.convertWeIdToAddress(owner);
-                } else {
-                    logger.error("[revokeAuthentication]: owner : {} is invalid.", owner);
-                    return new ResponseData<>(false, ErrorCode.WEID_INVALID);
+            WeIdDocument weIdDocument = this.getWeIdDocument(weId).getResult();
+            List<AuthenticationProperty> authentication = weIdDocument.getAuthentication();
+            if(!StringUtils.isEmpty(authenticationArgs.getPublicKey())){
+                for(int i=0; i<weIdDocument.getAuthentication().size(); i++){
+                    if(authenticationArgs.getPublicKey().equals(weIdDocument.getAuthentication().get(i).getPublicKeyMultibase())){
+                        try {
+                            authentication.remove(i);
+                            weIdDocument.setAuthentication(authentication);
+                            return weIdServiceEngine
+                                    .updateWeId(weIdDocument,
+                                            weAddress,
+                                            privateKey.getPrivateKey());
+                        } catch (PrivateKeyIllegalException e) {
+                            logger.error("remove authenticate with private key exception. Error message :{}", e);
+                            return new ResponseData<>(false, e.getErrorCode());
+                        } catch (Exception e) {
+                            logger.error("remove authenticate failed. Error message :{}", e);
+                            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+                        }
+                    }
+                    logger.error("[revokeAuthentication]: failed, the Authentication with publicKey :{} not exists",
+                            authenticationArgs.getPublicKey());
                 }
             }
-            try {
-                String attrValue = new StringBuffer()
-                    .append(authenticationArgs.getPublicKey())
-                    .append(WeIdConstant.REMOVED_AUTHENTICATION_TAG)
-                    .append(WeIdConstant.SEPARATOR)
-                    .append(owner)
-                    .toString();
-                return weIdServiceEngine
-                    .setAttribute(weAddress,
-                        WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX,
-                        attrValue,
-                        privateKey.getPrivateKey(),
-                        false);
-            } catch (PrivateKeyIllegalException e) {
-                logger
-                    .error("remove authenticate with private key exception. Error message :{}", e);
-                return new ResponseData<>(false, e.getErrorCode());
-            } catch (Exception e) {
-                logger.error("remove authenticate failed. Error message :{}", e);
-                return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+            if(!StringUtils.isEmpty(authenticationArgs.getId())){
+                for(int i=0; i<weIdDocument.getAuthentication().size(); i++){
+                    if(authenticationArgs.getId().equals(weIdDocument.getAuthentication().get(i).getId())){
+                        try {
+                            authentication.remove(i);
+                            weIdDocument.setAuthentication(authentication);
+                            return weIdServiceEngine
+                                    .updateWeId(weIdDocument,
+                                            weAddress,
+                                            privateKey.getPrivateKey());
+                        } catch (PrivateKeyIllegalException e) {
+                            logger.error("remove authenticate with private key exception. Error message :{}", e);
+                            return new ResponseData<>(false, e.getErrorCode());
+                        } catch (Exception e) {
+                            logger.error("remove authenticate failed. Error message :{}", e);
+                            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+                        }
+                    }
+                    logger.error("[revokeAuthentication]: failed, the Authentication with id :{} not exists",
+                            authenticationArgs.getId());
+                }
             }
+            logger.error("[revokeAuthentication]: failed, the Authentication not exists");
+            return new ResponseData<>(false, ErrorCode.AUTHENTICATION_METHOD_NOT_EXISTS);
         } else {
-            logger.error("Set authenticate failed. weid : {} is invalid.", weId);
+            logger.error("revokeAuthentication failed. weid : {} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
     }
@@ -568,25 +455,14 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             || StringUtils.isBlank(serviceArgs.getServiceEndpoint()));
     }
 
-    private boolean verifyServiceType(String type) {
-        String serviceType = new StringBuffer()
-            .append(WeIdConstant.WEID_DOC_SERVICE_PREFIX)
-            .append(WeIdConstant.SEPARATOR)
-            .append(type)
-            .toString();
-        int serviceTypeLength = serviceType.getBytes(StandardCharsets.UTF_8).length;
-        return serviceTypeLength <= WeIdConstant.BYTES32_FIXED_LENGTH;
-    }
-
     private ResponseData<Boolean> processCreateWeId(
         String weId,
         String publicKey,
-        String privateKey,
-        boolean isDelegate) {
+        String privateKey) {
 
         String address = WeIdUtils.convertWeIdToAddress(weId);
         try {
-            return weIdServiceEngine.createWeId(address, publicKey, privateKey, isDelegate);
+            return weIdServiceEngine.createWeId(address, publicKey, privateKey);
         } catch (PrivateKeyIllegalException e) {
             logger.error("[createWeId] create weid failed because privateKey is illegal. ",
                 e);
@@ -600,15 +476,6 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             logger.error("[createWeId] create weid failed with exception. ", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
-    }
-
-    private boolean verifyPublicKeyArgs(PublicKeyArgs publicKeyArgs) {
-
-        return !(publicKeyArgs == null
-            || publicKeyArgs.getType() == null
-            || StringUtils.isEmpty(publicKeyArgs.getType().getTypeName())
-            || StringUtils.isEmpty(publicKeyArgs.getPublicKey())
-            || !(isPublicKeyStringValid(publicKeyArgs.getPublicKey())));
     }
 
     private boolean verifyAuthenticationArgs(AuthenticationArgs authenticationArgs) {
@@ -625,242 +492,51 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             || NumberUtils.isDigits(pubKey));
     }
 
-    /* (non-Javadoc)
-     * @see com.webank.weid.rpc.WeIdService#delegateCreateWeId(
-     * com.webank.weid.protocol.base.WeIdPublicKey,
-     * com.webank.weid.protocol.base.WeIdAuthentication)
-     */
-    @Override
-    public ResponseData<String> delegateCreateWeId(
-        WeIdPublicKey publicKey,
-        WeIdAuthentication weIdAuthentication) {
-
-        if (publicKey == null || weIdAuthentication == null) {
-            logger.error("[delegateCreateWeId]: input parameter is null.");
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
-        }
-        if (!WeIdUtils.isPrivateKeyValid(weIdAuthentication.getWeIdPrivateKey())) {
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PRIVATEKEY_INVALID);
-        }
-        String privateKey = weIdAuthentication.getWeIdPrivateKey().getPrivateKey();
-        String pubKey = publicKey.getPublicKey();
-        if (StringUtils.isNotBlank(pubKey) && NumberUtils.isDigits(pubKey)) {
-            String weId = WeIdUtils.convertPublicKeyToWeId(pubKey);
-            ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
-            if (isWeIdExistResp.getResult() == null || isWeIdExistResp.getResult()) {
-                logger
-                    .error(
-                        "[delegateCreateWeId]: create weid failed, the weid :{} is already exist",
-                        weId);
-                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
-            }
-            ResponseData<Boolean> innerResp = processCreateWeId(weId, pubKey, privateKey, true);
-            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
-                logger.error(
-                    "[delegateCreateWeId]: create weid failed. error message is :{}, "
-                        + "public key is {}",
-                    innerResp.getErrorMessage(),
-                    publicKey
-                );
-                return new ResponseData<>(StringUtils.EMPTY,
-                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
-                    innerResp.getTransactionInfo());
-            }
-            return new ResponseData<>(weId,
-                ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
-                innerResp.getTransactionInfo());
-        } else {
-            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_INVALID);
-        }
-    }
-
-    /**
-     * Add a public key in the WeIdentity DID Document by other delegate caller (currently it must
-     * be admin / committee). If this key is already revoked, then it will be un-revoked.
-     *
-     * @param weId the WeID to add public key to
-     * @param publicKeyArgs the set public key args
-     * @param delegateAuth the delegate's auth
-     * @return the public key ID, -1 if any error occurred
-     */
-    @Override
-    public ResponseData<Integer> delegateAddPublicKey(
-        String weId,
-        PublicKeyArgs publicKeyArgs,
-        WeIdPrivateKey delegateAuth
-    ) {
-        if (delegateAuth == null) {
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                ErrorCode.ILLEGAL_INPUT);
-        }
-        if (publicKeyArgs == null || StringUtils.isEmpty(publicKeyArgs.getPublicKey())) {
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                ErrorCode.WEID_PUBLICKEY_INVALID);
-        }
-        if (!WeIdUtils.isPrivateKeyValid(delegateAuth) || !WeIdUtils
-            .isPrivateKeyLengthValid(delegateAuth.getPrivateKey())) {
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                ErrorCode.WEID_PRIVATEKEY_INVALID);
-        }
-        String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-        if (StringUtils.isEmpty(weAddress)) {
-            logger.error("addPublicKey: weId : {} is invalid.", weId);
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE, ErrorCode.WEID_INVALID);
-        }
-        ResponseData<WeIdDocument> weIdDocResp = this.getWeIdDocument(weId);
-        if (weIdDocResp.getResult() == null) {
-            logger.error("Failed to fetch WeID document for WeID: {}", weId);
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
-        }
-        String owner = publicKeyArgs.getOwner();
-        if (StringUtils.isEmpty(owner)) {
-            owner = weAddress;
-        } else {
-            if (WeIdUtils.isWeIdValid(owner)) {
-                owner = WeIdUtils.convertWeIdToAddress(owner);
-            } else {
-                logger.error("addPublicKey: owner : {} is invalid.", owner);
-                return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                    ErrorCode.WEID_INVALID);
-            }
-        }
-        String pubKey = publicKeyArgs.getPublicKey();
-        int currentPubKeyId = weIdDocResp.getResult().getPublicKey().size();
-        for (PublicKeyProperty pkp : weIdDocResp.getResult().getPublicKey()) {
-            if (pkp.getPublicKey().equalsIgnoreCase(pubKey)) {
-                if (pkp.getRevoked()) {
-                    currentPubKeyId = Integer
-                        .valueOf(pkp.getId().substring(pkp.getId().length() - 1));
-                    logger.info("Updating revocation for WeID {}, ID: {}", weId, currentPubKeyId);
-                } else {
-                    // Already exists and is not revoked, hence return "already exists" error
-                    return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                        ErrorCode.WEID_PUBLIC_KEY_ALREADY_EXISTS);
-                }
-            }
-        }
-        String privateKey = delegateAuth.getPrivateKey();
-
-        ResponseData<Boolean> processResp = processSetPubKey(
-            publicKeyArgs.getType().getTypeName(),
-            weAddress,
-            owner,
-            pubKey,
-            privateKey,
-            true);
-        if (!processResp.getResult()) {
-            return new ResponseData<>(WeIdConstant.ADD_PUBKEY_FAILURE_CODE,
-                processResp.getErrorCode(), processResp.getErrorMessage());
-        } else {
-            return new ResponseData<>(currentPubKeyId, ErrorCode.SUCCESS);
-        }
-    }
-
-    private ResponseData<Boolean> processSetPubKey(
-        String type,
-        String weAddress,
-        String owner,
-        String pubKey,
-        String privateKey,
-        boolean isDelegate) {
-
-        try {
-            String attributeKey =
-                new StringBuffer()
-                    .append(WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)
-                    .append("/")
-                    .append(type)
-                    .append("/")
-                    .append("base64")
-                    .toString();
-            String attrValue = new StringBuffer().append(pubKey).append(WeIdConstant.SEPARATOR)
-                .append(owner).toString();
-            return weIdServiceEngine.setAttribute(
-                weAddress,
-                attributeKey,
-                attrValue,
-                privateKey,
-                isDelegate);
-        } catch (PrivateKeyIllegalException e) {
-            logger.error("[addPublicKey] set PublicKey failed because privateKey is illegal. ",
-                e);
-            return new ResponseData<>(false, e.getErrorCode());
-        } catch (Exception e) {
-            logger.error("[addPublicKey] set PublicKey failed with exception. ", e);
-            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
-        }
-    }
-
-    /**
-     * Set service properties.
-     *
-     * @param serviceArgs your service name and endpoint
-     * @param delegateAuth the delegate's auth
-     * @return true if the "set" operation succeeds, false otherwise.
-     */
-    @Override
-    public ResponseData<Boolean> delegateSetService(
-        String weId,
-        ServiceArgs serviceArgs,
-        WeIdPrivateKey delegateAuth
-    ) {
-        if (delegateAuth == null) {
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
-        }
-        if (serviceArgs == null || StringUtils.isEmpty(serviceArgs.getServiceEndpoint())
-            || !WeIdUtils.isWeIdValid(weId)) {
-            logger.error("[setService]: input parameter setServiceArgs is illegal.");
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
-        }
-        if (!WeIdUtils.isPrivateKeyValid(delegateAuth) || !WeIdUtils
-            .isPrivateKeyLengthValid(delegateAuth.getPrivateKey())) {
-            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
-        }
-        if (!verifyServiceType(serviceArgs.getType())) {
-            logger.error("[setService]: the length of service type is overlimit");
-            return new ResponseData<>(false, ErrorCode.WEID_SERVICE_TYPE_OVERLIMIT);
-        }
-        String serviceType = serviceArgs.getType();
-        String serviceEndpoint = serviceArgs.getServiceEndpoint();
-        return processSetService(
-            delegateAuth.getPrivateKey(),
-            weId,
-            serviceType,
-            serviceEndpoint,
-            true);
-    }
-
     private ResponseData<Boolean> processSetService(
         String privateKey,
         String weId,
-        String serviceType,
-        String serviceEndpoint,
-        boolean isDelegate) {
+        ServiceArgs serviceArgs) {
         if (WeIdUtils.isWeIdValid(weId)) {
             ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
             if (isWeIdExistResp.getResult() == null || !isWeIdExistResp.getResult()) {
                 logger.error("[SetService]: failed, the weid :{} does not exist", weId);
                 return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
             }
+            WeIdDocument weIdDocument = this.getWeIdDocument(weId).getResult();
+            List<ServiceProperty> service = weIdDocument.getService();
+            ServiceProperty serviceProperty = new ServiceProperty();
+            serviceProperty.setType(serviceArgs.getType());
+            serviceProperty.setServiceEndpoint(serviceArgs.getServiceEndpoint());
+            if(weIdDocument.getService().size()==0){
+                if(StringUtils.isEmpty(serviceArgs.getId())){
+                    serviceProperty.setId(weId + '#' + DataToolUtils.hash(serviceArgs.getServiceEndpoint()));
+                }else{
+                    serviceProperty.setId(serviceArgs.getId());
+                }
+            }else{
+                if(StringUtils.isEmpty(serviceArgs.getId())){
+                    serviceProperty.setId(weId + '#' + DataToolUtils.hash(serviceArgs.getServiceEndpoint()));
+                }else{
+                    for(int i=0; i<weIdDocument.getService().size(); i++){
+                        if(serviceArgs.getId().equals(weIdDocument.getService().get(i).getId())){
+                            logger.error("[setAuthentication]: failed, the service with id :{} exists",
+                                    serviceArgs.getId());
+                            return new ResponseData<>(false, ErrorCode.SERVICE_METHOD_ID_EXISTS);
+                        }
+                    }
+                    serviceProperty.setId(serviceArgs.getId());
+                }
+            }
+            service.add(serviceProperty);
+            weIdDocument.setService(service);
             try {
-                // Service type is defined in key hence use the old slash identifier
-                String attributeKey = new StringBuffer()
-                    .append(WeIdConstant.WEID_DOC_SERVICE_PREFIX)
-                    .append("/")
-                    .append(serviceType)
-                    .toString();
                 return weIdServiceEngine
-                    .setAttribute(
-                        WeIdUtils.convertWeIdToAddress(weId),
-                        attributeKey,
-                        serviceEndpoint,
-                        privateKey,
-                        isDelegate);
-
+                        .updateWeId(weIdDocument,
+                                WeIdUtils.convertWeIdToAddress(weId),
+                                privateKey);
             } catch (PrivateKeyIllegalException e) {
                 logger
-                    .error("[setService] set PublicKey failed because privateKey is illegal. ",
+                    .error("[setService] set service failed because privateKey is illegal. ",
                         e);
                 return new ResponseData<>(false, e.getErrorCode());
             } catch (Exception e) {
@@ -873,55 +549,17 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         }
     }
 
-    /**
-     * Set authentications in WeIdentity DID.
-     *
-     * @param weId the WeID to set auth to
-     * @param authenticationArgs A public key is needed.
-     * @param delegateAuth the delegate's auth
-     * @return true if the "set" operation succeeds, false otherwise.
-     */
     @Override
-    public ResponseData<Boolean> delegateSetAuthentication(
-        String weId,
-        AuthenticationArgs authenticationArgs,
-        WeIdPrivateKey delegateAuth
-    ) {
-        if (delegateAuth == null) {
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
-        }
-        if (authenticationArgs == null || !WeIdUtils.isWeIdValid(weId)
-            || StringUtils.isEmpty(authenticationArgs.getPublicKey())) {
-            return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
-        }
-        if (!WeIdUtils.isPrivateKeyValid(delegateAuth) || !WeIdUtils
-            .isPrivateKeyLengthValid(delegateAuth.getPrivateKey())) {
-            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
-        }
-        return processSetAuthentication(
-            authenticationArgs.getOwner(),
-            authenticationArgs.getPublicKey(),
-            delegateAuth.getPrivateKey(),
-            weId,
-            true);
-    }
-
-    @Override
-    public ResponseData<List<WeIdPojo>> getWeIdList(
-        Integer blockNumber,
-        Integer pageSize,
-        Integer indexInBlock,
-        boolean direction
+    public ResponseData<List<String>> getWeIdList(
+            Integer first,
+            Integer last
     ) {
         try {
-            logger.info("[getWeIdList] begin get weIdList, blockNumber = {}, pageSize = {}, "
-                + "indexInBlock = {}, direction = {}", 
-                blockNumber, 
-                pageSize, 
-                indexInBlock, 
-                direction
+            logger.info("[getWeIdList] begin get weIdList, first index = {}, last index = {}",
+                    first,
+                    last
             );
-            return weIdServiceEngine.getWeIdList(blockNumber, pageSize, indexInBlock, direction);
+            return weIdServiceEngine.getWeIdList(first, last);
         } catch (Exception e) {
             logger.error("[getWeIdList] get weIdList failed with exception. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);

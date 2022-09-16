@@ -22,8 +22,7 @@ import com.webank.weid.util.DataToolUtils;
  * @author tonychen 2018.9.29
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class WeIdDocument extends WeIdBaseInfo implements JsonSerializer {
+public class WeIdDocument implements JsonSerializer {
 
     private static final Logger logger = LoggerFactory.getLogger(WeIdDocument.class);
 
@@ -33,14 +32,9 @@ public class WeIdDocument extends WeIdBaseInfo implements JsonSerializer {
     private static final long serialVersionUID = 411522771907189878L;
 
     /**
-     * Required: The updated.
+     * Required: The id.
      */
-    private Long updated;
-
-    /**
-     * Required: The public key list.
-     */
-    private List<PublicKeyProperty> publicKey = new ArrayList<>();
+    private String id;
 
     /**
      * Required: The authentication list.

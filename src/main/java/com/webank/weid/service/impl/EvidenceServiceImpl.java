@@ -803,10 +803,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
-        return evidenceServiceEngine.setAttribute(
+        return evidenceServiceEngine.revoke(
             hashResp.getResult(),
-            WeIdConstant.EVIDENCE_REVOKE_KEY,
-            StringUtils.EMPTY,
+            true,
             timestamp,
             weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
         );
@@ -831,10 +830,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
-        return evidenceServiceEngine.setAttribute(
+        return evidenceServiceEngine.revoke(
             hashResp.getResult(),
-            WeIdConstant.EVIDENCE_UNREVOKE_KEY,
-            StringUtils.EMPTY,
+            false,
             timestamp,
             weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
         );

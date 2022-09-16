@@ -59,7 +59,7 @@ public final class ParamKeyConstant {
     public static final String PROOF_CREATED = "created";
     public static final String PROOF_CREATOR = "creator";
     public static final String PROOF_SALT = "salt";
-    public static final String PROOF_VERIFICATION_METHOD = "verificationMethod";
+    public static final String PROOF_VERIFICATION_METHOD_ID = "verificationMethodId";
     public static final String PROOF_NONCE = "nonce";
     public static final String PROOF_VERIFICATIONREQUEST = "verificationRequest";
     public static final String PROOF_ENCODEDVERIFICATIONRULE = "encodedVerificationRule";

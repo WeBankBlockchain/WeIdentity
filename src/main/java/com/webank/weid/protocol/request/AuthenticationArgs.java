@@ -7,15 +7,21 @@ import lombok.Data;
 /**
  * The Arguments when setting Authentication for WeIdentity DID.
  *
- * @author tonychen 2020.4.24
+ * @author afeexian 2022.9.9
  */
 @Data
 public class AuthenticationArgs {
 
+    //用户可以指定verification method id，也可以由系统指定
     /**
-     * Required: The owner.
+     * Required: The method id.
      */
-    private String owner;
+    private String id;
+
+    /**
+     * Required: The method controller.
+     */
+    private String controller;
 
     /**
      * Required: The public key.
