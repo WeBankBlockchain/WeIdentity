@@ -75,4 +75,12 @@ public interface EvidenceServiceEngine {
         Long timestamp,
         String privateKey
     );
+
+    ResponseData<Boolean> revoke(
+            String hashValue,
+            Boolean revokeStage,
+            Long timestamp,
+            String privateKey
+    );
+
 }

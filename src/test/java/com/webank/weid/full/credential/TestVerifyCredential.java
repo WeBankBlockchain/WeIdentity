@@ -471,10 +471,6 @@ public class TestVerifyCredential extends TestBaseService {
     // CI hold: @Test
     public void testVerifyCredentialCase26() {
 
-        super.setPublicKey(
-            createWeIdResultWithSetAttr,
-            passwordKey.getPublicKey(),
-            createWeIdResultWithSetAttr.getWeId());
         super.setAuthentication(
             createWeIdResultWithSetAttr,
             passwordKey.getPublicKey(),

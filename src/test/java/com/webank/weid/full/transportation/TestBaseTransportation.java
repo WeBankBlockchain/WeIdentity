@@ -36,7 +36,7 @@ public abstract class TestBaseTransportation extends TestBaseService {
         if (weIdAuthentication == null) {
             weIdAuthentication = new WeIdAuthentication();
             weIdAuthentication.setWeId(createWeIdResult.getWeId());
-            weIdAuthentication.setWeIdPublicKeyId(createWeIdResult.getWeId() + "#key-0");
+            weIdAuthentication.setAuthenticationMethodId(createWeIdResult.getWeId() + "#key-0");
             weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
             weIdAuthentication.getWeIdPrivateKey().setPrivateKey(
                 createWeIdResult.getUserWeIdPrivateKey().getPrivateKey());

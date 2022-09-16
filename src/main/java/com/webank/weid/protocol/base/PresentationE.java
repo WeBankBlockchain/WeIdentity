@@ -57,7 +57,7 @@ public class PresentationE implements RawSerializer, IProof {
      * @return publicKeyId
      */
     public String getVerificationMethod() {
-        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_VERIFICATION_METHOD));
+        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_VERIFICATION_METHOD_ID));
     }
     
     /**
@@ -179,7 +179,7 @@ public class PresentationE implements RawSerializer, IProof {
             logger.error("[commit] the private key does not match the current weid.");
             return false;
         }
-        if (!weIdAuthentication.getWeIdPublicKeyId().equals(this.getVerificationMethod())) {
+        if (!weIdAuthentication.getAuthenticationMethodId().equals(this.getVerificationMethod())) {
             logger.error("[commit] the public key id does not match the presentation.");
             return false;
         }

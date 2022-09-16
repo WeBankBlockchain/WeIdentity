@@ -3,22 +3,11 @@
 package com.webank.weid.service.impl.engine.fiscov3;
 
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ResolveEventLogStatus;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.constant.WeIdConstant.PublicKeyType;
-import com.webank.weid.constant.WeIdEventConstant;
 import com.webank.weid.contract.v3.WeIdContract;
-import com.webank.weid.contract.v3.WeIdContract.WeIdAttributeChangedEventResponse;
-import com.webank.weid.contract.v3.WeIdContract.WeIdHistoryEventEventResponse;
-import com.webank.weid.exception.DataTypeCastException;
-import com.webank.weid.exception.ResolveAttributeException;
-import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
-import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.ServiceProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdPojo;
-import com.webank.weid.protocol.response.ResolveEventLogResult;
+import com.webank.weid.protocol.base.WeIdDocumentMetadata;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.TransactionInfo;
 import com.webank.weid.service.impl.engine.BaseEngine;
@@ -26,27 +15,15 @@ import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.DataFormatException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.fisco.bcos.sdk.v3.client.protocol.model.JsonTransactionResponse;
-//import org.fisco.bcos.sdk.v3.client.protocol.model.Transaction;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.v3.client.protocol.response.BcosBlock.TransactionResult;
-import org.fisco.bcos.sdk.v3.codec.EventEncoder;
-import org.fisco.bcos.sdk.v3.client.Client;
-import org.fisco.bcos.sdk.v3.model.TransactionReceipt;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple6;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+
+//import org.fisco.bcos.sdk.v3.client.protocol.model.Transaction;
 
 /**
  * WeIdServiceEngine call weid contract which runs on FISCO BCOS 2.0.
@@ -59,32 +36,9 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
         WeIdServiceEngineV3.class);
 
     /**
-     * The topic map.
-     */
-    private static final HashMap<String, String> topicMap;
-
-    /**
-     * Block number for stopping parsing.
-     */
-    private static final int STOP_RESOLVE_BLOCK_NUMBER = 0;
-
-    /**
      * WeIdentity DID contract object, for calling weIdentity DID contract.
      */
     private static WeIdContract weIdContract;
-
-    static {
-        // initialize the event topic
-        topicMap = new HashMap<String, String>();
-
-        topicMap.put(
-            //EventEncoder.encode(WeIdContract.WEIDATTRIBUTECHANGED_EVENT),
-                new EventEncoder(((Client)getClient()).getCryptoSuite()).encode(
-                        WeIdContract.WEIDATTRIBUTECHANGED_EVENT
-                ),
-            WeIdEventConstant.WEID_EVENT_ATTRIBUTE_CHANGE
-        );
-    }
 
     /**
      * 构造函数.
@@ -119,121 +73,20 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
         }
     }
 
-    /**
-     * Resolve the event history given weId as key, reversely from on-chain linked blocks.
-     *
-     * @param weId WeID as key
-     * @param blockNumber the current latest block number
-     * @param blockList stored block height list
-     * @param blockEventMap stored block event map
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.WeIdController#isDeactivated(java.lang.String)
      */
-    private void resolveEventHistory(
-        String weId,
-        int blockNumber,
-        List<Integer> blockList,
-        Map<Integer, List<WeIdAttributeChangedEventResponse>> blockEventMap
-    ) {
-        int previousBlock = blockNumber;
-        while (previousBlock != STOP_RESOLVE_BLOCK_NUMBER) {
-            int currentBlockNumber = previousBlock;
-            // Fill-in blockList
-            blockList.add(currentBlockNumber);
-            previousBlock = 0;
-            try {
-                List<TransactionReceipt> receipts = getTransactionReceipts(currentBlockNumber);
-                for (TransactionReceipt receipt : receipts) {
-                    List<TransactionReceipt.Logs> logs = receipt.getLogEntries();
-                    for (TransactionReceipt.Logs log : logs) {
-                        ResolveEventLogResult returnValue =
-                            resolveSingleEventLog(weId, log, receipt, currentBlockNumber,
-                                blockEventMap);
-                        if (returnValue.getResultStatus().equals(
-                            ResolveEventLogStatus.STATUS_SUCCESS)) {
-                            if (returnValue.getPreviousBlock() == currentBlockNumber) {
-                                continue;
-                            }
-                            previousBlock = returnValue.getPreviousBlock();
-                        }
-                    }
-                }
-            } catch (DataTypeCastException e) {
-                logger.error(
-                    "[resolveEventHistory]: get TransactionReceipt by weId :{} failed.", weId, e);
-                throw new ResolveAttributeException(
-                    ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-                    ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc(),
-                    e);
-            }
+    @Override
+    public ResponseData<Boolean> isDeactivated(String weId) {
+        try {
+
+            boolean isExist = weIdContract
+                    .isDeactivated(WeIdUtils.convertWeIdToAddress(weId));
+            return new ResponseData<>(isExist, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[isDeactivated] execute failed. Error message :{}", e);
+            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
-    }
-
-    private static ResolveEventLogResult resolveSingleEventLog(
-            String weId,
-            TransactionReceipt.Logs log,
-            TransactionReceipt receipt,
-            int currentBlockNumber,
-            Map<Integer, List<WeIdAttributeChangedEventResponse>> blockEventMap
-    ) {
-        String topic = log.getTopics().get(0);
-        String event = topicMap.get(topic);
-
-        if (StringUtils.isNotBlank(event)) {
-            return extractEventsFromBlock(weId, receipt, currentBlockNumber, blockEventMap);
-        }
-        ResolveEventLogResult response = new ResolveEventLogResult();
-        response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENT_NULL);
-        return response;
-    }
-
-
-    private static ResolveEventLogResult extractEventsFromBlock(
-        String weId,
-        TransactionReceipt receipt,
-        int currentBlockNumber,
-        Map<Integer, List<WeIdAttributeChangedEventResponse>> blockEventMap
-    ) {
-
-        List<WeIdAttributeChangedEventResponse> eventlog =
-            weIdContract.getWeIdAttributeChangedEvents(receipt);
-        ResolveEventLogResult response = new ResolveEventLogResult();
-
-        if (CollectionUtils.isEmpty(eventlog)) {
-            response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_EVENTLOG_NULL);
-            return response;
-        }
-
-        int previousBlock = 0;
-        for (WeIdAttributeChangedEventResponse res : eventlog) {
-            if (res.identity == null || res.updated == null || res.previousBlock == null) {
-                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_RES_NULL);
-                return response;
-            }
-
-            String identity = res.identity.toString();
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
-            if (!StringUtils.equals(weAddress, identity)) {
-                response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_KEY_NOT_MATCH);
-                return response;
-            }
-
-            // Fill-in blockEventMap
-            List<WeIdAttributeChangedEventResponse> events = blockEventMap.get(currentBlockNumber);
-            if (CollectionUtils.isEmpty(events)) {
-                List<WeIdAttributeChangedEventResponse> newEvents = new ArrayList<>();
-                newEvents.add(res);
-                blockEventMap.put(currentBlockNumber, newEvents);
-            } else {
-                events.add(res);
-            }
-
-            //String key = new String(res.key);
-            //String value = new String(res.value);
-            previousBlock = res.previousBlock.intValue();
-        }
-
-        response.setPreviousBlock(previousBlock);
-        response.setResolveEventLogStatus(ResolveEventLogStatus.STATUS_SUCCESS);
-        return response;
     }
 
     /* (non-Javadoc)
@@ -241,246 +94,55 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
      */
     @Override
     public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
-        Map<Integer, List<WeIdAttributeChangedEventResponse>> blockEventMap = new HashMap<>();
-        List<Integer> blockList = new ArrayList<>();
         WeIdDocument result = new WeIdDocument();
+
         result.setId(weId);
-        int latestBlockNumber = 0;
         try {
             String identityAddr = WeIdUtils.convertWeIdToAddress(weId);
-            latestBlockNumber = weIdContract
-                .getLatestRelatedBlock(identityAddr).intValue();
-            if (0 == latestBlockNumber) {
+            Tuple6<String, String, Boolean, BigInteger, List<String>, List<String>> document = weIdContract
+                    .resolve(identityAddr);
+            if (document == null) {
                 return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
             }
 
-            // Step 1: fetch all blocks in this event link in REVERSE order from chain
-            resolveEventHistory(weId, latestBlockNumber, blockList, blockEventMap);
-
-            // Step 2: reverse this the block list (so it is ascending order now)
-            Collections.reverse(blockList);
-
-            // Step 3: construct WeID Document in NORMAL order off-chain
-            constructWeIdDocument(blockList, blockEventMap, result);
-
+            List<AuthenticationProperty> authentications = new ArrayList<>();
+            for(int i = 0; i < document.getValue5().size(); i++){
+                authentications.add(AuthenticationProperty.fromString(document.getValue5().get(i)));
+            }
+            result.setAuthentication(authentications);
+            if(document.getValue6().size()>0){
+                List<ServiceProperty> serviceProperties= new ArrayList<>();
+                for(int i = 0; i < document.getValue6().size(); i++){
+                    serviceProperties.add(ServiceProperty.fromString(document.getValue6().get(i)));
+                }
+                result.setService(serviceProperties);
+            }
             return new ResponseData<>(result, ErrorCode.SUCCESS);
-        /*} catch (InterruptedException | ExecutionException e) {
-            logger.error("Set weId service failed. Error message :{}", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_EXECUTE_ERROR);
-        } catch (TimeoutException e) {
-            logger.error("Set weId service timeout. Error message :{}", e);
-            return new ResponseData<>(null, ErrorCode.TRANSACTION_TIMEOUT);*/
-        } catch (ResolveAttributeException e) {
-            logger.error("[getWeIdDocument]: resolveTransaction failed. "
-                    + "weId: {}, errorCode:{}",
-                weId,
-                e.getErrorCode(),
-                e);
-            return new ResponseData<WeIdDocument>(result,
-                ErrorCode.getTypeByErrorCode(e.getErrorCode()));
-        } catch (Exception e) {
+        }  catch (Exception e) {
             logger.error("[getWeIdDocument]: exception.", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
 
-    private void constructWeIdDocument(
-        List<Integer> blockList,
-        Map<Integer, List<WeIdAttributeChangedEventResponse>> blockEventMap,
-        WeIdDocument weIdDocument) {
-        String weId = weIdDocument.getId();
-        // Iterate thru the blocklist (now ascending)
-        for (int block : blockList) {
-            List<WeIdAttributeChangedEventResponse> eventList = blockEventMap.get(block);
-            for (WeIdAttributeChangedEventResponse event : eventList) {
-                String key = new String(event.key);
-                String value = new String(event.value);
-                constructWeIdAttribute(key, value, weId, weIdDocument);
+    @Override
+    public ResponseData<WeIdDocumentMetadata> getWeIdDocumentMetadata(String weId) {
+        WeIdDocumentMetadata result = new WeIdDocumentMetadata();
+
+        try {
+            String identityAddr = WeIdUtils.convertWeIdToAddress(weId);
+            Tuple6<String, String, Boolean, BigInteger, List<String>, List<String>> document = weIdContract
+                    .resolve(identityAddr);
+            if (document == null) {
+                return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
             }
-        }
-    }
-
-    /**
-     * Identify the event and construct WeID Document.
-     *
-     * @param key the key
-     * @param value the value (mainly pubkeys including tag)
-     * @param weId the weId
-     * @param result the updating Document
-     */
-    private static void constructWeIdAttribute(
-        String key, String value, String weId, WeIdDocument result) {
-        if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_PUBLICKEY_PREFIX)) {
-            constructWeIdPublicKeys(key, value, weId, result);
-        } else if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_AUTHENTICATE_PREFIX)) {
-            if (!value.contains(WeIdConstant.REMOVED_PUBKEY_TAG)) {
-                constructWeIdPublicKeys(null, value, weId, result);
-            }
-            constructWeIdAuthentication(value, weId, result);
-        } else if (StringUtils.startsWith(key, WeIdConstant.WEID_DOC_SERVICE_PREFIX)) {
-            constructWeIdService(key, value, weId, result);
-        } else {
-            constructDefaultWeIdAttribute(key, value, weId, result);
-        }
-    }
-
-    private static void constructWeIdPublicKeys(String key, String value, String weId,
-        WeIdDocument result) {
-
-        logger.info("method constructWeIdPublicKeys() parameter::value:{}, weId:{}, "
-            + "result:{}", value, weId, result);
-        List<PublicKeyProperty> pubkeyList = result.getPublicKey();
-
-        //String type = PublicKeyType.SECP256K1.getTypeName();
-        String type;
-        if(((Client) getClient()).getCryptoType() == CryptoType.ECDSA_TYPE){
-            type = PublicKeyType.ECDSA.getTypeName();
-        } else {
-            type = PublicKeyType.SM2.getTypeName();
-        }
-        // Identify explicit type from key
-        if (!StringUtils.isEmpty(key)) {
-            String[] keyArray = StringUtils.splitByWholeSeparator(key, "/");
-            if (keyArray.length > 2) {
-                type = keyArray[2];
-            }
-        }
-
-        // In ascending order approach, we use the new obtained value as overriding attribute.
-        // We 1st: UDPATE STATUS, by going thru the existing pubkeys list. If it already contains
-        // this pubkey, simply override the tag and return.
-        Boolean isRevoked = value.contains(WeIdConstant.REMOVED_PUBKEY_TAG);
-        String trimmedPubKey = StringUtils
-            .splitByWholeSeparator(value.replace(WeIdConstant.REMOVED_PUBKEY_TAG, ""),
-                WeIdConstant.SEPARATOR)[0];
-        for (PublicKeyProperty pr : pubkeyList) {
-            if (pr.getPublicKey().contains(trimmedPubKey)) {
-                // update status: revocation
-                if (!pr.getRevoked().equals(isRevoked)) {
-                    pr.setRevoked(isRevoked);
-                }
-                // update owner
-                String[] publicKeyData = StringUtils
-                    .splitByWholeSeparator(value, WeIdConstant.SEPARATOR);
-                String weAddress = publicKeyData[1];
-                String owner = WeIdUtils.convertAddressToWeId(weAddress);
-                pr.setOwner(owner);
-                return;
-            }
-        }
-
-        // 由于目前不允许对一个不存在的key直接remove，因此下面这小段不会被执行到。未来修改时需要留意。
-        if (isRevoked) {
-            logger.error("Failed to revoke a non-existent pubkey {} from current Document {}",
-                value, result);
-            return;
-        }
-
-        // We 2nd: not an UPDATE case, now CREATE a new pubkey property and allocate a new ID.
-        PublicKeyProperty pubKey = new PublicKeyProperty();
-        pubKey.setId(
-            new StringBuffer()
-                .append(weId)
-                .append("#keys-")
-                .append(result.getPublicKey().size())
-                .toString()
-        );
-        String[] publicKeyData = StringUtils.splitByWholeSeparator(value, WeIdConstant.SEPARATOR);
-        if (publicKeyData != null && publicKeyData.length == 2) {
-            pubKey.setPublicKey(publicKeyData[0]);
-            String weAddress = publicKeyData[1];
-            String owner = WeIdUtils.convertAddressToWeId(weAddress);
-            pubKey.setOwner(owner);
-        }
-        pubKey.setType(type);
-        result.getPublicKey().add(pubKey);
-    }
-
-    private static void constructWeIdAuthentication(
-        String value,
-        String weId,
-        WeIdDocument result
-    ) {
-        logger.info("method buildWeIdAuthentication() parameter::value:{}, weId:{}, "
-            + "result:{}", value, weId, result);
-        List<PublicKeyProperty> keyList = result.getPublicKey();
-        List<AuthenticationProperty> authList = result.getAuthentication();
-
-        // In ascending order approach, we use the similar approach as in pubkey - always override.
-
-        // We 1st: UDPATE STATUS, by going thru the existing auths list. If it already contains
-        // this auth, simply override the tag and return.
-        // Complexity here is: 1. the ID must follow public key. 2. enable tag case.
-        Boolean isRevoked = value.contains(WeIdConstant.REMOVED_AUTHENTICATION_TAG);
-        for (AuthenticationProperty ap : authList) {
-            String pubKeyId = ap.getPublicKey();
-            for (PublicKeyProperty pkp : keyList) {
-                if (pubKeyId.equalsIgnoreCase(pkp.getId()) && value.contains(pkp.getPublicKey())) {
-                    // Found matching, now do tag resetting
-                    // NOTE: 如果isRevoked为false，请注意由于pubKey此时一定已经是false（见母方法），
-                    //  故无需做特别处理。但，未来如果实现分离了，就需要做特殊处理，还请留意。
-                    if (!ap.getRevoked().equals(isRevoked)) {
-                        ap.setRevoked(isRevoked);
-                    }
-                    return;
-                }
-            }
-        }
-
-        // 由于目前不允许对一个不存在的key直接remove，因此下面这小段不会被执行到。未来修改时需要留意。
-        if (isRevoked) {
-            logger.error("Failed to revoke a non-existent auth {} from current Document {}",
-                value, result);
-            return;
-        }
-
-        // We 2nd: create new one when no matching record is found
-        AuthenticationProperty auth = new AuthenticationProperty();
-        for (PublicKeyProperty r : keyList) {
-            if (value.contains(r.getPublicKey())) {
-                for (AuthenticationProperty ar : authList) {
-                    if (StringUtils.equals(ar.getPublicKey(), r.getId())) {
-                        return;
-                    }
-                }
-                auth.setPublicKey(r.getId());
-                result.getAuthentication().add(auth);
-            }
-        }
-    }
-
-    private static void constructWeIdService(String key, String value, String weId,
-        WeIdDocument result) {
-
-        logger.info("method buildWeIdService() parameter::key{}, value:{}, weId:{}, "
-            + "result:{}", key, value, weId, result);
-        String service = StringUtils.splitByWholeSeparator(key, "/")[2];
-        List<ServiceProperty> serviceList = result.getService();
-
-        // Always override when new value is obtained
-        for (ServiceProperty sr : serviceList) {
-            if (service.equals(sr.getType())) {
-                sr.setServiceEndpoint(value);
-                return;
-            }
-        }
-        ServiceProperty serviceResult = new ServiceProperty();
-        serviceResult.setType(service);
-        serviceResult.setServiceEndpoint(value);
-        result.getService().add(serviceResult);
-    }
-
-    private static void constructDefaultWeIdAttribute(
-        String key, String value, String weId, WeIdDocument result) {
-
-        logger.info("method buildWeIdAttributeDefault() parameter::key{}, value:{}, weId:{}, "
-            + "result:{}", key, value, weId, result);
-        switch (key.trim()) {
-            case WeIdConstant.WEID_DOC_CREATED:
-                result.setCreated(Long.valueOf(value));
-                break;
-            default:
-                break;
+            result.setCreated(Long.getLong(document.getValue1()));
+            result.setUpdated(Long.getLong(document.getValue2()));
+            result.setDeactivated(document.getValue3());
+            result.setVersionId(document.getValue4().intValue());
+            return new ResponseData<>(result, ErrorCode.SUCCESS);
+        }  catch (Exception e) {
+            logger.error("[getWeIdDocument]: exception.", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
     }
 
@@ -490,315 +152,152 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
      */
     @Override
     public ResponseData<Boolean> createWeId(
-        String weAddress,
-        String publicKey,
-        String privateKey,
-        boolean isDelegate) {
+            String weAddress,
+            String publicKey,
+            String privateKey) {
 
-        String auth = new StringBuffer()
-            .append(publicKey)
-            .append(WeIdConstant.SEPARATOR)
-            .append(weAddress)
-            .toString();
-        String created = DateUtils.getNoMillisecondTimeStampString();
-        TransactionReceipt receipt;
-        WeIdContract weIdContract =
-            reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
+        AuthenticationProperty authenticationProperty = new AuthenticationProperty();
+        //在创建weid时默认添加一个id为#keys-0的verification method
+        authenticationProperty.setId(WeIdUtils.convertAddressToWeId(weAddress) + "#keys-" + DataToolUtils.hash(publicKey));
+        //verification method controller默认为自己
+        authenticationProperty.setController(WeIdUtils.convertAddressToWeId(weAddress));
+        //这里后面需要把publicKey使用multicodec编码
+        authenticationProperty.setPublicKeyMultibase(publicKey);
+        List<String> authList = new ArrayList<>();
+        authList.add(authenticationProperty.toString());
+        List<String> serviceList = new ArrayList<>();
+        org.fisco.bcos.sdk.v3.model.TransactionReceipt receipt;
+        com.webank.weid.contract.v3.WeIdContract weIdContract =
+                reloadContract(fiscoConfig.getWeIdAddress(), privateKey, com.webank.weid.contract.v3.WeIdContract.class);
         try {
-            if (isDelegate) {
-                receipt = weIdContract.delegateCreateWeId(
+            receipt = weIdContract.createWeId(
                     weAddress,
-                    DataToolUtils.stringToByteArray(auth),
-                    DataToolUtils.stringToByteArray(created),
-                    BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp())
-                );
-            } else {
-
-                receipt = weIdContract.createWeId(
-                    weAddress,
-                    DataToolUtils.stringToByteArray(auth),
-                    DataToolUtils.stringToByteArray(created),
-                    BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp())
-                );
-            }
+                    DateUtils.getNoMillisecondTimeStamp().toString(),
+                    authList,
+                    serviceList
+            );
 
             TransactionInfo info = new TransactionInfo(receipt);
-            List<WeIdAttributeChangedEventResponse> response =
-                weIdContract.getWeIdAttributeChangedEvents(receipt);
-            if (CollectionUtils.isEmpty(response)) {
+            //合约层面去掉了对交易发送者的地址是否等于所创建的weid地址的检查（为了允许可以代替其他人创建weid），所以交易失败的唯一可能是weid已经存在
+            if (!receipt.isStatusOK()) {
                 logger.error(
-                    "The input private key does not match the current weid, operation of "
-                        + "modifying weid is not allowed. we address is {}",
-                    weAddress
+                        "Create WeId failed: " + receipt.getMessage() + ". weid address is {}",
+                        weAddress
                 );
-                return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
+                return new ResponseData<>(false, ErrorCode.WEID_ALREADY_EXIST, info);
             }
             return new ResponseData<>(true, ErrorCode.SUCCESS, info);
         } catch (Exception e) {
             logger.error("[createWeId] create weid has error, Error Message：{}", e);
-            return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
+            return new ResponseData<>(false, ErrorCode.WEID_ALREADY_EXIST);
         }
     }
 
     /* (non-Javadoc)
      * @see com.webank.weid.service.impl.engine.WeIdController
-     * #setAttribute(java.lang.String, java.lang.String, java.lang.String)
+     * #updateWeId(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
-    public ResponseData<Boolean> setAttribute(
-        String weAddress,
-        String attributeKey,
-        String value,
-        String privateKey,
-        boolean isDelegate) {
-
+    public ResponseData<Boolean> updateWeId(
+            WeIdDocument weIdDocument,
+            String weAddress,
+            String privateKey) {
+        List<String> authList = new ArrayList<>();
+        if(weIdDocument.getAuthentication().size() > 0){
+            for(int i=0; i<weIdDocument.getAuthentication().size(); i++){
+                authList.add(weIdDocument.getAuthentication().get(i).toString());
+            }
+        }
+        List<String> serviceList = new ArrayList<>();
+        if(weIdDocument.getService().size() > 0){
+            for(int j=0; j<weIdDocument.getService().size(); j++){
+                serviceList.add(weIdDocument.getService().get(j).toString());
+            }
+        }
+        org.fisco.bcos.sdk.v3.model.TransactionReceipt receipt;
+        com.webank.weid.contract.v3.WeIdContract weIdContract =
+                reloadContract(fiscoConfig.getWeIdAddress(), privateKey, com.webank.weid.contract.v3.WeIdContract.class);
         try {
-            WeIdContract weIdContract =
-                reloadContract(fiscoConfig.getWeIdAddress(), privateKey, WeIdContract.class);
-            byte[] attrValue = value.getBytes();
-            BigInteger updated = BigInteger.valueOf(DateUtils.getNoMillisecondTimeStamp());
-            TransactionReceipt transactionReceipt = null;
-            if (isDelegate) {
-                transactionReceipt = weIdContract.delegateSetAttribute(
+            receipt = weIdContract.updateWeId(
                     weAddress,
-                    DataToolUtils.stringToByte32Array(attributeKey),
-                    attrValue,
-                    updated
-                );
-            } else {
-                transactionReceipt =
-                    weIdContract.setAttribute(
-                        weAddress,
-                        DataToolUtils.stringToByte32Array(attributeKey),
-                        attrValue,
-                        updated
-                    );
-            }
-
-            TransactionInfo info = new TransactionInfo(transactionReceipt);
-            List<WeIdAttributeChangedEventResponse> response =
-                weIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
-            if (CollectionUtils.isNotEmpty(response)) {
-                return new ResponseData<>(true, ErrorCode.SUCCESS, info);
-            } else {
-                return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH,
-                    info);
-            }
-        } catch (Exception e) {
-            logger.error("[setAttribute] set Attribute has error, Error Message：{}", e);
-            return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
-        }
-    }
-
-    private List<TransactionReceipt> getTransactionReceipts(Integer blockNumber) {
-        List<TransactionReceipt> receiptList = new ArrayList<>();
-        try {
-            BcosBlock bcosBlockOnlyHash = ((Client) weServer.getWeb3j()).getBlockByNumber(BigInteger.valueOf(blockNumber),
-                false, false);
-            List<TransactionResult> transHashList = bcosBlockOnlyHash.getBlock().getTransactions();
-            for (TransactionResult t : transHashList) {
-                JsonTransactionResponse trans = (JsonTransactionResponse) t;
-                receiptList.add(((Client) weServer.getWeb3j())
-                    .getTransactionReceipt(trans.getHash(), true).getTransactionReceipt());
-            }
-//            bcosTransactionReceiptsDecoder = ((Client) weServer.getWeb3j())
-//                    .getBatchReceiptsByBlockNumberAndRange(BigInteger.valueOf(blockNumber), "0", "-1");
-        } catch (Exception e) {
-            logger.error("[getTransactionReceipts] get block {} err: {}", blockNumber, e);
-            // 如果add一半报错了，clear重来
-            receiptList.clear();
-        }
-        if (receiptList.isEmpty()) {
-            logger.info("[getTransactionReceipts] get block {} err: is null", blockNumber);
-            throw new WeIdBaseException("the transactionReceipts is null.");
-        }
-        return receiptList;
-    }
-
-    private List<WeIdPojo> getWeIdListByBlockNumber(Integer blockNumber) {
-        // 根据块高获取当前块里面的所有weId
-        List<WeIdPojo> result = new ArrayList<WeIdPojo>();
-        try {
-            List<TransactionReceipt> receipts = getTransactionReceipts(blockNumber);
-            int index = 0;
-            for (TransactionReceipt receipt : receipts) {
-                List<WeIdHistoryEventEventResponse> eventlog =
-                    weIdContract.getWeIdHistoryEventEvents(receipt);
-                if (CollectionUtils.isEmpty(eventlog)) {
-                    continue;
-                }
-                for (WeIdHistoryEventEventResponse res : eventlog) {
-                    WeIdPojo pojo = new WeIdPojo();
-                    pojo.setId(WeIdUtils.convertAddressToWeId(res.identity));
-                    pojo.setCreated(res.created.longValue());
-                    pojo.setCurrentBlockNum(blockNumber);
-                    pojo.setPreviousBlockNum(res.previousBlock.intValue());
-                    boolean isExist = weIdContract
-                        .isIdentityExist(WeIdUtils.convertWeIdToAddress(pojo.getId()))
-                        .booleanValue();
-                    if (isExist) {
-                        pojo.setIndex(index);
-                        result.add(pojo);
-                        index++;
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error(
-                "[getWeIdListByBlockNumber]: get WeIdList By BlockNumber :{} failed.", 
-                blockNumber, 
-                e
+                    DateUtils.getNoMillisecondTimeStamp().toString(),
+                    authList,
+                    serviceList
             );
-            throw new ResolveAttributeException(
-                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-                ErrorCode.TRANSACTION_EXECUTE_ERROR.getCodeDesc(),
-                e);
+
+            TransactionInfo info = new TransactionInfo(receipt);
+            //更新weid document限制只能是本人更新，如果更新不成功，则是传入的私钥不对，接口层已做weid是否存在的检查
+            if (!receipt.isStatusOK()) {
+                logger.error(
+                        "Update WeId failed: " + receipt.getMessage() + ". weid address is {}",
+                        weAddress
+                );
+                return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
+            }
+            return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+        } catch (Exception e) {
+            logger.error("[updateWeId] update weid has error, Error Message：{}", e);
+            return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
         }
-        return result;
     }
 
-    /**
-     * get the first blockNumber for the contract.
-     * 
-     * @return the blockNumber
-     * @throws Exception unknown exception
+    /* (non-Javadoc)
+     * @see com.webank.weid.service.impl.engine.WeIdController
+     * #deactivateWeId(java.lang.String, java.lang.String, java.lang.String)
      */
-    private Integer getFirstBlockNum() throws Exception {
-        return weIdContract.getFirstBlockNum().intValue();
-    }
+    @Override
+    public ResponseData<Boolean> deactivateWeId(
+            String weAddress,
+            String privateKey) {
+        List<String> authList = new ArrayList<>();
+        org.fisco.bcos.sdk.v3.model.TransactionReceipt receipt;
+        com.webank.weid.contract.v3.WeIdContract weIdContract =
+                reloadContract(fiscoConfig.getWeIdAddress(), privateKey, com.webank.weid.contract.v3.WeIdContract.class);
+        try {
+            receipt = weIdContract.deactivateWeId(
+                    weAddress,
+                    true
+            );
 
-    /**
-     * get the last blockNumber for the contract.
-     * @return the blockNumber
-     * @throws Exception unknown exception
-     */
-    private Integer getLatestBlockNum() throws Exception {
-        return weIdContract.getLatestBlockNum().intValue();
-    }
-
-    /**
-     * get the next blockNumber by the currentBlockNumber.
-     * @param blockNumber the currentBlockNumber
-     * @return the blockNumber
-     * @throws Exception unknown exception
-     */
-    private Integer getNextBlockNum(Integer blockNumber) throws Exception {
-        return weIdContract.getNextBlockNumByBlockNum(
-                new BigInteger(String.valueOf(blockNumber))
-            ).intValue();
+            TransactionInfo info = new TransactionInfo(receipt);
+            //注销WeId失败的原因可能是私钥和WeId不匹配
+            if (!receipt.isStatusOK()) {
+                logger.error(
+                        "Deactivate WeId failed: " + receipt.getMessage() + ". weid address is {}",
+                        weAddress
+                );
+                return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH, info);
+            }
+            return new ResponseData<>(true, ErrorCode.SUCCESS, info);
+        } catch (Exception e) {
+            logger.error("[deactivateWeId] deactivate WeId has error, Error Message：{}", e);
+            return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
+        }
     }
 
     @Override
-    public ResponseData<List<WeIdPojo>> getWeIdList(
-        Integer blockNumber,
-        Integer pageSize,
-        Integer indexInBlock,
-        boolean direction
-    ) throws Exception {
-        LinkedList<WeIdPojo> result = new LinkedList<WeIdPojo>();
-        if (pageSize == null || indexInBlock == null || blockNumber == null) {
-            return new ResponseData<>(result, ErrorCode.ILLEGAL_INPUT);
-        }
-        if (pageSize <= 0) {
+    public ResponseData<List<String>> getWeIdList(
+            Integer first,
+            Integer last
+    ) {
+        try {
+            List addressList = weIdContract.getWeId(BigInteger.valueOf(first), BigInteger.valueOf(last));
+            List<String> result = new ArrayList<>();
+            for (Object o : addressList) {
+                result.add(WeIdUtils.convertAddressToWeId(o.toString()));
+            }
             return new ResponseData<>(result, ErrorCode.SUCCESS);
+        } catch (Exception e) {
+            logger.error("[getWeIdTotal]: get weId total has unknow error. ", e);
+            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
         }
-        // 处理块高
-        Integer firstBlockNumer = this.getFirstBlockNum();
-        Integer latestBlockNumer = this.getLatestBlockNum();
-        if (blockNumber < firstBlockNumer) {
-            blockNumber = firstBlockNumer;
-        } else if (blockNumber > latestBlockNumer) {
-            blockNumber = latestBlockNumer;
-        }
-        // 根据当前块高查找weidList
-        Integer queryBlockNumber = blockNumber;
-        Integer beginIndex = indexInBlock;
-        boolean changeBlock = false;//是否换块
-        outer: do {
-            if (changeBlock && queryBlockNumber == 0) {
-                break;
-            }
-            List<WeIdPojo> weIdListByBlockNumber = this.getWeIdListByBlockNumber(queryBlockNumber);
-            // 根据方向判断
-            if (direction) {
-                if (weIdListByBlockNumber.size() == 0) {
-                    // 说明根据块高没有查询出数据，此时也无法向前查询了直接返回
-                    break;
-                }
-                // 如果是正向的 表示往前检索
-                if (changeBlock) { 
-                    // 表示已换块查询
-                    beginIndex = weIdListByBlockNumber.size() - 1;
-                } else {
-                    // 没换块
-                    // 如果index大于当前块最大位置 则index为当前最大位置
-                    if (beginIndex > weIdListByBlockNumber.size() - 1) {
-                        beginIndex = weIdListByBlockNumber.size() - 1;
-                    }
-                }
-                for (int i = beginIndex; i >= 0; i--) {
-                    WeIdPojo pojo = weIdListByBlockNumber.get(i);
-                    result.add(pojo);
-                    // 指定下一个查询块
-                    queryBlockNumber = pojo.getPreviousBlockNum();
-                    if (result.size() == pageSize || queryBlockNumber == firstBlockNumer) { 
-                        // 说明够数了 或者已查询第一个块高
-                        break outer;
-                    }
-                }
-                if (beginIndex < 0) {
-                    // 指定下一个查询块
-                    queryBlockNumber = weIdListByBlockNumber.get(0).getPreviousBlockNum();
-                    if (queryBlockNumber == firstBlockNumer) { 
-                        // 说明已查询第一个块高
-                        break;
-                    }
-                }
-                // 换块
-                changeBlock = true;
-            } else {
-                if (weIdListByBlockNumber.size() == 0) {
-                    // 说明根据块高没有查询出数据
-                    // 换块
-                    queryBlockNumber = this.getNextBlockNum(queryBlockNumber);
-                    changeBlock = true;
-                    continue;
-                }
-                if (changeBlock) {
-                    beginIndex = 0; 
-                } else {
-                    if (beginIndex < 0) {
-                        beginIndex = 0;
-                    }
-                    if (beginIndex > weIdListByBlockNumber.size() - 1) {
-                        // 换块
-                        queryBlockNumber = this.getNextBlockNum(queryBlockNumber);
-                        changeBlock = true;
-                        continue;
-                    }
-                }
-                // 如果是反向的 表示往后检索
-                for (int i = beginIndex; i < weIdListByBlockNumber.size(); i++) {
-                    WeIdPojo pojo = weIdListByBlockNumber.get(i);
-                    result.addFirst(pojo);
-                    if (result.size() == pageSize) { 
-                        // 说明够数了
-                        break outer;
-                    }
-                }
-                // 换块
-                queryBlockNumber = this.getNextBlockNum(queryBlockNumber);
-                changeBlock = true;
-            }
-        } while (true);
-        return new ResponseData<>(result, ErrorCode.SUCCESS);
     }
 
     @Override
     public ResponseData<Integer> getWeIdCount() {
         try {
             Integer total = weIdContract.getWeIdCount().intValue();
-            return new ResponseData<>(total, ErrorCode.SUCCESS); 
+            return new ResponseData<>(total, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("[getWeIdTotal]: get weId total has unknow error. ", e);
             return new ResponseData<>(0, ErrorCode.UNKNOW_ERROR);
