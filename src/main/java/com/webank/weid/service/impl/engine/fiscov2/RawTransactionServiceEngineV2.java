@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl.engine.fiscov2;
 
@@ -25,10 +8,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.core.methods.response.BcosTransactionReceipt;
-import org.fisco.bcos.web3j.protocol.core.methods.response.SendTransaction;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
+import org.fisco.bcos.sdk.client.protocol.response.SendTransaction;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +22,6 @@ import com.webank.weid.contract.v2.AuthorityIssuerController.AuthorityIssuerRetL
 import com.webank.weid.contract.v2.CptController;
 import com.webank.weid.contract.v2.CptController.RegisterCptRetLogEventResponse;
 import com.webank.weid.contract.v2.WeIdContract;
-import com.webank.weid.contract.v2.WeIdContract.WeIdAttributeChangedEventResponse;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
@@ -104,23 +86,22 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     public static TransactionReceipt sendTransaction(String transactionHex)
         throws Exception {
 
-        Web3j web3j = (Web3j) getWeb3j();
-        SendTransaction ethSendTransaction = web3j.sendRawTransaction(transactionHex)
-            .sendAsync().get(WeIdConstant.TRANSACTION_RECEIPT_TIMEOUT, TimeUnit.SECONDS);
+        Client client = (Client) getClient();
+        SendTransaction ethSendTransaction = client.sendRawTransaction(transactionHex);
         if (ethSendTransaction.hasError()) {
             logger.error("Error processing transaction request: "
                 + ethSendTransaction.getError().getMessage());
             return null;
         }
         Optional<TransactionReceipt> receiptOptional =
-            getTransactionReceiptRequest(web3j, ethSendTransaction.getTransactionHash());
+            getTransactionReceiptRequest(client, ethSendTransaction.getTransactionHash());
         int sumTime = 0;
         try {
             for (int i = 0; i < WeIdConstant.POLL_TRANSACTION_ATTEMPTS; i++) {
                 if (!receiptOptional.isPresent()) {
                     Thread.sleep((long) WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION);
                     sumTime += WeIdConstant.POLL_TRANSACTION_SLEEP_DURATION;
-                    receiptOptional = getTransactionReceiptRequest(web3j,
+                    receiptOptional = getTransactionReceiptRequest(client,
                         ethSendTransaction.getTransactionHash());
                 } else {
                     return receiptOptional.get();
@@ -137,15 +118,15 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     /**
      * Get a TransactionReceipt request from a transaction Hash.
      *
-     * @param web3j the web3j instance to blockchain
+     * @param client the client instance to blockchain
      * @param transactionHash the transactionHash value
      * @return the transactionReceipt wrapper
      * @throws Exception the exception
      */
-    private static Optional<TransactionReceipt> getTransactionReceiptRequest(Web3j web3j,
+    private static Optional<TransactionReceipt> getTransactionReceiptRequest(Client client,
         String transactionHash) throws Exception {
         BcosTransactionReceipt transactionReceipt =
-            web3j.getTransactionReceipt(transactionHash).send();
+            client.getTransactionReceipt(transactionHash);
         if (transactionReceipt.hasError()) {
             logger.error("Error processing transaction request: "
                 + transactionReceipt.getError().getMessage());
@@ -215,8 +196,8 @@ public class RawTransactionServiceEngineV2 extends BaseEngine implements
     public ResponseData<String> createWeId(String transactionHex) {
         try {
             TransactionReceipt transactionReceipt = sendTransaction(transactionHex);
-            List<WeIdAttributeChangedEventResponse> response =
-                weIdContract.getWeIdAttributeChangedEvents(transactionReceipt);
+            List<WeIdContract.CreateWeIdEventResponse> response =
+                weIdContract.getCreateWeIdEvents(transactionReceipt);
             TransactionInfo info = new TransactionInfo(transactionReceipt);
             if (!CollectionUtils.isEmpty(response)) {
                 return new ResponseData<>(Boolean.TRUE.toString(), ErrorCode.SUCCESS, info);

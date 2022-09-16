@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl.engine.fiscov2;
 
@@ -23,11 +6,12 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webank.weid.contract.v2.SpecificIssuerData;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.tuples.generated.Tuple2;
-import org.fisco.bcos.web3j.tuples.generated.Tuple3;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple3;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +44,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
 
     private static AuthorityIssuerController authorityIssuerController;
     private static SpecificIssuerController specificIssuerController;
+    private static SpecificIssuerData specificIssuerData;
 
     /**
      * 构造函数.
@@ -73,6 +58,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     /**
      * 重新加载静态合约对象.
      */
+    @Override
     public void reload() {
         authorityIssuerController = getContractService(fiscoConfig.getIssuerAddress(),
             AuthorityIssuerController.class);
@@ -86,7 +72,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
             byte[] name = new byte[32];
             System.arraycopy(orgId.getBytes(), 0, name, 0, orgId.getBytes().length);
             String address = authorityIssuerController
-                .getAddressFromName(name).send();
+                .getAddressFromName(name);
             if (WeIdConstant.EMPTY_ADDRESS.equalsIgnoreCase(address)) {
                 return new ResponseData<>(StringUtils.EMPTY,
                     ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS);
@@ -141,7 +127,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                     WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH
                 ),
                 authorityIssuer.getAccValue().getBytes()
-            ).send();
+            );
             ErrorCode errorCode = resolveRegisterAuthorityIssuerEvents(receipt);
             TransactionInfo info = new TransactionInfo(receipt);
             if (errorCode.equals(ErrorCode.SUCCESS)) {
@@ -204,7 +190,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 args.getWeIdPrivateKey().getPrivateKey(),
                 AuthorityIssuerController.class);
             TransactionReceipt receipt = authorityIssuerController
-                .removeAuthorityIssuer(WeIdUtils.convertWeIdToAddress(weId)).send();
+                .removeAuthorityIssuer(WeIdUtils.convertWeIdToAddress(weId));
             List<AuthorityIssuerRetLogEventResponse> eventList =
                 authorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
 
@@ -241,9 +227,9 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 AuthorityIssuerController.class);
             TransactionReceipt receipt;
             if (isRecognize) {
-                receipt = authorityIssuerController.recognizeAuthorityIssuer(addr).send();
+                receipt = authorityIssuerController.recognizeAuthorityIssuer(addr);
             } else {
-                receipt = authorityIssuerController.deRecognizeAuthorityIssuer(addr).send();
+                receipt = authorityIssuerController.deRecognizeAuthorityIssuer(addr);
             }
             List<AuthorityIssuerRetLogEventResponse> eventList =
                 authorityIssuerController.getAuthorityIssuerRetLogEvents(receipt);
@@ -288,7 +274,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         ResponseData<Boolean> resultData = new ResponseData<Boolean>();
         try {
             Boolean result = authorityIssuerController.isAuthorityIssuer(
-                address).send();
+                address);
             resultData.setResult(result);
             if (result) {
                 resultData.setErrorCode(ErrorCode.SUCCESS);
@@ -313,7 +299,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
         try {
             Tuple2<List<byte[]>, List<BigInteger>> rawResult =
                 authorityIssuerController.getAuthorityIssuerInfoNonAccValue(
-                    WeIdUtils.convertWeIdToAddress(weId)).send();
+                    WeIdUtils.convertWeIdToAddress(weId));
             if (rawResult == null) {
                 return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
             }
@@ -388,7 +374,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 authorityIssuerController.getAuthorityIssuerAddressList(
                     new BigInteger(index.toString()),
                     new BigInteger(num.toString())
-                ).send();
+                );
         } catch (Exception e) {
             logger.error("query authority issuer failed.", e);
         }
@@ -410,7 +396,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 SpecificIssuerController.class);
             TransactionReceipt receipt = specificIssuerController.removeIssuer(
                 DataToolUtils.stringToByte32Array(issuerType),
-                issuerAddress).send();
+                issuerAddress);
 
             ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, false, issuerAddress);
             TransactionInfo info = new TransactionInfo(receipt);
@@ -465,7 +451,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
             Boolean result = specificIssuerController.isSpecificTypeIssuer(
                 DataToolUtils.stringToByte32Array(issuerType),
                 address
-            ).send();
+            );
 
             if (!result) {
                 return new ResponseData<>(result,
@@ -492,7 +478,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 DataToolUtils.stringToByte32Array(issuerType),
                 new BigInteger(index.toString()),
                 new BigInteger(num.toString())
-            ).send();
+            );
             List<String> addressList = new ArrayList<>();
             for (String addr : addresses) {
                 if (!WeIdUtils.isEmptyStringAddress(addr)) {
@@ -518,7 +504,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 privateKey,
                 SpecificIssuerController.class);
             TransactionReceipt receipt = specificIssuerController
-                .registerIssuerType(DataToolUtils.stringToByte32Array(issuerType)).send();
+                .registerIssuerType(DataToolUtils.stringToByte32Array(issuerType));
 
             // pass-in empty address
             String emptyAddress = new Address(BigInteger.ZERO).toString();
@@ -547,7 +533,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
             TransactionReceipt receipt = specificIssuerController.addIssuer(
                 DataToolUtils.stringToByte32Array(issuerType),
                 issuerAddress
-            ).send();
+            );
             ErrorCode errorCode = resolveSpecificIssuerEvents(receipt, true, issuerAddress);
             TransactionInfo info = new TransactionInfo(receipt);
             return new ResponseData<>(errorCode.getCode() == ErrorCode.SUCCESS.getCode(),
@@ -561,7 +547,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     @Override
     public ResponseData<Integer> getIssuerCount() {
         try {
-            Integer count = authorityIssuerController.getTotalIssuer().send().intValue();
+            Integer count = authorityIssuerController.getTotalIssuer().intValue();
             return new ResponseData<>(count, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("[getIssuerCount] query IssuerCount failed. exception message: ", e);
@@ -573,7 +559,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     public ResponseData<Integer> getSpecificTypeIssuerSize(String issuerType) {
         try {
             Integer count = specificIssuerController.getSpecificTypeIssuerSize(
-                DataToolUtils.stringToByte32Array(issuerType)).send().intValue();
+                DataToolUtils.stringToByte32Array(issuerType)).intValue();
             return new ResponseData<>(count, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("[getIssuerCount] query IssuerCount failed. exception message: ", e);
@@ -584,7 +570,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     @Override
     public ResponseData<Integer> getRecognizedIssuerCount() {
         try {
-            Integer count = authorityIssuerController.getRecognizedIssuerCount().send().intValue();
+            Integer count = authorityIssuerController.getRecognizedIssuerCount().intValue();
             return new ResponseData<>(count, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error(
@@ -597,7 +583,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     @Override
     public ResponseData<Integer> getIssuerTypeCount() {
         try {
-            Integer count = specificIssuerController.getIssuerTypeCount().send().intValue();
+            Integer count = specificIssuerController.getIssuerTypeCount().intValue();
             return new ResponseData<>(count, ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error(
@@ -614,7 +600,7 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
                 privateKey,
                 SpecificIssuerController.class);
             TransactionReceipt receipt = specificIssuerController
-                .removeIssuerType(DataToolUtils.stringToByte32Array(issuerType)).send();
+                .removeIssuerType(DataToolUtils.stringToByte32Array(issuerType));
 
             // pass-in empty address
             String emptyAddress = new Address(BigInteger.ZERO).toString();
@@ -632,11 +618,11 @@ public class AuthorityIssuerEngineV2 extends BaseEngine implements AuthorityIssu
     public ResponseData<List<IssuerType>> getIssuerTypeList(Integer index, Integer num) {
         List<IssuerType> list = new ArrayList<IssuerType>();
         try {
-            Tuple3<List<byte[]>, List<String>, List<BigInteger>> tuple = 
+            Tuple3<List<byte[]>, List<String>, List<BigInteger>> tuple =
                 specificIssuerController.getIssuerTypeList(
                     new BigInteger(index.toString()), 
                     new BigInteger(num.toString())
-                ).send();
+                );
             List<byte[]> typeNames = tuple.getValue1(); //typeNames
             List<String> owners = tuple.getValue2(); //owners
             List<BigInteger> createds = tuple.getValue3(); //createds

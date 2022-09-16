@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.config;
 
@@ -55,7 +38,7 @@ public class FiscoConfig {
 
     @NotNull(message = "the bcos.version is undefined")
     @NotEmpty(message = "the value of bcos.version is null")
-    @MatchPattern(pattern = "[0-9]+(\\.\\w*)?", message = "the value of bcos.version is invalid")
+    @MatchPattern(pattern = "[2,3]+(\\.\\w*)?", message = "the value of bcos.version is invalid, only support 2,3")
     private String version;
     
     @NotNull(message = "the nodes is undefined")
@@ -94,65 +77,34 @@ public class FiscoConfig {
     @NotEmpty(message = "the value of web3sdk.keep-alive-seconds is null")
     @MatchPattern(pattern = "\\d+", message = "the value of web3sdk.keep-alive-seconds is invalid")
     private String web3sdkKeepAliveSeconds;
-    
+
+    /**
+     * 3.0后groupId支持为string
+     */
     @NotNull(message = "the group.id is undefined")
     @NotEmpty(message = "the value of group.id is null")
-    @MatchPattern(pattern = "\\d+", message = "the value of group.id is invalid")
     private String groupId;
-    
-    @NotNull(message = "the encrypt.type is undefined")
-    @NotEmpty(message = "the value of encrypt.type is null")
-    @MatchPattern(pattern = "[0,1]", message = "the value of encrypt.type should be in [0,1]")
-    private String encryptType;
-    
-    @NotNull(message = "the v1.ca-crt-path is undefined")
-    @NotEmpty(message = "the value of v1.ca-crt-path is null")
-    private String v1CaCrtPath;
-    
-    @NotNull(message = "the v1.client-crt-password is undefined")
-    @NotEmpty(message = "the value of v1.client-crt-password is null")
-    private String v1ClientCrtPassword;
-    
-    @NotNull(message = "the v1.client-key-store-path is undefined")
-    @NotEmpty(message = "the value of v1.client-key-store-path is null")
-    private String v1ClientKeyStorePath;
-    
-    @NotNull(message = "the v1.key-store-password is undefined")
-    @NotEmpty(message = "the value of v1.key-store-password is null")
-    private String v1KeyStorePassword;
-    
-    @NotNull(message = "the v2.ca-crt-path is undefined")
-    @NotEmpty(message = "the value of v2.ca-crt-path is null")
-    private String v2CaCrtPath;
-    
-    @NotNull(message = "the v2.node-crt-path is undefined")
-    @NotEmpty(message = "the value of v2.node-crt-path is null")
-    private String v2NodeCrtPath;
-    
-    @NotNull(message = "the v2.node-key-path is undefined")
-    @NotEmpty(message = "the value of v2.node-key-path is null")
-    private String v2NodeKeyPath;
 
-    @NotNull(message = "the gm.ca-crt-path is undefined")
-    @NotEmpty(message = "the value of gm.ca-crt-path is null")
-    private String gmCaCrtPath;
+    @NotNull(message = "the sdk.sm-crypto is undefined")
+    @NotEmpty(message = "the value of sdk.sm-crypto is null")
+    private String sdkSMCrypto;
 
-    @NotNull(message = "the gm.sdk-crt-path is undefined")
-    @NotEmpty(message = "the value of gm.sdk-crt-path is null")
-    private String gmSdkCrtPath;
+    @NotNull(message = "the sdk.cert-path is undefined")
+    @NotEmpty(message = "the value of sdk.cert-path is null")
+    private String sdkCertPath;
 
-    @NotNull(message = "the gm.sdk-key-path is undefined")
-    @NotEmpty(message = "the value of gm.sdk-key-path is null")
-    private String gmSdkKeyPath;
+    @NotNull(message = "the amop.pub-path is undefined")
+    @NotEmpty(message = "the value of amop.pub-path is null")
+    private String amopPubPath;
 
-    @NotNull(message = "the gmen.sdk-crt-path is undefined")
-    @NotEmpty(message = "the value of gmen.sdk-crt-path is null")
-    private String gmenSdkCrtPath;
+    @NotNull(message = "the amop.pri-path is undefined")
+    @NotEmpty(message = "the value of amop.pri-path is null")
+    private String amopPriPath;
 
-    @NotNull(message = "the gmen.sdk-key-path is undefined")
-    @NotEmpty(message = "the value of gmen.sdk-key-path is null")
-    private String gmenSdkKeyPath;
-    
+    @NotNull(message = "the amop.p12-password is undefined")
+    @NotEmpty(message = "the value of amop.p12-password is null")
+    private String amopP12Password;
+
     @NotNull(message = "the blockchain.orgid is undefined")
     @NotEmpty(message = "the value of blockchain.orgid is null")
     private String currentOrgId;
@@ -162,6 +114,8 @@ public class FiscoConfig {
     private String amopId;
     
     private String cnsContractFollow;
+
+    private String privateKey;
 
     /**
      * load configuration without Spring context required.
@@ -186,21 +140,14 @@ public class FiscoConfig {
             web3sdkQueueSize = PropertyUtils.getProperty("web3sdk.queue-capacity");
             web3sdkKeepAliveSeconds = PropertyUtils.getProperty("web3sdk.keep-alive-seconds");
             groupId = PropertyUtils.getProperty("group.id");
-            encryptType = PropertyUtils.getProperty("encrypt.type");
-            v1CaCrtPath = PropertyUtils.getProperty("v1.ca-crt-path");
-            v1ClientCrtPassword = PropertyUtils.getProperty("v1.client-crt-password");
-            v1ClientKeyStorePath = PropertyUtils.getProperty("v1.client-key-store-path");
-            v1KeyStorePassword = PropertyUtils.getProperty("v1.key-store-password");
-            v2CaCrtPath = PropertyUtils.getProperty("v2.ca-crt-path");
-            v2NodeCrtPath = PropertyUtils.getProperty("v2.node-crt-path");
-            v2NodeKeyPath = PropertyUtils.getProperty("v2.node-key-path");
-            gmCaCrtPath = PropertyUtils.getProperty("gm.ca-crt-path");
-            gmSdkCrtPath = PropertyUtils.getProperty("gm.sdk-crt-path");
-            gmSdkKeyPath = PropertyUtils.getProperty("gm.sdk-key-path");
-            gmenSdkCrtPath = PropertyUtils.getProperty("gmen.sdk-crt-path");
-            gmenSdkKeyPath = PropertyUtils.getProperty("gmen.sdk-key-path");
+            sdkSMCrypto = PropertyUtils.getProperty("sdk.sm-crypto");
+            sdkCertPath = PropertyUtils.getProperty("sdk.cert-path");
+            amopPubPath = PropertyUtils.getProperty("amop.pub-path");
+            amopPriPath = PropertyUtils.getProperty("amop.pri-path");
+            amopP12Password = PropertyUtils.getProperty("amop.p12-password");
             currentOrgId = PropertyUtils.getProperty("blockchain.orgid");
             amopId = PropertyUtils.getProperty("amop.id");
+            privateKey = PropertyUtils.getProperty("amop.privateKey");
             cnsContractFollow = PropertyUtils.getProperty("cns.contract.follow");
             return true;
         } catch (Exception e) {

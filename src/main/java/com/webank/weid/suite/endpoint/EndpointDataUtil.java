@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.endpoint;
 
@@ -34,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
 import com.webank.weid.protocol.base.EndpointInfo;
 import com.webank.weid.util.DataToolUtils;
@@ -77,8 +59,10 @@ public class EndpointDataUtil {
     private static synchronized void loadPropsFromFile() {
         props = new Properties();
         try {
-            ClassPathResource resource = new ClassPathResource(CENTRAL_DATA);
-            InputStream input = resource.getInputStream();
+            /*ClassPathResource resource = new ClassPathResource(CENTRAL_DATA);
+            InputStream input = resource.getInputStream();*/
+            InputStream input = EndpointDataUtil.class
+                    .getClassLoader().getResourceAsStream(CENTRAL_DATA);
             props.load(input);
             logger.info("loadPropsFromFile finish...");
         } catch (Exception e) {
@@ -92,8 +76,11 @@ public class EndpointDataUtil {
      * @throws Exception when File does not exist
      */
     public static synchronized void saveEndpointsToFile() throws Exception {
-        ClassPathResource resource = new ClassPathResource(CENTRAL_DATA);
-        File file = resource.getFile();
+        /*ClassPathResource resource = new ClassPathResource(CENTRAL_DATA);
+        File file = resource.getFile();*/
+        String path = EndpointDataUtil.class
+                .getClassLoader().getResource(CENTRAL_DATA).getPath();
+        File file = new File(path);
         props = new Properties();
         int index = 1;
         for (EndpointInfo endpointInfo : endpointInfoList) {

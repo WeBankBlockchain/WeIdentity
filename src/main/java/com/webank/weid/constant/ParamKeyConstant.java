@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.constant;
 
@@ -76,7 +59,7 @@ public final class ParamKeyConstant {
     public static final String PROOF_CREATED = "created";
     public static final String PROOF_CREATOR = "creator";
     public static final String PROOF_SALT = "salt";
-    public static final String PROOF_VERIFICATION_METHOD = "verificationMethod";
+    public static final String PROOF_VERIFICATION_METHOD_ID = "verificationMethodId";
     public static final String PROOF_NONCE = "nonce";
     public static final String PROOF_VERIFICATIONREQUEST = "verificationRequest";
     public static final String PROOF_ENCODEDVERIFICATIONRULE = "encodedVerificationRule";
@@ -96,7 +79,8 @@ public final class ParamKeyConstant {
     public static final String WEID_AUTH_CHALLENGE = "challenge";
 
     public static final String TRNSACTION_RECEIPT_STATUS_SUCCESS = "0x0";
-    
+    public static final Integer TRNSACTION_RECEIPT_STATUS_SUCCESS_V3 = 0;
+
     /**
      * 内置配置Key.
      */

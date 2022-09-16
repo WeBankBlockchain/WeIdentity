@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full;
 
@@ -24,6 +7,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -32,9 +16,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.utils.Numeric;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -223,7 +208,7 @@ public class TestBaseUtil {
     public static WeIdAuthentication buildWeIdAuthentication(CreateWeIdDataResult weIdData) {
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(weIdData.getWeId());
-        weIdAuthentication.setWeIdPublicKeyId(weIdData.getWeId() + "#keys-0");
+        weIdAuthentication.setAuthenticationMethodId(weIdData.getWeId() + "#keys-0");
         weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey());
         weIdAuthentication.getWeIdPrivateKey().setPrivateKey(
             weIdData.getUserWeIdPrivateKey().getPrivateKey());
@@ -239,7 +224,7 @@ public class TestBaseUtil {
     public static HashMap<String, Object> buildCptJsonSchemaDataFromFile() throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -254,7 +239,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("test-singlelevel-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -269,7 +254,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("test-multilevel-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -284,7 +269,7 @@ public class TestBaseUtil {
         throws IOException {
 
         HashMap<String, Object> cptJsonSchemaData = new HashMap<String, Object>();
-        JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-claim.json");
+        JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("test-spectpl-claim.json");
         cptJsonSchemaData = DataToolUtils.deserialize(jsonNode.toString(), HashMap.class);
         return cptJsonSchemaData;
     }
@@ -385,7 +370,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/json-schema-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("json-schema-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -404,7 +389,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-multilevel-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("test-multilevel-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -424,7 +409,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-singlelevel-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("test-singlelevel-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -444,7 +429,7 @@ public class TestBaseUtil {
 
         String jsonSchema = TestData.SCHEMA;
         if (isFormatFile) {
-            JsonNode jsonNode = JsonLoader.fromResource("/test-spectpl-cpt.json");
+            JsonNode jsonNode = DataToolUtils.loadJsonObjectFromResource("test-spectpl-cpt.json");
             jsonSchema = jsonNode.toString();
         }
 
@@ -637,7 +622,7 @@ public class TestBaseUtil {
     public static PasswordKey createEcKeyPair() {
 
         PasswordKey passwordKey = new PasswordKey();
-        try {
+        /*try {
             ECKeyPair keyPair = DataToolUtils.createKeyPair();
             String publicKey = String.valueOf(keyPair.getPublicKey());
             String privateKey = String.valueOf(keyPair.getPrivateKey());
@@ -646,7 +631,18 @@ public class TestBaseUtil {
             LogUtil.info(logger, "createEcKeyPair", passwordKey);
         } catch (Exception e) {
             logger.error("createEcKeyPair error:", e);
-        }
+        }*/
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair();
+        BigInteger bigPublicKey =
+                new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));
+        BigInteger bigPrivateKey =
+                new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPrivateKey()));
+
+        String publicKey = String.valueOf(bigPublicKey);
+        String privateKey = String.valueOf(bigPrivateKey);
+        passwordKey.setPrivateKey(privateKey);
+        passwordKey.setPublicKey(publicKey);
+        LogUtil.info(logger, "createEcKeyPair", passwordKey);
         return passwordKey;
     }
 
@@ -655,9 +651,9 @@ public class TestBaseUtil {
      *
      * @return ECKeyPair
      */
-    public static ECKeyPair createKeyPair() {
+    public static CryptoKeyPair createKeyPair() {
         try {
-            return DataToolUtils.createKeyPair();
+            return DataToolUtils.cryptoSuite.createKeyPair();
         } catch (Exception e) {
             logger.error("createEcKeyPair error:", e);
         }

@@ -1,15 +1,16 @@
 package com.webank.weid.util;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
+import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,13 +48,7 @@ public class OffLineBatchTask extends AbstractService {
     private static Persistence dataDriver;
 
     static {
-
-        try {
-            ECKeyPair keyPair = GenCredential.createKeyPair();
-            privateKey = String.valueOf(keyPair.getPrivateKey());
-        } catch (Exception e) {
-            logger.error("Create weId failed.", e);
-        }
+        privateKey = DataToolUtils.generatePrivateKey();
     }
 
     private static Persistence getDataDriver() {
@@ -93,15 +88,15 @@ public class OffLineBatchTask extends AbstractService {
     public static ResponseData<List<Boolean>> sendBatchTransaction(
         List<TransactionArgs> transactionArgs) {
 
-        Map<Integer, List<String>> hashesByGroup = new HashMap<>();
-        Map<Integer, List<String>> signaturesByGroup = new HashMap<>();
-        Map<Integer, List<String>> logsByGroup = new HashMap<>();
-        Map<Integer, List<Long>> timestampsByGroup = new HashMap<>();
-        Map<Integer, List<String>> signersByGroup = new HashMap<>();
-        Map<Integer, List<String>> customKeysByGroup = new HashMap<>();
+        Map<String, List<String>> hashesByGroup = new HashMap<>();
+        Map<String, List<String>> signaturesByGroup = new HashMap<>();
+        Map<String, List<String>> logsByGroup = new HashMap<>();
+        Map<String, List<Long>> timestampsByGroup = new HashMap<>();
+        Map<String, List<String>> signersByGroup = new HashMap<>();
+        Map<String, List<String>> customKeysByGroup = new HashMap<>();
 
         // Preserve order
-        Map<Integer, List<Integer>> orderByGroup = new HashMap<>();
+        Map<String, List<Integer>> orderByGroup = new HashMap<>();
 
         for (TransactionArgs transaction : transactionArgs) {
 
@@ -109,12 +104,12 @@ public class OffLineBatchTask extends AbstractService {
             String[] argArray = StringUtils.splitByWholeSeparatorPreserveAllTokens(args, ",");
 
             String method = transaction.getMethod();
-            Integer groupId = Integer.valueOf(fiscoConfig.getGroupId());
+            String groupId = fiscoConfig.getGroupId();
             switch (method) {
 
                 case "createEvidence":
                     if (argArray.length > 5) {
-                        groupId = Integer.valueOf(argArray[5]);
+                        groupId = argArray[5];
                     }
                     updateCommonFields(hashesByGroup, signaturesByGroup, logsByGroup,
                         timestampsByGroup, groupId, argArray);
@@ -142,7 +137,7 @@ public class OffLineBatchTask extends AbstractService {
                     break;
                 case "createEvidenceWithCustomKey":
                     if (argArray.length > 6) {
-                        groupId = Integer.valueOf(argArray[6]);
+                        groupId = argArray[6];
                     }
                     updateCommonFields(hashesByGroup, signaturesByGroup, logsByGroup,
                         timestampsByGroup, groupId, argArray);
@@ -176,7 +171,7 @@ public class OffLineBatchTask extends AbstractService {
         List<Boolean> resp = Arrays.asList(new Boolean[transactionArgs.size()]);
 
         // Separately go batch creation and merge responses
-        for (Integer groupId : hashesByGroup.keySet()) {
+        for (String groupId : hashesByGroup.keySet()) {
             EvidenceServiceEngine evidenceServiceEngine = EngineFactory
                 .createEvidenceServiceEngine(groupId);
             List<Boolean> subResp = evidenceServiceEngine.batchCreateEvidenceWithCustomKey(
@@ -201,11 +196,11 @@ public class OffLineBatchTask extends AbstractService {
     }
 
     private static void updateCommonFields(
-        Map<Integer, List<String>> hashesByGroup,
-        Map<Integer, List<String>> signaturesByGroup,
-        Map<Integer, List<String>> logsByGroup,
-        Map<Integer, List<Long>> timestampsByGroup,
-        Integer groupId,
+        Map<String, List<String>> hashesByGroup,
+        Map<String, List<String>> signaturesByGroup,
+        Map<String, List<String>> logsByGroup,
+        Map<String, List<Long>> timestampsByGroup,
+        String groupId,
         String[] argArray
     ) {
         if (CollectionUtils.size(hashesByGroup.get(groupId)) == 0) {
