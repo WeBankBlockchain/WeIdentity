@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,9 +119,9 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
-        SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
-            sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-        return DataToolUtils.convertSignatureDataToRsv(signatureData);
+        //SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
+        return DataToolUtils.signToRsvSignature(
+            sb.toString(), cptPublisherPrivateKey.getPrivateKey());
     }
 
     /**

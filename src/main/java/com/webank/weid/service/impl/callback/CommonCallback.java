@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl.callback;
 
@@ -63,7 +46,7 @@ public class CommonCallback extends AmopCallback {
     }
 
     private static void register(String serviceType, TransmissionService<?> service) {
-        TransmissionServiceCenter.registerService(serviceType, service); 
+        TransmissionServiceCenter.registerService(serviceType, service);
     }
 
     @Override
@@ -75,10 +58,10 @@ public class CommonCallback extends AmopCallback {
             TransmissionService<?> service = TransmissionServiceCenter.getService(serviceType);
             if (service == null) {
                 logger.error(
-                    "[CommonCallBack] no found the service for {}, messageId:{}.", 
-                    serviceType,
-                    messageId
-                ); 
+                        "[CommonCallBack] no found the service for {}, messageId:{}.",
+                        serviceType,
+                        messageId
+                );
                 return super.onPush(arg);
             }
             // 此处暂时不走认证模式
@@ -94,7 +77,7 @@ public class CommonCallback extends AmopCallback {
                 return new AmopResponse(ErrorCode.WEID_AUTH_CHANNELID_INVALID);
             }
             //解密数据
-            String message = 
+            String message =
                 CryptServiceFactory
                     .getCryptService(CryptType.AES)
                     .decrypt(arg.getMessage(), weIdAuth.getSymmetricKey());
@@ -105,7 +88,7 @@ public class CommonCallback extends AmopCallback {
             /*
             // 数据暂时不走认证模式
             //加密响应数据
-            String originalData = 
+            String originalData =
                 CryptServiceFactory
                     .getCryptService(CryptType.AES)
                     .encrypt(amopResponse.getResult(), weIdAuth.getSymmetricKey());
@@ -124,7 +107,7 @@ public class CommonCallback extends AmopCallback {
 
     /**
      * 根据业务响应和请求构建AMOP响应.
-     * 
+     *
      * @param <T> 业务响应实体数据类型
      * @param response 业务响应
      * @param arg AMOP请求

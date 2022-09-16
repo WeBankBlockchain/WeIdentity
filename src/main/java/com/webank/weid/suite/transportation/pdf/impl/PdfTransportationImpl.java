@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.transportation.pdf.impl;
 
@@ -34,6 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import org.apache.fontbox.ttf.TTFParser;
 import org.apache.fontbox.ttf.TrueTypeFont;
 import org.apache.pdfbox.cos.COSName;
@@ -47,8 +31,8 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.interactive.form.PDAcroForm;
 import org.apache.pdfbox.pdmodel.interactive.form.PDField;
-import org.fisco.bcos.web3j.crypto.SHA3Digest;
-import org.fisco.bcos.web3j.utils.Numeric;
+
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1130,7 +1114,7 @@ public class PdfTransportationImpl
         pdfAttributeInfo.setVersion(version.getCode());
         pdfAttributeInfo.setEncodeType(property.getEncodeType().getCode());
         pdfAttributeInfo.setId(DataToolUtils.getUuId32());
-        pdfAttributeInfo.setAmopId(fiscoConfig.getAmopId());
+        //pdfAttributeInfo.setAmopId(fiscoConfig.getAmopId());
         return pdfAttributeInfo;
     }
 
@@ -1313,8 +1297,9 @@ public class PdfTransportationImpl
     private String getChecksum(byte[] pdfFileByte) {
 
         //使用web3j中的sha3算法：keccak-256
-        SHA3Digest digestSha3 = new SHA3Digest();
-        byte[] digest = digestSha3.hash(pdfFileByte);
+        /*SHA3Digest digestSha3 = new SHA3Digest();
+        byte[] digest = digestSha3.hash(pdfFileByte);*/
+        byte[] digest = DataToolUtils.hash(pdfFileByte);
         return Numeric.toHexString(digest);
     }
 

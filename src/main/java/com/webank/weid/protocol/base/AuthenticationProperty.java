@@ -1,27 +1,13 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.protocol.base;
 
 import lombok.Data;
 
 import com.webank.weid.constant.WeIdConstant.PublicKeyType;
+import org.junit.Assert;
+
+import java.util.List;
 
 /**
  * The base data structure for AuthenticationProperty.
@@ -32,17 +18,35 @@ import com.webank.weid.constant.WeIdConstant.PublicKeyType;
 public class AuthenticationProperty {
 
     /**
-     * Required: The type.
+     * Required: The verification method id.
      */
-    private String type = PublicKeyType.SECP256K1.getTypeName();
+    private String id;
 
     /**
-     * Required: The public key.
+     * Required: The verification method type.
      */
-    private String publicKey;
+    private String type = "Ed25519VerificationKey2020";
 
     /**
-     * Required: Revoked, or not.
+     * Required: The verification method controller.
      */
-    private Boolean revoked = false;
+    private String controller;
+
+    /**
+     * Required: The verification method material.
+     */
+    private String publicKeyMultibase;
+
+    public String toString() {
+        return this.id + ',' + this.type + ',' + this.controller + ',' + this.publicKeyMultibase;
+    }
+
+    public static AuthenticationProperty fromString(String authString) {
+        String[] result = authString.split(",");
+        AuthenticationProperty authenticationProperty = new AuthenticationProperty();
+        authenticationProperty.setId(result[0]);
+        authenticationProperty.setController(result[2]);
+        authenticationProperty.setPublicKeyMultibase(result[3]);
+        return authenticationProperty;
+    }
 }

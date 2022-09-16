@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.encode;
 
@@ -27,6 +10,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -211,15 +195,18 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
         GetEncryptKeyArgs args = new GetEncryptKeyArgs();
         args.setKeyId(encodeData.getId());
         args.setMessageId(DataToolUtils.getUuId32());
-        args.setToAmopId(encodeData.getAmopId());
-        args.setFromAmopId(fiscoConfig.getAmopId());
+        //args.setToAmopId(encodeData.getAmopId());
+        //args.setFromAmopId(fiscoConfig.getAmopId());
         if (encodeData.getWeIdAuthentication() != null) {
-            String signValue = DataToolUtils.secp256k1Sign(
+            /*String signValue = DataToolUtils.secp256k1Sign(
                 encodeData.getId(),
                 new BigInteger(
                     encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
+            );*/
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(encodeData.getId(), encodeData.getWeIdAuthentication().getWeIdPrivateKey().getPrivateKey())
             );
-            args.setSignValue(signValue);
+            args.setSignValue(signature);
             args.setWeId(encodeData.getWeIdAuthentication().getWeId());
         }
         ResponseData<GetEncryptKeyResponse> resResponse =

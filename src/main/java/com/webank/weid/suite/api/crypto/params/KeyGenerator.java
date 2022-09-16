@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.api.crypto.params;
 
@@ -28,10 +11,9 @@ import java.security.SecureRandom;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.utils.Numeric;
 
 import com.webank.weid.util.DataToolUtils;
+import org.fisco.bcos.sdk.utils.Numeric;
 
 /**
  * 秘钥生成器.
@@ -41,6 +23,8 @@ import com.webank.weid.util.DataToolUtils;
 public class KeyGenerator {
     
     public static final int DEFAULT_KEY_SIZE = 1024;
+    public static final int PUBLIC_KEY_LENGTH_IN_HEX = 128;
+    public static final int PRIVATE_KEY_LENGTH_IN_HEX = 64;
 
     /**
      * 使用UUID作为秘钥.
@@ -97,14 +81,15 @@ public class KeyGenerator {
             return StringUtils.EMPTY;
         }
         BigInteger bigInt = new BigInteger(decimalKey, 10);
-        int keySize = Keys.PUBLIC_KEY_LENGTH_IN_HEX;
+        /*int keySize = Keys.PUBLIC_KEY_LENGTH_IN_HEX;
         //公钥字节长度为63, 64, 65
         //私钥的字节长度32, 33, 30, 31
         if (bigInt.toByteArray().length < 50) {
             keySize = Keys.PRIVATE_KEY_LENGTH_IN_HEX;
         }
         String hex = Numeric.toHexStringNoPrefixZeroPadded(bigInt, keySize);
-        return Base64.encodeBase64String(Numeric.hexStringToByteArray(hex));
+        return Base64.encodeBase64String(Numeric.hexStringToByteArray(hex));*/
+        return Base64.encodeBase64String(bigInt.toByteArray());
     }
     
     /**
