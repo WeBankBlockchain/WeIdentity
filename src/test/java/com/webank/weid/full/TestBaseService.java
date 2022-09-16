@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full;
 
@@ -23,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.fisco.bcos.sdk.v3.codec.datatypes.StaticArray;
+import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Bytes32;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -383,7 +368,6 @@ public abstract class TestBaseService extends BaseTest {
         createResult.getUserWeIdPrivateKey().setPrivateKey(privateKey);
         createResult.getUserWeIdPublicKey().setPublicKey(publicKey);
 
-        this.setPublicKey(createResult, publicKey, createResult.getWeId());
         this.setAuthentication(createResult, publicKey, createResult.getWeId());
 
         CreateWeIdDataResult createWeId = new CreateWeIdDataResult();
@@ -597,8 +581,6 @@ public abstract class TestBaseService extends BaseTest {
 
         CreateWeIdDataResult createWeId = this.createWeId();
 
-        this.setPublicKey(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
-            createWeId.getWeId());
         this.setAuthentication(createWeId, createWeId.getUserWeIdPublicKey().getPublicKey(),
             createWeId.getWeId());
         this.setService(createWeId, TestData.SERVICE_TYPE, TestData.SERVICE_ENDPOINT);
@@ -620,32 +602,6 @@ public abstract class TestBaseService extends BaseTest {
         Assert.assertNotNull(createWeIdDataResult.getResult());
 
         return createWeIdDataResult.getResult();
-    }
-
-    /**
-     * addPublicKey default.
-     *
-     * @param createResult createResult
-     * @param publicKey publicKey
-     * @param owner owner
-     */
-    protected void setPublicKey(
-        CreateWeIdDataResult createResult,
-        String publicKey,
-        String owner) {
-
-        // No longer required, since this will be automatically set now.
-
-        // SetPublicKeyArgs setPublicKeyArgs = TestBaseUtil.buildSetPublicKeyArgs(createResult);
-        // setPublicKeyArgs.setPublicKey(publicKey);
-        // setPublicKeyArgs.setOwner(owner);
-
-        // ResponseData<Integer> responseSetPub = weIdService.addPublicKey(setPublicKeyArgs);
-        // LogUtil.info(logger, "addPublicKey", responseSetPub);
-
-        // Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
-        //     responseSetPub.getErrorCode().intValue());
-        // Assert.assertNotEquals(0, responseSetPub.getResult().intValue());
     }
 
     /**
@@ -688,15 +644,15 @@ public abstract class TestBaseService extends BaseTest {
         // setAuthenticate for this WeIdentity DID
         AuthenticationArgs setAuthenticationArgs =
             TestBaseUtil.buildSetAuthenticationArgs(createResult);
-        setAuthenticationArgs.setOwner(owner);
+        setAuthenticationArgs.setController(owner);
         setAuthenticationArgs.setPublicKey(publicKey);
         ResponseData<Boolean> responseSetAuth =
             weIdService.setAuthentication(createResult.getWeId(), setAuthenticationArgs,
                 createResult.getUserWeIdPrivateKey());
         LogUtil.info(logger, "setAuthentication", responseSetAuth);
 
-        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), responseSetAuth.getErrorCode().intValue());
-        Assert.assertEquals(true, responseSetAuth.getResult());
+        Assert.assertEquals(ErrorCode.AUTHENTICATION_PUBLIC_KEY_MULTIBASE_EXISTS.getCode(), responseSetAuth.getErrorCode().intValue());
+        Assert.assertEquals(false, responseSetAuth.getResult());
     }
 
     protected CredentialPojo copyCredentialPojo(CredentialPojo credentialPojo) {

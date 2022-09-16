@@ -1,39 +1,13 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl;
-
-import java.io.File;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ProcessingMode;
 import com.webank.weid.constant.WeIdConstant;
@@ -55,6 +29,14 @@ import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
+import java.io.File;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Service implementations for operations on Evidence.
@@ -71,7 +53,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private EvidenceServiceEngine evidenceServiceEngine;
 
-    private Integer groupId;
+    private String groupId;
 
     public EvidenceServiceImpl() {
         super();
@@ -84,13 +66,13 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
      * @param processingMode 上链模式
      * @param groupId 群组编号
      */
-    public EvidenceServiceImpl(ProcessingMode processingMode, Integer groupId) {
+    public EvidenceServiceImpl(ProcessingMode processingMode, String groupId) {
         super(groupId);
         this.processingMode = processingMode;
         initEvidenceServiceEngine(groupId);
     }
 
-    private void initEvidenceServiceEngine(Integer groupId) {
+    private void initEvidenceServiceEngine(String groupId) {
         evidenceServiceEngine = EngineFactory.createEvidenceServiceEngine(groupId);
         this.groupId = groupId;
     }
@@ -270,8 +252,11 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
         if (requireSig) {
-            String signature = DataToolUtils.secp256k1Sign(hashValue,
-                new BigInteger(weIdPrivateKey.getPrivateKey()));
+            /*String signature = DataToolUtils.secp256k1Sign(hashValue,
+                new BigInteger(weIdPrivateKey.getPrivateKey()));*/
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(hashValue, weIdPrivateKey.getPrivateKey())
+            );
             return evidenceServiceEngine.addLog(
                 hashValue,
                 signature,
@@ -373,8 +358,11 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
         if (requireSig) {
-            String signature = DataToolUtils.secp256k1Sign(hashValue,
-                new BigInteger(weIdPrivateKey.getPrivateKey()));
+            /*String signature = DataToolUtils.secp256k1Sign(hashValue,
+                new BigInteger(weIdPrivateKey.getPrivateKey()));*/
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(hashValue, weIdPrivateKey.getPrivateKey())
+            );
             return evidenceServiceEngine.addLogByCustomKey(
                 hashValue,
                 signature,
@@ -404,6 +392,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (object == null) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
+        //替换国密
         if (object instanceof Hashable) {
             ResponseData<String> hashResp = getHashValue((Hashable) object);
             if (StringUtils.isEmpty(hashResp.getResult())) {
@@ -419,7 +408,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 logger.error("Failed to convert file into String: {}", ((File) object).getName());
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
-            return new ResponseData<>(new HashString(DataToolUtils.sha3(rawData)),
+            return new ResponseData<>(new HashString(DataToolUtils.hash(rawData)),
                 ErrorCode.SUCCESS);
         }
         if (object instanceof String) {
@@ -427,7 +416,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 logger.error("Input String is blank, ignored..");
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
-            return new ResponseData<>(new HashString(DataToolUtils.sha3((String) object)),
+            return new ResponseData<>(new HashString(DataToolUtils.hash((String) object)),
                 ErrorCode.SUCCESS);
         }
         logger.error("Unsupported input object type: {}", object.getClass().getCanonicalName());
@@ -476,7 +465,11 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     private ResponseData<String> hashToNewEvidence(String hashValue, String privateKey,
         String extra) {
         try {
-            String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
+            //替换国密
+            //String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(hashValue, privateKey)
+            );
             Long timestamp = DateUtils.getCurrentTimeStamp();
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
                 String[] args = new String[6];
@@ -493,7 +486,8 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     .append(timestamp)
                     .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
                     .append(this.groupId).toString();
-                String hash = DataToolUtils.sha3(rawData);
+                //替换国密
+                String hash = DataToolUtils.hash(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
                     .writeTransaction(requestId, "createEvidence", args, StringUtils.EMPTY);
@@ -585,7 +579,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         // 1st: verify hash (accept both thumbprint hash or credential.getHash())
         if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(credentialPojo.getHash())) {
             if (CredentialPojoUtils.isLiteCredential(credentialPojo)) {
-                if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(DataToolUtils.sha3(
+                if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(DataToolUtils.hash(
                     CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(credentialPojo)))) {
                     logger.error("Evidence hash mismatches the lite credential hash or thumbprint");
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
@@ -597,7 +591,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
                 } else {
                     if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(
-                        DataToolUtils.sha3(
+                            DataToolUtils.hash(
                             CredentialPojoUtils.getCredentialThumbprintWithoutSig(credentialPojo,
                                 credentialPojo.getSalt(), null)))) {
                         logger.error("Evidence hash mismatches the non-embedded credential hash or"
@@ -620,22 +614,24 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (!DataToolUtils.isValidBase64String(signature)) {
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN);
         }
-        SignatureData signatureData =
+        /*SignatureData signatureData =
             DataToolUtils.simpleSignatureDeserialization(
                 DataToolUtils.base64Decode(signature.getBytes(StandardCharsets.UTF_8))
-            );
+            );*/
 
         // Firstly, we check the secp256k1 style signature
         if (StringUtils.isEmpty(publicKey)) {
-            ResponseData<Boolean> verifyResp = verifySecp256k1SignatureToSigner(
+            ResponseData<Boolean> verifyResp = verifySignatureToSigner(
                 evidenceInfo.getCredentialHash(),
                 WeIdUtils.convertAddressToWeId(weId),
                 signature);
             return verifyResp;
         } else {
             try {
-                boolean result = DataToolUtils
+                /*boolean result = DataToolUtils
                     .verifySecp256k1Signature(evidenceInfo.getCredentialHash(), signature,
+                        new BigInteger(publicKey));*/
+                boolean result = DataToolUtils.verifySignature(evidenceInfo.getCredentialHash(), signature,
                         new BigInteger(publicKey));
 
                 if (!result) {
@@ -650,7 +646,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
     }
 
-    private ResponseData<Boolean> verifySecp256k1SignatureToSigner(
+    private ResponseData<Boolean> verifySignatureToSigner(
         String rawData,
         String signerWeId,
         String secp256k1sig
@@ -665,8 +661,10 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
+            /*ErrorCode errorCode = DataToolUtils
+                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument, null);*/
             ErrorCode errorCode = DataToolUtils
-                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument, null);
+                    .verifySignatureFromWeId(rawData, secp256k1sig, weIdDocument, null);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(false, errorCode);
             }
@@ -717,7 +715,10 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         String privateKey = weIdPrivateKey.getPrivateKey();
         try {
-            String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
+            //String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(hashValue, weIdPrivateKey.getPrivateKey())
+            );
             Long timestamp = DateUtils.getCurrentTimeStamp();
 
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
@@ -737,7 +738,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     .append(customKey)
                     .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
                     .append(this.groupId).toString();
-                String hash = DataToolUtils.sha3(rawData);
+                String hash = DataToolUtils.hash(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
                     .writeTransaction(requestId, "createEvidenceWithCustomKey", args,
@@ -802,10 +803,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
-        return evidenceServiceEngine.setAttribute(
+        return evidenceServiceEngine.revoke(
             hashResp.getResult(),
-            WeIdConstant.EVIDENCE_REVOKE_KEY,
-            StringUtils.EMPTY,
+            true,
             timestamp,
             weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
         );
@@ -830,10 +830,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
-        return evidenceServiceEngine.setAttribute(
+        return evidenceServiceEngine.revoke(
             hashResp.getResult(),
-            WeIdConstant.EVIDENCE_UNREVOKE_KEY,
-            StringUtils.EMPTY,
+            false,
             timestamp,
             weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
         );

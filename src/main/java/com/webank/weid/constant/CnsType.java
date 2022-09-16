@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.constant;
 
@@ -44,9 +27,10 @@ public enum CnsType {
     /**
      * 机构配置CNS定义.
      */
-    ORG_CONFING("orgConfig", "v3.1");
+    ORG_CONFING("orgConfig", "v3.3");
 
     private static final String SPLIT_CHAR = "/";
+    private static final String SPLIT_CHAR_V3 = "_";
 
     private String name;
 
@@ -59,8 +43,14 @@ public enum CnsType {
 
     private String getCnsName(String name) {
         String profile = PropertyUtils.getProperty("cns.profile.active");
+        String chainVersion = PropertyUtils.getProperty("bcos.version");
         if (StringUtils.isNotBlank(profile)) {
-            return profile + SPLIT_CHAR + name;
+            if ("2".equals(chainVersion)) {
+                return profile + SPLIT_CHAR + name;
+            } else {
+                // v3使用BFS，不能使用斜线
+                return profile + SPLIT_CHAR_V3 + name;
+            }
         }
         return name;
     }

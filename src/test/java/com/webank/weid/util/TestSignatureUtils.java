@@ -1,29 +1,18 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.util;
 
+import com.webank.weid.protocol.response.RsvSignature;
 import java.math.BigInteger;
 
-import com.lambdaworks.codec.Base64;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Sign;
+import com.webank.weid.service.BaseService;
+import org.apache.commons.codec.binary.Base64;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.utils.Numeric;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -40,39 +29,53 @@ public class TestSignatureUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(TestSignatureUtils.class);
 
+
     @Test
     public void testSignatureUtils()
         throws Exception {
 
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
-        BigInteger publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        //logger.info("publicKey:{} ", keyPair.getHexPublicKey());
+        //BigInteger publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
+        String publicKey = keyPair.getHexPublicKey();
         logger.info("publicKey:{} ", publicKey);
 
-        ECKeyPair keyPair = TestBaseUtil.createKeyPair();
+        /*ECKeyPair keyPair = TestBaseUtil.createKeyPair();
         keyPair = ECKeyPair.create(new BigInteger(privateKey));
         logger.info("publicKey:{} ", keyPair.getPublicKey());
-        logger.info("privateKey:{}", keyPair.getPrivateKey());
+        logger.info("privateKey:{}", keyPair.getPrivateKey());*/
+        //CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        logger.info("privateKey:{}", keyPair.getHexPrivateKey());
 
         String str = "hello world...........................yes";
-        Sign.SignatureData sigData = DataToolUtils.secp256k1SignToSignature(str, keyPair);
-        byte[] serialized = DataToolUtils.simpleSignatureSerialization(sigData);
-        Sign.SignatureData newSigData = DataToolUtils.simpleSignatureDeserialization(serialized);
-        logger.info(newSigData.toString());
+        //Sign.SignatureData sigData = DataToolUtils.secp256k1SignToSignature(str, keyPair);
+        //ECDSASignatureResult sigData = DataToolUtils.secp256k1SignToSignature(str, keyPair);
+        RsvSignature signatureResult = DataToolUtils.signToRsvSignature(str, privateKey);
+        //byte[] serialized = DataToolUtils.simpleSignatureSerialization(sigData);
+        //Sign.SignatureData newSigData = DataToolUtils.simpleSignatureDeserialization(serialized);
+        //ECDSASignatureResult newSigData = DataToolUtils.simpleSignatureDeserialization(serialized);
+        logger.info(DataToolUtils.SigBase64Serialization(signatureResult));
 
-        Sign.SignatureData signatureData = DataToolUtils
-            .convertBase64StringToSignatureData(new String(Base64.encode(serialized)));
-        logger.info(signatureData.toString());
+        /*Sign.SignatureData signatureData = DataToolUtils
+            .convertBase64StringToSignatureData(new String(Base64.encode(serialized)));*/
+        /*ECDSASignatureResult signatureData = DataToolUtils
+                .convertBase64StringToSignatureData(new String(Base64.encodeBase64(serialized)));*/
+        //logger.info(signatureData.toString());
     }
 
     @Test
     public void testSecp256k1Signatures() {
-        String hexPrivKey =
+        String privKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         String msg = "12345";
-        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(hexPrivKey));
-        String sig = DataToolUtils.secp256k1Sign(msg, new BigInteger(hexPrivKey));
-        Boolean result = DataToolUtils.verifySecp256k1Signature(msg, sig, keyPair.getPublicKey());
+        //ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(hexPrivKey));
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privKey));
+        String sig = DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(msg, privKey));
+        //Boolean result = DataToolUtils.verifySecp256k1Signature(msg, sig, keyPair.getPublicKey());
+        BigInteger bigPublicKey = new BigInteger(DataToolUtils.hexStr2DecStr(keyPair.getHexPublicKey()));
+        boolean result = DataToolUtils.verifySignature(msg, sig, bigPublicKey);
         Assert.assertTrue(result);
     }
 }

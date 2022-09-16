@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.auth.impl;
 
@@ -24,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -165,7 +149,7 @@ public class WeIdAuthImpl implements WeIdAuth {
         }
         WeIdDocument weIdDocument = weIdDoc.getResult();
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
+            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
@@ -243,15 +227,18 @@ public class WeIdAuthImpl implements WeIdAuth {
 
         //验证对手方对challenge的签名
         ErrorCode verifyErrorCode = DataToolUtils
-            .verifySecp256k1SignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
+            .verifySignatureFromWeId(rawData, challengeSignData, weIdDocument, null);
         if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<WeIdAuthObj>(null, verifyErrorCode);
         }
 
         //双向auth，发起方也需要对对手方的challenge进行签名
         String challenge1 = (String) dataMap.get(ParamKeyConstant.WEID_AUTH_CHALLENGE);
-        String signData = DataToolUtils.secp256k1Sign(
-            challenge1, new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));
+        /*String signData = DataToolUtils.secp256k1Sign(
+            challenge1, new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey()));*/
+        String signData = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(rawData, weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
+        );
         RequestVerifyChallengeArgs verifyChallengeArgs = new RequestVerifyChallengeArgs();
         verifyChallengeArgs.setSignData(signData);
         verifyChallengeArgs.setChallenge(Challenge.fromJson(challenge1));

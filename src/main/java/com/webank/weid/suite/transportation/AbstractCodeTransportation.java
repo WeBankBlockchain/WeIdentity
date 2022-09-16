@@ -1,26 +1,10 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.transportation;
 
 import java.math.BigInteger;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
 
 import com.webank.weid.constant.ErrorCode;
@@ -34,6 +18,7 @@ import com.webank.weid.suite.entity.TransBaseData;
 import com.webank.weid.suite.entity.TransCodeBaseData;
 import com.webank.weid.suite.transmission.TransmissionRequest;
 import com.webank.weid.util.DataToolUtils;
+
 
 /**
  * 二维码传输协议抽象类定义.
@@ -62,15 +47,18 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
     ) {
         GetTransDataArgs args = new GetTransDataArgs();
         args.setResourceId(codeData.getId());
-        args.setToAmopId(codeData.getAmopId());
+        args.setTopic(codeData.getAmopId());
         args.setFromAmopId(fiscoConfig.getAmopId());
         args.setWeId(weIdAuthentication.getWeId());
         args.setClassName(codeData.getClass().getName());
-        String signValue = DataToolUtils.secp256k1Sign(
-            codeData.getId(), 
+        /*String signValue = DataToolUtils.secp256k1Sign(
+            codeData.getId(),
             new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
+        );*/
+        String signature = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(codeData.getId(), weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
         );
-        args.setSignValue(signValue);
+        args.setSignValue(signature);
         return args;
     }
     

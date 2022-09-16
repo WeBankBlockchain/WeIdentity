@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.util;
 
@@ -26,8 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -210,7 +196,7 @@ public final class CredentialPojoUtils {
      * @return Hash value in String.
      */
     public static String getCredentialPojoHash(CredentialPojo credentialPojo,
-        Map<String, Object> disclosures) {
+           Map<String, Object> disclosures) {
         String rawData = getCredentialPojoRawDataWithProofWithoutSalt(
             credentialPojo,
             credentialPojo.getSalt(),
@@ -219,7 +205,7 @@ public final class CredentialPojoUtils {
             return StringUtils.EMPTY;
         }
         // System.out.println(rawData);
-        return DataToolUtils.sha3(rawData);
+        return DataToolUtils.hash(rawData);
     }
 
     /**
@@ -240,7 +226,7 @@ public final class CredentialPojoUtils {
             credMap.put(ParamKeyConstant.CLAIM, getLiteClaimHash(credentialPojo));
             String rawData = DataToolUtils.mapToCompactJson(credMap);
             //System.out.println("LiteCredential's Pre-Hash for evidence: " + rawData);
-            return DataToolUtils.sha3(rawData);
+            return DataToolUtils.hash(rawData);
         } catch (Exception e) {
             logger.error("get Credential Thumbprint error.", e);
             return StringUtils.EMPTY;
@@ -645,7 +631,7 @@ public final class CredentialPojoUtils {
      * @return the hash value
      */
     public static String getFieldSaltHash(String field, String salt) {
-        return DataToolUtils.sha3(String.valueOf(field) + String.valueOf(salt));
+        return DataToolUtils.hash(String.valueOf(field) + String.valueOf(salt));
     }
 
     /**
@@ -882,7 +868,7 @@ public final class CredentialPojoUtils {
         if (callerAuth == null
             || callerAuth.getWeIdPrivateKey() == null
             || StringUtils.isBlank(callerAuth.getWeIdPrivateKey().getPrivateKey())
-            || StringUtils.isBlank(callerAuth.getWeIdPublicKeyId())) {
+            || StringUtils.isBlank(callerAuth.getAuthenticationMethodId())) {
             return ErrorCode.ILLEGAL_INPUT;
         }
         if (!WeIdUtils.isWeIdValid(callerAuth.getWeId())) {

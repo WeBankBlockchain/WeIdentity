@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.util;
 
@@ -30,8 +13,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
@@ -43,6 +26,10 @@ import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 
 /**
  * The Class CredentialUtils.
@@ -102,7 +89,7 @@ public final class CredentialUtils {
      * Build the credential Proof.
      *
      * @param credential the credential
-     * @param privateKey the privatekey
+     * @param privateKey private key decimal
      * @param disclosureMap the disclosureMap
      * @return the Proof structure
      */
@@ -269,7 +256,7 @@ public final class CredentialUtils {
      * @return hash value.
      */
     public static String getFieldHash(Object field) {
-        return DataToolUtils.sha3(String.valueOf(field));
+        return DataToolUtils.hash(String.valueOf(field));
     }
 
     /**
@@ -306,15 +293,15 @@ public final class CredentialUtils {
      * creation is the credential thumbprint result based on an empty signature value filled in.
      *
      * @param credential target credential object
-     * @param privateKey the privatekey for signing
+     * @param privateKey decimal
      * @param disclosureMap the disclosure map
      * @return the String signature value
      */
-    public static String getCredentialSignature(Credential credential, String privateKey,
-        Map<String, Object> disclosureMap) {
+    public static String getCredentialSignature(Credential credential,
+           String privateKey, Map<String, Object> disclosureMap) {
         String rawData = CredentialUtils
             .getCredentialThumbprintWithoutSig(credential, disclosureMap);
-        return DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
+        return DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(rawData, privateKey));
     }
 
     /**
@@ -330,7 +317,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        return DataToolUtils.sha3(rawData);
+        return DataToolUtils.hash(rawData);
     }
 
     /**
@@ -345,7 +332,7 @@ public final class CredentialUtils {
         if (StringUtils.isEmpty(rawData)) {
             return StringUtils.EMPTY;
         }
-        return DataToolUtils.sha3(rawData);
+        return DataToolUtils.hash(rawData);
     }
 
     /**

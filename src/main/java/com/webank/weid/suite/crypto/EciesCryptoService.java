@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.crypto;
 
@@ -26,10 +9,10 @@ import java.nio.charset.StandardCharsets;
 import com.webank.wedpr.ecies.EciesResult;
 import com.webank.wedpr.ecies.NativeInterface;
 
+import com.webank.weid.suite.api.crypto.params.KeyGenerator;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.utils.Numeric;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +34,9 @@ public class EciesCryptoService implements CryptoService {
         if (StringUtils.isNumeric(key)) {
             //如果为10进制数字
             BigInteger bigInt = new BigInteger(key);
-            pubValue = Numeric.toHexStringNoPrefixZeroPadded(bigInt, Keys.PUBLIC_KEY_LENGTH_IN_HEX);
+            //pubValue = Numeric.toHexStringNoPrefixZeroPadded(bigInt, Keys.PUBLIC_KEY_LENGTH_IN_HEX);
+            pubValue = Numeric.toHexStringNoPrefixZeroPadded(
+                    bigInt, KeyGenerator.PUBLIC_KEY_LENGTH_IN_HEX);
         } else {
             if (!DataToolUtils.isValidBase64String(key)) {
                 String errorMessage = "input publicKey is not a valid Base64 string.";
@@ -93,7 +78,8 @@ public class EciesCryptoService implements CryptoService {
             //如果为10进制数字
             BigInteger bigInt = new BigInteger(key);
             priValue = Numeric.toHexStringNoPrefixZeroPadded(
-                bigInt, Keys.PRIVATE_KEY_LENGTH_IN_HEX);
+                    bigInt, KeyGenerator.PRIVATE_KEY_LENGTH_IN_HEX);
+                //bigInt, Keys.PRIVATE_KEY_LENGTH_IN_HEX);
         } else {
             if (!DataToolUtils.isValidBase64String(key)) {
                 String errorMessage = "input privateKey is not a valid Base64 string.";
