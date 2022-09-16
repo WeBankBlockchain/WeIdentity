@@ -1,0 +1,1 @@
+{"type":"object","description":"Trusted Timestamp from authorized 3rd-party, or chain consensus","title":"Trusted Timestamp","properties":{"claimHash":{"type":"string"},"hashKey":{"type":"string"},"signatureList":{"type":"string"},"timestamp":{"type":"integer"}},"$schema":"http://json-schema.org/draft-04/schema#"}

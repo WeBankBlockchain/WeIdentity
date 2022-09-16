@@ -19,16 +19,18 @@
 
 package com.webank.weid.service.fisco;
 
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.contract.deploy.v2.DeployContractV2;
+import com.webank.weid.protocol.response.CnsInfo;
+import com.webank.weid.service.fisco.v3.WeServerV3;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.precompile.cns.CnsInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.webank.weid.config.FiscoConfig;
 import com.webank.weid.constant.AmopMsgType;
@@ -42,7 +44,13 @@ import com.webank.weid.service.impl.callback.CommonCallback;
 import com.webank.weid.service.impl.callback.KeyManagerCallback;
 import com.webank.weid.util.PropertyUtils;
 
-public abstract class WeServer<W, C, S> {
+/**
+ * BcosSDK,Client,CryptoKeyPair
+ * @param <B> BcosSDK
+ * @param <W> client
+ * @param <C> cryptoKeyPair
+ */
+public abstract class WeServer<B, W, C> {
 
     /*
      * Maximum Timeout period in milliseconds.
@@ -59,15 +67,15 @@ public abstract class WeServer<W, C, S> {
     /**
      * WeServer对象上下文.
      */
-    private static ConcurrentHashMap<Integer, WeServer<?, ?, ?>>  weServerContext = 
+    private static ConcurrentHashMap<String, WeServer<?, ?, ?>>  weServerContext =
         new ConcurrentHashMap<>();
 
     /**
      * bucket地址映射Map.
      */
-    private static ConcurrentHashMap<String, CnsInfo> bucketAddressMap = 
+    private static ConcurrentHashMap<String, CnsInfo> bucketAddressMap =
         new ConcurrentHashMap<>();
-    
+
     /**
      * FISCO配置对象.
      */
@@ -95,27 +103,35 @@ public abstract class WeServer<W, C, S> {
      *
      * @param fiscoConfig FISCO配置对象
      * @param groupId 群组ID
+     * @param <B> BcosSDK
      * @param <W> Web3j对象
      * @param <C> Credential对象
-     * @param <S> Service 对象
      * @return 返回WeServer对象
      */
-    public static synchronized <W, C, S> WeServer<W, C, S> getInstance(
-        FiscoConfig fiscoConfig, 
-        Integer groupId
+    public static synchronized <B, W, C> WeServer<B, W, C> getInstance (
+        FiscoConfig fiscoConfig,
+        String groupId
     ) {
         WeServer<?, ?, ?> weServer = weServerContext.get(groupId);
         if (weServer == null) {
             synchronized (WeServer.class) {
                 weServer = weServerContext.get(groupId);
                 if (weServer == null) {
-                    weServer = new WeServerV2(fiscoConfig);
-                    weServer.initWeb3j(groupId);
-                    weServerContext.put(groupId, weServer);
+                    if (fiscoConfig.getVersion()
+                        .startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+                        weServer = new WeServerV2(fiscoConfig);
+                        weServer.initWeb3j(groupId);
+                        weServerContext.put(groupId, weServer);
+                    } else {
+                        // v3
+                        weServer = new WeServerV3(fiscoConfig);
+                        weServer.initWeb3j(groupId);
+                        weServerContext.put(groupId, weServer);
+                    }
                 }
             }
         }
-        return (WeServer<W, C, S>)weServer;
+        return (WeServer<B, W, C>) weServer;
     }
 
     /**
@@ -142,24 +158,6 @@ public abstract class WeServer<W, C, S> {
     }
 
     /**
-     * 初始化Web3sdk线程池信息.
-     *
-     * @param groupId 群组编号
-     * @return 返回线程池对象
-     */
-    protected ThreadPoolTaskExecutor initializePool(Integer groupId) {
-        ThreadPoolTaskExecutor pool = new ThreadPoolTaskExecutor();
-        pool.setBeanName("web3sdk-group" + groupId);
-        pool.setCorePoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkCorePoolSize()));
-        pool.setMaxPoolSize(Integer.valueOf(fiscoConfig.getWeb3sdkMaxPoolSize()));
-        pool.setQueueCapacity(Integer.valueOf(fiscoConfig.getWeb3sdkQueueSize()));
-        pool.setKeepAliveSeconds(Integer.valueOf(fiscoConfig.getWeb3sdkKeepAliveSeconds()));
-        pool.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.AbortPolicy());
-        pool.initialize();
-        return pool;
-    }
-
-    /**
      * 获取超时时间，如果超时时间非法，则返回默认的超时时间.
      *
      * @param timeOut 调用对应AMOP请求接口的超时时间,毫秒单位.
@@ -173,7 +171,7 @@ public abstract class WeServer<W, C, S> {
             return timeOut;
         }
     }
-    
+
     /**
      * 获取AMOP监听的topic.
      *
@@ -188,7 +186,7 @@ public abstract class WeServer<W, C, S> {
         }
         return topics;
     }
-    
+
     /**
      * 获取Web3j对象.
      *
@@ -197,18 +195,19 @@ public abstract class WeServer<W, C, S> {
     public abstract W getWeb3j();
 
     /**
+     * 返回Bcos SDK 实例
+     * @return BcosSDK
+     */
+    public abstract B getBcosSDK();
+
+
+    /**
      * 获取Web3j对象所属的类型,此处是为了给动态加载合约使用.
-     * 
+     *
      * @return Web3j的Class
      */
     public abstract Class<?> getWeb3jClass();
 
-    /**
-     * 获取Service对象.
-     *
-     * @return 返回Service对象
-     */
-    public abstract S getService();
 
     /**
      * 获取Credentials对象.
@@ -220,17 +219,17 @@ public abstract class WeServer<W, C, S> {
     /**
      * 根据传入的私钥(10进制数字私钥)，进行动态创建Credentials对象.
      *
-     * @param privateKey 数字私钥
+     * @param privateKey 数字私钥 decimal
      * @return 返回Credentials对象
      */
     public abstract C createCredentials(String privateKey);
 
     /**
-     * 初始化Web3j.
-     * 
+     * 初始化Web3j. todo 不用初始化多个bcosSDK
+     *
      * @param groupId 群组Id
      */
-    protected abstract void initWeb3j(Integer groupId);
+    protected abstract void initWeb3j(String groupId);
 
     /**
      * 发送AMOP消息.
@@ -251,7 +250,7 @@ public abstract class WeServer<W, C, S> {
 
     /**
      * 获取FISCO-BCOS版本.
-     * 
+     *
      * @return 返回版本信息
      * @throws IOException 可能出现的异常.
      */
@@ -259,7 +258,7 @@ public abstract class WeServer<W, C, S> {
 
     /**
      * 查询bucketAddress.
-     * 
+     *
      * @param cnsType cns类型枚举
      * @return 返回CnsInfo
      * @throws WeIdBaseException 查询合约地址异常
@@ -267,8 +266,15 @@ public abstract class WeServer<W, C, S> {
     protected abstract CnsInfo queryCnsInfo(CnsType cnsType) throws WeIdBaseException;
 
     /**
+     * 获取链上群组列表
+     * @return groupList
+     */
+    public abstract Set<String> getGroupList();
+
+
+    /**
      * 获取Bucket地址.
-     * 
+     *
      * @param cnsType cns类型枚举
      * @return 返回bucket地址
      */
@@ -278,6 +284,8 @@ public abstract class WeServer<W, C, S> {
             cnsInfo = this.queryCnsInfo(cnsType);
             if (cnsInfo != null) {
                 bucketAddressMap.put(cnsType.toString(), cnsInfo);
+            } else {
+                logger.error("getBucketByCns cnsInfo is still null of [{}]", cnsType.toString());
             }
         }
         return cnsInfo;

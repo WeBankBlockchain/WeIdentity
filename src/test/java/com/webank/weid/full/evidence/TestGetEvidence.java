@@ -1,24 +1,9 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.evidence;
 
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -49,8 +34,8 @@ public class TestGetEvidence extends TestBaseService {
      */
     @Test
     public void testGetEvidence_success() {
-        HashString str = new HashString(
-            DataToolUtils.sha3(DateUtils.getNoMillisecondTimeStampString()));
+        String hashStr = new CryptoSuite(0).hash(DateUtils.getNoMillisecondTimeStampString());
+        HashString str = new HashString(Numeric.prependHexPrefix(hashStr));
         ResponseData<String> evidence = evidenceService
             .createEvidence(str, createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         Assert.assertTrue(!evidence.getResult().isEmpty());

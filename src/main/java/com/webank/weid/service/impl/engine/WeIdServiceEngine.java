@@ -1,27 +1,11 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl.engine;
 
 import java.util.List;
 
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdDocumentMetadata;
 import com.webank.weid.protocol.base.WeIdPojo;
 import com.webank.weid.protocol.response.ResponseData;
 
@@ -39,32 +23,38 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
      * @param weAddress identity on blockchain
      * @param publicKey public key of the identity
      * @param privateKey privateKey identity's private key
-     * @param isDelegate true if the caller is a delegate
      * @return result
      */
     ResponseData<Boolean> createWeId(
         String weAddress,
         String publicKey,
-        String privateKey,
-        boolean isDelegate
+        String privateKey
     );
 
     /**
-     * write attribute to blockchain.
+     * call weid contract to deactivate a weid.
      *
-     * @param weAddress identity on blockchain
-     * @param attributeKey the key of the attribute
-     * @param value the value of the attribute
-     * @param privateKey identity's private key
-     * @param isDelegate true if the caller is a delegate
+     * @param weAddress address of the identity
+     * @param privateKey privateKey identity's private key
      * @return result
      */
-    ResponseData<Boolean> setAttribute(
-        String weAddress,
-        String attributeKey,
-        String value,
-        String privateKey,
-        boolean isDelegate
+    ResponseData<Boolean> deactivateWeId(
+            String weAddress,
+            String privateKey
+    );
+
+    /**
+     * call weid contract to update the weid document.
+     *
+     * @param weIdDocument identity on blockchain
+     * @param weAddress address of the identity
+     * @param privateKey privateKey identity's private key
+     * @return result
+     */
+    ResponseData<Boolean> updateWeId(
+            WeIdDocument weIdDocument,
+            String weAddress,
+            String privateKey
     );
 
     /**
@@ -76,6 +66,14 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
     ResponseData<Boolean> isWeIdExist(String weId);
 
     /**
+     * check if the weid deactivated on blockchain.
+     *
+     * @param weId the weid of the entity
+     * @return result
+     */
+    ResponseData<Boolean> isDeactivated(String weId);
+
+    /**
      * get weid document from blockchain.
      *
      * @param weId the entity's weid
@@ -84,21 +82,24 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
     ResponseData<WeIdDocument> getWeIdDocument(String weId);
 
     /**
+     * get weid document metadata from blockchain.
+     *
+     * @param weId the entity's weid
+     * @return weid document metadata
+     */
+    ResponseData<WeIdDocumentMetadata> getWeIdDocumentMetadata(String weId);
+
+    /**
      * query data according to block height, index location and search direction.
      * 
-     * @param blockNumber the query blockNumber
-     * @param pageSize the page size
-     * @param indexInBlock the beginning (including) of the current block
-     * @param direction search direction: true means forward search, false means backward search
-     * @return return the WeIdPojo List
-     * @throws Exception unknown exception
+     * @param first the first index of weid in contract
+     * @param last the last index of weid in contract
+     * @return return the WeId List
      */
-    ResponseData<List<WeIdPojo>> getWeIdList(
-        Integer blockNumber,
-        Integer pageSize,
-        Integer indexInBlock,
-        boolean direction
-    ) throws Exception;
+    ResponseData<List<String>> getWeIdList(
+            Integer first,
+            Integer last
+    );
     
     /**
      * get total weId.

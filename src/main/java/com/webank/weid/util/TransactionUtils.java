@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.util;
 
@@ -30,15 +13,25 @@ import java.util.Random;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
-import org.fisco.bcos.web3j.abi.datatypes.Type;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.abi.datatypes.DynamicBytes;
+import org.fisco.bcos.sdk.abi.datatypes.StaticArray;
+import org.fisco.bcos.sdk.abi.datatypes.Type;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Int256;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+
+import org.fisco.bcos.sdk.utils.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +54,7 @@ import com.webank.weid.protocol.response.TransactionInfo;
 public class TransactionUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionUtils.class);
+
 
     /**
      * Check validity and build input params for createWeId (with attributes - public key) function.
@@ -202,11 +196,7 @@ public class TransactionUtils {
             logger.error("Input cpt signature invalid: {}", cptSignature);
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        RsvSignature rsvSignature =
-            DataToolUtils.convertSignatureDataToRsv(
-                DataToolUtils.convertBase64StringToSignatureData(cptSignature)
-            );
-
+        RsvSignature rsvSignature = DataToolUtils.SigBase64Deserialization(cptSignature);
         StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
@@ -364,7 +354,67 @@ public class TransactionUtils {
         BigInteger retCode,
         BigInteger cptId,
         BigInteger cptVersion,
-        org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt receipt) {
+        TransactionReceipt receipt) {
+
+        TransactionInfo info = new TransactionInfo(receipt);
+        // register
+        if (retCode.intValue()
+            == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
+            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}",
+                retCode.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
+        }
+
+        if (retCode.intValue() == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST, info);
+        }
+
+        if (retCode.intValue() == ErrorCode.CPT_NO_PERMISSION.getCode()) {
+            logger.error("[getResultByResolveEvent] no permission. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION, info);
+        }
+
+        // register and update
+        if (retCode.intValue() == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
+            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
+        }
+
+        // update
+        if (retCode.intValue() == ErrorCode.CPT_NOT_EXISTS.getCode()) {
+            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.",
+                cptId.intValue());
+            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
+        }
+
+        CptBaseInfo result = new CptBaseInfo();
+        result.setCptId(cptId.intValue());
+        result.setCptVersion(cptVersion.intValue());
+
+        ResponseData<CptBaseInfo> responseData = new ResponseData<>(result, ErrorCode.SUCCESS,
+            info);
+        return responseData;
+    }
+
+
+    /**
+     * Resolve CPT Event.
+     *
+     * @param retCode the retCode
+     * @param cptId the CptId
+     * @param cptVersion the CptVersion
+     * @param receipt receipt
+     * @return the result
+     */
+    public static ResponseData<CptBaseInfo> getResultByResolveEvent(
+        BigInteger retCode,
+        BigInteger cptId,
+        BigInteger cptVersion,
+        org.fisco.bcos.sdk.v3.model.TransactionReceipt receipt) {
 
         TransactionInfo info = new TransactionInfo(receipt);
         // register

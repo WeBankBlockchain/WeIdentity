@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.persistence.mysql.driver;
 
@@ -28,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +88,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->get] the id of the data is empty.");
             return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             ResponseData<String> result = new ResponseData<String>();
             result.setResult(StringUtils.EMPTY);
@@ -142,7 +126,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->add] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
             Date now = sqlDomain.getNow();
@@ -171,7 +155,7 @@ public class MysqlDriver implements Persistence {
                     logger.error("[mysql->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
-                idHashList.add(DataToolUtils.getHash(id));
+                idHashList.add(DataToolUtils.hash(id));
                 dataList.add(data);
             }
             SqlDomain sqlDomain = new SqlDomain(domain);
@@ -209,7 +193,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->delete] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);
             return new SqlExecutor(sqlDomain).execute(SqlExecutor.SQL_DELETE, dataKey);
@@ -229,7 +213,7 @@ public class MysqlDriver implements Persistence {
             logger.error("[mysql->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         Date date = new Date();
         try {
             SqlDomain sqlDomain = new SqlDomain(domain);

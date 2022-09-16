@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.contract.deploy.v2;
 
@@ -25,13 +8,14 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
+import com.webank.weid.util.DataToolUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.crypto.Credentials;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.protocol.Web3j;
-import org.fisco.bcos.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.fisco.bcos.web3j.tx.gas.StaticGasProvider;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,46 +53,54 @@ public class DeployContractV2 extends AddressProcess {
     private static final Logger logger = LoggerFactory.getLogger(DeployContractV2.class);
 
     /**
-     * The credentials.
+     * The cryptoKeyPair.
      */
-    private static Credentials credentials;
+    private static CryptoKeyPair cryptoKeyPair;
 
     /**
-     * web3j object.
+     * client object.
      */
-    private static Web3j web3j;
+    private static Client client;
 
     /**
-     * Inits the credentials.
+     * Inits the cryptoKeyPair.
      *
      * @return true, if successful
      */
-    private static boolean initCredentials(String inputPrivateKey) {
+    private static boolean initCryptoKeyPair(String inputPrivateKey) {
+        if (client == null) {
+            initClient();
+        }
         if (StringUtils.isNotBlank(inputPrivateKey)) {
-            logger.info("[DeployContractV2] begin to init credentials by privateKey..");
-            credentials = GenCredential.create(new BigInteger(inputPrivateKey).toString(16));
+            logger.info("[DeployContractV2] begin to init cryptoKeyPair by privateKey.{}", inputPrivateKey);
+            cryptoKeyPair = client.getCryptoSuite().getKeyPairFactory().createKeyPair(new BigInteger(inputPrivateKey));
         } else {
-            logger.info("[DeployContractV2] begin to init credentials..");
-            credentials = GenCredential.create();
+            logger.info("[DeployContractV2] begin to init cryptoKeyPair..");
+            cryptoKeyPair = client.getCryptoSuite().createKeyPair();
         }
 
-        if (credentials == null) {
-            logger.error("[DeployContractV2] credentials init failed. ");
+        if (cryptoKeyPair == null) {
+            logger.error("[DeployContractV2] cryptoKeyPair init failed. ");
             return false;
         }
-        String privateKey = credentials.getEcKeyPair().getPrivateKey().toString();
-        String publicKey = credentials.getEcKeyPair().getPublicKey().toString();
-        writeAddressToFile(publicKey, "ecdsa_key.pub");
-        writeAddressToFile(privateKey, "ecdsa_key");
+        byte[] priBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPrivateKey());
+        byte[] pubBytes = Numeric.hexStringToByteArray(cryptoKeyPair.getHexPublicKey());
+        String privateKey = new BigInteger(1, priBytes).toString(10);
+        String publicKey = new BigInteger(1, pubBytes).toString(10);
+        logger.info("store private key");
+        /*writeAddressToFile(publicKey, "ecdsa_key.pub");
+        writeAddressToFile(privateKey, "ecdsa_key");*/
+        writeAddressToFile(publicKey, "public_key");
+        writeAddressToFile(privateKey, "private_key");
         return true;
     }
 
     /**
-     * Inits the web3j.
+     * Inits the client.
      */
-    protected static void initWeb3j() {
-        if (web3j == null) {
-            web3j = (Web3j) BaseService.getWeb3j();
+    protected static void initClient() {
+        if (client == null) {
+            client = (Client) BaseService.getClient();
         }
     }
 
@@ -124,10 +116,10 @@ public class DeployContractV2 extends AddressProcess {
         FiscoConfig fiscoConfig,
         boolean instantEnable
     ) {
-        initWeb3j();
-        initCredentials(privateKey);
+        initClient();
+        initCryptoKeyPair(privateKey);
         String roleControllerAddress = deployRoleControllerContracts();
-        String weIdContractAddress = deployWeIdContract(roleControllerAddress);
+        String weIdContractAddress = deployWeIdContract();
         Map<String, String> addrList = deployIssuerContracts(roleControllerAddress);
         if (addrList.containsKey("AuthorityIssuerData")) {
             String authorityIssuerDataAddress = addrList.get("AuthorityIssuerData");
@@ -146,7 +138,7 @@ public class DeployContractV2 extends AddressProcess {
         FiscoConfig fiscoConfig,
         boolean instantEnable
     ) {
-        String privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
+        String privateKey = AddressProcess.getAddressFromFile("private_key");
         WeIdPrivateKey weIdPrivate = new WeIdPrivateKey();
         weIdPrivate.setPrivateKey(privateKey);
         registerAddress(weIdPrivate, fiscoConfig, instantEnable);
@@ -154,17 +146,22 @@ public class DeployContractV2 extends AddressProcess {
 
 
     private static String deployRoleControllerContracts() {
-        if (web3j == null) {
-            initWeb3j();
+        /*if (web3j == null) {
+            initWeb3j();*/
+        if (client == null) {
+            initClient();
         }
         RoleController roleController = null;
         try {
             roleController =
                 RoleController.deploy(
-                    web3j,
+                    /*web3j,
                     credentials,
                     new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)
-                ).send();
+                ).send();*/
+                        client,
+                        cryptoKeyPair
+                );
             return roleController.getContractAddress();
         } catch (Exception e) {
             logger.error("RoleController deploy exception", e);
@@ -172,19 +169,21 @@ public class DeployContractV2 extends AddressProcess {
         }
     }
 
-    private static String deployWeIdContract(String roleControllerAddress) {
-        if (web3j == null) {
-            initWeb3j();
+    private static String deployWeIdContract() {
+        /*if (web3j == null) {
+            initWeb3j();*/
+        if (client == null) {
+            initClient();
         }
 
         WeIdContract weIdContract = null;
         try {
             weIdContract = WeIdContract.deploy(
-                web3j,
+                /*web3j,
                 credentials,
-                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
-                roleControllerAddress)
-                .send();
+                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),*/
+                client,
+                cryptoKeyPair);
         } catch (Exception e) {
             logger.error("WeIdContract deploy error.", e);
             return StringUtils.EMPTY;
@@ -200,44 +199,54 @@ public class DeployContractV2 extends AddressProcess {
         String authorityIssuerDataAddress,
         String weIdContractAddress,
         String roleControllerAddress) {
-        if (web3j == null) {
-            initWeb3j();
+        /*if (web3j == null) {
+            initWeb3j();*/
+        if (client == null) {
+            initClient();
         }
 
         try {
             CptData cptData =
                 CptData.deploy(
-                    web3j,
+                    /*web3j,
                     credentials,
                     new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
-                    authorityIssuerDataAddress).send();
+                    authorityIssuerDataAddress).send();*/
+                    client,
+                    cryptoKeyPair,
+                    authorityIssuerDataAddress);
             String cptDataAddress = cptData.getContractAddress();
 
             CptData policyData =
                 CptData.deploy(
-                    web3j,
+                    /*web3j,
                     credentials,
                     new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
-                    authorityIssuerDataAddress).send();
+                    authorityIssuerDataAddress).send();*/
+                    client,
+                    cryptoKeyPair,
+                    authorityIssuerDataAddress);
             String policyDataAddress = policyData.getContractAddress();
 
             CptController cptController =
                 CptController.deploy(
-                    web3j,
+                    /*web3j,
                     credentials,
-                    new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                    new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),*/
+                    client,
+                    cryptoKeyPair,
                     cptDataAddress,
                     weIdContractAddress
-                ).send();
+                );
             String cptControllerAddress = cptController.getContractAddress();
             writeAddressToFile(cptControllerAddress, "cptController.address");
 
             TransactionReceipt receipt =
-                cptController.setRoleController(roleControllerAddress).send();
+                cptController.setRoleController(roleControllerAddress);
             if (receipt == null) {
                 logger.error("CptController deploy exception: role address illegal");
             }
-            receipt = cptController.setPolicyData(policyDataAddress).send();
+            receipt = cptController.setPolicyData(policyDataAddress);
             if (receipt == null) {
                 logger.error("CptController deploy exception: policy data address illegal");
             }
@@ -249,18 +258,23 @@ public class DeployContractV2 extends AddressProcess {
     }
 
     private static Map<String, String> deployIssuerContracts(String roleControllerAddress) {
-        if (web3j == null) {
-            initWeb3j();
+        /*if (web3j == null) {
+            initWeb3j();*/
+        if (client == null) {
+            initClient();
         }
         Map<String, String> issuerAddressList = new HashMap<>();
 
         String committeeMemberDataAddress;
         try {
             CommitteeMemberData committeeMemberData = CommitteeMemberData.deploy(
-                web3j,
+                /*web3j,
                 credentials,
                 new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
-                roleControllerAddress).send();
+                roleControllerAddress).send();*/
+                client,
+                cryptoKeyPair,
+                roleControllerAddress);
             committeeMemberDataAddress = committeeMemberData.getContractAddress();
             if (!WeIdUtils.isEmptyAddress(new Address(committeeMemberDataAddress))) {
                 issuerAddressList.put("CommitteeMemberData", committeeMemberDataAddress);
@@ -273,12 +287,14 @@ public class DeployContractV2 extends AddressProcess {
         String committeeMemberControllerAddress;
         try {
             CommitteeMemberController committeeMemberController = CommitteeMemberController.deploy(
-                web3j,
+                /*web3j,
                 credentials,
-                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),*/
+                client,
+                cryptoKeyPair,
                 committeeMemberDataAddress,
                 roleControllerAddress
-            ).send();
+            );
             committeeMemberControllerAddress = committeeMemberController.getContractAddress();
             if (!WeIdUtils.isEmptyAddress(new Address(committeeMemberControllerAddress))) {
                 issuerAddressList
@@ -292,11 +308,13 @@ public class DeployContractV2 extends AddressProcess {
         String authorityIssuerDataAddress;
         try {
             AuthorityIssuerData authorityIssuerData = AuthorityIssuerData.deploy(
-                web3j,
+                /*web3j,
                 credentials,
-                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),*/
+                client,
+                cryptoKeyPair,
                 roleControllerAddress
-            ).send();
+            );
             authorityIssuerDataAddress = authorityIssuerData.getContractAddress();
             if (!WeIdUtils.isEmptyAddress(new Address(authorityIssuerDataAddress))) {
                 issuerAddressList.put("AuthorityIssuerData", authorityIssuerDataAddress);
@@ -309,11 +327,13 @@ public class DeployContractV2 extends AddressProcess {
         String authorityIssuerControllerAddress;
         try {
             AuthorityIssuerController authorityIssuerController = AuthorityIssuerController.deploy(
-                web3j,
+                /*web3j,
                 credentials,
-                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),*/
+                client,
+                cryptoKeyPair,
                 authorityIssuerDataAddress,
-                roleControllerAddress).send();
+                roleControllerAddress);
             authorityIssuerControllerAddress = authorityIssuerController.getContractAddress();
             if (!WeIdUtils.isEmptyAddress(new Address(authorityIssuerControllerAddress))) {
                 issuerAddressList
@@ -333,10 +353,13 @@ public class DeployContractV2 extends AddressProcess {
         String specificIssuerDataAddress = StringUtils.EMPTY;
         try {
             SpecificIssuerData specificIssuerData = SpecificIssuerData.deploy(
-                web3j,
+                /*web3j,
                 credentials,
                 new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)
-            ).send();
+            ).send();*/
+                client,
+                cryptoKeyPair
+            );
             specificIssuerDataAddress = specificIssuerData.getContractAddress();
             if (!WeIdUtils.isEmptyAddress(new Address(specificIssuerDataAddress))) {
                 issuerAddressList.put("SpecificIssuerData", specificIssuerDataAddress);
@@ -347,12 +370,14 @@ public class DeployContractV2 extends AddressProcess {
 
         try {
             SpecificIssuerController specificIssuerController = SpecificIssuerController.deploy(
-                web3j,
+                /*web3j,
                 credentials,
-                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),
+                new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT),*/
+                client,
+                cryptoKeyPair,
                 specificIssuerDataAddress,
                 roleControllerAddress
-            ).send();
+            );
             String specificIssuerControllerAddress = specificIssuerController.getContractAddress();
             if (!WeIdUtils.isEmptyAddress(new Address(specificIssuerControllerAddress))) {
                 issuerAddressList.put("SpecificIssuerController", specificIssuerControllerAddress);
@@ -370,21 +395,24 @@ public class DeployContractV2 extends AddressProcess {
 
     @Deprecated
     private static String deployEvidenceContracts() {
-        if (web3j == null) {
-            initWeb3j();
+        /*if (web3j == null) {
+            initWeb3j();*/
+        if (client == null) {
+            initClient();
         }
         try {
             EvidenceFactory evidenceFactory =
                 EvidenceFactory.deploy(
-                    web3j,
+                    /*web3j,
                     credentials,
                     new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)
-                ).send();
+                ).send();*/
+                    client,
+                    cryptoKeyPair
+                );
             String evidenceFactoryAddress = evidenceFactory.getContractAddress();
             writeAddressToFile(evidenceFactoryAddress, "evidenceController.address");
             return evidenceFactoryAddress;
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            logger.error("EvidenceFactory deploy exception", e);
         } catch (Exception e) {
             logger.error("EvidenceFactory deploy exception", e);
         }
@@ -392,16 +420,21 @@ public class DeployContractV2 extends AddressProcess {
     }
 
     private static String deployEvidenceContractsNew() {
-        if (web3j == null) {
-            initWeb3j();
+        /*if (web3j == null) {
+            initWeb3j();*/
+        if (client == null) {
+            initClient();
         }
         try {
             EvidenceContract evidenceContract =
                 EvidenceContract.deploy(
-                    web3j,
+                    /*web3j,
                     credentials,
                     new StaticGasProvider(WeIdConstant.GAS_PRICE, WeIdConstant.GAS_LIMIT)
-                ).send();
+                ).send();*/
+                    client,
+                    cryptoKeyPair
+                );
             String evidenceContractAddress = evidenceContract.getContractAddress();
             writeAddressToFile(evidenceContractAddress, "evidenceController.address");
             return evidenceContractAddress;

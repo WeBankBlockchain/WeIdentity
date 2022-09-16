@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.protocol.base;
 
@@ -25,9 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.BaseService;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +57,7 @@ public class PresentationE implements RawSerializer, IProof {
      * @return publicKeyId
      */
     public String getVerificationMethod() {
-        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_VERIFICATION_METHOD));
+        return toString(getValueFromProof(proof, ParamKeyConstant.PROOF_VERIFICATION_METHOD_ID));
     }
     
     /**
@@ -193,16 +179,19 @@ public class PresentationE implements RawSerializer, IProof {
             logger.error("[commit] the private key does not match the current weid.");
             return false;
         }
-        if (!weIdAuthentication.getWeIdPublicKeyId().equals(this.getVerificationMethod())) {
+        if (!weIdAuthentication.getAuthenticationMethodId().equals(this.getVerificationMethod())) {
             logger.error("[commit] the public key id does not match the presentation.");
             return false;
         }
         // 更新proof里面的签名
-        String signature = 
+        /*String signature =
             DataToolUtils.secp256k1Sign(
                 this.toRawData(),
                 new BigInteger(weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
-            );
+            );*/
+        String signature = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(this.toRawData(), weIdAuthentication.getWeIdPrivateKey().getPrivateKey())
+        );
         this.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
         logger.info("[commit] commit credential with weIdAuthentication is success.");
         return true;

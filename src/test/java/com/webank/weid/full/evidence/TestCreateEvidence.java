@@ -1,38 +1,6 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.evidence;
-
-import java.io.File;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
@@ -44,11 +12,32 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.engine.EngineFactory;
 import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.OffLineBatchTask;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import com.webank.weid.util.WeIdUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
+import org.fisco.bcos.sdk.utils.Numeric;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Test CreateEvidence.
@@ -393,9 +382,9 @@ public class TestCreateEvidence extends TestBaseService {
             credential.setId(UUID.randomUUID().toString());
             String hash = credential.getHash();
             hashValues.add(credential.getHash());
-            signatures.add(DataToolUtils.secp256k1Sign(hash, new BigInteger(privateKey)));
+            signatures.add(DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(hash, privateKey)));
             timestamps.add(System.currentTimeMillis());
-            signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            signers.add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
             logs.add("test log" + i);
             if (i % 2 == 1) {
                 customKeys.add(String.valueOf(System.currentTimeMillis()));
@@ -417,7 +406,7 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(booleans.size(), hashValues.size());
         Boolean result = true;
         for (int i = 0; i < booleans.size(); i++) {
-            result = result && booleans.get(i).booleanValue();
+            result = result && booleans.get(i);
         }
         Assert.assertTrue(result);
 
@@ -462,29 +451,55 @@ public class TestCreateEvidence extends TestBaseService {
     /**
      * This test can only be invoked when using multi-group with group = 1 and 2.
      */
-    public void testBatchCreateMultiGroup() {
+    public void testBatchCreateMultiGroup() throws IOException {
         int batchSize = 100;
         List<TransactionArgs> transactionArgsList = new ArrayList<>();
-        for (int i = 0; i < batchSize; i++) {
-            CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
-            credential.setId(UUID.randomUUID().toString());
-            String hash = credential.getHash();
-            TransactionArgs args = new TransactionArgs();
-            args.setMethod("createEvidence");
-            List<String> argList = new ArrayList<>();
-            argList.add(credential.getHash());
-            argList.add(new String(DataToolUtils.base64Encode(DataToolUtils
-                .simpleSignatureSerialization(DataToolUtils.secp256k1SignToSignature(
-                    hash, new BigInteger(privateKey)))),
-                StandardCharsets.UTF_8));
-            argList.add("test log" + i);
-            argList.add(DateUtils.getNoMillisecondTimeStampString());
-            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
-            if (i % 2 == 1) {
-                argList.add("2");
+        if ("2".equals(BaseService.getVersion())) {
+            CryptoKeyPair cryptoKeyPair = DataToolUtils.cryptoSuite.getKeyPairFactory()
+                .createKeyPair(new BigInteger(privateKey));
+            for (int i = 0; i < batchSize; i++) {
+                CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+                credential.setId(UUID.randomUUID().toString());
+                String hash = credential.getHash();
+                TransactionArgs args = new TransactionArgs();
+                args.setMethod("createEvidence");
+                List<String> argList = new ArrayList<>();
+                argList.add(credential.getHash());
+                argList.add(DataToolUtils.cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
+                argList.add("test log" + i);
+                argList.add(DateUtils.getNoMillisecondTimeStampString());
+                argList
+                    .add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
+                if (i % 2 == 1) {
+                    argList.add("2");
+                }
+                args.setArgs(String.join(",", argList));
+                transactionArgsList.add(args);
             }
-            args.setArgs(String.join(",", argList));
-            transactionArgsList.add(args);
+        } else {
+            CryptoSuite cryptoSuite = new CryptoSuite(DataToolUtils.cryptoSuite.getCryptoTypeConfig());
+            org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair cryptoKeyPair =
+                cryptoSuite.getKeyPairFactory()
+                .createKeyPair(new BigInteger(privateKey));
+            for (int i = 0; i < batchSize; i++) {
+                CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+                credential.setId(UUID.randomUUID().toString());
+                String hash = credential.getHash();
+                TransactionArgs args = new TransactionArgs();
+                args.setMethod("createEvidence");
+                List<String> argList = new ArrayList<>();
+                argList.add(credential.getHash());
+                argList.add(cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
+                argList.add("test log" + i);
+                argList.add(DateUtils.getNoMillisecondTimeStampString());
+                argList
+                    .add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
+                if (i % 2 == 1) {
+                    argList.add("2");
+                }
+                args.setArgs(String.join(",", argList));
+                transactionArgsList.add(args);
+            }
         }
         OffLineBatchTask task = new OffLineBatchTask();
         task.sendBatchTransaction(transactionArgsList);
@@ -650,14 +665,18 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertTrue(evidenceService.generateHash(selectiveCredentialPojo).getResult()
             .getHash().equalsIgnoreCase(selectiveCredentialPojo.getHash()));
         // Test file
-        File file = new ClassPathResource("test-template.pdf").getFile();
+        String path = TestCreateEvidence.class
+                .getClassLoader().getResource("test-template.pdf").getPath();
+        File file = new File(path);
         String fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
         // Support GBK and UTF-8 encoding here - they will yield different hash values, though
-        file = new ClassPathResource("org1.txt").getFile();
+        path = TestCreateEvidence.class.getClassLoader().getResource("org1.txt").getPath();
+        file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
-        file = new ClassPathResource("test-hash-pic.png").getFile();
+        path = TestCreateEvidence.class.getClassLoader().getResource("test-hash-pic.png").getPath();
+        file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
         // Non-existent file - uncreated with createNewFile()

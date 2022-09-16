@@ -1,39 +1,21 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.util;
 
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.UUID;
-
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-
+import com.networknt.schema.ValidationMessage;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.protocol.base.Challenge;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.cpt.Cpt103;
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.UUID;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class TestJsonUtil {
 
@@ -96,9 +78,9 @@ public class TestJsonUtil {
         cpt103.setChallenge(Challenge.create("did:weid:0x11111", "abcd"));
         cpt103.setProof("aaa");
         cpt103.setId("did:weid:101:0x12221");
-        ProcessingReport checkRes = DataToolUtils.checkJsonVersusSchema(
+        Set<ValidationMessage> checkRes = DataToolUtils.checkJsonVersusSchema(
             DataToolUtils.objToJsonStrWithNoPretty(cpt103), cptSchema);
-        Assert.assertTrue(checkRes.isSuccess());
+        Assert.assertTrue(checkRes.size() == 0);
 
         cptSchema = DataToolUtils.generateDefaultCptJsonSchema(105);
         Assert.assertTrue(DataToolUtils.isCptJsonSchemaValid(cptSchema));

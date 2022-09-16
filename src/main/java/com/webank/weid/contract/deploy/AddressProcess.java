@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 
+import com.webank.weid.service.BaseService;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +24,7 @@ public abstract class AddressProcess {
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(AddressProcess.class);
-    
+
     protected static void writeAddressToFile(
         String contractAddress,
         String fileName) {
@@ -134,8 +136,14 @@ public abstract class AddressProcess {
             .append(evidenceAddress);
         return DataToolUtils.getHash(address.toString());
     }
-    
-    public static String getHashForShare(Integer groupId, String evidenceAddress) {
+
+    /**
+     * todo 设置String groupId后是否影响hash
+     * @param groupId groupId
+     * @param evidenceAddress evidenceAddress
+     * @return hash
+     */
+    public static String getHashForShare(String groupId, String evidenceAddress) {
         StringBuffer address = new StringBuffer();
         address.append("share").append(groupId).append(evidenceAddress);
         return DataToolUtils.getHash(address.toString());
