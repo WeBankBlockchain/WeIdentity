@@ -1,22 +1,3 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package com.webank.weid.service.impl.callback;
 
 import java.math.BigInteger;
@@ -25,16 +6,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import com.webank.weid.protocol.base.*;
+import com.webank.weid.service.BaseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
-import com.webank.weid.protocol.base.Challenge;
-import com.webank.weid.protocol.base.PublicKeyProperty;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.GetWeIdAuthResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
@@ -77,7 +56,10 @@ public class WeIdAuthAmopCallback extends AmopCallback {
         Challenge challenge = args.getChallenge();
         String rawData = challenge.toJson();
         String privateKey = weIdAuth.getWeIdPrivateKey().getPrivateKey();
-        String challengeSign = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
+        //String challengeSign = DataToolUtils.secp256k1Sign(rawData, new BigInteger(privateKey));
+        String challengeSign = DataToolUtils.SigBase64Serialization(
+                DataToolUtils.signToRsvSignature(rawData, privateKey)
+        );
         dataMap.put(ParamKeyConstant.WEID_AUTH_SIGN_DATA, challengeSign);
 
         ResponseData<WeIdDocument> weIdDocResp = weIdService.getWeIdDocument(fromWeId);
@@ -89,8 +71,9 @@ public class WeIdAuthAmopCallback extends AmopCallback {
             return result;
         }
         WeIdDocument document = weIdDocResp.getResult();
-        List<PublicKeyProperty> pubKeyList = document.getPublicKey();
-        String pubKey = pubKeyList.get(0).getPublicKey();
+        List<AuthenticationProperty> authList = document.getAuthentication();
+        //TODO:后面PublicKeyMultibase换成base58编码后这里需要解码
+        String pubKey = authList.get(0).getPublicKeyMultibase();
 
         //2. generate a symmetricKey
         String symmetricKey = UUID.randomUUID().toString();

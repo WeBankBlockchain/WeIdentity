@@ -52,7 +52,7 @@ public class TestRemoveIssuerFromIssuerType extends TestBaseService {
     @Before
     public void andIssuerIntoIssuerType() {
         callerAuth.setWeId(createWeId.getWeId());
-        callerAuth.setWeIdPublicKeyId(createWeId.getUserWeIdPublicKey().getPublicKey());
+        callerAuth.setAuthenticationMethodId(createWeId.getUserWeIdPublicKey().getPublicKey());
         callerAuth.setWeIdPrivateKey(createWeId.getUserWeIdPrivateKey());
         authorityIssuerService.recognizeAuthorityIssuer(createWeId.getWeId(),
             new WeIdPrivateKey(privateKey));
@@ -69,7 +69,7 @@ public class TestRemoveIssuerFromIssuerType extends TestBaseService {
     @After
     public void removeIssuerFromIssuerType() {
         callerAuth.setWeId(createWeId.getWeId());
-        callerAuth.setWeIdPublicKeyId(createWeId.getUserWeIdPublicKey().getPublicKey());
+        callerAuth.setAuthenticationMethodId(createWeId.getUserWeIdPublicKey().getPublicKey());
         callerAuth.setWeIdPrivateKey(createWeId.getUserWeIdPrivateKey());
 
         ResponseData<Boolean> res = authorityIssuerService

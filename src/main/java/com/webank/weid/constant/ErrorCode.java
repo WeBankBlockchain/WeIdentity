@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.constant;
 
@@ -397,9 +380,9 @@ public enum ErrorCode {
     ),
 
     /**
-     * the publicKeyId is invalid.
+     * the authentication method id is invalid.
      */
-    PRESENTATION_WEID_PUBLICKEY_ID_INVALID(100604, "the publicKeyId is invalid."),
+    PRESENTATION_AUTHENTICATION_METHOD_ID_INVALID(100604, "the authentication method id is invalid."),
 
     /**
      * the nonce of challenge does not match the nonce of presentation.
@@ -803,7 +786,7 @@ public enum ErrorCode {
     /**
      * weid pubkey already exists, used in add case.
      */
-    WEID_PUBLIC_KEY_ALREADY_EXISTS(
+    WEID_HAS_BEEN_DEACTIVATED(
         100116,
         "this public key already exists and is not revoked."
     ),
@@ -814,6 +797,38 @@ public enum ErrorCode {
     WEID_PUBLIC_KEY_NOT_EXIST(
         100117,
         "this public key does not exist, or is already revoked."
+    ),
+
+    /**
+     * Authentication with PublicKeyMultibase exists.
+     */
+    AUTHENTICATION_PUBLIC_KEY_MULTIBASE_EXISTS(
+            100118,
+            "the Authentication with PublicKeyMultibase exists."
+    ),
+
+    /**
+     * Authentication with method id exists.
+     */
+    AUTHENTICATION_METHOD_ID_EXISTS(
+            100119,
+            "the Authentication with method id exists."
+    ),
+
+    /**
+     * Authentication method not exists.
+     */
+    AUTHENTICATION_METHOD_NOT_EXISTS(
+            100120,
+            "the Authentication method not exists."
+    ),
+
+    /**
+     * Authentication with method id exists.
+     */
+    SERVICE_METHOD_ID_EXISTS(
+            100121,
+            "the service with id exists."
     ),
 
     /**

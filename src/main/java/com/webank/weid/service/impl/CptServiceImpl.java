@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl;
 
@@ -26,7 +9,6 @@ import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,9 +36,10 @@ import com.webank.weid.util.WeIdUtils;
 public class CptServiceImpl extends AbstractService implements CptService {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
+
     //获取CPT缓存节点
     private static CacheNode<ResponseData<Cpt>> cptCahceNode =
-        CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
+            CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
 
     /**
      * Register a new CPT with a pre-set CPT ID, to the blockchain.
@@ -68,14 +51,14 @@ public class CptServiceImpl extends AbstractService implements CptService {
     public ResponseData<CptBaseInfo> registerCpt(CptStringArgs args, Integer cptId) {
         if (args == null || cptId == null || cptId <= 0) {
             logger.error(
-                "[registerCpt1] input argument is illegal");
+                    "[registerCpt1] input argument is illegal");
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
         try {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             Map<String, Object> cptJsonSchemaMap =
-                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
+                    DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
             cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs, cptId);
         } catch (Exception e) {
@@ -96,14 +79,14 @@ public class CptServiceImpl extends AbstractService implements CptService {
         try {
             if (args == null) {
                 logger.error(
-                    "[registerCpt1]input CptStringArgs is null");
+                        "[registerCpt1]input CptStringArgs is null");
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
 
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             Map<String, Object> cptJsonSchemaMap =
-                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
+                    DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class);
             cptMapArgs.setCptJsonSchema(cptJsonSchemaMap);
             return this.registerCpt(cptMapArgs);
         } catch (Exception e) {
@@ -126,10 +109,10 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
         try {
             ErrorCode errorCode =
-                this.validateCptArgs(
-                    args.getWeIdAuthentication(),
-                    args.getCptJsonSchema()
-                );
+                    this.validateCptArgs(
+                            args.getWeIdAuthentication(),
+                            args.getCptJsonSchema()
+                    );
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null, errorCode);
             }
@@ -138,12 +121,12 @@ public class CptServiceImpl extends AbstractService implements CptService {
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
-                weId,
-                cptJsonSchemaNew,
-                weIdPrivateKey);
+                    weId,
+                    cptJsonSchemaNew,
+                    weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
+                    weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -164,10 +147,10 @@ public class CptServiceImpl extends AbstractService implements CptService {
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
             ErrorCode validateResult =
-                this.validateCptArgs(
-                    args.getWeIdAuthentication(),
-                    args.getCptJsonSchema()
-                );
+                    this.validateCptArgs(
+                            args.getWeIdAuthentication(),
+                            args.getCptJsonSchema()
+                    );
 
             if (validateResult.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null, validateResult);
@@ -177,12 +160,12 @@ public class CptServiceImpl extends AbstractService implements CptService {
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
-                weId,
-                cptJsonSchemaNew,
-                weIdPrivateKey);
+                    weId,
+                    cptJsonSchemaNew,
+                    weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
-                weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
+                    weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -233,7 +216,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
             CptMapArgs cptMapArgs = new CptMapArgs();
             cptMapArgs.setWeIdAuthentication(args.getWeIdAuthentication());
             cptMapArgs.setCptJsonSchema(
-                DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
+                    DataToolUtils.deserialize(args.getCptJsonSchema(), HashMap.class));
             return this.updateCpt(cptMapArgs, cptId);
         } catch (Exception e) {
             logger.error("[updateCpt1] update cpt failed due to unkown error. ", e);
@@ -259,10 +242,10 @@ public class CptServiceImpl extends AbstractService implements CptService {
                 return new ResponseData<>(null, ErrorCode.CPT_ID_ILLEGAL);
             }
             ErrorCode errorCode =
-                this.validateCptArgs(
-                    args.getWeIdAuthentication(),
-                    args.getCptJsonSchema()
-                );
+                    this.validateCptArgs(
+                            args.getWeIdAuthentication(),
+                            args.getCptJsonSchema()
+                    );
 
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null, errorCode);
@@ -272,17 +255,17 @@ public class CptServiceImpl extends AbstractService implements CptService {
             WeIdPrivateKey weIdPrivateKey = args.getWeIdAuthentication().getWeIdPrivateKey();
             String cptJsonSchemaNew = DataToolUtils.cptSchemaToString(args);
             RsvSignature rsvSignature = sign(
-                weId,
-                cptJsonSchemaNew,
-                weIdPrivateKey);
+                    weId,
+                    cptJsonSchemaNew,
+                    weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
             ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(
-                cptId,
-                address,
-                cptJsonSchemaNew,
-                rsvSignature,
-                weIdPrivateKey.getPrivateKey(),
-                WeIdConstant.CPT_DATA_INDEX);
+                    cptId,
+                    address,
+                    cptJsonSchemaNew,
+                    rsvSignature,
+                    weIdPrivateKey.getPrivateKey(),
+                    WeIdConstant.CPT_DATA_INDEX);
             if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                 cptCahceNode.remove(String.valueOf(cptId));
             }
@@ -293,24 +276,22 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
     }
 
-
     private RsvSignature sign(
-        String cptPublisher,
-        String jsonSchema,
-        WeIdPrivateKey cptPublisherPrivateKey) {
+            String cptPublisher,
+            String jsonSchema,
+            WeIdPrivateKey cptPublisherPrivateKey) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
         sb.append(jsonSchema);
-        SignatureData signatureData = DataToolUtils.secp256k1SignToSignature(
-            sb.toString(), new BigInteger(cptPublisherPrivateKey.getPrivateKey()));
-        return DataToolUtils.convertSignatureDataToRsv(signatureData);
+        return DataToolUtils.signToRsvSignature(
+                sb.toString(), cptPublisherPrivateKey.getPrivateKey());
     }
 
     private ErrorCode validateCptArgs(
-        WeIdAuthentication weIdAuthentication,
-        Map<String, Object> cptJsonSchemaMap) throws Exception {
+            WeIdAuthentication weIdAuthentication,
+            Map<String, Object> cptJsonSchemaMap) throws Exception {
 
         if (weIdAuthentication == null) {
             logger.error("Input cpt weIdAuthentication is invalid.");
@@ -334,10 +315,10 @@ public class CptServiceImpl extends AbstractService implements CptService {
         }
         WeIdPrivateKey weIdPrivateKey = weIdAuthentication.getWeIdPrivateKey();
         if (weIdPrivateKey == null
-            || StringUtils.isEmpty(weIdPrivateKey.getPrivateKey())) {
+                || StringUtils.isEmpty(weIdPrivateKey.getPrivateKey())) {
             logger.error(
-                "Input cpt publisher private key : {} is in valid.",
-                weIdPrivateKey
+                    "Input cpt publisher private key : {} is in valid.",
+                    weIdPrivateKey
             );
             return ErrorCode.WEID_PRIVATEKEY_INVALID;
         }
@@ -349,7 +330,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
     }
 
     private ErrorCode validateCptJsonSchemaMap(
-        Map<String, Object> cptJsonSchemaMap) throws Exception {
+            Map<String, Object> cptJsonSchemaMap) throws Exception {
         if (cptJsonSchemaMap == null || cptJsonSchemaMap.isEmpty()) {
             logger.error("Input cpt json schema is invalid.");
             return ErrorCode.CPT_JSON_SCHEMA_INVALID;

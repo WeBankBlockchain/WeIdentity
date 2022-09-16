@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,12 @@ import com.webank.weid.service.BaseService;
 public abstract class BaseEngine extends BaseService {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseEngine.class);
-    
+
     public BaseEngine() {
         super();
     }
-    
-    public BaseEngine(Integer groupId) {
+
+    public BaseEngine(String groupId) {
         super(groupId);
     }
 
@@ -47,23 +48,20 @@ public abstract class BaseEngine extends BaseService {
         Object credentials,
         Class<T> cls) throws NoSuchMethodException, IllegalAccessException,
         InvocationTargetException {
+        Class clazz = "2".equals(BaseService.fiscoConfig.getVersion()) ? CryptoKeyPair.class : org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair.class;
         Object contract;
         Method method = cls.getMethod(
             "load",
             String.class,
             getWeb3jClass(),
-            credentials.getClass(),
-            BigInteger.class,
-            BigInteger.class
+            clazz // 获取ECDSAKeyPair或者SM2KeyPair的父类CryptoKeyPair
         );
         Object obj = weServer.getWeb3j();
         contract = method.invoke(
             null,
             contractAddress,
             obj,
-            credentials,
-            WeIdConstant.GAS_PRICE,
-            WeIdConstant.GAS_LIMIT
+            credentials
         );
         return (T) contract;
     }
