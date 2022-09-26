@@ -74,6 +74,46 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     }
 
     /**
+     * Create a WeIdentity DID with null input param.
+     *
+     * @return the response data
+     */
+    @Override
+    public ResponseData<String> createWeIdByPublicKey(WeIdPublicKey weIdPublicKey, WeIdPrivateKey weIdPrivateKey) {
+        if (!WeIdUtils.isPrivateKeyValid(weIdPrivateKey) || !WeIdUtils
+                .isPrivateKeyLengthValid(weIdPrivateKey.getPrivateKey())) {
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PRIVATEKEY_INVALID);
+        }
+        String privateKey = weIdPrivateKey.getPrivateKey();
+        String publicKey = weIdPublicKey.getPublicKey();
+        if (StringUtils.isNotBlank(publicKey)) {
+            String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
+            ResponseData<Boolean> isWeIdExistResp = this.isWeIdExist(weId);
+            if (isWeIdExistResp.getResult() == null || isWeIdExistResp.getResult()) {
+                logger
+                        .error("[createWeId]: create weid failed, the weid :{} is already exist", weId);
+                return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
+            }
+            ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                        "[createWeId]: create weid failed. error message is :{}, public key is {}",
+                        innerResp.getErrorMessage(),
+                        publicKey
+                );
+                return new ResponseData<>(StringUtils.EMPTY,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                        innerResp.getTransactionInfo());
+            }
+            return new ResponseData<>(weId,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                    innerResp.getTransactionInfo());
+        } else {
+            return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_INVALID);
+        }
+    }
+
+    /**
      * Create a WeIdentity DID.
      *
      * @param createWeIdArgs the create WeIdentity DID args
@@ -93,7 +133,6 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         String privateKey = createWeIdArgs.getWeIdPrivateKey().getPrivateKey();
         String publicKey = createWeIdArgs.getPublicKey();
         if (StringUtils.isNotBlank(publicKey)) {
-            //替换国密
             if (!WeIdUtils.isKeypairMatch(new BigInteger(privateKey), publicKey)) {
                 return new ResponseData<>(
                     StringUtils.EMPTY,
