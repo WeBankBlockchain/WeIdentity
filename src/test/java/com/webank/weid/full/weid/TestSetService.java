@@ -72,7 +72,7 @@ public class TestSetService extends TestBaseService {
             weIdService.getWeIdDocument(createWeIdResult.getWeId());
         LogUtil.info(logger, "setService", weIdDoc);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(2, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(3, weIdDoc.getResult().getService().size());
 
 
     }
@@ -104,7 +104,7 @@ public class TestSetService extends TestBaseService {
             weIdService.getWeIdDocument(createWeIdResult.getWeId());
         LogUtil.info(logger, "setService", weIdDoc);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(2, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(3, weIdDoc.getResult().getService().size());
     }
 
     /**
@@ -213,47 +213,6 @@ public class TestSetService extends TestBaseService {
         LogUtil.info(logger, "setService", response);
 
         Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: type contain interger special string.
-     */
-    @Test
-    public void testSetService_typeIsAnyString() {
-
-        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs.setType("x123!@#$%^&*()_+=-?><:;sdf");
-
-        ResponseData<Boolean> response = weIdService.setService(
-            createWeIdResult.getWeId(),
-            setServiceArgs,
-            createWeIdResult.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "setService", response);
-
-        Assert.assertEquals(
-            ErrorCode.WEID_SERVICE_TYPE_OVERLIMIT.getCode(), response.getErrorCode().intValue());
-        Assert.assertEquals(false, response.getResult());
-    }
-
-    /**
-     * case: type too long.
-     */
-    @Test
-    public void testSetService_typeTooLong() {
-
-        ServiceArgs setServiceArgs = TestBaseUtil.buildSetServiceArgs(createWeIdResult);
-        setServiceArgs
-            .setType("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-
-        ResponseData<Boolean> response = weIdService.setService(
-            createWeIdResult.getWeId(),
-            setServiceArgs,
-            createWeIdResult.getUserWeIdPrivateKey());
-        LogUtil.info(logger, "setService", response);
-
-        Assert.assertEquals(ErrorCode.WEID_SERVICE_TYPE_OVERLIMIT.getCode(),
-            response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
 

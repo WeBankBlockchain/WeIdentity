@@ -571,7 +571,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (!WeIdUtils.isWeIdValid(weId)) {
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
-        if (!evidenceInfo.getSigners().contains(weId)) {
+        if (!evidenceInfo.getSigners().contains(WeIdUtils.convertWeIdToAddress(weId))) {
             logger.error("This Evidence does not contain the provided WeID: {}", weId);
             return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
         }
@@ -609,7 +609,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
 
         // 3rd: verify signature w.r.t. weid (must exist and must be the signer (from pubkey))
-        EvidenceSignInfo signInfo = evidenceInfo.getSignInfo().get(weId);
+        EvidenceSignInfo signInfo = evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(weId));
         String signature = signInfo.getSignature();
         if (!DataToolUtils.isValidBase64String(signature)) {
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN);
@@ -623,7 +623,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (StringUtils.isEmpty(publicKey)) {
             ResponseData<Boolean> verifyResp = verifySignatureToSigner(
                 evidenceInfo.getCredentialHash(),
-                WeIdUtils.convertAddressToWeId(weId),
+                    weId,
                 signature);
             return verifyResp;
         } else {
@@ -852,9 +852,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         Map<String, EvidenceSignInfo> evidenceSignInfos = evidenceInfo.getSignInfo();
         if (evidenceSignInfos == null || evidenceSignInfos.size() == 0
-            || evidenceSignInfos.get(weId) == null) {
+            || evidenceSignInfos.get(WeIdUtils.convertWeIdToAddress(weId)) == null) {
             return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
         }
-        return new ResponseData<>(evidenceSignInfos.get(weId).getRevoked(), ErrorCode.SUCCESS);
+        return new ResponseData<>(evidenceSignInfos.get(WeIdUtils.convertWeIdToAddress(weId)).getRevoked(), ErrorCode.SUCCESS);
     }
 }
