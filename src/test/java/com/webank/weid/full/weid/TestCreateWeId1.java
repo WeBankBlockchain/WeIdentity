@@ -4,6 +4,9 @@ package com.webank.weid.full.weid;
 
 import java.security.NoSuchProviderException;
 
+import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.request.CreateWeIdArgs;
 import mockit.Mock;
 import mockit.MockUp;
 import org.junit.Assert;
@@ -54,6 +57,36 @@ public class TestCreateWeId1 extends TestBaseService {
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response1.getErrorCode().intValue());
         Assert.assertNotNull(response1.getResult());
         Assert.assertNotEquals(response.getResult().getWeId(), response1.getResult().getWeId());
+    }
+
+    /**
+     * case: create WeId success.
+     */
+    @Test
+    public void testCreateWeIdByPublicKey_createSucess() {
+        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
+        WeIdPublicKey weIdPublicKey = new WeIdPublicKey();
+        weIdPublicKey.setPublicKey(createWeIdArgs.getPublicKey());
+        ResponseData<String> response = weIdService.createWeIdByPublicKey(weIdPublicKey, createWeIdArgs.getWeIdPrivateKey());
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+    }
+
+    /**
+     * case: create WeId success, public key not match with private key.
+     */
+    @Test
+    public void testCreateWeIdByPublicKey_createSucess2() {
+        CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
+        WeIdPublicKey weIdPublicKey = new WeIdPublicKey();
+        weIdPublicKey.setPublicKey(createWeIdArgs.getPublicKey());
+        ResponseData<String> response = weIdService.createWeIdByPublicKey(weIdPublicKey, createWeIdNew.getUserWeIdPrivateKey());
+        LogUtil.info(logger, "createWeId", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
     }
 
 }

@@ -30,8 +30,18 @@ public interface WeIdService {
 
     /**
      * Create a WeIdentity DID from the provided public key.
+     * A private key is required to send transaction, but may be not matching the given public key
      *
-     * @param createWeIdArgs you need to input a public key
+     * @param weIdPublicKey you need to input a public key
+     * @param weIdPrivateKey you need to input a private key
+     * @return a data set including a WeIdentity DID and a keypair
+     */
+    ResponseData<String> createWeIdByPublicKey(WeIdPublicKey weIdPublicKey, WeIdPrivateKey weIdPrivateKey);
+
+    /**
+     * Create a WeIdentity DID from the provided public key.
+     *
+     *@param createWeIdArgs the create WeIdentity DID args
      * @return WeIdentity DID
      */
     ResponseData<String> createWeId(CreateWeIdArgs createWeIdArgs);
