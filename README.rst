@@ -110,7 +110,7 @@ WeIdentity目前支持基于FISCO-BCOS的区块链，并提供Java SDK及RestSer
                <a href="https://www.codacy.com/manual/chaoxinhu/WeIdentity?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=WeBankBlockchain/WeIdentity&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/37d3bc478ede4839ba16ccac469ad3f2" /></a>
                <a href="https://www.codefactor.io/repository/github/webankblockchain/weidentity"><img src="https://www.codefactor.io/repository/github/webankblockchain/weidentity/badge" /></a>
                <a href="https://codecov.io/gh/WeBankBlockchain/WeIdentity"><img src="https://codecov.io/gh/WeBankBlockchain/WeIdentity/branch/master/graph/badge.svg" /></a>
-               <a href="https://www.gnu.org/licenses/lgpl-3.0"><img src="https://img.shields.io/badge/license-GNU%20LGPL%20v3.0-blue.svg" /></a>
+               <a href="http://www.apache.org/licenses/"><img src="http://img.shields.io/badge/license-Apache%20v2-blue.svg" /></a>
                <a href="https://github.com/WeBankBlockchain/WeIdentity"><img src="https://sloc.xyz/github/WeBankBlockchain/WeIdentity" /></a>
             </td>
          </tr>
