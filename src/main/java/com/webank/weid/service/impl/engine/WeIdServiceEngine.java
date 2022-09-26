@@ -30,7 +30,7 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
         String weAddress,
         String publicKey,
         String privateKey
-    ) throws NoSuchAlgorithmException;
+    );
 
     /**
      * call weid contract to deactivate a weid.
