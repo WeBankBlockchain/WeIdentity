@@ -1,13 +1,10 @@
 
 
 package com.webank.weid.service.impl.engine;
-
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.base.WeIdDocumentMetadata;
-import com.webank.weid.protocol.base.WeIdPojo;
 import com.webank.weid.protocol.response.ResponseData;
 
 /**
