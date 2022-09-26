@@ -2,12 +2,13 @@
 
 package com.webank.weid.protocol.base;
 
+import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.Multibase.Multibase;
+import com.webank.weid.util.Multicodec.AmbiguousCodecEncodingException;
+import com.webank.weid.util.Multicodec.DecodedData;
+import com.webank.weid.util.Multicodec.MulticodecEncoder;
 import lombok.Data;
-
-import com.webank.weid.constant.WeIdConstant.PublicKeyType;
-import org.junit.Assert;
-
-import java.util.List;
+import org.fisco.bcos.sdk.model.CryptoType;
 
 /**
  * The base data structure for AuthenticationProperty.
@@ -25,7 +26,7 @@ public class AuthenticationProperty {
     /**
      * Required: The verification method type.
      */
-    private String type = "Ed25519VerificationKey2020";
+    private String type = DataToolUtils.cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE? "Ed25519VerificationKey2020":"SM2VerificationKey";
 
     /**
      * Required: The verification method controller.
@@ -48,5 +49,11 @@ public class AuthenticationProperty {
         authenticationProperty.setController(result[2]);
         authenticationProperty.setPublicKeyMultibase(result[3]);
         return authenticationProperty;
+    }
+
+    public String getPublicKey() {
+        byte[] publicKeyEncode = Multibase.decode(this.publicKeyMultibase);
+        DecodedData decodedData = MulticodecEncoder.decode(publicKeyEncode);
+        return new String(decodedData.getData());
     }
 }
