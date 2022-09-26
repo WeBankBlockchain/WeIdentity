@@ -4,7 +4,6 @@ package com.webank.weid.protocol.base;
 
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.Multibase.Multibase;
-import com.webank.weid.util.Multicodec.AmbiguousCodecEncodingException;
 import com.webank.weid.util.Multicodec.DecodedData;
 import com.webank.weid.util.Multicodec.MulticodecEncoder;
 import lombok.Data;
