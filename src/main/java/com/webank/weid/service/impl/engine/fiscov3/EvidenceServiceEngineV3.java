@@ -201,8 +201,8 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
                 );
 
             TransactionInfo info = new TransactionInfo(receipt);
-            List<EvidenceAttributeChangedEventResponse> eventList =
-                evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
+            List<EvidenceContract.CreateEvidenceEventResponse> eventList =
+                evidenceContractWriter.getCreateEvidenceEvents(receipt);
             if (eventList == null) {
                 return new ResponseData<>(result, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
             } else if (eventList.isEmpty()) {
@@ -210,7 +210,7 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
                     info);
             } else {
                 List<String> returnedHashs = new ArrayList<>();
-                for (EvidenceAttributeChangedEventResponse event : eventList) {
+                for (EvidenceContract.CreateEvidenceEventResponse event : eventList) {
                     //Object[] hashArray = event.hash.toArray();
                     returnedHashs.add(DataToolUtils.convertHashByte32ArrayIntoHashStr(
                             (new Bytes32(event.hash)).getValue()));
@@ -278,8 +278,8 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
                 );
 
             TransactionInfo info = new TransactionInfo(receipt);
-            List<EvidenceAttributeChangedEventResponse> eventList =
-                evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
+            List<EvidenceContract.CreateEvidenceEventResponse> eventList =
+                evidenceContractWriter.getCreateEvidenceEvents(receipt);
             if (eventList == null) {
                 return new ResponseData<>(result,
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
@@ -288,7 +288,7 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
                     info);
             } else {
                 List<String> returnedHashs = new ArrayList<>();
-                for (EvidenceAttributeChangedEventResponse event : eventList) {
+                for (EvidenceContract.CreateEvidenceEventResponse event : eventList) {
                     //Object[] hashArray = event.hash.toArray();
                     returnedHashs.add(DataToolUtils.convertHashByte32ArrayIntoHashStr(
                             (new Bytes32(event.hash)).getValue()));
@@ -466,13 +466,19 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
             for(int i=0; i<result.getValue1().size(); i++){
                 //如果signer已经存在（通过addSignatureAndLogs添加的签名和log），则覆盖签名，把log添加到已有的logs列表
                 if(signInfoMap.containsKey(result.getValue1().get(i))){
-                    signInfoMap.get(result.getValue1().get(i)).setSignature(result.getValue2().get(i));
-                    signInfoMap.get(result.getValue1().get(i)).getLogs().add(result.getValue3().get(i));
+                    if(!StringUtils.isEmpty(result.getValue2().get(i))){
+                        signInfoMap.get(result.getValue1().get(i)).setSignature(result.getValue2().get(i));
+                    }
+                    if(!StringUtils.isEmpty(result.getValue3().get(i))){
+                        signInfoMap.get(result.getValue1().get(i)).getLogs().add(result.getValue3().get(i));
+                    }
                     signInfoMap.get(result.getValue1().get(i)).setTimestamp(result.getValue4().get(i).toString());
                 }else{
                     EvidenceSignInfo evidenceSignInfo = new EvidenceSignInfo();
                     evidenceSignInfo.setSignature(result.getValue2().get(i));
-                    evidenceSignInfo.getLogs().add(result.getValue3().get(i));
+                    if(!StringUtils.isEmpty(result.getValue3().get(i))){
+                        evidenceSignInfo.getLogs().add(result.getValue3().get(i));
+                    }
                     evidenceSignInfo.setTimestamp(result.getValue4().get(i).toString());
                     evidenceSignInfo.setRevoked(result.getValue5().get(i));
                     signInfoMap.put(result.getValue1().get(i), evidenceSignInfo);
@@ -814,8 +820,8 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
                 );
 
             TransactionInfo info = new TransactionInfo(receipt);
-            List<EvidenceAttributeChangedEventResponse> eventList =
-                evidenceContractWriter.getEvidenceAttributeChangedEvents(receipt);
+            List<EvidenceContract.CreateEvidenceEventResponse> eventList =
+                evidenceContractWriter.getCreateEvidenceEvents(receipt);
             if (eventList == null) {
                 return new ResponseData<>(StringUtils.EMPTY,
                     ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR, info);
@@ -823,7 +829,7 @@ public class EvidenceServiceEngineV3 extends BaseEngine implements EvidenceServi
                 return new ResponseData<>(StringUtils.EMPTY,
                     ErrorCode.CREDENTIAL_EVIDENCE_ALREADY_EXISTS, info);
             } else {
-                for (EvidenceAttributeChangedEventResponse event : eventList) {
+                for (EvidenceContract.CreateEvidenceEventResponse event : eventList) {
                     if (event.sig.equalsIgnoreCase(signature)
                             && event.signer.equalsIgnoreCase(address)) {
                         return new ResponseData<>(hashValue, ErrorCode.SUCCESS, info);

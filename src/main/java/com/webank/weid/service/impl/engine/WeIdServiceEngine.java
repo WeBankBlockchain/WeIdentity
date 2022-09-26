@@ -2,6 +2,7 @@
 
 package com.webank.weid.service.impl.engine;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import com.webank.weid.protocol.base.WeIdDocument;
@@ -29,7 +30,7 @@ public interface WeIdServiceEngine extends ReloadStaticContract {
         String weAddress,
         String publicKey,
         String privateKey
-    );
+    ) throws NoSuchAlgorithmException;
 
     /**
      * call weid contract to deactivate a weid.

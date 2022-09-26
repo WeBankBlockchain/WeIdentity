@@ -2,10 +2,18 @@
 
 package com.webank.weid.full;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.Multibase.Multibase;
+import com.webank.weid.util.Multicodec.DecodedData;
+import com.webank.weid.util.Multicodec.Multicodec;
+import com.webank.weid.util.Multicodec.MulticodecEncoder;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.v3.codec.datatypes.StaticArray;
 import org.fisco.bcos.sdk.v3.codec.datatypes.generated.Bytes32;
 import org.junit.Assert;

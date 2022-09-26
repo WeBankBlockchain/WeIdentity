@@ -11,8 +11,13 @@ import java.util.Objects;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.webank.weid.protocol.base.*;
+import com.webank.weid.util.Multibase.Multibase;
+import com.webank.weid.util.Multicodec.AmbiguousCodecEncodingException;
+import com.webank.weid.util.Multicodec.Multicodec;
+import com.webank.weid.util.Multicodec.MulticodecEncoder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,7 +27,6 @@ import com.webank.weid.exception.LoadContractException;
 import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
-import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
@@ -217,8 +221,6 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         if (!WeIdUtils.isPrivateKeyValid(privateKey)) {
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
-        String serviceType = serviceArgs.getType();
-        String serviceEndpoint = serviceArgs.getServiceEndpoint();
         return processSetService(
             privateKey.getPrivateKey(),
             weId,
@@ -268,7 +270,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
     public ResponseData<Boolean> setAuthentication(
         String weId,
         AuthenticationArgs authenticationArgs,
-        WeIdPrivateKey privateKey) {
+        WeIdPrivateKey privateKey){
 
         if (!verifyAuthenticationArgs(authenticationArgs)) {
             logger.error("[setAuthentication]: input parameter setAuthenticationArgs is illegal.");
@@ -299,8 +301,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             if (isDeactivatedResp.getResult() == null || isDeactivatedResp.getResult()) {
                 logger.error("[setAuthentication]: failed, the weid :{} has been deactivated",
                         weId);
-                //TODO：改ErrorCode
-                return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
+                return new ResponseData<>(false, ErrorCode.WEID_HAS_BEEN_DEACTIVATED);
             }
             //检查authentication的controller WeId是否存在和是否被注销
             if (StringUtils.isEmpty(authenticationArgs.getController())) {
@@ -324,12 +325,12 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             }
             WeIdDocument weIdDocument = this.getWeIdDocument(weId).getResult();
             for(int i=0; i<weIdDocument.getAuthentication().size(); i++){
-                if(authenticationArgs.getPublicKey().equals(weIdDocument.getAuthentication().get(i).getPublicKeyMultibase())){
+                if(authenticationArgs.getPublicKey().equals(weIdDocument.getAuthentication().get(i).getPublicKey())){
                     logger.error("[setAuthentication]: failed, the Authentication with PublicKeyMultibase :{} exists",
                             authenticationArgs.getPublicKey());
                     return new ResponseData<>(false, ErrorCode.AUTHENTICATION_PUBLIC_KEY_MULTIBASE_EXISTS);
                 }
-                if(authenticationArgs.getId().equals(weIdDocument.getAuthentication().get(i).getId())){
+                if(!StringUtils.isEmpty(authenticationArgs.getId()) && authenticationArgs.getId().equals(weIdDocument.getAuthentication().get(i).getId())){
                     logger.error("[setAuthentication]: failed, the Authentication with id :{} exists",
                             authenticationArgs.getId());
                     return new ResponseData<>(false, ErrorCode.AUTHENTICATION_METHOD_ID_EXISTS);
@@ -339,10 +340,12 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             //如果用户没有指定method id，则系统分配
             authenticationProperty.setId(authenticationArgs.getId());
             if(StringUtils.isBlank(authenticationArgs.getId())){
-                authenticationProperty.setId(weId + "#keys-" + DataToolUtils.hash(authenticationArgs.getPublicKey()));
+                authenticationProperty.setId(weId + "#keys-" + DataToolUtils.hash(authenticationArgs.getPublicKey()).substring(58));
             }
             authenticationProperty.setController(authenticationArgs.getController());
-            authenticationProperty.setPublicKeyMultibase(authenticationArgs.getPublicKey());
+            byte[] publicKeyEncode = MulticodecEncoder.encode(DataToolUtils.cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+                    authenticationArgs.getPublicKey().getBytes(StandardCharsets.UTF_8));
+            authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
 
             List<AuthenticationProperty> authentication = weIdDocument.getAuthentication();
             authentication.add(authenticationProperty);
@@ -398,7 +401,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             List<AuthenticationProperty> authentication = weIdDocument.getAuthentication();
             if(!StringUtils.isEmpty(authenticationArgs.getPublicKey())){
                 for(int i=0; i<weIdDocument.getAuthentication().size(); i++){
-                    if(authenticationArgs.getPublicKey().equals(weIdDocument.getAuthentication().get(i).getPublicKeyMultibase())){
+                    if(authenticationArgs.getPublicKey().equals(weIdDocument.getAuthentication().get(i).getPublicKey())){
                         try {
                             authentication.remove(i);
                             weIdDocument.setAuthentication(authentication);
@@ -515,7 +518,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                 }
             }else{
                 if(StringUtils.isEmpty(serviceArgs.getId())){
-                    serviceProperty.setId(weId + '#' + DataToolUtils.hash(serviceArgs.getServiceEndpoint()));
+                    serviceProperty.setId(weId + '#' + DataToolUtils.hash(serviceArgs.getServiceEndpoint()).substring(58));
                 }else{
                     for(int i=0; i<weIdDocument.getService().size(); i++){
                         if(serviceArgs.getId().equals(weIdDocument.getService().get(i).getId())){

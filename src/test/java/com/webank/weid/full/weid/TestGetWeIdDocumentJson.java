@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.webank.weid.protocol.request.AuthenticationArgs;
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
@@ -53,7 +54,7 @@ public class TestGetWeIdDocumentJson extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
         WeIdDocument weIdDocument = WeIdDocument.fromJson(weIdDoc.getResult());
-        Assert.assertEquals(1, weIdDocument.getService().size());
+        Assert.assertEquals(2, weIdDocument.getService().size());
         Assert.assertEquals(1, weIdDocument.getAuthentication().size());
     }
 
@@ -69,7 +70,7 @@ public class TestGetWeIdDocumentJson extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
         WeIdDocument weIdDocument = WeIdDocument.fromJson(weIdDoc.getResult());
-        Assert.assertEquals(0, weIdDocument.getService().size());
+        Assert.assertEquals(1, weIdDocument.getService().size());
         Assert.assertEquals(1, weIdDocument.getAuthentication().size());
     }
 
@@ -149,10 +150,12 @@ public class TestGetWeIdDocumentJson extends TestBaseService {
      */
     @Test
     public void testGetWeIdDocumentJsonCase2() {
-
-        super.setAuthentication(createWeIdForGetJson,
-            TestBaseUtil.createEcKeyPair().getPublicKey(),
-            createWeIdForGetJson.getWeId());
+        AuthenticationArgs setAuthenticationArgs = new AuthenticationArgs();
+        setAuthenticationArgs.setController(createWeIdForGetJson.getWeId());
+        setAuthenticationArgs.setPublicKey(TestBaseUtil.createEcKeyPair().getPublicKey());
+        weIdService.setAuthentication(createWeIdForGetJson.getWeId(),
+                setAuthenticationArgs,
+            createWeIdForGetJson.getUserWeIdPrivateKey());
         super.setService(createWeIdForGetJson,
             "drivingCardServic1",
             "https://weidentity.webank.com/endpoint/8377465");
