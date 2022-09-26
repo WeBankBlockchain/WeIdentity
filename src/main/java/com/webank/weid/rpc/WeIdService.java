@@ -7,12 +7,11 @@ import java.util.List;
 import com.webank.weid.protocol.base.*;
 import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
-import com.webank.weid.protocol.request.PublicKeyArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.WeIdListResult;
-import com.webank.weid.util.Multicodec.AmbiguousCodecEncodingException;
+
 
 
 /**
