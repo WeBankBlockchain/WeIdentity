@@ -85,12 +85,12 @@ public class TestCreateEvidence extends TestBaseService {
         EvidenceInfo evidenceInfo = eviInfo.getResult();
         Assert.assertTrue(evidenceInfo.getCredentialHash().equalsIgnoreCase(hash));
         String signerWeId = tempCreateWeIdResultWithSetAttr.getWeId();
-        Assert.assertTrue(evidenceInfo.getSigners().contains(signerWeId));
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(signerWeId).getLogs().size(), 2);
+        Assert.assertTrue(evidenceInfo.getSigners().contains(WeIdUtils.convertWeIdToAddress(signerWeId)));
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().size(), 2);
         Assert.assertTrue(
-            evidenceInfo.getSignInfo().get(signerWeId).getLogs().get(0).equals("1.23"));
+            evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().get(0).equals("1.23"));
         Assert.assertTrue(
-            evidenceInfo.getSignInfo().get(signerWeId).getLogs().get(1).equals("13.15"));
+            evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().get(1).equals("13.15"));
         ResponseData<Boolean> resp = evidenceService
             .verifySigner(credential, evidenceInfo, signerWeId);
         Assert.assertTrue(resp.getResult());
@@ -206,8 +206,8 @@ public class TestCreateEvidence extends TestBaseService {
         EvidenceInfo evidenceInfo = eviInfo.getResult();
         String signer1 = tempCreateWeIdResultWithSetAttr.getWeId();
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(signer1).getLogs().size(), 2);
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(signer2).getLogs().size(), 2);
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer1)).getLogs().size(), 2);
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer2)).getLogs().size(), 2);
         ResponseData<Boolean> resp = evidenceService
             .verifySigner(credential, evidenceInfo, signer1);
         Assert.assertTrue(resp.getResult());
@@ -244,16 +244,16 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(evi1.getSigners(), evi2.getSigners());
         Assert.assertEquals(evi1.getSignatures(), evi2.getSignatures());
         String signer = tempCreateWeIdResultWithSetAttr.getWeId();
-        Assert.assertEquals(evi1.getSignInfo().get(signer).getLogs(),
-            evi2.getSignInfo().get(signer).getLogs());
+        Assert.assertEquals(evi1.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs(),
+            evi2.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs());
         evidenceService.addLogByHash(hash, "Insane",
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         evidenceService.addLogByCustomKey(null, credId, "Difficult",
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         evi2 = evidenceService.getEvidenceByCustomKey(credId).getResult();
-        Assert.assertEquals(evi2.getSignInfo().get(signer).getLogs().size(), 3);
+        Assert.assertEquals(evi2.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs().size(), 3);
         List<String> list = Arrays.asList("Ironman", "Insane", "Difficult");
-        Assert.assertEquals(evi2.getSignInfo().get(signer).getLogs(), list);
+        Assert.assertEquals(evi2.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs(), list);
     }
 
     @Test
@@ -330,11 +330,11 @@ public class TestCreateEvidence extends TestBaseService {
         EvidenceInfo evi = eviCustomKey.getResult();
         String signer = tempCreateWeIdResultWithSetAttr.getWeId();
         Assert.assertNotNull(evi.getSignInfo());
-        Assert.assertNotNull(evi.getSignInfo().get(signer));
-        Assert.assertEquals(evi.getSignInfo().get(signer).getLogs(), list);
+        Assert.assertNotNull(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)));
+        Assert.assertEquals(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs(), list);
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
-        Assert.assertTrue(evi.getSignInfo().get(signer2).getLogs().contains("Age:22")
-            && evi.getSignInfo().get(signer2).getLogs().size() == 3);
+        Assert.assertTrue(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer2)).getLogs().contains("Age:22")
+            && evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer2)).getLogs().size() == 4);
     }
 
     @Test
@@ -354,7 +354,7 @@ public class TestCreateEvidence extends TestBaseService {
         ResponseData<EvidenceInfo> eviResp = evidenceService.getEvidenceByCustomKey(credId);
         EvidenceInfo evi = eviResp.getResult();
         String signer = tempCreateWeIdResultWithSetAttr.getWeId();
-        Assert.assertTrue(evi.getSignInfo().get(signer).getLogs().contains(log));
+        Assert.assertTrue(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs().contains(log));
         int length = 50; // Up to 2M can still work
         StringBuffer outputBuffer = new StringBuffer(length);
         for (int i = 0; i < length; i++) {
@@ -365,7 +365,7 @@ public class TestCreateEvidence extends TestBaseService {
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         evi = evidenceService.getEvidenceByCustomKey(credId).getResult();
         Assert.assertNotNull(evi);
-        Assert.assertTrue(evi.getSignInfo().get(signer).getLogs().contains(log));
+        Assert.assertTrue(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs().contains(log));
     }
 
     @Test
@@ -530,7 +530,7 @@ public class TestCreateEvidence extends TestBaseService {
         eviResp = evidenceService.getEvidence(hash);
         Assert.assertTrue(hash.equalsIgnoreCase(eviResp.getResult().getCredentialHash()));
         Assert.assertTrue(eviResp.getResult().getSigners().size() == 1);
-        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(signer1));
+        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(WeIdUtils.convertWeIdToAddress(signer1)));
 
         //----
         credential.setId(UUID.randomUUID().toString());
@@ -545,7 +545,7 @@ public class TestCreateEvidence extends TestBaseService {
             eviResp2.getResult().getCredentialHash());
         Assert.assertTrue(hash.equalsIgnoreCase(eviResp.getResult().getCredentialHash()));
         Assert.assertTrue(eviResp.getResult().getSigners().size() == 1);
-        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(signer1));
+        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(WeIdUtils.convertWeIdToAddress(signer1)));
     }
 
     /**
@@ -567,15 +567,15 @@ public class TestCreateEvidence extends TestBaseService {
         ResponseData<EvidenceInfo> getResp = evidenceService.getEvidence(credential.getHash());
         Assert.assertNotNull(getResp.getResult());
         Assert.assertTrue(getResp.getResult().getSignInfo()
-            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+            .get(WeIdUtils.convertWeIdToAddress(tempCreateWeIdResultWithSetAttr.getWeId())).getRevoked());
         revokeResp = evidenceService.unRevoke(credential, weIdAuthentication);
         getResp = evidenceService.getEvidence(credential.getHash());
         Assert.assertFalse(getResp.getResult().getSignInfo()
-            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+            .get(WeIdUtils.convertWeIdToAddress(tempCreateWeIdResultWithSetAttr.getWeId())).getRevoked());
         revokeResp = evidenceService.revoke(credential, weIdAuthentication);
         getResp = evidenceService.getEvidence(credential.getHash());
         Assert.assertTrue(getResp.getResult().getSignInfo()
-            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+            .get(WeIdUtils.convertWeIdToAddress(tempCreateWeIdResultWithSetAttr.getWeId())).getRevoked());
         EvidenceInfo evidenceInfo = getResp.getResult();
         Assert.assertFalse(evidenceService.isRevoked(
             evidenceInfo, createWeIdResultWithSetAttr.getWeId()).getResult());
