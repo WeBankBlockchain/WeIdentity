@@ -12,6 +12,7 @@ import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.WeIdListResult;
+import com.webank.weid.util.Multicodec.AmbiguousCodecEncodingException;
 
 
 /**

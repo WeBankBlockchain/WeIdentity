@@ -58,7 +58,7 @@ public class TestGetWeIdDocument extends TestBaseService {
         LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(1, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(2, weIdDoc.getResult().getService().size());
         Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
     }
 
@@ -73,7 +73,7 @@ public class TestGetWeIdDocument extends TestBaseService {
         LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(0, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(1, weIdDoc.getResult().getService().size());
         Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
     }
 
@@ -108,7 +108,7 @@ public class TestGetWeIdDocument extends TestBaseService {
         LogUtil.info(logger, "getWeIdDocument", weIdDoc);
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(2, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(3, weIdDoc.getResult().getService().size());
         Assert.assertEquals(1, weIdDoc.getResult().getAuthentication().size());
     }
 
@@ -169,7 +169,7 @@ public class TestGetWeIdDocument extends TestBaseService {
             .writerWithDefaultPrettyPrinter().writeValueAsString(weIdDoc.getResult()));
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), weIdDoc.getErrorCode().intValue());
-        Assert.assertEquals(2, weIdDoc.getResult().getService().size());
+        Assert.assertEquals(3, weIdDoc.getResult().getService().size());
         Assert.assertEquals(2, weIdDoc.getResult().getAuthentication().size());
 
         // test cycle 2: remove another pubkey and authentication
