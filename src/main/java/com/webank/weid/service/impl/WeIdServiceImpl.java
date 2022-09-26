@@ -12,7 +12,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.webank.weid.protocol.base.*;
 import com.webank.weid.util.Multibase.Multibase;
-import com.webank.weid.util.Multicodec.AmbiguousCodecEncodingException;
 import com.webank.weid.util.Multicodec.Multicodec;
 import com.webank.weid.util.Multicodec.MulticodecEncoder;
 import org.apache.commons.lang3.StringUtils;
