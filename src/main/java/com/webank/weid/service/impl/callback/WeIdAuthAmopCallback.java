@@ -72,9 +72,8 @@ public class WeIdAuthAmopCallback extends AmopCallback {
         }
         WeIdDocument document = weIdDocResp.getResult();
         List<AuthenticationProperty> authList = document.getAuthentication();
-        //TODO:后面PublicKeyMultibase换成base58编码后这里需要解码
-        String pubKey = authList.get(0).getPublicKeyMultibase();
-
+        //PublicKeyMultibase直接解码
+        String pubKey = authList.get(0).getPublicKey();
         //2. generate a symmetricKey
         String symmetricKey = UUID.randomUUID().toString();
         String channelId = UUID.randomUUID().toString();
