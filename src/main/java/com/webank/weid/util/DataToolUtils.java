@@ -961,9 +961,9 @@ public final class DataToolUtils {
         try {
             boolean result = false;
             for (AuthenticationProperty authenticationProperty : weIdDocument.getAuthentication()) {
-                if (StringUtils.isNotEmpty(authenticationProperty.getPublicKeyMultibase())) {
+                if (StringUtils.isNotEmpty(authenticationProperty.getPublicKey())) {
                     boolean currentResult = verifySignature(
-                        rawData, signature, new BigInteger(authenticationProperty.getPublicKeyMultibase()));
+                        rawData, signature, new BigInteger(authenticationProperty.getPublicKey()));
                     result = currentResult || result;
                     if (currentResult) {
                         foundMatchingMethodId = authenticationProperty.getId();
