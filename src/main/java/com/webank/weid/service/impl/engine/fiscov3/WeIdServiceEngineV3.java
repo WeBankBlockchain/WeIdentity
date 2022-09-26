@@ -14,12 +14,17 @@ import com.webank.weid.service.impl.engine.BaseEngine;
 import com.webank.weid.service.impl.engine.WeIdServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
+import com.webank.weid.util.Multibase.Multibase;
+import com.webank.weid.util.Multicodec.Multicodec;
+import com.webank.weid.util.Multicodec.MulticodecEncoder;
 import com.webank.weid.util.WeIdUtils;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.v3.codec.datatypes.generated.tuples.generated.Tuple6;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,8 +124,9 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
             }
             return new ResponseData<>(result, ErrorCode.SUCCESS);
         }  catch (Exception e) {
+            //由于合约中要求weid存在才返回对应的document，如果weid不存在，会抛出异常
             logger.error("[getWeIdDocument]: exception.", e);
-            return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+            return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         }
     }
 
@@ -158,14 +164,21 @@ public class WeIdServiceEngineV3 extends BaseEngine implements WeIdServiceEngine
 
         AuthenticationProperty authenticationProperty = new AuthenticationProperty();
         //在创建weid时默认添加一个id为#keys-0的verification method
-        authenticationProperty.setId(WeIdUtils.convertAddressToWeId(weAddress) + "#keys-" + DataToolUtils.hash(publicKey));
+        authenticationProperty.setId(WeIdUtils.convertAddressToWeId(weAddress) + "#keys-" + DataToolUtils.hash(publicKey).substring(58));
         //verification method controller默认为自己
         authenticationProperty.setController(WeIdUtils.convertAddressToWeId(weAddress));
-        //这里后面需要把publicKey使用multicodec编码
-        authenticationProperty.setPublicKeyMultibase(publicKey);
+        //这里把publicKey用multicodec编码，然后使用Multibase格式化，国密和非国密使用不同的编码
+        byte[] publicKeyEncode = MulticodecEncoder.encode(DataToolUtils.cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+                publicKey.getBytes(StandardCharsets.UTF_8));
+        authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
         List<String> authList = new ArrayList<>();
         authList.add(authenticationProperty.toString());
         List<String> serviceList = new ArrayList<>();
+        ServiceProperty serviceProperty = new ServiceProperty();
+        serviceProperty.setServiceEndpoint("https://github.com/WeBankBlockchain/WeIdentity");
+        serviceProperty.setType("WeIdentity");
+        serviceProperty.setId(authenticationProperty.getController() + '#' + DataToolUtils.hash(serviceProperty.getServiceEndpoint()).substring(58));
+        serviceList.add(serviceProperty.toString());
         org.fisco.bcos.sdk.v3.model.TransactionReceipt receipt;
         com.webank.weid.contract.v3.WeIdContract weIdContract =
                 reloadContract(fiscoConfig.getWeIdAddress(), privateKey, com.webank.weid.contract.v3.WeIdContract.class);
