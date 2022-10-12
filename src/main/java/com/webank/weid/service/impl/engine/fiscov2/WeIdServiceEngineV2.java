@@ -29,7 +29,7 @@ import java.util.List;
 /**
  * WeIdServiceEngine call weid contract which runs on FISCO BCOS 2.0.
  *
- * @author tonychen 2019年6月21日
+ * @author afeexian, marsli 2022.10.10
  */
 public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine {
 
@@ -157,7 +157,7 @@ public class WeIdServiceEngineV2 extends BaseEngine implements WeIdServiceEngine
         String privateKey) {
 
         AuthenticationProperty authenticationProperty = new AuthenticationProperty();
-        //在创建weid时默认添加一个id为#keys-0的verification method
+        //在创建weid时默认添加一个id为#keys-[hash(publicKey)]的verification method
         authenticationProperty.setId(WeIdUtils.convertAddressToWeId(weAddress) + "#keys-" + DataToolUtils.hash(publicKey).substring(58));
         //verification method controller默认为自己
         authenticationProperty.setController(WeIdUtils.convertAddressToWeId(weAddress));
