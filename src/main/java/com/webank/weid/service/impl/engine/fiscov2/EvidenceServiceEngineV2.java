@@ -48,7 +48,7 @@ import com.webank.weid.util.WeIdUtils;
 /**
  * EvidenceServiceEngine calls evidence contract which runs on FISCO BCOS 2.0.
  *
- * @author yanggang, chaoxinhu
+ * @author afeexian, marsli
  */
 public class EvidenceServiceEngineV2 extends BaseEngine implements EvidenceServiceEngine {
 

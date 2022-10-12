@@ -37,7 +37,7 @@ import com.webank.weid.util.WeIdUtils;
 /**
  * Service implementations for operations on WeIdentity DID.
  *
- * @author tonychen 2018.10
+ * @author afeexian 2022.08
  */
 public class WeIdServiceImpl extends AbstractService implements WeIdService {
 
