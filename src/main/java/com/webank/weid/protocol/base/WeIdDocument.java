@@ -19,7 +19,7 @@ import com.webank.weid.util.DataToolUtils;
 /**
  * The base data structure to handle WeIdentity DID Document info.
  *
- * @author tonychen 2018.9.29
+ * @author afeexian 2022.8.29
  */
 @Data
 public class WeIdDocument implements JsonSerializer {

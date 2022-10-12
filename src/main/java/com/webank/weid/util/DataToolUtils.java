@@ -27,7 +27,6 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
-import com.webank.weid.protocol.base.PublicKeyProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.cpt.RawCptSchema;
 import com.webank.weid.protocol.request.CptMapArgs;
@@ -623,7 +622,7 @@ public final class DataToolUtils {
      * @param signature signature base64 string
      * @return secp256k1 signature (v = 0,1)
      */
-    public static RsvSignature  SigBase64Deserialization(String signature) {
+    public static RsvSignature SigBase64Deserialization(String signature) {
         byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
         if (SERIALIZED_SIGNATUREDATA_LENGTH != sigBytes.length) {
             throw new WeIdBaseException("signature data illegal");
@@ -765,19 +764,19 @@ public final class DataToolUtils {
     }*/
 
     /**
-     * eecrypt the data. todo
+     * encrypt the data. todo
      *
      * @param data the data to encrypt
      * @param publicKey public key
      * @return decrypt data
      * @throws Exception encrypt exception
      */
-    public static byte[] encrypt(String data, String publicKey)
-        throws Exception {
-//
-//        cryptoSuite.
-//        ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
-//        return encrypt.encrypt(data.getBytes());*/
+    public static byte[] encrypt(String data, String publicKey) throws Exception {
+        /*
+        cryptoSuite.ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
+            return encrypt.encrypt(data.getBytes());
+
+         */
         return data.getBytes();
     }
 

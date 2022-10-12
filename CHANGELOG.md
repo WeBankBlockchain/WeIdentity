@@ -1,3 +1,9 @@
+### V1.8.6 (2022-10-14)
+Features:
+1. Upgrade the property fields in WeIdDocument to conform to the W3C DID Specification
+2. Upgrade the way data is stored and retrieved in the weid-contract
+3. Upgrade the interfaces related to WeId and Evidence
+
 ### V1.8.5 (2022-08-16)
 Features:
 1. Replace the web3sdk with fisco-bcos-java-sdk
