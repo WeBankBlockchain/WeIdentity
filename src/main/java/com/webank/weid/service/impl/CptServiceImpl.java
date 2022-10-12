@@ -31,7 +31,7 @@ import com.webank.weid.util.WeIdUtils;
 /**
  * Service implementation for operation on CPT (Claim Protocol Type).
  *
- * @author lingfenghe
+ * @author afeexian
  */
 public class CptServiceImpl extends AbstractService implements CptService {
 

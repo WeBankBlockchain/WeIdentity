@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Service implementations for operations on Evidence.
  *
- * @author chaoxinhu 2019.1
+ * @author afeexian 2022.10
  */
 public class EvidenceServiceImpl extends AbstractService implements EvidenceService {
 
