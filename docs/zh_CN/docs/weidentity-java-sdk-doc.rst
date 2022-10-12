@@ -9936,6 +9936,86 @@ T java.lang.Object
    接口名称:com.webank.weid.rpc.EvidenceService.addLogByHash / addLogByCustomKey
    接口定义:ResponseData<Boolean> addLogByHash(String hashValueSupplement（仅在customKey中用到）, String hashValue / customKey, String log, WeIdPrivateKey weIdPrivateKey)
    接口描述: 为一个**已经在链上存在的存证**添加额外信息记录存入其log中。有两个接口，一个是以hash值为索引，一个可以接受用户自定义索引（customKey）；如果自定义索引不存在，则会使用替补hash作为上链索引。
+   
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValueSupplement
+     - String
+     - N
+     - 
+     - 
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - N
+     - 
+     - 
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - log
+     - String
+     - Y
+     - 额外信息
+     - 长度不能超过2M，必须为UTF-8
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - customKey
+     - String
+     - Y
+     - 用户自定索引关键字
+     - 长度不能超过2M，必须为UTF-8
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示    
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
 
@@ -10030,6 +10110,751 @@ com.webank.weid.protocol.response.TransactionInfo
    EvidenceService-->>调用者: 报错并退出
    end
    EvidenceService-->>调用者: 返回成功
+
+
+----
+
+9. addSignatureAndLogByHash / addSignatureAndLogByCustomKey
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.addSignatureAndLogByHash / addSignatureAndLogByCustomKey
+   接口定义:ResponseData<Boolean> addSignatureAndLogByHash(String hashValueSupplement（仅在customKey中用到）, String hashValue / customKey, String log, WeIdPrivateKey weIdPrivateKey)
+   接口描述:为一个**已经在链上存在的存证**添加日志条目。有两个接口，一个是以hash值为索引，一个可以接受用户自定义索引（customKey）；如果自定义索引不存在，则会使用替补hash作为上链索引，此日志将是永久记录在区块链上，最后在尝试获取存证。
+   
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValueSupplement
+     - String
+     - N
+     - 
+     - 
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - N
+     - 
+     - 
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - log
+     - String
+     - Y
+     - 额外信息
+     - 长度不能超过2M，必须为UTF-8
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - customKey
+     - String
+     - Y
+     - 用户自定索引关键字
+     - 长度不能超过2M，必须为UTF-8
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示   
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
+
+10. revoke / unRevoke
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.revoke / unRevoke
+   接口定义:ResponseData<Boolean> revoke(Hashable object, WeIdAuthentication weIdAuthentication)
+   接口描述: 撤销存证 / 撤销存证-可以取消。
+
+**接口入参**\ :
+
+Hashable java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - Hashable object
+     - N
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 
+     - 用户WeID
+   * - authenticationMethodId
+     - String
+     - Y
+     - 
+     - method Id
+   
+   com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示 
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
+
+11. isRevoked
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.isRevoked
+   接口定义:ResponseData<Boolean> isRevoked(EvidenceInfo evidenceInfo, String weId)
+   接口描述: 检查该存证是否被该WeID撤销。
+
+**接口入参**\ :
+
+com.webank.weid.protocol.base.EvidenceInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - credentialHash
+     - String
+     - 凭证Hash值
+     - 是一个66个字节的字符串，以0x开头
+   * - signInfo
+     - Map<String, EvidenceSignInfo>
+     - 存证创建者信息
+     - 链上允许一个存证存在多个创建者
+
+com.webank.weid.protocol.base.EvidenceSignInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - signature
+     - String
+     - 存证的签名
+     - 以Base64编码的存证签名值
+   * - timestamp
+     - String
+     - 存证创建时间
+     -
+   * - logs
+     - List<String>
+     - 额外信息列表
+     -
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 
+     - 用户WeID
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
+
+12. createRawEvidenceWithCustomKey
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.createRawEvidenceWithCustomKey
+   接口定义:ResponseData<Boolean> createRawEvidenceWithCustomKey(String hashValue,String signature,String log,Long timestamp,String extraKey,String privateKey)
+   接口描述: 创建可定制所有输入的原始存证。
+
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - Y
+     - 哈希值
+     -
+   * - signature
+     - String
+     - 存证的签名
+     - 以Base64编码的存证签名值
+   * - timestamp
+     - Long
+     - 存证创建时间
+     -
+   * - log
+     - String
+     - 日志
+     -
+   * - extraKey
+     - String
+     - 
+     -
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+  
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 
+     - 用户WeID
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
+
+13. createRawEvidenceWithSpecificSigner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.createRawEvidenceWithSpecificSigner
+   接口定义:ResponseData<Boolean> createRawEvidenceWithSpecificSigner(String hashValue,String signature,String log,Long timestamp,String extraKey,String signer,
+   String privateKey)
+   接口描述: 创建原始存证接口，其中所有输入（包括签名者）都可以定制。
+
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - Y
+     - 哈希值
+     -
+   * - signature
+     - String
+     - 存证的签名
+     - 以Base64编码的存证签名值
+   * - timestamp
+     - Long
+     - 存证创建时间
+     -
+   * - log
+     - String
+     - 日志
+     -
+   * - extraKey
+     - String
+     - 
+     -
+   * - signer
+     - String
+     - 
+     -
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+  
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 
+     - 用户WeID
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
 
 
 CredentialPojoService
