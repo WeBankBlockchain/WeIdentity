@@ -687,7 +687,8 @@ public final class DataToolUtils {
 //                System.arraycopy(rsvSignature.getS().getValue(), 0, sigBytes, 32, 32);
                 String messageHash = Numeric.toHexStringNoPrefix(cryptoSuite.hash(rawData.getBytes()));
                 //这里注意publicKey要不要带0x
-                String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
+                //String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
+                String hexPublicKey = publicKey.toString(16);
 
                 return cryptoSuite.verify(hexPublicKey, messageHash, signatureResult.convertToString());
             } else {
@@ -699,9 +700,9 @@ public final class DataToolUtils {
                     rsvSignature.getR().getValue(),
                     rsvSignature.getS().getValue());
                 String messageHash = Numeric.toHexStringNoPrefix(cryptoSuite.hash(rawData.getBytes()));
-                //这里注意publicKey要不要带0x
-                String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
-
+                //这里注意publicKey要不要带0x，也不能用toByteArray()，在国密环境下最终得到的hex string前面多两个0
+                //String hexPublicKey = Numeric.toHexStringNoPrefix(publicKey.toByteArray());
+                String hexPublicKey = publicKey.toString(16);
                 return cryptoSuite.verify(hexPublicKey, messageHash, signatureResult.convertToString());
             }
         } catch (Exception e) {
