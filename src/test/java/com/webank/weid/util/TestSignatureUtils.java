@@ -70,8 +70,11 @@ public class TestSignatureUtils {
         String privKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         String msg = "12345";
-        //ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(hexPrivKey));
-        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privKey));
+        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privKey, 10));
+        SignatureResult signatureResult = DataToolUtils.cryptoSuite.sign(DataToolUtils.cryptoSuite.hash(msg),
+                DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privKey)));
+        Boolean a = DataToolUtils.cryptoSuite.verify(keyPair.getHexPublicKey(), DataToolUtils.cryptoSuite.hash(msg), signatureResult.convertToString());
+
         String sig = DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(msg, privKey));
         //Boolean result = DataToolUtils.verifySecp256k1Signature(msg, sig, keyPair.getPublicKey());
         BigInteger bigPublicKey = new BigInteger(DataToolUtils.hexStr2DecStr(keyPair.getHexPublicKey()));
