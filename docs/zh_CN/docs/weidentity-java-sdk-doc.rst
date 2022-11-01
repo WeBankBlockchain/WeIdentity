@@ -1332,15 +1332,15 @@ com.webank.weid.protocol.response.TransactionInfo
 ----
 
 
-3. delegateCreateWeId
+3. createWeIdByPublicKey
 ~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.delegateCreateWeId
-   接口定义:ResponseData<String> delegateCreateWeId(WeIdPublicKey publicKey,WeIdAuthentication weIdAuthentication)
+   接口名称:com.webank.weid.rpc.WeIdService.createWeIdByPublicKey
+   接口定义:ResponseData<String> createWeIdByPublicKey(WeIdPublicKey weIdPublicKey,WeIdPrivateKey weIdPrivateKey)
    接口描述: 根据传入的公钥和代理的私钥，通过代理发交易链上注册WeIdentity DID，并返回WeIdentity DID。
 
 **接口入参**\ :  com.webank.weid.protocol.base.WeIdPublicKey
@@ -1359,31 +1359,6 @@ com.webank.weid.protocol.response.TransactionInfo
      - 数字公钥，代理会根据这个公钥来创建WeID
      -
 
-com.webank.weid.protocol.base.WeIdAuthentication
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - Y
-     - WeIdentity DID
-     - WeIdentity DID的格式传入
-   * - weIdPublicKeyId
-     - String
-     - N
-     - 公钥Id
-     -
-   * - weIdPrivateKey
-     - WeIdPrivateKey
-     - Y
-     -
-     - 交易私钥，见下
 
 com.webank.weid.protocol.base.WeIdPrivateKey
 
@@ -1467,9 +1442,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - WEID_PRIVATEKEY_INVALID
      - 100103
      - 私钥格式非法
-   * - WEID_ALREADY_EXIST
-     - 100105
-     - WeIdentity DID已存在
    * - TRANSACTION_TIMEOUT
      - 160001
      - 超时
@@ -1493,12 +1465,10 @@ com.webank.weid.protocol.response.TransactionInfo
    WeIdPublicKey weIdPublicKey = new WeIdPublicKey();
    weIdPublicKey.setPublicKey(
       "2905679808560626772263712571437125497429146398815877180317365034921958007199576809718056336050058032599743534507469742764670961100255274766148096681073592");
-   String delegateWeId = "did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7";
-   String delegatePrivateKey = "60866441986950167911324536025850958917764441489874006048340539971987791929772";
-   WeIdAuthentication weIdAuthentication = new WeIdAuthentication(delegateWeId, delegatePrivateKey);
-   weIdAuthentication.setWeIdPublicKeyId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7#key0");
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
 
-   ResponseData<String> response = weIdService.delegateCreateWeId(weIdPublicKey, weIdAuthentication);
+   esponseData<String> response = weIdService.createWeIdByPublicKey(weIdPublicKey, weIdPrivateKey);
 
 
 .. code-block:: text
@@ -1519,7 +1489,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
    sequenceDiagram
    Note over 调用者:传入自己的WeIdentity DID及用作authentication的私钥
-   调用者->>WeIdentity SDK:delegateCreateWeId()
+   调用者->>WeIdentity SDK:createWeIdByPublicKey()
    WeIdentity SDK->>区块链节点:调用智能合约
    区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
    opt 身份校验不通过
@@ -1915,20 +1885,18 @@ com.webank.weid.protocol.base.ServiceProperty
 
 ----
 
-6. addPublicKey
-~~~~~~~~~~~~~~~
+6. getWeIdDocumentMetadata
+~~~~~~~~~~~~~~~~~
 
 **基本信息**
 
 .. code-block:: text
 
-   接口名称:addPublicKey
-   接口定义:ResponseData<Integer> addPublicKey(String weId, PublicKeyArgs publicKeyArgs, WeIdPrivateKey weIdPrivateKey)
-   接口描述: 为指定WeIdentity DID添加公钥，可以使用getWeIdDocument方法来读取所有挂在此WeID下的公钥，读取出的顺序和添加顺序一致。同时，公钥的ID通过被调用添加的顺序来决定，从而保证ID永远是增长的，且固定下来就永远不会变。返回值为整形，表示所添加的公钥的ID，若失败，返回-1。
+   接口名称:com.webank.weid.rpc.WeIdService.getWeIdDocumentMetadata
+   接口定义:ResponseData<getWeIdDocumentMetadata> getWeIdDocumentMetadata(String weId)
+   接口描述: 根据WeIdentity DID查询出WeIdentity DID DocumentMetadata对象。
 
-**接口入参**\ :
-
-String
+**接口入参**\ :  String
 
 .. list-table::
    :header-rows: 1
@@ -1944,44 +1912,8 @@ String
      - WeIdentity DID字符串
      -
 
-com.webank.weid.protocol.request.PublicKeyArgs
 
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - owner
-     - String
-     - N
-     - 所有者
-     - 如不传入，则默认为当前WeIdentity DID
-   * - publicKey
-     - String
-     - Y
-     - 数字公钥
-     - 使用十进制数字表示
-
-
-com.webank.weid.protocol.base.WeIdPrivateKey
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - privateKey
-     - String
-     - 私钥
-     - 使用十进制数字表示
-
-
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<WeIdDocumentMetadata>;
 
 .. list-table::
    :header-rows: 1
@@ -1999,9 +1931,9 @@ com.webank.weid.protocol.base.WeIdPrivateKey
      - 返回结果描述
      -
    * - result
-     - Integer
-     - 所添加的公钥的ID，若为-1，则表示失败
+     - WeIdDocument
      -
+     - 见下
    * - transactionInfo
      - TransactionInfo
      - 交易信息
@@ -2029,208 +1961,31 @@ com.webank.weid.protocol.response.TransactionInfo
      - BigInteger
      - 交易索引
      -
-
-
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - WEID_INVALID
-     - 100101
-     - 无效的WeIdentity DID
-   * - WEID_PRIVATEKEY_INVALID
-     - 100103
-     - 私钥格式非法
-   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
-     - 100106
-     - 私钥不与WeIdentity DID所对应
-   * - TRANSACTION_TIMEOUT
-     - 160001
-     - 超时
-   * - TRANSACTION_EXECUTE_ERROR
-     - 160002
-     - 交易错误
-   * - UNKNOW_ERROR
-     - 160003
-     -  其他错误
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数为空
-
-
-**调用示例**
-
-.. code-block:: java
-
-   WeIdService weIdService = new WeIdServiceImpl();
-
-   PublicKeyArgs setPublicKeyArgs = new SetPublicKeyArgs();
-   setPublicKeyArgs.setPublicKey(
-      "13161444623157635919577071263152435729269604287924587017945158373362984739390835280704888860812486081963832887336483721952914804189509503053687001123007342");
-
-   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
-   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
-
-   ResponseData<Boolean> response = weIdService.addPublicKey("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", setPublicKeyArgs, weIdPrivateKey);
-
-
-.. code-block:: text
-
-   返回结果如下：
-   result: 1
-   errorCode: 0
-   errorMessage: success
-   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
-      blockNumber: 30011
-      transactionHash: 0xda4a1c64a3991170975475fdd6604bb2897512948ea491d3c88f24c4c3fd0028
-      transactionIndex: 0
-
-**时序图**
-
-.. mermaid::
-
-   sequenceDiagram
-   Note over 调用者:传入自己的WeIdentity DID及用作authentication的公私钥
-   调用者->>WeIdentity SDK : 调用addPublicKey来添加公钥。
-   WeIdentity SDK->>WeIdentity SDK:拿私钥来重新加载合约对象
-   WeIdentity SDK->>区块链节点: 调用智能合约
-   区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
-   opt 身份校验不通过
-   区块链节点-->>WeIdentity SDK:报错，提示私钥不匹配并退出
-   WeIdentity SDK-->>调用者:报错退出
-   end
-   区块链节点->>区块链节点:将公钥和WeIdentity DID以及上次记录的块高写到属性事件中
-   区块链节点->>区块链节点:记录最新块高
-   区块链节点-->>WeIdentity SDK:返回
-   WeIdentity SDK-->>调用者:返回调用结果
-
-
-----
-
-7. delegateAddPublicKey
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称:delegateAddPublicKey
-   接口定义:ResponseData<Integer> delegateAddPublicKey(String weId, PublicKeyArgs publicKeyArgs, WeIdPrivateKey delegateAuth)
-   接口描述: 和addPublicKey调用方式和返回值一致，但由**代理方**来给WeIdentity DID添加公钥。仅支持联盟链管理员或委员会成员作为代理方调用。
-
-**接口入参**\ :
-
-String
+ 
+ com.webank.weid.protocol.base.WeIdDocumentMetadata
 
 .. list-table::
    :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - Y
-     - WeIdentity DID字符串
-     -
-
-com.webank.weid.protocol.request.PublicKeyArgs
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - Y
-     - WeIdentity DID格式字符串
-     - 如：did:weid:1000:1:0x....
-   * - owner
-     - String
-     - N
-     - 所有者
-     - 默认为当前WeIdentity DID
-   * - publicKey
-     - String
-     - Y
-     - 数字公钥
-     -
-
-com.webank.weid.protocol.base.WeIdPrivateKey
-
-.. list-table::
-   :header-rows: 1
-
+   
    * - 名称
      - 类型
      - 说明
      - 备注
-   * - privateKey
-     - String
-     - 私钥
-     - 使用十进制数字表示
-
-
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
+   * - created
+     - Long
+     - 创建
      -
-   * - errorMessage
-     - String
-     - 返回结果描述
+   * - updated
+     - Long
+     - 修改
      -
-   * - result
-     - Integer
-     - 所添加成功的公钥ID，若失败，返回-1
-     -
-   * - transactionInfo
-     - TransactionInfo
-     - 交易信息
-     -
-
-
-com.webank.weid.protocol.response.TransactionInfo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - blockNumber
-     - BigInteger
-     - 交易块高
-     -
-   * - transactionHash
-     - String
-     - 交易hash
-     -
-   * - transactionIndex
-     - BigInteger
-     - 交易索引
+   * - deactivated
+     - boolean
+     - 解散
+     - 
+   * - versionId
+     - int
+     - 版本Id
      -
 
 
@@ -2248,9 +2003,9 @@ com.webank.weid.protocol.response.TransactionInfo
    * - WEID_INVALID
      - 100101
      - 无效的WeIdentity DID
-   * - WEID_PRIVATEKEY_INVALID
-     - 100103
-     - 私钥格式非法
+   * - WEID_DOES_NOT_EXIST
+     - 100104
+     - WeIdentity DID不存在
    * - TRANSACTION_TIMEOUT
      - 160001
      - 超时
@@ -2260,9 +2015,6 @@ com.webank.weid.protocol.response.TransactionInfo
    * - UNKNOW_ERROR
      - 160003
      -  其他错误
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数为空
 
 
 **调用示例**
@@ -2270,52 +2022,39 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: java
 
    WeIdService weIdService = new WeIdServiceImpl();
-
-   PublicKeyArgs publicKeyArgs = new PublicKeyArgs();
-   publicKeyArgs.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
-   publicKeyArgs.setPublicKey(
-      "13161444623157635919577071263152435729269604287924587017945158373362984739390835280704888860812486081963832887336483721952914804189509503053687001123007342");
-   String delegatePrivateKey = "60866441986950167911324536025850958917764441489874006048340539971987791929772";
-
-   ResponseData<Boolean> response = weIdService.delegateSetPublicKey("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", publicKeyArgs, new WeIdPrivateKey(delegatePrivateKey));
+   ResponseData<WeIdDocument> response = weIdService.getWeIdDocumentMetadata("did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a");
 
 
 .. code-block:: text
 
    返回结果如下：
-   result: 1
+   result:(com.webank.weid.protocol.base.WeIdDocument)
+      id: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
+      created: 1560419409898
+      updated: 1560419409898
+      publicKey:(java.util.ArrayList)
+         [0]:com.webank.weid.protocol.base.PublicKeyProperty
+            id: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
+            type: Secp256k18
+            owner: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a
+            publicKey: 2905679808560626772263712571437125497429146398815877180317365034921958007199576809718056336050058032599743534507469742764670961100255274766148096681073592
+      authentication:(java.util.ArrayList)
+         [0]:com.webank.weid.protocol.base.AuthenticationProperty
+            type: Secp256k1
+            publicKey: did:weid:101:0xd9aeaa982fc21ea9addaf09e4f0c6a23a08d306a#keys-0
+      service:(java.util.ArrayList)
+         [0]:com.webank.weid.protocol.base.ServiceProperty
+            type: drivingCardService
+            serviceEndpoint: https://weidentity.webank.com/endpoint/8377464
    errorCode: 0
    errorMessage: success
-   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
-      blockNumber: 30011
-      transactionHash: 0xda4a1c64a3991170975475fdd6604bb2897512948ea491d3c88f24c4c3fd0028
-      transactionIndex: 0
-
-
-
-**时序图**
-
-.. mermaid::
-
-   sequenceDiagram
-   Note over 调用者:传入自己的WeIdentity DID及用作authentication的公私钥
-   调用者->>WeIdentity SDK : 调用delegateSetPublicKey来添加公钥。
-   WeIdentity SDK->>WeIdentity SDK:拿私钥来重新加载合约对象
-   WeIdentity SDK->>区块链节点: 调用智能合约
-   区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
-   opt 身份校验不通过
-   区块链节点-->>WeIdentity SDK:报错，提示私钥不匹配并退出
-   WeIdentity SDK-->>调用者:报错退出
-   end
-   区块链节点->>区块链节点:将公钥和WeIdentity DID以及上次记录的块高写到属性事件中
-   区块链节点->>区块链节点:记录最新块高
-   区块链节点-->>WeIdentity SDK:返回
-   WeIdentity SDK-->>调用者:返回调用结果
+   transactionInfo:null
 
 
 ----
 
-8. setService
+
+7. setService
 ~~~~~~~~~~~~~
 
 **基本信息**
@@ -2519,210 +2258,7 @@ com.webank.weid.protocol.response.TransactionInfo
 ----
 
 
-9. delegateSetService
-~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称:com.webank.weid.rpc.WeIdService.delegateSetService
-   接口定义:ResponseData<Boolean> setService(ServiceArgs serviceArgs，WeIdAuthentication delegateAuth)
-   接口描述: 由**代理方**来给WeIdentity DID添加Service信息。仅支持联盟链管理员或委员会成员作为代理方调用。
-
-**接口入参**\ :
-
-String
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - Y
-     - WeIdentity DID字符串
-     -
-
-com.webank.weid.protocol.request.ServiceArgs
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - Y
-     - WeIdentity DID格式字符串
-     - 如：did:weid:101:0x.....
-   * - type
-     - String
-     - Y
-     - 类型
-     - 如：drivingCardService
-   * - serviceEndpoint
-     - String
-     - Y
-     - 服务端点
-     - 如："https://weidentity.webank.com/endpoint/8377464"
-
-com.webank.weid.protocol.base.WeIdPrivateKey
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - privateKey
-     - String
-     - 私钥
-     - 使用十进制数字表示
-
-
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     -
-   * - errorMessage
-     - String
-     - 返回结果描述
-     -
-   * - result
-     - Boolean
-     - 是否set成功
-     -
-   * - transactionInfo
-     - TransactionInfo
-     - 交易信息
-     -
-
-
-com.webank.weid.protocol.response.TransactionInfo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - blockNumber
-     - BigInteger
-     - 交易块高
-     -
-   * - transactionHash
-     - String
-     - 交易hash
-     -
-   * - transactionIndex
-     - BigInteger
-     - 交易索引
-     -
-
-
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - WEID_INVALID
-     - 100101
-     - 无效的WeIdentity DID
-   * - WEID_PRIVATEKEY_INVALID
-     - 100103
-     - 私钥格式非法
-   * - WEID_SERVICE_TYPE_OVERLIMIT
-     - 100110
-     - type字段超长
-   * - TRANSACTION_TIMEOUT
-     - 160001
-     - 超时
-   * - TRANSACTION_EXECUTE_ERROR
-     - 160002
-     - 交易错误
-   * - UNKNOW_ERROR
-     - 160003
-     -  其他错误
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数为空
-
-
-**调用示例**
-
-.. code-block:: java
-
-   WeIdService weIdService = new WeIdServiceImpl();
-
-   ServiceArgs serviceArgs = new ServiceArgs();
-   serviceArgs.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
-   serviceArgs.setType("drivingCardService");
-   serviceArgs.setServiceEndpoint("https://weidentity.webank.com/endpoint/8377464");
-
-   String delegatePrivateKey = "60866441986950167911324536025850958917764441489874006048340539971987791929772";
-
-   ResponseData<Boolean> response = weIdService.delegateSetService("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", serviceArgs, new WeIdPrivateKey(delegatePrivateKey));
-
-
-.. code-block:: text
-
-   返回结果如下：
-   result: true
-   errorCode: 0
-   errorMessage: success
-   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
-      blockNumber: 30012
-      transactionHash: 0xf4992c4d190a9338f13119125861aaa3fa86622de1ab6862d06c05c6e6d1d9be
-      transactionIndex: 0
-
-
-**时序图**
-
-.. mermaid::
-
-   sequenceDiagram
-   Note over 调用者:传入自己的WeIdentity DID及要用作<br>authentication的私钥，<br>以及service endpoint
-   调用者->>WeIdentity SDK : 调用delegateSetService来添加认证。
-   WeIdentity SDK->>WeIdentity SDK:拿私钥来重新加载合约对象
-   WeIdentity SDK->>区块链节点: 调用智能合约
-   区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
-   opt 身份校验不通过
-   区块链节点-->>WeIdentity SDK:报错，提示私钥不匹配并退出
-   WeIdentity SDK-->>调用者:报错退出
-   end
-   区块链节点->>区块链节点:将service endpoint和WeIdentity DID以及上次记录的块高写到属性事件中
-   区块链节点->>区块链节点:记录最新块高
-   区块链节点-->>WeIdentity SDK:返回
-   WeIdentity SDK-->>调用者:返回调用结果
-
-----
-
-10. setAuthentication
+8. setAuthentication
 ~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
@@ -2730,7 +2266,7 @@ com.webank.weid.protocol.response.TransactionInfo
 .. code-block:: text
 
    接口名称:com.webank.weid.rpc.WeIdService.setAuthentication
-   接口定义:ResponseData<Boolean> setAuthentication(String weId, SetAuthenticationArgs setAuthenticationArgs)
+   接口定义:ResponseData<Boolean> setAuthentication(String weId, AuthenticationArgs authenticationArgs, WeIdPrivateKey weIdPrivateKey)
    接口描述: 根据WeIdentity DID添加Authentication信息。
 
 **接口入参**\ :
@@ -2923,203 +2459,7 @@ com.webank.weid.protocol.response.TransactionInfo
 ----
 
 
-11. delegateSetAuthentication
-~~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称:com.webank.weid.rpc.WeIdService.delegateSetAuthentication
-   接口定义:ResponseData<Boolean> delegateSetAuthentication(String weId, AuthenticationArgs authenticationArgs，WeIdAuthentication delegateAuth)
-   接口描述: 由**代理方**来给WeIdentity DID添加Authentication信息。仅支持联盟链管理员或委员会成员作为代理方调用。
-
-**接口入参**\ :
-
-String
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - Y
-     - WeIdentity DID字符串
-     -
-
-com.webank.weid.protocol.request.AuthenticationArgs
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - owner
-     - String
-     - N
-     - 所有者
-     - 默认为当前WeIdentity DID
-   * - publicKey
-     - String
-     - Y
-     - 数字公钥
-     -
-
-com.webank.weid.protocol.base.WeIdPrivateKey
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - privateKey
-     - String
-     - 私钥
-     - 使用十进制数字表示
-
-
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     -
-   * - errorMessage
-     - String
-     - 返回结果描述
-     -
-   * - result
-     - Boolean
-     - 是否set成功
-     -
-   * - transactionInfo
-     - TransactionInfo
-     - 交易信息
-     -
-
-
-com.webank.weid.protocol.response.TransactionInfo
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - blockNumber
-     - BigInteger
-     - 交易块高
-     -
-   * - transactionHash
-     - String
-     - 交易hash
-     -
-   * - transactionIndex
-     - BigInteger
-     - 交易索引
-     -
-
-
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - WEID_INVALID
-     - 100101
-     - 无效的WeIdentity DID
-   * - WEID_PRIVATEKEY_INVALID
-     - 100103
-     - 私钥格式非法
-   * - TRANSACTION_TIMEOUT
-     - 160001
-     - 超时
-   * - TRANSACTION_EXECUTE_ERROR
-     - 160002
-     - 交易错误
-   * - UNKNOW_ERROR
-     - 160003
-     -  其他错误
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数为空
-
-
-**调用示例**
-
-.. code-block:: java
-
-   WeIdService weIdService = new WeIdServiceImpl();
-
-   AuthenticationArgs authenticationArgs = new AuthenticationArgs();
-   authenticationArgs.setWeId("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
-   authenticationArgs.setPublicKey(
-      "13161444623157635919577071263152435729269604287924587017945158373362984739390835280704888860812486081963832887336483721952914804189509503053687001123007342");
-
-   String delegatePrivateKey = "60866441986950167911324536025850958917764441489874006048340539971987791929772";
-
-   ResponseData<Boolean> response = weIdService.delegateSetAuthentication("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", authenticationArgs, new WeIdPrivateKey(delegatePrivateKey));
-
-
-.. code-block:: text
-
-   返回结果如下：
-   result: true
-   errorCode: 0
-   errorMessage: success
-   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
-      blockNumber: 30013
-      transactionHash: 0xfbf8338e7df2af0612eca5107c0d2ed75dfd7a795988687f49c010112678f847
-      transactionIndex: 0
-
-
-**时序图**
-
-.. mermaid::
-
-   sequenceDiagram
-   Note over 调用者:传入自己的WeIdentity DID及用作authentication的公私钥
-   调用者->>WeIdentity SDK : 调用delegateSetAuthentication来添加认证。
-   WeIdentity SDK->>WeIdentity SDK:拿私钥来重新加载合约对象
-   WeIdentity SDK->>区块链节点: 调用智能合约
-   区块链节点->>区块链节点: 检查调用者的身份是否和WeIdentity DID匹配　　　
-   opt 身份校验不通过
-   区块链节点-->>WeIdentity SDK:报错，提示私钥不匹配并退出
-   WeIdentity SDK-->>调用者:报错退出
-   end
-   区块链节点->>区块链节点:将authentication和WeIdentity DID以及上次记录的块高写到属性事件中
-   区块链节点->>区块链节点:记录最新块高
-   区块链节点-->>WeIdentity SDK:返回
-   WeIdentity SDK-->>调用者:返回调用结果
-
-
-----
-
-12. isWeIdExist
+9. isWeIdExist
 ~~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
@@ -3255,6 +2595,746 @@ com.webank.weid.protocol.response.TransactionInfo
    WeIdentity SDK->>区块链节点: 传入WeIdentity DID链上存在性校验
          区块链节点-->>WeIdentity SDK:返回
    WeIdentity SDK-->>调用者:返回调用结果
+
+
+----
+
+10. isDeactivated
+~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.WeIdService.isDeactivated
+   接口定义:ResponseData<Boolean> isDeactivated(String weId)
+   接口描述: 检查WeIdentity DID是否在链上停用。
+
+
+**接口入参**\ :   String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - WeIdentity DID格式字符串
+     - 如：did:weid:101:0x....
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 是否set成功
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - WEID_INVALID
+     - 100101
+     - 无效的WeIdentity DID
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     - 未知异常
+
+
+**调用示例**
+
+.. code-block:: java
+
+   WeIdService weIdService = new WeIdServiceImpl();
+   ResponseData<Boolean> response = weIdService.isDeactivated("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7");
+
+
+.. code-block:: text
+
+   返回结果如下：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:null
+
+
+----
+
+11. revokeAuthentication
+~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.WeIdService.revokeAuthentication
+   接口定义:ResponseData<Boolean> revokeAuthentication(String weId, AuthenticationArgs authenticationArgs, WeIdPrivateKey weIdPrivateKey)
+   接口描述: 仅删除WeID文档中的身份验证标签-不会影响其公钥。
+
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - WeIdentity DID字符串
+     -
+
+com.webank.weid.protocol.request.AuthenticationArgs
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - owner
+     - String
+     - N
+     - 所有者
+     - 默认为当前WeIdentity DID
+   * - publicKey
+     - String
+     - Y
+     - 数字公钥
+     -
+
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 是否set成功
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - WEID_INVALID
+     - 100101
+     - 无效的WeIdentity DID
+   * - WEID_PRIVATEKEY_INVALID
+     - 100103
+     - 私钥格式非法
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥不与WeIdentity DID所对应
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+
+   WeIdService weIdService = new WeIdServiceImpl();
+
+   AuthenticationArgs authenticationArgs = new AuthenticationArgs();
+   authenticationArgs.setPublicKey(
+      "13161444623157635919577071263152435729269604287924587017945158373362984739390835280704888860812486081963832887336483721952914804189509503053687001123007342");
+
+   WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
+   weIdPrivateKey.setPrivateKey("60866441986950167911324536025850958917764441489874006048340539971987791929772");
+
+   ResponseData<Boolean> response = weIdService.revokeAuthentication("did:weid:101:0x39e5e6f663ef77409144014ceb063713b65600e7", authenticationArgs, weIdPrivateKey);
+
+
+.. code-block:: text
+
+   返回结果如下：
+   result: true
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30013
+      transactionHash: 0xfbf8338e7df2af0612eca5107c0d2ed75dfd7a795988687f49c010112678f847
+      transactionIndex: 0
+
+
+----
+
+12. getWeIdList
+~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.WeIdService.getWeIdList
+   接口定义:ResponseData<List<String>> getWeIdList(Integer first, Integer last)
+   接口描述: 根据块高度、索引位置和搜索方向查询数据。
+
+**接口入参**\ :
+
+Integer
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - first
+     - Integer
+     - 
+     - 
+     -
+
+Integer
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - last
+     - Integer
+     - 
+     - 
+     -
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<List<String>>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 是否set成功
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - WEID_INVALID
+     - 100101
+     - 无效的WeIdentity DID
+   * - WEID_PRIVATEKEY_INVALID
+     - 100103
+     - 私钥格式非法
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥不与WeIdentity DID所对应
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+
+   WeIdService weIdService = new WeIdServiceImpl();
+
+   ResponseData<Boolean> response = weIdService.getWeIdList(1,10);
+
+
+.. code-block:: text
+
+   返回结果如下：
+   result: 
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30013
+      transactionHash: 0xfbf8338e7df2af0612eca5107c0d2ed75dfd7a795988687f49c010112678f847
+      transactionIndex: 0
+
+
+----
+
+
+13. getWeIdCount
+~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.WeIdService.getWeIdCount
+   接口定义:ResponseData<Integer> getWeIdCount()
+   接口描述: 获得总weId。
+
+**接口入参**\ :
+
+无
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Integer>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 是否set成功
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - WEID_INVALID
+     - 100101
+     - 无效的WeIdentity DID
+   * - WEID_PRIVATEKEY_INVALID
+     - 100103
+     - 私钥格式非法
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥不与WeIdentity DID所对应
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+
+   WeIdService weIdService = new WeIdServiceImpl();
+
+   ResponseData<Boolean> response = weIdService.getWeIdCount();
+
+
+.. code-block:: text
+
+   返回结果如下：
+   result: 123
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30013
+      transactionHash: 0xfbf8338e7df2af0612eca5107c0d2ed75dfd7a795988687f49c010112678f847
+      transactionIndex: 0
+
+
+----
+
+14. getWeIdListByPubKeyList
+~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.WeIdService.getWeIdListByPubKeyList
+   接口定义:ResponseData<WeIdListResult> getWeIdListByPubKeyList(List<WeIdPublicKey> pubKeyList)
+   接口描述: 通过公钥列表获取WeID列表。
+
+**接口入参**\ :   com.webank.weid.protocol.base.WeIdPublicKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - publicKey
+     - String
+     - Y
+     - 数字公钥，代理会根据这个公钥来创建WeID
+     -
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<WeIdListResult>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 是否set成功
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+com.webank.weid.protocol.response.WeIdListResult
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - weIdList
+     - List<String>
+     - 
+     -
+   * - errorCodeList
+     - List<String>
+     - 
+     -
+     
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - WEID_INVALID
+     - 100101
+     - 无效的WeIdentity DID
+   * - WEID_PRIVATEKEY_INVALID
+     - 100103
+     - 私钥格式非法
+   * - WEID_PRIVATEKEY_DOES_NOT_MATCH
+     - 100106
+     - 私钥不与WeIdentity DID所对应
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - UNKNOW_ERROR
+     - 160003
+     -  其他错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+
+
+**调用示例**
+
+.. code-block:: java
+
+   WeIdService weIdService = new WeIdServiceImpl();
+   List<WeIdPublicKey> pubKeyList = new ArrayList<>();
+        int num = 5;
+        for (int i = 0; i < num; i++) {
+            WeIdPublicKey publicKey = new WeIdPublicKey();
+            publicKey.setPublicKey("13161444623157635919577071263152435729269604287924587017945158373362984739390835280704888860812486081963832887336483721952914804189509503053687001123007342");
+            pubKeyList.add(publicKey);
+        }
+
+   ResponseData<WeIdListResult> weIdListRes = weIdService.getWeIdListByPubKeyList(pubKeyList);
+
+
+.. code-block:: text
+
+   返回结果如下：
+   result: 
+   errorCode: 0
+   errorMessage: success
+   transactionInfo:(com.webank.weid.protocol.response.TransactionInfo)
+      blockNumber: 30013
+      transactionHash: 0xfbf8338e7df2af0612eca5107c0d2ed75dfd7a795988687f49c010112678f847
+      transactionIndex: 0
 
 
 ----
@@ -9856,6 +9936,86 @@ T java.lang.Object
    接口名称:com.webank.weid.rpc.EvidenceService.addLogByHash / addLogByCustomKey
    接口定义:ResponseData<Boolean> addLogByHash(String hashValueSupplement（仅在customKey中用到）, String hashValue / customKey, String log, WeIdPrivateKey weIdPrivateKey)
    接口描述: 为一个**已经在链上存在的存证**添加额外信息记录存入其log中。有两个接口，一个是以hash值为索引，一个可以接受用户自定义索引（customKey）；如果自定义索引不存在，则会使用替补hash作为上链索引。
+   
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValueSupplement
+     - String
+     - N
+     - 
+     - 
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - N
+     - 
+     - 
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - log
+     - String
+     - Y
+     - 额外信息
+     - 长度不能超过2M，必须为UTF-8
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - customKey
+     - String
+     - Y
+     - 用户自定索引关键字
+     - 长度不能超过2M，必须为UTF-8
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示    
 
 **接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
 
@@ -9950,6 +10110,751 @@ com.webank.weid.protocol.response.TransactionInfo
    EvidenceService-->>调用者: 报错并退出
    end
    EvidenceService-->>调用者: 返回成功
+
+
+----
+
+9. addSignatureAndLogByHash / addSignatureAndLogByCustomKey
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.addSignatureAndLogByHash / addSignatureAndLogByCustomKey
+   接口定义:ResponseData<Boolean> addSignatureAndLogByHash(String hashValueSupplement（仅在customKey中用到）, String hashValue / customKey, String log, WeIdPrivateKey weIdPrivateKey)
+   接口描述:为一个**已经在链上存在的存证**添加日志条目。有两个接口，一个是以hash值为索引，一个可以接受用户自定义索引（customKey）；如果自定义索引不存在，则会使用替补hash作为上链索引，此日志将是永久记录在区块链上，最后在尝试获取存证。
+   
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValueSupplement
+     - String
+     - N
+     - 
+     - 
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - N
+     - 
+     - 
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - log
+     - String
+     - Y
+     - 额外信息
+     - 长度不能超过2M，必须为UTF-8
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - customKey
+     - String
+     - Y
+     - 用户自定索引关键字
+     - 长度不能超过2M，必须为UTF-8
+
+com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示   
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
+
+10. revoke / unRevoke
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.revoke / unRevoke
+   接口定义:ResponseData<Boolean> revoke(Hashable object, WeIdAuthentication weIdAuthentication)
+   接口描述: 撤销存证 / 撤销存证-可以取消。
+
+**接口入参**\ :
+
+Hashable java.lang.Object
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - Object
+     - Hashable object
+     - N
+     - 实现了Hashable接口的任意Object
+     - 当前支持Credential，CredentialWrapper，CredentialPojo
+
+com.webank.weid.protocol.base.WeIdAuthentication
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 
+     - 用户WeID
+   * - authenticationMethodId
+     - String
+     - Y
+     - 
+     - method Id
+   
+   com.webank.weid.protocol.base.WeIdPrivateKey
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示 
+
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
+
+11. isRevoked
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.isRevoked
+   接口定义:ResponseData<Boolean> isRevoked(EvidenceInfo evidenceInfo, String weId)
+   接口描述: 检查该存证是否被该WeID撤销。
+
+**接口入参**\ :
+
+com.webank.weid.protocol.base.EvidenceInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - credentialHash
+     - String
+     - 凭证Hash值
+     - 是一个66个字节的字符串，以0x开头
+   * - signInfo
+     - Map<String, EvidenceSignInfo>
+     - 存证创建者信息
+     - 链上允许一个存证存在多个创建者
+
+com.webank.weid.protocol.base.EvidenceSignInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - signature
+     - String
+     - 存证的签名
+     - 以Base64编码的存证签名值
+   * - timestamp
+     - String
+     - 存证创建时间
+     -
+   * - logs
+     - List<String>
+     - 额外信息列表
+     -
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 
+     - 用户WeID
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
+
+12. createRawEvidenceWithCustomKey
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.createRawEvidenceWithCustomKey
+   接口定义:ResponseData<Boolean> createRawEvidenceWithCustomKey(String hashValue,String signature,String log,Long timestamp,String extraKey,String privateKey)
+   接口描述: 创建可定制所有输入的原始存证。
+
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - Y
+     - 哈希值
+     -
+   * - signature
+     - String
+     - 存证的签名
+     - 以Base64编码的存证签名值
+   * - timestamp
+     - Long
+     - 存证创建时间
+     -
+   * - log
+     - String
+     - 日志
+     -
+   * - extraKey
+     - String
+     - 
+     -
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+  
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 
+     - 用户WeID
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
+
+13. createRawEvidenceWithSpecificSigner
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**基本信息**
+
+.. code-block:: text
+
+   接口名称:com.webank.weid.rpc.EvidenceService.createRawEvidenceWithSpecificSigner
+   接口定义:ResponseData<Boolean> createRawEvidenceWithSpecificSigner(String hashValue,String signature,String log,Long timestamp,String extraKey,String signer,
+   String privateKey)
+   接口描述: 创建原始存证接口，其中所有输入（包括签名者）都可以定制。
+
+**接口入参**\ :
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - hashValue
+     - String
+     - Y
+     - 哈希值
+     -
+   * - signature
+     - String
+     - 存证的签名
+     - 以Base64编码的存证签名值
+   * - timestamp
+     - Long
+     - 存证创建时间
+     -
+   * - log
+     - String
+     - 日志
+     -
+   * - extraKey
+     - String
+     - 
+     -
+   * - signer
+     - String
+     - 
+     -
+   * - privateKey
+     - String
+     - 私钥
+     - 使用十进制数字表示
+  
+
+String
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 非空
+     - 说明
+     - 备注
+   * - weId
+     - String
+     - Y
+     - 
+     - 用户WeID
+
+**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<Boolean>;
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - errorCode
+     - Integer
+     - 返回结果码
+     -
+   * - errorMessage
+     - String
+     - 返回结果描述
+     -
+   * - result
+     - Boolean
+     - 成功与否
+     -
+   * - transactionInfo
+     - TransactionInfo
+     - 交易信息
+     -
+
+
+com.webank.weid.protocol.response.TransactionInfo
+
+.. list-table::
+   :header-rows: 1
+
+   * - 名称
+     - 类型
+     - 说明
+     - 备注
+   * - blockNumber
+     - BigInteger
+     - 交易块高
+     -
+   * - transactionHash
+     - String
+     - 交易hash
+     -
+   * - transactionIndex
+     - BigInteger
+     - 交易索引
+     -
+
+
+**此方法返回code**
+
+.. list-table::
+   :header-rows: 1
+
+   * - enum
+     - code
+     - desc
+   * - SUCCESS
+     - 0
+     - 成功
+   * - CREDENTIAL_EVIDENCE_BASE_ERROR
+     - 100500
+     - Evidence标准错误
+   * - TRANSACTION_TIMEOUT
+     - 160001
+     - 超时
+   * - TRANSACTION_EXECUTE_ERROR
+     - 160002
+     - 交易错误
+   * - ILLEGAL_INPUT
+     - 160004
+     - 参数为空
+     
+----
 
 
 CredentialPojoService
@@ -15926,7 +16831,7 @@ java.util.List<java.lang.String>
 
 ----
 
-3. deserialize
+4. deserialize
 ~~~~~~~~~~~~~~~~~~~
 
 **基本信息**
