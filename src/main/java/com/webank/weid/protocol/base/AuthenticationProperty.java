@@ -2,7 +2,7 @@
 
 package com.webank.weid.protocol.base;
 
-import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.blockchain.util.DataToolUtils;
 import com.webank.weid.util.Multibase.Multibase;
 import com.webank.weid.util.Multicodec.DecodedData;
 import com.webank.weid.util.Multicodec.MulticodecEncoder;
@@ -25,7 +25,7 @@ public class AuthenticationProperty {
     /**
      * Required: The verification method type.
      */
-    private String type = DataToolUtils.cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE? "Ed25519VerificationKey2020":"SM2VerificationKey";
+    private String type = DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? "Ed25519VerificationKey2020":"SM2VerificationKey";
 
     /**
      * Required: The verification method controller.
@@ -54,5 +54,23 @@ public class AuthenticationProperty {
         byte[] publicKeyEncode = Multibase.decode(this.publicKeyMultibase);
         DecodedData decodedData = MulticodecEncoder.decode(publicKeyEncode);
         return new String(decodedData.getData());
+    }
+
+    public static AuthenticationProperty fromBlockChain(com.webank.weid.blockchain.protocol.base.AuthenticationProperty authentication) {
+        AuthenticationProperty authenticationProperty = new AuthenticationProperty();
+        authenticationProperty.setType(authentication.getType());
+        authenticationProperty.setController(authentication.getController());
+        authenticationProperty.setId(authentication.getId());
+        authenticationProperty.setPublicKeyMultibase(authentication.getPublicKeyMultibase());
+        return authenticationProperty;
+    }
+
+    public static com.webank.weid.blockchain.protocol.base.AuthenticationProperty toBlockChain(AuthenticationProperty authentication) {
+        com.webank.weid.blockchain.protocol.base.AuthenticationProperty authenticationProperty = new com.webank.weid.blockchain.protocol.base.AuthenticationProperty();
+        authenticationProperty.setType(authentication.getType());
+        authenticationProperty.setController(authentication.getController());
+        authenticationProperty.setId(authentication.getId());
+        authenticationProperty.setPublicKeyMultibase(authentication.getPublicKeyMultibase());
+        return authenticationProperty;
     }
 }

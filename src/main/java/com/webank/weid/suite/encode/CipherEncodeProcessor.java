@@ -2,18 +2,6 @@
 
 package com.webank.weid.suite.encode;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
@@ -23,7 +11,6 @@ import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
-import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
@@ -34,13 +21,22 @@ import com.webank.weid.suite.api.persistence.params.PersistenceType;
 import com.webank.weid.suite.entity.EncodeData;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 密文编解码处理器.
  *
  * @author v_wbgyang
  */
-public class CipherEncodeProcessor extends BaseService implements EncodeProcessor {
+public class CipherEncodeProcessor implements EncodeProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(CipherEncodeProcessor.class);
 
@@ -134,7 +130,7 @@ public class CipherEncodeProcessor extends BaseService implements EncodeProcesso
      */
     private String getEntryptKey(EncodeData encodeData) {
         //说明是当前机构，这个时候不适用于AMOP获取key，而是从本地数据库中获取key
-        if (fiscoConfig.getAmopId().equals(encodeData.getAmopId())) {
+        if (com.webank.weid.blockchain.service.fisco.BaseServiceFisco.fiscoConfig.getAmopId().equals(encodeData.getAmopId())) {
             logger.info("get Encrypt Key from DB.");
             //保存秘钥
             ResponseData<String> response =

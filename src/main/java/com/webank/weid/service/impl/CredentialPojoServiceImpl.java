@@ -3,39 +3,14 @@ package com.webank.weid.service.impl;
 
 import com.networknt.schema.ValidationMessage;
 import com.webank.wedpr.common.Utils;
-import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
-import com.webank.wedpr.selectivedisclosure.PredicateType;
-import com.webank.wedpr.selectivedisclosure.UserClient;
-import com.webank.wedpr.selectivedisclosure.UserResult;
-import com.webank.wedpr.selectivedisclosure.VerifierClient;
-import com.webank.wedpr.selectivedisclosure.VerifierResult;
+import com.webank.wedpr.selectivedisclosure.*;
 import com.webank.wedpr.selectivedisclosure.proto.Predicate;
 import com.webank.wedpr.selectivedisclosure.proto.VerificationRule;
-import com.webank.weid.service.BaseService;
-import jodd.cli.Cli;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.*;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
-import com.webank.weid.constant.CredentialFieldDisclosureValue;
-import com.webank.weid.constant.CredentialType;
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.Challenge;
-import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.Cpt;
-import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.PresentationPolicyE;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.base.*;
 import com.webank.weid.protocol.cpt.Cpt101;
 import com.webank.weid.protocol.cpt.Cpt111;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
@@ -49,28 +24,16 @@ import com.webank.weid.suite.api.persistence.params.PersistenceType;
 import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
 import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
 import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
-import com.webank.weid.util.CredentialPojoUtils;
-import com.webank.weid.util.CredentialUtils;
-import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.JsonUtil;
-import com.webank.weid.util.PropertyUtils;
-import com.webank.weid.util.TimestampUtils;
-import com.webank.weid.util.WeIdUtils;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.webank.weid.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -78,7 +41,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author tonychen 2019年4月17日
  */
-public class CredentialPojoServiceImpl extends BaseService implements CredentialPojoService {
+public class CredentialPojoServiceImpl implements CredentialPojoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
     private static final String NOT_DISCLOSED =

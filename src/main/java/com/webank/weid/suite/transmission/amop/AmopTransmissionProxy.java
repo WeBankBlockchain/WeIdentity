@@ -6,10 +6,9 @@ import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.AmopService;
-import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
-import com.webank.weid.service.impl.callback.CommonCallback;
+import com.webank.weid.service.impl.callback.CommonCallbackWeId;
 import com.webank.weid.suite.transmission.TransmissionServiceCenter;
 
 /**
@@ -18,7 +17,7 @@ import com.webank.weid.suite.transmission.TransmissionServiceCenter;
  * @author yanggang
  *
  */
-public class AmopTransmissionProxy extends BaseService {
+public class AmopTransmissionProxy {
 
     private static AmopService amopService;
     
@@ -53,7 +52,7 @@ public class AmopTransmissionProxy extends BaseService {
     public AmopResponse sendLocal(AmopCommonArgs amopCommonArgs) {
         ResponseData<?> response = TransmissionServiceCenter.getService(
             amopCommonArgs.getServiceType()).service(amopCommonArgs.getMessage());
-        return ((CommonCallback)super.getPushCallback().getAmopCallback(
+        return ((CommonCallbackWeId)getAmopService().getPushCallback().getAmopCallback(
             AmopMsgType.COMMON_REQUEST.getValue())).buildAmopResponse(response, amopCommonArgs);
     }
     
@@ -63,6 +62,6 @@ public class AmopTransmissionProxy extends BaseService {
      * @return 返回当前机构名称
      */
     public String getCurrentAmopId() {
-        return fiscoConfig.getAmopId();
+        return com.webank.weid.blockchain.service.fisco.BaseServiceFisco.fiscoConfig.getAmopId();
     }
 }

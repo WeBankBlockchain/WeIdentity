@@ -17,7 +17,7 @@ import com.webank.weid.protocol.response.GetWeIdAuthResponse;
 import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
 import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
-import com.webank.weid.rpc.callback.AmopCallback;
+import com.webank.weid.rpc.callback.WeIdAmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.util.DataToolUtils;
 
@@ -86,12 +86,12 @@ public enum AmopMsgType {
     /**
      * callback by type.
      *
-     * @param amopCallback the callback instance
+     * @param weIdAmopCallback the callback instance
      * @param messageId the messageId
      * @param msgBodyStr the message body
      * @return result of string
      */
-    public String callOnPush(AmopCallback amopCallback, String messageId, String msgBodyStr) {
+    public String callOnPush(WeIdAmopCallback weIdAmopCallback, String messageId, String msgBodyStr) {
 
         String resultBodyStr = null;
 
@@ -100,13 +100,13 @@ public enum AmopMsgType {
                 CheckAmopMsgHealthArgs args =
                     DataToolUtils.deserialize(msgBodyStr, CheckAmopMsgHealthArgs.class);
                 args.setMessageId(messageId);
-                AmopNotifyMsgResult result = amopCallback.onPush(args);
+                AmopNotifyMsgResult result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
             case TYPE_TRANSPORTATION: {
                 AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
-                AmopResponse result = amopCallback.onPush(args);
+                AmopResponse result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
@@ -114,7 +114,7 @@ public enum AmopMsgType {
                 // GET key
                 GetEncryptKeyArgs args =
                     DataToolUtils.deserialize(msgBodyStr, GetEncryptKeyArgs.class);
-                GetEncryptKeyResponse result = amopCallback.onPush(args);
+                GetEncryptKeyResponse result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
@@ -122,41 +122,41 @@ public enum AmopMsgType {
                 // GET POLICY AND CHALLENGE
                 GetPolicyAndChallengeArgs args =
                     DataToolUtils.deserialize(msgBodyStr, GetPolicyAndChallengeArgs.class);
-                GetPolicyAndChallengeResponse result = amopCallback.onPush(args);
+                GetPolicyAndChallengeResponse result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
             case GET_POLICY_AND_PRE_CREDENTIAL: {
                 GetPolicyAndPreCredentialArgs args =
                     DataToolUtils.deserialize(msgBodyStr, GetPolicyAndPreCredentialArgs.class);
-                PolicyAndPreCredentialResponse result = amopCallback.onPush(args);
+                PolicyAndPreCredentialResponse result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
             case REQUEST_SIGN_CREDENTIAL: {
                 IssueCredentialArgs args =
                     DataToolUtils.deserialize(msgBodyStr, IssueCredentialArgs.class);
-                RequestIssueCredentialResponse result = amopCallback.onPush(args);
+                RequestIssueCredentialResponse result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
             case GET_WEID_AUTH: {
                 GetWeIdAuthArgs args =
                     DataToolUtils.deserialize(msgBodyStr, GetWeIdAuthArgs.class);
-                GetWeIdAuthResponse result = amopCallback.onPush(args);
+                GetWeIdAuthResponse result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
             case REQUEST_VERIFY_CHALLENGE: {
                 RequestVerifyChallengeArgs args =
                     DataToolUtils.deserialize(msgBodyStr, RequestVerifyChallengeArgs.class);
-                RequestVerifyChallengeResponse result = amopCallback.onPush(args);
+                RequestVerifyChallengeResponse result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }
             case COMMON_REQUEST: {
                 AmopCommonArgs args = DataToolUtils.deserialize(msgBodyStr, AmopCommonArgs.class);
-                AmopResponse result = amopCallback.onPush(args);
+                AmopResponse result = weIdAmopCallback.onPush(args);
                 resultBodyStr = DataToolUtils.serialize(result);
                 break;
             }

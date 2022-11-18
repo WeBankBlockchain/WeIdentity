@@ -2,12 +2,12 @@
 
 package com.webank.weid.suite.auth.impl;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weid.service.BaseService;
+import com.webank.weid.service.impl.callback.RequestVerifyChallengeCallbackWeId;
+import com.webank.weid.service.impl.callback.WeIdAuthWeIdAmopCallback;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -30,8 +30,6 @@ import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
-import com.webank.weid.service.impl.callback.RequestVerifyChallengeCallback;
-import com.webank.weid.service.impl.callback.WeIdAuthAmopCallback;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
 import com.webank.weid.suite.auth.inf.WeIdAuthCallback;
@@ -55,9 +53,9 @@ public class WeIdAuthImpl implements WeIdAuth {
      */
     private static AmopService amopService = new AmopServiceImpl();
     private static WeIdAuthCallback weIdAuthCallback;
-    private static WeIdAuthAmopCallback weIdAuthAmopCallback = new WeIdAuthAmopCallback();
-    private static RequestVerifyChallengeCallback VerifyChallengeCallback =
-        new RequestVerifyChallengeCallback();
+    private static WeIdAuthWeIdAmopCallback weIdAuthAmopCallback = new WeIdAuthWeIdAmopCallback();
+    private static RequestVerifyChallengeCallbackWeId VerifyChallengeCallback =
+        new RequestVerifyChallengeCallbackWeId();
 
     private static Persistence dataDriver;
     /**

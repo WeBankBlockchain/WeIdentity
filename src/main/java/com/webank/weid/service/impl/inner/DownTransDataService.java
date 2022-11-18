@@ -2,17 +2,6 @@
 
 package com.webank.weid.service.impl.inner;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.webank.weid.service.BaseService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
@@ -27,6 +16,15 @@ import com.webank.weid.suite.api.transportation.params.EncodeType;
 import com.webank.weid.suite.entity.TransCodeBaseData;
 import com.webank.weid.suite.transmission.TransmissionService;
 import com.webank.weid.util.DataToolUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 根据资源获取CodeData回调处理.

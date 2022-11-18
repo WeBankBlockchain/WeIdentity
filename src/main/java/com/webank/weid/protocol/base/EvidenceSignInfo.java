@@ -37,4 +37,13 @@ public class EvidenceSignInfo {
      * appropriate values upon getEvidence().
      */
     private Boolean revoked = null;
+
+    public static EvidenceSignInfo fromBlockChain(com.webank.weid.blockchain.protocol.base.EvidenceSignInfo evidenceSign) {
+        EvidenceSignInfo evidenceSignInfo = new EvidenceSignInfo();
+        evidenceSignInfo.setSignature(evidenceSign.getSignature());
+        evidenceSignInfo.setTimestamp(evidenceSign.getTimestamp());
+        evidenceSignInfo.setRevoked(evidenceSign.getRevoked());
+        evidenceSignInfo.setLogs(evidenceSign.getLogs());
+        return evidenceSignInfo;
+    }
 }

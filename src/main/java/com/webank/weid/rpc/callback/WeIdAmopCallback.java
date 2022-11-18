@@ -23,7 +23,7 @@ import com.webank.weid.service.impl.base.AmopCommonArgs;
 /**
  * Created by junqizhang on 08/07/2017. 业务方需要继承DirectRouteCallback，并实现需要实现的方法.
  */
-public class AmopCallback implements PushNotifyAllCallback {
+public class WeIdAmopCallback implements PushNotifyAllCallback {
 
     private static final String MSG_HEALTH = "I am alive!";
     private static final String ERROR_MSG_NO_OVERRIDE =

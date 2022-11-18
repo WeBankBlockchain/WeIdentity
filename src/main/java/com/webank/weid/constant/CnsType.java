@@ -66,4 +66,14 @@ public enum CnsType {
     public String getVersion() {
         return version;
     }
+
+    public static com.webank.weid.blockchain.constant.CnsType toBlockchain(CnsType cnsType) {
+        if(cnsType.getName().equals("allOrg")){
+            return com.webank.weid.blockchain.constant.CnsType.DEFAULT;
+        } else if(cnsType.getName().equals("share")) {
+            return com.webank.weid.blockchain.constant.CnsType.SHARE;
+        } else {
+            return com.webank.weid.blockchain.constant.CnsType.ORG_CONFING;
+        }
+    }
 }

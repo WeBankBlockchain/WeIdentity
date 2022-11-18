@@ -2,11 +2,8 @@ package com.webank.weid.service.impl.base;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.util.DataToolUtils;
 import org.fisco.bcos.sdk.amop.AmopResponse;
 import org.fisco.bcos.sdk.amop.AmopResponseCallback;
-import org.fisco.bcos.sdk.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
