@@ -1,30 +1,19 @@
 package com.webank.weid.util;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.webank.weid.service.BaseService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.impl.AbstractService;
-import com.webank.weid.service.impl.engine.EngineFactory;
-import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * 离线交易批处理工具类.
@@ -32,9 +21,11 @@ import com.webank.weid.suite.persistence.mysql.driver.MysqlDriver;
  * @author tonychen 2020年4月4日
  */
 
-public class OffLineBatchTask extends AbstractService {
+public class OffLineBatchTask {
 
     private static final Logger logger = LoggerFactory.getLogger(OffLineBatchTask.class);
+
+    private static com.webank.weid.blockchain.service.impl.EvidenceServiceImpl evidenceBlockchainService;
 
     private static Map<String, String> userKey = new HashMap<>();
 
@@ -104,7 +95,7 @@ public class OffLineBatchTask extends AbstractService {
             String[] argArray = StringUtils.splitByWholeSeparatorPreserveAllTokens(args, ",");
 
             String method = transaction.getMethod();
-            String groupId = fiscoConfig.getGroupId();
+            String groupId = com.webank.weid.blockchain.service.fisco.CryptoFisco.fiscoConfig.getGroupId();
             switch (method) {
 
                 case "createEvidence":
@@ -172,9 +163,10 @@ public class OffLineBatchTask extends AbstractService {
 
         // Separately go batch creation and merge responses
         for (String groupId : hashesByGroup.keySet()) {
-            EvidenceServiceEngine evidenceServiceEngine = EngineFactory
-                .createEvidenceServiceEngine(groupId);
-            List<Boolean> subResp = evidenceServiceEngine.batchCreateEvidenceWithCustomKey(
+           /* EvidenceServiceEngine evidenceServiceEngine = EngineFactory
+                .createEvidenceServiceEngine(groupId);*/
+            evidenceBlockchainService = new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl(groupId);
+            List<Boolean> subResp = evidenceBlockchainService.batchCreateEvidenceWithCustomKey(
                 hashesByGroup.get(groupId),
                 signaturesByGroup.get(groupId),
                 logsByGroup.get(groupId),

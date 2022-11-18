@@ -160,7 +160,7 @@ public class TestRemoveIssuerFromIssuerType extends TestBaseService {
             callerAuth, "中国人民-chinese people", issuer.getWeId());
         LogUtil.info(logger, "removeIssuerFromIssuerType", response);
 
-        Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST.getCode(),
+        Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_NOT_EXIST.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(response.getResult());
 
@@ -207,7 +207,7 @@ public class TestRemoveIssuerFromIssuerType extends TestBaseService {
             callerAuth, issuerType, createWeIdData.getWeId());
         LogUtil.info(logger, "removeIssuerFromIssuerType", response);
 
-        Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST.getCode(),
+        Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_NOT_EXIST.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(response.getResult());
     }

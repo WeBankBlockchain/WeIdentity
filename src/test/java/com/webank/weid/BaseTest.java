@@ -2,33 +2,19 @@
 
 package com.webank.weid;
 
+import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.rpc.*;
+import com.webank.weid.service.impl.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-
-import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.rpc.AuthorityIssuerService;
-import com.webank.weid.rpc.CptService;
-import com.webank.weid.rpc.CredentialPojoService;
-import com.webank.weid.rpc.CredentialService;
-import com.webank.weid.rpc.EvidenceService;
-import com.webank.weid.rpc.PolicyService;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.AuthorityIssuerServiceImpl;
-import com.webank.weid.service.impl.CptServiceImpl;
-import com.webank.weid.service.impl.CredentialPojoServiceImpl;
-import com.webank.weid.service.impl.CredentialServiceImpl;
-import com.webank.weid.service.impl.EvidenceServiceImpl;
-import com.webank.weid.service.impl.PolicyServiceImpl;
-import com.webank.weid.service.impl.WeIdServiceImpl;
 
 /**
  * Test base class.
  *
  * @author v_wbgyang
  */
-public abstract class BaseTest extends BaseService {
+public abstract class BaseTest {
 
     protected AuthorityIssuerService authorityIssuerService;
     protected CptService cptService;

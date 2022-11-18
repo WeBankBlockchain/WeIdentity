@@ -2,28 +2,10 @@
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import com.webank.weid.protocol.base.*;
-import com.webank.weid.util.Multibase.Multibase;
-import com.webank.weid.util.Multicodec.Multicodec;
-import com.webank.weid.util.Multicodec.MulticodecEncoder;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.fisco.bcos.sdk.model.CryptoType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.exception.LoadContractException;
-import com.webank.weid.exception.PrivateKeyIllegalException;
+import com.webank.weid.protocol.base.*;
 import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
@@ -32,19 +14,35 @@ import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.WeIdListResult;
 import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.util.DataToolUtils;
+import com.webank.weid.util.Multibase.Multibase;
+import com.webank.weid.util.Multicodec.Multicodec;
+import com.webank.weid.util.Multicodec.MulticodecEncoder;
 import com.webank.weid.util.WeIdUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Service implementations for operations on WeIdentity DID.
  *
  * @author afeexian 2022.08
  */
-public class WeIdServiceImpl extends AbstractService implements WeIdService {
+public class WeIdServiceImpl implements WeIdService {
 
     /**
      * log4j object, for recording log.
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceImpl.class);
+
+    private static final com.webank.weid.blockchain.service.impl.WeIdServiceImpl weIdBlockchainService = new com.webank.weid.blockchain.service.impl.WeIdServiceImpl();
 
     /**
      * Create a WeIdentity DID with null input param.
@@ -59,7 +57,26 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             logger.error("Create weId failed.");
             return new ResponseData<>(null, ErrorCode.WEID_KEYPAIR_CREATE_FAILED);
         }
-        ResponseData<Boolean> innerResp = processCreateWeId(result.getWeId(), result.getUserWeIdPublicKey().getPublicKey(), result.getUserWeIdPrivateKey().getPrivateKey());
+        String address = WeIdUtils.convertWeIdToAddress(result.getWeId());
+        AuthenticationProperty authenticationProperty = new AuthenticationProperty();
+        //在创建weid时默认添加一个id为#keys-[hash(publicKey)]的verification method
+        authenticationProperty.setId(result.getWeId() + "#keys-" + DataToolUtils.hash(result.getUserWeIdPublicKey().getPublicKey()).substring(58));
+        //verification method controller默认为自己
+        authenticationProperty.setController(result.getWeId());
+        //这里把publicKey用multicodec编码，然后使用Multibase格式化，国密和非国密使用不同的编码
+        byte[] publicKeyEncode = MulticodecEncoder.encode(com.webank.weid.blockchain.util.DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+                result.getUserWeIdPublicKey().getPublicKey().getBytes(StandardCharsets.UTF_8));
+        authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
+        List<String> authList = new ArrayList<>();
+        authList.add(authenticationProperty.toString());
+        List<String> serviceList = new ArrayList<>();
+        ServiceProperty serviceProperty = new ServiceProperty();
+        serviceProperty.setServiceEndpoint("https://github.com/WeBankBlockchain/WeIdentity");
+        serviceProperty.setType("WeIdentity");
+        serviceProperty.setId(authenticationProperty.getController() + '#' + DataToolUtils.hash(serviceProperty.getServiceEndpoint()).substring(58));
+        serviceList.add(serviceProperty.toString());
+        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp = weIdBlockchainService.createWeId(address, authList, serviceList, result.getUserWeIdPrivateKey().getPrivateKey());
+        //ResponseData<Boolean> innerResp = processCreateWeId(result.getWeId(), result.getUserWeIdPublicKey().getPublicKey(), result.getUserWeIdPrivateKey().getPrivateKey());
         if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error(
                 "[createWeId] Create weId failed. error message is :{}",
@@ -69,8 +86,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                 ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
                 innerResp.getTransactionInfo());
         }
-        return new ResponseData<>(result, ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
-            innerResp.getTransactionInfo());
+        return new ResponseData<>(result, ErrorCode.SUCCESS, innerResp.getTransactionInfo());
     }
 
     /**
@@ -94,7 +110,26 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                         .error("[createWeId]: create weid failed, the weid :{} is already exist", weId);
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
-            ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
+            String address = WeIdUtils.convertWeIdToAddress(weId);
+            AuthenticationProperty authenticationProperty = new AuthenticationProperty();
+            //在创建weid时默认添加一个id为#keys-[hash(publicKey)]的verification method
+            authenticationProperty.setId(weId + "#keys-" + DataToolUtils.hash(publicKey).substring(58));
+            //verification method controller默认为自己
+            authenticationProperty.setController(weId);
+            //这里把publicKey用multicodec编码，然后使用Multibase格式化，国密和非国密使用不同的编码
+            byte[] publicKeyEncode = MulticodecEncoder.encode(com.webank.weid.blockchain.util.DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+                    publicKey.getBytes(StandardCharsets.UTF_8));
+            authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
+            List<String> authList = new ArrayList<>();
+            authList.add(authenticationProperty.toString());
+            List<String> serviceList = new ArrayList<>();
+            ServiceProperty serviceProperty = new ServiceProperty();
+            serviceProperty.setServiceEndpoint("https://github.com/WeBankBlockchain/WeIdentity");
+            serviceProperty.setType("WeIdentity");
+            serviceProperty.setId(authenticationProperty.getController() + '#' + DataToolUtils.hash(serviceProperty.getServiceEndpoint()).substring(58));
+            serviceList.add(serviceProperty.toString());
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp = weIdBlockchainService.createWeId(address, authList, serviceList, privateKey);
+            //ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                         "[createWeId]: create weid failed. error message is :{}, public key is {}",
@@ -106,7 +141,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                         innerResp.getTransactionInfo());
             }
             return new ResponseData<>(weId,
-                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                    ErrorCode.SUCCESS,
                     innerResp.getTransactionInfo());
         } else {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_INVALID);
@@ -146,7 +181,26 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                     .error("[createWeId]: create weid failed, the weid :{} is already exist", weId);
                 return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_ALREADY_EXIST);
             }
-            ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
+            String address = WeIdUtils.convertWeIdToAddress(weId);
+            AuthenticationProperty authenticationProperty = new AuthenticationProperty();
+            //在创建weid时默认添加一个id为#keys-[hash(publicKey)]的verification method
+            authenticationProperty.setId(weId + "#keys-" + DataToolUtils.hash(publicKey).substring(58));
+            //verification method controller默认为自己
+            authenticationProperty.setController(weId);
+            //这里把publicKey用multicodec编码，然后使用Multibase格式化，国密和非国密使用不同的编码
+            byte[] publicKeyEncode = MulticodecEncoder.encode(com.webank.weid.blockchain.util.DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+                    publicKey.getBytes(StandardCharsets.UTF_8));
+            authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
+            List<String> authList = new ArrayList<>();
+            authList.add(authenticationProperty.toString());
+            List<String> serviceList = new ArrayList<>();
+            ServiceProperty serviceProperty = new ServiceProperty();
+            serviceProperty.setServiceEndpoint("https://github.com/WeBankBlockchain/WeIdentity");
+            serviceProperty.setType("WeIdentity");
+            serviceProperty.setId(authenticationProperty.getController() + '#' + DataToolUtils.hash(serviceProperty.getServiceEndpoint()).substring(58));
+            serviceList.add(serviceProperty.toString());
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp = weIdBlockchainService.createWeId(address, authList, serviceList, privateKey);
+            //ResponseData<Boolean> innerResp = processCreateWeId(weId, publicKey, privateKey);
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error(
                     "[createWeId]: create weid failed. error message is :{}, public key is {}",
@@ -158,7 +212,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                     innerResp.getTransactionInfo());
             }
             return new ResponseData<>(weId,
-                ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                    ErrorCode.SUCCESS,
                 innerResp.getTransactionInfo());
         } else {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PUBLICKEY_INVALID);
@@ -178,8 +232,14 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             logger.error("Input weId : {} is invalid.", weId);
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
-        ResponseData<WeIdDocument> weIdDocResp = weIdServiceEngine.getWeIdDocument(weId);
-        return weIdDocResp;
+        com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.WeIdDocument> innerResp = weIdBlockchainService.getWeIdDocument(weId);
+        //ResponseData<WeIdDocument> weIdDocResp = weIdServiceEngine.getWeIdDocument(weId);
+        if(innerResp.getErrorCode() == ErrorCode.SUCCESS.getCode()){
+            WeIdDocument weIdDocument = WeIdDocument.fromBlockChain(innerResp.getResult());
+            return new ResponseData<>(weIdDocument, ErrorCode.SUCCESS);
+        } else {
+            return new ResponseData<>(null, innerResp.getErrorCode(), innerResp.getErrorMessage());
+        }
     }
 
     /**
@@ -195,8 +255,14 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             logger.error("Input weId : {} is invalid.", weId);
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
-        ResponseData<WeIdDocumentMetadata> weIdDocResp = weIdServiceEngine.getWeIdDocumentMetadata(weId);
-        return weIdDocResp;
+        //ResponseData<WeIdDocumentMetadata> weIdDocResp = weIdServiceEngine.getWeIdDocumentMetadata(weId);
+        com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.WeIdDocumentMetadata> innerResp = weIdBlockchainService.getWeIdDocumentMetadata(weId);
+        if(innerResp.getErrorCode() == ErrorCode.SUCCESS.getCode()){
+            WeIdDocumentMetadata weIdDocResp = WeIdDocumentMetadata.fromBlockChain(innerResp.getResult());
+            return new ResponseData<>(weIdDocResp, ErrorCode.SUCCESS);
+        } else {
+            return new ResponseData<>(null, innerResp.getErrorCode(), innerResp.getErrorMessage());
+        }
     }
 
     /**
@@ -278,7 +344,14 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             logger.error("[isWeIdExist] check weid failed. weid : {} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
-        return weIdServiceEngine.isWeIdExist(weId);
+        //return weIdServiceEngine.isWeIdExist(weId);
+        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                weIdBlockchainService.isWeIdExist(weId);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(false,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
     }
 
     /**
@@ -293,7 +366,14 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             logger.error("[isWeIdExist] check weid failed. weid : {} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
-        return weIdServiceEngine.isDeactivated(weId);
+        //return weIdServiceEngine.isDeactivated(weId);
+        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                weIdBlockchainService.isDeactivated(weId);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(true,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
     }
 
     /**
@@ -381,14 +461,14 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                 authenticationProperty.setId(weId + "#keys-" + DataToolUtils.hash(authenticationArgs.getPublicKey()).substring(58));
             }
             authenticationProperty.setController(authenticationArgs.getController());
-            byte[] publicKeyEncode = MulticodecEncoder.encode(DataToolUtils.cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+            byte[] publicKeyEncode = MulticodecEncoder.encode(com.webank.weid.blockchain.util.DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
                     authenticationArgs.getPublicKey().getBytes(StandardCharsets.UTF_8));
             authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
 
             List<AuthenticationProperty> authentication = weIdDocument.getAuthentication();
             authentication.add(authenticationProperty);
             weIdDocument.setAuthentication(authentication);
-            try {
+            /*try {
                 return weIdServiceEngine
                     .updateWeId(weIdDocument,
                         WeIdUtils.convertWeIdToAddress(weId),
@@ -399,7 +479,21 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             } catch (Exception e) {
                 logger.error("Set authenticate failed. Error message :{}", e);
                 return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+            }*/
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    weIdBlockchainService.updateWeId(WeIdDocument.toBlockChain(weIdDocument), privateKey, WeIdUtils.convertWeIdToAddress(weId));
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                        "[setAuthentication]: set authenticate failed. error message is :{}",
+                        innerResp.getErrorMessage()
+                );
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                        innerResp.getTransactionInfo());
             }
+            return new ResponseData<>(true,
+                    ErrorCode.SUCCESS,
+                    innerResp.getTransactionInfo());
         } else {
             logger.error("Set authenticate failed. weid : {} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
@@ -440,7 +534,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             if(!StringUtils.isEmpty(authenticationArgs.getPublicKey())){
                 for(int i=0; i<weIdDocument.getAuthentication().size(); i++){
                     if(authenticationArgs.getPublicKey().equals(weIdDocument.getAuthentication().get(i).getPublicKey())){
-                        try {
+                        /*try {
                             authentication.remove(i);
                             weIdDocument.setAuthentication(authentication);
                             return weIdServiceEngine
@@ -453,7 +547,23 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                         } catch (Exception e) {
                             logger.error("remove authenticate failed. Error message :{}", e);
                             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+                        }*/
+                        authentication.remove(i);
+                        weIdDocument.setAuthentication(authentication);
+                        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                                weIdBlockchainService.updateWeId(WeIdDocument.toBlockChain(weIdDocument), privateKey.getPrivateKey(), WeIdUtils.convertWeIdToAddress(weId));
+                        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                            logger.error(
+                                    "[revokeAuthentication]: remove authenticate failed. error message is :{}",
+                                    innerResp.getErrorMessage()
+                            );
+                            return new ResponseData<>(false,
+                                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                                    innerResp.getTransactionInfo());
                         }
+                        return new ResponseData<>(true,
+                                ErrorCode.SUCCESS,
+                                innerResp.getTransactionInfo());
                     }
                     logger.error("[revokeAuthentication]: failed, the Authentication with publicKey :{} not exists",
                             authenticationArgs.getPublicKey());
@@ -462,7 +572,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             if(!StringUtils.isEmpty(authenticationArgs.getId())){
                 for(int i=0; i<weIdDocument.getAuthentication().size(); i++){
                     if(authenticationArgs.getId().equals(weIdDocument.getAuthentication().get(i).getId())){
-                        try {
+                        /*try {
                             authentication.remove(i);
                             weIdDocument.setAuthentication(authentication);
                             return weIdServiceEngine
@@ -475,7 +585,23 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
                         } catch (Exception e) {
                             logger.error("remove authenticate failed. Error message :{}", e);
                             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+                        }*/
+                        authentication.remove(i);
+                        weIdDocument.setAuthentication(authentication);
+                        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                                weIdBlockchainService.updateWeId(WeIdDocument.toBlockChain(weIdDocument), privateKey.getPrivateKey(), WeIdUtils.convertWeIdToAddress(weId));
+                        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                            logger.error(
+                                    "[revokeAuthentication]: remove authenticate failed. error message is :{}",
+                                    innerResp.getErrorMessage()
+                            );
+                            return new ResponseData<>(false,
+                                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                                    innerResp.getTransactionInfo());
                         }
+                        return new ResponseData<>(true,
+                                ErrorCode.SUCCESS,
+                                innerResp.getTransactionInfo());
                     }
                     logger.error("[revokeAuthentication]: failed, the Authentication with id :{} not exists",
                             authenticationArgs.getId());
@@ -496,7 +622,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             || StringUtils.isBlank(serviceArgs.getServiceEndpoint()));
     }
 
-    private ResponseData<Boolean> processCreateWeId(
+    /*private ResponseData<Boolean> processCreateWeId(
         String weId,
         String publicKey,
         String privateKey) {
@@ -517,7 +643,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             logger.error("[createWeId] create weid failed with exception. ", e);
             return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
         }
-    }
+    }*/
 
     private boolean verifyAuthenticationArgs(AuthenticationArgs authenticationArgs) {
 
@@ -570,7 +696,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             }
             service.add(serviceProperty);
             weIdDocument.setService(service);
-            try {
+            /*try {
                 return weIdServiceEngine
                         .updateWeId(weIdDocument,
                                 WeIdUtils.convertWeIdToAddress(weId),
@@ -583,7 +709,21 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             } catch (Exception e) {
                 logger.error("[setService] set service failed. Error message :{}", e);
                 return new ResponseData<>(false, ErrorCode.UNKNOW_ERROR);
+            }*/
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    weIdBlockchainService.updateWeId(WeIdDocument.toBlockChain(weIdDocument), privateKey, WeIdUtils.convertWeIdToAddress(weId));
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                logger.error(
+                        "[createWeId]: set service failed. error message is :{}",
+                        innerResp.getErrorMessage()
+                );
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()),
+                        innerResp.getTransactionInfo());
             }
+            return new ResponseData<>(true,
+                    ErrorCode.SUCCESS,
+                    innerResp.getTransactionInfo());
         } else {
             logger.error("[setService] set service failed, weid -->{} is invalid.", weId);
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
@@ -595,7 +735,7 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
             Integer first,
             Integer last
     ) {
-        try {
+        /*try {
             logger.info("[getWeIdList] begin get weIdList, first index = {}, last index = {}",
                     first,
                     last
@@ -604,12 +744,26 @@ public class WeIdServiceImpl extends AbstractService implements WeIdService {
         } catch (Exception e) {
             logger.error("[getWeIdList] get weIdList failed with exception. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }*/
+        com.webank.weid.blockchain.protocol.response.ResponseData<List<String>> innerResp =
+                weIdBlockchainService.getWeIdList(first, last);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
         }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
     }
 
     @Override
     public ResponseData<Integer> getWeIdCount() {
-        return weIdServiceEngine.getWeIdCount();
+        //return weIdServiceEngine.getWeIdCount();
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> innerResp =
+                weIdBlockchainService.getWeIdCount();
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
     }
 
     @Override

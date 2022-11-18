@@ -1,13 +1,12 @@
 package com.webank.weid.service.impl.callback;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import com.webank.weid.protocol.base.*;
-import com.webank.weid.service.BaseService;
+import com.webank.weid.rpc.callback.WeIdAmopCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,6 @@ import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
 import com.webank.weid.protocol.response.GetWeIdAuthResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.suite.auth.impl.WeIdAuthImpl;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
@@ -29,9 +27,9 @@ import com.webank.weid.util.DataToolUtils;
  * amop callback for weIdAuth.
  * @author tonychen 2020年3月10日
  */
-public class WeIdAuthAmopCallback extends AmopCallback {
+public class WeIdAuthWeIdAmopCallback extends WeIdAmopCallback {
 
-    private static final Logger logger = LoggerFactory.getLogger(WeIdAuthAmopCallback.class);
+    private static final Logger logger = LoggerFactory.getLogger(WeIdAuthWeIdAmopCallback.class);
 
     private WeIdService weIdService = new WeIdServiceImpl();
 

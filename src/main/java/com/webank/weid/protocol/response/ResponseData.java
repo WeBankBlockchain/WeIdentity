@@ -2,6 +2,7 @@
 
 package com.webank.weid.protocol.response;
 
+import com.webank.weid.blockchain.protocol.response.TransactionInfo;
 import lombok.Data;
 
 import com.webank.weid.constant.ErrorCode;

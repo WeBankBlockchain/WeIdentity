@@ -68,4 +68,50 @@ public class WeIdDocument implements JsonSerializer {
         }
         return DataToolUtils.deserialize(weIdDocumentString, WeIdDocument.class);
     }
+
+    /**
+     * create WeIdDocument with document from weid-blockchain.
+     * @param document the weIdDocument JSON String
+     * @return WeIdDocument
+     */
+    public static WeIdDocument fromBlockChain(com.webank.weid.blockchain.protocol.base.WeIdDocument document) {
+        WeIdDocument weIdDocument = new WeIdDocument();
+        weIdDocument.setId(document.getId());
+        List<AuthenticationProperty> authenticationList = new ArrayList<>();
+        for(com.webank.weid.blockchain.protocol.base.AuthenticationProperty authentication : document.getAuthentication()){
+            AuthenticationProperty authenticationProperty = AuthenticationProperty.fromBlockChain(authentication);
+            authenticationList.add(authenticationProperty);
+        }
+        weIdDocument.setAuthentication(authenticationList);
+        List<ServiceProperty> serviceList = new ArrayList<>();
+        for(com.webank.weid.blockchain.protocol.base.ServiceProperty service : document.getService()){
+            ServiceProperty serviceProperty = ServiceProperty.fromBlockChain(service);
+            serviceList.add(serviceProperty);
+        }
+        weIdDocument.setService(serviceList);
+        return weIdDocument;
+    }
+
+    /**
+     * change WeIdDocument to document for weid-blockchain.
+     * @param document the weIdDocument JSON String
+     * @return WeIdDocument
+     */
+    public static com.webank.weid.blockchain.protocol.base.WeIdDocument toBlockChain(WeIdDocument document) {
+        com.webank.weid.blockchain.protocol.base.WeIdDocument weIdDocument = new com.webank.weid.blockchain.protocol.base.WeIdDocument();
+        weIdDocument.setId(document.getId());
+        List<com.webank.weid.blockchain.protocol.base.AuthenticationProperty> authenticationList = new ArrayList<>();
+        for(AuthenticationProperty authentication : document.getAuthentication()){
+            com.webank.weid.blockchain.protocol.base.AuthenticationProperty authenticationProperty = AuthenticationProperty.toBlockChain(authentication);
+            authenticationList.add(authenticationProperty);
+        }
+        weIdDocument.setAuthentication(authenticationList);
+        List<com.webank.weid.blockchain.protocol.base.ServiceProperty> serviceList = new ArrayList<>();
+        for(ServiceProperty service : document.getService()){
+            com.webank.weid.blockchain.protocol.base.ServiceProperty serviceProperty = ServiceProperty.toBlockChain(service);
+            serviceList.add(serviceProperty);
+        }
+        weIdDocument.setService(serviceList);
+        return weIdDocument;
+    }
 }

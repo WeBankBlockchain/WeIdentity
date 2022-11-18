@@ -23,15 +23,15 @@ public class OnNotifyCallbackV2
 
     private static final Logger logger = LoggerFactory.getLogger(OnNotifyCallbackV2.class);
 
-    private Map<Integer, AmopCallback> amopCallBackMap = new HashMap<Integer, AmopCallback>();
+    private Map<Integer, WeIdAmopCallback> amopCallBackMap = new HashMap<Integer, WeIdAmopCallback>();
 
-    private AmopCallback defaultAmopCallBack = new AmopCallback();
+    private WeIdAmopCallback defaultWeIdAmopCallBack = new WeIdAmopCallback();
 
-    public void registAmopCallback(Integer msgType, AmopCallback routeCallBack) {
+    public void registAmopCallback(Integer msgType, WeIdAmopCallback routeCallBack) {
         amopCallBackMap.put(msgType, routeCallBack);
     }
     
-    public AmopCallback getAmopCallback(Integer msgType) {
+    public WeIdAmopCallback getAmopCallback(Integer msgType) {
         return amopCallBackMap.get(msgType);
     }
     
@@ -45,15 +45,15 @@ public class OnNotifyCallbackV2
 
         AmopRequestBody amopRequestBody = DataToolUtils.deserialize(content, AmopRequestBody.class);
         AmopMsgType msgType = amopRequestBody.getMsgType();
-        AmopCallback amopCallBack = amopCallBackMap.get(msgType.getValue());
-        if (amopCallBack == null) {
-            amopCallBack = defaultAmopCallBack;
+        WeIdAmopCallback weIdAmopCallBack = amopCallBackMap.get(msgType.getValue());
+        if (weIdAmopCallBack == null) {
+            weIdAmopCallBack = defaultWeIdAmopCallBack;
         }
         String messageBody = amopRequestBody.getMsgBody();
         String result = null;
         try {
             //result = msgType.callOnPush(amopCallBack, push.getMessageID(), messageBody);
-            result = msgType.callOnPush(amopCallBack, amopMsgIn.getMessageID(), messageBody);
+            result = msgType.callOnPush(weIdAmopCallBack, amopMsgIn.getMessageID(), messageBody);
         } catch (Exception e) {
             logger.error("callOnPush error, please check the log.", e);
             return null;
