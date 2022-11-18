@@ -10,7 +10,7 @@ import com.webank.weid.constant.ServiceType;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.response.AmopResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.callback.AmopCallback;
+import com.webank.weid.rpc.callback.WeIdAmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 import com.webank.weid.service.impl.inner.DownTransDataService;
 import com.webank.weid.suite.transmission.TransmissionService;
@@ -22,9 +22,9 @@ import com.webank.weid.util.DataToolUtils;
  * @author yanggang
  *
  */
-public class CommonCallback extends AmopCallback {
+public class CommonCallbackWeId extends WeIdAmopCallback {
 
-    private static final Logger logger =  LoggerFactory.getLogger(CommonCallback.class);
+    private static final Logger logger =  LoggerFactory.getLogger(CommonCallbackWeId.class);
 
     //private static WeIdAuth weIdAuthService;
 

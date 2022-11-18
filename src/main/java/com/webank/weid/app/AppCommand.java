@@ -14,7 +14,6 @@ import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
 import com.webank.weid.protocol.response.AmopNotifyMsgResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 
@@ -72,10 +71,10 @@ public class AppCommand {
     private static int checkVersion() {
         try {
             System.setOut(new PrintStream("./sdk.out"));
-            String version = BaseService.getVersion();
+            String version = com.webank.weid.blockchain.util.DataToolUtils.getVersion();
             System.err.println("block chain nodes connected successfully. ");
             System.err.println("the FISCO-BCOS version is: " + version);
-            int blockNumer = BaseService.getBlockNumber();
+            int blockNumer = com.webank.weid.blockchain.util.DataToolUtils.getBlockNumber();
             System.err.println("the current blockNumer is: " + blockNumer);
         } catch (InitWeb3jException e) {
             System.err.println("ERROR: initWeb3j error:" + e.getMessage());

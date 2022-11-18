@@ -7,39 +7,29 @@ import com.webank.weid.constant.CredentialFieldDisclosureValue;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.Cpt;
-import com.webank.weid.protocol.base.Credential;
-import com.webank.weid.protocol.base.CredentialWrapper;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.base.*;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialService;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 import com.webank.weid.util.WeIdUtils;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Service implementations for operations on Credential.
  *
  * @author chaoxinhu 2019.1
  */
-public class CredentialServiceImpl extends BaseService implements CredentialService {
+public class CredentialServiceImpl implements CredentialService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialServiceImpl.class);
 

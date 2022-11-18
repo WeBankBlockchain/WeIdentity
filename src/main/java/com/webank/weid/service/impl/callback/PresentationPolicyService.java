@@ -3,14 +3,13 @@ package com.webank.weid.service.impl.callback;
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.rpc.AmopService;
-import com.webank.weid.service.BaseService;
 import com.webank.weid.service.impl.AmopServiceImpl;
 
-public abstract class PresentationPolicyService extends BaseService {
+public abstract class PresentationPolicyService {
     
     protected AmopService amopService = new AmopServiceImpl();
     
-    private static PresentationCallback presentationCallback = new PresentationCallback();
+    private static PresentationCallbackWeId presentationCallback = new PresentationCallbackWeId();
     
     /**
      * 无参构造器,自动注册callback.

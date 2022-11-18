@@ -206,7 +206,7 @@ public class JsonTransportationImpl
         JsonBaseData jsonBaseData = new JsonBaseData();
         jsonBaseData.setEncodeType(property.getEncodeType().getCode());
         jsonBaseData.setId(DataToolUtils.getUuId32());
-        jsonBaseData.setAmopId(fiscoConfig.getAmopId());
+        jsonBaseData.setAmopId(com.webank.weid.blockchain.service.fisco.BaseServiceFisco.fiscoConfig.getAmopId());
         jsonBaseData.setVersion(version.getCode());
         return jsonBaseData;
     }

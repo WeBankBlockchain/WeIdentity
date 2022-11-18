@@ -8,7 +8,17 @@ import java.util.List;
 import java.util.Map;
 
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
+import com.webank.wedpr.selectivedisclosure.IssuerClient;
+import com.webank.wedpr.selectivedisclosure.IssuerResult;
+import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.constant.ParamKeyConstant;
+import com.webank.weid.exception.DatabaseException;
+import com.webank.weid.suite.api.persistence.PersistenceFactory;
+import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.api.persistence.params.PersistenceType;
+import com.webank.weid.util.*;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,18 +35,19 @@ import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.suite.cache.CacheManager;
 import com.webank.weid.suite.cache.CacheNode;
-import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.WeIdUtils;
 
 /**
  * Service implementation for operation on CPT (Claim Protocol Type).
  *
  * @author afeexian
  */
-public class CptServiceImpl extends AbstractService implements CptService {
+public class CptServiceImpl implements CptService {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
+    private static final com.webank.weid.blockchain.service.impl.CptServiceImpl cptBlockchainService = new com.webank.weid.blockchain.service.impl.CptServiceImpl();
 
+    private static Persistence dataDriver;
+    private static PersistenceType persistenceType;
     //获取CPT缓存节点
     private static CacheNode<ResponseData<Cpt>> cptCahceNode =
             CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
@@ -125,8 +136,24 @@ public class CptServiceImpl extends AbstractService implements CptService {
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
-                    weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
+            com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.CptBaseInfo> innerResp =
+                    cptBlockchainService.registerCpt(address, cptJsonSchemaNew, RsvSignature.toBlockChain(rsvSignature),
+                            weIdPrivateKey.getPrivateKey(), cptId);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(null,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            ErrorCode errorCodeProcess = processTemplate(cptId, cptJsonSchemaNew);
+            int code = errorCodeProcess.getCode();
+            if (code != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[registerCpt]register cpt failed, error code is {}", code);
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code));
+            }
+            CptBaseInfo cptBaseInfo = CptBaseInfo.fromBlockChain(innerResp.getResult());
+            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS);
+            /*return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
+                    weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);*/
+
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -164,11 +191,74 @@ public class CptServiceImpl extends AbstractService implements CptService {
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
-                    weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);
+            com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.CptBaseInfo> innerResp =
+                    cptBlockchainService.registerCpt(address, cptJsonSchemaNew, RsvSignature.toBlockChain(rsvSignature),
+                            weIdPrivateKey.getPrivateKey());
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(null,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            CptBaseInfo cptBaseInfo = CptBaseInfo.fromBlockChain(innerResp.getResult());
+            ErrorCode errorCodeProcess = processTemplate(cptBaseInfo.getCptId(), cptJsonSchemaNew);
+            int code = errorCodeProcess.getCode();
+            if (code != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[registerCpt]register cpt failed, error code is {}", code);
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code));
+            }
+            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS);
+            /*return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
+                    weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);*/
         } catch (Exception e) {
             logger.error("[registerCpt] register cpt failed due to unknown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
+        }
+    }
+
+    private static Persistence getDataDriver() {
+        String type = PropertyUtils.getProperty("persistence_type");
+        if (type.equals("mysql")) {
+            persistenceType = PersistenceType.Mysql;
+        } else if (type.equals("redis")) {
+            persistenceType = PersistenceType.Redis;
+        }
+        if (dataDriver == null) {
+            dataDriver = PersistenceFactory.build(persistenceType);
+        }
+        return dataDriver;
+    }
+
+    private ErrorCode processTemplate(Integer cptId, String cptJsonSchemaNew) {
+
+        //if the cpt is not zkp type, no need to make template.
+        if (!CredentialPojoUtils.isZkpCpt(cptJsonSchemaNew)) {
+            return ErrorCode.SUCCESS;
+        }
+        List<String> attributeList;
+        try {
+            attributeList = JsonUtil.extractCptProperties(cptJsonSchemaNew);
+            IssuerResult issuerResult = IssuerClient.makeCredentialTemplate(attributeList);
+            CredentialTemplateEntity template = issuerResult.credentialTemplateEntity;
+            String templateSecretKey = issuerResult.templateSecretKey;
+            ResponseData<Integer> resp =
+                    getDataDriver().addOrUpdate(
+                            DataDriverConstant.DOMAIN_ISSUER_TEMPLATE_SECRET,
+                            String.valueOf(cptId),
+                            templateSecretKey);
+            if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[processTemplate] save credential template to db failed.");
+                throw new DatabaseException("database error!");
+            }
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp = cptBlockchainService.putCredentialTemplate(
+                    cptId,
+                    template.getPublicKey().getCredentialPublicKey(),
+                    template.getCredentialKeyCorrectnessProof());
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return ErrorCode.CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR;
+            }
+            return ErrorCode.SUCCESS;
+        } catch (Exception e) {
+            logger.error("[processTemplate] process credential template failed.", e);
+            return ErrorCode.CPT_CREDENTIAL_TEMPLATE_SAVE_ERROR;
         }
     }
 
@@ -187,10 +277,19 @@ public class CptServiceImpl extends AbstractService implements CptService {
             String cptIdStr = String.valueOf(cptId);
             ResponseData<Cpt> result = cptCahceNode.get(cptIdStr);
             if (result == null) {
-                result = cptServiceEngine.queryCpt(cptId, WeIdConstant.CPT_DATA_INDEX);
+                com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.Cpt> innerResp =
+                        cptBlockchainService.queryCpt(cptId);
+                if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                    return new ResponseData<>(null,
+                            ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+                }
+                Cpt cpt = Cpt.fromBlockChain(innerResp.getResult());
+                cptCahceNode.put(cptIdStr, new ResponseData<>(cpt, ErrorCode.SUCCESS));
+                return new ResponseData<>(cpt, ErrorCode.SUCCESS);
+                /*result = cptServiceEngine.queryCpt(cptId, WeIdConstant.CPT_DATA_INDEX);
                 if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                     cptCahceNode.put(cptIdStr, result);
-                }
+                }*/
             }
             return result;
         } catch (Exception e) {
@@ -259,7 +358,27 @@ public class CptServiceImpl extends AbstractService implements CptService {
                     cptJsonSchemaNew,
                     weIdPrivateKey);
             String address = WeIdUtils.convertWeIdToAddress(weId);
-            ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(
+            com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.CptBaseInfo> innerResp =
+                    cptBlockchainService.updateCpt(
+                            address,
+                            cptJsonSchemaNew,
+                            RsvSignature.toBlockChain(rsvSignature),
+                            weIdPrivateKey.getPrivateKey(),
+                            cptId);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(null,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            cptCahceNode.remove(String.valueOf(cptId));
+            ErrorCode errorCodeProcess = processTemplate(cptId, cptJsonSchemaNew);
+            int code = errorCodeProcess.getCode();
+            if (code != ErrorCode.SUCCESS.getCode()) {
+                logger.error("[updateCpt]update cpt failed, error code is {}", code);
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code));
+            }
+            CptBaseInfo cptBaseInfo = CptBaseInfo.fromBlockChain(innerResp.getResult());
+            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS);
+           /* ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(
                     cptId,
                     address,
                     cptJsonSchemaNew,
@@ -269,7 +388,7 @@ public class CptServiceImpl extends AbstractService implements CptService {
             if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                 cptCahceNode.remove(String.valueOf(cptId));
             }
-            return result;
+            return result;*/
         } catch (Exception e) {
             logger.error("[updateCpt] update cpt failed due to unkown error. ", e);
             return new ResponseData<>(null, ErrorCode.UNKNOW_ERROR);
@@ -351,7 +470,14 @@ public class CptServiceImpl extends AbstractService implements CptService {
      */
     @Override
     public ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId) {
-        return cptServiceEngine.queryCredentialTemplate(cptId);
+        com.webank.weid.blockchain.protocol.response.ResponseData<CredentialTemplateEntity> innerResp =
+                cptBlockchainService.queryCredentialTemplate(cptId);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return cptServiceEngine.queryCredentialTemplate(cptId);
     }
 
 
@@ -360,11 +486,25 @@ public class CptServiceImpl extends AbstractService implements CptService {
         if (startPos < 0 || num < 1) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        return cptServiceEngine.getCptIdList(startPos, num, WeIdConstant.CPT_DATA_INDEX);
+        com.webank.weid.blockchain.protocol.response.ResponseData<List<Integer>> innerResp =
+                cptBlockchainService.getCptIdList(startPos, num);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return cptServiceEngine.getCptIdList(startPos, num, WeIdConstant.CPT_DATA_INDEX);
     }
 
     @Override
     public ResponseData<Integer> getCptCount() {
-        return cptServiceEngine.getCptCount(WeIdConstant.CPT_DATA_INDEX);
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> innerResp =
+                cptBlockchainService.getCptCount();
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return cptServiceEngine.getCptCount(WeIdConstant.CPT_DATA_INDEX);
     }
 }

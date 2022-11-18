@@ -2,18 +2,9 @@
 
 package com.webank.weid.full.weid;
 
-import mockit.Mock;
-import mockit.MockUp;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.exception.PrivateKeyIllegalException;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
@@ -21,7 +12,11 @@ import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.RawTransactionService;
 import com.webank.weid.service.impl.RawTransactionServiceImpl;
-import com.webank.weid.service.impl.engine.BaseEngine;
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * a parametric createWeId method for testing WeIdService.
@@ -380,7 +375,7 @@ public class TestCreateWeId2 extends TestBaseService {
      * case: Simulation throws an PrivateKeyIllegalException when calling the reloadContract
      * method.
      */
-    @Test
+    /*@Test
     public void testCreateWeIdCase13() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
@@ -400,7 +395,7 @@ public class TestCreateWeId2 extends TestBaseService {
         Assert.assertEquals(ErrorCode.WEID_PRIVATEKEY_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
-    }
+    }*/
 
     /**
      * case: create again.

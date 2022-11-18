@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.webank.weid.service.BaseService;
+import com.webank.weid.rpc.callback.WeIdAmopCallback;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,7 +22,6 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.GetEncryptKeyResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.rpc.callback.AmopCallback;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.suite.api.persistence.PersistenceFactory;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
@@ -30,9 +29,9 @@ import com.webank.weid.suite.api.persistence.params.PersistenceType;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
 
-public class KeyManagerCallback extends AmopCallback {
+public class KeyManagerCallbackWeId extends WeIdAmopCallback {
 
-    private static final Logger logger =  LoggerFactory.getLogger(KeyManagerCallback.class);
+    private static final Logger logger =  LoggerFactory.getLogger(KeyManagerCallbackWeId.class);
 
     private Persistence dataDriver;
 

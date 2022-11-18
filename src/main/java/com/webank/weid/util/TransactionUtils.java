@@ -13,7 +13,7 @@ import java.util.Random;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.weid.service.BaseService;
+import com.webank.weid.blockchain.protocol.response.TransactionInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.Address;
 import org.fisco.bcos.sdk.abi.datatypes.DynamicBytes;
@@ -22,16 +22,8 @@ import org.fisco.bcos.sdk.abi.datatypes.Type;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Int256;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-import org.fisco.bcos.sdk.model.CryptoType;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 
-import org.fisco.bcos.sdk.utils.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +34,6 @@ import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
-import com.webank.weid.protocol.response.TransactionInfo;
 
 /**
  * Transaction related utility functions. This class handles specific Transaction tasks, including
@@ -87,8 +78,8 @@ public class TransactionUtils {
         // We do not check DID existence in this case since it does not really affect the outcome.
         List<Type> result = Arrays.<Type>asList(
             new Address(addr),
-            DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
-            DataToolUtils.stringToDynamicBytes(DateUtils.getNoMillisecondTimeStampString()),
+                com.webank.weid.blockchain.util.DataToolUtils.stringToBytes32(WeIdConstant.WEID_DOC_CREATED),
+                com.webank.weid.blockchain.util.DataToolUtils.stringToDynamicBytes(DateUtils.getNoMillisecondTimeStampString()),
             DateUtils.getNoMillisecondTimeStampInt256()
         );
         return new ResponseData<>(result, ErrorCode.SUCCESS);
@@ -139,7 +130,7 @@ public class TransactionUtils {
     private static StaticArray<Bytes32> getParamName(String name) {
         String[] nameArray = new String[WeIdConstant.AUTHORITY_ISSUER_ARRAY_LEGNTH];
         nameArray[0] = name;
-        return DataToolUtils.stringArrayToBytes32StaticArray(nameArray);
+        return com.webank.weid.blockchain.util.DataToolUtils.stringArrayToBytes32StaticArray(nameArray);
     }
 
     /**
@@ -197,7 +188,7 @@ public class TransactionUtils {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
         RsvSignature rsvSignature = DataToolUtils.SigBase64Deserialization(cptSignature);
-        StaticArray<Bytes32> bytes32Array = DataToolUtils.stringArrayToBytes32StaticArray(
+        StaticArray<Bytes32> bytes32Array = com.webank.weid.blockchain.util.DataToolUtils.stringArrayToBytes32StaticArray(
             new String[WeIdConstant.CPT_STRING_ARRAY_LENGTH]
         );
         List<Type> result = Arrays.<Type>asList(
@@ -244,7 +235,7 @@ public class TransactionUtils {
         long[] longArray = new long[length];
         long created = DateUtils.getNoMillisecondTimeStamp();
         longArray[1] = created;
-        return DataToolUtils.longArrayToInt256StaticArray(longArray);
+        return com.webank.weid.blockchain.util.DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
 
     /**
@@ -257,7 +248,7 @@ public class TransactionUtils {
         long[] longArray = new long[length];
         long created = DateUtils.getNoMillisecondTimeStamp();
         longArray[2] = created;
-        return DataToolUtils.longArrayToInt256StaticArray(longArray);
+        return com.webank.weid.blockchain.util.DataToolUtils.longArrayToInt256StaticArray(longArray);
     }
 
     /**
@@ -269,7 +260,7 @@ public class TransactionUtils {
     public static StaticArray<Bytes32> getParamJsonSchema(String cptJsonSchema) {
         List<byte[]> bytes = DataToolUtils
             .stringToByte32ArrayList(cptJsonSchema, WeIdConstant.JSON_SCHEMA_ARRAY_LENGTH);
-        return DataToolUtils.byteArrayListToBytes32StaticArray(bytes);
+        return com.webank.weid.blockchain.util.DataToolUtils.byteArrayListToBytes32StaticArray(bytes);
     }
 
     /**
@@ -280,65 +271,6 @@ public class TransactionUtils {
     public static BigInteger getNonce() {
         Random r = new SecureRandom();
         return new BigInteger(250, r);
-    }
-
-    /**
-     * Resolve CPT Event.
-     *
-     * @param retCode the retCode
-     * @param cptId the CptId
-     * @param cptVersion the CptVersion
-     * @param receipt the transactionReceipt
-     * @return the result
-     */
-    public static ResponseData<CptBaseInfo> getResultByResolveEvent(
-        Uint256 retCode,
-        Uint256 cptId,
-        Int256 cptVersion,
-        TransactionReceipt receipt) {
-
-        TransactionInfo info = new TransactionInfo(receipt);
-        // register
-        if (DataToolUtils.uint256ToInt(retCode)
-            == ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX.getCode()) {
-            logger.error("[getResultByResolveEvent] cptId limited max value. cptId:{}",
-                DataToolUtils.uint256ToInt(cptId));
-            return new ResponseData<>(null, ErrorCode.CPT_ID_AUTHORITY_ISSUER_EXCEED_MAX, info);
-        }
-
-        if (DataToolUtils.uint256ToInt(retCode) == ErrorCode.CPT_ALREADY_EXIST.getCode()) {
-            logger.error("[getResultByResolveEvent] cpt already exists on chain. cptId:{}",
-                DataToolUtils.uint256ToInt(cptId));
-            return new ResponseData<>(null, ErrorCode.CPT_ALREADY_EXIST, info);
-        }
-
-        if (DataToolUtils.uint256ToInt(retCode) == ErrorCode.CPT_NO_PERMISSION.getCode()) {
-            logger.error("[getResultByResolveEvent] no permission. cptId:{}",
-                DataToolUtils.uint256ToInt(cptId));
-            return new ResponseData<>(null, ErrorCode.CPT_NO_PERMISSION, info);
-        }
-
-        // register and update
-        if (DataToolUtils.uint256ToInt(retCode)
-            == ErrorCode.CPT_PUBLISHER_NOT_EXIST.getCode()) {
-            logger.error("[getResultByResolveEvent] publisher does not exist. cptId:{}",
-                DataToolUtils.uint256ToInt(cptId));
-            return new ResponseData<>(null, ErrorCode.CPT_PUBLISHER_NOT_EXIST, info);
-        }
-
-        // update
-        if (DataToolUtils.uint256ToInt(retCode)
-            == ErrorCode.CPT_NOT_EXISTS.getCode()) {
-            logger.error("[getResultByResolveEvent] cpt id : {} does not exist.",
-                DataToolUtils.uint256ToInt(cptId));
-            return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS, info);
-        }
-
-        CptBaseInfo result = new CptBaseInfo();
-        result.setCptId(DataToolUtils.uint256ToInt(cptId));
-        result.setCptVersion(DataToolUtils.int256ToInt(cptVersion));
-
-        return new ResponseData<>(result, ErrorCode.SUCCESS, info);
     }
 
     /**

@@ -2,11 +2,6 @@
 
 package com.webank.weid.suite.transportation;
 
-import java.math.BigInteger;
-
-import com.webank.weid.service.BaseService;
-import org.apache.commons.lang3.StringUtils;
-
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ServiceType;
 import com.webank.weid.exception.ProtocolSuiteException;
@@ -18,6 +13,7 @@ import com.webank.weid.suite.entity.TransBaseData;
 import com.webank.weid.suite.entity.TransCodeBaseData;
 import com.webank.weid.suite.transmission.TransmissionRequest;
 import com.webank.weid.util.DataToolUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
@@ -48,7 +44,7 @@ public abstract class AbstractCodeTransportation extends AbstractJsonTransportat
         GetTransDataArgs args = new GetTransDataArgs();
         args.setResourceId(codeData.getId());
         args.setTopic(codeData.getAmopId());
-        args.setFromAmopId(fiscoConfig.getAmopId());
+        args.setFromAmopId(com.webank.weid.blockchain.service.fisco.BaseServiceFisco.fiscoConfig.getAmopId());
         args.setWeId(weIdAuthentication.getWeId());
         args.setClassName(codeData.getClass().getName());
         /*String signValue = DataToolUtils.secp256k1Sign(

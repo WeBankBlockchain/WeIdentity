@@ -2,6 +2,7 @@
 
 package com.webank.weid.service.impl.callback;
 
+import com.webank.weid.rpc.callback.WeIdAmopCallback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,7 +10,6 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
 import com.webank.weid.protocol.base.PolicyAndChallenge;
 import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
-import com.webank.weid.rpc.callback.AmopCallback;
 
 /**
  * 用于处理机构根据policyId获取policy的回调.
@@ -17,10 +17,10 @@ import com.webank.weid.rpc.callback.AmopCallback;
  * @author v_wbgyang
  *
  */
-public class PresentationCallback extends AmopCallback {
+public class PresentationCallbackWeId extends WeIdAmopCallback {
     
     private static final Logger logger = 
-            LoggerFactory.getLogger(PresentationCallback.class);
+            LoggerFactory.getLogger(PresentationCallbackWeId.class);
 
     private PresentationPolicyService policyService;
     
