@@ -15,7 +15,8 @@ import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
 import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
 import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.callback.AmopCallback;
+import com.webank.weid.rpc.callback.RegistCallBack;
+import com.webank.weid.rpc.callback.WeIdAmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
 
 /**
@@ -23,9 +24,11 @@ import com.webank.weid.service.impl.base.AmopCommonArgs;
  */
 public interface AmopService {
 
-    void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback);
+    void registerCallback(Integer directRouteMsgType, WeIdAmopCallback directRouteCallback);
 
     ResponseData<AmopResponse> request(String toAmopId, AmopCommonArgs args);
+
+    RegistCallBack getPushCallback();
 
     ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
             String amopId,

@@ -2,6 +2,8 @@
 
 package com.webank.weid.service.impl;
 
+import com.webank.weid.protocol.base.EvidenceSignInfo;
+import com.webank.weid.util.WeIdUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +12,18 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.RawTransactionService;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Service interface for operations on direct transactions on blockchain.
  *
  * @author chaoxinhu 2019.4
  */
-public class RawTransactionServiceImpl extends AbstractService implements RawTransactionService {
+public class RawTransactionServiceImpl implements RawTransactionService {
 
     private static final Logger logger = LoggerFactory.getLogger(RawTransactionServiceImpl.class);
+    private static final com.webank.weid.blockchain.service.impl.RawTransactionServiceImpl rawBlockchainService = new com.webank.weid.blockchain.service.impl.RawTransactionServiceImpl();
 
     /**
      * Create a WeIdentity DID from the provided public key, with preset transaction hex value.
@@ -32,7 +38,14 @@ public class RawTransactionServiceImpl extends AbstractService implements RawTra
             logger.error("WeID transaction error");
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return rawEngine.createWeId(transactionHex);
+        com.webank.weid.blockchain.protocol.response.ResponseData<String> innerResp =
+                rawBlockchainService.createWeId(transactionHex);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(StringUtils.EMPTY,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return rawEngine.createWeId(transactionHex);
     }
 
     /**
@@ -49,7 +62,14 @@ public class RawTransactionServiceImpl extends AbstractService implements RawTra
             logger.error("AuthorityIssuer transaction error");
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return rawEngine.registerAuthorityIssuer(transactionHex);
+        com.webank.weid.blockchain.protocol.response.ResponseData<String> innerResp =
+                rawBlockchainService.registerAuthorityIssuer(transactionHex);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(StringUtils.EMPTY,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return rawEngine.registerAuthorityIssuer(transactionHex);
     }
 
 
@@ -64,6 +84,13 @@ public class RawTransactionServiceImpl extends AbstractService implements RawTra
             logger.error("CptService transaction error");
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
-        return rawEngine.registerCpt(transactionHex);
+        com.webank.weid.blockchain.protocol.response.ResponseData<String> innerResp =
+                rawBlockchainService.registerCpt(transactionHex);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(StringUtils.EMPTY,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return rawEngine.registerCpt(transactionHex);
     }
 }

@@ -664,7 +664,7 @@ public enum ErrorCode {
     /**
      * The Specific Issuer Contract level error: already exists.
      */
-    SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST(
+    SPECIFIC_ISSUER_CONTRACT_ERROR_NOT_EXIST(
         500502,
         "the specific issuer type or address does not exist."
     ),
@@ -784,11 +784,11 @@ public enum ErrorCode {
     ),
 
     /**
-     * weid pubkey already exists, used in add case.
+     * weid has been deactivated.
      */
     WEID_HAS_BEEN_DEACTIVATED(
         100116,
-        "this public key already exists and is not revoked."
+        "weid has been deactivated."
     ),
 
     /**

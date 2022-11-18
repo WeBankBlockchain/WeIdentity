@@ -9,7 +9,7 @@ import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.rpc.callback.AmopCallback;
+import com.webank.weid.rpc.callback.WeIdAmopCallback;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.suite.auth.impl.WeIdAuthImpl;
 import com.webank.weid.suite.auth.inf.WeIdAuth;
@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author tonychen 2020年3月10日
  */
-public class RequestVerifyChallengeCallback extends AmopCallback {
+public class RequestVerifyChallengeCallbackWeId extends WeIdAmopCallback {
 
     private static final Logger logger = LoggerFactory
-        .getLogger(RequestVerifyChallengeCallback.class);
+        .getLogger(RequestVerifyChallengeCallbackWeId.class);
 
     private WeIdService weIdService = new WeIdServiceImpl();
 

@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import com.webank.weid.blockchain.protocol.response.TransactionInfo;
 import org.fisco.bcos.sdk.abi.datatypes.StaticArray;
 import org.fisco.bcos.sdk.abi.datatypes.Type;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
@@ -18,7 +18,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.protocol.response.TransactionInfo;
 
 /**
  * test DateUtils.

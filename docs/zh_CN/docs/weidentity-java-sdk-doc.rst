@@ -14201,7 +14201,7 @@ java.lang.Integer
      - 
 
 
-com.webank.weid.rpc.callback.AmopCallback
+com.webank.weid.rpc.callback.WeIdAmopCallback
 
 .. list-table::
    :header-rows: 1

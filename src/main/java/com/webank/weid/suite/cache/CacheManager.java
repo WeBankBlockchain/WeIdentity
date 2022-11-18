@@ -32,7 +32,7 @@ public class CacheManager {
 
     /**
      * 根据缓存名获取缓存节点最大缓存个数，如果没有配置则使用默认大小配置.
-     * @param cacheKey 缓存名
+     * @param cacheName 缓存名
      * @return
      */
     private static Integer getMaxSize(String cacheName) {

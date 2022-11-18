@@ -2,49 +2,29 @@
 
 package com.webank.weid.service.impl;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.UserClient;
 import com.webank.wedpr.selectivedisclosure.UserResult;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.webank.weid.blockchain.constant.WeIdConstant;
+import com.webank.weid.blockchain.service.fisco.BaseServiceFisco;
 import com.webank.weid.constant.AmopMsgType;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.DatabaseException;
-import com.webank.weid.protocol.amop.GetEncryptKeyArgs;
-import com.webank.weid.protocol.amop.GetPolicyAndChallengeArgs;
-import com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs;
-import com.webank.weid.protocol.amop.GetWeIdAuthArgs;
-import com.webank.weid.protocol.amop.IssueCredentialArgs;
-import com.webank.weid.protocol.amop.RequestIssueCredentialArgs;
-import com.webank.weid.protocol.amop.RequestVerifyChallengeArgs;
-import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.PolicyAndChallenge;
-import com.webank.weid.protocol.base.PolicyAndPreCredential;
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.response.AmopResponse;
-import com.webank.weid.protocol.response.GetEncryptKeyResponse;
-import com.webank.weid.protocol.response.GetPolicyAndChallengeResponse;
-import com.webank.weid.protocol.response.GetWeIdAuthResponse;
-import com.webank.weid.protocol.response.PolicyAndPreCredentialResponse;
-import com.webank.weid.protocol.response.RequestIssueCredentialResponse;
-import com.webank.weid.protocol.response.RequestVerifyChallengeResponse;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.protocol.amop.*;
+import com.webank.weid.protocol.amop.base.AmopBaseMsgArgs;
+import com.webank.weid.protocol.base.*;
+import com.webank.weid.protocol.response.*;
 import com.webank.weid.rpc.AmopService;
 import com.webank.weid.rpc.CptService;
 import com.webank.weid.rpc.CredentialPojoService;
-import com.webank.weid.rpc.callback.AmopCallback;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.fisco.WeServer;
+import com.webank.weid.rpc.callback.OnNotifyCallbackV2;
+import com.webank.weid.rpc.callback.OnNotifyCallbackV3;
+import com.webank.weid.rpc.callback.RegistCallBack;
+import com.webank.weid.rpc.callback.WeIdAmopCallback;
 import com.webank.weid.service.impl.base.AmopCommonArgs;
+import com.webank.weid.service.impl.callback.CommonCallbackWeId;
+import com.webank.weid.service.impl.callback.KeyManagerCallbackWeId;
 import com.webank.weid.suite.api.persistence.PersistenceFactory;
 import com.webank.weid.suite.api.persistence.inf.Persistence;
 import com.webank.weid.suite.api.persistence.params.PersistenceType;
@@ -52,16 +32,39 @@ import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.JsonUtil;
 import com.webank.weid.util.PropertyUtils;
 import com.webank.weid.util.WeIdUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.BcosSDK;
+import org.fisco.bcos.sdk.amop.AmopCallback;
+import org.fisco.bcos.sdk.jni.amop.AmopRequestCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**
  * Created by Junqi Zhang on 2019/4/10.
  */
-public class AmopServiceImpl extends BaseService implements AmopService {
+public class AmopServiceImpl implements AmopService {
 
     private static final Logger logger = LoggerFactory.getLogger(AmopServiceImpl.class);
 
+    public static final int MAX_AMOP_REQUEST_TIMEOUT = 50000;
+    public static final int AMOP_REQUEST_TIMEOUT = Integer
+            .valueOf(PropertyUtils.getProperty("amop.request.timeout", "5000"));
+
+
     private static CptService cptService = new CptServiceImpl();
+
+    /**
+     * AMOP回调处理注册器.
+     */
+    private RegistCallBack pushCallBack;
+
+    private String amopId;
 
     /**
      * persistence service.
@@ -69,10 +72,48 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     private static Persistence dataDriver;
 
     private static PersistenceType persistenceType;
+
+    public AmopServiceImpl() {
+        this.amopId = com.webank.weid.blockchain.service.fisco.BaseServiceFisco.fiscoConfig.getAmopId();
+        initAmopCallBack();
+    }
+
     /**
      * credentialpojo service.
      */
     private static CredentialPojoService credentialPojoService = new CredentialPojoServiceImpl();
+
+    /**
+     * 获取AMOP监听的topic.
+     *
+     * @return 返回topic集合，目前sdk只支持单topic监听
+     */
+    private String getTopic() {
+        if (StringUtils.isNotBlank(com.webank.weid.blockchain.config.FiscoConfig.topic)) {
+            return this.amopId + "_" + com.webank.weid.blockchain.config.FiscoConfig.topic;
+        } else {
+            return this.amopId;
+        }
+    }
+
+    private void initAmopCallBack() {
+        if (com.webank.weid.blockchain.service.fisco.BaseServiceFisco.fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+            pushCallBack = new OnNotifyCallbackV2();
+            ((BcosSDK) com.webank.weid.blockchain.service.fisco.BaseServiceFisco.getBcosSDK()).getAmop().setCallback((AmopCallback) pushCallBack);
+            ((BcosSDK) com.webank.weid.blockchain.service.fisco.BaseServiceFisco.getBcosSDK()).getAmop().subscribeTopic(getTopic(), (AmopCallback) pushCallBack);
+        } else {
+            pushCallBack = new OnNotifyCallbackV3();
+            ((org.fisco.bcos.sdk.v3.BcosSDK) com.webank.weid.blockchain.service.fisco.BaseServiceFisco.getBcosSDK()).getAmop().setCallback((AmopRequestCallback) pushCallBack);
+        }
+        pushCallBack.registAmopCallback(
+                AmopMsgType.GET_ENCRYPT_KEY.getValue(),
+                new KeyManagerCallbackWeId()
+        );
+        pushCallBack.registAmopCallback(
+                AmopMsgType.COMMON_REQUEST.getValue(),
+                new CommonCallbackWeId()
+        );
+    }
 
     private static Persistence getDataDriver() {
         String type = PropertyUtils.getProperty("persistence_type");
@@ -87,6 +128,15 @@ public class AmopServiceImpl extends BaseService implements AmopService {
         return dataDriver;
     }
 
+    /**
+     * 获取PushCallback对象，用于给使用者注册callback处理器.
+     *
+     * @return 返回RegistCallBack
+     */
+    public RegistCallBack getPushCallback() {
+        return pushCallBack;
+    }
+
     @Override
     public ResponseData<PolicyAndChallenge> getPolicyAndChallenge(
             String toAmopId,
@@ -94,15 +144,15 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             String targetUserWeId
     ) {
         try {
-            if (StringUtils.isBlank(fiscoConfig.getAmopId())) {
+            if (StringUtils.isBlank(this.amopId)) {
                 logger.error("the amopId is null, policyId = {}", policyId);
                 return new ResponseData<PolicyAndChallenge>(null, ErrorCode.ILLEGAL_INPUT);
             }
             GetPolicyAndChallengeArgs args = new GetPolicyAndChallengeArgs();
-            args.setFromAmopId(fiscoConfig.getAmopId());
+            args.setFromAmopId(this.amopId);
             args.setTopic(toAmopId);
             args.setPolicyId(String.valueOf(policyId));
-            args.setMessageId(super.getSeq());
+            args.setMessageId(DataToolUtils.getUuId32());
             args.setTargetUserWeId(targetUserWeId);
             ResponseData<GetPolicyAndChallengeResponse> retResponse =
                     this.getPolicyAndChallenge(toAmopId, args);
@@ -131,13 +181,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             String toAmopId,
             GetPolicyAndChallengeArgs args) {
         return this.getImpl(
-                fiscoConfig.getAmopId(),
+                this.amopId,
                 toAmopId,
                 args,
                 GetPolicyAndChallengeArgs.class,
                 GetPolicyAndChallengeResponse.class,
                 AmopMsgType.GET_POLICY_AND_CHALLENGE,
-                WeServer.AMOP_REQUEST_TIMEOUT
+                AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -146,13 +196,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      */
     public ResponseData<AmopResponse> request(String toAmopId, AmopCommonArgs args) {
         return this.getImpl(
-                fiscoConfig.getAmopId(),
+                this.amopId,
                 toAmopId,
                 args,
                 AmopCommonArgs.class,
                 AmopResponse.class,
                 AmopMsgType.TYPE_TRANSPORTATION,
-                WeServer.AMOP_REQUEST_TIMEOUT
+                AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -162,21 +212,21 @@ public class AmopServiceImpl extends BaseService implements AmopService {
     public ResponseData<GetEncryptKeyResponse> getEncryptKey(String toAmopId,
                                                              GetEncryptKeyArgs args) {
         return this.getImpl(
-                fiscoConfig.getAmopId(),
+                this.amopId,
                 toAmopId,
                 args,
                 GetEncryptKeyArgs.class,
                 GetEncryptKeyResponse.class,
                 AmopMsgType.GET_ENCRYPT_KEY,
-                WeServer.AMOP_REQUEST_TIMEOUT
+                AMOP_REQUEST_TIMEOUT
         );
     }
 
     /**
      * 注册回调函数接口.
      */
-    public void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback) {
-        super.getPushCallback().registAmopCallback(directRouteMsgType, directRouteCallback);
+    public void registerCallback(Integer directRouteMsgType, WeIdAmopCallback directRouteCallback) {
+        pushCallBack.registAmopCallback(directRouteMsgType, directRouteCallback);
     }
 
     /**
@@ -191,13 +241,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             GetPolicyAndPreCredentialArgs args) {
 
         return this.getImpl(
-                fiscoConfig.getAmopId(),
+                this.amopId,
                 toAmopId,
                 args,
                 GetPolicyAndPreCredentialArgs.class,
                 PolicyAndPreCredentialResponse.class,
                 AmopMsgType.GET_POLICY_AND_PRE_CREDENTIAL,
-                WeServer.AMOP_REQUEST_TIMEOUT
+                AMOP_REQUEST_TIMEOUT
         );
     }
 
@@ -312,13 +362,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
 
         // AMOP request (issuer to issue credential)
         ResponseData<RequestIssueCredentialResponse> resp = this.getImpl(
-                fiscoConfig.getAmopId(),
+                this.amopId,
                 toAmopId,
                 issueCredentialArgs,
                 IssueCredentialArgs.class,
                 RequestIssueCredentialResponse.class,
                 AmopMsgType.REQUEST_SIGN_CREDENTIAL,
-                WeServer.AMOP_REQUEST_TIMEOUT
+                AMOP_REQUEST_TIMEOUT
         );
         return resp;
     }
@@ -410,13 +460,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
             GetWeIdAuthArgs args) {
 
         ResponseData<GetWeIdAuthResponse> resp = this.getImpl(
-                fiscoConfig.getAmopId(),
+                this.amopId,
                 toAmopId,
                 args,
                 GetWeIdAuthArgs.class,
                 GetWeIdAuthResponse.class,
                 AmopMsgType.GET_WEID_AUTH,
-                WeServer.AMOP_REQUEST_TIMEOUT
+                AMOP_REQUEST_TIMEOUT
         );
 
         return resp;
@@ -431,13 +481,13 @@ public class AmopServiceImpl extends BaseService implements AmopService {
                                                                                RequestVerifyChallengeArgs args) {
 
         ResponseData<RequestVerifyChallengeResponse> resp = this.getImpl(
-                fiscoConfig.getAmopId(),
+                this.amopId,
                 toAmopId,
                 args,
                 RequestVerifyChallengeArgs.class,
                 RequestVerifyChallengeResponse.class,
                 AmopMsgType.GET_WEID_AUTH,
-                WeServer.AMOP_REQUEST_TIMEOUT
+                AMOP_REQUEST_TIMEOUT
         );
 
         return resp;
@@ -448,13 +498,83 @@ public class AmopServiceImpl extends BaseService implements AmopService {
      */
     public ResponseData<AmopResponse> send(String toAmopId, AmopCommonArgs args) {
         return this.getImpl(
-                fiscoConfig.getAmopId(),
+                this.amopId,
                 toAmopId,
                 args,
                 AmopCommonArgs.class,
                 AmopResponse.class,
                 AmopMsgType.COMMON_REQUEST,
-                WeServer.AMOP_REQUEST_TIMEOUT
+                AMOP_REQUEST_TIMEOUT
         );
+    }
+
+    /**
+     * the checkDirectRouteMsgHealth。.
+     *
+     * @param toAmopId target amopId.
+     * @param arg the message
+     * @return return the health result
+     */
+    public ResponseData<AmopNotifyMsgResult> checkDirectRouteMsgHealth(
+            String toAmopId,
+            CheckAmopMsgHealthArgs arg) {
+
+        return this.getImpl(
+                com.webank.weid.blockchain.service.fisco.BaseServiceFisco.fiscoConfig.getAmopId(),
+                toAmopId,
+                arg,
+                CheckAmopMsgHealthArgs.class,
+                AmopNotifyMsgResult.class,
+                AmopMsgType.TYPE_CHECK_DIRECT_ROUTE_MSG_HEALTH,
+                AMOP_REQUEST_TIMEOUT
+        );
+    }
+
+    protected <T, F extends AmopBaseMsgArgs> ResponseData<T> getImpl(
+            String fromAmopId,
+            String toAmopId,
+            F arg,
+            Class<F> argsClass,
+            Class<T> resultClass,
+            AmopMsgType msgType,
+            int timeOut
+    ) {
+        arg.setFromAmopId(fromAmopId);
+        arg.setTopic(toAmopId);
+
+        String msgBody = DataToolUtils.serialize(arg);
+        AmopRequestBody amopRequestBody = new AmopRequestBody();
+        amopRequestBody.setMsgType(msgType);
+        amopRequestBody.setMsgBody(msgBody);
+        String requestBodyStr = DataToolUtils.serialize(amopRequestBody);
+
+        com.webank.weid.blockchain.protocol.amop.base.AmopCommonArgs amopCommonArgs = new com.webank.weid.blockchain.protocol.amop.base.AmopCommonArgs();
+        amopCommonArgs.setTopic(toAmopId);
+        amopCommonArgs.setMessage(requestBodyStr);
+        amopCommonArgs.setMessageId(DataToolUtils.getUuId32());
+        logger.info("direct route request, seq : {}, body ：{}", amopCommonArgs.getMessageId(),
+                requestBodyStr);
+        com.webank.weid.blockchain.protocol.response.AmopResponse response = com.webank.weid.blockchain.service.fisco.BaseServiceFisco.getWeServer(BaseServiceFisco.masterGroupId).sendChannelMessage(amopCommonArgs, timeOut);
+        logger.info("direct route response, seq : {}, errorCode : {}, errorMsg : {}, body : {}",
+                response.getMessageId(),
+                response.getErrorCode(),
+                response.getErrorMessage(),
+                response.getResult()
+        );
+        ResponseData<T> responseStruct = new ResponseData<>();
+        if (102 == response.getErrorCode()) {
+            responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_REQUEST_TIMEOUT);
+        } else if (0 != response.getErrorCode()) {
+            responseStruct.setErrorCode(ErrorCode.DIRECT_ROUTE_MSG_BASE_ERROR);
+            //return responseStruct;
+        } else {
+            responseStruct.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
+        }
+        T msgBodyObj = DataToolUtils.deserialize(response.getResult(), resultClass);
+        if (null == msgBodyObj) {
+            responseStruct.setErrorCode(ErrorCode.UNKNOW_ERROR);
+        }
+        responseStruct.setResult(msgBodyObj);
+        return responseStruct;
     }
 }

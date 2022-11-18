@@ -4,12 +4,10 @@ package com.webank.weid.util;
 
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.service.BaseService;
 import com.webank.weid.suite.api.crypto.CryptoServiceFactory;
 import com.webank.weid.suite.api.crypto.params.Asymmetrickey;
 import com.webank.weid.suite.api.crypto.params.CryptoType;
 import com.webank.weid.suite.api.crypto.params.KeyGenerator;
-import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -28,7 +26,7 @@ public class TestCrypt {
     
     private static final String original = "{\"name\":\"zhangsan\",age:12}";
 
-    private static final CryptoSuite cryptoSuite = DataToolUtils.cryptoSuite;
+    private static final CryptoSuite cryptoSuite = com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite;
 
 
     @Test
