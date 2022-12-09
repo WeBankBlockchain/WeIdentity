@@ -7,7 +7,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.Persistence;
 import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.redis.RedisDomain;
 import com.webank.weid.suite.persistence.redis.RedisExecutor;

@@ -2,16 +2,7 @@
 
 package com.webank.weid.full.cpt;
 
-import java.io.IOException;
-import java.util.HashMap;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
@@ -26,9 +17,14 @@ import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.RawTransactionService;
-import com.webank.weid.service.impl.RawTransactionServiceImpl;
 import com.webank.weid.util.WeIdUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * registerCpt(CptMapArgs args) method for testing CptService.
@@ -586,32 +582,6 @@ public class TestRegisterCptArgs extends TestBaseService {
             ErrorCode.WEID_INVALID.getCode(),
             response.getErrorCode().intValue());
         Assert.assertNull(response.getResult());
-    }
-
-    /**
-     * case: call transactionhex method - arbitrary.
-     */
-    @Test
-    public void testRegisterCptCase28() {
-        String hex = StringUtils.EMPTY;
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.registerCpt(hex);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
-    }
-
-    /**
-     * case: call transactionhex method - arbitrary.
-     */
-    @Test
-    public void testRegisterCptCase29() {
-        String hex = "11111";
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.registerCpt(hex);
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
     }
 
 }
