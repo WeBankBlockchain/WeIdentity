@@ -79,7 +79,7 @@ WeIdentity支持认证机构自行注册标准化凭证模板，共同丰富公�
    `WeIdentity规范文档 <https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-spec.html>`_
 
 *
-   `WeIdentity及其组件的[兼容版本说明文档] <https://weidentity.readthedocs.io/zh_CN/develop/docs/compatibility.html>`_
+   `WeIdentity及其组件的兼容版本说明文档 <https://weidentity.readthedocs.io/zh_CN/develop/docs/compatibility.html>`_
 
 
 当前状态
