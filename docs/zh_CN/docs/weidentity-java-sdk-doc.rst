@@ -964,7 +964,7 @@ WeIdService
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.createWeId
+   接口名称:com.webank.weid.service.rpc.WeIdService.createWeId
    接口定义:ResponseData<CreateWeIdDataResult> createWeId()
    接口描述: 内部创建公私钥，并链上注册WeIdentity DID， 并返回公钥、私钥以及WeIdentity DID。
 
@@ -1149,7 +1149,7 @@ com.webank.weid.protocol.base.WeIdPrivateKey
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.createWeId
+   接口名称:com.webank.weid.service.rpc.WeIdService.createWeId
    接口定义:ResponseData<String> createWeId(CreateWeIdArgs createWeIdArgs)
    接口描述: 根据传入的公私钥，链上注册WeIdentity DID，并返回WeIdentity DID。
 
@@ -1339,7 +1339,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.createWeIdByPublicKey
+   接口名称:com.webank.weid.service.rpc.WeIdService.createWeIdByPublicKey
    接口定义:ResponseData<String> createWeIdByPublicKey(WeIdPublicKey weIdPublicKey,WeIdPrivateKey weIdPrivateKey)
    接口描述: 根据传入的公钥和代理的私钥，通过代理发交易链上注册WeIdentity DID，并返回WeIdentity DID。
 
@@ -1510,7 +1510,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.getWeIdDocumentJson
+   接口名称:com.webank.weid.service.rpc.WeIdService.getWeIdDocumentJson
    接口定义:ResponseData<String> getWeIdDocumentJson(String weId)
    接口描述: 根据WeIdentity DID查询WeIdentity DID Document信息，并以JSON格式返回。
 
@@ -1650,7 +1650,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.getWeIdDocument
+   接口名称:com.webank.weid.service.rpc.WeIdService.getWeIdDocument
    接口定义:ResponseData<WeIdDocument> getWeIdDocument(String weId)
    接口描述: 根据WeIdentity DID查询出WeIdentity DID Document对象。
 
@@ -1892,7 +1892,7 @@ com.webank.weid.protocol.base.ServiceProperty
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.getWeIdDocumentMetadata
+   接口名称:com.webank.weid.service.rpc.WeIdService.getWeIdDocumentMetadata
    接口定义:ResponseData<getWeIdDocumentMetadata> getWeIdDocumentMetadata(String weId)
    接口描述: 根据WeIdentity DID查询出WeIdentity DID DocumentMetadata对象。
 
@@ -2061,7 +2061,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.setService
+   接口名称:com.webank.weid.service.rpc.WeIdService.setService
    接口定义:ResponseData<Boolean> setService(String weId, ServiceArgs setServiceArgs, WeIdPrivateKey weIdPrivateKey)
    接口描述: 根据WeIdentity DID添加Service信息。
 
@@ -2265,7 +2265,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.setAuthentication
+   接口名称:com.webank.weid.service.rpc.WeIdService.setAuthentication
    接口定义:ResponseData<Boolean> setAuthentication(String weId, AuthenticationArgs authenticationArgs, WeIdPrivateKey weIdPrivateKey)
    接口描述: 根据WeIdentity DID添加Authentication信息。
 
@@ -2466,7 +2466,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.isWeIdExist
+   接口名称:com.webank.weid.service.rpc.WeIdService.isWeIdExist
    接口定义:ResponseData<Boolean> isWeIdExist(String weId)
    接口描述: 根据WeIdentity DID判断链上是否存在。
 
@@ -2606,7 +2606,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.isDeactivated
+   接口名称:com.webank.weid.service.rpc.WeIdService.isDeactivated
    接口定义:ResponseData<Boolean> isDeactivated(String weId)
    接口描述: 检查WeIdentity DID是否在链上停用。
 
@@ -2729,7 +2729,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.revokeAuthentication
+   接口名称:com.webank.weid.service.rpc.WeIdService.revokeAuthentication
    接口定义:ResponseData<Boolean> revokeAuthentication(String weId, AuthenticationArgs authenticationArgs, WeIdPrivateKey weIdPrivateKey)
    接口描述: 仅删除WeID文档中的身份验证标签-不会影响其公钥。
 
@@ -2909,7 +2909,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.getWeIdList
+   接口名称:com.webank.weid.service.rpc.WeIdService.getWeIdList
    接口定义:ResponseData<List<String>> getWeIdList(Integer first, Integer last)
    接口描述: 根据块高度、索引位置和搜索方向查询数据。
 
@@ -3063,7 +3063,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.getWeIdCount
+   接口名称:com.webank.weid.service.rpc.WeIdService.getWeIdCount
    接口定义:ResponseData<Integer> getWeIdCount()
    接口描述: 获得总weId。
 
@@ -3186,7 +3186,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.WeIdService.getWeIdListByPubKeyList
+   接口名称:com.webank.weid.service.rpc.WeIdService.getWeIdListByPubKeyList
    接口定义:ResponseData<WeIdListResult> getWeIdListByPubKeyList(List<WeIdPublicKey> pubKeyList)
    接口描述: 通过公钥列表获取WeID列表。
 
@@ -3350,7 +3350,7 @@ AuthorityIssuerService
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.AuthorityIssuerService.registerAuthorityIssuer
+   接口名称:com.webank.weid.service.rpc.AuthorityIssuerService.registerAuthorityIssuer
    接口定义:ResponseData<Boolean> registerAuthorityIssuer(RegisterAuthorityIssuerArgs args)
    接口描述: 注册成为权威机构。
    注意：这是一个需要权限的操作，目前只有合约的部署者（一般为SDK）才能正确执行。
@@ -3593,7 +3593,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.AuthorityIssuerService.removeAuthorityIssuer
+   接口名称:com.webank.weid.service.rpc.AuthorityIssuerService.removeAuthorityIssuer
    接口定义:ResponseData<Boolean> removeAuthorityIssuer(RemoveAuthorityIssuerArgs args)
    接口描述: 注销权威机构。
    注意：这是一个需要权限的操作，目前只有合约的部署者（一般为SDK）才能正确执行。
@@ -3781,7 +3781,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.AuthorityIssuerService.isAuthorityIssuer
+   接口名称:com.webank.weid.service.rpc.AuthorityIssuerService.isAuthorityIssuer
    接口定义:ResponseData<Boolean> isAuthorityIssuer(String weId)
    接口描述: 根据WeIdentity DID判断是否为权威机构。
 
@@ -3926,7 +3926,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.AuthorityIssuerService.queryAuthorityIssuerInfo
+   接口名称:com.webank.weid.service.rpc.AuthorityIssuerService.queryAuthorityIssuerInfo
    接口定义:ResponseData<AuthorityIssuer> queryAuthorityIssuerInfo(String weId)
    接口描述: 根据WeIdentity DID查询权威机构信息。
 
@@ -4110,7 +4110,7 @@ com.webank.weid.protocol.base.AuthorityIssuer
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.AuthorityIssuerService.getAllAuthorityIssuerList
+   接口名称: com.webank.weid.service.rpc.AuthorityIssuerService.getAllAuthorityIssuerList
    接口定义: ResponseData<List<AuthorityIssuer>> getAllAuthorityIssuerList(Integer index, Integer num)
    接口描述: 查询指定范围内的issuer列表。
 
@@ -4292,7 +4292,7 @@ com.webank.weid.protocol.base.AuthorityIssuer
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.AuthorityIssuerService.registerIssuerType
+   接口名称: com.webank.weid.service.rpc.AuthorityIssuerService.registerIssuerType
    接口定义: ResponseData<Boolean> registerIssuerType(WeIdAuthentication callerAuth, String issuerType)
    接口描述: 指定并注册不同issuer的类型，如学校、政府机构等。
    权限说明：本方法对传入的WeIdAuthentication没有特定权限要求。
@@ -4482,7 +4482,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.AuthorityIssuerService.addIssuerIntoIssuerType
+   接口名称: com.webank.weid.service.rpc.AuthorityIssuerService.addIssuerIntoIssuerType
    接口定义: ResponseData<Boolean> addIssuerIntoIssuerType(WeIdAuthentication callerAuth, String issuerType, String targetIssuerWeId)
    接口描述: 向指定的issuerType中添加成员。
    权限说明：方法的调用者至少需要是Authority Issuer才能成功。
@@ -4684,7 +4684,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.AuthorityIssuerService.removeIssuerFromIssuerType
+   接口名称: com.webank.weid.service.rpc.AuthorityIssuerService.removeIssuerFromIssuerType
    接口定义: ResponseData<Boolean> removeIssuerFromIssuerType(WeIdAuthentication callerAuth, String issuerType, String targetIssuerWeId)
    接口描述: 移除指定issuerType里面的WeId成员。
 
@@ -4885,7 +4885,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.AuthorityIssuerService.isSpecificTypeIssuer
+   接口名称: com.webank.weid.service.rpc.AuthorityIssuerService.isSpecificTypeIssuer
    接口定义: ResponseData<Boolean> isSpecificTypeIssuer(String issuerType, String targetIssuerWeId)
    接口描述: 判断issuer是否为指定机构里面的成员。
 
@@ -5042,7 +5042,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.AuthorityIssuerService.getAllSpecificTypeIssuerList
+   接口名称: com.webank.weid.service.rpc.AuthorityIssuerService.getAllSpecificTypeIssuerList
    接口定义: ResponseData<List<String>> getAllSpecificTypeIssuerList(String issuerType, Integer index, Integer num)
    接口描述: 获取指定索引范围内的issuer列表。
 
@@ -5178,7 +5178,7 @@ CptService
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CptService.registerCpt
+   接口名称:com.webank.weid.service.rpc.CptService.registerCpt
    接口定义:ResponseData<CptBaseInfo> registerCpt(CptMapArgs args)
    接口描述: 传入WeIdentity DID，JsonSchema(Map类型) 和其对应的私钥，链上注册CPT，返回CPT编号和版本。
 
@@ -5458,7 +5458,7 @@ com.webank.weid.protocol.base.CptBaseInfo
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.CptService.registerCpt
+   接口名称: com.webank.weid.service.rpc.CptService.registerCpt
    接口定义: ResponseData<CptBaseInfo> registerCpt(CptMapArgs args, Integer cptId)
    接口描述: 传入WeIdentity DID，JsonSchema(Map类型), cptId 和其对应的私钥，链上注册指定cptId的CPT，返回CPT编号和版本。
 
@@ -5752,7 +5752,7 @@ com.webank.weid.protocol.base.CptBaseInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CptService.registerCpt
+   接口名称:com.webank.weid.service.rpc.CptService.registerCpt
    接口定义:ResponseData<CptBaseInfo> registerCpt(CptStringArgs args)
    接口描述: 传入WeIdentity DID，JsonSchema(String类型) 和其对应的私钥，链上注册CPT，返回CPT编号和版本。
 
@@ -5993,7 +5993,7 @@ com.webank.weid.protocol.base.CptBaseInfo
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.CptService.registerCpt
+   接口名称: com.webank.weid.service.rpc.CptService.registerCpt
    接口定义: ResponseData<CptBaseInfo> registerCpt(CptStringArgs args, Integer cptId)
    接口描述: 传入WeIdentity DID，JsonSchema(String类型) , cptId和其对应的私钥，链上注册指定cptId的CPT，返回CPT编号和版本。
 
@@ -6256,7 +6256,7 @@ com.webank.weid.protocol.base.CptBaseInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CptService.queryCpt
+   接口名称:com.webank.weid.service.rpc.CptService.queryCpt
    接口定义:ResponseData<Cpt> queryCpt(Integer cptId)
    接口描述: 根据CPT编号查询CPT信息。
 
@@ -6494,7 +6494,7 @@ com.webank.weid.protocol.base.Cpt.MetaData
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CptService.updateCpt
+   接口名称:com.webank.weid.service.rpc.CptService.updateCpt
    接口定义:ResponseData<CptBaseInfo> updateCpt(CptMapArgs args, Integer cptId)
    接口描述: 传入cptId，JsonSchema(Map类型)，WeIdentity DID，WeIdentity DID所属私钥，进行更新CPT信息，更新成功版本自动+1。
 
@@ -6809,7 +6809,7 @@ com.webank.weid.protocol.base.CptBaseInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CptService.updateCpt
+   接口名称:com.webank.weid.service.rpc.CptService.updateCpt
    接口定义:ResponseData<CptBaseInfo> updateCpt(CptStringArgs args, Integer cptId)
    接口描述: 传入cptId，JsonSchema(String类型)，WeIdentity DID，WeIdentity DID所属私钥，进行更新CPT信息，更新成功版本自动+1。
 
@@ -7079,7 +7079,7 @@ CredentialService
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialService.createCredential
+   接口名称:com.webank.weid.service.rpc.CredentialService.createCredential
    接口定义:ResponseData<CredentialWrapper> createCredential(CreateCredentialArgs args)
    接口描述: 创建电子凭证，默认是original类型，还支持轻量级lite1类型和基于零知识证明的zkp类型的credential。
 
@@ -7453,7 +7453,7 @@ Lite类型的credential生成示例：
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialService.verify
+   接口名称:com.webank.weid.service.rpc.CredentialService.verify
    接口定义:ResponseData<Boolean> verify(Credential credential);
    接口描述: 验证凭证是否正确。
 
@@ -7718,7 +7718,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialService.verifyCredentialWithSpecifiedPubKey
+   接口名称:com.webank.weid.service.rpc.CredentialService.verifyCredentialWithSpecifiedPubKey
    接口定义: ResponseData<Boolean> verifyCredentialWithSpecifiedPubKey(CredentialWrapper credentialWrapper, WeIdPublicKey weIdPublicKey)
    接口描述: 验证凭证是否正确，需传入公钥。
 
@@ -7999,7 +7999,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialService.getCredentialHash
+   接口名称:com.webank.weid.service.rpc.CredentialService.getCredentialHash
    接口定义:ResponseData<String> getCredentialHash(Credential args)
    接口描述: 传入Credential信息生成Credential整体的Hash值，一般在生成Evidence时调用。
 
@@ -8213,7 +8213,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialService.getCredentialHash
+   接口名称:com.webank.weid.service.rpc.CredentialService.getCredentialHash
    接口定义:ResponseData<String> getCredentialHash(CredentialWrapper args)
    接口描述: 传入Credential信息生成Credential整体的Hash值，一般在生成Evidence时调用。
 
@@ -8447,7 +8447,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialService.addSignature
+   接口名称:com.webank.weid.service.rpc.CredentialService.addSignature
    接口定义:ResponseData<Credential> addSignature(List<Credential> credentialList, WeIdPrivateKey weIdPrivateKey)
    接口描述:多签，在原凭证列表的基础上，创建包裹成一个新的多签凭证，由传入的私钥所签名。此凭证的CPT为一个固定值。在验证一个多签凭证时，会迭代验证其包裹的所有子凭证。本接口不支持创建选择性披露的多签凭证。
 
@@ -8797,7 +8797,7 @@ EvidenceService
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.createEvidence
+   接口名称:com.webank.weid.service.rpc.EvidenceService.createEvidence
    接口定义:ResponseData<String> createEvidence(Hashable object, WeIdPrivateKey weIdPrivateKey)
    接口描述: 为一个**未曾上过链**的Object，将传入的Object计算Hash值生成存证上链，返回存证hash值。传入的私钥将会成为链上存证的签名方。此签名方和凭证的Issuer可以不是同一方。此接口返回的Hash值和generateHash()接口返回值一致。同样的传入Object可以由不同的私钥注册存证，它们的链上存证值将会共存。
 
@@ -8948,7 +8948,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.createEvidence
+   接口名称:com.webank.weid.service.rpc.EvidenceService.createEvidence
    接口定义:ResponseData<String> createEvidence(Hashable object, WeIdPrivateKey weIdPrivateKey, String log, String customKey)
    接口描述: 为一个**未曾上过链**的Object，将传入Object计算Hash值生成存证上链。此方法允许在创建存证时写入额外信息。额外信息为一个log记录，从后往前叠加存储。不同私钥发交易方的额外信息也是共存且相互独立存储的。如果您重复调用此接口，那么新写入的额外值会以列表的形式添加到之前的log列表之后。此方法还允许传入一个用户自定义的custom key，用来查询链上的存证（而不是通过hash）。
 
@@ -9133,7 +9133,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.getEvidence
+   接口名称:com.webank.weid.service.rpc.EvidenceService.getEvidence
    接口定义:ResponseData<EvidenceInfo> getEvidence(String hashValue)
    接口描述: 根据传入的凭证存证hash值，在链上查找凭证在链上是否存在。如果存在，则返回所有为此hash值创建过存证的创建方，及其创建时间、额外信息。
 
@@ -9284,7 +9284,7 @@ com.webank.weid.protocol.base.EvidenceSignInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.getEvidenceByCustomKey
+   接口名称:com.webank.weid.service.rpc.EvidenceService.getEvidenceByCustomKey
    接口定义:ResponseData<EvidenceInfo> getEvidenceByCustomKey(String customKey)
    接口描述: 根据传入的自定义索引，在链上查找凭证在链上是否存在。如果存在，则返回所有为此索引值值创建过存证的创建方，及其创建时间、额外信息。
 
@@ -9435,7 +9435,7 @@ com.webank.weid.protocol.base.EvidenceSignInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.verifySigner
+   接口名称:com.webank.weid.service.rpc.EvidenceService.verifySigner
    接口定义:ResponseData<Boolean> verify(CredentialPojo credentialPojo, EvidenceInfo evidenceInfo, String weId)
    接口描述: 根据传入的凭证和存证信息和WeID，从链上根据WeID的公钥，判断此存证是否合法。
 
@@ -9611,7 +9611,7 @@ java.lang.String
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.verifySigner
+   接口名称:com.webank.weid.service.rpc.EvidenceService.verifySigner
    接口定义:ResponseData<Boolean> verify(CredentialPojo credentialPojo, EvidenceInfo evidenceInfo, String weId, String publicKey)
    接口描述: 根据传入的凭证和存证信息和WeID，及传入的公钥，判断此WeID是否为存证的合法创建者。不需要链上交互。
 
@@ -9803,7 +9803,7 @@ java.lang.String
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.rpc.EvidenceService.generateHash
+   接口名称: com.webank.weid.service.rpc.EvidenceService.generateHash
    接口定义: ResponseData<HashString> generateHash(T object)
    接口描述: 将传入的任意Object计算Hash值，不需网络。可以接受**任意Hashable对象**（如凭证）、**File**（Java里的文件实例）、**String**（字符串）。对于不符合类型的入参，将返回类型不支持错误。返回值为HashString，可以直接传入CreateEvidence接口用于存证创建。
 
@@ -9933,7 +9933,7 @@ T java.lang.Object
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.addLogByHash / addLogByCustomKey
+   接口名称:com.webank.weid.service.rpc.EvidenceService.addLogByHash / addLogByCustomKey
    接口定义:ResponseData<Boolean> addLogByHash(String hashValueSupplement（仅在customKey中用到）, String hashValue / customKey, String log, WeIdPrivateKey weIdPrivateKey)
    接口描述: 为一个**已经在链上存在的存证**添加额外信息记录存入其log中。有两个接口，一个是以hash值为索引，一个可以接受用户自定义索引（customKey）；如果自定义索引不存在，则会使用替补hash作为上链索引。
    
@@ -10121,7 +10121,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.addSignatureAndLogByHash / addSignatureAndLogByCustomKey
+   接口名称:com.webank.weid.service.rpc.EvidenceService.addSignatureAndLogByHash / addSignatureAndLogByCustomKey
    接口定义:ResponseData<Boolean> addSignatureAndLogByHash(String hashValueSupplement（仅在customKey中用到）, String hashValue / customKey, String log, WeIdPrivateKey weIdPrivateKey)
    接口描述:为一个**已经在链上存在的存证**添加日志条目。有两个接口，一个是以hash值为索引，一个可以接受用户自定义索引（customKey）；如果自定义索引不存在，则会使用替补hash作为上链索引，此日志将是永久记录在区块链上，最后在尝试获取存证。
    
@@ -10288,7 +10288,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.revoke / unRevoke
+   接口名称:com.webank.weid.service.rpc.EvidenceService.revoke / unRevoke
    接口定义:ResponseData<Boolean> revoke(Hashable object, WeIdAuthentication weIdAuthentication)
    接口描述: 撤销存证 / 撤销存证-可以取消。
 
@@ -10429,7 +10429,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.isRevoked
+   接口名称:com.webank.weid.service.rpc.EvidenceService.isRevoked
    接口定义:ResponseData<Boolean> isRevoked(EvidenceInfo evidenceInfo, String weId)
    接口描述: 检查该存证是否被该WeID撤销。
 
@@ -10574,7 +10574,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.createRawEvidenceWithCustomKey
+   接口名称:com.webank.weid.service.rpc.EvidenceService.createRawEvidenceWithCustomKey
    接口定义:ResponseData<Boolean> createRawEvidenceWithCustomKey(String hashValue,String signature,String log,Long timestamp,String extraKey,String privateKey)
    接口描述: 创建可定制所有输入的原始存证。
 
@@ -10716,7 +10716,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.EvidenceService.createRawEvidenceWithSpecificSigner
+   接口名称:com.webank.weid.service.rpc.EvidenceService.createRawEvidenceWithSpecificSigner
    接口定义:ResponseData<Boolean> createRawEvidenceWithSpecificSigner(String hashValue,String signature,String log,Long timestamp,String extraKey,String signer,
    String privateKey)
    接口描述: 创建原始存证接口，其中所有输入（包括签名者）都可以定制。
@@ -10867,7 +10867,7 @@ CredentialPojoService
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.createCredential
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.createCredential
    接口定义:<T> ResponseData<CredentialPojo> createCredential(CreateCredentialPojoArgs<T> args)
    接口描述: 根据传入的claim对象生成Credential。
 
@@ -11177,7 +11177,7 @@ com.webank.weid.protocol.base.CredentialPojo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.prepareZkpCredential
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.prepareZkpCredential
    接口定义:<T> ResponseData<CredentialPojo> createCredential(CredentialPojo preCredential, String claimJson, WeIdAuthentication weIdAuthentication)
    接口描述: 此接口仅在使用WeDPR的选择性披露时才需要调用，用于生成一些中间数据。用户根据传入的preCredential，claimJson以及weIdAuthentication生成基于系统CPT 111的credential。
 
@@ -11555,7 +11555,7 @@ com.webank.weid.protocol.base.CredentialPojo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.createSelectiveCredential
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.createSelectiveCredential
    接口定义: ResponseData<CredentialPojo> createSelectiveCredential(CredentialPojo credentialPojo, ClaimPolicy claimPolicy)
    接口描述: 通过原始凭证和披露策略，创建选择性披露的Credential。
 
@@ -11852,7 +11852,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.verify
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.verify
    接口定义: ResponseData<Boolean> verify(String issuerWeId, CredentialPojo credential)
    接口描述: 验证credential。
 
@@ -12137,7 +12137,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.verify
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.verify
    接口定义: ResponseData<Boolean> verify(WeIdPublicKey issuerPublicKey, CredentialPojo credential)
    接口描述: 使用指定公钥验证credential。
 
@@ -12415,7 +12415,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.verify
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.verify
    接口定义: ResponseData<Boolean> verify(String presenterWeId, PresentationPolicyE presentationPolicyE, Challenge challenge, PresentationE presentationE)
    接口描述: 验证Presentation。
 
@@ -12776,7 +12776,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.verifyPresentationFromPdf
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.verifyPresentationFromPdf
    接口定义: ResponseData<Boolean> verifyPresentationFromPdf(String pdfTemplatePath, byte[] serializePdf, String presenterWeId, PresentationPolicyE presentationPolicyE, Challenge challenge, PresentationE presentationE)
    接口描述: 验证由PDF Transportation传输的Presentation。
 
@@ -13109,7 +13109,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.createPresentation
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.createPresentation
    接口定义: ResponseData<PresentationE> createPresentation(List<CredentialPojo> credentialList, PresentationPolicyE presentationPolicyE, Challenge challenge, WeIdAuthentication weIdAuthentication)
    接口描述: 创建Presentation。
 
@@ -13552,7 +13552,7 @@ com.webank.weid.protocol.base.PresentationE
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.getCredentialPojoHash
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.getCredentialPojoHash
    接口定义:ResponseData<String> getCredentialHash(CredentialPojo args)
    接口描述: 传入CredentialPojo信息生成CredentialPojo整体的Hash值，一般在生成Evidence时调用。
 
@@ -13775,7 +13775,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.addSignature
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.addSignature
    接口定义:ResponseData<Credential> addSignature(List<Credential> credentialList, WeIdPrivateKey weIdPrivateKey)
    接口描述:多签，在原凭证列表的基础上，创建包裹成一个新的多签凭证，由传入的私钥所签名。此凭证的CPT为一个固定值。在验证一个多签凭证时，会迭代验证其包裹的所有子凭证。本接口不支持创建选择性披露的多签凭证。
 
@@ -14146,7 +14146,7 @@ com.webank.weid.protocol.base.Credential
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.createTrustedTimestamp
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.createTrustedTimestamp
    接口定义:ResponseData<CredentialPojo> createTrustedTimestamp(List<CredentialPojo> credentialList, WeIdAuthentication weIdAuthentication)
    接口描述: 使用第三方可信时间戳服务，创建一个可信时间戳凭证。
 
@@ -14539,7 +14539,7 @@ com.webank.weid.protocol.base.CredentialPojo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.createDataAuthToken
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.createDataAuthToken
    接口定义:ResponseData<CredentialPojo> createCredential(Cpt101 authInfo, WeIdAuthentication weIdAuthentication)
    接口描述: 根据传入的授权要求信息，生成符合CPT101格式规范的数据授权凭证。该凭证需要被verify之后和Endpoint Service结合使用。
 
@@ -14855,7 +14855,7 @@ com.webank.weid.protocol.base.CredentialPojo
 
 .. code-block:: text
 
-   接口名称:com.webank.weid.rpc.CredentialPojoService.verify
+   接口名称:com.webank.weid.service.rpc.CredentialPojoService.verify
    接口定义: ResponseData<Boolean> verify(String issuerWeId, String weIdPublicKeyId, CredentialPojo credential)
    接口描述: 通过传入的Issuer的WeID，并指定其链上公钥ID，验证credential。若验证失败，则会遍历所有公钥；如果能够找到一个适配的，那么就返回验证成功但公钥ID不匹配。
 
@@ -15070,964 +15070,6 @@ com.webank.weid.protocol.base.CredentialPojo
    transactionInfo:null
 
 ----
-
-
-AmopService
-^^^^^^^^^^^^^^^^^
-
-1. registerCallback
-~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称:com.webank.weid.rpc.AmopService.registerCallback
-   接口定义:void registerCallback(Integer directRouteMsgType, AmopCallback directRouteCallback)
-   接口描述: 注册AMOP回调处理。
-
-
-**接口入参**\ : 
-
-java.lang.Integer
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - directRouteMsgType
-     - Integer
-     - Y
-     - AMOP消息类型
-     - 
-
-
-com.webank.weid.rpc.callback.WeIdAmopCallback
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - object
-     - AmopCallback
-     - 处理消息的callback对象
-     - 机构需继承并且重写onPush(AmopCommonArgs arg)
-
-**接口返回**\ :   无;
-
-
-----
-
-2. request
-~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称: com.webank.weid.rpc.AmopService.request
-   接口定义: ResponseData<AmopResponse> request(String toOrgId, AmopCommonArgs args)
-   接口描述: AMOP请求Server。
-
-**接口入参**\ : 
-
-java.lang.String
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - toOrgId
-     - String
-     - Y
-     - 目标机构编码
-     - 
-
-
-com.webank.weid.protocol.amop.AmopCommonArgs
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - messageId
-     - String
-     - N
-     - 消息编号
-     - 
-   * - fromOrgId
-     - String
-     - N
-     - 消息来源机构编号
-     - 
-   * - toOrgId
-     - String
-     - N
-     - 消息目标机构编号
-     - 
-   * - message
-     - String
-     - Y
-     - 请求body
-     - 
-
-
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<AmopResponse>;
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     - 
-   * - errorMessage
-     - String
-     - 返回结果描述
-     - 
-   * - result
-     - AmopResponse
-     - AMOP响应
-     - 业务数据
-
-
-com.webank.weid.protocol.response.AmopResponse
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - result
-     - String
-     - AMOP消息响应body
-     - 
-   * - errorCode
-     - Integer
-     - 业务结果编码
-     -  
-   * - errorMessage
-     - String
-     - 业务结果描述
-     - 
-   * - messageId
-     - String
-     - 消息编号
-     - 
-
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常
-   * - DIRECT_ROUTE_REQUEST_TIMEOUT
-     - 160009
-     - AMOP超时
-   * - DIRECT_ROUTE_MSG_BASE_ERROR
-     - 160010
-     - AMOP异常
-     
-     
-----
-
-3. getPolicyAndChallenge
-~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称: com.webank.weid.rpc.AmopService.getPolicyAndChallenge
-   接口定义: ResponseData<PolicyAndChallenge> getPolicyAndChallenge(String orgId, Integer policyId, String targetUserWeId)
-   接口描述: 通过AMOP获取PolicyAndChallenge。
-
-**接口入参**\ : 
-
-java.lang.String
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - toOrgId
-     - String
-     - Y
-     - 目标机构编码
-     - 
-
-
-java.lang.Integer
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - policyId
-     - String
-     - Y
-     - 策略编号
-     -
-     
-      
-java.lang.String
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - targetUserWeId
-     - String
-     - Y
-     - 需要被challenge的WeIdentity DID
-     - 
-     
-     
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<PolicyAndChallenge>;
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     - 
-   * - errorMessage
-     - String
-     - 返回结果描述
-     - 
-   * - result
-     - PolicyAndChallenge
-     - 
-     - 业务数据
-
-com.webank.weid.protocol.base.PolicyAndChallenge
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - presentationPolicyE
-     - PresentationPolicyE
-     - 策略信息
-     - 
-   * - challenge
-     - Challenge
-     - 
-     - 
-     
-      
-com.webank.weid.protocol.base.PresentationPolicyE
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - id
-     - Integer
-     - polcyId
-     - 策略编号
-   * - orgId
-     - String
-     - 机构编号
-     - 
-   * - version
-     - Integer
-     - 版本
-     -  
-   * - policyPublisherWeId
-     - String
-     - WeIdentity DID
-     - 创建policy机构的WeIdentity DID
-   * - policy
-     - Map<Integer, ClaimPolicy>
-     - 策略配置
-     - key:CPTID, value:披露策略对象
-   * - extra
-     - Map<String, String>
-     - 扩展字段
-     -  
-
-
-com.webank.weid.protocol.base.Challenge
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - WeIdentity DID
-     - policy提供给指定的WeIdentity DID
-   * - version
-     - Integer
-     - 版本
-     -  
-   * - nonce
-     - String
-     - 随机字符串
-     - 
-     
-     
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - POLICY_SERVICE_NOT_EXISTS
-     - 100701
-     - policyService不存在
-   * - POLICY_SERVICE_CALL_FAIL
-     - 100702
-     - policyService调用未知异常
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数非法
-   * - DIRECT_ROUTE_REQUEST_TIMEOUT
-     - 160009
-     - AMOP超时
-   * - DIRECT_ROUTE_MSG_BASE_ERROR
-     - 160010
-     - AMOP异常
-----
-
-
-4. requestPolicyAndPreCredential
-~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称: com.webank.weid.rpc.AmopService.requestPolicyAndPreCredential
-   接口定义: ResponseData<PolicyAndChallenge> requestPolicyAndPreCredential(String orgId, GetPolicyAndPreCredentialArgs args)
-   接口描述: 通过AMOP获取PolicyAndChallenge和preCredential，在用户向issuer请求发zkp类型的credential时调用。
-
-**接口入参**\ : 
-
-java.lang.String
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - toOrgId
-     - String
-     - Y
-     - 目标机构编码
-     - 
-
-
-com.webank.weid.protocol.amop.GetPolicyAndPreCredentialArgs
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - policyId
-     - String
-     - Y
-     - 策略编号
-     - 
-   * - targetUserWeId
-     - String
-     - Y
-     - 目前用户WeID
-     - 
-   * - cptId
-     - String
-     - Y
-     - CPT 编号
-     - 
-   * - claim
-     - String
-     - Y
-     - 用户claim
-     - 
-
-     
-     
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<PolicyAndPreCredentialResponse>;
-
-com.webank.weid.protocol.base.PolicyAndPreCredential
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     - 
-   * - errorMessage
-     - String
-     - 返回结果描述
-     - 
-   * - result
-     - PolicyAndChallenge
-     - 
-     - 业务数据
-   * - preCredential
-     - CredentialPojo
-     - 
-     - 基于CPT 110的元数据的Credential
-   * - extra
-     - Map
-     - 
-     - 附加信息
-
-com.webank.weid.protocol.base.PolicyAndChallenge
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - presentationPolicyE
-     - PresentationPolicyE
-     - 策略信息
-     - 
-   * - challenge
-     - Challenge
-     - 
-     - 
-     
-      
-com.webank.weid.protocol.base.PresentationPolicyE
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - id
-     - Integer
-     - polcyId
-     - 策略编号
-   * - orgId
-     - String
-     - 机构编号
-     - 
-   * - version
-     - Integer
-     - 版本
-     -  
-   * - policyPublisherWeId
-     - String
-     - WeIdentity DID
-     - 创建policy机构的WeIdentity DID
-   * - policy
-     - Map<Integer, ClaimPolicy>
-     - 策略配置
-     - key:CPTID, value:披露策略对象
-   * - extra
-     - Map<String, String>
-     - 扩展字段
-     -  
-
-
-com.webank.weid.protocol.base.Challenge
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - WeIdentity DID
-     - policy提供给指定的WeIdentity DID
-   * - version
-     - Integer
-     - 版本
-     -  
-   * - nonce
-     - String
-     - 随机字符串
-     - 
-     
-     
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - POLICY_SERVICE_NOT_EXISTS
-     - 100701
-     - policyService不存在
-   * - POLICY_SERVICE_CALL_FAIL
-     - 100702
-     - policyService调用未知异常
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数非法
-   * - DIRECT_ROUTE_REQUEST_TIMEOUT
-     - 160009
-     - AMOP超时
-   * - DIRECT_ROUTE_MSG_BASE_ERROR
-     - 160010
-     - AMOP异常
-----
-
-
-5. requestIssueCredential
-~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称: com.webank.weid.rpc.AmopService.requestIssueCredential
-   接口定义: ResponseData<PolicyAndChallenge> requestIssueCredential(String orgId, RequestIssueCredentialArgs args)
-   接口描述: 通过AMOP获取zkp类型的Credential，在用户向issuer请求发zkp类型的credential时调用。
-
-**接口入参**\ : 
-
-java.lang.String
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - toOrgId
-     - String
-     - Y
-     - 目标机构编码
-     - 
-
-
-com.webank.weid.protocol.amop.RequestIssueCredentialArgs
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - policyAndPreCredential
-     - PolicyAndPreCredential
-     - Y
-     - policyAndChanllenge和基于元数据的precredential
-     - 
-   * - credentialList
-     - List
-     - Y
-     - 用户根据policy向issuer提供的credential列表
-     - 
-   * - claim
-     - String
-     - Y
-     - 用户要填入的claim
-     - 
-   * - auth
-     - WeIdAuthentication
-     - Y
-     - 用户私钥信息
-     - 
-
-com.webank.weid.protocol.base.PolicyAndPreCredential
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - policyAndChallenge
-     - PolicyAndChallenge
-     - 
-     - 业务数据
-   * - preCredential
-     - CredentialPojo
-     - 
-     - 基于CPT 110的元数据的Credential
-   * - extra
-     - Map
-     - 
-     - 附加信息
-
-com.webank.weid.protocol.base.PolicyAndChallenge
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - presentationPolicyE
-     - PresentationPolicyE
-     - 策略信息
-     - 
-   * - challenge
-     - Challenge
-     - 
-     - 
-     
-      
-com.webank.weid.protocol.base.PresentationPolicyE
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - id
-     - Integer
-     - polcyId
-     - 策略编号
-   * - orgId
-     - String
-     - 机构编号
-     - 
-   * - version
-     - Integer
-     - 版本
-     -  
-   * - policyPublisherWeId
-     - String
-     - WeIdentity DID
-     - 创建policy机构的WeIdentity DID
-   * - policy
-     - Map<Integer, ClaimPolicy>
-     - 策略配置
-     - key:CPTID, value:披露策略对象
-   * - extra
-     - Map<String, String>
-     - 扩展字段
-     -  
-
-
-com.webank.weid.protocol.base.Challenge
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - weId
-     - String
-     - WeIdentity DID
-     - policy提供给指定的WeIdentity DID
-   * - version
-     - Integer
-     - 版本
-     -  
-   * - nonce
-     - String
-     - 随机字符串
-     -     
-     
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<RequestIssueCredentialResponse>;
-
-com.webank.weid.protocol.base.RequestIssueCredentialResponse
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     - 
-   * - errorMessage
-     - String
-     - 返回结果描述
-     - 
-   * - credentialPojo
-     - CredentialPojo
-     - 
-     - 业务数据
-   * - credentialSignature
-     - String
-     - 
-     - credential的签名
-   * - issuerNonce
-     - String
-     - 
-     - issuer提供的随机数
-     
-     
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0
-     - 成功
-   * - POLICY_SERVICE_NOT_EXISTS
-     - 100701
-     - policyService不存在
-   * - POLICY_SERVICE_CALL_FAIL
-     - 100702
-     - policyService调用未知异常
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常
-   * - ILLEGAL_INPUT
-     - 160004
-     - 参数非法
-   * - DIRECT_ROUTE_REQUEST_TIMEOUT
-     - 160009
-     - AMOP超时
-   * - DIRECT_ROUTE_MSG_BASE_ERROR
-     - 160010
-     - AMOP异常
-----
-
-6. getEncryptKey
-~~~~~~~~~~~~~~~~~~~
-
-**基本信息**
-
-.. code-block:: text
-
-   接口名称: com.webank.weid.rpc.AmopService.getEncryptKey
-   接口定义: ResponseData<GetEncryptKeyResponse> getEncryptKey(String toOrgId, GetEncryptKeyArgs args)
-   接口描述: 通过AMOP获取密钥数据。
-
-**接口入参**\ : 
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - toOrgId
-     - String
-     - Y
-     - 目标机构编码
-     - 
-   * - args
-     - GetEncryptKeyArgs
-     - Y
-     - 密钥请求数据
-     - 
- 
- 
-com.webank.weid.protocol.amop.GetEncryptKeyArgs
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 非空
-     - 说明
-     - 备注
-   * - keyId
-     - String
-     - Y
-     - 用于获取数据的Id
-     - 
-   * - version
-     - Version
-     - Y
-     - sdk版本信息
-     - 
-   * - messageId
-     - String
-     - Y
-     - 消息Id
-     - 
-   * - fromOrgId
-     - String
-     - Y
-     - 数据来源机构
-     - 
-   * - toOrgId
-     - String
-     - Y
-     - 数据目标机构
-     - 
-
-     
-**接口返回**\ :   com.webank.weid.protocol.response.ResponseData\<GetEncryptKeyResponse>;
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - errorCode
-     - Integer
-     - 返回结果码
-     - 
-   * - errorMessage
-     - String
-     - 返回结果描述
-     - 
-   * - result
-     - GetEncryptKeyResponse
-     - 
-     - 业务数据
-
-com.webank.weid.protocol.response.GetEncryptKeyResponse
-
-.. list-table::
-   :header-rows: 1
-
-   * - 名称
-     - 类型
-     - 说明
-     - 备注
-   * - encryptKey
-     - String
-     - 密钥数据
-     - 
-   * - errorCode
-     - Integer
-     - 错误码
-     - 
-   * - errorMessage
-     - String
-     - 错误描述
-     - 
-
-    
-**此方法返回code**
-
-.. list-table::
-   :header-rows: 1
-
-   * - enum
-     - code
-     - desc
-   * - SUCCESS
-     - 0   
-     - 成功
-   * - ENCRYPT_KEY_NOT_EXISTS
-     - 100700
-     - 无法获取秘钥
-   * - PRESISTENCE_DATA_KEY_INVALID
-     - 100901
-     - dataKey无效
-   * - UNKNOW_ERROR
-     - 160003
-     - 未知异常
-   * - DIRECT_ROUTE_REQUEST_TIMEOUT
-     - 160009
-     - AMOP超时
-   * - DIRECT_ROUTE_MSG_BASE_ERROR
-     - 160010
-     - AMOP异常
-   * - SQL_EXECUTE_FAILED
-     - 160011
-     - SQL执行异常
-   * - SQL_GET_CONNECTION_ERROR
-     - 160013
-     - 获取数据源连接异常
-----
-
 
 JsonTransportation
 ^^^^^^^^^^^^^^^^^
@@ -17356,7 +16398,7 @@ PdfTransportation
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.specify
+   接口名称: com.webank.weid.suite.transportation.pdf.PdfTransportation.specify
    接口定义: PdfTransportation specify(List<String> verifierWeIdList)
    接口描述: 指定transportation的认证者,用于权限控制。
 
@@ -17379,7 +16421,7 @@ java.util.List<java.lang.String>
      -
 
 
-**接口返回**\ :   com.webank.weid.suite.api.transportation.inf.PdfTransportation;
+**接口返回**\ :   com.webank.weid.suite.transportation.pdf.PdfTransportation;
 
 **调用示例**
 
@@ -17403,7 +16445,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serialize
+   接口名称: com.webank.weid.suite.transportation.pdf.PdfTransportation.serialize
    接口定义: <T extends JsonSerializer> ResponseData<byte[]> serialize(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication);
    接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
 
@@ -17558,7 +16600,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serialize
+   接口名称: com.webank.weid.suite.transportation.pdf.PdfTransportation.serialize
    接口定义: <T extends JsonSerializer> ResponseData<Boolean> serialize(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String outputPdfFilePath);
    接口描述: 用于序列化对象并输出PDF文件,要求对象实现JsonSerializer接口
 
@@ -17720,7 +16762,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serializeWithTemplate
+   接口名称: com.webank.weid.suite.transportation.pdf.PdfTransportation.serializeWithTemplate
    接口定义: <T extends JsonSerializer> ResponseData<byte[]> serializeWithTemplate(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String inputPdfTemplatePath);
    接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
 
@@ -17890,7 +16932,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.serializeWithTemplate
+   接口名称: com.webank.weid.suite.transportation.pdf.PdfTransportation.serializeWithTemplate
    接口定义: <T extends JsonSerializer> ResponseData<Boolean> serializeWithTemplate(T object, ProtocolProperty property, WeIdAuthentication weIdAuthentication,String inputPdfTemplatePath,String outputPdfFilePath);
    接口描述: 用于序列化对象,要求对象实现JsonSerializer接口
 
@@ -18068,7 +17110,7 @@ java.util.List<java.lang.String>
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.transportation.inf.PdfTransportation.deserialize
+   接口名称: com.webank.weid.suite.transportation.pdf.PdfTransportation.deserialize
    接口定义: <T extends JsonSerializer> ResponseData<T> deserialize(byte[] pdfTransportation, Class clazz, WeIdAuthentication weIdAuthentication);
    接口描述: 用于反序列化对象,要求目标对象实现JsonSerializer接口。
 
@@ -18389,7 +17431,7 @@ Persistence
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.add
+   接口名称: com.webank.weid.suite.persistence.Persistence.add
    接口定义: public ResponseData<Integer> add(String domain, String id, String data);
    接口描述: 将数据存储到配置的存储库中
 
@@ -18506,7 +17548,7 @@ Persistence
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.batchAdd
+   接口名称: com.webank.weid.suite.persistence.Persistence.batchAdd
    接口定义: public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList);
    接口描述: 数据批量存储到配置的存储库中
 
@@ -18606,7 +17648,7 @@ Persistence
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.get
+   接口名称: com.webank.weid.suite.persistence.Persistence.get
    接口定义: public ResponseData<String> get(String domain, String id);
    接口描述: 从相关存储库读取数据
 
@@ -18700,7 +17742,7 @@ Persistence
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.delete
+   接口名称: com.webank.weid.suite.persistence.Persistence.delete
    接口定义: public ResponseData<Integer> delete(String domain, String id);
    接口描述: 从相关存储库中删除数据
 
@@ -18792,7 +17834,7 @@ Persistence
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.update
+   接口名称: com.webank.weid.suite.persistence.Persistence.update
    接口定义: public ResponseData<Integer> update(String domain, String id, String data);
    接口描述: 更新存储库中对应的数据
 
@@ -18889,7 +17931,7 @@ Persistence
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.addOrUpdate
+   接口名称: com.webank.weid.suite.persistence.Persistence.addOrUpdate
    接口定义: public ResponseData<Integer> addOrUpdate(String domain, String id, String data);
    接口描述: 更新或新增数据
 
@@ -18987,7 +18029,7 @@ Persistence
 
 .. code-block:: text
 
-   接口名称: com.webank.weid.suite.api.persistence.inf.Persistence.addTransaction
+   接口名称: com.webank.weid.suite.persistence.Persistence.addTransaction
    接口定义: public ResponseData<Integer> addTransaction(TransactionArgs transactionArgs);
    接口描述: 新增交易数据
 

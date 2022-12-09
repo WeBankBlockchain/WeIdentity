@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.webank.weid.full.persistence.TestBaseTransportation;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,11 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.transportation.TestBaseTransportation;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.PersistenceFactory;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.api.persistence.params.PersistenceType;
+import com.webank.weid.suite.persistence.PersistenceFactory;
+import com.webank.weid.suite.persistence.Persistence;
+import com.webank.weid.suite.persistence.PersistenceType;
 import com.webank.weid.util.PropertyUtils;
 
 public class TestRedisAdd extends TestBaseTransportation {

@@ -3,8 +3,8 @@
 package com.webank.weid;
 
 import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.rpc.*;
 import com.webank.weid.service.impl.*;
+import com.webank.weid.service.rpc.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

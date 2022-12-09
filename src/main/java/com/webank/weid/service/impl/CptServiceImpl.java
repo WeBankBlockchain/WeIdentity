@@ -2,7 +2,6 @@
 
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,14 +10,12 @@ import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
 import com.webank.wedpr.selectivedisclosure.IssuerClient;
 import com.webank.wedpr.selectivedisclosure.IssuerResult;
 import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.DatabaseException;
-import com.webank.weid.suite.api.persistence.PersistenceFactory;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.api.persistence.params.PersistenceType;
+import com.webank.weid.suite.persistence.PersistenceFactory;
+import com.webank.weid.suite.persistence.Persistence;
+import com.webank.weid.suite.persistence.PersistenceType;
 import com.webank.weid.util.*;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +29,7 @@ import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
-import com.webank.weid.rpc.CptService;
+import com.webank.weid.service.rpc.CptService;
 import com.webank.weid.suite.cache.CacheManager;
 import com.webank.weid.suite.cache.CacheNode;
 
@@ -466,7 +463,7 @@ public class CptServiceImpl implements CptService {
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CptService#queryCredentialTemplate(java.lang.Integer)
+     * @see com.webank.weid.service.rpc.CptService#queryCredentialTemplate(java.lang.Integer)
      */
     @Override
     public ResponseData<CredentialTemplateEntity> queryCredentialTemplate(Integer cptId) {
