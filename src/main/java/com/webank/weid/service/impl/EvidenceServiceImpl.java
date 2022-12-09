@@ -4,14 +4,16 @@ package com.webank.weid.service.impl;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+
+
+import com.webank.weid.service.rpc.EvidenceService;
+import com.webank.weid.service.rpc.WeIdService;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.ProcessingMode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.*;
 import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.EvidenceService;
-import com.webank.weid.rpc.WeIdService;
 import com.webank.weid.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -411,7 +413,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.generateHash
+     * @see com.webank.weid.service.rpc.generateHash
      * #generateHash(T object)
      */
     @Override
@@ -708,7 +710,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.EvidenceService#createEvidenceWithLogAndCustomKey(
+     * @see com.webank.weid.service.rpc.EvidenceService#createEvidenceWithLogAndCustomKey(
      * com.webank.weid.protocol.inf.Hashable, com.webank.weid.protocol.base.WeIdPrivateKey,
      * java.lang.String)
      */
@@ -801,7 +803,7 @@ public class EvidenceServiceImpl implements EvidenceService {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.EvidenceService#getEvidenceByCustomKey(java.lang.String)
+     * @see com.webank.weid.service.rpc.EvidenceService#getEvidenceByCustomKey(java.lang.String)
      */
     @Override
     public ResponseData<EvidenceInfo> getEvidenceByCustomKey(String customKey) {

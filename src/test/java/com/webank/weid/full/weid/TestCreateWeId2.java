@@ -10,8 +10,6 @@ import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.RawTransactionService;
-import com.webank.weid.service.impl.RawTransactionServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -341,33 +339,6 @@ public class TestCreateWeId2 extends TestBaseService {
         Assert.assertEquals(ErrorCode.WEID_PUBLICKEY_AND_PRIVATEKEY_NOT_MATCHED.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(StringUtils.EMPTY, response.getResult());
-    }
-
-    /**
-     * case: call transactionhex null - arbitrary.
-     */
-
-    @Test
-    public void testCreateWeIdCase7() {
-        String hex = StringUtils.EMPTY;
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.createWeId(hex);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
-    }
-
-    /**
-     * case: call transactionhex method - arbitrary.
-     */
-    @Test
-    public void testCreateWeIdCase81() {
-        String hex = "11111";
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.createWeId(hex);
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
     }
 
 

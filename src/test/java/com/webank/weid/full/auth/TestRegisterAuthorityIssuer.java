@@ -2,15 +2,6 @@
 
 package com.webank.weid.full.auth;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
@@ -20,9 +11,14 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.RawTransactionService;
-import com.webank.weid.service.impl.RawTransactionServiceImpl;
 import com.webank.weid.util.DateUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * registerAuthorityIssuer method for testing AuthorityIssuerService.
@@ -1023,33 +1019,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
         Assert.assertEquals(true, response.getResult());
     }
 
-    /**
-     * case: call transactionhex null - arbitrary.
-     */
-    @Test
-    public void testRegisterAuthorityIssuerCase22() {
-        String hex = StringUtils.EMPTY;
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.registerAuthorityIssuer(hex);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
-    }
-
-    /**
-     * case: call transactionhex method - arbitrary.
-     */
-    @Test
-    public void testRegisterAuthorityIssuerCase23() {
-        String hex = "11111";
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.registerAuthorityIssuer(hex);
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
-    }
-    
-    
     /**
      * case: getIssuerCount.
      */
