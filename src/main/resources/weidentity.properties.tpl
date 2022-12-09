@@ -14,7 +14,6 @@ chain.id=${CHAIN_ID}
 amop.request.timeout=5000
 
 amop.id=${AMOP_ID}
-amop.privateKey="xeewrwervvwv"
 
 # Blockchain node info.
 nodes=${BLOCKCHIAN_NODE_INFO}

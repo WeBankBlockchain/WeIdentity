@@ -7,7 +7,7 @@ import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.Persistence;
 import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.mysql.SqlDomain;
 import com.webank.weid.suite.persistence.mysql.SqlExecutor;
@@ -246,7 +246,7 @@ public class MysqlDriver implements Persistence {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.api.persistence.inf.Persistence#addOrUpdate(java.lang.String,
+     * @see com.webank.weid.suite.persistence.Persistence#addOrUpdate(java.lang.String,
      * java.lang.String, java.lang.String)
      */
     @Override
@@ -263,7 +263,7 @@ public class MysqlDriver implements Persistence {
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.api.persistence.inf.Persistence#addTransaction(
+     * @see com.webank.weid.suite.persistence.Persistence#addTransaction(
      * com.webank.weid.protocol.request.TransactionArgs)
      */
     @Override

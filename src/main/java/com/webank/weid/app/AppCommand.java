@@ -2,20 +2,16 @@
 
 package com.webank.weid.app;
 
-import java.io.PrintStream;
-
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.InitWeb3jException;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.service.rpc.WeIdService;
+import com.webank.weid.service.impl.WeIdServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.exception.InitWeb3jException;
-import com.webank.weid.protocol.amop.CheckAmopMsgHealthArgs;
-import com.webank.weid.protocol.response.AmopNotifyMsgResult;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.impl.AmopServiceImpl;
-import com.webank.weid.service.impl.WeIdServiceImpl;
+import java.io.PrintStream;
 
 /**
  * commands for testing.
@@ -49,9 +45,9 @@ public class AppCommand {
             }
 
             switch (command) {
-                case "--checkhealth":
+                /*case "--checkhealth":
                     result = checkAmopHealth(args[1]);
-                    break;
+                    break;*/
                 case "--checkweid":
                     result = checkWeid(args[1]);
                     break;
@@ -115,7 +111,7 @@ public class AppCommand {
      * @param toOrgId the orgid to test amop connection
      * @return ErrorCode
      */
-    private static Integer checkAmopHealth(String toOrgId) {
+    /*private static Integer checkAmopHealth(String toOrgId) {
 
         AmopServiceImpl amopService = new AmopServiceImpl();
         CheckAmopMsgHealthArgs checkAmopMsgHealthArgs = new CheckAmopMsgHealthArgs();
@@ -136,5 +132,5 @@ public class AppCommand {
                 "[checkAmopHealth] toOrgId -->" + toOrgId + " check failed. please check log.");
         }
         return resp.getErrorCode();
-    }
+    }*/
 }

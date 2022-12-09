@@ -544,20 +544,6 @@ public class TestBaseUtil {
      * buildSetPublicKeyArgs.
      *
      * @param createWeId WeId
-     * @return SetPublicKeyArgs
-     */
-    public static PublicKeyArgs buildSetPublicKeyArgs(CreateWeIdDataResult createWeId) {
-
-        PublicKeyArgs setPublicKeyArgs = new PublicKeyArgs();
-        setPublicKeyArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-
-        return setPublicKeyArgs;
-    }
-
-    /**
-     * buildSetPublicKeyArgs.
-     *
-     * @param createWeId WeId
      * @return SetServiceArgs
      */
     public static ServiceArgs buildSetServiceArgs(CreateWeIdDataResult createWeId) {

@@ -12,7 +12,7 @@ import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.WeIdListResult;
-import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.service.rpc.WeIdService;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.Multibase.Multibase;
 import com.webank.weid.util.Multicodec.Multicodec;

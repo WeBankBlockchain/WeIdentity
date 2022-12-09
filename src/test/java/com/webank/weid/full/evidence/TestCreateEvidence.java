@@ -14,7 +14,7 @@ import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.OffLineBatchTask;
+
 import com.webank.weid.util.WeIdUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -509,8 +509,8 @@ public class TestCreateEvidence extends TestBaseService {
                 transactionArgsList.add(args);
             }
         }*/
-        OffLineBatchTask task = new OffLineBatchTask();
-        task.sendBatchTransaction(transactionArgsList);
+        //OffLineBatchTask task = new OffLineBatchTask();
+        //task.sendBatchTransaction(transactionArgsList);
     }
 
     @Test
