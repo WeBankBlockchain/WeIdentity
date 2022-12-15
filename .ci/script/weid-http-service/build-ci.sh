@@ -33,10 +33,10 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     cp src/main/resources/* weid-http-service/src/test/resources/
     cp .ci/ca.crt weid-http-service/src/test/resources/
     cp .ci/ca.crt weid-http-service/src/main/resources/
-    cp .ci/node.crt weid-http-service/src/test/resources/
-    cp .ci/node.crt weid-http-service/src/main/resources/
-    cp .ci/node.key weid-http-service/src/test/resources/
-    cp .ci/node.key weid-http-service/src/main/resources/
+    cp .ci/sdk.crt weid-http-service/src/test/resources/
+    cp .ci/sdk.crt weid-http-service/src/main/resources/
+    cp .ci/sdk.key weid-http-service/src/test/resources/
+    cp .ci/sdk.key weid-http-service/src/main/resources/
 
     # run repo ci scripts
     cd weid-http-service/
