@@ -2,28 +2,19 @@
 
 package com.webank.weid.util;
 
-import com.webank.weid.config.FiscoConfig;
-import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.deploy.v3.DeployContractV3;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.BaseService;
-import java.math.BigInteger;
-import java.security.KeyPair;
-import java.util.Objects;
-import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-import org.fisco.bcos.sdk.abi.datatypes.Address;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keypair.ECDSAKeyPair;
 import org.fisco.bcos.sdk.utils.Numeric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.util.regex.Pattern;
 
 /**
  * The WeIdentity DID Utils.
@@ -38,14 +29,15 @@ public final class WeIdUtils {
     private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
 
     private static String getChainId() {
-        return BaseService.getChainId();
+        return com.webank.weid.blockchain.util.DataToolUtils.chainId;
     }
 
     public static CreateWeIdDataResult createWeId() {
         CreateWeIdDataResult result = new CreateWeIdDataResult();
-        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair();
-        String publicKey = DataToolUtils.hexStr2DecStr(keyPair.getHexPublicKey());
-        String privateKey = DataToolUtils.hexStr2DecStr(keyPair.getHexPrivateKey());
+        //CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair();
+        //String publicKey = DataToolUtils.hexStr2DecStr(keyPair.getHexPublicKey());
+        String privateKey = DataToolUtils.generatePrivateKey();
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privateKey, 10));
         WeIdPublicKey userWeIdPublicKey = new WeIdPublicKey();
         userWeIdPublicKey.setPublicKey(publicKey);
         result.setUserWeIdPublicKey(userWeIdPublicKey);
@@ -207,29 +199,6 @@ public final class WeIdUtils {
             return weIdFields[2].equals(getChainId());
         }
         return true;
-    }
-
-    /**
-     * check if the given Address is empty.
-     *
-     * @param addr given Address
-     * @return true if yes, false otherwise.
-     */
-    public static boolean isEmptyAddress(Address addr) {
-        if (addr == null) {
-            return false;
-        }
-        return addr.getValue().equals(BigInteger.ZERO);
-    }
-
-    /**
-     * check if the given Address is empty.
-     *
-     * @param addr given Address
-     * @return true if yes, false otherwise.
-     */
-    public static boolean isEmptyStringAddress(String addr) {
-        return Numeric.toBigInt(addr).equals(BigInteger.ZERO);
     }
 
     /**

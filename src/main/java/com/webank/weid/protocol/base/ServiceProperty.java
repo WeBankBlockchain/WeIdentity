@@ -39,4 +39,18 @@ public class ServiceProperty {
         serviceProperty.setServiceEndpoint(result[2]);
         return serviceProperty;
     }
+    public static ServiceProperty fromBlockChain(com.webank.weid.blockchain.protocol.base.ServiceProperty service) {
+        ServiceProperty serviceProperty = new ServiceProperty();
+        serviceProperty.setId(service.getId());
+        serviceProperty.setType(service.getType());
+        serviceProperty.setServiceEndpoint(service.getServiceEndpoint());
+        return serviceProperty;
+    }
+    public static com.webank.weid.blockchain.protocol.base.ServiceProperty toBlockChain(ServiceProperty service) {
+        com.webank.weid.blockchain.protocol.base.ServiceProperty serviceProperty = new com.webank.weid.blockchain.protocol.base.ServiceProperty();
+        serviceProperty.setId(service.getId());
+        serviceProperty.setType(service.getType());
+        serviceProperty.setServiceEndpoint(service.getServiceEndpoint());
+        return serviceProperty;
+    }
 }

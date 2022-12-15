@@ -2,31 +2,22 @@
 
 package com.webank.weid.suite.persistence.mysql.driver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.webank.weid.service.BaseService;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.Persistence;
 import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.mysql.SqlDomain;
 import com.webank.weid.suite.persistence.mysql.SqlExecutor;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * mysql operations.
@@ -255,7 +246,7 @@ public class MysqlDriver implements Persistence {
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.api.persistence.inf.Persistence#addOrUpdate(java.lang.String,
+     * @see com.webank.weid.suite.persistence.Persistence#addOrUpdate(java.lang.String,
      * java.lang.String, java.lang.String)
      */
     @Override
@@ -272,7 +263,7 @@ public class MysqlDriver implements Persistence {
 
 
     /* (non-Javadoc)
-     * @see com.webank.weid.suite.api.persistence.inf.Persistence#addTransaction(
+     * @see com.webank.weid.suite.persistence.Persistence#addTransaction(
      * com.webank.weid.protocol.request.TransactionArgs)
      */
     @Override
