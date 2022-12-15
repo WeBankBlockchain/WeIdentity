@@ -47,8 +47,8 @@ function modify_config()
         cp ${java_source_code_dir}/ecdsa_key ${java_source_code_dir}/src/test/resources/
     fi
     cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/test/resources
-    cp ${java_source_code_dir}/.ci/node.crt ${java_source_code_dir}/src/test/resources
-    cp ${java_source_code_dir}/.ci/node.key ${java_source_code_dir}/src/test/resources
+    cp ${java_source_code_dir}/.ci/sdk.crt ${java_source_code_dir}/src/test/resources
+    cp ${java_source_code_dir}/.ci/sdk.key ${java_source_code_dir}/src/test/resources
     cp ${java_source_code_dir}/NotoSansCJKtc-Regular.ttf ${java_source_code_dir}/src/main/resources
     cp ${java_source_code_dir}/NotoSansCJKtc-Regular.ttf ${java_source_code_dir}/src/test/resources
 	cp -r ${java_source_code_dir}/src/main/resources/WeDPR_dynamic_lib ${java_source_code_dir}/src/test/resources
@@ -60,8 +60,8 @@ function gradle_build_sdk()
 {
     #run gradle build
     cp ${java_source_code_dir}/.ci/ca.crt ${java_source_code_dir}/src/main/resources
-    cp ${java_source_code_dir}/.ci/node.crt ${java_source_code_dir}/src/main/resources
-    cp ${java_source_code_dir}/.ci/node.key ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/.ci/sdk.crt ${java_source_code_dir}/src/main/resources
+    cp ${java_source_code_dir}/.ci/sdk.key ${java_source_code_dir}/src/main/resources
 
     export FISCO_BCOS_VERSION="2"
     export CNS_PROFILE_ACTIVE="ci"
