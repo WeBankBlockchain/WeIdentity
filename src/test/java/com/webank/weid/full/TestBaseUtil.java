@@ -2,11 +2,23 @@
 
 package com.webank.weid.full;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.webank.weid.common.LogUtil;
+import com.webank.weid.common.PasswordKey;
+import com.webank.weid.constant.JsonSchemaConstant;
+import com.webank.weid.protocol.base.AuthorityIssuer;
+import com.webank.weid.protocol.base.CptBaseInfo;
+import com.webank.weid.protocol.base.WeIdAuthentication;
+import com.webank.weid.protocol.base.WeIdPrivateKey;
+import com.webank.weid.protocol.request.*;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
+import com.webank.weid.util.DataToolUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+
+import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -15,36 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.utils.Numeric;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-
-import com.webank.weid.common.LogUtil;
-import com.webank.weid.common.PasswordKey;
-import com.webank.weid.config.FiscoConfig;
-import com.webank.weid.constant.JsonSchemaConstant;
-import com.webank.weid.protocol.base.AuthorityIssuer;
-import com.webank.weid.protocol.base.CptBaseInfo;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.request.AuthenticationArgs;
-import com.webank.weid.protocol.request.CptMapArgs;
-import com.webank.weid.protocol.request.CptStringArgs;
-import com.webank.weid.protocol.request.CreateCredentialArgs;
-import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
-import com.webank.weid.protocol.request.CreateWeIdArgs;
-import com.webank.weid.protocol.request.PublicKeyArgs;
-import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
-import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
-import com.webank.weid.protocol.request.ServiceArgs;
-import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.util.DataToolUtils;
-
 /**
  * testing basic entity object building classes.
  *
@@ -52,19 +34,10 @@ import com.webank.weid.util.DataToolUtils;
  */
 public class TestBaseUtil {
 
-    private static final FiscoConfig fiscoConfig;
-
     /**
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(TestBaseUtil.class);
-
-    static {
-        logger.info("[init] begin init FiscoConfig.");
-        // load fisco.properties
-        fiscoConfig = new FiscoConfig();
-        fiscoConfig.load();
-    }
 
     /**
      * build CreateCredentialArgs no cptId.
@@ -571,20 +544,6 @@ public class TestBaseUtil {
      * buildSetPublicKeyArgs.
      *
      * @param createWeId WeId
-     * @return SetPublicKeyArgs
-     */
-    public static PublicKeyArgs buildSetPublicKeyArgs(CreateWeIdDataResult createWeId) {
-
-        PublicKeyArgs setPublicKeyArgs = new PublicKeyArgs();
-        setPublicKeyArgs.setPublicKey(createWeId.getUserWeIdPublicKey().getPublicKey());
-
-        return setPublicKeyArgs;
-    }
-
-    /**
-     * buildSetPublicKeyArgs.
-     *
-     * @param createWeId WeId
      * @return SetServiceArgs
      */
     public static ServiceArgs buildSetServiceArgs(CreateWeIdDataResult createWeId) {
@@ -632,32 +591,18 @@ public class TestBaseUtil {
         } catch (Exception e) {
             logger.error("createEcKeyPair error:", e);
         }*/
-        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair();
+        String privateKey = DataToolUtils.generatePrivateKey();
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privateKey, 10));
         BigInteger bigPublicKey =
-                new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));
-        BigInteger bigPrivateKey =
-                new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPrivateKey()));
+                new BigInteger(publicKey, 10);
+        BigInteger bigPrivateKey =new BigInteger(privateKey, 10);
 
-        String publicKey = String.valueOf(bigPublicKey);
-        String privateKey = String.valueOf(bigPrivateKey);
+        //String publicKey = String.valueOf(bigPublicKey);
+        //String privateKey = String.valueOf(bigPrivateKey);
         passwordKey.setPrivateKey(privateKey);
         passwordKey.setPublicKey(publicKey);
         LogUtil.info(logger, "createEcKeyPair", passwordKey);
         return passwordKey;
-    }
-
-    /**
-     * create a new public key - private key.
-     *
-     * @return ECKeyPair
-     */
-    public static CryptoKeyPair createKeyPair() {
-        try {
-            return DataToolUtils.cryptoSuite.createKeyPair();
-        } catch (Exception e) {
-            logger.error("createEcKeyPair error:", e);
-        }
-        return null;
     }
 
     /**

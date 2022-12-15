@@ -2,34 +2,19 @@
 
 package com.webank.weid.util;
 
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
-
-import com.webank.weid.service.BaseService;
-import org.apache.commons.lang3.StringUtils;
-
-import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.*;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
-import com.webank.weid.constant.CredentialFieldDisclosureValue;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
+import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 /**
  * The Class CredentialUtils.
@@ -347,7 +332,7 @@ public final class CredentialUtils {
         }
         String mergedId = id.replaceAll(WeIdConstant.UUID_SEPARATOR, StringUtils.EMPTY);
         byte[] uuidBytes = mergedId.getBytes(StandardCharsets.UTF_8);
-        return DataToolUtils.bytesArrayToBytes32(uuidBytes);
+        return com.webank.weid.blockchain.util.DataToolUtils.bytesArrayToBytes32(uuidBytes);
     }
 
     /**

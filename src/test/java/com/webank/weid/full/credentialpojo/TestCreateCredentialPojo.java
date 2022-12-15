@@ -119,7 +119,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
 
         // Specify key ID to be "1" and it should be OK too
         verify = credentialPojoService.verify(createCredentialPojoArgs.getIssuer(),
-            "1", createResp.getResult());
+                cwdr.getWeId() + "#keys-" + DataToolUtils.hash(pwKey.getPublicKey()).substring(58), createResp.getResult());
         Assert.assertTrue(verify.getResult());
 
         // Specify key ID to be "0" and it should be semi-succeeded
@@ -944,8 +944,9 @@ public class TestCreateCredentialPojo extends TestBaseService {
         // Enforce a Register/Update system CPT first
         WeIdAuthentication sdkAuthen = new WeIdAuthentication();
         //ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
-        String keyWeId = WeIdUtils.convertAddressToWeId(keyPair.getAddress());
+        //CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils.convertAddressToWeId(DataToolUtils.addressFromPublic(new BigInteger(publicKey, 10)));
         sdkAuthen.setWeId(keyWeId);
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
         weIdPrivateKey.setPrivateKey(privateKey);
@@ -954,9 +955,9 @@ public class TestCreateCredentialPojo extends TestBaseService {
             CreateWeIdArgs wargs = new CreateWeIdArgs();
             wargs.setWeIdPrivateKey(weIdPrivateKey);
             //wargs.setPublicKey(keyPair.getPublicKey().toString(10));
-            BigInteger publicKey =
-                    new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));
-            wargs.setPublicKey(publicKey.toString(10));
+            /*BigInteger publicKey =
+                    new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));*/
+            wargs.setPublicKey(publicKey);
             weIdService.createWeId(wargs);
         }
 //        String cptJsonSchema = DataToolUtils.generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));

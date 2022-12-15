@@ -2,23 +2,23 @@
 
 package com.webank.weid.full.persistence.testmysql;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashMap;
-
+import com.webank.weid.common.LogUtil;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.full.persistence.TestBaseTransportation;
+import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.suite.persistence.Persistence;
+import com.webank.weid.suite.persistence.PersistenceFactory;
+import com.webank.weid.suite.persistence.PersistenceType;
+import com.webank.weid.util.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.transportation.TestBaseTransportation;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.PersistenceFactory;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.api.persistence.params.PersistenceType;
-import com.webank.weid.util.PropertyUtils;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
 
 public class TestMysqlAdd extends TestBaseTransportation {
 
@@ -46,6 +46,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:test add.
      */
+    @Test
     public void testSave_success() {
 
         ResponseData<String> response = new ResponseData<>();
@@ -71,6 +72,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:test batch add.
      */
+    @Test
     public void testBatchAdd_success() {
         persistence.delete("domain.defaultInfo", "1111aa");
         persistence.delete("domain.defaultInfo", "1222bb");
@@ -96,6 +98,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:insert data into a same database again.
      */
+    @Test
     public void testAdd_repeat() {
 
         ResponseData<String> response = new ResponseData<>();
@@ -121,6 +124,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:domain is not spit by : .
      */
+    @Test
     public void testAdd_domainNoSpit() {
         if (persistence.get(null, idname).getResult() != null) {
             persistence.delete(null, idname);
@@ -138,6 +142,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:domain spit by : but the databases and table begin with space and end with space.
      */
+    @Test
     public void testAdd_domainContainSpace() {
         ResponseData<Integer> res = persistence.add(
                 " datasource1 : sdk_all_data ", "123456", "data123456");
@@ -151,6 +156,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:domain is null.
      */
+    @Test
     public void testAdd_domainNull() {
 
         if (persistence.get(null, "123456") != null) {
@@ -170,6 +176,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:domain is blank.
      */
+    @Test
     public void testAdd_domainBlank() {
         if (persistence.get("", idname) != null) {
             persistence.delete("", idname);
@@ -188,6 +195,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:database is zh.
      */
+    @Test
     public void testAdd_domainContainZh() {
         String id = idname + System.currentTimeMillis();
         ResponseData<Integer> res = persistence.add("datasource1:夏石龙",
@@ -203,6 +211,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:domain hasspecial character.
      */
+    @Test
     public void testAdd_domainContainSpecialChar() {
 
         ResponseData<Integer> res = persistence
@@ -217,6 +226,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:id is zh.
      */
+    @Test
     public void testAdd_idZh() {
 
         ResponseData<String> response = new ResponseData<>();
@@ -239,6 +249,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:id contains special char.
      */
+    @Test
     public void testAdd_idContainSpecialChar() {
 
         ResponseData<String> response = new ResponseData<>();
@@ -261,6 +272,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:id contains special char.
      */
+    @Test
     public void testAdd_idContainKeyWord() {
 
         ResponseData<String> response = new ResponseData<>();
@@ -284,6 +296,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:data contains zh.
      */
+    @Test
     public void testAdd_dataZh() {
 
         ResponseData<String> response = new ResponseData<>();
@@ -308,6 +321,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:data contains special char.
      */
+    @Test
     public void testAdd_dataContainSpeciaChar() {
 
         ResponseData<String> response = new ResponseData<>();
@@ -328,6 +342,7 @@ public class TestMysqlAdd extends TestBaseTransportation {
     /**
      * case:data contains special char.
      */
+    @Test
     public void testAdd_dataIsTooLong() {
         char[] chars = new char[1000];
         for (int i = 0; i < chars.length; i++) {

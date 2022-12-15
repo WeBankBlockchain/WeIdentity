@@ -4,9 +4,7 @@ package com.webank.weid.protocol.base;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
@@ -153,5 +151,27 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
             claimPolicyMap.put(CredentialConstant.CLAIM_POLICY_DISCLOSED_FIELD, disclosureMap);
         }
         return DataToolUtils.serialize(policyEMap);
+    }
+
+    /**
+     * transfer PresentationPolicyE class from weid-blockchain.
+     * @param presentation the PresentationPolicyE object in weid-blockchain
+     * @return PresentationPolicyE
+     */
+    public static PresentationPolicyE fromBlockChain(com.webank.weid.blockchain.protocol.base.PresentationPolicyE presentation) {
+        PresentationPolicyE presentationPolicyE = new PresentationPolicyE();
+        presentationPolicyE.setId(presentation.getId());
+        presentationPolicyE.setOrgId(presentation.getOrgId());
+        presentationPolicyE.setPolicyPublisherWeId(presentation.getPolicyPublisherWeId());
+        presentationPolicyE.setExtra(presentation.getExtra());
+        presentationPolicyE.setPolicyType(presentation.getPolicyType());
+        Map<Integer, ClaimPolicy> policyMap = new HashMap<>();
+        for(Map.Entry<Integer, String> entry  : presentation.getPolicy().entrySet()){
+            ClaimPolicy claimPolicy = new ClaimPolicy();
+            claimPolicy.setFieldsToBeDisclosed(entry.getValue());
+            policyMap.put(entry.getKey(), claimPolicy);
+        }
+        presentationPolicyE.setPolicy(policyMap);
+        return presentationPolicyE;
     }
 }

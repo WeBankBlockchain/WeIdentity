@@ -35,8 +35,8 @@ if [ "$TRAVIS_BRANCH" = "master" ];then
     cp src/main/resources/fisco.properties weid-sample/src/main/resources/
     cp src/main/resources/weidentity.properties weid-sample/src/main/resources/
     cp .ci/ca.crt weid-sample/src/main/resources/
-    cp .ci/node.crt weid-sample/src/main/resources/
-    cp .ci/node.key weid-sample/src/main/resources/
+    cp .ci/sdk.crt weid-sample/src/main/resources/
+    cp .ci/sdk.key weid-sample/src/main/resources/
 
     # run repo ci scripts
     cd weid-sample/

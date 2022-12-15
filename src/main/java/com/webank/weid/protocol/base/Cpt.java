@@ -2,8 +2,10 @@
 
 package com.webank.weid.protocol.base;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import com.webank.weid.protocol.response.RsvSignature;
 import lombok.Data;
 
 /**
@@ -138,6 +140,19 @@ public class Cpt {
     }
 
     /**
+     * transfer cpt MetaData from weid-blockchain.
+     * @param cptData the cpt MetaData class in weid-blockchain
+     * @return RsvSignature
+     */
+    public static Cpt fromBlockChain(com.webank.weid.blockchain.protocol.base.Cpt cptData) {
+        Cpt cpt = new Cpt();
+        cpt.setCptBaseInfo(CptBaseInfo.fromBlockChain(cptData.getCptBaseInfo()));
+        cpt.setCptJsonSchema(cptData.getCptJsonSchema());
+        cpt.setMetaData(MetaData.fromBlockChain(cptData.getMetaData()));
+        return cpt;
+    }
+
+    /**
      * The base data structure for CPT meta data.
      */
     @Data
@@ -162,5 +177,19 @@ public class Cpt {
          * The cpt update timestamp.
          */
         private long updated;
+
+        /**
+         * transfer cpt MetaData from weid-blockchain.
+         * @param data the cpt MetaData class in weid-blockchain
+         * @return RsvSignature
+         */
+        public static MetaData fromBlockChain(com.webank.weid.blockchain.protocol.base.Cpt.MetaData data) {
+            MetaData metaData = new MetaData();
+            metaData.setUpdated(data.getUpdated());
+            metaData.setCreated(data.getCreated());
+            metaData.setCptSignature(data.getCptSignature());
+            metaData.setCptPublisher(data.getCptPublisher());
+            return metaData;
+        }
     }
 }
