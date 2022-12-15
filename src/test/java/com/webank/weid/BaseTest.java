@@ -1,51 +1,20 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid;
 
+import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.service.impl.*;
+import com.webank.weid.service.rpc.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-
-import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.rpc.AuthorityIssuerService;
-import com.webank.weid.rpc.CptService;
-import com.webank.weid.rpc.CredentialPojoService;
-import com.webank.weid.rpc.CredentialService;
-import com.webank.weid.rpc.EvidenceService;
-import com.webank.weid.rpc.PolicyService;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.AuthorityIssuerServiceImpl;
-import com.webank.weid.service.impl.CptServiceImpl;
-import com.webank.weid.service.impl.CredentialPojoServiceImpl;
-import com.webank.weid.service.impl.CredentialServiceImpl;
-import com.webank.weid.service.impl.EvidenceServiceImpl;
-import com.webank.weid.service.impl.PolicyServiceImpl;
-import com.webank.weid.service.impl.WeIdServiceImpl;
 
 /**
  * Test base class.
  *
  * @author v_wbgyang
  */
-public abstract class BaseTest extends BaseService {
+public abstract class BaseTest {
 
     protected AuthorityIssuerService authorityIssuerService;
     protected CptService cptService;
@@ -80,7 +49,8 @@ public abstract class BaseTest extends BaseService {
         credentialPojoService = new CredentialPojoServiceImpl();
         policyService = new PolicyServiceImpl();
 
-        privateKey = TestBaseUtil.readPrivateKeyFromFile("ecdsa_key");
+        //privateKey = TestBaseUtil.readPrivateKeyFromFile("ecdsa_key");
+        privateKey = TestBaseUtil.readPrivateKeyFromFile("private_key");
 
         testInit();
     }

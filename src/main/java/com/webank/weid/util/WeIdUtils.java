@@ -1,41 +1,20 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.util;
-
-import java.math.BigInteger;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.crypto.WalletUtils;
-import org.fisco.bcos.web3j.utils.Numeric;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.service.BaseService;
+import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.response.CreateWeIdDataResult;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.fisco.bcos.sdk.utils.Numeric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigInteger;
+import java.util.regex.Pattern;
 
 /**
  * The WeIdentity DID Utils.
@@ -50,7 +29,25 @@ public final class WeIdUtils {
     private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
 
     private static String getChainId() {
-        return BaseService.getChainId();
+        return com.webank.weid.blockchain.util.DataToolUtils.chainId;
+    }
+
+    public static CreateWeIdDataResult createWeId() {
+        CreateWeIdDataResult result = new CreateWeIdDataResult();
+        //CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.createKeyPair();
+        //String publicKey = DataToolUtils.hexStr2DecStr(keyPair.getHexPublicKey());
+        String privateKey = DataToolUtils.generatePrivateKey();
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privateKey, 10));
+        WeIdPublicKey userWeIdPublicKey = new WeIdPublicKey();
+        userWeIdPublicKey.setPublicKey(publicKey);
+        result.setUserWeIdPublicKey(userWeIdPublicKey);
+        WeIdPrivateKey userWeIdPrivateKey = new WeIdPrivateKey();
+        userWeIdPrivateKey.setPrivateKey(privateKey);
+        result.setUserWeIdPrivateKey(userWeIdPrivateKey);
+        //替换国密
+        String weId = WeIdUtils.convertPublicKeyToWeId(publicKey);
+        result.setWeId(weId);
+        return result;
     }
 
     /**
@@ -96,12 +93,13 @@ public final class WeIdUtils {
     /**
      * Convert a public key to a WeIdentity DID.
      *
-     * @param publicKey the public key
+     * @param publicKey the public key (decimal)
      * @return WeIdentity DID
      */
     public static String convertPublicKeyToWeId(String publicKey) {
         try {
-            String address = Keys.getAddress(new BigInteger(publicKey));
+            //String address = Keys.getAddress(new BigInteger(publicKey));
+            String address = DataToolUtils.addressFromPublic(new BigInteger(publicKey));
             return buildWeIdByAddress(address);
         } catch (Exception e) {
             logger.error("convert publicKey to weId error.", e);
@@ -143,25 +141,29 @@ public final class WeIdUtils {
      * @param publicKey the WeIdentity DID publicKey key
      * @return true if the private and publicKey key is match, false otherwise.
      */
-    public static boolean isEcdsaKeypairMatch(String privateKey, String publicKey) {
+    /*public static boolean isEcdsaKeypairMatch(String privateKey, String publicKey) {
         try {
-            ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
-            return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);
+            *//*ECKeyPair keyPair = ECKeyPair.create(new BigInteger(privateKey));
+            return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);*//*
+            CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(
+                    new BigInteger(privateKey));
+            byte[] bytePub = Numeric.hexStringToByteArray(keyPair.getHexPublicKey());
+            return StringUtils.equals(new BigInteger(1, bytePub).toString(), publicKey);
         } catch (Exception e) {
             return false;
         }
-    }
+    }*/
 
     /**
      * check if the public key matchs the private key.
      *
-     * @param privateKey the WeIdentity DID private key
-     * @param publicKey the WeIdentity DID publicKey key
+     * @param privateKey BigInt of decimal private key
+     * @param publicKey the WeIdentity DID publicKey key decimal
      * @return true if the private and publicKey key is match, false otherwise.
      */
-    public static boolean isKeypairMatch(String privateKey, String publicKey) {
-        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        return StringUtils.equals(String.valueOf(keyPair.getPublicKey()), publicKey);
+    public static boolean isKeypairMatch(BigInteger privateKey, String publicKey) {
+        String pubFromPri = DataToolUtils.publicKeyStrFromPrivate(privateKey);
+        return StringUtils.equals(pubFromPri, publicKey);
     }
 
     /**
@@ -176,7 +178,10 @@ public final class WeIdUtils {
             return false;
         }
         try {
-            return WalletUtils.isValidAddress(addr);
+            // return WalletUtils.isValidAddress(addr);
+            // java-sdk去掉了WalletUtils.isValidAddress, 此处为先将原逻辑迁移出来
+            String addressNoPrefix = Numeric.cleanHexPrefix(addr);
+            return addressNoPrefix.length() == 40;
         } catch (Exception e) {
             return false;
         }
@@ -197,29 +202,6 @@ public final class WeIdUtils {
     }
 
     /**
-     * check if the given Address is empty.
-     *
-     * @param addr given Address
-     * @return true if yes, false otherwise.
-     */
-    public static boolean isEmptyAddress(Address addr) {
-        if (addr == null) {
-            return false;
-        }
-        return addr.getValue().equals(BigInteger.ZERO);
-    }
-
-    /**
-     * check if the given Address is empty.
-     *
-     * @param addr given Address
-     * @return true if yes, false otherwise.
-     */
-    public static boolean isEmptyStringAddress(String addr) {
-        return Numeric.toBigInt(addr).equals(BigInteger.ZERO);
-    }
-
-    /**
      * check the weId is match the private key.
      *
      * @param privateKey the private key
@@ -230,16 +212,14 @@ public final class WeIdUtils {
         boolean isMatch = false;
 
         try {
-            BigInteger publicKey = DataToolUtils
-                .publicKeyFromPrivate(new BigInteger(privateKey.getPrivateKey()));
-            String address1 = "0x" + Keys.getAddress(publicKey);
+            String address1 = DataToolUtils.addressFromPrivate(new BigInteger(privateKey.getPrivateKey()));
             String address2 = WeIdUtils.convertWeIdToAddress(weId);
             if (address1.equals(address2)) {
                 isMatch = true;
             }
         } catch (Exception e) {
             logger.error("Validate private key We Id matches failed. Error message :{}", e);
-            return isMatch;
+            return false;
         }
 
         return isMatch;
@@ -252,10 +232,10 @@ public final class WeIdUtils {
      * @return address
      */
     public static String getWeIdFromPrivateKey(String privateKey) {
-
-        BigInteger publicKey = DataToolUtils
-            .publicKeyFromPrivate(new BigInteger(privateKey));
-        return convertPublicKeyToWeId(String.valueOf(publicKey));
+        /*BigInteger publicKey = DataToolUtils
+            .publicKeyFromPrivate(new BigInteger(privateKey));*/
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privateKey));
+        return convertPublicKeyToWeId(publicKey);
     }
 
     /**

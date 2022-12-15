@@ -1,33 +1,12 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.contract.deploy;
 
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.webank.weid.config.FiscoConfig;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.contract.deploy.v2.DeployContractV2;
-import com.webank.weid.exception.WeIdBaseException;
 
 /**
  * The Class DeployContract.
@@ -43,16 +22,16 @@ public abstract class DeployContract {
 
     /**
      * The Fisco Config bundle.
-     */
-    protected static final FiscoConfig fiscoConfig;
+        */
+    //protected static final FiscoConfig fiscoConfig;
 
-    static {
+    /*static {
         fiscoConfig = new FiscoConfig();
         if (!fiscoConfig.load()) {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
             System.exit(1);
         }
-    }
+    }*/
 
     /**
      * The main method.
@@ -60,18 +39,21 @@ public abstract class DeployContract {
      * @param args the arguments
      */
     public static void main(String[] args) {
-        
-        String chainId = args[0];
+        //此处初始化读取main resource的配置文件，可修改chainId为101。并修改fisco.properties:profile.active=prd101
+        //String chainId = "101";
+        //String chainId = args[0];
         String privateKey = null;
         if (args != null && args.length > 2) {
             privateKey = args[1];
         }
         if (StringUtils.isBlank(privateKey)) {
-            privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
+            //privateKey = AddressProcess.getAddressFromFile("ecdsa_key");
+            privateKey = AddressProcess.getAddressFromFile("private_key");
         }
-        fiscoConfig.setChainId(chainId);
+        //fiscoConfig.setChainId(chainId);
+        //logger.info("deploy contract fisco version is [{},{}]", fiscoConfig.getVersion(), fiscoConfig.getNodes());
         try {
-            deployContract(privateKey, true);
+            com.webank.weid.blockchain.deploy.DeployContract.deployContract(privateKey, true);
         } catch (WeIdBaseException e) {
             if (e.getErrorCode().getCode() == ErrorCode.CNS_NO_PERMISSION.getCode()) {
                 System.out.println("deploy fail, Maybe your private key is incorrect. Please make "
@@ -83,11 +65,15 @@ public abstract class DeployContract {
         System.exit(0);
     }
     
-    public static void deployContract(String privateKey, boolean instantEnable) {
+    /*public static void deployContract(String privateKey, boolean instantEnable) {
         if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_1_X_VERSION_PREFIX)) {
             throw new WeIdBaseException(ErrorCode.THIS_IS_UNSUPPORTED);
-        } else {
+        } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_2_X_VERSION_PREFIX)) {
+            logger.info("deployContract v2");
             DeployContractV2.deployContract(privateKey, fiscoConfig, instantEnable);
-        } 
-    }
+        } else if (fiscoConfig.getVersion().startsWith(WeIdConstant.FISCO_BCOS_3_X_VERSION_PREFIX)) {
+            logger.info("deployContract v3");
+            DeployContractV3.deployContract(privateKey, fiscoConfig, instantEnable);
+        }
+    }*/
 }

@@ -1,47 +1,24 @@
-/*
- *       Copyright© (2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.persistence.redis.driver;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RedissonClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
+import com.webank.weid.suite.persistence.Persistence;
 import com.webank.weid.suite.persistence.DefaultValue;
 import com.webank.weid.suite.persistence.redis.RedisDomain;
 import com.webank.weid.suite.persistence.redis.RedisExecutor;
 import com.webank.weid.suite.persistence.redis.RedissonConfig;
 import com.webank.weid.util.DataToolUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * redis Driver.
@@ -67,7 +44,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->add] the id of the data is empty.");
             return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             Date date = new Date();
@@ -93,7 +70,7 @@ public class RedisDriver implements Persistence {
                     logger.error("[redis->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
-                idHashList.add(DataToolUtils.getHash(id));
+                idHashList.add(DataToolUtils.hash(id));
                 dataList.add(data);
             }
             RedisDomain redisDomain = new RedisDomain(domain);
@@ -130,7 +107,7 @@ public class RedisDriver implements Persistence {
             return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
         //dataKey:id的hash值
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             ResponseData<String> result = new ResponseData<String>();
             //设置result初始值为空字符串
@@ -178,7 +155,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->delete] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             return new RedisExecutor(redisDomain).executeDelete(dataKey, client);
@@ -195,7 +172,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         Date date = new Date();
         try {
             RedisDomain redisDomain = new RedisDomain(domain);

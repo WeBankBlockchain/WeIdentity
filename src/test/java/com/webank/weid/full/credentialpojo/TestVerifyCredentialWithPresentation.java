@@ -1,29 +1,19 @@
 package com.webank.weid.full.credentialpojo;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.webank.weid.common.LogUtil;
+import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.full.TestBaseUtil;
+import com.webank.weid.full.persistence.TestBaseTransportation;
+import com.webank.weid.protocol.base.*;
+import com.webank.weid.protocol.response.ResponseData;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.full.TestBaseUtil;
-import com.webank.weid.full.transportation.TestBaseTransportation;
-import com.webank.weid.protocol.base.Challenge;
-import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.PresentationPolicyE;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.transportation.TransportationFactory;
-import com.webank.weid.suite.api.transportation.params.EncodeType;
-import com.webank.weid.suite.api.transportation.params.ProtocolProperty;
-import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class TestVerifyCredentialWithPresentation extends TestBaseTransportation {
 
@@ -146,7 +136,7 @@ public class TestVerifyCredentialWithPresentation extends TestBaseTransportation
     /**
      * verify presentation from pdf transportation.
      */
-    @Test
+    /*@Test
     @Ignore
     public void testVerifyPdfPresentation_fail() {
 
@@ -172,12 +162,12 @@ public class TestVerifyCredentialWithPresentation extends TestBaseTransportation
         Assert.assertEquals(
             ErrorCode.CREDENTIAL_USE_VERIFY_FUNCTION_ERROR.getCode(),
             response.getErrorCode().intValue());
-    }
+    }*/
 
     /**
      * verify presentation from pdf transportation.
      */
-    @Test
+    /*@Test
     @Ignore
     public void testVerifyPdfPresentation_success() {
         PdfTransportationImpl pdfTransportation = new PdfTransportationImpl();
@@ -207,5 +197,5 @@ public class TestVerifyCredentialWithPresentation extends TestBaseTransportation
             retDeserialize.getResult());
         LogUtil.info(logger, "testVerfiyCredentialWithPresention", response);
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
-    }
+    }*/
 }

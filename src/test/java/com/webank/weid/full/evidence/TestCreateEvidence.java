@@ -1,38 +1,6 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.evidence;
-
-import java.io.File;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.constant.ErrorCode;
@@ -44,11 +12,25 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.impl.engine.EngineFactory;
-import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.OffLineBatchTask;
+
+import com.webank.weid.util.WeIdUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Test CreateEvidence.
@@ -96,12 +78,12 @@ public class TestCreateEvidence extends TestBaseService {
         EvidenceInfo evidenceInfo = eviInfo.getResult();
         Assert.assertTrue(evidenceInfo.getCredentialHash().equalsIgnoreCase(hash));
         String signerWeId = tempCreateWeIdResultWithSetAttr.getWeId();
-        Assert.assertTrue(evidenceInfo.getSigners().contains(signerWeId));
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(signerWeId).getLogs().size(), 2);
+        Assert.assertTrue(evidenceInfo.getSigners().contains(WeIdUtils.convertWeIdToAddress(signerWeId)));
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().size(), 2);
         Assert.assertTrue(
-            evidenceInfo.getSignInfo().get(signerWeId).getLogs().get(0).equals("1.23"));
+            evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().get(0).equals("1.23"));
         Assert.assertTrue(
-            evidenceInfo.getSignInfo().get(signerWeId).getLogs().get(1).equals("13.15"));
+            evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().get(1).equals("13.15"));
         ResponseData<Boolean> resp = evidenceService
             .verifySigner(credential, evidenceInfo, signerWeId);
         Assert.assertTrue(resp.getResult());
@@ -217,8 +199,8 @@ public class TestCreateEvidence extends TestBaseService {
         EvidenceInfo evidenceInfo = eviInfo.getResult();
         String signer1 = tempCreateWeIdResultWithSetAttr.getWeId();
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(signer1).getLogs().size(), 2);
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(signer2).getLogs().size(), 2);
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer1)).getLogs().size(), 2);
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer2)).getLogs().size(), 2);
         ResponseData<Boolean> resp = evidenceService
             .verifySigner(credential, evidenceInfo, signer1);
         Assert.assertTrue(resp.getResult());
@@ -255,16 +237,16 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertEquals(evi1.getSigners(), evi2.getSigners());
         Assert.assertEquals(evi1.getSignatures(), evi2.getSignatures());
         String signer = tempCreateWeIdResultWithSetAttr.getWeId();
-        Assert.assertEquals(evi1.getSignInfo().get(signer).getLogs(),
-            evi2.getSignInfo().get(signer).getLogs());
+        Assert.assertEquals(evi1.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs(),
+            evi2.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs());
         evidenceService.addLogByHash(hash, "Insane",
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         evidenceService.addLogByCustomKey(null, credId, "Difficult",
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         evi2 = evidenceService.getEvidenceByCustomKey(credId).getResult();
-        Assert.assertEquals(evi2.getSignInfo().get(signer).getLogs().size(), 3);
+        Assert.assertEquals(evi2.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs().size(), 3);
         List<String> list = Arrays.asList("Ironman", "Insane", "Difficult");
-        Assert.assertEquals(evi2.getSignInfo().get(signer).getLogs(), list);
+        Assert.assertEquals(evi2.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs(), list);
     }
 
     @Test
@@ -341,11 +323,11 @@ public class TestCreateEvidence extends TestBaseService {
         EvidenceInfo evi = eviCustomKey.getResult();
         String signer = tempCreateWeIdResultWithSetAttr.getWeId();
         Assert.assertNotNull(evi.getSignInfo());
-        Assert.assertNotNull(evi.getSignInfo().get(signer));
-        Assert.assertEquals(evi.getSignInfo().get(signer).getLogs(), list);
+        Assert.assertNotNull(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)));
+        Assert.assertEquals(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs(), list);
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
-        Assert.assertTrue(evi.getSignInfo().get(signer2).getLogs().contains("Age:22")
-            && evi.getSignInfo().get(signer2).getLogs().size() == 3);
+        Assert.assertTrue(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer2)).getLogs().contains("Age:22")
+            && evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer2)).getLogs().size() == 4);
     }
 
     @Test
@@ -365,7 +347,7 @@ public class TestCreateEvidence extends TestBaseService {
         ResponseData<EvidenceInfo> eviResp = evidenceService.getEvidenceByCustomKey(credId);
         EvidenceInfo evi = eviResp.getResult();
         String signer = tempCreateWeIdResultWithSetAttr.getWeId();
-        Assert.assertTrue(evi.getSignInfo().get(signer).getLogs().contains(log));
+        Assert.assertTrue(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs().contains(log));
         int length = 50; // Up to 2M can still work
         StringBuffer outputBuffer = new StringBuffer(length);
         for (int i = 0; i < length; i++) {
@@ -376,7 +358,7 @@ public class TestCreateEvidence extends TestBaseService {
             tempCreateWeIdResultWithSetAttr.getUserWeIdPrivateKey());
         evi = evidenceService.getEvidenceByCustomKey(credId).getResult();
         Assert.assertNotNull(evi);
-        Assert.assertTrue(evi.getSignInfo().get(signer).getLogs().contains(log));
+        Assert.assertTrue(evi.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer)).getLogs().contains(log));
     }
 
     @Test
@@ -393,9 +375,9 @@ public class TestCreateEvidence extends TestBaseService {
             credential.setId(UUID.randomUUID().toString());
             String hash = credential.getHash();
             hashValues.add(credential.getHash());
-            signatures.add(DataToolUtils.secp256k1Sign(hash, new BigInteger(privateKey)));
+            signatures.add(DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(hash, privateKey)));
             timestamps.add(System.currentTimeMillis());
-            signers.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            signers.add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
             logs.add("test log" + i);
             if (i % 2 == 1) {
                 customKeys.add(String.valueOf(System.currentTimeMillis()));
@@ -404,20 +386,19 @@ public class TestCreateEvidence extends TestBaseService {
             }
         }
 
-        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine(masterGroupId);
-
+        //EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine(com.webank.weid.blockchain.service.fisco.BaseService.masterGroupId);
+        com.webank.weid.blockchain.service.impl.EvidenceServiceImpl evidenceBlockchainService = new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl();
         // raw creation
         Long start = System.currentTimeMillis();
-        ResponseData<List<Boolean>> resp = engine
-            .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey);
         Long end = System.currentTimeMillis();
         System.out.println("Batch creation w/ size: " + batchSize + " takes time (ms): " + (String
             .valueOf(end - start)));
-        List<Boolean> booleans = resp.getResult();
+        List<Boolean> booleans = evidenceBlockchainService
+                .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey).getResult();
         Assert.assertEquals(booleans.size(), hashValues.size());
         Boolean result = true;
         for (int i = 0; i < booleans.size(); i++) {
-            result = result && booleans.get(i).booleanValue();
+            result = result && booleans.get(i);
         }
         Assert.assertTrue(result);
 
@@ -425,22 +406,19 @@ public class TestCreateEvidence extends TestBaseService {
         List<String> faultyHashValues = new ArrayList<>();
         faultyHashValues.addAll(hashValues);
         faultyHashValues.set(1, null);
-        ResponseData<List<Boolean>> faultyResp = engine
-            .batchCreateEvidence(faultyHashValues, signatures, logs, timestamps, signers,
-                privateKey);
-        booleans = faultyResp.getResult();
+        booleans = evidenceBlockchainService
+                .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey).getResult();
         Assert.assertFalse(booleans.get(1));
 
         // custom keys (semi filled)
         start = System.currentTimeMillis();
-        resp = engine
-            .batchCreateEvidenceWithCustomKey(hashValues, signatures, logs, timestamps, signers,
-                customKeys, privateKey);
         end = System.currentTimeMillis();
         System.out.println(
             "Batch creation w/ custom keys and size: " + batchSize + " takes time (ms): " + (String
                 .valueOf(end - start)));
-        booleans = resp.getResult();
+        booleans = evidenceBlockchainService
+                .batchCreateEvidenceWithCustomKey(hashValues, signatures, logs, timestamps, signers,
+                        customKeys, privateKey).getResult();
         Assert.assertEquals(booleans.size(), hashValues.size());
         result = true;
         // All hashes already existed, so all fail.
@@ -462,7 +440,7 @@ public class TestCreateEvidence extends TestBaseService {
     /**
      * This test can only be invoked when using multi-group with group = 1 and 2.
      */
-    public void testBatchCreateMultiGroup() {
+    public void testBatchCreateMultiGroup() throws IOException {
         int batchSize = 100;
         List<TransactionArgs> transactionArgsList = new ArrayList<>();
         for (int i = 0; i < batchSize; i++) {
@@ -473,21 +451,66 @@ public class TestCreateEvidence extends TestBaseService {
             args.setMethod("createEvidence");
             List<String> argList = new ArrayList<>();
             argList.add(credential.getHash());
-            argList.add(new String(DataToolUtils.base64Encode(DataToolUtils
-                .simpleSignatureSerialization(DataToolUtils.secp256k1SignToSignature(
-                    hash, new BigInteger(privateKey)))),
-                StandardCharsets.UTF_8));
+            argList.add(DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(hash, privateKey)));
             argList.add("test log" + i);
             argList.add(DateUtils.getNoMillisecondTimeStampString());
-            argList.add(DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey));
+            argList
+                    .add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
             if (i % 2 == 1) {
                 argList.add("2");
             }
             args.setArgs(String.join(",", argList));
             transactionArgsList.add(args);
         }
-        OffLineBatchTask task = new OffLineBatchTask();
-        task.sendBatchTransaction(transactionArgsList);
+        /*if ("2".equals(com.webank.weid.blockchain.service.fisco.BaseService.getVersion())) {
+            CryptoKeyPair cryptoKeyPair = com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.getKeyPairFactory()
+                .createKeyPair(new BigInteger(privateKey));
+            for (int i = 0; i < batchSize; i++) {
+                CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+                credential.setId(UUID.randomUUID().toString());
+                String hash = credential.getHash();
+                TransactionArgs args = new TransactionArgs();
+                args.setMethod("createEvidence");
+                List<String> argList = new ArrayList<>();
+                argList.add(credential.getHash());
+                argList.add(com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
+                argList.add("test log" + i);
+                argList.add(DateUtils.getNoMillisecondTimeStampString());
+                argList
+                    .add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
+                if (i % 2 == 1) {
+                    argList.add("2");
+                }
+                args.setArgs(String.join(",", argList));
+                transactionArgsList.add(args);
+            }
+        } else {
+            CryptoSuite cryptoSuite = new CryptoSuite(com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.getCryptoTypeConfig());
+            org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair cryptoKeyPair =
+                cryptoSuite.getKeyPairFactory()
+                .createKeyPair(new BigInteger(privateKey));
+            for (int i = 0; i < batchSize; i++) {
+                CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+                credential.setId(UUID.randomUUID().toString());
+                String hash = credential.getHash();
+                TransactionArgs args = new TransactionArgs();
+                args.setMethod("createEvidence");
+                List<String> argList = new ArrayList<>();
+                argList.add(credential.getHash());
+                argList.add(cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
+                argList.add("test log" + i);
+                argList.add(DateUtils.getNoMillisecondTimeStampString());
+                argList
+                    .add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
+                if (i % 2 == 1) {
+                    argList.add("2");
+                }
+                args.setArgs(String.join(",", argList));
+                transactionArgsList.add(args);
+            }
+        }*/
+        //OffLineBatchTask task = new OffLineBatchTask();
+        //task.sendBatchTransaction(transactionArgsList);
     }
 
     @Test
@@ -515,7 +538,7 @@ public class TestCreateEvidence extends TestBaseService {
         eviResp = evidenceService.getEvidence(hash);
         Assert.assertTrue(hash.equalsIgnoreCase(eviResp.getResult().getCredentialHash()));
         Assert.assertTrue(eviResp.getResult().getSigners().size() == 1);
-        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(signer1));
+        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(WeIdUtils.convertWeIdToAddress(signer1)));
 
         //----
         credential.setId(UUID.randomUUID().toString());
@@ -530,7 +553,7 @@ public class TestCreateEvidence extends TestBaseService {
             eviResp2.getResult().getCredentialHash());
         Assert.assertTrue(hash.equalsIgnoreCase(eviResp.getResult().getCredentialHash()));
         Assert.assertTrue(eviResp.getResult().getSigners().size() == 1);
-        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(signer1));
+        Assert.assertTrue(eviResp.getResult().getSigners().get(0).equalsIgnoreCase(WeIdUtils.convertWeIdToAddress(signer1)));
     }
 
     /**
@@ -552,15 +575,15 @@ public class TestCreateEvidence extends TestBaseService {
         ResponseData<EvidenceInfo> getResp = evidenceService.getEvidence(credential.getHash());
         Assert.assertNotNull(getResp.getResult());
         Assert.assertTrue(getResp.getResult().getSignInfo()
-            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+            .get(WeIdUtils.convertWeIdToAddress(tempCreateWeIdResultWithSetAttr.getWeId())).getRevoked());
         revokeResp = evidenceService.unRevoke(credential, weIdAuthentication);
         getResp = evidenceService.getEvidence(credential.getHash());
         Assert.assertFalse(getResp.getResult().getSignInfo()
-            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+            .get(WeIdUtils.convertWeIdToAddress(tempCreateWeIdResultWithSetAttr.getWeId())).getRevoked());
         revokeResp = evidenceService.revoke(credential, weIdAuthentication);
         getResp = evidenceService.getEvidence(credential.getHash());
         Assert.assertTrue(getResp.getResult().getSignInfo()
-            .get(tempCreateWeIdResultWithSetAttr.getWeId()).getRevoked());
+            .get(WeIdUtils.convertWeIdToAddress(tempCreateWeIdResultWithSetAttr.getWeId())).getRevoked());
         EvidenceInfo evidenceInfo = getResp.getResult();
         Assert.assertFalse(evidenceService.isRevoked(
             evidenceInfo, createWeIdResultWithSetAttr.getWeId()).getResult());
@@ -650,14 +673,18 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertTrue(evidenceService.generateHash(selectiveCredentialPojo).getResult()
             .getHash().equalsIgnoreCase(selectiveCredentialPojo.getHash()));
         // Test file
-        File file = new ClassPathResource("test-template.pdf").getFile();
+        String path = TestCreateEvidence.class
+                .getClassLoader().getResource("test-template.pdf").getPath();
+        File file = new File(path);
         String fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
         // Support GBK and UTF-8 encoding here - they will yield different hash values, though
-        file = new ClassPathResource("org1.txt").getFile();
+        path = TestCreateEvidence.class.getClassLoader().getResource("org1.txt").getPath();
+        file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
-        file = new ClassPathResource("test-hash-pic.png").getFile();
+        path = TestCreateEvidence.class.getClassLoader().getResource("test-hash-pic.png").getPath();
+        file = new File(path);
         fileHash = evidenceService.generateHash(file).getResult().getHash();
         Assert.assertFalse(StringUtils.isEmpty(fileHash));
         // Non-existent file - uncreated with createNewFile()
