@@ -1,35 +1,8 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.cpt;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Random;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.ErrorCode;
@@ -43,9 +16,15 @@ import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.RawTransactionService;
-import com.webank.weid.service.impl.RawTransactionServiceImpl;
 import com.webank.weid.util.WeIdUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Random;
 
 /**
  * registerCpt(CptMapArgs args, Integer cptId) method for testing CptService.
@@ -65,7 +44,7 @@ public class TestRegisterCptArgsWithId extends TestBaseService {
         if (createWeId == null) {
             createWeId = super.createWeId();
             super.registerAuthorityIssuer(createWeId);
-            authorityIssuerService
+            ResponseData<Boolean> responseData = authorityIssuerService
                 .recognizeAuthorityIssuer(createWeId.getWeId(), new WeIdPrivateKey(privateKey));
         }
     }
@@ -533,32 +512,6 @@ public class TestRegisterCptArgsWithId extends TestBaseService {
     }
 
     /**
-     * case: call transactionhex method - arbitrary.
-     */
-    @Test
-    public void testRegisterCptArgsWithIdCase28() {
-        String hex = StringUtils.EMPTY;
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.registerCpt(hex);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
-    }
-
-    /**
-     * case: call transactionhex method - arbitrary.
-     */
-    @Test
-    public void testRegisterCptArgsWithIdCase29() {
-        String hex = "11111";
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.registerCpt(hex);
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
-    }
-
-    /**
      * case: register cpt id w/ and w/o permission.
      */
     @Test
@@ -584,8 +537,7 @@ public class TestRegisterCptArgsWithId extends TestBaseService {
         Assert.assertNotNull(responseData.getResult());
 
         ResponseData<CptBaseInfo> errResponse = cptService.registerCpt(registerCptArgs, null);
-        Assert
-            .assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), errResponse.getErrorCode().intValue());
+        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(), errResponse.getErrorCode().intValue());
     }
 
     /**
