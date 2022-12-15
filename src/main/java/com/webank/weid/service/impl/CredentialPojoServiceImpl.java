@@ -3,74 +3,34 @@ package com.webank.weid.service.impl;
 
 import com.networknt.schema.ValidationMessage;
 import com.webank.wedpr.common.Utils;
-import com.webank.wedpr.selectivedisclosure.CredentialTemplateEntity;
-import com.webank.wedpr.selectivedisclosure.PredicateType;
-import com.webank.wedpr.selectivedisclosure.UserClient;
-import com.webank.wedpr.selectivedisclosure.UserResult;
-import com.webank.wedpr.selectivedisclosure.VerifierClient;
-import com.webank.wedpr.selectivedisclosure.VerifierResult;
+import com.webank.wedpr.selectivedisclosure.*;
 import com.webank.wedpr.selectivedisclosure.proto.Predicate;
 import com.webank.wedpr.selectivedisclosure.proto.VerificationRule;
-import com.webank.weid.service.BaseService;
-import jodd.cli.Cli;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.webank.weid.constant.CredentialConstant;
+import com.webank.weid.constant.*;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
-import com.webank.weid.constant.CredentialFieldDisclosureValue;
-import com.webank.weid.constant.CredentialType;
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.Challenge;
-import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.Cpt;
-import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.PresentationPolicyE;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdPublicKey;
+import com.webank.weid.protocol.base.*;
 import com.webank.weid.protocol.cpt.Cpt101;
 import com.webank.weid.protocol.cpt.Cpt111;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.CptService;
-import com.webank.weid.rpc.CredentialPojoService;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.suite.api.persistence.PersistenceFactory;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.api.persistence.params.PersistenceType;
-import com.webank.weid.suite.api.transportation.inf.PdfTransportation;
-import com.webank.weid.suite.transportation.pdf.impl.PdfTransportationImpl;
-import com.webank.weid.suite.transportation.pdf.protocol.PdfAttributeInfo;
-import com.webank.weid.util.CredentialPojoUtils;
-import com.webank.weid.util.CredentialUtils;
-import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.JsonUtil;
-import com.webank.weid.util.PropertyUtils;
-import com.webank.weid.util.TimestampUtils;
-import com.webank.weid.util.WeIdUtils;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import com.webank.weid.service.rpc.CptService;
+import com.webank.weid.service.rpc.CredentialPojoService;
+import com.webank.weid.service.rpc.WeIdService;
+import com.webank.weid.suite.persistence.PersistenceFactory;
+import com.webank.weid.suite.persistence.Persistence;
+import com.webank.weid.suite.persistence.PersistenceType;
+import com.webank.weid.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 /**
@@ -78,7 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author tonychen 2019年4月17日
  */
-public class CredentialPojoServiceImpl extends BaseService implements CredentialPojoService {
+public class CredentialPojoServiceImpl implements CredentialPojoService {
 
     private static final Logger logger = LoggerFactory.getLogger(CredentialPojoServiceImpl.class);
     private static final String NOT_DISCLOSED =
@@ -91,7 +51,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     private static CptService cptService;
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
-    private static PdfTransportation pdfTransportation;
+    //private static PdfTransportation pdfTransportation;
 
     private static Persistence getDataDriver() {
         String type = PropertyUtils.getProperty("persistence_type");
@@ -120,12 +80,12 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         return cptService;
     }
 
-    private static PdfTransportation getPdfTransportation() {
+    /*private static PdfTransportation getPdfTransportation() {
         if (pdfTransportation == null) {
             pdfTransportation = new PdfTransportationImpl();
         }
         return pdfTransportation;
-    }
+    }*/
 
     /**
      * Salt generator. Automatically fillin the map structure in a recursive manner.
@@ -1000,7 +960,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#createCredential(
+     * @see com.webank.weid.service.rpc.CredentialPojoService#createCredential(
      *          com.webank.weid.protocol.request.CreateCredentialPojoArgs
      *      )
      */
@@ -1237,7 +1197,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#createSelectiveCredential(
+     * @see com.webank.weid.service.rpc.CredentialPojoService#createSelectiveCredential(
      *          com.webank.weid.protocol.base.CredentialPojo,
      *          com.webank.weid.protocol.base.ClaimPolicy
      *      )
@@ -1337,7 +1297,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#verify(
+     * @see com.webank.weid.service.rpc.CredentialPojoService#verify(
      *          java.lang.String,
      *          com.webank.weid.protocol.base.CredentialPojo
      *      )
@@ -1371,7 +1331,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#verify(
+     * @see com.webank.weid.service.rpc.CredentialPojoService#verify(
      *          com.webank.weid.protocol.base.CredentialPojo,
      *          com.webank.weid.protocol.base.WeIdPublicKey
      *      )
@@ -1396,7 +1356,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#verify(
+     * @see com.webank.weid.service.rpc.CredentialPojoService#verify(
      *          java.lang.String,
      *          com.webank.weid.protocol.base.PresentationPolicyE,
      *           com.webank.weid.protocol.base.Challenge,
@@ -1466,7 +1426,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#verify()
+     * @see com.webank.weid.service.rpc.CredentialPojoService#verify()
      */
     @Override
     public ResponseData<Boolean> verify(
@@ -1498,7 +1458,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#verify(
+     * @see com.webank.weid.service.rpc.CredentialPojoService#verify(
      *          com.webank.weid.protocol.base.CredentialPojo,
      *          com.webank.weid.protocol.base.WeIdPublicKey
      *      )
@@ -1522,7 +1482,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         return new ResponseData<Boolean>(true, ErrorCode.SUCCESS);
     }
 
-    @Override
+    /*@Override
     public ResponseData<Boolean> verifyPresentationFromPdf(
         String pdfTemplatePath,
         byte[] serializePdf,
@@ -1555,7 +1515,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
         presentationE.setType(typeList);
 
         return this.verify(presenterWeId, presentationPolicyE, challenge, presentationE);
-    }
+    }*/
 
     private ErrorCode checkInputArgs(
         String presenterWeId,
@@ -2025,7 +1985,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#prepareZKPCredential(
+     * @see com.webank.weid.service.rpc.CredentialPojoService#prepareZKPCredential(
      * com.webank.weid.protocol.base.CredentialPojo, java.lang.Object)
      */
     @Override
@@ -2225,7 +2185,7 @@ public class CredentialPojoServiceImpl extends BaseService implements Credential
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.CredentialPojoService#createDataAuthToken()
+     * @see com.webank.weid.service.rpc.CredentialPojoService#createDataAuthToken()
      */
     @Override
     public ResponseData<CredentialPojo> createDataAuthToken(

@@ -3,7 +3,9 @@
 package com.webank.weid.protocol.base;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
@@ -96,5 +98,31 @@ public class AuthorityIssuer {
         this.description = StringUtils.EMPTY;
         this.extraStr32 = new ArrayList<>();
         this.extraInt = new ArrayList<>();
+    }
+
+    public static com.webank.weid.blockchain.protocol.base.AuthorityIssuer toBlockChain(AuthorityIssuer issuer) {
+        com.webank.weid.blockchain.protocol.base.AuthorityIssuer authorityIssuer = new com.webank.weid.blockchain.protocol.base.AuthorityIssuer();
+        authorityIssuer.setWeId(issuer.getWeId());
+        authorityIssuer.setName(issuer.getName());
+        authorityIssuer.setCreated(issuer.getCreated());
+        authorityIssuer.setAccValue(issuer.getAccValue());
+        authorityIssuer.setDescription(issuer.getDescription());
+        authorityIssuer.setExtraInt(issuer.getExtraInt());
+        authorityIssuer.setExtraStr32(issuer.getExtraStr32());
+        authorityIssuer.setRecognized(issuer.isRecognized());
+        return authorityIssuer;
+    }
+
+    public static AuthorityIssuer fromBlockChain(com.webank.weid.blockchain.protocol.base.AuthorityIssuer issuer) {
+        AuthorityIssuer authorityIssuer = new AuthorityIssuer();
+        authorityIssuer.setWeId(issuer.getWeId());
+        authorityIssuer.setName(issuer.getName());
+        authorityIssuer.setCreated(issuer.getCreated());
+        authorityIssuer.setAccValue(issuer.getAccValue());
+        authorityIssuer.setDescription(issuer.getDescription());
+        authorityIssuer.setExtraInt(issuer.getExtraInt());
+        authorityIssuer.setExtraStr32(issuer.getExtraStr32());
+        authorityIssuer.setRecognized(issuer.isRecognized());
+        return authorityIssuer;
     }
 }

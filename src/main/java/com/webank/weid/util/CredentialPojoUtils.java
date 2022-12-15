@@ -2,37 +2,19 @@
 
 package com.webank.weid.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import com.webank.weid.service.BaseService;
+import com.webank.weid.constant.*;
+import com.webank.weid.constant.CredentialConstant.CredentialProofType;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.base.*;
+import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.webank.weid.service.impl.CredentialPojoServiceImpl.generateSalt;
+import java.util.*;
 
-import com.webank.weid.constant.CptType;
-import com.webank.weid.constant.CredentialConstant;
-import com.webank.weid.constant.CredentialConstant.CredentialProofType;
-import com.webank.weid.constant.CredentialFieldDisclosureValue;
-import com.webank.weid.constant.CredentialType;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ParamKeyConstant;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.PresentationE;
-import com.webank.weid.protocol.base.PresentationPolicyE;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
+import static com.webank.weid.service.impl.CredentialPojoServiceImpl.generateSalt;
 
 /**
  * The Class CredentialUtils.

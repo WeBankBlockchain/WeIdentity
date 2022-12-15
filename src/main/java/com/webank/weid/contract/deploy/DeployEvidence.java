@@ -5,9 +5,6 @@ package com.webank.weid.contract.deploy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.config.FiscoConfig;
-import com.webank.weid.contract.deploy.v2.DeployEvidenceV2;
-
 /**
  * The Class DeployContract.
  *
@@ -23,7 +20,7 @@ public abstract class DeployEvidence {
     /**
      * The Fisco Config bundle.
      */
-    protected static final FiscoConfig fiscoConfig;
+    /*protected static final FiscoConfig fiscoConfig;
 
     static {
         fiscoConfig = new FiscoConfig();
@@ -31,7 +28,7 @@ public abstract class DeployEvidence {
             logger.error("[BaseService] Failed to load Fisco-BCOS blockchain node information.");
             System.exit(1);
         }
-    }
+    }*/
 
     /**
      * The main method.
@@ -55,7 +52,7 @@ public abstract class DeployEvidence {
             privateKey = args[1];
         }
 
-        deployContract(privateKey, groupId, true);
+        com.webank.weid.blockchain.deploy.DeployEvidence.deployContract(privateKey, groupId, true);
         System.exit(0);
     }
     
@@ -67,7 +64,7 @@ public abstract class DeployEvidence {
      * @param instantEnable 是否即时启用
      * @return 返回部署的hash值
      */
-    public static String deployContract(String privateKey, String groupId, boolean instantEnable) {
+    /*public static String deployContract(String privateKey, String groupId, boolean instantEnable) {
         return DeployEvidenceV2.deployContract(fiscoConfig, privateKey, groupId, instantEnable);
-    }
+    }*/
 }

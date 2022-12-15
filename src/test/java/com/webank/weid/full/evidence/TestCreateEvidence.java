@@ -12,32 +12,25 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.service.BaseService;
-import com.webank.weid.service.impl.engine.EngineFactory;
-import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.OffLineBatchTask;
-import java.io.File;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
 
 import com.webank.weid.util.WeIdUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
-import org.fisco.bcos.sdk.utils.Numeric;
 import org.fisco.bcos.sdk.v3.crypto.CryptoSuite;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Test CreateEvidence.
@@ -393,16 +386,15 @@ public class TestCreateEvidence extends TestBaseService {
             }
         }
 
-        EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine(masterGroupId);
-
+        //EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine(com.webank.weid.blockchain.service.fisco.BaseService.masterGroupId);
+        com.webank.weid.blockchain.service.impl.EvidenceServiceImpl evidenceBlockchainService = new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl();
         // raw creation
         Long start = System.currentTimeMillis();
-        ResponseData<List<Boolean>> resp = engine
-            .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey);
         Long end = System.currentTimeMillis();
         System.out.println("Batch creation w/ size: " + batchSize + " takes time (ms): " + (String
             .valueOf(end - start)));
-        List<Boolean> booleans = resp.getResult();
+        List<Boolean> booleans = evidenceBlockchainService
+                .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey).getResult();
         Assert.assertEquals(booleans.size(), hashValues.size());
         Boolean result = true;
         for (int i = 0; i < booleans.size(); i++) {
@@ -414,22 +406,19 @@ public class TestCreateEvidence extends TestBaseService {
         List<String> faultyHashValues = new ArrayList<>();
         faultyHashValues.addAll(hashValues);
         faultyHashValues.set(1, null);
-        ResponseData<List<Boolean>> faultyResp = engine
-            .batchCreateEvidence(faultyHashValues, signatures, logs, timestamps, signers,
-                privateKey);
-        booleans = faultyResp.getResult();
+        booleans = evidenceBlockchainService
+                .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey).getResult();
         Assert.assertFalse(booleans.get(1));
 
         // custom keys (semi filled)
         start = System.currentTimeMillis();
-        resp = engine
-            .batchCreateEvidenceWithCustomKey(hashValues, signatures, logs, timestamps, signers,
-                customKeys, privateKey);
         end = System.currentTimeMillis();
         System.out.println(
             "Batch creation w/ custom keys and size: " + batchSize + " takes time (ms): " + (String
                 .valueOf(end - start)));
-        booleans = resp.getResult();
+        booleans = evidenceBlockchainService
+                .batchCreateEvidenceWithCustomKey(hashValues, signatures, logs, timestamps, signers,
+                        customKeys, privateKey).getResult();
         Assert.assertEquals(booleans.size(), hashValues.size());
         result = true;
         // All hashes already existed, so all fail.
@@ -454,8 +443,27 @@ public class TestCreateEvidence extends TestBaseService {
     public void testBatchCreateMultiGroup() throws IOException {
         int batchSize = 100;
         List<TransactionArgs> transactionArgsList = new ArrayList<>();
-        if ("2".equals(BaseService.getVersion())) {
-            CryptoKeyPair cryptoKeyPair = DataToolUtils.cryptoSuite.getKeyPairFactory()
+        for (int i = 0; i < batchSize; i++) {
+            CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
+            credential.setId(UUID.randomUUID().toString());
+            String hash = credential.getHash();
+            TransactionArgs args = new TransactionArgs();
+            args.setMethod("createEvidence");
+            List<String> argList = new ArrayList<>();
+            argList.add(credential.getHash());
+            argList.add(DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(hash, privateKey)));
+            argList.add("test log" + i);
+            argList.add(DateUtils.getNoMillisecondTimeStampString());
+            argList
+                    .add(WeIdUtils.getWeIdFromPrivateKey(privateKey));
+            if (i % 2 == 1) {
+                argList.add("2");
+            }
+            args.setArgs(String.join(",", argList));
+            transactionArgsList.add(args);
+        }
+        /*if ("2".equals(com.webank.weid.blockchain.service.fisco.BaseService.getVersion())) {
+            CryptoKeyPair cryptoKeyPair = com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.getKeyPairFactory()
                 .createKeyPair(new BigInteger(privateKey));
             for (int i = 0; i < batchSize; i++) {
                 CredentialPojo credential = createCredentialPojo(createCredentialPojoArgs);
@@ -465,7 +473,7 @@ public class TestCreateEvidence extends TestBaseService {
                 args.setMethod("createEvidence");
                 List<String> argList = new ArrayList<>();
                 argList.add(credential.getHash());
-                argList.add(DataToolUtils.cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
+                argList.add(com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.sign(hash, cryptoKeyPair).convertToString());
                 argList.add("test log" + i);
                 argList.add(DateUtils.getNoMillisecondTimeStampString());
                 argList
@@ -477,7 +485,7 @@ public class TestCreateEvidence extends TestBaseService {
                 transactionArgsList.add(args);
             }
         } else {
-            CryptoSuite cryptoSuite = new CryptoSuite(DataToolUtils.cryptoSuite.getCryptoTypeConfig());
+            CryptoSuite cryptoSuite = new CryptoSuite(com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.getCryptoTypeConfig());
             org.fisco.bcos.sdk.v3.crypto.keypair.CryptoKeyPair cryptoKeyPair =
                 cryptoSuite.getKeyPairFactory()
                 .createKeyPair(new BigInteger(privateKey));
@@ -500,9 +508,9 @@ public class TestCreateEvidence extends TestBaseService {
                 args.setArgs(String.join(",", argList));
                 transactionArgsList.add(args);
             }
-        }
-        OffLineBatchTask task = new OffLineBatchTask();
-        task.sendBatchTransaction(transactionArgsList);
+        }*/
+        //OffLineBatchTask task = new OffLineBatchTask();
+        //task.sendBatchTransaction(transactionArgsList);
     }
 
     @Test
