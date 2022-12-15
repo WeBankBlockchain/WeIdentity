@@ -1,28 +1,18 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.protocol.response;
 
+import com.webank.weid.protocol.base.AuthenticationProperty;
+import com.webank.weid.protocol.base.ServiceProperty;
+import com.webank.weid.protocol.base.WeIdDocument;
 import lombok.Data;
 
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Uint8;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * The internal base RSV signature data class.
@@ -46,4 +36,35 @@ public class RsvSignature {
      * The s value.
      */
     private Bytes32 s;
+
+    /**
+     * todo support sm2
+     */
+//    private Bytes32 pub;
+
+    /**
+     * transfer RsvSignature from weid-blockchain.
+     * @param signature the RsvSignature class in weid-blockchain
+     * @return RsvSignature
+     */
+    public static RsvSignature fromBlockChain(com.webank.weid.blockchain.protocol.response.RsvSignature signature) {
+        RsvSignature rsvSignature = new RsvSignature();
+        rsvSignature.setV(signature.getV());
+        rsvSignature.setS(signature.getS());
+        rsvSignature.setR(signature.getR());
+        return rsvSignature;
+    }
+
+    /**
+     * transfer RsvSignature to weid-blockchain.
+     * @param signature the RsvSignature class
+     * @return RsvSignature
+     */
+    public static com.webank.weid.blockchain.protocol.response.RsvSignature toBlockChain(RsvSignature signature) {
+        com.webank.weid.blockchain.protocol.response.RsvSignature rsvSignature = new com.webank.weid.blockchain.protocol.response.RsvSignature();
+        rsvSignature.setV(signature.getV());
+        rsvSignature.setS(signature.getS());
+        rsvSignature.setR(signature.getR());
+        return rsvSignature;
+    }
 }

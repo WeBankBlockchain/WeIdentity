@@ -1,26 +1,11 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.protocol.base;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import com.webank.weid.protocol.response.RsvSignature;
 import lombok.Data;
 
 /**
@@ -155,6 +140,19 @@ public class Cpt {
     }
 
     /**
+     * transfer cpt MetaData from weid-blockchain.
+     * @param cptData the cpt MetaData class in weid-blockchain
+     * @return RsvSignature
+     */
+    public static Cpt fromBlockChain(com.webank.weid.blockchain.protocol.base.Cpt cptData) {
+        Cpt cpt = new Cpt();
+        cpt.setCptBaseInfo(CptBaseInfo.fromBlockChain(cptData.getCptBaseInfo()));
+        cpt.setCptJsonSchema(cptData.getCptJsonSchema());
+        cpt.setMetaData(MetaData.fromBlockChain(cptData.getMetaData()));
+        return cpt;
+    }
+
+    /**
      * The base data structure for CPT meta data.
      */
     @Data
@@ -179,5 +177,19 @@ public class Cpt {
          * The cpt update timestamp.
          */
         private long updated;
+
+        /**
+         * transfer cpt MetaData from weid-blockchain.
+         * @param data the cpt MetaData class in weid-blockchain
+         * @return RsvSignature
+         */
+        public static MetaData fromBlockChain(com.webank.weid.blockchain.protocol.base.Cpt.MetaData data) {
+            MetaData metaData = new MetaData();
+            metaData.setUpdated(data.getUpdated());
+            metaData.setCreated(data.getCreated());
+            metaData.setCptSignature(data.getCptSignature());
+            metaData.setCptPublisher(data.getCptPublisher());
+            return metaData;
+        }
     }
 }

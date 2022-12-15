@@ -1,28 +1,16 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.protocol.request;
 
+import com.webank.weid.protocol.base.ClaimPolicy;
+import com.webank.weid.protocol.base.PresentationPolicyE;
 import lombok.Data;
 
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The Arguments for SDK RegisterAuthorityIssuer.
@@ -41,4 +29,19 @@ public class RegisterAuthorityIssuerArgs {
      * Required: The WeIdentity DID private key for sending transaction.
      */
     private WeIdPrivateKey weIdPrivateKey;
+
+    /**
+     * transfer RegisterAuthorityIssuerArgs class to weid-blockchain.
+     * @param args the RegisterAuthorityIssuerArgs object
+     * @return RegisterAuthorityIssuerArgs object in weid-blockchain
+     */
+    public static com.webank.weid.blockchain.protocol.request.RegisterAuthorityIssuerArgs toBlockChain(RegisterAuthorityIssuerArgs args) {
+        com.webank.weid.blockchain.protocol.request.RegisterAuthorityIssuerArgs registerAuthorityIssuerArgs = new com.webank.weid.blockchain.protocol.request.RegisterAuthorityIssuerArgs();
+        com.webank.weid.blockchain.protocol.base.AuthorityIssuer authorityIssuer = AuthorityIssuer.toBlockChain(args.getAuthorityIssuer());
+        registerAuthorityIssuerArgs.setAuthorityIssuer(authorityIssuer);
+        com.webank.weid.blockchain.protocol.base.WeIdPrivateKey weIdPrivateKey = new com.webank.weid.blockchain.protocol.base.WeIdPrivateKey();
+        weIdPrivateKey.setPrivateKey(args.getWeIdPrivateKey().getPrivateKey());
+        registerAuthorityIssuerArgs.setWeIdPrivateKey(weIdPrivateKey);
+        return registerAuthorityIssuerArgs;
+    }
 }
