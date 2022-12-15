@@ -3,22 +3,14 @@
 package com.webank.weid.util;
 
 import com.webank.weid.protocol.response.RsvSignature;
-import java.math.BigInteger;
-
-import com.webank.weid.service.BaseService;
-import org.apache.commons.codec.binary.Base64;
-import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
-import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
 import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
-import org.fisco.bcos.sdk.utils.Numeric;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.full.TestBaseUtil;
+import java.math.BigInteger;
 
 /**
  * Test SignatureUtils.
@@ -36,10 +28,10 @@ public class TestSignatureUtils {
 
         String privateKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
-        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        //CryptoKeyPair keyPair = com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
         //logger.info("publicKey:{} ", keyPair.getHexPublicKey());
         //BigInteger publicKey = DataToolUtils.publicKeyFromPrivate(new BigInteger(privateKey));
-        String publicKey = keyPair.getHexPublicKey();
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privateKey, 10));
         logger.info("publicKey:{} ", publicKey);
 
         /*ECKeyPair keyPair = TestBaseUtil.createKeyPair();
@@ -47,7 +39,7 @@ public class TestSignatureUtils {
         logger.info("publicKey:{} ", keyPair.getPublicKey());
         logger.info("privateKey:{}", keyPair.getPrivateKey());*/
         //CryptoKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        logger.info("privateKey:{}", keyPair.getHexPrivateKey());
+        //logger.info("privateKey:{}", keyPair.getHexPrivateKey());
 
         String str = "hello world...........................yes";
         //Sign.SignatureData sigData = DataToolUtils.secp256k1SignToSignature(str, keyPair);
@@ -70,14 +62,14 @@ public class TestSignatureUtils {
         String privKey =
             "58317564669857453586637110679746575832914889677346283755719850144028639639651";
         String msg = "12345";
-        CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privKey, 10));
-        SignatureResult signatureResult = DataToolUtils.cryptoSuite.sign(DataToolUtils.cryptoSuite.hash(msg),
-                DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privKey)));
-        Boolean a = DataToolUtils.cryptoSuite.verify(keyPair.getHexPublicKey(), DataToolUtils.cryptoSuite.hash(msg), signatureResult.convertToString());
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privKey, 10));
+        /*SignatureResult signatureResult = com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.sign(com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.hash(msg),
+                com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privKey)));
+                //注意cryptoSuite.verify只能接收hex形式的publicKey
+        Boolean a = com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.verify((new BigInteger(publicKey, 10)).toString(16), com.webank.weid.blockchain.service.fisco.CryptoFisco.cryptoSuite.hash(msg), signatureResult.convertToString());*/
 
         String sig = DataToolUtils.SigBase64Serialization(DataToolUtils.signToRsvSignature(msg, privKey));
-        //Boolean result = DataToolUtils.verifySecp256k1Signature(msg, sig, keyPair.getPublicKey());
-        BigInteger bigPublicKey = new BigInteger(DataToolUtils.hexStr2DecStr(keyPair.getHexPublicKey()));
+        BigInteger bigPublicKey = new BigInteger(publicKey, 10);
         boolean result = DataToolUtils.verifySignature(msg, sig, bigPublicKey);
         Assert.assertTrue(result);
     }

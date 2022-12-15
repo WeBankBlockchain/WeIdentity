@@ -52,4 +52,21 @@ public class EvidenceInfo {
         }
         return signatures;
     }
+
+    /**
+     * change EvidenceInfo from weid-blockchain.
+     * @param evidence the weid-blockchain evidence class
+     * @return EvidenceInfo
+     */
+    public static EvidenceInfo fromBlockChain(com.webank.weid.blockchain.protocol.base.EvidenceInfo evidence) {
+        EvidenceInfo evidenceInfo = new EvidenceInfo();
+        evidenceInfo.setCredentialHash(evidence.getCredentialHash());
+        Map<String, EvidenceSignInfo> signInfoMap = new HashMap<>();
+        for(Map.Entry<String, com.webank.weid.blockchain.protocol.base.EvidenceSignInfo> entry  : evidence.getSignInfo().entrySet()){
+            EvidenceSignInfo evidenceSignInfo = EvidenceSignInfo.fromBlockChain(entry.getValue());
+            signInfoMap.put(entry.getKey(), evidenceSignInfo);
+        }
+        evidenceInfo.setSignInfo(signInfoMap);
+        return evidenceInfo;
+    }
 }

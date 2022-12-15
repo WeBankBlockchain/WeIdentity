@@ -1,6 +1,5 @@
 package com.webank.weid.service.impl;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,15 +12,13 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.ClaimPolicy;
-import com.webank.weid.protocol.base.Cpt;
-import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
-import com.webank.weid.rpc.PolicyService;
+import com.webank.weid.service.rpc.PolicyService;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.WeIdUtils;
@@ -32,9 +29,10 @@ import com.webank.weid.util.WeIdUtils;
  * @author chaoxinhu 2020.8
  */
 
-public class PolicyServiceImpl extends AbstractService implements PolicyService {
+public class PolicyServiceImpl implements PolicyService {
 
     private static final Logger logger = LoggerFactory.getLogger(PolicyServiceImpl.class);
+    private static final com.webank.weid.blockchain.service.impl.PolicyServiceImpl policyBlockchainService = new com.webank.weid.blockchain.service.impl.PolicyServiceImpl();
 
     /**
      * Register Claim Policy on blockchain and assign it under a CPT ID.
@@ -64,20 +62,27 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
             policies = new ArrayList<>();
         }
         policies.add(policyIdResp.getResult());
-        ResponseData<Integer> addResp = cptServiceEngine
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> innerResp =
+                policyBlockchainService.putPolicyIntoCpt(cptId, policies, weIdAuthentication.getWeIdPrivateKey().getPrivateKey());
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(policyIdResp.getResult(), ErrorCode.SUCCESS);
+        /*ResponseData<Integer> addResp = cptServiceEngine
             .putPolicyIntoCpt(cptId, policies, weIdAuthentication.getWeIdPrivateKey());
         if (addResp.getResult() < 0) {
             logger.error("Failed to add this policy ID {} into existing CPT ID's list: {}",
                 policyIdResp.getResult(), cptId);
             return addResp;
         }
-        return new ResponseData<>(policyIdResp.getResult(), ErrorCode.SUCCESS);
+        return new ResponseData<>(policyIdResp.getResult(), ErrorCode.SUCCESS);*/
     }
 
     private ResponseData<Integer> registerPolicyData(String policyJson, WeIdAuthentication auth) {
         if (!DataToolUtils.isValidJsonStr(policyJson)) {
             logger.error("[registerPolicy] input json format illegal.");
-            return new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
+            return new ResponseData<>(-1, ErrorCode.CPT_JSON_SCHEMA_INVALID);
         }
         ErrorCode errorCode = CredentialPojoUtils.isWeIdAuthenticationValid(auth);
         if (errorCode != ErrorCode.SUCCESS) {
@@ -94,7 +99,15 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
             cptJsonSchemaNew,
             weIdPrivateKey);
         String address = WeIdUtils.convertWeIdToAddress(auth.getWeId());
-        CptBaseInfo cptBaseInfo;
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> innerResp =
+                policyBlockchainService.registerPolicyData(address, cptJsonSchemaNew, RsvSignature.toBlockChain(rsvSignature),
+                        weIdPrivateKey.getPrivateKey());
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        /*CptBaseInfo cptBaseInfo;
         try {
             cptBaseInfo = cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
                 weIdPrivateKey.getPrivateKey(), WeIdConstant.POLICY_DATA_INDEX).getResult();
@@ -107,14 +120,13 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
             return new ResponseData<>(cptBaseInfo.getCptId(), ErrorCode.SUCCESS);
         } else {
             return new ResponseData<>(-1, ErrorCode.UNKNOW_ERROR);
-        }
+        }*/
     }
 
     private RsvSignature sign(
         String cptPublisher,
         String jsonSchema,
         WeIdPrivateKey cptPublisherPrivateKey) {
-
         StringBuilder sb = new StringBuilder();
         sb.append(cptPublisher);
         sb.append(WeIdConstant.PIPELINE);
@@ -135,7 +147,16 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         if (policyId == null || policyId < 0) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        ResponseData<Cpt> policyResp = cptServiceEngine
+        com.webank.weid.blockchain.protocol.response.ResponseData<String> policyResp =
+                policyBlockchainService.getClaimPolicy(policyId);
+        if (policyResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null,
+                    ErrorCode.getTypeByErrorCode(policyResp.getErrorCode()));
+        }
+        ClaimPolicy claimPolicy = new ClaimPolicy();
+        claimPolicy.setFieldsToBeDisclosed(policyResp.getResult());
+        return new ResponseData<>(claimPolicy, ErrorCode.SUCCESS);
+        /*ResponseData<Cpt> policyResp = cptServiceEngine
             .queryCpt(policyId, WeIdConstant.POLICY_DATA_INDEX);
         if (policyResp.getResult() == null) {
             return new ResponseData<>(null, ErrorCode.CPT_NOT_EXISTS.getCode(),
@@ -144,7 +165,7 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         ClaimPolicy claimPolicy = new ClaimPolicy();
         claimPolicy.setFieldsToBeDisclosed(
             DataToolUtils.serialize(policyResp.getResult().getCptJsonSchema()));
-        return new ResponseData<>(claimPolicy, ErrorCode.SUCCESS);
+        return new ResponseData<>(claimPolicy, ErrorCode.SUCCESS);*/
     }
 
     /**
@@ -158,7 +179,14 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         if (cptId == null || cptId < 0) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        return cptServiceEngine.getPolicyFromCpt(cptId);
+        com.webank.weid.blockchain.protocol.response.ResponseData<List<Integer>> policyResp =
+                policyBlockchainService.getClaimPoliciesFromCpt(cptId);
+        if (policyResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null,
+                    ErrorCode.getTypeByErrorCode(policyResp.getErrorCode()));
+        }
+        return new ResponseData<>(policyResp.getResult(), ErrorCode.SUCCESS);
+        //return cptServiceEngine.getPolicyFromCpt(cptId);
     }
 
     /**
@@ -175,8 +203,14 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         if (errorCode != ErrorCode.SUCCESS) {
             return new ResponseData<>(-1, errorCode);
         }
-        return cptServiceEngine
-            .putPolicyIntoPresentation(claimPolicyIdList, weIdAuthentication.getWeIdPrivateKey());
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> policyResp =
+                policyBlockchainService.registerPresentationPolicy(claimPolicyIdList, weIdAuthentication.getWeIdPrivateKey().getPrivateKey());
+        if (policyResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(policyResp.getErrorCode()));
+        }
+        return new ResponseData<>(policyResp.getResult(), ErrorCode.SUCCESS);
+        //return cptServiceEngine.putPolicyIntoPresentation(claimPolicyIdList, weIdAuthentication.getWeIdPrivateKey());
     }
 
     /**
@@ -190,7 +224,15 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         if (presentationPolicyId == null || presentationPolicyId < 0) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        PresentationPolicyE presentationPolicy = cptServiceEngine
+        com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.PresentationPolicyE> policyResp =
+                policyBlockchainService.getPresentationPolicy(presentationPolicyId);
+        if (policyResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null,
+                    ErrorCode.getTypeByErrorCode(policyResp.getErrorCode()));
+        }
+        PresentationPolicyE presentationPolicyE = PresentationPolicyE.fromBlockChain(policyResp.getResult());
+        return new ResponseData<>(presentationPolicyE, ErrorCode.SUCCESS);
+        /*PresentationPolicyE presentationPolicy = cptServiceEngine
             .getPolicyFromPresentation(presentationPolicyId)
             .getResult();
         if (presentationPolicy == null) {
@@ -201,7 +243,7 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
             policyMap.put(entry.getKey(), getClaimPolicy(entry.getKey()).getResult());
         }
         presentationPolicy.setPolicy(policyMap);
-        return new ResponseData<>(presentationPolicy, ErrorCode.SUCCESS);
+        return new ResponseData<>(presentationPolicy, ErrorCode.SUCCESS);*/
     }
 
 
@@ -217,11 +259,25 @@ public class PolicyServiceImpl extends AbstractService implements PolicyService 
         if (startPos < 0 || num < 1) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        return cptServiceEngine.getCptIdList(startPos, num, WeIdConstant.POLICY_DATA_INDEX);
+        com.webank.weid.blockchain.protocol.response.ResponseData<List<Integer>> policyResp =
+                policyBlockchainService.getAllClaimPolicies(startPos, num);
+        if (policyResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null,
+                    ErrorCode.getTypeByErrorCode(policyResp.getErrorCode()));
+        }
+        return new ResponseData<>(policyResp.getResult(), ErrorCode.SUCCESS);
+        //return cptServiceEngine.getCptIdList(startPos, num, WeIdConstant.POLICY_DATA_INDEX);
     }
 
     @Override
     public ResponseData<Integer> getPolicyCount() {
-        return cptServiceEngine.getCptCount(WeIdConstant.POLICY_DATA_INDEX);
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> policyResp =
+                policyBlockchainService.getPolicyCount();
+        if (policyResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(policyResp.getErrorCode()));
+        }
+        return new ResponseData<>(policyResp.getResult(), ErrorCode.SUCCESS);
+        //return cptServiceEngine.getCptCount(WeIdConstant.POLICY_DATA_INDEX);
     }
 }
