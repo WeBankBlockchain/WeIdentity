@@ -1,32 +1,12 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.protocol.base;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.slf4j.Logger;
@@ -95,12 +75,14 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
             JsonNode jsonNode = null;
             //获取policyJson文件 转换成JsonNode
             File file = new File(policyFileName);
+            logger.info("create policy file path:{}|{}", file.getAbsolutePath(), policyFileName);
             if (file.exists()) {
-                jsonNode = JsonLoader.fromFile(file);
+                jsonNode = DataToolUtils.loadJsonObjectFromFile(file);
             } else {
-                jsonNode = JsonLoader.fromResource("/" + policyFileName);
+                // 去除了 / 开头 ("/" + policyFileName)
+                jsonNode = DataToolUtils.loadJsonObjectFromResource(policyFileName);
             }
-           
+
             if (jsonNode == null) {
                 logger.error("can not find the {} file in your classpath.", policyFileName);
                 return policy;
@@ -169,5 +151,27 @@ public class PresentationPolicyE extends Version implements JsonSerializer {
             claimPolicyMap.put(CredentialConstant.CLAIM_POLICY_DISCLOSED_FIELD, disclosureMap);
         }
         return DataToolUtils.serialize(policyEMap);
+    }
+
+    /**
+     * transfer PresentationPolicyE class from weid-blockchain.
+     * @param presentation the PresentationPolicyE object in weid-blockchain
+     * @return PresentationPolicyE
+     */
+    public static PresentationPolicyE fromBlockChain(com.webank.weid.blockchain.protocol.base.PresentationPolicyE presentation) {
+        PresentationPolicyE presentationPolicyE = new PresentationPolicyE();
+        presentationPolicyE.setId(presentation.getId());
+        presentationPolicyE.setOrgId(presentation.getOrgId());
+        presentationPolicyE.setPolicyPublisherWeId(presentation.getPolicyPublisherWeId());
+        presentationPolicyE.setExtra(presentation.getExtra());
+        presentationPolicyE.setPolicyType(presentation.getPolicyType());
+        Map<Integer, ClaimPolicy> policyMap = new HashMap<>();
+        for(Map.Entry<Integer, String> entry  : presentation.getPolicy().entrySet()){
+            ClaimPolicy claimPolicy = new ClaimPolicy();
+            claimPolicy.setFieldsToBeDisclosed(entry.getValue());
+            policyMap.put(entry.getKey(), claimPolicy);
+        }
+        presentationPolicyE.setPolicy(policyMap);
+        return presentationPolicyE;
     }
 }

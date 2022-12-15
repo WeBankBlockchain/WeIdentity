@@ -6,6 +6,9 @@
 # The organization ID for AMOP communication.
 blockchain.orgid=${ORG_ID}
 
+# The Chain Id
+chain.id=${CHAIN_ID}
+
 # AMOP Config
 # Timeout for amop request, default: 5000ms
 amop.request.timeout=5000
