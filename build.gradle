@@ -245,7 +245,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from 'build/docs/javadoc'
 }
 
-tasks.withType(Javadoc).all { enabled = false}
+//tasks.withType(Javadoc).all { enabled = false}
 
 test {
     systemProperty "jdk.tls.namedGroups", "${jdkTlsNamedGroups}"
@@ -261,7 +261,7 @@ test {
 artifacts {
     archives jar
     archives sourcesJar
-    //archives javadocJar
+    archives javadocJar
 }
 
 jar {
@@ -398,7 +398,7 @@ if (!gradle.startParameter.isOffline()) {
 gradle.taskGraph.whenReady { taskGraph ->
     if (taskGraph.allTasks.any { it.name == 'build' || it.name == 'assemble' }) {
         tasks.findAll {
-            it.name == 'signArchives' || it.name == 'signTestJar'
+            it.name == 'signArchives' || it.name == 'signDocsJar' || it.name == 'signTestJar'
         }.each { task ->
             task.enabled = false
         }
