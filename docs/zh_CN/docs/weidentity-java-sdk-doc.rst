@@ -1619,7 +1619,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 **时序图**
 
-（同时也包含getWeIDDocment时序）
+（同时也包含getWeIdDocument时序）
 
 .. mermaid::
 
@@ -1643,7 +1643,7 @@ com.webank.weid.protocol.response.TransactionInfo
 
 ----
 
-5. getWeIDDocment
+5. getWeIdDocument
 ~~~~~~~~~~~~~~~~~
 
 **基本信息**
