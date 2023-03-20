@@ -280,4 +280,13 @@ public final class DataDriverConstant {
     public static final String DOMAIN_RESOURCE_INFO = "domain.resourceInfo";
 
     public static final String DOMAIN_WEID_AUTH = "domain.weIdAuth";
+
+    /**
+     * 本地运行所需表.
+     */
+
+    public static final String LOCAL_WEID_DOCUMENT = "local.weIdDocument";
+
+    public static final String LOCAL_CPT = "local.cpt";
+
 }
