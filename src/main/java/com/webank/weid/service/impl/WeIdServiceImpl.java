@@ -3,14 +3,14 @@
 package com.webank.weid.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.*;
 import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.WeIdListResult;
 import com.webank.weid.service.rpc.WeIdService;
 import com.webank.weid.util.DataToolUtils;
@@ -528,7 +528,6 @@ public class WeIdServiceImpl implements WeIdService {
                 logger.error("[revokeAuthentication]: failed, the weid :{} does not exist", weId);
                 return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
             }
-            String weAddress = WeIdUtils.convertWeIdToAddress(weId);
             WeIdDocument weIdDocument = this.getWeIdDocument(weId).getResult();
             List<AuthenticationProperty> authentication = weIdDocument.getAuthentication();
             if(!StringUtils.isEmpty(authenticationArgs.getPublicKey())){

@@ -8,7 +8,7 @@ import com.webank.weid.protocol.base.HashString;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.inf.Hashable;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 
 /**
  * Service inf for operations on Evidence for Credentials.
