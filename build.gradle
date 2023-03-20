@@ -80,7 +80,7 @@ List lombok = [
         "org.projectlombok:lombok:1.18.10"
 ]
 
-def log4j_version="2.18.0"
+def log4j_version="2.20.0"
 List logger = [
         "org.slf4j:jul-to-slf4j:1.7.30",
         "org.apache.logging.log4j:log4j-api:$log4j_version",
@@ -106,7 +106,7 @@ List jmockit = [
         "org.jmockit:jmockit:1.47"
 ]
 
-def jackson_version="2.13.3"
+def jackson_version="2.14.2"
 List json = [
         "com.fasterxml.jackson.core:jackson-databind:$jackson_version",
         "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jackson_version",
@@ -127,7 +127,7 @@ List mysql_driver = [
 ]
 
 List redisson = [
-        "org.redisson:redisson:3.13.1"
+        "org.redisson:redisson:3.20.0"
 ]
 
 List zxing = [
@@ -145,7 +145,7 @@ List pdfbox = [
 ]
 
 List protobuf = [
-        "com.google.protobuf:protobuf-java:3.19.2"
+        "com.google.protobuf:protobuf-java:3.22.2"
 ]
 
 List caffeine = [
@@ -157,7 +157,8 @@ List oval = [
 ]
 
 List spring = [
-        "org.springframework:spring-core:5.3.21"
+        "org.springframework:spring-core:5.3.21",
+        "org.springframework:spring-context:5.3.25"
 ]
 
 configurations {
@@ -172,7 +173,7 @@ configurations.all {
 dependencies {
     localDeps 'org.projectlombok:lombok:1.18.10'
     if (!gradle.startParameter.isOffline()) {
-        compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval, gson
+        compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval, gson, spring
         //compile("com.webank:weid-contract-java:1.3.1-rc.2-SNAPSHOT")
         //compile("com.webank:weid-contract-java:1.3.1-rc1")
         compile("com.webank:weid-blockchain:3.0.0-rc.1")
