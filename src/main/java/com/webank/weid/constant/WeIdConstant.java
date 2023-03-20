@@ -263,6 +263,11 @@ public final class WeIdConstant {
 
     public static final Long RECOGNIZED_AUTHORITY_ISSUER_FLAG = 1L;
 
+    /*
+     * State file path for run local
+     */
+    public static final String STATE_FILE_PATH = "output/local_state";
+
     public static enum PublicKeyType {
         SM2("SM2"),
         //RSA("RSA"),
