@@ -9,7 +9,7 @@ public class CptValue {
     /**
      * 主键，cptId.
      */
-    private int cptId;
+    private int cpt_id;
 
     /**
      * 创建时间.
@@ -24,7 +24,7 @@ public class CptValue {
     /**
      * 数据版本.
      */
-    private int cptVersion;
+    private int cpt_version;
 
     /**
      * cpt创建者.
@@ -39,11 +39,25 @@ public class CptValue {
     /**
      * cpt对象的json序列化.
      */
-    private String cptSchema;
+    private String cpt_schema;
 
     /**
      * cpt签名
      */
-    private String cptSignature;
+    private String cpt_signature;
+
+    /**
+     * credential验证公钥
+     */
+    private String credential_publicKey;
+
+    /**
+     * credential证明
+     */
+    private String credential_proof;
+    /**
+     * claim policies列表
+     */
+    private String claim_policies;
 
 }

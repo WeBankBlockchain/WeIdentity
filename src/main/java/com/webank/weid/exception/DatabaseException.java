@@ -2,7 +2,7 @@
 
 package com.webank.weid.exception;
 
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 
 /**
  * Database Exception. Base Exception for WeIdentity Project.
