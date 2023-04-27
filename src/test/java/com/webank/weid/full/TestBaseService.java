@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 import com.webank.weid.BaseTest;
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.CptBaseInfo;
 import com.webank.weid.protocol.base.Credential;
@@ -40,7 +40,7 @@ import com.webank.weid.protocol.request.CreateWeIdArgs;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialUtils;
 import com.webank.weid.util.WeIdUtils;
 

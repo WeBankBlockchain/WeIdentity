@@ -1,13 +1,13 @@
 package com.webank.weid.service.local;
 
 import com.webank.weid.blockchain.constant.ErrorCode;
-import com.webank.weid.blockchain.protocol.base.AuthenticationProperty;
-import com.webank.weid.blockchain.protocol.base.ServiceProperty;
-import com.webank.weid.blockchain.protocol.base.WeIdDocument;
-import com.webank.weid.blockchain.protocol.base.WeIdDocumentMetadata;
+import com.webank.weid.protocol.base.AuthenticationProperty;
+import com.webank.weid.protocol.base.ServiceProperty;
+import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.base.WeIdDocumentMetadata;
 import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.blockchain.rpc.WeIdService;
-import com.webank.weid.blockchain.util.WeIdUtils;
+import com.webank.weid.util.WeIdUtils;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.suite.persistence.Persistence;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component("local")
+@Component("weIdServiceLocal")
 public class WeIdServiceLocal implements WeIdService {
 
     /**
@@ -53,7 +53,7 @@ public class WeIdServiceLocal implements WeIdService {
     @Override
     public ResponseData<Boolean> isWeIdExist(String weId) {
         try {
-            ResponseData<WeIdDocumentMetadata> dbResp = this.getWeIdDocumentMetadata(weId);
+            ResponseData<com.webank.weid.blockchain.protocol.base.WeIdDocumentMetadata> dbResp = this.getWeIdDocumentMetadata(weId);
             if(dbResp.getResult() != null){
                 return new ResponseData<>(true, ErrorCode.SUCCESS);
             }
@@ -73,7 +73,7 @@ public class WeIdServiceLocal implements WeIdService {
     @Override
     public ResponseData<Boolean> isDeactivated(String weId) {
         try {
-            ResponseData<WeIdDocumentMetadata> dbResp = this.getWeIdDocumentMetadata(weId);
+            ResponseData<com.webank.weid.blockchain.protocol.base.WeIdDocumentMetadata> dbResp = this.getWeIdDocumentMetadata(weId);
             return new ResponseData<>(dbResp.getResult().isDeactivated(), ErrorCode.SUCCESS);
         } catch (Exception e) {
             logger.error("[isDeactivated] execute failed. Error message :{}", e);
@@ -91,13 +91,14 @@ public class WeIdServiceLocal implements WeIdService {
             if(authList.size()==0 || serviceList.size()==0){
                 return new ResponseData<>(false, ErrorCode.ILLEGAL_INPUT);
             }
+            String weId = WeIdUtils.convertAddressToWeId(address);
             //如果已经存在该weId则报错
-            if(this.isWeIdExist(address).getResult()){
+            if(this.isWeIdExist(weId).getResult()){
                 return new ResponseData<>(false, ErrorCode.WEID_ALREADY_EXIST);
             }
             //创建weIdDocument插入db
             WeIdDocument weIdDocument = new WeIdDocument();
-            weIdDocument.setId(address);
+            weIdDocument.setId(weId);
             List<AuthenticationProperty> authenticationList = new ArrayList<>();
             for(String authenticationStr : authList){
                 AuthenticationProperty authenticationProperty = AuthenticationProperty.fromString(authenticationStr);
@@ -113,7 +114,7 @@ public class WeIdServiceLocal implements WeIdService {
             ResponseData<Integer> resp =
                     getDataDriver().addWeId(
                             DataDriverConstant.LOCAL_WEID_DOCUMENT,
-                            address,
+                            weId,
                             weIdDocument.toJson());
             if (resp.getErrorCode().intValue() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("[createWeId] save weIdDocument to db failed.");
@@ -133,7 +134,7 @@ public class WeIdServiceLocal implements WeIdService {
      * @return the WeIdentity DID document
      */
     @Override
-    public ResponseData<WeIdDocument> getWeIdDocument(String weId) {
+    public ResponseData<com.webank.weid.blockchain.protocol.base.WeIdDocument> getWeIdDocument(String weId) {
         try {
             return getDataDriver().getWeIdDocument(
                     DataDriverConstant.LOCAL_WEID_DOCUMENT,
@@ -151,7 +152,7 @@ public class WeIdServiceLocal implements WeIdService {
      * @return the WeIdentity DID document
      */
     @Override
-    public ResponseData<WeIdDocumentMetadata> getWeIdDocumentMetadata(String weId) {
+    public ResponseData<com.webank.weid.blockchain.protocol.base.WeIdDocumentMetadata> getWeIdDocumentMetadata(String weId) {
         try {
             return getDataDriver().getMeta(
                     DataDriverConstant.LOCAL_WEID_DOCUMENT,
@@ -172,19 +173,19 @@ public class WeIdServiceLocal implements WeIdService {
      */
     @Override
     public ResponseData<Boolean> updateWeId(
-            WeIdDocument weIdDocument,
-            String address,
-            String privateKey) {
+            com.webank.weid.blockchain.protocol.base.WeIdDocument weIdDocument,
+            String privateKey,
+            String address) {
         try {
             String weId = WeIdUtils.getWeIdFromPrivateKey(privateKey);
-            if(!weId.equals(address)){
+            if(!weId.equals(WeIdUtils.convertAddressToWeId(address))){
                 logger.error("[updateWeId] the private key does not match the current weid.");
                 return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_DOES_NOT_MATCH);
             }
             ResponseData<Integer> resp =
                     getDataDriver().updateWeId(
                             DataDriverConstant.LOCAL_WEID_DOCUMENT,
-                            address,
+                            weId,
                             weIdDocument.toJson());
             if (resp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 logger.error("[updateWeId] updateWeId weIdDocument to db failed.");
