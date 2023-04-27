@@ -8,13 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 
 public class TestRemoveIssuerFromIssuerType extends TestBaseService {
 
@@ -160,7 +160,7 @@ public class TestRemoveIssuerFromIssuerType extends TestBaseService {
             callerAuth, "中国人民-chinese people", issuer.getWeId());
         LogUtil.info(logger, "removeIssuerFromIssuerType", response);
 
-        Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_NOT_EXIST.getCode(),
+        Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(response.getResult());
 
@@ -207,7 +207,7 @@ public class TestRemoveIssuerFromIssuerType extends TestBaseService {
             callerAuth, issuerType, createWeIdData.getWeId());
         LogUtil.info(logger, "removeIssuerFromIssuerType", response);
 
-        Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_NOT_EXIST.getCode(),
+        Assert.assertEquals(ErrorCode.SPECIFIC_ISSUER_CONTRACT_ERROR_ALREADY_NOT_EXIST.getCode(),
             response.getErrorCode().intValue());
         Assert.assertFalse(response.getResult());
     }

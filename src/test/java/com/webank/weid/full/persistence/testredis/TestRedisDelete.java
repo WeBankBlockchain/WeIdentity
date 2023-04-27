@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.constant.ErrorCode;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.suite.persistence.PersistenceFactory;
 import com.webank.weid.suite.persistence.Persistence;
 import com.webank.weid.suite.persistence.PersistenceType;

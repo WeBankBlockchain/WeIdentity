@@ -16,10 +16,10 @@ import org.bouncycastle.util.encoders.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.protocol.request.timestamp.wesign.GetTimestampRequest;
 import com.webank.weid.protocol.request.timestamp.wesign.VerifyTimestampRequest;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.timestamp.wesign.AccessTokenResponse;
 import com.webank.weid.protocol.response.timestamp.wesign.GetTimestampResponse;
 import com.webank.weid.protocol.response.timestamp.wesign.SignTicketResponse;

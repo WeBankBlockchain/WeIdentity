@@ -34,6 +34,6 @@ public class WeIdDocumentValue {
     /**
      * WeIdDocument对象的json序列化.
      */
-    private String documentSchema;
+    private String document_schema;
 
 }

@@ -9,7 +9,7 @@ import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;

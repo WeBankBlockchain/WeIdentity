@@ -12,23 +12,31 @@ import com.webank.weid.protocol.request.ServiceArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
 import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.WeIdListResult;
+import com.webank.weid.service.local.WeIdServiceLocal;
 import com.webank.weid.service.rpc.WeIdService;
+import com.webank.weid.suite.persistence.Persistence;
+import com.webank.weid.suite.persistence.PersistenceFactory;
+import com.webank.weid.suite.persistence.PersistenceType;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.Multibase.Multibase;
 import com.webank.weid.util.Multicodec.Multicodec;
 import com.webank.weid.util.Multicodec.MulticodecEncoder;
+import com.webank.weid.util.PropertyUtils;
 import com.webank.weid.util.WeIdUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.fisco.bcos.sdk.model.CryptoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 
 /**
  * Service implementations for operations on WeIdentity DID.
@@ -42,7 +50,25 @@ public class WeIdServiceImpl implements WeIdService {
      */
     private static final Logger logger = LoggerFactory.getLogger(WeIdServiceImpl.class);
 
-    private static final com.webank.weid.blockchain.service.impl.WeIdServiceImpl weIdBlockchainService = new com.webank.weid.blockchain.service.impl.WeIdServiceImpl();
+    private static com.webank.weid.blockchain.rpc.WeIdService weIdBlockchainService;
+
+    public WeIdServiceImpl(){
+        weIdBlockchainService = getWeIdService();
+    }
+
+    private static com.webank.weid.blockchain.rpc.WeIdService getWeIdService() {
+        if(weIdBlockchainService != null) {
+            return weIdBlockchainService;
+        } else {
+            String type = PropertyUtils.getProperty("deploy.style");
+            if (type.equals("blockchain")) {
+                return new com.webank.weid.blockchain.service.impl.WeIdServiceImpl();
+            } else {
+                // default database
+                return new WeIdServiceLocal();
+            }
+        }
+    }
 
     /**
      * Create a WeIdentity DID with null input param.
@@ -64,7 +90,7 @@ public class WeIdServiceImpl implements WeIdService {
         //verification method controller默认为自己
         authenticationProperty.setController(result.getWeId());
         //这里把publicKey用multicodec编码，然后使用Multibase格式化，国密和非国密使用不同的编码
-        byte[] publicKeyEncode = MulticodecEncoder.encode(com.webank.weid.blockchain.util.DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+        byte[] publicKeyEncode = MulticodecEncoder.encode(DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
                 result.getUserWeIdPublicKey().getPublicKey().getBytes(StandardCharsets.UTF_8));
         authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
         List<String> authList = new ArrayList<>();
@@ -117,7 +143,7 @@ public class WeIdServiceImpl implements WeIdService {
             //verification method controller默认为自己
             authenticationProperty.setController(weId);
             //这里把publicKey用multicodec编码，然后使用Multibase格式化，国密和非国密使用不同的编码
-            byte[] publicKeyEncode = MulticodecEncoder.encode(com.webank.weid.blockchain.util.DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+            byte[] publicKeyEncode = MulticodecEncoder.encode(DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
                     publicKey.getBytes(StandardCharsets.UTF_8));
             authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
             List<String> authList = new ArrayList<>();
@@ -188,7 +214,7 @@ public class WeIdServiceImpl implements WeIdService {
             //verification method controller默认为自己
             authenticationProperty.setController(weId);
             //这里把publicKey用multicodec编码，然后使用Multibase格式化，国密和非国密使用不同的编码
-            byte[] publicKeyEncode = MulticodecEncoder.encode(com.webank.weid.blockchain.util.DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+            byte[] publicKeyEncode = MulticodecEncoder.encode(DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
                     publicKey.getBytes(StandardCharsets.UTF_8));
             authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
             List<String> authList = new ArrayList<>();
@@ -234,7 +260,7 @@ public class WeIdServiceImpl implements WeIdService {
         }
         com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.WeIdDocument> innerResp = weIdBlockchainService.getWeIdDocument(weId);
         //ResponseData<WeIdDocument> weIdDocResp = weIdServiceEngine.getWeIdDocument(weId);
-        if(innerResp.getErrorCode() == ErrorCode.SUCCESS.getCode()){
+        if(innerResp.getErrorCode() == ErrorCode.SUCCESS.getCode() && innerResp.getResult() != null){
             WeIdDocument weIdDocument = WeIdDocument.fromBlockChain(innerResp.getResult());
             return new ResponseData<>(weIdDocument, ErrorCode.SUCCESS);
         } else {
@@ -461,7 +487,7 @@ public class WeIdServiceImpl implements WeIdService {
                 authenticationProperty.setId(weId + "#keys-" + DataToolUtils.hash(authenticationArgs.getPublicKey()).substring(58));
             }
             authenticationProperty.setController(authenticationArgs.getController());
-            byte[] publicKeyEncode = MulticodecEncoder.encode(com.webank.weid.blockchain.util.DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
+            byte[] publicKeyEncode = MulticodecEncoder.encode(DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? Multicodec.ED25519_PUB:Multicodec.SM2_PUB,
                     authenticationArgs.getPublicKey().getBytes(StandardCharsets.UTF_8));
             authenticationProperty.setPublicKeyMultibase(Multibase.encode(Multibase.Base.Base58BTC, publicKeyEncode));
 

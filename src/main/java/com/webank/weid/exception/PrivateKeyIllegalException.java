@@ -2,7 +2,7 @@
 
 package com.webank.weid.exception;
 
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 
 /**
  * Private Key IllegalException.

@@ -289,4 +289,16 @@ public final class DataDriverConstant {
 
     public static final String LOCAL_CPT = "local.cpt";
 
+    public static final String LOCAL_POLICY = "local.policy";
+
+    public static final String LOCAL_PRESENTATION = "local.presentation";
+
+    public static final String LOCAL_ROLE = "local.role";
+
+    public static final String LOCAL_AUTHORITY_ISSUER = "local.authorityIssuer";
+
+    public static final String LOCAL_SPECIFIC_ISSUER = "local.specificIssuer";
+
+    public static final String LOCAL_EVIDENCE = "local.evidence";
+
 }
