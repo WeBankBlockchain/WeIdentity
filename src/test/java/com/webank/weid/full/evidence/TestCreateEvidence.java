@@ -3,7 +3,7 @@
 package com.webank.weid.full.evidence;
 
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
@@ -11,10 +11,12 @@ import com.webank.weid.protocol.base.EvidenceInfo;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
+import com.webank.weid.service.local.EvidenceServiceLocal;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
 
+import com.webank.weid.util.PropertyUtils;
 import com.webank.weid.util.WeIdUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -79,11 +81,11 @@ public class TestCreateEvidence extends TestBaseService {
         Assert.assertTrue(evidenceInfo.getCredentialHash().equalsIgnoreCase(hash));
         String signerWeId = tempCreateWeIdResultWithSetAttr.getWeId();
         Assert.assertTrue(evidenceInfo.getSigners().contains(WeIdUtils.convertWeIdToAddress(signerWeId)));
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().size(), 2);
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().size(), 3);
         Assert.assertTrue(
-            evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().get(0).equals("1.23"));
+            evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().get(1).equals("1.23"));
         Assert.assertTrue(
-            evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().get(1).equals("13.15"));
+            evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signerWeId)).getLogs().get(2).equals("13.15"));
         ResponseData<Boolean> resp = evidenceService
             .verifySigner(credential, evidenceInfo, signerWeId);
         Assert.assertTrue(resp.getResult());
@@ -189,7 +191,7 @@ public class TestCreateEvidence extends TestBaseService {
         // Another guy signs
         CreateWeIdDataResult tempCreateWeIdResultWithSetAttr2 = createWeIdWithSetAttr();
         ResponseData<Boolean> createResp2 = evidenceService.addSignatureAndLogByHash(
-            credential.getHash(), "", tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey());
+            credential.getHash(), "empty log", tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey());
         ResponseData<Boolean> addResp3 = evidenceService.addLogByHash(hash, "abc",
             tempCreateWeIdResultWithSetAttr2.getUserWeIdPrivateKey());
         ResponseData<Boolean> addResp4 = evidenceService.addLogByHash(hash, "eef",
@@ -199,8 +201,8 @@ public class TestCreateEvidence extends TestBaseService {
         EvidenceInfo evidenceInfo = eviInfo.getResult();
         String signer1 = tempCreateWeIdResultWithSetAttr.getWeId();
         String signer2 = tempCreateWeIdResultWithSetAttr2.getWeId();
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer1)).getLogs().size(), 2);
-        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer2)).getLogs().size(), 2);
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer1)).getLogs().size(), 3);
+        Assert.assertEquals(evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(signer2)).getLogs().size(), 3);
         ResponseData<Boolean> resp = evidenceService
             .verifySigner(credential, evidenceInfo, signer1);
         Assert.assertTrue(resp.getResult());
@@ -387,7 +389,13 @@ public class TestCreateEvidence extends TestBaseService {
         }
 
         //EvidenceServiceEngine engine = EngineFactory.createEvidenceServiceEngine(com.webank.weid.blockchain.service.fisco.BaseService.masterGroupId);
-        com.webank.weid.blockchain.service.impl.EvidenceServiceImpl evidenceBlockchainService = new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl();
+        com.webank.weid.blockchain.rpc.EvidenceService evidenceBlockchainService;
+        if (PropertyUtils.getProperty("deploy.style").equals("blockchain")) {
+            evidenceBlockchainService = new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl();
+        } else {
+            // default database
+            evidenceBlockchainService = new EvidenceServiceLocal();
+        }
         // raw creation
         Long start = System.currentTimeMillis();
         Long end = System.currentTimeMillis();
@@ -407,7 +415,7 @@ public class TestCreateEvidence extends TestBaseService {
         faultyHashValues.addAll(hashValues);
         faultyHashValues.set(1, null);
         booleans = evidenceBlockchainService
-                .batchCreateEvidence(hashValues, signatures, logs, timestamps, signers, privateKey).getResult();
+                .batchCreateEvidence(faultyHashValues, signatures, logs, timestamps, signers, privateKey).getResult();
         Assert.assertFalse(booleans.get(1));
 
         // custom keys (semi filled)

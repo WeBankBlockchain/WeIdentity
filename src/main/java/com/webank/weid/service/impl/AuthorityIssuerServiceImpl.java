@@ -7,12 +7,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webank.weid.service.local.AuthorityIssuerServiceLocal;
+import com.webank.weid.service.local.CptServiceLocal;
+import com.webank.weid.service.local.PolicyServiceLocal;
+import com.webank.weid.util.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.IssuerType;
@@ -20,7 +24,7 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.service.rpc.AuthorityIssuerService;
 import com.webank.weid.service.rpc.WeIdService;
 import com.webank.weid.util.WeIdUtils;
@@ -34,9 +38,27 @@ public class AuthorityIssuerServiceImpl implements AuthorityIssuerService {
 
     private static final Logger logger = LoggerFactory
         .getLogger(AuthorityIssuerServiceImpl.class);
-    private static final com.webank.weid.blockchain.service.impl.AuthorityIssuerServiceImpl authorityBlockchainService = new com.webank.weid.blockchain.service.impl.AuthorityIssuerServiceImpl();
+    private static com.webank.weid.blockchain.rpc.AuthorityIssuerService authorityBlockchainService;
 
     private WeIdService weIdService = new WeIdServiceImpl();
+
+    public AuthorityIssuerServiceImpl(){
+        authorityBlockchainService = getAuthorityIssuerService();
+    }
+
+    private static com.webank.weid.blockchain.rpc.AuthorityIssuerService getAuthorityIssuerService() {
+        if(authorityBlockchainService != null) {
+            return authorityBlockchainService;
+        } else {
+            String type = PropertyUtils.getProperty("deploy.style");
+            if (type.equals("blockchain")) {
+                return new com.webank.weid.blockchain.service.impl.AuthorityIssuerServiceImpl();
+            } else {
+                // default database
+                return new AuthorityIssuerServiceLocal();
+            }
+        }
+    }
 
     /**
      * Register a new Authority Issuer on Chain.

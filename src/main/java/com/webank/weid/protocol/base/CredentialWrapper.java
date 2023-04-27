@@ -7,7 +7,7 @@ import java.util.Map;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.protocol.inf.Hashable;
 import com.webank.weid.util.CredentialUtils;
 

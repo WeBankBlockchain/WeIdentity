@@ -7,7 +7,7 @@ import lombok.Data;
 /**
  * The base data structure to handle WeIdentity DID authority info.
  *
- * @author darwindu
+ * @author afeexian
  */
 @Data
 public class WeIdAuthentication {

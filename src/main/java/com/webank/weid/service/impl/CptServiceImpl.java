@@ -11,6 +11,8 @@ import com.webank.wedpr.selectivedisclosure.IssuerClient;
 import com.webank.wedpr.selectivedisclosure.IssuerResult;
 import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.exception.DatabaseException;
+import com.webank.weid.service.local.CptServiceLocal;
+import com.webank.weid.service.local.WeIdServiceLocal;
 import com.webank.weid.suite.persistence.PersistenceFactory;
 import com.webank.weid.suite.persistence.Persistence;
 import com.webank.weid.suite.persistence.PersistenceType;
@@ -41,13 +43,31 @@ import com.webank.weid.suite.cache.CacheNode;
 public class CptServiceImpl implements CptService {
 
     private static final Logger logger = LoggerFactory.getLogger(CptServiceImpl.class);
-    private static final com.webank.weid.blockchain.service.impl.CptServiceImpl cptBlockchainService = new com.webank.weid.blockchain.service.impl.CptServiceImpl();
+    private static com.webank.weid.blockchain.rpc.CptService cptBlockchainService;
 
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
     //获取CPT缓存节点
     private static CacheNode<ResponseData<Cpt>> cptCahceNode =
             CacheManager.registerCacheNode("SYS_CPT", 1000 * 3600 * 24L);
+
+    public CptServiceImpl(){
+        cptBlockchainService = getCptService();
+    }
+
+    private static com.webank.weid.blockchain.rpc.CptService getCptService() {
+        if(cptBlockchainService != null) {
+            return cptBlockchainService;
+        } else {
+            String type = PropertyUtils.getProperty("deploy.style");
+            if (type.equals("blockchain")) {
+                return new com.webank.weid.blockchain.service.impl.CptServiceImpl();
+            } else {
+                // default database
+                return new CptServiceLocal();
+            }
+        }
+    }
 
     /**
      * Register a new CPT with a pre-set CPT ID, to the blockchain.
