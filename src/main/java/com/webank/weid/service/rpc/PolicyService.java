@@ -7,7 +7,7 @@ import java.util.List;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 
 /**
  * Service inf for operation on Policy on blockchain (Claim protocol Type).

@@ -3,8 +3,16 @@
 #         application config                                                                          #
 #                                                                                                     #
 #######################################################################################################
+# Deploy WeIdentity with blockchain or only database
+deploy.style=${DEPLOY_STYLE}
+# Crypto type, only use for deploy with database, 0 for ECDSA, 1 for SM
+crypto.type=${CRYPTO_TYPE}
+
 # The organization ID for AMOP communication.
 blockchain.orgid=${ORG_ID}
+
+# The Blockchain Type
+blockchain.type=${CHAIN_TYPE}
 
 # The Chain Id
 chain.id=${CHAIN_ID}
@@ -98,6 +106,16 @@ domain.weIdAuth=datasource1:weid_auth
 # the domain for save resource
 domain.resourceInfo=datasource1:resource_info
 domain.resourceInfo.timeout=31556908799941
+
+# tables for running locally
+local.weIdDocument=datasource1:table_weid_document
+local.cpt=datasource1:table_cpt
+local.policy=datasource1:table_policy
+local.presentation=datasource1:table_presentation
+local.role=datasource1:table_role
+local.authorityIssuer=datasource1:table_authority_issuer
+local.specificIssuer=datasource1:table_specific_issuer
+local.evidence=datasource1:table_evidence
 
 
 #######################################################################################################

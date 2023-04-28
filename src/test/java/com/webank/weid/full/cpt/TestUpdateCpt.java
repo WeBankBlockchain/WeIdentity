@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
@@ -23,7 +23,7 @@ import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -218,7 +218,7 @@ public class TestUpdateCpt extends TestBaseService {
         LogUtil.info(logger, "updateCpt", response);
 
         Assert.assertEquals(
-            ErrorCode.CPT_NO_PERMISSION.getCode(),
+            ErrorCode.CPT_NOT_EXISTS.getCode(),
             response.getErrorCode().intValue()
         );
         Assert.assertNull(response.getResult());

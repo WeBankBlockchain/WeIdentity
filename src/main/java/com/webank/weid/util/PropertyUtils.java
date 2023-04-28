@@ -80,6 +80,9 @@ public final class PropertyUtils {
         
         try {
             loadProperties(WEIDENTITY_PROP_NAME);
+            /*if(getProperty("deploy.style").equals("blockchain")){
+                loadProperties(FISCO_PROP_NAME);
+            }*/
             loadProperties(FISCO_PROP_NAME);
         } catch (IOException e) {
             logger.error("[PropertyUtils] Load weidentity.properties file failed.", e);

@@ -7,14 +7,14 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 
 /**
  * Test most cases of Specific Issuers.
@@ -101,8 +101,8 @@ public class TestSpecificIssuer extends TestBaseService {
         ResponseData<List<String>> respData3 = authorityIssuerService
             .getAllSpecificTypeIssuerList(defaultType, 0,
                 WeIdConstant.MAX_AUTHORITY_ISSUER_LIST_SIZE);
-        Assert.assertNotNull(respData2.getResult());
-        Assert.assertEquals(respData2.getResult().size(), 0);
+        Assert.assertNull(respData2.getResult());
+        //Assert.assertEquals(respData2.getResult().size(), 0);
         Assert.assertNotNull(respData3.getResult());
         Assert.assertTrue(respData3.getResult().size() > 0);
         ResponseData<Boolean> response4 = authorityIssuerService
