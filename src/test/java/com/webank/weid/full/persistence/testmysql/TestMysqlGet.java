@@ -3,9 +3,9 @@
 package com.webank.weid.full.persistence.testmysql;
 
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.persistence.TestBaseTransportation;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.suite.persistence.Persistence;
 import com.webank.weid.suite.persistence.PersistenceFactory;
 import com.webank.weid.suite.persistence.PersistenceType;

@@ -31,7 +31,7 @@ public abstract class BaseTest {
     
     static {
         // mock DB
-        MockMysqlDriver.mockMysqlDriver();
+        //MockMysqlDriver.mockMysqlDriver();
         MockIssuerClient.mockMakeCredentialTemplate();
     }
 
