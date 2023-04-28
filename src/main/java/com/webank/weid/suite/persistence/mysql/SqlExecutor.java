@@ -9,10 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,9 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 
 
 /**
@@ -49,23 +46,163 @@ public class SqlExecutor {
      * sql for add.
      */
     public static final String SQL_SAVE = "insert into $1(id, data, expire, created, updated) "
-        + "values(?,?,?,?,?)";
+            + "values(?,?,?,?,?)";
     /**
      * sql for update.
      */
     public static final String SQL_UPDATE = "update $1 set updated = ?, data = ?, expire = ? "
-        + "where id = ?";
+            + "where id = ?";
     /**
      * sql for delete.
      */
     public static final String SQL_DELETE = "delete from $1 where id = ?";
     /**
-     * sql for add.
+     * sql for add transaction.
      */
     public static final String SQL_SAVE_TRANSACTION =
         "insert into weidentity_offline_transaction_info"
         + "(request_id, transaction_method, transaction_args, transaction_timestamp, extra, batch)"
         + " values(?,?,?,?,?,?)";
+    /**
+     * sql for query total lines of data.
+     */
+    public static final String SQL_QUERY_TOTAL_LINE = "select COUNT(*) totalCount from $1";
+    /**
+     * sql for query several weId from firstIndex.
+     */
+    public static final String SQL_QUERY_SEVERAL_WEID = "select weid from $1 LIMIT ?, ?";
+    /**
+     * sql for insert weIdDocument and metaDta.
+     */
+    public static final String SQL_SAVE_WEID = "insert into $1 (weid,created,updated,version,deactivated,document_schema) values(?,?,?,?,?,?)";
+    /**
+     * sql for query weIdDocument and metaDta.
+     */
+    public static final String SQL_QUERY_WEID = "select weid,created,updated,version,deactivated,document_schema from $1 where weid=?";
+    /**
+     * sql for update weIdDocument and metaDta.
+     */
+    public static final String SQL_UPDATE_WEID = "update $1 set updated = ?, version = ?, deactivated = ?, document_schema = ? where weid = ?";
+    /**
+     * sql for query cpt.
+     */
+    public static final String SQL_QUERY_CPT = "select cpt_id,created,updated,cpt_version,publisher,description,cpt_schema,cpt_signature,credential_publicKey,credential_proof,claim_policies from $1 where cpt_id =?";
+    /**
+     * sql for insert cpt.
+     */
+    public static final String SQL_SAVE_CPT = "insert into $1 (cpt_id,created,updated,cpt_version,publisher,description,cpt_schema,cpt_signature) values(?,?,?,?,?,?,?,?)";
+    /**
+     * sql for update cpt.
+     */
+    public static final String SQL_UPDATE_CPT = "update $1 set updated = ?, cpt_version = ?, publisher = ?, description = ?, cpt_schema = ?, cpt_signature = ? where cpt_id = ?";
+    /**
+     * sql for update credential template.
+     */
+    public static final String SQL_UPDATE_CREDENTIAL_TEMPLATE = "update $1 set credential_publicKey = ?, credential_proof = ? where cpt_id = ?";
+    /**
+     * sql for update cpt claim policies.
+     */
+    public static final String SQL_UPDATE_CLAIM_POLICIES = "update $1 set claim_policies = ? where cpt_id = ?";
+    /**
+     * sql for query several cpt_id from firstIndex.
+     */
+    public static final String SQL_QUERY_SEVERAL_CPT = "select cpt_id from $1 LIMIT ?, ?";
+    /**
+     * sql for insert policy.
+     */
+    public static final String SQL_SAVE_POLICY = "insert into $1 (policy_id,created,updated,policy_version,publisher,description,policy_schema,policy_signature) values(?,?,?,?,?,?,?,?)";
+    /**
+     * sql for query policy.
+     */
+    public static final String SQL_QUERY_POLICY = "select policy_id,created,updated,policy_version,publisher,description,policy_schema,policy_signature,credential_publicKey,credential_proof,claim_policies from $1 where policy_id =?";
+    /**
+     * sql for query several policy_id from firstIndex.
+     */
+    public static final String SQL_QUERY_SEVERAL_POLICY = "select policy_id from $1 LIMIT ?, ?";
+    /**
+     * sql for insert presentation.
+     */
+    public static final String SQL_SAVE_PRESENTATION = "insert into $1 (presentation_id,creator,claim_policies) values(?,?,?)";
+    /**
+     * sql for query presentation.
+     */
+    public static final String SQL_QUERY_PRESENTATION = "select presentation_id,creator,claim_policies from $1 where presentation_id =?";
+    /**
+     * sql for insert authority issuer.
+     */
+    public static final String SQL_SAVE_AUTHORITY_ISSUER = "insert into $1 (weid,name,description,created,updated,recognize,acc_value,extra_str,extra_int) values(?,?,?,?,?,?,?,?,?)";
+    /**
+     * sql for query authority issuer by weId.
+     */
+    public static final String SQL_QUERY_AUTHORITY_ISSUER_BY_ADDRESS = "select weid,name,description,created,updated,recognize,acc_value,extra_str,extra_int from $1 where weid =?";
+    /**
+     * sql for query authority issuer by name.
+     */
+    public static final String SQL_QUERY_AUTHORITY_ISSUER_BY_NAME = "select weid,name,description,created,updated,recognize,acc_value,extra_str,extra_int from $1 where name =?";
+    /**
+     * sql for delete authority issuer.
+     */
+    public static final String SQL_DELETE_AUTHORITY_ISSUER = "delete from $1 where weid = ?";
+    /**
+     * sql for update authority issuer, only update recognize.
+     */
+    public static final String SQL_UPDATE_AUTHORITY_ISSUER = "update $1 set updated = ?, recognize = ? where weid = ?";
+    /**
+     * sql for query total amount of recognized authority issuer.
+     */
+    public static final String SQL_QUERY_TOTAL_RECOGNIZED_ISSUER = "select COUNT(*) totalCount from $1 where recognize = 1";
+    /**
+     * sql for insert role.
+     */
+    public static final String SQL_SAVE_ROLE = "insert into $1 (weid,created,updated,authority_role,committee_role,admin_role) values(?,?,?,?,?,?)";
+    /**
+     * sql for query role by weId.
+     */
+    public static final String SQL_QUERY_ROLE = "select weid,created,updated,authority_role,committee_role,admin_role from $1 where weid =?";
+    /**
+     * sql for update role.
+     */
+    public static final String SQL_UPDATE_ROLE = "update $1 set updated = ?, authority_role = ?, committee_role = ?, admin_role = ? where weid = ?";
+    /**
+     * sql for insert specific type.
+     */
+    public static final String SQL_SAVE_SPECIFIC_TYPE = "insert into $1 (type_name,created,updated,owner) values(?,?,?,?)";
+    /**
+     * sql for query specific type by type_name.
+     */
+    public static final String SQL_QUERY_SPECIFIC_TYPE = "select type_name,fellow,created,updated,owner from $1 where type_name =?";
+    /**
+     * sql for delete specific type.
+     */
+    public static final String SQL_DELETE_SPECIFIC_TYPE = "delete from $1 where type_name = ?";
+    /**
+     * sql for update specific issuer, only update fellow.
+     */
+    public static final String SQL_UPDATE_SPECIFIC_TYPE_FELLOW = "update $1 set fellow = ? where type_name = ?";
+    /**
+     * sql for query several policy_id from firstIndex.
+     */
+    public static final String SQL_QUERY_SEVERAL_SPECIFIC_TYPE = "select type_name from $1 LIMIT ?, ?";
+    /**
+     * sql for query evidence by hash.
+     */
+    public static final String SQL_QUERY_EVIDENCE_BY_HASH = "select hash,signers,signatures,logs,updated,revoked,extra_key,extra_data,group_id from $1 where hash =?";
+    /**
+     * sql for query evidence by extra_key.
+     */
+    public static final String SQL_QUERY_EVIDENCE_BY_EXTRAKEY = "select hash,signers,signatures,logs,updated,revoked,extra_key,extra_data,group_id from $1 where extra_key =?";
+    /**
+     * sql for insert evidence.
+     */
+    public static final String SQL_SAVE_EVIDENCE_BY_HASH = "insert into $1 (hash,signers,signatures,logs,updated,revoked,group_id) values(?,?,?,?,?,?,?)";
+    /**
+     * sql for insert evidence.
+     */
+    public static final String SQL_SAVE_EVIDENCE_EXTRAKEY = "insert into $1 (hash,signers,signatures,logs,updated,revoked,extra_key,group_id) values(?,?,?,?,?,?,?,?)";
+    /**
+     * sql for update evidence.
+     */
+    public static final String SQL_UPDATE_EVIDENCE = "update $1 set signers = ?, signatures = ?, logs = ?, updated = ?, revoked = ?, extra_key = ? where hash = ?";
 
     private static final Logger logger = LoggerFactory.getLogger(SqlExecutor.class);
     /**
@@ -76,6 +213,7 @@ public class SqlExecutor {
      * tableDomain 与 tableName的映射.
      */
     private static final Map<String, String> TABLE_CACHE = new ConcurrentHashMap<String, String>();
+
     /**
      * the sql domain.
      */
@@ -201,6 +339,101 @@ public class SqlExecutor {
             result.setResult(DataDriverConstant.SQL_EXECUTE_FAILED_STATUS);
         } finally {
             ConnectionPool.close(conn, ps);
+        }
+        return result;
+    }
+
+    /**
+     * 查询操作.
+     *
+     * @param sql 需要被执行的SQL语句
+     * @param data 占位符所需要的数据
+     * @return 返回查询出来的多行数据，每行仅查询一列，仅用于按序号查询多个weid
+     */
+    public ResponseData<List<String>> executeQueryLines(String sql, Object... data) {
+        ResponseData<List<String>> result = new ResponseData<List<String>>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionPool.getConnection(sqlDomain.getBaseDomain());
+            if (conn == null) {
+                return
+                        new ResponseData<List<String>>(
+                                null,
+                                ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR
+                        );
+            }
+
+            ps = conn.prepareStatement(buildExecuteSql(sql, conn));
+            for (int i = 0; i < data.length; i++) {
+                ps.setObject(i + 1, data[i]);
+            }
+
+            rs = ps.executeQuery();
+            List<String> dataList = new ArrayList<>();
+            while (rs.next()) {
+                ResultSetMetaData metaData = rs.getMetaData();
+                String columnLabel = metaData.getColumnLabel(1);
+                dataList.add(rs.getString(columnLabel));
+                /*int type = metaData.getColumnType(i);
+                if (type == Types.TIMESTAMP) {
+                    Timestamp timestamp = rs.getTimestamp(columnLabel);
+                    if (timestamp != null) {
+                        dataMap.put(columnLabel, String.valueOf(timestamp.getTime()));
+                    }
+                } else {
+                    dataMap.put(columnLabel, rs.getString(columnLabel));
+                }*/
+            }
+            rs.close();
+            ps.close();
+            result.setErrorCode(ErrorCode.SUCCESS);
+            result.setResult(dataList);
+        } catch (SQLException e) {
+            logger.error("Query data from {{}} with exception", sqlDomain.getBaseDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+        } finally {
+            ConnectionPool.close(conn, ps, rs);
+        }
+        return result;
+    }
+
+    /**
+     * 查询操作.
+     *
+     * @param sql 需要被执行的SQL语句
+     * @return 返回查询数据总行数
+     */
+    public ResponseData<Integer> executeQueryAmounts(String sql) {
+        ResponseData<Integer> result = new ResponseData<Integer>();
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = ConnectionPool.getConnection(sqlDomain.getBaseDomain());
+            if (conn == null) {
+                return
+                        new ResponseData<Integer>(
+                                0,
+                                ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR
+                        );
+            }
+            ps = conn.prepareStatement(buildExecuteSql(sql, conn));
+            rs = ps.executeQuery();
+            int rowCount = 0;
+            if(rs.next()) {
+                rowCount = rs.getInt("totalCount");
+            }
+            rs.close();
+            ps.close();
+            result.setErrorCode(ErrorCode.SUCCESS);
+            result.setResult(rowCount);
+        } catch (SQLException e) {
+            logger.error("Query data from {{}} with exception", sqlDomain.getBaseDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+        } finally {
+            ConnectionPool.close(conn, ps, rs);
         }
         return result;
     }

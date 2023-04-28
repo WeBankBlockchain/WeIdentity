@@ -5,18 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.webank.weid.service.local.PolicyServiceLocal;
+import com.webank.weid.service.local.WeIdServiceLocal;
+import com.webank.weid.util.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.ClaimPolicy;
 import com.webank.weid.protocol.base.PresentationPolicyE;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.CptMapArgs;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.protocol.response.RsvSignature;
 import com.webank.weid.service.rpc.PolicyService;
 import com.webank.weid.util.CredentialPojoUtils;
@@ -32,8 +35,25 @@ import com.webank.weid.util.WeIdUtils;
 public class PolicyServiceImpl implements PolicyService {
 
     private static final Logger logger = LoggerFactory.getLogger(PolicyServiceImpl.class);
-    private static final com.webank.weid.blockchain.service.impl.PolicyServiceImpl policyBlockchainService = new com.webank.weid.blockchain.service.impl.PolicyServiceImpl();
+    private static com.webank.weid.blockchain.rpc.PolicyService policyBlockchainService;
 
+    public PolicyServiceImpl(){
+        policyBlockchainService = getPolicyService();
+    }
+
+    private static com.webank.weid.blockchain.rpc.PolicyService getPolicyService() {
+        if(policyBlockchainService != null) {
+            return policyBlockchainService;
+        } else {
+            String type = PropertyUtils.getProperty("deploy.style");
+            if (type.equals("blockchain")) {
+                return new com.webank.weid.blockchain.service.impl.PolicyServiceImpl();
+            } else {
+                // default database
+                return new PolicyServiceLocal();
+            }
+        }
+    }
     /**
      * Register Claim Policy on blockchain and assign it under a CPT ID.
      *
