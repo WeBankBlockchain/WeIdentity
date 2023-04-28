@@ -4,7 +4,7 @@ package com.webank.weid.app;
 
 import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.exception.InitWeb3jException;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.service.rpc.WeIdService;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import org.apache.commons.lang3.StringUtils;

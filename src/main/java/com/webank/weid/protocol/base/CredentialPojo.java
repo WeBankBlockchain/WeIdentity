@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialType;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.protocol.inf.Hashable;

@@ -6,14 +6,16 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 
 
+import com.webank.weid.service.local.EvidenceServiceLocal;
+import com.webank.weid.service.local.WeIdServiceLocal;
 import com.webank.weid.service.rpc.EvidenceService;
 import com.webank.weid.service.rpc.WeIdService;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.ProcessingMode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.*;
 import com.webank.weid.protocol.inf.Hashable;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -40,14 +42,32 @@ public class EvidenceServiceImpl implements EvidenceService {
 
     //private EvidenceServiceEngine evidenceServiceEngine;
 
-    private static com.webank.weid.blockchain.service.impl.EvidenceServiceImpl evidenceBlockchainService;
+    private static com.webank.weid.blockchain.rpc.EvidenceService evidenceBlockchainService;
 
     //private String groupId;
 
     public EvidenceServiceImpl() {
         //super();
         //initEvidenceServiceEngine(masterGroupId);
-        evidenceBlockchainService = new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl();
+        evidenceBlockchainService = getEvidenceService(StringUtils.EMPTY);
+    }
+
+    private static com.webank.weid.blockchain.rpc.EvidenceService getEvidenceService(String groupId) {
+        if(evidenceBlockchainService != null) {
+            return evidenceBlockchainService;
+        } else {
+            String type = PropertyUtils.getProperty("deploy.style");
+            if (type.equals("blockchain")) {
+                if(!groupId.equals(StringUtils.EMPTY)) {
+                    return new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl(groupId);
+                } else {
+                    return new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl();
+                }
+            } else {
+                // default database
+                return new EvidenceServiceLocal();
+            }
+        }
     }
 
     /**
@@ -60,7 +80,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         //super(groupId);
         this.processingMode = processingMode;
         //initEvidenceServiceEngine(groupId);
-        evidenceBlockchainService = new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl(groupId);
+        evidenceBlockchainService = getEvidenceService(groupId);
     }
 
     /*private void initEvidenceServiceEngine(String groupId) {
@@ -165,7 +185,7 @@ public class EvidenceServiceImpl implements EvidenceService {
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         return hashToNewEvidence(hashResp.getResult(), weIdPrivateKey.getPrivateKey(),
-            StringUtils.EMPTY);
+            "empty log");
     }
 
     /**
@@ -507,14 +527,14 @@ public class EvidenceServiceImpl implements EvidenceService {
                 args[2] = extra;
                 args[3] = String.valueOf(timestamp);
                 args[4] = privateKey;
-                args[5] = String.valueOf(evidenceBlockchainService.groupId);
+                args[5] = String.valueOf(evidenceBlockchainService.getGroupId());
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
                     .append(extra)
                     .append(timestamp)
                     .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
-                    .append(evidenceBlockchainService.groupId).toString();
+                    .append(evidenceBlockchainService.getGroupId()).toString();
                 //替换国密
                 String hash = DataToolUtils.hash(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
@@ -763,7 +783,7 @@ public class EvidenceServiceImpl implements EvidenceService {
                 args[3] = String.valueOf(timestamp);
                 args[4] = customKey;
                 args[5] = privateKey;
-                args[6] = String.valueOf(evidenceBlockchainService.groupId);
+                args[6] = String.valueOf(evidenceBlockchainService.getGroupId());
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
@@ -771,7 +791,7 @@ public class EvidenceServiceImpl implements EvidenceService {
                     .append(timestamp)
                     .append(customKey)
                     .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
-                    .append(evidenceBlockchainService.groupId).toString();
+                    .append(evidenceBlockchainService.getGroupId()).toString();
                 String hash = DataToolUtils.hash(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
