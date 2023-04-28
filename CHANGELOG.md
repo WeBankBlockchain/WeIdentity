@@ -1,3 +1,9 @@
+### V3.1.0 (2023-4-28)
+- Features:
+1. Add a way for local databases to deploy WeIdentity without deploying blockchain
+- Bugfixes:
+1. Upgrade components with known vulnerabilities
+
 ### V3.0.0 (2022-12-15)
 - Features:
 1. The project was restructured to strip the blockchain-related functions and interfaces from the project, as well as the file transfer and format conversion functions from the project
