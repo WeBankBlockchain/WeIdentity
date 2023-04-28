@@ -3,6 +3,7 @@
 package com.webank.weid.util;
 
 import com.webank.weid.constant.*;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.CredentialConstant.CredentialProofType;
 import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialPojo;
