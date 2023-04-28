@@ -29,7 +29,12 @@ public final class WeIdUtils {
     private static final Logger logger = LoggerFactory.getLogger(WeIdUtils.class);
 
     private static String getChainId() {
-        return com.webank.weid.blockchain.util.DataToolUtils.chainId;
+        if (DataToolUtils.deployStyle.equals("blockchain")) {
+            return com.webank.weid.blockchain.util.DataToolUtils.chainId;
+        } else {
+            // default database
+            return "0";
+        }
     }
 
     public static CreateWeIdDataResult createWeId() {
