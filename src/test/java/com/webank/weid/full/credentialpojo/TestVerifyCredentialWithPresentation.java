@@ -1,11 +1,11 @@
 package com.webank.weid.full.credentialpojo;
 
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.full.persistence.TestBaseTransportation;
 import com.webank.weid.protocol.base.*;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
