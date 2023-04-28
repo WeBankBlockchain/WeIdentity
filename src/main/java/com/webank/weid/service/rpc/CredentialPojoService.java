@@ -12,7 +12,7 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPublicKey;
 import com.webank.weid.protocol.cpt.Cpt101;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import java.util.List;
 import java.util.Set;
 
