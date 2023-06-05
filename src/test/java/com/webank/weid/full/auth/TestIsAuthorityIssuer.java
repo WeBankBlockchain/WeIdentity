@@ -1,38 +1,24 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.auth;
 
+import com.webank.weid.util.DataToolUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
+
+import java.math.BigInteger;
 
 /**
  * isAuthorityIssuer method for testing AuthorityIssuerService.
@@ -68,7 +54,6 @@ public class TestIsAuthorityIssuer extends TestBaseService {
         AuthorityIssuer authorityIssuer =
             authorityIssuerService.queryAuthorityIssuerInfo(createWeId.getWeId()).getResult();
         Assert.assertFalse(authorityIssuer.isRecognized());
-
         response = authorityIssuerService.recognizeAuthorityIssuer(createWeId.getWeId(),
             new WeIdPrivateKey(privateKey));
         Assert.assertTrue(response.getResult());
@@ -195,7 +180,7 @@ public class TestIsAuthorityIssuer extends TestBaseService {
             .isAuthorityIssuer(weId);
         LogUtil.info(logger, "isAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -210,7 +195,7 @@ public class TestIsAuthorityIssuer extends TestBaseService {
             .isAuthorityIssuer("did:weid:0x5f3d8234e93823fac7ebdf0cfaa03b6a43d87733");
         LogUtil.info(logger, "isAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -237,7 +222,7 @@ public class TestIsAuthorityIssuer extends TestBaseService {
         response = authorityIssuerService.isAuthorityIssuer(createWeId.getWeId());
         LogUtil.info(logger, "isAuthorityIssuer", response);
 
-        Assert.assertEquals(ErrorCode.AUTHORITY_ISSUER_CONTRACT_ERROR_NOT_EXISTS.getCode(),
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }

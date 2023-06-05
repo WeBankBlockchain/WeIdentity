@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.protocol.base;
 
@@ -24,7 +7,7 @@ import lombok.Data;
 /**
  * The base data structure to handle WeIdentity DID authority info.
  *
- * @author darwindu
+ * @author afeexian
  */
 @Data
 public class WeIdAuthentication {
@@ -35,9 +18,9 @@ public class WeIdAuthentication {
     private String weId;
     
     /**
-     * the public key Id.
+     * the method Id.
      */
-    private String weIdPublicKeyId;
+    private String authenticationMethodId;
 
     /**
      * Required: The private key or The weIdentity DID.
@@ -63,10 +46,10 @@ public class WeIdAuthentication {
      * Constructor with weId, privateKey and weIdPublicKeyId. 
      * @param weId the weId
      * @param privateKey the privateKey
-     * @param weIdPublicKeyId the weIdPublicKeyId
+     * @param authenticationMethodId the weIdPublicKeyId
      */
-    public WeIdAuthentication(String weId, String privateKey, String weIdPublicKeyId) {
+    public WeIdAuthentication(String weId, String privateKey, String authenticationMethodId) {
         this(weId, privateKey);
-        this.weIdPublicKeyId = weIdPublicKeyId;
+        this.authenticationMethodId = authenticationMethodId;
     }
 }

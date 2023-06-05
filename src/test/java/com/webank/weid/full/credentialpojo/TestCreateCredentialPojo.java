@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.credentialpojo;
 
@@ -26,9 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.Keys;
+import org.fisco.bcos.sdk.abi.datatypes.Address;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.utils.Numeric;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -38,7 +22,7 @@ import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
 import com.webank.weid.constant.CredentialConstant;
 import com.webank.weid.constant.CredentialType;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.CptBaseInfo;
@@ -50,10 +34,8 @@ import com.webank.weid.protocol.request.AuthenticationArgs;
 import com.webank.weid.protocol.request.CptStringArgs;
 import com.webank.weid.protocol.request.CreateCredentialPojoArgs;
 import com.webank.weid.protocol.request.CreateWeIdArgs;
-import com.webank.weid.protocol.request.SetAuthenticationArgs;
-import com.webank.weid.protocol.request.SetPublicKeyArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.util.CredentialPojoUtils;
 import com.webank.weid.util.DataToolUtils;
 import com.webank.weid.util.DateUtils;
@@ -112,7 +94,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         // Add new public key to this guy
         PasswordKey pwKey = TestBaseUtil.createEcKeyPair();
         AuthenticationArgs arg = new AuthenticationArgs();
-        arg.setOwner(cwdr.getWeId());
+        arg.setController(cwdr.getWeId());
         arg.setPublicKey(pwKey.getPublicKey());
         ResponseData<Boolean> addResp = weIdService.setAuthentication(cwdr.getWeId(),
             arg, cwdr.getUserWeIdPrivateKey());
@@ -122,7 +104,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
         weIdPrivateKey.setPrivateKey(pwKey.getPrivateKey());
         weIdAuth.setWeIdPrivateKey(weIdPrivateKey);
-        weIdAuth.setWeIdPublicKeyId(cwdr.getUserWeIdPublicKey().getPublicKey() + "#keys-1");
+        weIdAuth.setAuthenticationMethodId(cwdr.getUserWeIdPublicKey().getPublicKey() + "#keys-1");
         createCredentialPojoArgs.setWeIdAuthentication(weIdAuth);
 
         ResponseData<CredentialPojo> createResp =
@@ -137,7 +119,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
 
         // Specify key ID to be "1" and it should be OK too
         verify = credentialPojoService.verify(createCredentialPojoArgs.getIssuer(),
-            "1", createResp.getResult());
+                cwdr.getWeId() + "#keys-" + DataToolUtils.hash(pwKey.getPublicKey()).substring(58), createResp.getResult());
         Assert.assertTrue(verify.getResult());
 
         // Specify key ID to be "0" and it should be semi-succeeded
@@ -328,7 +310,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         String thumbprint = CredentialPojoUtils
             .getLiteCredentialThumbprintWithoutSig(liteCredential);
         System.out.println("Lite Credential Thumbprint: " + thumbprint + ", Thumbprint hash: "
-            + DataToolUtils.sha3(thumbprint) + ", signature: " + liteCredential.getSignature());
+            + new CryptoSuite(0).hash(thumbprint) + ", signature: " + liteCredential.getSignature());
         // 2. getHash() -> createEvidence (对凭证完整内容包括签名内容进行hash，claim支持选择性披露)
         System.out.println("Lite Credential Hash: "
             + CredentialPojoUtils.getLiteCredentialPojoHash(liteCredential));
@@ -453,7 +435,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
 
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
-        weIdAuthentication.setWeIdPublicKeyId(
+        weIdAuthentication.setAuthenticationMethodId(
             createWeIdResultWithSetAttr.getUserWeIdPublicKey().getPublicKey());
         weIdAuthentication.setWeIdPrivateKey(
             createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
@@ -870,7 +852,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
-        weIdAuthentication.setWeIdPublicKeyId(
+        weIdAuthentication.setAuthenticationMethodId(
             createWeIdResultWithSetAttr.getUserWeIdPublicKey().getPublicKey());
         createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
@@ -895,7 +877,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
         weIdAuthentication.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        weIdAuthentication.setWeIdPublicKeyId(
+        weIdAuthentication.setAuthenticationMethodId(
             createWeIdResultWithSetAttr.getUserWeIdPublicKey().getPublicKey() + "56");
         createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
@@ -922,7 +904,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         createCredentialPojoArgs.setCptId(cptBaseInfo.getCptId());
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdNew.getWeId());
-        weIdAuthentication.setWeIdPublicKeyId(createWeIdNew.getUserWeIdPublicKey().getPublicKey());
+        weIdAuthentication.setAuthenticationMethodId(createWeIdNew.getUserWeIdPublicKey().getPublicKey());
         weIdAuthentication.setWeIdPrivateKey(createWeIdNew.getUserWeIdPrivateKey());
         createCredentialPojoArgs.setWeIdAuthentication(weIdAuthentication);
 
@@ -961,9 +943,10 @@ public class TestCreateCredentialPojo extends TestBaseService {
 
         // Enforce a Register/Update system CPT first
         WeIdAuthentication sdkAuthen = new WeIdAuthentication();
-        ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
-        String keyWeId = WeIdUtils
-            .convertAddressToWeId(new Address(Keys.getAddress(keyPair)).toString());
+        //ECKeyPair keyPair = DataToolUtils.createKeyPairFromPrivate(new BigInteger(privateKey));
+        //CryptoKeyPair keyPair = DataToolUtils.cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        String publicKey = DataToolUtils.publicKeyStrFromPrivate(new BigInteger(privateKey));
+        String keyWeId = WeIdUtils.convertAddressToWeId(DataToolUtils.addressFromPublic(new BigInteger(publicKey, 10)));
         sdkAuthen.setWeId(keyWeId);
         WeIdPrivateKey weIdPrivateKey = new WeIdPrivateKey();
         weIdPrivateKey.setPrivateKey(privateKey);
@@ -971,11 +954,14 @@ public class TestCreateCredentialPojo extends TestBaseService {
         if (!weIdService.isWeIdExist(keyWeId).getResult()) {
             CreateWeIdArgs wargs = new CreateWeIdArgs();
             wargs.setWeIdPrivateKey(weIdPrivateKey);
-            wargs.setPublicKey(keyPair.getPublicKey().toString(10));
+            //wargs.setPublicKey(keyPair.getPublicKey().toString(10));
+            /*BigInteger publicKey =
+                    new BigInteger(1, Numeric.hexStringToByteArray(keyPair.getHexPublicKey()));*/
+            wargs.setPublicKey(publicKey);
             weIdService.createWeId(wargs);
         }
-        String cptJsonSchema = DataToolUtils
-            .generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));
+//        String cptJsonSchema = DataToolUtils.generateDefaultCptJsonSchema(Class.forName("com.webank.weid.protocol.cpt.Cpt101"));
+        String cptJsonSchema = DataToolUtils.generateDefaultCptJsonSchema(101);
         CptStringArgs args = new CptStringArgs();
         args.setCptJsonSchema(cptJsonSchema);
         args.setWeIdAuthentication(sdkAuthen);
@@ -996,7 +982,7 @@ public class TestCreateCredentialPojo extends TestBaseService {
         WeIdAuthentication weIdAuthentication = new WeIdAuthentication();
         weIdAuthentication.setWeId(createWeIdResultWithSetAttr.getWeId());
         weIdAuthentication.setWeIdPrivateKey(createWeIdResultWithSetAttr.getUserWeIdPrivateKey());
-        weIdAuthentication.setWeIdPublicKeyId(createWeIdResultWithSetAttr.getWeId() + "#keys-0");
+        weIdAuthentication.setAuthenticationMethodId(createWeIdResultWithSetAttr.getWeId() + "#keys-0");
 
         // Create and check
         ResponseData<CredentialPojo> authTokenCredResp = credentialPojoService

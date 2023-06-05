@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl;
 
@@ -24,12 +7,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.webank.weid.service.local.AuthorityIssuerServiceLocal;
+import com.webank.weid.service.local.CptServiceLocal;
+import com.webank.weid.service.local.PolicyServiceLocal;
+import com.webank.weid.util.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.IssuerType;
@@ -37,9 +24,9 @@ import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.AuthorityIssuerService;
-import com.webank.weid.rpc.WeIdService;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
+import com.webank.weid.service.rpc.AuthorityIssuerService;
+import com.webank.weid.service.rpc.WeIdService;
 import com.webank.weid.util.WeIdUtils;
 
 /**
@@ -47,12 +34,31 @@ import com.webank.weid.util.WeIdUtils;
  *
  * @author chaoxinhu 2018.10
  */
-public class AuthorityIssuerServiceImpl extends AbstractService implements AuthorityIssuerService {
+public class AuthorityIssuerServiceImpl implements AuthorityIssuerService {
 
     private static final Logger logger = LoggerFactory
         .getLogger(AuthorityIssuerServiceImpl.class);
+    private static com.webank.weid.blockchain.rpc.AuthorityIssuerService authorityBlockchainService;
 
     private WeIdService weIdService = new WeIdServiceImpl();
+
+    public AuthorityIssuerServiceImpl(){
+        authorityBlockchainService = getAuthorityIssuerService();
+    }
+
+    private static com.webank.weid.blockchain.rpc.AuthorityIssuerService getAuthorityIssuerService() {
+        if(authorityBlockchainService != null) {
+            return authorityBlockchainService;
+        } else {
+            String type = PropertyUtils.getProperty("deploy.style");
+            if (type.equals("blockchain")) {
+                return new com.webank.weid.blockchain.service.impl.AuthorityIssuerServiceImpl();
+            } else {
+                // default database
+                return new AuthorityIssuerServiceLocal();
+            }
+        }
+    }
 
     /**
      * Register a new Authority Issuer on Chain.
@@ -68,7 +74,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return new ResponseData<>(false, innerResponseData);
         }
         try {
-            return authEngine.addAuthorityIssuer(args);
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.addAuthorityIssuer(RegisterAuthorityIssuerArgs.toBlockChain(args));
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.addAuthorityIssuer(args);
         } catch (Exception e) {
             logger.error("register has error, Error Message:{}", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -88,9 +101,15 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
         if (ErrorCode.SUCCESS.getCode() != innerResponseData.getCode()) {
             return new ResponseData<>(false, innerResponseData);
         }
-
         try {
-            return authEngine.removeAuthorityIssuer(args);
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.removeAuthorityIssuer(args.getWeId(), args.getWeIdPrivateKey().getPrivateKey());
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.removeAuthorityIssuer(args);
         } catch (Exception e) {
             logger.error("remove authority issuer failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -111,7 +130,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
         }
         String addr = WeIdUtils.convertWeIdToAddress(weId);
         try {
-            return authEngine.isAuthorityIssuer(addr);
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.isAuthorityIssuer(addr);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.isAuthorityIssuer(addr);
         } catch (Exception e) {
             logger.error("check authority issuer id failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
@@ -137,7 +163,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
         }
         String addr = WeIdUtils.convertWeIdToAddress(weId);
         try {
-            return authEngine.recognizeWeId(true, addr, weIdPrivateKey.getPrivateKey());
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.recognizeWeId(true, addr, weIdPrivateKey.getPrivateKey());
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.recognizeWeId(true, addr, weIdPrivateKey.getPrivateKey());
         } catch (Exception e) {
             logger.error("Failed to recognize authority issuer.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
@@ -163,7 +196,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
         }
         String addr = WeIdUtils.convertWeIdToAddress(weId);
         try {
-            return authEngine.recognizeWeId(false, addr, weIdPrivateKey.getPrivateKey());
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.recognizeWeId(false, addr, weIdPrivateKey.getPrivateKey());
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.recognizeWeId(false, addr, weIdPrivateKey.getPrivateKey());
         } catch (Exception e) {
             logger.error("Failed to recognize authority issuer.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR.getCode(),
@@ -183,7 +223,15 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return new ResponseData<>(null, ErrorCode.WEID_INVALID);
         }
         try {
-            return authEngine.getAuthorityIssuerInfoNonAccValue(weId);
+            com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.AuthorityIssuer> innerResp =
+                    authorityBlockchainService.queryAuthorityIssuerInfo(weId);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(null,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            AuthorityIssuer authorityIssuer = AuthorityIssuer.fromBlockChain(innerResp.getResult());
+            return new ResponseData<>(authorityIssuer, ErrorCode.SUCCESS);
+            //return authEngine.getAuthorityIssuerInfoNonAccValue(weId);
         } catch (Exception e) {
             logger.error("query authority issuer failed.", e);
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -205,9 +253,15 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return new ResponseData<>(null, errorCode);
         }
         try {
-            List<String> addrList = authEngine.getAuthorityIssuerAddressList(index, num);
+            com.webank.weid.blockchain.protocol.response.ResponseData<List<String>> innerResp =
+                    authorityBlockchainService.getAuthorityIssuerAddressList(index, num);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(null,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            //List<String> addrList = authEngine.getAuthorityIssuerAddressList(index, num);
             List<AuthorityIssuer> authorityIssuerList = new ArrayList<>();
-            for (String address : addrList) {
+            for (String address : innerResp.getResult()) {
                 String weId = WeIdUtils.convertAddressToWeId(address);
                 ResponseData<AuthorityIssuer> innerResponseData
                     = this.queryAuthorityIssuerInfo(weId);
@@ -243,8 +297,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return new ResponseData<>(false, innerCode);
         }
         try {
-            return authEngine
-                .registerIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.registerIssuerType(callerAuth.getWeIdPrivateKey().getPrivateKey(), issuerType);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.registerIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("register issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -273,8 +333,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
         }
         try {
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return authEngine.addIssuer(issuerType, issuerAddress,
-                callerAuth.getWeIdPrivateKey().getPrivateKey());
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.addIssuer(callerAuth.getWeIdPrivateKey().getPrivateKey(), issuerType, issuerAddress);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.addIssuer(issuerType, issuerAddress, callerAuth.getWeIdPrivateKey().getPrivateKey());
         } catch (Exception e) {
             logger.error("add issuer into type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -302,10 +368,17 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
         }
         try {
             String issuerAddress = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return authEngine.removeIssuer(
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.removeIssuer(callerAuth.getWeIdPrivateKey().getPrivateKey(), issuerType, issuerAddress);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            /*return authEngine.removeIssuer(
                 issuerType,
                 issuerAddress,
-                callerAuth.getWeIdPrivateKey().getPrivateKey());
+                callerAuth.getWeIdPrivateKey().getPrivateKey());*/
         } catch (Exception e) {
             logger.error("remove issuer from type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -333,7 +406,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
         }
         try {
             String address = WeIdUtils.convertWeIdToAddress(targetIssuerWeId);
-            return authEngine.isSpecificTypeIssuer(issuerType, address);
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                    authorityBlockchainService.isSpecificTypeIssuer(issuerType, address);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(false,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.isSpecificTypeIssuer(issuerType, address);
         } catch (Exception e) {
             logger.error("check issuer type failed.", e);
             return new ResponseData<>(false, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -363,7 +443,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return new ResponseData<>(null, errorCode);
         }
         try {
-            return authEngine.getSpecificTypeIssuerList(issuerType, index, num);
+            com.webank.weid.blockchain.protocol.response.ResponseData<List<String>> innerResp =
+                    authorityBlockchainService.getAllSpecificTypeIssuerList(issuerType, index, num);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(null,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.getSpecificTypeIssuerList(issuerType, index, num);
         } catch (Exception e) {
             logger.error("get all specific issuers failed.", e);
             return new ResponseData<>(null, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -530,7 +617,14 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.AUTHORITY_ISSUER_NAME_ILLEGAL);
         }
         try {
-            return authEngine.getWeIdFromOrgId(orgId);
+            com.webank.weid.blockchain.protocol.response.ResponseData<String> innerResp =
+                    authorityBlockchainService.getWeIdFromOrgId(orgId);
+            if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(StringUtils.EMPTY,
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+            }
+            return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+            //return authEngine.getWeIdFromOrgId(orgId);
         } catch (Exception e) {
             logger.error("Failed to get WeID, Error Message:{}", e);
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.AUTHORITY_ISSUER_ERROR);
@@ -539,22 +633,50 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
 
     @Override
     public ResponseData<Integer> getIssuerCount() {
-        return authEngine.getIssuerCount();
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> innerResp =
+                authorityBlockchainService.getIssuerCount();
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return authEngine.getIssuerCount();
     }
 
     @Override
     public ResponseData<Integer> getRecognizedIssuerCount() {
-        return authEngine.getRecognizedIssuerCount();
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> innerResp =
+                authorityBlockchainService.getRecognizedIssuerCount();
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return authEngine.getRecognizedIssuerCount();
     }
 
     @Override
     public ResponseData<Integer> getSpecificTypeIssuerSize(String issuerType) {
-        return authEngine.getSpecificTypeIssuerSize(issuerType);
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> innerResp =
+                authorityBlockchainService.getSpecificTypeIssuerSize(issuerType);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return authEngine.getSpecificTypeIssuerSize(issuerType);
     }
 
     @Override
     public ResponseData<Integer> getIssuerTypeCount() {
-        return authEngine.getIssuerTypeCount();
+        com.webank.weid.blockchain.protocol.response.ResponseData<Integer> innerResp =
+                authorityBlockchainService.getIssuerTypeCount();
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(-1,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return authEngine.getIssuerTypeCount();
     }
 
     @Override
@@ -570,12 +692,30 @@ public class AuthorityIssuerServiceImpl extends AbstractService implements Autho
         if (innerCode != ErrorCode.SUCCESS) {
             return new ResponseData<>(false, innerCode);
         }
-        return authEngine.removeIssuerType(
-            issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
+        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> innerResp =
+                authorityBlockchainService.removeIssuerType(callerAuth.getWeIdPrivateKey().getPrivateKey(), issuerType);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(false,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        //return authEngine.removeIssuerType(issuerType, callerAuth.getWeIdPrivateKey().getPrivateKey());
     }
 
     @Override
     public ResponseData<List<IssuerType>> getIssuerTypeList(Integer index, Integer num) {
-        return authEngine.getIssuerTypeList(index, num);
+        com.webank.weid.blockchain.protocol.response.ResponseData<List<com.webank.weid.blockchain.protocol.base.IssuerType>> innerResp =
+                authorityBlockchainService.getIssuerTypeList(index, num);
+        if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(null,
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+        }
+        List<IssuerType> typeList = new ArrayList<>();
+        for(com.webank.weid.blockchain.protocol.base.IssuerType type : innerResp.getResult()){
+            IssuerType issuerType = IssuerType.fromBlockChain(type);
+            typeList.add(issuerType);
+        }
+        return new ResponseData<>(typeList, ErrorCode.SUCCESS);
+        //return authEngine.getIssuerTypeList(index, num);
     }
 }

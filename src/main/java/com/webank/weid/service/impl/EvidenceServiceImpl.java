@@ -1,67 +1,38 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.service.impl;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+
+
+import com.webank.weid.service.local.EvidenceServiceLocal;
+import com.webank.weid.service.local.WeIdServiceLocal;
+import com.webank.weid.service.rpc.EvidenceService;
+import com.webank.weid.service.rpc.WeIdService;
+import com.webank.weid.blockchain.constant.ErrorCode;
+import com.webank.weid.constant.ProcessingMode;
+import com.webank.weid.constant.WeIdConstant;
+import com.webank.weid.protocol.base.*;
+import com.webank.weid.protocol.inf.Hashable;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
+import com.webank.weid.util.*;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.constant.ProcessingMode;
-import com.webank.weid.constant.WeIdConstant;
-import com.webank.weid.protocol.base.CredentialPojo;
-import com.webank.weid.protocol.base.EvidenceInfo;
-import com.webank.weid.protocol.base.EvidenceSignInfo;
-import com.webank.weid.protocol.base.HashString;
-import com.webank.weid.protocol.base.WeIdAuthentication;
-import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdPrivateKey;
-import com.webank.weid.protocol.inf.Hashable;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.EvidenceService;
-import com.webank.weid.rpc.WeIdService;
-import com.webank.weid.service.impl.engine.EngineFactory;
-import com.webank.weid.service.impl.engine.EvidenceServiceEngine;
-import com.webank.weid.util.BatchTransactionUtils;
-import com.webank.weid.util.CredentialPojoUtils;
-import com.webank.weid.util.DataToolUtils;
-import com.webank.weid.util.DateUtils;
-import com.webank.weid.util.WeIdUtils;
-
 /**
  * Service implementations for operations on Evidence.
  *
- * @author chaoxinhu 2019.1
+ * @author afeexian 2022.10
  */
-public class EvidenceServiceImpl extends AbstractService implements EvidenceService {
+public class EvidenceServiceImpl implements EvidenceService {
 
     private static final Logger logger = LoggerFactory.getLogger(EvidenceServiceImpl.class);
 
@@ -69,31 +40,53 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
 
     private ProcessingMode processingMode = ProcessingMode.IMMEDIATE;
 
-    private EvidenceServiceEngine evidenceServiceEngine;
+    //private EvidenceServiceEngine evidenceServiceEngine;
 
-    private Integer groupId;
+    private static com.webank.weid.blockchain.rpc.EvidenceService evidenceBlockchainService;
+
+    //private String groupId;
 
     public EvidenceServiceImpl() {
-        super();
-        initEvidenceServiceEngine(masterGroupId);
+        //super();
+        //initEvidenceServiceEngine(masterGroupId);
+        evidenceBlockchainService = getEvidenceService(StringUtils.EMPTY);
+    }
+
+    private static com.webank.weid.blockchain.rpc.EvidenceService getEvidenceService(String groupId) {
+        if(evidenceBlockchainService != null) {
+            return evidenceBlockchainService;
+        } else {
+            String type = PropertyUtils.getProperty("deploy.style");
+            if (type.equals("blockchain")) {
+                if(!groupId.equals(StringUtils.EMPTY)) {
+                    return new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl(groupId);
+                } else {
+                    return new com.webank.weid.blockchain.service.impl.EvidenceServiceImpl();
+                }
+            } else {
+                // default database
+                return new EvidenceServiceLocal();
+            }
+        }
     }
 
     /**
-     * 传入processingMode来决定上链模式.
+     * 传入processingMode来决定上链模式，仅适用于FiscoBcos区块链，用于初始化不同群组的evidence服务.
      *
      * @param processingMode 上链模式
      * @param groupId 群组编号
      */
-    public EvidenceServiceImpl(ProcessingMode processingMode, Integer groupId) {
-        super(groupId);
+    public EvidenceServiceImpl(ProcessingMode processingMode, String groupId) {
+        //super(groupId);
         this.processingMode = processingMode;
-        initEvidenceServiceEngine(groupId);
+        //initEvidenceServiceEngine(groupId);
+        evidenceBlockchainService = getEvidenceService(groupId);
     }
 
-    private void initEvidenceServiceEngine(Integer groupId) {
+    /*private void initEvidenceServiceEngine(String groupId) {
         evidenceServiceEngine = EngineFactory.createEvidenceServiceEngine(groupId);
         this.groupId = groupId;
-    }
+    }*/
 
     @Override
     public ResponseData<Boolean> createRawEvidenceWithCustomKey(
@@ -104,7 +97,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         String extraKey,
         String privateKey
     ) {
-        ResponseData<String> hashResp = evidenceServiceEngine.createEvidenceWithCustomKey(
+        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> hashResp = evidenceBlockchainService.createEvidenceWithCustomKey(
             hashValue,
             signature,
             log,
@@ -112,7 +105,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             extraKey,
             privateKey
         );
-        if (hashResp.getResult().equalsIgnoreCase(hashValue)) {
+        if (hashResp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<>(true, ErrorCode.SUCCESS);
         } else {
             return new ResponseData<>(false, hashResp.getErrorCode(), hashResp.getErrorMessage());
@@ -141,18 +134,36 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         List<String> signers = new ArrayList<>();
         signers.add(signer);
         if (StringUtils.isEmpty(extraKey)) {
-            ResponseData<List<Boolean>> resp = evidenceServiceEngine.batchCreateEvidence(
-                hashValues, signatures, logs, timestamps, signers, privateKey);
-            return new ResponseData<>(resp.getResult().get(0), resp.getErrorCode(),
-                resp.getErrorMessage());
+            com.webank.weid.blockchain.protocol.response.ResponseData<List<Boolean>> hashResp = evidenceBlockchainService.batchCreateEvidence(
+                    hashValues,
+                    signatures,
+                    logs,
+                    timestamps,
+                    signers,
+                    privateKey
+            );
+            if (hashResp.getErrorCode() == ErrorCode.SUCCESS.getCode() && hashResp.getResult().get(0)) {
+                return new ResponseData<>(true, ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(false, hashResp.getErrorCode(), hashResp.getErrorMessage());
+            }
         } else {
             List<String> extraKeys = new ArrayList<>();
             extraKeys.add(extraKey);
-            ResponseData<List<Boolean>> resp = evidenceServiceEngine
-                .batchCreateEvidenceWithCustomKey(hashValues, signatures, logs, timestamps,
-                    signers, extraKeys, privateKey);
-            return new ResponseData<>(resp.getResult().get(0), resp.getErrorCode(),
-                resp.getErrorMessage());
+            com.webank.weid.blockchain.protocol.response.ResponseData<List<Boolean>> hashResp = evidenceBlockchainService.batchCreateEvidenceWithCustomKey(
+                    hashValues,
+                    signatures,
+                    logs,
+                    timestamps,
+                    signers,
+                    extraKeys,
+                    privateKey
+            );
+            if (hashResp.getErrorCode() == ErrorCode.SUCCESS.getCode() && hashResp.getResult().get(0)) {
+                return new ResponseData<>(true, ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(false, hashResp.getErrorCode(), hashResp.getErrorMessage());
+            }
         }
     }
 
@@ -174,7 +185,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         return hashToNewEvidence(hashResp.getResult(), weIdPrivateKey.getPrivateKey(),
-            StringUtils.EMPTY);
+            "empty log");
     }
 
     /**
@@ -270,23 +281,36 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
         if (requireSig) {
-            String signature = DataToolUtils.secp256k1Sign(hashValue,
-                new BigInteger(weIdPrivateKey.getPrivateKey()));
-            return evidenceServiceEngine.addLog(
-                hashValue,
-                signature,
-                log,
-                timestamp,
-                weIdPrivateKey.getPrivateKey()
+            /*String signature = DataToolUtils.secp256k1Sign(hashValue,
+                new BigInteger(weIdPrivateKey.getPrivateKey()));*/
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(hashValue, weIdPrivateKey.getPrivateKey())
             );
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> hashResp = evidenceBlockchainService.addLog(
+                    hashValue,
+                    signature,
+                    log,
+                    timestamp,
+                    weIdPrivateKey.getPrivateKey()
+            );
+            if (hashResp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(true, ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(false, hashResp.getErrorCode(), hashResp.getErrorMessage());
+            }
         } else {
-            return evidenceServiceEngine.addLog(
-                hashValue,
-                StringUtils.EMPTY,
-                log,
-                timestamp,
-                weIdPrivateKey.getPrivateKey()
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> hashResp = evidenceBlockchainService.addLog(
+                    hashValue,
+                    StringUtils.EMPTY,
+                    log,
+                    timestamp,
+                    weIdPrivateKey.getPrivateKey()
             );
+            if (hashResp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(true, ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(false, hashResp.getErrorCode(), hashResp.getErrorMessage());
+            }
         }
     }
 
@@ -361,7 +385,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (!isChainStringLengthValid(log)) {
             return new ResponseData<>(false, ErrorCode.ON_CHAIN_STRING_TOO_LONG);
         }
-        ResponseData<String> hashResp = evidenceServiceEngine.getHashByCustomKey(customKey);
+        com.webank.weid.blockchain.protocol.response.ResponseData<String> hashResp = evidenceBlockchainService.getHashByCustomKey(customKey);
         String hashValue = hashResp.getResult();
         if (StringUtils.isEmpty(hashValue)) {
             logger.error("Failed to find the hash value from custom key: ", customKey);
@@ -373,30 +397,43 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
         if (requireSig) {
-            String signature = DataToolUtils.secp256k1Sign(hashValue,
-                new BigInteger(weIdPrivateKey.getPrivateKey()));
-            return evidenceServiceEngine.addLogByCustomKey(
-                hashValue,
-                signature,
-                log,
-                timestamp,
-                customKey,
-                weIdPrivateKey.getPrivateKey()
+            /*String signature = DataToolUtils.secp256k1Sign(hashValue,
+                new BigInteger(weIdPrivateKey.getPrivateKey()));*/
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(hashValue, weIdPrivateKey.getPrivateKey())
             );
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> resp = evidenceBlockchainService.addLogByCustomKey(
+                    hashValue,
+                    signature,
+                    log,
+                    timestamp,
+                    customKey,
+                    weIdPrivateKey.getPrivateKey()
+            );
+            if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(true, ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(false, resp.getErrorCode(), resp.getErrorMessage());
+            }
         } else {
-            return evidenceServiceEngine.addLogByCustomKey(
-                hashValue,
-                StringUtils.EMPTY,
-                log,
-                timestamp,
-                customKey,
-                weIdPrivateKey.getPrivateKey()
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> resp = evidenceBlockchainService.addLogByCustomKey(
+                    hashValue,
+                    StringUtils.EMPTY,
+                    log,
+                    timestamp,
+                    customKey,
+                    weIdPrivateKey.getPrivateKey()
             );
+            if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(true, ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(false, resp.getErrorCode(), resp.getErrorMessage());
+            }
         }
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.generateHash
+     * @see com.webank.weid.service.rpc.generateHash
      * #generateHash(T object)
      */
     @Override
@@ -404,6 +441,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (object == null) {
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
+        //替换国密
         if (object instanceof Hashable) {
             ResponseData<String> hashResp = getHashValue((Hashable) object);
             if (StringUtils.isEmpty(hashResp.getResult())) {
@@ -419,7 +457,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 logger.error("Failed to convert file into String: {}", ((File) object).getName());
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
-            return new ResponseData<>(new HashString(DataToolUtils.sha3(rawData)),
+            return new ResponseData<>(new HashString(DataToolUtils.hash(rawData)),
                 ErrorCode.SUCCESS);
         }
         if (object instanceof String) {
@@ -427,7 +465,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 logger.error("Input String is blank, ignored..");
                 return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
             }
-            return new ResponseData<>(new HashString(DataToolUtils.sha3((String) object)),
+            return new ResponseData<>(new HashString(DataToolUtils.hash((String) object)),
                 ErrorCode.SUCCESS);
         }
         logger.error("Unsupported input object type: {}", object.getClass().getCanonicalName());
@@ -476,7 +514,11 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     private ResponseData<String> hashToNewEvidence(String hashValue, String privateKey,
         String extra) {
         try {
-            String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
+            //替换国密
+            //String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(hashValue, privateKey)
+            );
             Long timestamp = DateUtils.getCurrentTimeStamp();
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
                 String[] args = new String[6];
@@ -485,15 +527,16 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 args[2] = extra;
                 args[3] = String.valueOf(timestamp);
                 args[4] = privateKey;
-                args[5] = String.valueOf(this.groupId);
+                args[5] = String.valueOf(evidenceBlockchainService.getGroupId());
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
                     .append(extra)
                     .append(timestamp)
                     .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
-                    .append(this.groupId).toString();
-                String hash = DataToolUtils.sha3(rawData);
+                    .append(evidenceBlockchainService.getGroupId()).toString();
+                //替换国密
+                String hash = DataToolUtils.hash(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
                     .writeTransaction(requestId, "createEvidence", args, StringUtils.EMPTY);
@@ -503,14 +546,18 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
                 }
             }
-
-            return evidenceServiceEngine.createEvidence(
-                hashValue,
-                signature,
-                extra,
-                timestamp,
-                privateKey
+            com.webank.weid.blockchain.protocol.response.ResponseData<String> resp = evidenceBlockchainService.createEvidence(
+                    hashValue,
+                    signature,
+                    extra,
+                    timestamp,
+                    privateKey
             );
+            if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(StringUtils.EMPTY, resp.getErrorCode(), resp.getErrorMessage());
+            }
         } catch (Exception e) {
             logger.error("create evidence failed due to system error. ", e);
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
@@ -529,11 +576,12 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             logger.error("Evidence argument illegal input: evidence hash. ");
             return new ResponseData<>(null, ErrorCode.ILLEGAL_INPUT);
         }
-        try {
-            return evidenceServiceEngine.getInfo(evidenceKey);
-        } catch (Exception e) {
-            logger.error("get evidence failed.", e);
-            return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.EvidenceInfo> hashResp = evidenceBlockchainService.getInfo(evidenceKey);
+        if(hashResp.getErrorCode() == ErrorCode.SUCCESS.getCode()){
+            EvidenceInfo evidenceInfo = EvidenceInfo.fromBlockChain(hashResp.getResult());
+            return new ResponseData<>(evidenceInfo, ErrorCode.SUCCESS);
+        } else {
+            return new ResponseData<>(null, hashResp.getErrorCode(), hashResp.getErrorMessage());
         }
     }
 
@@ -577,7 +625,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         if (!WeIdUtils.isWeIdValid(weId)) {
             return new ResponseData<>(false, ErrorCode.WEID_INVALID);
         }
-        if (!evidenceInfo.getSigners().contains(weId)) {
+        if (!evidenceInfo.getSigners().contains(WeIdUtils.convertWeIdToAddress(weId))) {
             logger.error("This Evidence does not contain the provided WeID: {}", weId);
             return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
         }
@@ -585,7 +633,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         // 1st: verify hash (accept both thumbprint hash or credential.getHash())
         if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(credentialPojo.getHash())) {
             if (CredentialPojoUtils.isLiteCredential(credentialPojo)) {
-                if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(DataToolUtils.sha3(
+                if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(DataToolUtils.hash(
                     CredentialPojoUtils.getLiteCredentialThumbprintWithoutSig(credentialPojo)))) {
                     logger.error("Evidence hash mismatches the lite credential hash or thumbprint");
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
@@ -597,7 +645,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_HASH_MISMATCH);
                 } else {
                     if (!evidenceInfo.getCredentialHash().equalsIgnoreCase(
-                        DataToolUtils.sha3(
+                            DataToolUtils.hash(
                             CredentialPojoUtils.getCredentialThumbprintWithoutSig(credentialPojo,
                                 credentialPojo.getSalt(), null)))) {
                         logger.error("Evidence hash mismatches the non-embedded credential hash or"
@@ -615,27 +663,29 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
 
         // 3rd: verify signature w.r.t. weid (must exist and must be the signer (from pubkey))
-        EvidenceSignInfo signInfo = evidenceInfo.getSignInfo().get(weId);
+        EvidenceSignInfo signInfo = evidenceInfo.getSignInfo().get(WeIdUtils.convertWeIdToAddress(weId));
         String signature = signInfo.getSignature();
         if (!DataToolUtils.isValidBase64String(signature)) {
             return new ResponseData<>(false, ErrorCode.CREDENTIAL_EVIDENCE_SIGNATURE_BROKEN);
         }
-        SignatureData signatureData =
+        /*SignatureData signatureData =
             DataToolUtils.simpleSignatureDeserialization(
                 DataToolUtils.base64Decode(signature.getBytes(StandardCharsets.UTF_8))
-            );
+            );*/
 
         // Firstly, we check the secp256k1 style signature
         if (StringUtils.isEmpty(publicKey)) {
-            ResponseData<Boolean> verifyResp = verifySecp256k1SignatureToSigner(
+            ResponseData<Boolean> verifyResp = verifySignatureToSigner(
                 evidenceInfo.getCredentialHash(),
-                WeIdUtils.convertAddressToWeId(weId),
+                    weId,
                 signature);
             return verifyResp;
         } else {
             try {
-                boolean result = DataToolUtils
+                /*boolean result = DataToolUtils
                     .verifySecp256k1Signature(evidenceInfo.getCredentialHash(), signature,
+                        new BigInteger(publicKey));*/
+                boolean result = DataToolUtils.verifySignature(evidenceInfo.getCredentialHash(), signature,
                         new BigInteger(publicKey));
 
                 if (!result) {
@@ -650,7 +700,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
     }
 
-    private ResponseData<Boolean> verifySecp256k1SignatureToSigner(
+    private ResponseData<Boolean> verifySignatureToSigner(
         String rawData,
         String signerWeId,
         String secp256k1sig
@@ -665,8 +715,10 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 return new ResponseData<>(false, ErrorCode.CREDENTIAL_WEID_DOCUMENT_ILLEGAL);
             }
             WeIdDocument weIdDocument = innerResponseData.getResult();
+            /*ErrorCode errorCode = DataToolUtils
+                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument, null);*/
             ErrorCode errorCode = DataToolUtils
-                .verifySecp256k1SignatureFromWeId(rawData, secp256k1sig, weIdDocument, null);
+                    .verifySignatureFromWeId(rawData, secp256k1sig, weIdDocument, null);
             if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(false, errorCode);
             }
@@ -678,7 +730,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.EvidenceService#createEvidenceWithLogAndCustomKey(
+     * @see com.webank.weid.service.rpc.EvidenceService#createEvidenceWithLogAndCustomKey(
      * com.webank.weid.protocol.inf.Hashable, com.webank.weid.protocol.base.WeIdPrivateKey,
      * java.lang.String)
      */
@@ -717,7 +769,10 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         String privateKey = weIdPrivateKey.getPrivateKey();
         try {
-            String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
+            //String signature = DataToolUtils.secp256k1Sign(hashValue, new BigInteger(privateKey));
+            String signature = DataToolUtils.SigBase64Serialization(
+                    DataToolUtils.signToRsvSignature(hashValue, weIdPrivateKey.getPrivateKey())
+            );
             Long timestamp = DateUtils.getCurrentTimeStamp();
 
             if (processingMode == ProcessingMode.PERIODIC_AND_BATCH) {
@@ -728,7 +783,7 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                 args[3] = String.valueOf(timestamp);
                 args[4] = customKey;
                 args[5] = privateKey;
-                args[6] = String.valueOf(this.groupId);
+                args[6] = String.valueOf(evidenceBlockchainService.getGroupId());
                 String rawData = new StringBuffer()
                     .append(hashValue)
                     .append(signature)
@@ -736,8 +791,8 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     .append(timestamp)
                     .append(customKey)
                     .append(WeIdUtils.getWeIdFromPrivateKey(privateKey))
-                    .append(this.groupId).toString();
-                String hash = DataToolUtils.sha3(rawData);
+                    .append(evidenceBlockchainService.getGroupId()).toString();
+                String hash = DataToolUtils.hash(rawData);
                 String requestId = new BigInteger(hash.substring(2), 16).toString();
                 boolean isSuccess = BatchTransactionUtils
                     .writeTransaction(requestId, "createEvidenceWithCustomKey", args,
@@ -748,15 +803,19 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
                     return new ResponseData<>(hashValue, ErrorCode.OFFLINE_EVIDENCE_SAVE_FAILED);
                 }
             }
-
-            return evidenceServiceEngine.createEvidenceWithCustomKey(
-                hashValue,
-                signature,
-                log,
-                timestamp,
-                customKey,
-                privateKey
+            com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> resp = evidenceBlockchainService.createEvidenceWithCustomKey(
+                    hashValue,
+                    signature,
+                    log,
+                    timestamp,
+                    customKey,
+                    privateKey
             );
+            if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+                return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+            } else {
+                return new ResponseData<>(StringUtils.EMPTY, resp.getErrorCode(), resp.getErrorMessage());
+            }
         } catch (Exception e) {
             logger.error("create evidence failed due to system error. ", e);
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
@@ -764,18 +823,19 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
     }
 
     /* (non-Javadoc)
-     * @see com.webank.weid.rpc.EvidenceService#getEvidenceByCustomKey(java.lang.String)
+     * @see com.webank.weid.service.rpc.EvidenceService#getEvidenceByCustomKey(java.lang.String)
      */
     @Override
     public ResponseData<EvidenceInfo> getEvidenceByCustomKey(String customKey) {
         if (!isChainStringLengthValid(customKey)) {
             return new ResponseData<>(null, ErrorCode.ON_CHAIN_STRING_TOO_LONG);
         }
-        try {
-            return evidenceServiceEngine.getInfoByCustomKey(customKey);
-        } catch (Exception e) {
-            logger.error("get evidence failed.", e);
-            return new ResponseData<>(null, ErrorCode.CREDENTIAL_EVIDENCE_BASE_ERROR);
+        com.webank.weid.blockchain.protocol.response.ResponseData<com.webank.weid.blockchain.protocol.base.EvidenceInfo> hashResp = evidenceBlockchainService.getInfoByCustomKey(customKey);
+        if(hashResp.getErrorCode() == ErrorCode.SUCCESS.getCode()){
+            EvidenceInfo evidenceInfo = EvidenceInfo.fromBlockChain(hashResp.getResult());
+            return new ResponseData<>(evidenceInfo, ErrorCode.SUCCESS);
+        } else {
+            return new ResponseData<>(null, hashResp.getErrorCode(), hashResp.getErrorMessage());
         }
     }
 
@@ -802,13 +862,17 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
-        return evidenceServiceEngine.setAttribute(
-            hashResp.getResult(),
-            WeIdConstant.EVIDENCE_REVOKE_KEY,
-            StringUtils.EMPTY,
-            timestamp,
-            weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
+        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> resp = evidenceBlockchainService.revoke(
+                hashResp.getResult(),
+                true,
+                timestamp,
+                weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
         );
+        if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS);
+        } else {
+            return new ResponseData<>(false, resp.getErrorCode(), resp.getErrorMessage());
+        }
     }
 
     /**
@@ -830,13 +894,17 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
             return new ResponseData<>(false, ErrorCode.WEID_PRIVATEKEY_INVALID);
         }
         Long timestamp = DateUtils.getNoMillisecondTimeStamp();
-        return evidenceServiceEngine.setAttribute(
-            hashResp.getResult(),
-            WeIdConstant.EVIDENCE_UNREVOKE_KEY,
-            StringUtils.EMPTY,
-            timestamp,
-            weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
+        com.webank.weid.blockchain.protocol.response.ResponseData<Boolean> resp = evidenceBlockchainService.revoke(
+                hashResp.getResult(),
+                false,
+                timestamp,
+                weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
         );
+        if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
+            return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS);
+        } else {
+            return new ResponseData<>(false, resp.getErrorCode(), resp.getErrorMessage());
+        }
     }
 
     /**
@@ -853,9 +921,9 @@ public class EvidenceServiceImpl extends AbstractService implements EvidenceServ
         }
         Map<String, EvidenceSignInfo> evidenceSignInfos = evidenceInfo.getSignInfo();
         if (evidenceSignInfos == null || evidenceSignInfos.size() == 0
-            || evidenceSignInfos.get(weId) == null) {
+            || evidenceSignInfos.get(WeIdUtils.convertWeIdToAddress(weId)) == null) {
             return new ResponseData<>(false, ErrorCode.WEID_DOES_NOT_EXIST);
         }
-        return new ResponseData<>(evidenceSignInfos.get(weId).getRevoked(), ErrorCode.SUCCESS);
+        return new ResponseData<>(evidenceSignInfos.get(WeIdUtils.convertWeIdToAddress(weId)).getRevoked(), ErrorCode.SUCCESS);
     }
 }

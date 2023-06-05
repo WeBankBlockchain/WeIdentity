@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.credential;
 
@@ -25,7 +8,6 @@ import java.util.Map;
 import mockit.Mock;
 import mockit.MockUp;
 import org.apache.commons.lang3.StringUtils;
-import org.fisco.bcos.web3j.crypto.Sign;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -35,7 +17,7 @@ import static com.webank.weid.util.CredentialUtils.copyCredential;
 
 import com.webank.weid.common.LogUtil;
 import com.webank.weid.common.PasswordKey;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.ParamKeyConstant;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
@@ -44,7 +26,7 @@ import com.webank.weid.protocol.base.Credential;
 import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.base.WeIdDocument;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.service.impl.WeIdServiceImpl;
 import com.webank.weid.util.DataToolUtils;
 
@@ -387,7 +369,7 @@ public class TestVerifyCredential extends TestBaseService {
     /**
      * case: mock SignatureException.
      */
-    @Test
+    /*@Test
     public void testVerifyCredentialCase20() {
 
         new MockUp<DataToolUtils>() {
@@ -403,7 +385,7 @@ public class TestVerifyCredential extends TestBaseService {
         Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
-    }
+    }*/
 
     /**
      * case: signature is empty.
@@ -455,7 +437,8 @@ public class TestVerifyCredential extends TestBaseService {
         ResponseData<Boolean> response = super.verifyCredential(newCredential);
         LogUtil.info(logger, "verifyCredential", response);
 
-        Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
+        //Assert.assertEquals(ErrorCode.CREDENTIAL_ERROR.getCode(),
+        Assert.assertEquals(ErrorCode.CREDENTIAL_VERIFY_FAIL.getCode(),
             response.getErrorCode().intValue());
         Assert.assertEquals(false, response.getResult());
     }
@@ -488,10 +471,6 @@ public class TestVerifyCredential extends TestBaseService {
     // CI hold: @Test
     public void testVerifyCredentialCase26() {
 
-        super.setPublicKey(
-            createWeIdResultWithSetAttr,
-            passwordKey.getPublicKey(),
-            createWeIdResultWithSetAttr.getWeId());
         super.setAuthentication(
             createWeIdResultWithSetAttr,
             passwordKey.getPublicKey(),

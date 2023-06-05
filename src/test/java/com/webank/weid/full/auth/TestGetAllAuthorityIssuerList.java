@@ -1,21 +1,25 @@
 package com.webank.weid.full.auth;
 
+import java.math.BigInteger;
 import java.util.List;
 
+import com.webank.weid.util.WeIdUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keystore.KeyTool;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.util.DataToolUtils;
 
 
@@ -149,7 +153,8 @@ public class TestGetAllAuthorityIssuerList extends TestBaseService {
 
         Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
         List<AuthorityIssuer> authorityIssuers = response.getResult();
-        String sdkWeId = DataToolUtils.convertPrivateKeyToDefaultWeId(privateKey);
+        String sdkWeId = WeIdUtils.getWeIdFromPrivateKey(privateKey);
+
         for (int i = 0; i < authorityIssuers.size(); i++) {
             String weId = authorityIssuers.get(i).getWeId();
             if (!weId.equals(createWeId.getWeId()) && !sdkWeId.equals(weId)) {
