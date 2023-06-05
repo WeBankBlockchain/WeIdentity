@@ -1,45 +1,24 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.full.auth;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.AuthorityIssuer;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RegisterAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.rpc.RawTransactionService;
-import com.webank.weid.service.impl.RawTransactionServiceImpl;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.util.DateUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * registerAuthorityIssuer method for testing AuthorityIssuerService.
@@ -836,7 +815,7 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
      * one WeId can not register one more AuthorityIssuer with diferent name.
      */
     @Test
-    public void testRegisterAuthorityIssuer_registerIssers() {
+    public void testRegisterAuthorityIssuer_registerIssuers() {
 
         CreateWeIdDataResult createWeId = super.createWeId();
 
@@ -1040,33 +1019,6 @@ public class TestRegisterAuthorityIssuer extends TestBaseService {
         Assert.assertEquals(true, response.getResult());
     }
 
-    /**
-     * case: call transactionhex null - arbitrary.
-     */
-    @Test
-    public void testRegisterAuthorityIssuerCase22() {
-        String hex = StringUtils.EMPTY;
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.registerAuthorityIssuer(hex);
-        Assert.assertEquals(ErrorCode.ILLEGAL_INPUT.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
-    }
-
-    /**
-     * case: call transactionhex method - arbitrary.
-     */
-    @Test
-    public void testRegisterAuthorityIssuerCase23() {
-        String hex = "11111";
-        RawTransactionService rawTransactionService = new RawTransactionServiceImpl();
-        ResponseData<String> response = rawTransactionService.registerAuthorityIssuer(hex);
-        Assert.assertEquals(ErrorCode.TRANSACTION_EXECUTE_ERROR.getCode(),
-            response.getErrorCode().intValue());
-        Assert.assertTrue(StringUtils.isEmpty(response.getResult()));
-    }
-    
-    
     /**
      * case: getIssuerCount.
      */

@@ -1,19 +1,20 @@
 package com.webank.weid.full.auth;
 
+import com.webank.weid.util.WeIdUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.webank.weid.common.LogUtil;
-import com.webank.weid.constant.ErrorCode;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.full.TestBaseService;
 import com.webank.weid.full.TestBaseUtil;
 import com.webank.weid.protocol.base.WeIdAuthentication;
 import com.webank.weid.protocol.base.WeIdPrivateKey;
 import com.webank.weid.protocol.request.RemoveAuthorityIssuerArgs;
 import com.webank.weid.protocol.response.CreateWeIdDataResult;
-import com.webank.weid.protocol.response.ResponseData;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 
 public class TestAddIssuerIntoIssuerType extends TestBaseService {
 
@@ -230,7 +231,7 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
 
         WeIdAuthentication weIdAuthentication = TestBaseUtil.buildWeIdAuthentication(createWeId);
         weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey(privateKey));
-        weIdAuthentication.setWeIdPublicKeyId(null);
+        weIdAuthentication.setAuthenticationMethodId(null);
 
         ResponseData<Boolean> response = authorityIssuerService
             .addIssuerIntoIssuerType(weIdAuthentication, issuerType, super.createWeId().getWeId());
@@ -251,7 +252,7 @@ public class TestAddIssuerIntoIssuerType extends TestBaseService {
         for (int i = 0; i < chars.length; i++) {
             chars[i] = (char) (i % 127);
         }
-        weIdAuthentication.setWeIdPublicKeyId(String.valueOf(chars));
+        weIdAuthentication.setAuthenticationMethodId(String.valueOf(chars));
         weIdAuthentication.setWeIdPrivateKey(new WeIdPrivateKey(privateKey));
 
         ResponseData<Boolean> response = authorityIssuerService

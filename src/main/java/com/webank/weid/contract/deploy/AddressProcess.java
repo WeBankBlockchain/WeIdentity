@@ -1,28 +1,21 @@
 package com.webank.weid.contract.deploy;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
-
+import com.webank.weid.config.ContractConfig;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.util.DataToolUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.config.ContractConfig;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.util.DataToolUtils;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public abstract class AddressProcess {
     /**
      * log4j.
      */
     private static final Logger logger = LoggerFactory.getLogger(AddressProcess.class);
-    
+
     protected static void writeAddressToFile(
         String contractAddress,
         String fileName) {
@@ -134,8 +127,14 @@ public abstract class AddressProcess {
             .append(evidenceAddress);
         return DataToolUtils.getHash(address.toString());
     }
-    
-    public static String getHashForShare(Integer groupId, String evidenceAddress) {
+
+    /**
+     * todo 设置String groupId后是否影响hash
+     * @param groupId groupId
+     * @param evidenceAddress evidenceAddress
+     * @return hash
+     */
+    public static String getHashForShare(String groupId, String evidenceAddress) {
         StringBuffer address = new StringBuffer();
         address.append("share").append(groupId).append(evidenceAddress);
         return DataToolUtils.getHash(address.toString());

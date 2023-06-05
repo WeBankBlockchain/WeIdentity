@@ -1,47 +1,26 @@
-/*
- *       Copyright© (2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.suite.persistence.redis.driver;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import com.webank.weid.blockchain.protocol.base.CptBaseInfo;
+import com.webank.weid.blockchain.protocol.base.WeIdDocument;
+import com.webank.weid.blockchain.protocol.base.WeIdDocumentMetadata;
+import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.blockchain.constant.ErrorCode;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.protocol.request.TransactionArgs;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
+import com.webank.weid.suite.persistence.*;
+import com.webank.weid.suite.persistence.redis.RedisDomain;
+import com.webank.weid.suite.persistence.redis.RedisExecutor;
+import com.webank.weid.suite.persistence.redis.RedissonConfig;
+import com.webank.weid.util.DataToolUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.constant.ErrorCode;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.request.TransactionArgs;
-import com.webank.weid.protocol.response.ResponseData;
-import com.webank.weid.suite.api.persistence.inf.Persistence;
-import com.webank.weid.suite.persistence.DefaultValue;
-import com.webank.weid.suite.persistence.redis.RedisDomain;
-import com.webank.weid.suite.persistence.redis.RedisExecutor;
-import com.webank.weid.suite.persistence.redis.RedissonConfig;
-import com.webank.weid.util.DataToolUtils;
+import java.util.*;
 
 /**
  * redis Driver.
@@ -67,7 +46,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->add] the id of the data is empty.");
             return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             Date date = new Date();
@@ -93,7 +72,7 @@ public class RedisDriver implements Persistence {
                     logger.error("[redis->batchAdd] the id of the data is empty.");
                     return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
-                idHashList.add(DataToolUtils.getHash(id));
+                idHashList.add(DataToolUtils.hash(id));
                 dataList.add(data);
             }
             RedisDomain redisDomain = new RedisDomain(domain);
@@ -130,7 +109,7 @@ public class RedisDriver implements Persistence {
             return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
         //dataKey:id的hash值
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             ResponseData<String> result = new ResponseData<String>();
             //设置result初始值为空字符串
@@ -178,7 +157,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->delete] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             return new RedisExecutor(redisDomain).executeDelete(dataKey, client);
@@ -195,7 +174,7 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->update] the id of the data is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.getHash(id);
+        String dataKey = DataToolUtils.hash(id);
         Date date = new Date();
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
@@ -245,5 +224,209 @@ public class RedisDriver implements Persistence {
             logger.error("[redis->add] add the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
+    }
+
+    /*
+    以下方法暂不需要，本地部署不需要使用redis方式，默认使用Mysql
+     */
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addWeId(String domain, String weId, String documentSchema) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateWeId(String domain, String weId, String documentSchema) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<WeIdDocument> getWeIdDocument(String domain, String weId) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<WeIdDocumentMetadata> getMeta(String domain, String weId) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> deactivateWeId(String domain, String weId, Boolean state) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<List<String>> getWeIdList(String domain, Integer first, Integer last) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getWeIdCount(String domain) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<CptValue> getCpt(String domain, int cptId) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<CptBaseInfo> addCpt(String domain, int cptId, String publisher, String description, String cptSchema, String cptSignature) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<PolicyValue> getPolicy(String domain, int policyId) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addPolicy(String domain, int policyId, String publisher, String description, String cptSchema, String cptSignature) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<PresentationValue> getPresentation(String domain, int presentationId) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addPresentation(String domain, int presentationId, String creator, String policies) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateCpt(String domain, int cptId, int cptVersion, String publisher, String description, String cptSchema, String cptSignature) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateCredentialTemplate(String domain, int cptId, String credentialPublicKey, String credentialProof) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateCptClaimPolicies(String domain, int cptId, String policies) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<List<Integer>> getCptIdList(String domain, Integer first, Integer last) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getCptCount(String domain) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<List<Integer>> getPolicyIdList(String domain, Integer first, Integer last) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getPolicyCount(String domain) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addAuthorityIssuer(String domain, String weId, String name, String desc, String accValue, String extraStr, String extraInt) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> removeAuthorityIssuer(String domain, String weId) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<AuthorityIssuerInfo> getAuthorityIssuerByWeId(String domain, String weId) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<AuthorityIssuerInfo> getAuthorityIssuerByName(String domain, String name) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateAuthorityIssuer(String domain, String weId, Integer recognize) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getAuthorityIssuerCount(String domain) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getRecognizedIssuerCount(String domain) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addRole(String domain, String weId, Integer roleValue) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<RoleValue> getRole(String domain, String weId) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateRole(String domain, String weId, Integer roleValue) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addSpecificType(String domain, String typeName, String owner) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<SpecificTypeValue> getSpecificType(String domain, String typeName) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> removeSpecificType(String domain, String typeName) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateSpecificTypeFellow(String domain, String typeName, String fellow) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getIssuerTypeCount(String domain) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<List<String>> getIssuerTypeList(String domain, Integer first, Integer last) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addEvidenceByHash(String domain, String hashValue, String signer, String signature, String log, String updated, String revoked, String extraKey, String group_id) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<EvidenceValue> getEvidenceByHash(String domain, String hash) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addSignatureAndLogs(String domain, String hashValue, String signer, String signature, String log, String updated, String revoked, String extraKey) {
+        return null;
+    }
+
+    @Override
+    public com.webank.weid.blockchain.protocol.response.ResponseData<EvidenceValue> getEvidenceByExtraKey(String domain, String extraKey) {
+        return null;
     }
 }

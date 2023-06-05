@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018-2020) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.constant;
 
@@ -297,4 +280,25 @@ public final class DataDriverConstant {
     public static final String DOMAIN_RESOURCE_INFO = "domain.resourceInfo";
 
     public static final String DOMAIN_WEID_AUTH = "domain.weIdAuth";
+
+    /**
+     * 本地运行所需表.
+     */
+
+    public static final String LOCAL_WEID_DOCUMENT = "local.weIdDocument";
+
+    public static final String LOCAL_CPT = "local.cpt";
+
+    public static final String LOCAL_POLICY = "local.policy";
+
+    public static final String LOCAL_PRESENTATION = "local.presentation";
+
+    public static final String LOCAL_ROLE = "local.role";
+
+    public static final String LOCAL_AUTHORITY_ISSUER = "local.authorityIssuer";
+
+    public static final String LOCAL_SPECIFIC_ISSUER = "local.specificIssuer";
+
+    public static final String LOCAL_EVIDENCE = "local.evidence";
+
 }

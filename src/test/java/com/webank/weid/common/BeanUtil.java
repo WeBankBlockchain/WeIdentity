@@ -1,21 +1,4 @@
-/*
- *       Copyright© (2018) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
+
 
 package com.webank.weid.common;
 
@@ -26,17 +9,12 @@ import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.ClassUtils;
 
 /**
  * debug class for output object information.
@@ -46,6 +24,27 @@ import org.springframework.util.ClassUtils;
 public class BeanUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BeanUtil.class);
+
+    private static final Set<Class<?>> primitiveWrapperTypeSet = new HashSet<>();
+
+    static {
+        primitiveWrapperTypeSet.add(Boolean.class);
+        primitiveWrapperTypeSet.add(Byte.class);
+        primitiveWrapperTypeSet.add(Character.class);
+        primitiveWrapperTypeSet.add(Double.class);
+        primitiveWrapperTypeSet.add(Float.class);
+        primitiveWrapperTypeSet.add(Integer.class);
+        primitiveWrapperTypeSet.add(Long.class);
+        primitiveWrapperTypeSet.add(Short.class);
+        primitiveWrapperTypeSet.add(boolean[].class);
+        primitiveWrapperTypeSet.add(byte[].class);
+        primitiveWrapperTypeSet.add(char[].class);
+        primitiveWrapperTypeSet.add(double[].class);
+        primitiveWrapperTypeSet.add(float[].class);
+        primitiveWrapperTypeSet.add(int[].class);
+        primitiveWrapperTypeSet.add(long[].class);
+        primitiveWrapperTypeSet.add(short[].class);
+    }
 
     private static SimpleDateFormat getFormat() {
         return new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -169,7 +168,9 @@ public class BeanUtil {
         if (Date.class.isAssignableFrom(clazz)) {
             return false;
         }
-        return (ClassUtils.isPrimitiveOrWrapper(clazz)
+        //return (ClassUtils.isPrimitiveOrWrapper(clazz)
+        return (clazz.isPrimitive()
+            || primitiveWrapperTypeSet.contains(clazz)
             || Enum.class.isAssignableFrom(clazz)
             || CharSequence.class.isAssignableFrom(clazz)
             || Number.class.isAssignableFrom(clazz)

@@ -1,5 +1,30 @@
-### V1.7.0
-Features: 
+### V3.1.0 (2023-4-28)
+- Features:
+1. Add a way for local databases to deploy WeIdentity without deploying blockchain
+- Bugfixes:
+1. Upgrade components with known vulnerabilities
+
+### V3.0.0 (2022-12-15)
+- Features:
+1. The project was restructured to strip the blockchain-related functions and interfaces from the project, as well as the file transfer and format conversion functions from the project
+- Bugfixes:
+1. the value of sdk.sm-crypto in fisco.properties adapt to FISCO BCOS 3.0 guomi
+   
+### V1.8.6 (2022-10-14)
+- Features:
+1. Upgrade the property fields in WeIdDocument to conform to the W3C DID Specification
+2. Upgrade the way data is stored and retrieved in the weid-contract
+3. Upgrade the interfaces related to WeId and Evidence
+
+### V1.8.5 (2022-08-16)
+- Features:
+1. Replace the web3sdk with fisco-bcos-java-sdk
+2. Support the OSCCA-approved(SM2/SM3) cryptography algorithm
+3. Support the FISCO BCOS 3.0.0 (rc4 version)
+4. Upgrade the functionality of WeID-Build-Tools to accommodate the new version of weid-java-sdk 
+
+### V1.7.0 (2021-01-08)
+- Features: 
 1. FISCO BCOS 1.3.x support is fully removed - please use the FISCO BCOS 2.x node version respectively.
 2. Evidence and WeIdDocument query performance improved due to support batch type blockchain node data lookup.
 3. Authority Issuer can be registered by any WeID while only administrator can recognize.

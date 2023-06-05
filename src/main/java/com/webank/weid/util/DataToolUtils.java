@@ -1,119 +1,50 @@
-/*
- *       Copyright© (2018-2019) WeBank Co., Ltd.
- *
- *       This file is part of weid-java-sdk.
- *
- *       weid-java-sdk is free software: you can redistribute it and/or modify
- *       it under the terms of the GNU Lesser General Public License as published by
- *       the Free Software Foundation, either version 3 of the License, or
- *       (at your option) any later version.
- *
- *       weid-java-sdk is distributed in the hope that it will be useful,
- *       but WITHOUT ANY WARRANTY; without even the implied warranty of
- *       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *       GNU Lesser General Public License for more details.
- *
- *       You should have received a copy of the GNU Lesser General Public License
- *       along with weid-java-sdk.  If not, see <https://www.gnu.org/licenses/>.
- */
 
 package com.webank.weid.util;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.SignatureException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.report.ProcessingMessage;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchema;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.github.reinert.jjschema.v1.JsonSchemaV4Factory;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
-import org.bouncycastle.util.encoders.Base64;
-import org.fisco.bcos.web3j.abi.datatypes.Address;
-import org.fisco.bcos.web3j.abi.datatypes.DynamicArray;
-import org.fisco.bcos.web3j.abi.datatypes.DynamicBytes;
-import org.fisco.bcos.web3j.abi.datatypes.StaticArray;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Int256;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Uint256;
-import org.fisco.bcos.web3j.abi.datatypes.generated.Uint8;
-import org.fisco.bcos.web3j.crypto.ECDSASign;
-import org.fisco.bcos.web3j.crypto.ECDSASignature;
-import org.fisco.bcos.web3j.crypto.ECKeyPair;
-import org.fisco.bcos.web3j.crypto.EncryptType;
-import org.fisco.bcos.web3j.crypto.Hash;
-import org.fisco.bcos.web3j.crypto.Keys;
-import org.fisco.bcos.web3j.crypto.Sign;
-import org.fisco.bcos.web3j.crypto.Sign.SignatureData;
-import org.fisco.bcos.web3j.crypto.gm.GenCredential;
-import org.fisco.bcos.web3j.crypto.gm.sm2.SM2Sign;
-import org.fisco.bcos.web3j.crypto.gm.sm3.SM3Digest;
-import org.fisco.bcos.web3j.crypto.tool.ECCDecrypt;
-import org.fisco.bcos.web3j.crypto.tool.ECCEncrypt;
-import org.fisco.bcos.web3j.utils.Numeric;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.networknt.schema.SpecVersion.VersionFlag;
+import com.networknt.schema.ValidationMessage;
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.CredentialConstant;
-import com.webank.weid.constant.ErrorCode;
 import com.webank.weid.constant.JsonSchemaConstant;
 import com.webank.weid.constant.WeIdConstant;
 import com.webank.weid.exception.DataTypeCastException;
 import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.protocol.base.PublicKeyProperty;
+import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
+import com.webank.weid.protocol.cpt.RawCptSchema;
 import com.webank.weid.protocol.request.CptMapArgs;
 import com.webank.weid.protocol.response.RsvSignature;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.bouncycastle.util.encoders.Base64;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.abi.datatypes.generated.Uint8;
+import org.fisco.bcos.sdk.crypto.CryptoSuite;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.crypto.signature.ECDSASignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SM2SignatureResult;
+import org.fisco.bcos.sdk.crypto.signature.SignatureResult;
+import org.fisco.bcos.sdk.model.CryptoType;
+import org.fisco.bcos.sdk.utils.Numeric;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.math.BigInteger;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.security.SignatureException;
+import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * 数据工具类.
@@ -157,8 +88,18 @@ public final class DataToolUtils {
     //private static final ObjectReader OBJECT_READER;
     private static final ObjectWriter OBJECT_WRITER_UN_PRETTY_PRINTER;
 
-    private static final String encryptType;
+    private static final com.networknt.schema.JsonSchemaFactory JSON_SCHEMA_FACTORY;
 
+    public static final String deployStyle = PropertyUtils.getProperty("deploy.style");
+
+    //Todo:后面把两个配置文件的cryptoType合成一个，只放在weidentity.properties文件
+    public static int cryptoType = Integer.parseInt(PropertyUtils.getProperty("crypto.type"));
+
+    public static final CryptoSuite cryptoSuite = new CryptoSuite(Integer.parseInt(PropertyUtils.getProperty("crypto.type")));
+    /**
+     * use this to create key pair of v2 or v3
+     * WARN: create keyPair must use BigInteger of privateKey or decimal String of privateKey
+     */
     static {
         // sort by letter
         OBJECT_MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
@@ -178,34 +119,15 @@ public final class DataToolUtils {
         CONVERT_UTC_LONG_KEYLIST.add(KEY_ISSUANCEDATE);
         CONVERT_UTC_LONG_KEYLIST.add(KEY_EXPIRATIONDATE);
 
-        encryptType = PropertyUtils.getProperty("encrypt.type");
-
         //OBJECT_WRITER = OBJECT_MAPPER.writer().withDefaultPrettyPrinter();
         //OBJECT_READER = OBJECT_MAPPER.reader();
-    }
 
-    /**
-     * Keccak-256 hash function.
-     *
-     * @param utfString the utfString
-     * @return hash value as hex encoded string
-     */
-    public static String sha3(String utfString) {
-        return Numeric.toHexString(sha3(utfString.getBytes(StandardCharsets.UTF_8)));
-    }
+        JSON_SCHEMA_FACTORY = com.networknt.schema.JsonSchemaFactory.getInstance(VersionFlag.V4);
 
-    /**
-     * Sha 3.
-     *
-     * @param input the input
-     * @return the byte[]
-     */
-    public static byte[] sha3(byte[] input) {
-        return Hash.sha3(input, 0, input.length);
-    }
+        if (deployStyle.equals("blockchain")) {
+            cryptoType = com.webank.weid.blockchain.util.DataToolUtils.cryptoType;
+        }
 
-    public static String getHash(String hexInput) {
-        return sha3(hexInput);
     }
 
     /**
@@ -220,6 +142,41 @@ public final class DataToolUtils {
         String salt = RandomStringUtils.random(saltLength, true, true);
         return salt;
     }
+
+    /**
+     * Sha 3.
+     *
+     * @param input the input
+     * @return the string
+     */
+    public static String hash(String input) {
+        if (deployStyle.equals("blockchain")) {
+            return com.webank.weid.blockchain.util.DataToolUtils.hash(input);
+        } else {
+            // default database
+            return Numeric.toHexString(hash(input.getBytes(StandardCharsets.UTF_8)));
+        }
+    }
+
+    /**
+     * Sha 3.
+     *
+     * @param input the input
+     * @return the byte[]
+     */
+    public static byte[] hash(byte[] input) {
+        if (deployStyle.equals("blockchain")) {
+            return com.webank.weid.blockchain.util.DataToolUtils.hash(input);
+        } else {
+            // default database
+            return cryptoSuite.hash(input);
+        }
+    }
+
+    public static String getHash(String hexInput) {
+        return hash(hexInput);
+    }
+
 
     /**
      * serialize a class instance to Json String.
@@ -242,23 +199,6 @@ public final class DataToolUtils {
         return write.toString();
     }
 
-    /**
-     * Convert a private key to its default WeID.
-     *
-     * @param privateKey the pass-in privatekey
-     * @return true if yes, false otherwise
-     */
-    public static String convertPrivateKeyToDefaultWeId(String privateKey) {
-        BigInteger publicKey;
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            publicKey = Sign.publicKeyFromPrivate(new BigInteger(privateKey));
-        } else {
-            publicKey = Sign.smPublicKeyFromPrivate(new BigInteger(privateKey));
-        }
-        return WeIdUtils
-            .convertAddressToWeId(new org.fisco.bcos.web3j.abi.datatypes.Address(
-                Keys.getAddress(publicKey)).toString());
-    }
 
     /**
      * Check whether the String is a valid hash.
@@ -424,11 +364,43 @@ public final class DataToolUtils {
      *
      * @param jsonString the json string
      * @return JsonNode
-     * @throws IOException Signals that an I/O exception has occurred.
+     * @throws JsonProcessingException parse json fail
      */
-    public static JsonNode loadJsonObject(String jsonString) throws IOException {
-        return JsonLoader.fromString(jsonString);
+    public static JsonNode loadJsonObject(String jsonString) throws JsonProcessingException {
+        return OBJECT_MAPPER.readTree(jsonString);
+
     }
+
+    /**
+     * load json from resource
+     * @param path class path file path
+     * @return json node
+     * @throws IOException load error
+     */
+    public static JsonNode loadJsonObjectFromResource(String path) throws IOException {
+        try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
+            if (inputStream == null) {
+                throw new DataTypeCastException("open path to inputStream get null!");
+            }
+            return OBJECT_MAPPER.readTree(inputStream);
+        }
+    }
+
+    /**
+     * load json from file
+     * @param file file of json
+     * @return json node
+     * @throws IOException file not found
+     */
+    public static JsonNode loadJsonObjectFromFile(File file) throws IOException {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return OBJECT_MAPPER.readTree(inputStream);
+        } catch (FileNotFoundException e) {
+            logger.error("file not found when load jsonObject:{}", file.getPath());
+            throw new DataTypeCastException(e);
+        }
+    }
+
 
     /**
      * Validate Json Data versus Json Schema.
@@ -438,23 +410,38 @@ public final class DataToolUtils {
      * @return empty if yes, not empty otherwise
      * @throws Exception the exception
      */
-    public static ProcessingReport checkJsonVersusSchema(String jsonData, String jsonSchema)
+    public static Set<ValidationMessage> checkJsonVersusSchema(String jsonData, String jsonSchema)
         throws Exception {
         JsonNode jsonDataNode = loadJsonObject(jsonData);
         JsonNode jsonSchemaNode = loadJsonObject(jsonSchema);
-        JsonSchema schema = JsonSchemaFactory.byDefault().getJsonSchema(jsonSchemaNode);
-        ProcessingReport report = schema.validate(jsonDataNode);
-        if (report.isSuccess()) {
+        // use new validator
+        com.networknt.schema.JsonSchema schema = JSON_SCHEMA_FACTORY.getSchema(jsonSchemaNode);
+        Set<ValidationMessage> report = schema.validate(jsonDataNode);
+        if (report.size() == 0) {
             logger.info(report.toString());
         } else {
-            Iterator<ProcessingMessage> it = report.iterator();
+            Iterator<ValidationMessage> it = report.iterator();
             StringBuffer errorMsg = new StringBuffer();
             while (it.hasNext()) {
-                errorMsg.append(it.next().getMessage());
+                ValidationMessage msg = it.next();
+                errorMsg.append(msg.getCode()).append(":").append(msg.getMessage());
             }
             logger.error("Json schema validator failed, error: {}", errorMsg.toString());
         }
         return report;
+//        JsonSchema schema = JsonSchemaFactory.byDefault().getJsonSchema(jsonSchemaNode);
+//        ProcessingReport report = schema.validate(jsonDataNode);
+//        if (report.isSuccess()) {
+//            logger.info(report.toString());
+//        } else {
+//            Iterator<ProcessingMessage> it = report.iterator();
+//            StringBuffer errorMsg = new StringBuffer();
+//            while (it.hasNext()) {
+//                errorMsg.append(it.next().getMessage());
+//            }
+//            logger.error("Json schema validator failed, error: {}", errorMsg.toString());
+//        }
+//        return report;
     }
 
     /**
@@ -464,12 +451,12 @@ public final class DataToolUtils {
      * @return true if yes, false otherwise
      * @throws IOException Signals that an I/O exception has occurred.
      */
-    public static boolean isValidJsonSchema(String jsonSchema) throws IOException {
-        return JsonSchemaFactory
-            .byDefault()
-            .getSyntaxValidator()
-            .schemaIsValid(loadJsonObject(jsonSchema));
-    }
+//    public static boolean isValidJsonSchema(String jsonSchema) {
+//        return JsonSchemaFactory
+//            .byDefault()
+//            .getSyntaxValidator()
+//            .schemaIsValid(loadJsonObject(jsonSchema));
+//    }
 
     /**
      * validate Cpt Json Schema validity .
@@ -480,7 +467,7 @@ public final class DataToolUtils {
      */
     public static boolean isCptJsonSchemaValid(String cptJsonSchema) throws IOException {
         return StringUtils.isNotEmpty(cptJsonSchema)
-            && isValidJsonSchema(cptJsonSchema)
+//            && isValidJsonSchema(cptJsonSchema)
             && cptJsonSchema.length() <= WeIdConstant.JSON_SCHEMA_MAX_LENGTH;
     }
 
@@ -521,78 +508,53 @@ public final class DataToolUtils {
         return DataToolUtils.serialize(cptJsonSchemaNew);
     }
 
-    /**
-     * Generate a new Key-pair.
-     *
-     * @return the ECKeyPair
-     * @throws InvalidAlgorithmParameterException Invalid algorithm.
-     * @throws NoSuchAlgorithmException No such algorithm.
-     * @throws NoSuchProviderException No such provider.
-     */
-    public static ECKeyPair createKeyPair() throws
-            InvalidAlgorithmParameterException,
-            NoSuchAlgorithmException,
-            NoSuchProviderException {
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            return Keys.createEcKeyPair();
-        } else {
-            return GenCredential.createGuomiKeyPair();
-        }
-    }
 
-    /**
-     * Secp256k1 sign.
-     *
-     * @param rawData original raw data
-     * @param privateKey private key in BigInteger format
-     * @return base64 string for signature value
-     */
-    public static String secp256k1Sign(String rawData, BigInteger privateKey) {
-        SignatureData sigData = secp256k1SignToSignature(rawData, privateKey);
-        return secp256k1SigBase64Serialization(sigData);
-    }
-    
     /**
      * Secp256k1 sign to Signature.
      *
      * @param rawData original raw data
-     * @param keyPair keyPair
+     * @param privateKey decimal
      * @return SignatureData for signature value
      */
-    public static SignatureData secp256k1SignToSignature(String rawData, ECKeyPair keyPair) {
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            ECDSASign ecdsaSign = new ECDSASign();
-            return ecdsaSign.secp256SignMessage(rawData.getBytes(), keyPair);
+    public static RsvSignature signToRsvSignature(String rawData, String privateKey) {
+        if (deployStyle.equals("blockchain")) {
+            return RsvSignature.fromBlockChain(com.webank.weid.blockchain.util.DataToolUtils.signToRsvSignature(rawData, privateKey));
         } else {
-            return SM2Sign.sign(rawData.getBytes(), keyPair);
+            // default database
+            String messageHash = hash(rawData);
+            return sign(messageHash, privateKey);
         }
+    }
 
+    public static RsvSignature sign(String messageHash, String privateKey) {
+        CryptoKeyPair cryptoKeyPair =  cryptoSuite.getKeyPairFactory().createKeyPair(new BigInteger(privateKey));
+        RsvSignature rsvSignature = new RsvSignature();
+        SignatureResult signatureResult = cryptoSuite.sign(messageHash, cryptoKeyPair);
+        Bytes32 R = new Bytes32(signatureResult.getR());
+        rsvSignature.setR(R);
+        Bytes32 S = new Bytes32(signatureResult.getS());
+        rsvSignature.setS(S);
+        if(cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE){
+            ECDSASignatureResult ecdsaSignatureResult = new ECDSASignatureResult(signatureResult.convertToString());
+            rsvSignature.setV(new Uint8(BigInteger.valueOf(ecdsaSignatureResult.getV())));
+        } else {
+            rsvSignature.setV(new Uint8(0));
+        }
+        return rsvSignature;
     }
-    
-    /**
-     * Secp256k1 sign to Signature.
-     *
-     * @param rawData original raw data
-     * @param privateKey private key in BigInteger format
-     * @return SignatureData for signature value
-     */
-    public static SignatureData secp256k1SignToSignature(String rawData, BigInteger privateKey) {
-        ECKeyPair keyPair = GenCredential.createKeyPair(privateKey.toString(16));
-        return secp256k1SignToSignature(rawData, keyPair);
-    }
-    
+
     /**
      * Serialize secp256k1 signature into base64 encoded, in R, S, V (0, 1) format.
      *
      * @param sigData secp256k1 signature (v = 0,1)
      * @return base64 string
      */
-    public static String secp256k1SigBase64Serialization(
-        SignatureData sigData) {
+    public static String SigBase64Serialization(
+            RsvSignature sigData) {
         byte[] sigBytes = new byte[65];
-        sigBytes[64] = sigData.getV();
-        System.arraycopy(sigData.getR(), 0, sigBytes, 0, 32);
-        System.arraycopy(sigData.getS(), 0, sigBytes, 32, 32);
+        sigBytes[64] = sigData.getV().getValue().byteValue();
+        System.arraycopy(sigData.getR().getValue(), 0, sigBytes, 0, 32);
+        System.arraycopy(sigData.getS().getValue(), 0, sigBytes, 32, 32);
         return new String(base64Encode(sigBytes), StandardCharsets.UTF_8);
     }
 
@@ -602,141 +564,104 @@ public final class DataToolUtils {
      * @param signature signature base64 string
      * @return secp256k1 signature (v = 0,1)
      */
-    public static SignatureData secp256k1SigBase64Deserialization(String signature) {
+    public static RsvSignature SigBase64Deserialization(String signature) {
         byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
+        if (SERIALIZED_SIGNATUREDATA_LENGTH != sigBytes.length) {
+            throw new WeIdBaseException("signature data illegal");
+        }
         byte[] r = new byte[32];
         byte[] s = new byte[32];
         System.arraycopy(sigBytes, 0, r, 0, 32);
         System.arraycopy(sigBytes, 32, s, 0, 32);
-        return new SignatureData(sigBytes[64], r, s);
-    }
-
-    /**
-     * De-Serialize secp256k1 signature base64 encoded string, in R, S, V (0, 1) format.
-     *
-     * @param signature signature base64 string
-     * @param publicKey publicKey
-     * @return secp256k1 signature (v = 0,1)
-     */
-    public static SignatureData secp256k1SigBase64Deserialization(
-        String signature,
-        BigInteger publicKey) {
-        byte[] sigBytes = base64Decode(signature.getBytes(StandardCharsets.UTF_8));
-        byte[] r = new byte[32];
-        byte[] s = new byte[32];
-        System.arraycopy(sigBytes, 0, r, 0, 32);
-        System.arraycopy(sigBytes, 32, s, 0, 32);
-
-        return new SignatureData(sigBytes[64], r, s, Numeric.toBytesPadded(publicKey, 64));
+        RsvSignature rsvSignature = new RsvSignature();
+        rsvSignature.setR(new Bytes32(r));
+        rsvSignature.setS(new Bytes32(s));
+        rsvSignature.setV(new Uint8(sigBytes[64]));
+        return rsvSignature;
     }
 
     /**
      * Verify secp256k1 signature.
      *
      * @param rawData original raw data
-     * @param signatureBase64 signature base64 string
+     * @param signatureBase64 signature string
      * @param publicKey in BigInteger format
      * @return return boolean result, true is success and false is fail
      */
-    public static boolean verifySecp256k1Signature(
+    public static boolean verifySignature(
         String rawData,
         String signatureBase64,
         BigInteger publicKey
     ) {
-        try {
-            if (rawData == null) {
+        if (deployStyle.equals("blockchain")) {
+            return com.webank.weid.blockchain.util.DataToolUtils.verifySignature(rawData, signatureBase64, publicKey);
+        } else {
+            // default database
+            try {
+                if (rawData == null) {
+                    return false;
+                }
+                RsvSignature rsvSignature = SigBase64Deserialization(signatureBase64);
+                String messageHash = hash(rawData);
+                return verifySignature(publicKey.toString(16), messageHash, rsvSignature);
+            } catch (Exception e) {
+                logger.error("Error occurred during secp256k1 sig verification: {}", e);
                 return false;
             }
-            if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-                SignatureData sigData =
-                        secp256k1SigBase64Deserialization(signatureBase64);
-                byte[] hashBytes = Hash.sha3(rawData.getBytes());
-                ECDSASign ecdsaSign = new ECDSASign();
-                return ecdsaSign.secp256Verify(hashBytes, publicKey, sigData);
-            } else {
-                SM3Digest sm3Digest = new SM3Digest();
-                byte[] hashBytes = sm3Digest.hash(rawData.getBytes());
-                SignatureData sigData =
-                        secp256k1SigBase64Deserialization(signatureBase64, publicKey);
-                return SM2Sign.verify(hashBytes, sigData);
-            }
-        } catch (Exception e) {
-            logger.error("Error occurred during secp256k1 sig verification: {}", e);
-            return false;
         }
     }
 
     /**
-     * Recover WeID from message and Signature (Secp256k1 type of sig only).
+     * Verify secp256k1 signature.
      *
-     * @param rawData Raw Data
-     * @param sigBase64 signature in base64
-     * @return WeID
+     * @param hexPublicKey publicKey in hex string
+     * @param messageHash hash of original raw data
+     * @param rsvSignature signature value
+     * @return return boolean result, true is success and false is fail
      */
-    public static String recoverWeIdFromMsgAndSecp256Sig(String rawData, String sigBase64) {
-        SignatureData sigData = secp256k1SigBase64Deserialization(
-            sigBase64);
-        byte[] hashBytes = Hash.sha3(rawData.getBytes());
-        SignatureData modifiedSigData =
-            new SignatureData(
-                (byte) (sigData.getV() + 27),
-                sigData.getR(),
-                sigData.getS());
-
-        BigInteger publicKey;
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            ECDSASignature sig =
-                new ECDSASignature(
-                    org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getR()),
-                    org.fisco.bcos.web3j.utils.Numeric.toBigInt(modifiedSigData.getS()));
-            publicKey = Sign
-                .recoverFromSignature(modifiedSigData.getV() - 27, sig, hashBytes);
+    public static boolean verifySignature(
+            String hexPublicKey,
+            String messageHash,
+            RsvSignature rsvSignature
+    ) {
+        if(cryptoSuite.getCryptoTypeConfig() == CryptoType.ECDSA_TYPE) {
+            ECDSASignatureResult signatureResult = new ECDSASignatureResult(
+                    rsvSignature.getV().getValue().byteValueExact(),
+                    rsvSignature.getR().getValue(),
+                    rsvSignature.getS().getValue());
+            return cryptoSuite.verify(hexPublicKey, messageHash, signatureResult.convertToString());
         } else {
-            // not support
-            throw new WeIdBaseException("not support!");
-        }
-        return WeIdUtils.convertPublicKeyToWeId(publicKey.toString(10));
-    }
-
-    /**
-     * Extract the Public Key from the message and the SignatureData.
-     *
-     * @param message the message
-     * @param signatureData the signature data
-     * @return publicKey
-     * @throws SignatureException Signature is the exception.
-     */
-    public static BigInteger signatureToPublicKey(
-        String message,
-        Sign.SignatureData signatureData)
-        throws SignatureException {
-        try {
-            return Sign.signedMessageToKey(sha3(message.getBytes(StandardCharsets.UTF_8)),
-                    signatureData);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new SignatureException(e);
+//                byte[] sigBytes = new byte[64];
+//                System.arraycopy(rsvSignature.getR(), 0, sigBytes, 0, 32);
+//                System.arraycopy(rsvSignature.getS(), 0, sigBytes, 32, 32);
+            SM2SignatureResult signatureResult = new SM2SignatureResult(
+                    Numeric.hexStringToByteArray(hexPublicKey), //todo pub of sm2 sig
+                    rsvSignature.getR().getValue(),
+                    rsvSignature.getS().getValue());
+            return cryptoSuite.verify(hexPublicKey, messageHash, signatureResult.convertToString());
         }
     }
 
     /**
-     * eecrypt the data.
+     * encrypt the data. todo
      *
      * @param data the data to encrypt
      * @param publicKey public key
      * @return decrypt data
      * @throws Exception encrypt exception
      */
-    public static byte[] encrypt(String data, String publicKey)
-        throws Exception {
+    public static byte[] encrypt(String data, String publicKey) throws Exception {
+        /*
+        cryptoSuite.ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
+            return encrypt.encrypt(data.getBytes());
 
-        ECCEncrypt encrypt = new ECCEncrypt(new BigInteger(publicKey));
-        return encrypt.encrypt(data.getBytes());
+         */
+        return data.getBytes();
     }
 
 
     /**
-     * decrypt the data.
+     * decrypt the data. todo
      *
      * @param data the data to decrypt
      * @param privateKey private key
@@ -745,8 +670,33 @@ public final class DataToolUtils {
      */
     public static byte[] decrypt(byte[] data, String privateKey) throws Exception {
 
-        ECCDecrypt decrypt = new ECCDecrypt(new BigInteger(privateKey));
-        return decrypt.decrypt(data);
+        /*ECCDecrypt decrypt = new ECCDecrypt(new BigInteger(privateKey));
+        return decrypt.decrypt(data);*/
+        return data;
+    }
+
+
+    /**
+     * hexString of pub or private key convert to decimal string
+     * @param keyInHex private key or pub key in hex string
+     * @return decimal string
+     */
+    public static String hexStr2DecStr(String keyInHex) {
+        byte[] keyBytes = Numeric.hexStringToByteArray(keyInHex);
+        return new BigInteger(1, keyBytes).toString(10);
+    }
+
+    /**
+     * generate private key
+     * @return decimal private key
+     */
+    public static String generatePrivateKey() {
+        if (deployStyle.equals("blockchain")) {
+            return com.webank.weid.blockchain.util.DataToolUtils.generatePrivateKey();
+        } else {
+            // default database
+            return hexStr2DecStr(cryptoSuite.getKeyPairFactory().generateKeyPair().getHexPrivateKey());
+        }
     }
 
     /**
@@ -756,26 +706,54 @@ public final class DataToolUtils {
      * @return publicKey
      */
     public static BigInteger publicKeyFromPrivate(BigInteger privateKey) {
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            return Sign.publicKeyFromPrivate(privateKey);
+        return new BigInteger(publicKeyStrFromPrivate(privateKey));
+    }
+
+    /**
+     * Obtain the PublicKey from given PrivateKey.
+     *
+     * @param privateKey the private key
+     * @return publicKey decimal
+     */
+    public static String publicKeyStrFromPrivate(BigInteger privateKey) {
+        if (deployStyle.equals("blockchain")) {
+            return com.webank.weid.blockchain.util.DataToolUtils.publicKeyStrFromPrivate(privateKey);
         } else {
-            return Sign.smPublicKeyFromPrivate(privateKey);
+            // default database
+            return hexStr2DecStr(cryptoSuite.getKeyPairFactory().createKeyPair(privateKey).getHexPublicKey());
         }
     }
 
     /**
-     * Obtain the WeIdPrivateKey from given PrivateKey.
+     * Obtain the PublicKey from given PrivateKey.
      *
      * @param privateKey the private key
-     * @return WeIdPrivateKey
+     * @return publicKey
      */
-    public static ECKeyPair createKeyPairFromPrivate(BigInteger privateKey) {
-        if (encryptType.equals(String.valueOf(EncryptType.ECDSA_TYPE))) {
-            return GenCredential.createECDSAKeyPair(privateKey.toString(16));
+    public static String addressFromPrivate(BigInteger privateKey) {
+        if (deployStyle.equals("blockchain")) {
+            return com.webank.weid.blockchain.util.DataToolUtils.addressFromPrivate(privateKey);
         } else {
-            return GenCredential.createGuomiKeyPair(privateKey.toString(16));
+            // default database
+            return cryptoSuite.getKeyPairFactory().createKeyPair(privateKey).getAddress();
         }
     }
+
+    /**
+     * Obtain the PublicKey from given PrivateKey.
+     *
+     * @param publicKey the public key
+     * @return publicKey
+     */
+    public static String addressFromPublic(BigInteger publicKey) {
+        if (deployStyle.equals("blockchain")) {
+            return com.webank.weid.blockchain.util.DataToolUtils.addressFromPublic(publicKey);
+        } else {
+            // default database
+            return Numeric.toHexString(cryptoSuite.getKeyPairFactory().getAddress(publicKey));
+        }
+    }
+
 
     /**
      * The Base64 encode/decode class.
@@ -808,107 +786,30 @@ public final class DataToolUtils {
     }
 
     /**
-     * The Serialization class of Signatures. This is simply a concatenation of bytes of the v, r,
-     * and s. Ethereum uses a similar approach with a wrapping from Base64.
-     * https://www.programcreek.com/java-api-examples/index.php?source_dir=redPandaj-master/src/org/redPandaLib/crypt/ECKey.java
-     * uses a DER-formatted serialization, but it does not entail the v tag, henceforth is more
-     * complex and computation hungry.
-     *
-     * @param signatureData the signature data
-     * @return the byte[]
-     */
-    public static byte[] simpleSignatureSerialization(Sign.SignatureData signatureData) {
-        byte[] serializedSignatureData = new byte[65];
-        serializedSignatureData[0] = signatureData.getV();
-        System.arraycopy(signatureData.getR(), 0, serializedSignatureData, 1, 32);
-        System.arraycopy(signatureData.getS(), 0, serializedSignatureData, 33, 32);
-        return serializedSignatureData;
-    }
-
-
-    /**
-     * The De-Serialization class of Signatures. This is simply a de-concatenation of bytes of the
-     * v, r, and s.
-     *
-     * @param serializedSignatureData the serialized signature data
-     * @return the sign. signature data
-     */
-    public static Sign.SignatureData simpleSignatureDeserialization(
-        byte[] serializedSignatureData) {
-        if (SERIALIZED_SIGNATUREDATA_LENGTH != serializedSignatureData.length) {
-            throw new WeIdBaseException("signature data illegal");
-        }
-        byte v = serializedSignatureData[0];
-        byte[] r = new byte[32];
-        byte[] s = new byte[32];
-        System.arraycopy(serializedSignatureData, 1, r, 0, 32);
-        System.arraycopy(serializedSignatureData, 33, s, 0, 32);
-        Sign.SignatureData signatureData = new Sign.SignatureData(v, r, s);
-        return signatureData;
-    }
-
-    /**
-     * The De-Serialization class of Signatures accepting raw values of v, r, and s. Note: due to
-     * the non 1:1 mapping between default encoded Java String and Byte Array, all the parameters
-     * derived from Byte Array should either be STILL IN Byte Array or Base-64.
-     *
-     * @param v the v
-     * @param r the r
-     * @param s the s
-     * @return the sign. signature data
-     */
-    public static Sign.SignatureData rawSignatureDeserialization(int v, byte[] r, byte[] s) {
-        byte valueByte = (byte) v;
-        return new Sign.SignatureData(valueByte, r, s);
-    }
-
-    /**
-     * Verify a secp256k1 signature (base64).
+     * Verify a signature (base64).
      *
      * @param rawData the rawData to be verified
-     * @param signature the Signature Data in secp256k1 style
+     * @param signature the Signature Data in Base64 style
      * @param weIdDocument the WeIdDocument to be extracted
-     * @param weIdPublicKeyId the WeID public key ID
+     * @param methodId the WeID public key ID
      * @return true if yes, false otherwise with exact error codes
      */
-    public static ErrorCode verifySecp256k1SignatureFromWeId(
+    public static ErrorCode verifySignatureFromWeId(
         String rawData,
         String signature,
         WeIdDocument weIdDocument,
-        String weIdPublicKeyId) {
-        List<String> publicKeysListToVerify = new ArrayList<String>();
+        String methodId) {
 
-        try {
-            secp256k1SigBase64Deserialization(signature);
-        } catch (Exception e) {
-            return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
-        }
-
-        // Traverse public key list indexed Authentication key list
-
-        for (PublicKeyProperty publicKeyProperty : weIdDocument.getPublicKey()) {
-            if (publicKeyProperty.getRevoked()) {
-                continue;
-            }
-            publicKeysListToVerify.add(publicKeyProperty.getPublicKey());
-        }
-        String foundMatchingPubKeyId = StringUtils.EMPTY;
+        String foundMatchingMethodId = StringUtils.EMPTY;
         try {
             boolean result = false;
-            for (String publicKeyItem : publicKeysListToVerify) {
-                if (StringUtils.isNotEmpty(publicKeyItem)) {
-                    boolean currentResult = verifySecp256k1Signature(
-                        rawData, signature, new BigInteger(publicKeyItem));
+            for (AuthenticationProperty authenticationProperty : weIdDocument.getAuthentication()) {
+                if (StringUtils.isNotEmpty(authenticationProperty.getPublicKey())) {
+                    boolean currentResult = verifySignature(
+                        rawData, signature, new BigInteger(authenticationProperty.getPublicKey()));
                     result = currentResult || result;
                     if (currentResult) {
-                        for (PublicKeyProperty pkp : weIdDocument.getPublicKey()) {
-                            if (pkp.getRevoked()) {
-                                continue;
-                            }
-                            if (pkp.getPublicKey().equalsIgnoreCase(publicKeyItem)) {
-                                foundMatchingPubKeyId = pkp.getId();
-                            }
-                        }
+                        foundMatchingMethodId = authenticationProperty.getId();
                         break;
                     }
                 }
@@ -920,33 +821,13 @@ public final class DataToolUtils {
             logger.error("some exceptions occurred in signature verification", e);
             return ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE;
         }
-        if (NumberUtils.isDigits(weIdPublicKeyId)) {
-            weIdPublicKeyId = weIdDocument.getId() + "#keys-" + Integer.valueOf(weIdPublicKeyId);
-        }
-        if (!StringUtils.isEmpty(weIdPublicKeyId)
-            && !foundMatchingPubKeyId.equalsIgnoreCase(weIdPublicKeyId)) {
+        if (!StringUtils.isEmpty(methodId)
+            && !foundMatchingMethodId.equalsIgnoreCase(methodId)) {
             return ErrorCode.CREDENTIAL_VERIFY_SUCCEEDED_WITH_WRONG_PUBLIC_KEY_ID;
         }
         return ErrorCode.SUCCESS;
     }
 
-    /**
-     * Convert SignatureData to blockchain-ready RSV format.
-     *
-     * @param signatureData the signature data
-     * @return rsvSignature the rsv signature structure
-     */
-    public static RsvSignature convertSignatureDataToRsv(
-        SignatureData signatureData) {
-        Uint8 v = intToUnt8(Integer.valueOf(signatureData.getV()));
-        Bytes32 r = bytesArrayToBytes32(signatureData.getR());
-        Bytes32 s = bytesArrayToBytes32(signatureData.getS());
-        RsvSignature rsvSignature = new RsvSignature();
-        rsvSignature.setV(v);
-        rsvSignature.setR(r);
-        rsvSignature.setS(s);
-        return rsvSignature;
-    }
 
     /**
      * Convert an off-chain Base64 signature String to signatureData format.
@@ -954,11 +835,12 @@ public final class DataToolUtils {
      * @param base64Signature the signature string in Base64
      * @return signatureData structure
      */
-    public static SignatureData convertBase64StringToSignatureData(String base64Signature) {
+    //public static SignatureData convertBase64StringToSignatureData(String base64Signature) {
+    /*public static ECDSASignatureResult convertBase64StringToSignatureData(String base64Signature) {
         return simpleSignatureDeserialization(
             base64Decode(base64Signature.getBytes(StandardCharsets.UTF_8))
         );
-    }
+    }*/
 
     /**
      * Get the UUID and remove the '-'.
@@ -967,141 +849,6 @@ public final class DataToolUtils {
      */
     public static String getUuId32() {
         return UUID.randomUUID().toString().replaceAll(SEPARATOR_CHAR, StringUtils.EMPTY);
-    }
-
-    /**
-     * Compress JSON String.
-     *
-     * @param arg the compress string
-     * @return return the value of compressed
-     * @throws IOException IOException
-     */
-    public static String compress(String arg) throws IOException {
-        if (null == arg || arg.length() <= 0) {
-            return arg;
-        }
-        ByteArrayOutputStream out = null;
-        GZIPOutputStream gzip = null;
-        try {
-            out = new ByteArrayOutputStream();
-            gzip = new GZIPOutputStream(out);
-            gzip.write(arg.getBytes(StandardCharsets.UTF_8.toString()));
-            close(gzip);
-            String value = out.toString(StandardCharsets.ISO_8859_1.toString());
-            return value;
-        } finally {
-            close(out);
-        }
-    }
-
-    /**
-     * Decompression of String data.
-     *
-     * @param arg String data with decompression
-     * @return return the value of decompression
-     * @throws IOException IOException
-     */
-    public static String unCompress(String arg) throws IOException {
-        if (null == arg || arg.length() <= 0) {
-            return arg;
-        }
-        ByteArrayOutputStream out = null;
-        ByteArrayInputStream in = null;
-        GZIPInputStream gzip = null;
-        try {
-            out = new ByteArrayOutputStream();
-            in = new ByteArrayInputStream(arg.getBytes(StandardCharsets.ISO_8859_1.toString()));
-            gzip = new GZIPInputStream(in);
-            byte[] buffer = new byte[256];
-            int n = 0;
-            while ((n = gzip.read(buffer)) >= 0) {
-                out.write(buffer, 0, n);
-            }
-            String value = out.toString(StandardCharsets.UTF_8.toString());
-            return value;
-        } finally {
-            close(gzip);
-            close(in);
-            close(out);
-        }
-    }
-
-    private static void close(OutputStream os) {
-        if (os != null) {
-            try {
-                os.close();
-            } catch (IOException e) {
-                logger.error("close OutputStream error", e);
-            }
-        }
-    }
-
-    private static void close(InputStream is) {
-        if (is != null) {
-            try {
-                is.close();
-            } catch (IOException e) {
-                logger.error("close InputStream error", e);
-            }
-        }
-    }
-
-    /**
-     * Bytes array to bytes 32.
-     *
-     * @param byteValue the byte value
-     * @return the bytes 32
-     */
-    public static Bytes32 bytesArrayToBytes32(byte[] byteValue) {
-
-        byte[] byteValueLen32 = new byte[32];
-        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
-        return new Bytes32(byteValueLen32);
-    }
-
-    /**
-     * String to bytes 32.
-     *
-     * @param string the string
-     * @return the bytes 32
-     */
-    public static Bytes32 stringToBytes32(String string) {
-
-        byte[] byteValueLen32 = new byte[32];
-        if (StringUtils.isEmpty(string)) {
-            return new Bytes32(byteValueLen32);
-        }
-        byte[] byteValue = string.getBytes(StandardCharsets.UTF_8);
-        System.arraycopy(byteValue, 0, byteValueLen32, 0, byteValue.length);
-
-        return new Bytes32(byteValueLen32);
-    }
-
-    /**
-     * Bytes 32 to bytes array.
-     *
-     * @param bytes32 the bytes 32
-     * @return the byte[]
-     */
-    public static byte[] bytes32ToBytesArray(Bytes32 bytes32) {
-
-        byte[] bytesArray = new byte[32];
-        byte[] bytes32Value = bytes32.getValue();
-        System.arraycopy(bytes32Value, 0, bytesArray, 0, 32);
-        return bytesArray;
-    }
-
-    /**
-     * Convert a Byte32 data to Java String. IMPORTANT NOTE: Byte to String is not 1:1 mapped. So -
-     * Know your data BEFORE do the actual transform! For example, Deximal Bytes, or ASCII Bytes are
-     * OK to be in Java String, but Encrypted Data, or raw Signature, are NOT OK.
-     *
-     * @param bytes32 the bytes 32
-     * @return String
-     */
-    public static String bytes32ToString(Bytes32 bytes32) {
-
-        return new String(bytes32.getValue(), StandardCharsets.UTF_8).trim();
     }
 
     /**
@@ -1135,61 +882,6 @@ public final class DataToolUtils {
         return value.getBytes(StandardCharsets.UTF_8);
     }
 
-    /**
-     * string to byte32.
-     *
-     * @param value stringData
-     * @return byte[]
-     */
-    public static byte[] stringToByte32Array(String value) {
-        if (StringUtils.isBlank(value)) {
-            return new byte[32];
-        }
-
-        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-        byte[] newBytes = new byte[32];
-
-        System.arraycopy(bytes, 0, newBytes, 0, bytes.length);
-        return newBytes;
-    }
-
-    /**
-     * string to byte32List.
-     *
-     * @param data stringData
-     * @param size size of byte32List
-     * @return data
-     */
-    public static List<byte[]> stringToByte32ArrayList(String data, int size) {
-        List<byte[]> byteList = new ArrayList<>();
-
-        if (StringUtils.isBlank(data)) {
-            for (int i = 0; i < size; i++) {
-                byteList.add(new byte[32]);
-            }
-            return byteList;
-        }
-
-        byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
-
-        if (dataBytes.length <= WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH) {
-            byte[] newBytes = new byte[32];
-            System.arraycopy(dataBytes, 0, newBytes, 0, dataBytes.length);
-            byteList.add(newBytes);
-        } else {
-            byteList = splitBytes(dataBytes, size);
-        }
-
-        if (byteList.size() < size) {
-            List<byte[]> addList = new ArrayList<>();
-            for (int i = 0; i < size - byteList.size(); i++) {
-                addList.add(new byte[32]);
-            }
-            byteList.addAll(addList);
-        }
-        return byteList;
-    }
-
     private static synchronized List<byte[]> splitBytes(byte[] bytes, int size) {
         List<byte[]> byteList = new ArrayList<>();
         double splitLength =
@@ -1220,325 +912,21 @@ public final class DataToolUtils {
         return byteList;
     }
 
-    /**
-     * convert bytesArrayList to Bytes32ArrayList.
-     *
-     * @param list byte size
-     * @param size size
-     * @return result
-     */
-    public static List<byte[]> bytesArrayListToBytes32ArrayList(List<byte[]> list, int size) {
-
-        List<byte[]> bytesList = new ArrayList<>();
-        if (list.isEmpty()) {
-            for (int i = 0; i < size; i++) {
-                bytesList.add(new byte[32]);
-            }
-            return bytesList;
-        }
-
-        for (byte[] bytes : list) {
-            if (bytes.length <= WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH) {
-                byte[] newBytes = new byte[32];
-                System.arraycopy(bytes, 0, newBytes, 0, bytes.length);
-                bytesList.add(newBytes);
-            }
-        }
-
-        if (bytesList.size() < size) {
-            List<byte[]> addList = new ArrayList<>();
-            for (int i = 0; i < size - bytesList.size(); i++) {
-                addList.add(new byte[32]);
-            }
-            bytesList.addAll(addList);
-        }
-        return bytesList;
-    }
 
     /**
-     * Bytes 32 to string without trim.
-     *
-     * @param bytes32 the bytes 32
-     * @return the string
-     */
-    public static String bytes32ToStringWithoutTrim(Bytes32 bytes32) {
-
-        byte[] strs = bytes32.getValue();
-        return new String(strs, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Int to uint 256.
-     *
-     * @param value the value
-     * @return the uint 256
-     */
-    public static Uint256 intToUint256(int value) {
-        return new Uint256(new BigInteger(String.valueOf(value)));
-    }
-
-    /**
-     * Uint 256 to int.
-     *
-     * @param value the value
-     * @return the int
-     */
-    public static int uint256ToInt(Uint256 value) {
-        return value.getValue().intValue();
-    }
-
-    /**
-     * String to dynamic bytes.
-     *
-     * @param input the input
-     * @return the dynamic bytes
-     */
-    public static DynamicBytes stringToDynamicBytes(String input) {
-
-        return new DynamicBytes(input.getBytes(StandardCharsets.UTF_8));
-    }
-
-    /**
-     * Dynamic bytes to string.
-     *
-     * @param input the input
-     * @return the string
-     */
-    public static String dynamicBytesToString(DynamicBytes input) {
-        return new String(input.getValue(), StandardCharsets.UTF_8);
-    }
-
-    /**
-     * Int to int 256.
-     *
-     * @param value the value
-     * @return the int 256
-     */
-    public static Int256 intToInt256(int value) {
-        return new Int256(value);
-    }
-
-    /**
-     * Int 256 to int.
-     *
-     * @param value the value
-     * @return the int
-     */
-    public static int int256ToInt(Int256 value) {
-        return value.getValue().intValue();
-    }
-
-    /**
-     * Int to unt 8.
-     *
-     * @param value the value
-     * @return the uint 8
-     */
-    public static Uint8 intToUnt8(int value) {
-        return new Uint8(value);
-    }
-
-    /**
-     * Uint 8 to int.
-     *
-     * @param value the value
-     * @return the int
-     */
-    public static int uint8ToInt(Uint8 value) {
-        return value.getValue().intValue();
-    }
-
-    /**
-     * Long to int 256.
-     *
-     * @param value the value
-     * @return the int 256
-     */
-    public static Int256 longToInt256(long value) {
-        return new Int256(value);
-    }
-
-    /**
-     * Int 256 to long.
-     *
-     * @param value the value
-     * @return the long
-     */
-    public static long int256ToLong(Int256 value) {
-        return value.getValue().longValue();
-    }
-
-    /**
-     * Long array to int 256 static array.
-     *
-     * @param longArray the long array
-     * @return the static array
-     */
-    public static StaticArray<Int256> longArrayToInt256StaticArray(long[] longArray) {
-        List<Int256> int256List = new ArrayList<Int256>();
-        for (int i = 0; i < longArray.length; i++) {
-            int256List.add(longToInt256(longArray[i]));
-        }
-        StaticArray<Int256> in256StaticArray = new StaticArray<Int256>(int256List);
-        return in256StaticArray;
-    }
-
-    /**
-     * String array to bytes 32 static array.
-     *
-     * @param stringArray the string array
-     * @return the static array
-     */
-    public static StaticArray<Bytes32> stringArrayToBytes32StaticArray(String[] stringArray) {
-
-        List<Bytes32> bytes32List = new ArrayList<Bytes32>();
-        for (int i = 0; i < stringArray.length; i++) {
-            if (StringUtils.isNotEmpty(stringArray[i])) {
-                bytes32List.add(stringToBytes32(stringArray[i]));
-            } else {
-                bytes32List.add(stringToBytes32(StringUtils.EMPTY));
-            }
-        }
-        StaticArray<Bytes32> bytes32StaticArray = new StaticArray<Bytes32>(bytes32List);
-        return bytes32StaticArray;
-    }
-
-    /**
-     * byte array List to bytes 32 static array.
-     *
-     * @param bytes the byte array List
-     * @return the static array
-     */
-    public static StaticArray<Bytes32> byteArrayListToBytes32StaticArray(List<byte[]> bytes) {
-        List<Bytes32> bytes32List = new ArrayList<Bytes32>();
-        for (int i = 0; i < bytes.size(); i++) {
-            bytes32List.add(DataToolUtils.bytesArrayToBytes32(bytes.get(i)));
-        }
-        StaticArray<Bytes32> bytes32StaticArray = new StaticArray<Bytes32>(bytes32List);
-        return bytes32StaticArray;
-    }
-
-    /**
-     * String array to bytes 32 static array.
-     *
-     * @param addressArray the string array
-     * @return the static array
-     */
-    public static StaticArray<Address> addressArrayToAddressStaticArray(Address[] addressArray) {
-
-        List<Address> addressList = new ArrayList<>();
-        for (int i = 0; i < addressArray.length; i++) {
-            addressList.add(addressArray[i]);
-        }
-        StaticArray<Address> addressStaticArray = new StaticArray<Address>(addressList);
-        return addressStaticArray;
-    }
-
-    /**
-     * Bytes 32 dynamic array to string array without trim.
-     *
-     * @param bytes32DynamicArray the bytes 32 dynamic array
-     * @return the string[]
-     */
-    public static String[] bytes32DynamicArrayToStringArrayWithoutTrim(
-        DynamicArray<Bytes32> bytes32DynamicArray) {
-
-        List<Bytes32> bytes32List = bytes32DynamicArray.getValue();
-        String[] stringArray = new String[bytes32List.size()];
-        for (int i = 0; i < bytes32List.size(); i++) {
-            stringArray[i] = bytes32ToStringWithoutTrim(bytes32List.get(i));
-        }
-        return stringArray;
-    }
-
-    /**
-     * Bytes 32 dynamic array to stringwithout trim.
-     *
-     * @param bytes32DynamicArray the bytes 32 dynamic array
-     * @return the string
-     */
-    public static String bytes32DynamicArrayToStringWithoutTrim(
-        DynamicArray<Bytes32> bytes32DynamicArray) {
-
-        List<Bytes32> bytes32List = bytes32DynamicArray.getValue();
-        List<byte[]> byteArraylist = new ArrayList<>();
-        for (int i = 0; i < bytes32List.size(); i++) {
-            byteArraylist.add(bytes32ToBytesArray(bytes32List.get(i)));
-        }
-        return byte32ListToString(byteArraylist, bytes32List.size());
-    }
-
-    /**
-     * Int 256 dynamic array to long array.
-     *
-     * @param int256DynamicArray the int 256 dynamic array
-     * @return the long[]
-     */
-    public static long[] int256DynamicArrayToLongArray(DynamicArray<Int256> int256DynamicArray) {
-
-        List<Int256> int256list = int256DynamicArray.getValue();
-        long[] longArray = new long[int256list.size()];
-        for (int i = 0; i < int256list.size(); i++) {
-            longArray[i] = int256ToLong(int256list.get(i));
-        }
-        return longArray;
-    }
-
-    /**
-     * convert list to BigInteger list.
-     *
-     * @param list BigInteger list
-     * @param size size
-     * @return result
-     */
-    public static List<BigInteger> listToListBigInteger(List<BigInteger> list, int size) {
-        List<BigInteger> bigIntegerList = new ArrayList<>();
-        for (BigInteger bs : list) {
-            bigIntegerList.add(bs);
-        }
-
-        List<BigInteger> addList = new ArrayList<>();
-        if (bigIntegerList.size() < size) {
-            for (int i = 0; i < size - bigIntegerList.size(); i++) {
-                addList.add(BigInteger.ZERO);
-            }
-            bigIntegerList.addAll(addList);
-        }
-        return bigIntegerList;
-    }
-
-    /**
-     * Generate Default CPT Json Schema based on a given CPT ID.
-     *
+//     * Generate Default CPT Json Schema based on a given CPT ID.
+     * get Default CPT Json Schema from default constant class by given CPT ID
      * @param cptId the CPT ID
      * @return CPT Schema in Json String
      */
     public static String generateDefaultCptJsonSchema(Integer cptId) {
-        String cptClassStr = "com.webank.weid.protocol.cpt.Cpt" + cptId;
         try {
-            return generateDefaultCptJsonSchema(Class.forName(cptClassStr));
+            return RawCptSchema.getCptSchema(cptId);
         } catch (Exception e) {
             return StringUtils.EMPTY;
         }
     }
 
-    /**
-     * Generate Default CPT Json Schema based on a given class, to support external invocation.
-     *
-     * @param myClass the CPT ID
-     * @return CPT Schema in Json String
-     */
-    public static String generateDefaultCptJsonSchema(Class myClass) {
-        try {
-            com.github.reinert.jjschema.v1.JsonSchemaFactory schemaFactory
-                = new JsonSchemaV4Factory();
-            schemaFactory.setAutoPutDollarSchema(true);
-            JsonNode cptSchema = schemaFactory.createSchema(myClass);
-            return DataToolUtils.objToJsonStrWithNoPretty(cptSchema);
-        } catch (Exception e) {
-            return StringUtils.EMPTY;
-        }
-    }
 
     /**
      * Generate unformatted CPT which allows any format, to support external invocation.
@@ -1579,45 +967,6 @@ public final class DataToolUtils {
             }
         }
         return true;
-    }
-
-    /**
-     * convert byte32List to String.
-     *
-     * @param bytesList list
-     * @param size size
-     * @return reuslt
-     */
-    public static synchronized String byte32ListToString(List<byte[]> bytesList, int size) {
-        if (bytesList.isEmpty()) {
-            return "";
-        }
-
-        int zeroCount = 0;
-        for (int i = 0; i < bytesList.size(); i++) {
-            for (int j = 0; j < bytesList.get(i).length; j++) {
-                if (bytesList.get(i)[j] == 0) {
-                    zeroCount++;
-                }
-            }
-        }
-
-        if (WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH * size - zeroCount == 0) {
-            return "";
-        }
-
-        byte[] newByte = new byte[WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH * size - zeroCount];
-        int index = 0;
-        for (int i = 0; i < bytesList.size(); i++) {
-            for (int j = 0; j < bytesList.get(i).length; j++) {
-                if (bytesList.get(i)[j] != 0) {
-                    newByte[index] = bytesList.get(i)[j];
-                    index++;
-                }
-            }
-        }
-
-        return (new String(newByte)).toString();
     }
 
     /**
@@ -1980,11 +1329,12 @@ public final class DataToolUtils {
      * @return hash String list
      */
     public static List<String> convertBytes32ObjectListToStringHashList(
-        List<org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32> byteList) {
+        List<Bytes32> byteList) {
         List<String> strList = new ArrayList<>();
         for (int i = 0; i < byteList.size(); i++) {
             strList.add(DataToolUtils.convertHashByte32ArrayIntoHashStr(
-                ((org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32) (byteList.toArray()[i]))
+                //((org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32) (byteList.toArray()[i]))
+                    ((Bytes32) (byteList.toArray()[i]))
                     .getValue()));
         }
         return strList;
