@@ -199,3 +199,4 @@ doc/bak/
 secring.gpg
 *.address
 logs/
+gradle.properties
