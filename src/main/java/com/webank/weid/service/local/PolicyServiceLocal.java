@@ -219,7 +219,7 @@ public class PolicyServiceLocal implements PolicyService {
                 getDataDriver().addPresentation(
                         DataDriverConstant.LOCAL_PRESENTATION,
                         presentationId,
-                        WeIdUtils.convertPublicKeyToWeId(privateKey),
+                        WeIdUtils.getWeIdFromPrivateKey(privateKey),
                         policyString);
         if (resp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[registerPresentationPolicy] save presentation to db failed.");
@@ -269,7 +269,7 @@ public class PolicyServiceLocal implements PolicyService {
         presentationPolicy.setId(presentationValue.getPresentation_id());
         Map<Integer, String> policyMap = new HashMap<>();
         for (Integer id : result) {
-            policyMap.put(id, null);
+            policyMap.put(id, getClaimPolicy(id).getResult());
         }
         presentationPolicy.setPolicy(policyMap);
         presentationPolicy.setPolicyPublisherWeId(presentationValue.getCreator());
