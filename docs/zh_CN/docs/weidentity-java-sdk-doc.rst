@@ -9,7 +9,7 @@ WeIdentity JAVA SDK文档
 总体介绍
 --------
 
-WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库。目前，SDK支持本地密钥管理、数字身份标识（WeIdentity DID）管理、电子凭证（WeIdentity Credential）管理、授权机构（Authority Issuer）管理、CPT（Claim Protocol Type）管理、存证（Evidence）管理、AMOP链上数据通道、凭证传输（Transportation）管理等功能，未来还将支持更丰富的功能和应用。
+WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库。目前，SDK支持本地密钥管理、数字身份标识（WeIdentity DID）管理、电子凭证（WeIdentity Credential）管理、授权机构（Authority Issuer）管理、CPT（Claim Protocol Type）管理、存证（Evidence）管理等功能，未来还将支持更丰富的功能和应用。
 
 术语
 ----
@@ -48,7 +48,7 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
    ├─ app：测试小工具
    ├─ config：FISCO-BCOS的合约配置
    ├─ constant：系统常量相关
-   └─ contract：通过FISCO-BCOS Web3sdk生成的合约Java接口文件
+   └─ contract：通过WeIdentity-Blockchain模块部署合约
       └─ deploy: 合约部署相关
    ├─ exception: 异常定义
    └─ protocol：接口参数相关定义
@@ -57,7 +57,9 @@ WeIdentity Java SDK提供了一整套对WeIdentity进行管理操作的Java库�
       └─ response: 接口出参定义
    └─ service：SDK提供的接口
       ├─ rpc：接口定义
-      └─impl：接口实现
+      ├─ console：完全无依赖的接口实现
+      ├─ local：基于数据库的接口实现
+      └─impl：基于区块链的接口实现
    └─ suite：一些配套的工具
       ├─ cache：自定义缓存
       └─persistence：存储接口
