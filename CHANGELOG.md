@@ -1,3 +1,11 @@
+### V3.1.1 (2023-6-15)
+- Features:
+1. Add purely functional interfaces that does not rely on any storage and blockchain
+2. Upgrade API document
+- Bugfixes:
+1. Upgrade components with known vulnerabilities
+
+
 ### V3.1.0 (2023-4-28)
 - Features:
 1. Add a way for local databases to deploy WeIdentity without deploying blockchain
