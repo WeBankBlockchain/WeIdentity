@@ -1,1 +1,7 @@
 sphinxcontrib-mermaid
+docutils == 0.12
+sphinx ==  1.7.5
+sphinx-rtd-theme
+recommonmark == 0.5.0
+commonmarkextensions == 0.0.4
+commonmark == 0.8.0
