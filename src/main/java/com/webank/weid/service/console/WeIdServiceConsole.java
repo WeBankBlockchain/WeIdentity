@@ -53,7 +53,7 @@ public class WeIdServiceConsole {
 
     /**
      * Create a WeIdentity DID Document.
-     *
+     * @param publicKey the publicKey
      * @return the WeIdDocument
      */
     public ResponseData<WeIdDocument> createWeIdDocument(String publicKey) {
@@ -103,7 +103,6 @@ public class WeIdServiceConsole {
 
     /**
      * Create a WeIdentity DID Document Json.
-     *
      * @param publicKey the publicKey
      * @return the WeIdentity DID document json
      */
@@ -389,6 +388,7 @@ public class WeIdServiceConsole {
      * This is used to update a CPT data which has been register.
      *
      * @param args the args
+     * @param cptId the cptId
      * @return the response data
      */
     public ResponseData<CptBaseInfo> updateCpt(CptMapArgs args, Integer cptId) {
