@@ -33,7 +33,7 @@ public class TestCreateWeId1 extends TestBaseService {
      * case: create WeId success.
      */
     @Test
-    public void testCreateWeId_createSucess() {
+    public void testCreateWeId_createSuccess() {
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
         LogUtil.info(logger, "createWeId", response);
@@ -46,7 +46,7 @@ public class TestCreateWeId1 extends TestBaseService {
      * case:run CreateWeId twice Will create two different WeId.
      */
     @Test
-    public void testCreateWeId_doubleCreateSucess() {
+    public void testCreateWeId_doubleCreateSuccess() {
 
         ResponseData<CreateWeIdDataResult> response = weIdService.createWeId();
         LogUtil.info(logger, "createWeId", response);
@@ -63,7 +63,7 @@ public class TestCreateWeId1 extends TestBaseService {
      * case: create WeId success.
      */
     @Test
-    public void testCreateWeIdByPublicKey_createSucess() {
+    public void testCreateWeIdByPublicKey_createSuccess() {
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         WeIdPublicKey weIdPublicKey = new WeIdPublicKey();
         weIdPublicKey.setPublicKey(createWeIdArgs.getPublicKey());
@@ -78,7 +78,7 @@ public class TestCreateWeId1 extends TestBaseService {
      * case: create WeId success, public key not match with private key.
      */
     @Test
-    public void testCreateWeIdByPublicKey_createSucess2() {
+    public void testCreateWeIdByPublicKey_createSuccess2() {
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         WeIdPublicKey weIdPublicKey = new WeIdPublicKey();
         weIdPublicKey.setPublicKey(createWeIdArgs.getPublicKey());

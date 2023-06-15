@@ -49,7 +49,6 @@ public abstract class BaseTest {
         credentialPojoService = new CredentialPojoServiceImpl();
         policyService = new PolicyServiceImpl();
 
-        //privateKey = TestBaseUtil.readPrivateKeyFromFile("ecdsa_key");
         privateKey = TestBaseUtil.readPrivateKeyFromFile("private_key");
 
         testInit();
