@@ -424,11 +424,11 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         CredentialPojo credential,
         String publicKey,
         boolean offLine,
-        String weIdPublicKeyId
+        String methodId
     ) {
         ErrorCode errorCode;
         try {
-            errorCode = verifyContentInner(credential, publicKey, offLine, weIdPublicKeyId);
+            errorCode = verifyContentInner(credential, publicKey, offLine, methodId);
         } catch (WeIdBaseException ex) {
             logger.error("[verifyContent] verify credential has exception.", ex);
             return ex.getErrorCode();
@@ -493,7 +493,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         CredentialPojo credential,
         String publicKey,
         boolean offline,
-        String weIdPublicKeyId
+        String methodId
     ) {
         ErrorCode checkResp = CredentialPojoUtils.isCredentialPojoValid(credential);
         if (ErrorCode.SUCCESS.getCode() != checkResp.getCode()) {
@@ -509,7 +509,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             .intValue()) {
             // This is a multi-signed Credential. We firstly verify itself (i.e. external check)
             ErrorCode errorCode = verifySingleSignedCredential(
-                credential, publicKey, offline, weIdPublicKeyId);
+                credential, publicKey, offline, methodId);
             if (errorCode != ErrorCode.SUCCESS) {
                 return errorCode;
             }
@@ -538,7 +538,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
                         innerCredential = (CredentialPojo) innerCredentialObject;
                     }
                     errorCode = verifyContentInner(
-                        innerCredential, null, offline, weIdPublicKeyId);
+                        innerCredential, null, offline, methodId);
                     if (errorCode != ErrorCode.SUCCESS) {
                         return errorCode;
                     }
@@ -549,14 +549,14 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             }
             return ErrorCode.SUCCESS;
         }
-        return verifySingleSignedCredential(credential, publicKey, offline, weIdPublicKeyId);
+        return verifySingleSignedCredential(credential, publicKey, offline, methodId);
     }
 
     private static ErrorCode verifySingleSignedCredential(
         CredentialPojo credential,
         String publicKey,
         boolean offline,
-        String weIdPublicKeyId
+        String methodId
     ) {
         ErrorCode errorCode = verifyCptFormat(
             credential.getCptId(),
@@ -603,7 +603,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             } else {
                 WeIdDocument weIdDocument = innerResponseData.getResult();
                 errorCode = DataToolUtils.verifySignatureFromWeId(
-                    rawData, credential.getSignature(), weIdDocument, weIdPublicKeyId);
+                    rawData, credential.getSignature(), weIdDocument, methodId);
                 return errorCode;
             }
         } else {
@@ -859,7 +859,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     private static ResponseData<Boolean> verifyLiteCredential(
         CredentialPojo credential,
         String publicKey,
-        String weIdPublicKeyId) {
+        String methodId) {
         // Lite Credential only contains limited areas (others truncated)
         if (credential.getCptId() == null || credential.getCptId().intValue() < 0) {
             return new ResponseData<>(false, ErrorCode.CPT_ID_ILLEGAL);
@@ -905,7 +905,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         } else {
             WeIdDocument weIdDocument = innerResponseData.getResult();
             ErrorCode verifyErrorCode = DataToolUtils.verifySignatureFromWeId(
-                rawData, credential.getSignature(), weIdDocument, weIdPublicKeyId);
+                rawData, credential.getSignature(), weIdDocument, methodId);
             if (verifyErrorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<Boolean>(false, verifyErrorCode);
             }
@@ -1432,7 +1432,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
     @Override
     public ResponseData<Boolean> verify(
         String issuerWeId,
-        String weIdPublicKeyId,
+        String methodId,
         CredentialPojo credential
     ) {
         if (credential == null) {
@@ -1448,9 +1448,9 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             return new ResponseData<Boolean>(false, ErrorCode.CREDENTIAL_ISSUER_MISMATCH);
         }
         if (CredentialPojoUtils.isLiteCredential(credential)) {
-            return verifyLiteCredential(credential, null, weIdPublicKeyId);
+            return verifyLiteCredential(credential, null, methodId);
         }
-        ErrorCode errorCode = verifyContent(credential, null, false, weIdPublicKeyId);
+        ErrorCode errorCode = verifyContent(credential, null, false, methodId);
         if (errorCode.getCode() != ErrorCode.SUCCESS.getCode()) {
             logger.error("[verify] credential verify failed. error message :{}", errorCode);
             return new ResponseData<Boolean>(false, errorCode);
@@ -1837,10 +1837,12 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         Map<Integer, ClaimPolicy> claimPolicyMap = presentationPolicy.getPolicy();
 
         String policyType = presentationPolicy.getPolicyType();
+        //如果presentationPolicy是ZKP类型，则所有credentials采用ZKP生成
         if (StringUtils.equals(policyType, CredentialType.ZKP.getName())) {
             newCredentialList = generateZkpCredentialList(credentialList, presentationPolicy,
                 userId);
         } else {
+            // 如果presentationPolicy是普通的类型，则所有credentials采用基于hash链接的选择性披露
             // 遍历所有原始证书
             for (CredentialPojo credential : credentialList) {
                 // 根据原始证书获取对应的 claimPolicy
@@ -1876,7 +1878,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             if (claimPolicy == null) {
                 continue;
             }
-            // 根据原始证书和claimPolicy去创建选择性披露凭证
+            // 根据原始证书和claimPolicy去创建ZKP类型选择性披露凭证
             ResponseData<CredentialPojo> res = this
                 .createZkpCredential(credential, claimPolicy, userId);
 
@@ -2259,7 +2261,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             }
            
             String cptJsonSchema = DataToolUtils.serialize(cpt.getCptJsonSchema());
-            // 验证cp自身的合法性
+            // 验证cpt自身的合法性
             if (!DataToolUtils.isCptJsonSchemaValid(cptJsonSchema)) {
                 logger.error("[checkCredentialWithCpt] the cpt invalid.");
                 return new ResponseData<>(null, ErrorCode.CPT_JSON_SCHEMA_INVALID);
