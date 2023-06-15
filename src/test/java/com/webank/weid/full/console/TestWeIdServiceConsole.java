@@ -62,6 +62,19 @@ public class TestWeIdServiceConsole {
     }
 
     /**
+     * case: create WeIdDocument Metadata Json success.
+     */
+    @Test
+    public void testCreateWeIdDocumentMetadata_createSuccess() {
+
+        ResponseData<WeIdDocumentMetadata> response = weIdServiceConsole.createWeIdDocumentMetadata();
+        LogUtil.info(logger, "createWeIdDocumentMetadata", response);
+
+        Assert.assertEquals(ErrorCode.SUCCESS.getCode(), response.getErrorCode().intValue());
+        Assert.assertNotNull(response.getResult());
+    }
+
+    /**
      * case: SetAuthentication success.
      */
     @Test
@@ -223,6 +236,7 @@ public class TestWeIdServiceConsole {
         Assert.assertTrue(presentationResp.getResult() >= 0);
         ResponseData<PresentationPolicyE> getClaimFromPresResp = weIdServiceConsole
                 .getPresentationPolicy(presentationResp.getResult());
+        LogUtil.info(logger, "presentationPolicyE", getClaimFromPresResp);
         Assert.assertNotNull(getClaimFromPresResp.getResult());
         System.out.println(DataToolUtils.serialize(getClaimFromPresResp.getResult()));
     }
