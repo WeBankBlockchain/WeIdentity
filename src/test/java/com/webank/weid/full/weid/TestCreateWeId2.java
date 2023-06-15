@@ -29,7 +29,7 @@ public class TestCreateWeId2 extends TestBaseService {
      * case: create weid with param success.
      */
     @Test
-    public void testCreateWeId_paramSucess() {
+    public void testCreateWeId_paramSuccess() {
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
         LogUtil.info(logger, "createWeId", response);
@@ -69,7 +69,7 @@ public class TestCreateWeId2 extends TestBaseService {
      * case: when publickey is digtal,then return WEID_PRIVATEKEY_INVALID.
      */
     @Test
-    public void testCreateWeId_publicKeyIsDigtal() {
+    public void testCreateWeId_publicKeyIsDigital() {
         CreateWeIdArgs createWeIdArgs = new CreateWeIdArgs();
         createWeIdArgs.setPublicKey("1234567493064");
         ResponseData<String> response = weIdService.createWeId(createWeIdArgs);
@@ -289,7 +289,7 @@ public class TestCreateWeId2 extends TestBaseService {
      * case: privateKey is invalid.
      */
     @Test
-    public void testCreateWeId_privateKeyIsInvaild() {
+    public void testCreateWeId_privateKeyIsInvalid() {
 
         CreateWeIdArgs createWeIdArgs = TestBaseUtil.buildCreateWeIdArgs();
         createWeIdArgs.getWeIdPrivateKey().setPrivateKey("xxxxxxxxxxxx");
