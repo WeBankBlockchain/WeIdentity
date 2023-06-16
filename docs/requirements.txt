@@ -1,7 +1,13 @@
-sphinxcontrib-mermaid
 docutils == 0.12
-sphinx ==  1.7.5
-sphinx-rtd-theme
+sphinx == 2.2.0
+sphinx-rtd-theme == 0.4.3
+sphinx-copybutton == 0.2.6
+sphinx-version-warning == 1.1.2
+sphinx-markdown-tables == 0.0.17
+sphinxcontrib-mermaid == 0.6.0
 recommonmark == 0.5.0
-commonmarkextensions == 0.0.4
-commonmark == 0.8.0
+sphinx-notfound-page == 0.1
+commonmarkextensions == 0.0.5
+commonmark == 0.8.1
+git-lfs
+Jinja2<3.1
