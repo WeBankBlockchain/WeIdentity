@@ -17430,6 +17430,9 @@ com.webank.weid.protocol.base.PresentationPolicyE
 
 ----
 
+CredentialServiceConsole
+^^^^^^^^^^^
+
 12. createCredential
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
