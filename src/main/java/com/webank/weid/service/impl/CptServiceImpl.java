@@ -158,16 +158,16 @@ public class CptServiceImpl implements CptService {
                             weIdPrivateKey.getPrivateKey(), cptId);
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null,
-                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()), innerResp.getTransactionInfo());
             }
             ErrorCode errorCodeProcess = processTemplate(cptId, cptJsonSchemaNew);
             int code = errorCodeProcess.getCode();
             if (code != ErrorCode.SUCCESS.getCode()) {
                 logger.error("[registerCpt]register cpt failed, error code is {}", code);
-                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code));
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code), innerResp.getTransactionInfo());
             }
             CptBaseInfo cptBaseInfo = CptBaseInfo.fromBlockChain(innerResp.getResult());
-            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS);
+            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS, innerResp.getTransactionInfo());
             /*return cptServiceEngine.registerCpt(cptId, address, cptJsonSchemaNew, rsvSignature,
                     weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);*/
 
@@ -213,16 +213,16 @@ public class CptServiceImpl implements CptService {
                             weIdPrivateKey.getPrivateKey());
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null,
-                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()), innerResp.getTransactionInfo());
             }
             CptBaseInfo cptBaseInfo = CptBaseInfo.fromBlockChain(innerResp.getResult());
             ErrorCode errorCodeProcess = processTemplate(cptBaseInfo.getCptId(), cptJsonSchemaNew);
             int code = errorCodeProcess.getCode();
             if (code != ErrorCode.SUCCESS.getCode()) {
                 logger.error("[registerCpt]register cpt failed, error code is {}", code);
-                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code));
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code), innerResp.getTransactionInfo());
             }
-            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS);
+            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS, innerResp.getTransactionInfo());
             /*return cptServiceEngine.registerCpt(address, cptJsonSchemaNew, rsvSignature,
                     weIdPrivateKey.getPrivateKey(), WeIdConstant.CPT_DATA_INDEX);*/
         } catch (Exception e) {
@@ -298,11 +298,11 @@ public class CptServiceImpl implements CptService {
                         cptBlockchainService.queryCpt(cptId);
                 if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                     return new ResponseData<>(null,
-                            ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+                            ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()), innerResp.getTransactionInfo());
                 }
                 Cpt cpt = Cpt.fromBlockChain(innerResp.getResult());
                 cptCahceNode.put(cptIdStr, new ResponseData<>(cpt, ErrorCode.SUCCESS));
-                return new ResponseData<>(cpt, ErrorCode.SUCCESS);
+                return new ResponseData<>(cpt, ErrorCode.SUCCESS, innerResp.getTransactionInfo());
                 /*result = cptServiceEngine.queryCpt(cptId, WeIdConstant.CPT_DATA_INDEX);
                 if (result.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()) {
                     cptCahceNode.put(cptIdStr, result);
@@ -384,17 +384,17 @@ public class CptServiceImpl implements CptService {
                             cptId);
             if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
                 return new ResponseData<>(null,
-                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+                        ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()), innerResp.getTransactionInfo());
             }
             cptCahceNode.remove(String.valueOf(cptId));
             ErrorCode errorCodeProcess = processTemplate(cptId, cptJsonSchemaNew);
             int code = errorCodeProcess.getCode();
             if (code != ErrorCode.SUCCESS.getCode()) {
                 logger.error("[updateCpt]update cpt failed, error code is {}", code);
-                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code));
+                return new ResponseData<CptBaseInfo>(null, ErrorCode.getTypeByErrorCode(code), innerResp.getTransactionInfo());
             }
             CptBaseInfo cptBaseInfo = CptBaseInfo.fromBlockChain(innerResp.getResult());
-            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS);
+            return new ResponseData<>(cptBaseInfo, ErrorCode.SUCCESS, innerResp.getTransactionInfo());
            /* ResponseData<CptBaseInfo> result = cptServiceEngine.updateCpt(
                     cptId,
                     address,
@@ -491,9 +491,9 @@ public class CptServiceImpl implements CptService {
                 cptBlockchainService.queryCredentialTemplate(cptId);
         if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<>(null,
-                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()), innerResp.getTransactionInfo());
         }
-        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS, innerResp.getTransactionInfo());
         //return cptServiceEngine.queryCredentialTemplate(cptId);
     }
 
@@ -507,9 +507,9 @@ public class CptServiceImpl implements CptService {
                 cptBlockchainService.getCptIdList(startPos, num);
         if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<>(null,
-                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()), innerResp.getTransactionInfo());
         }
-        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS, innerResp.getTransactionInfo());
         //return cptServiceEngine.getCptIdList(startPos, num, WeIdConstant.CPT_DATA_INDEX);
     }
 
@@ -519,9 +519,9 @@ public class CptServiceImpl implements CptService {
                 cptBlockchainService.getCptCount();
         if (innerResp.getErrorCode() != ErrorCode.SUCCESS.getCode()) {
             return new ResponseData<>(-1,
-                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()));
+                    ErrorCode.getTypeByErrorCode(innerResp.getErrorCode()), innerResp.getTransactionInfo());
         }
-        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS);
+        return new ResponseData<>(innerResp.getResult(), ErrorCode.SUCCESS, innerResp.getTransactionInfo());
         //return cptServiceEngine.getCptCount(WeIdConstant.CPT_DATA_INDEX);
     }
 }
