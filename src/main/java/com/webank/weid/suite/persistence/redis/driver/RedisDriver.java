@@ -2,20 +2,21 @@
 
 package com.webank.weid.suite.persistence.redis.driver;
 
+import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.blockchain.protocol.base.CptBaseInfo;
 import com.webank.weid.blockchain.protocol.base.WeIdDocument;
 import com.webank.weid.blockchain.protocol.base.WeIdDocumentMetadata;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
-import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.suite.persistence.*;
 import com.webank.weid.suite.persistence.redis.RedisDomain;
 import com.webank.weid.suite.persistence.redis.RedisExecutor;
 import com.webank.weid.suite.persistence.redis.RedissonConfig;
 import com.webank.weid.util.DataToolUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RScoredSortedSet;
 import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,8 @@ public class RedisDriver implements Persistence {
     private static final Integer FAILED_STATUS = DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS;
 
     private static final ErrorCode KEY_INVALID = ErrorCode.PRESISTENCE_DATA_KEY_INVALID;
+
+    private static int CPT_DEFAULT_VERSION = 1;
 
     RedissonConfig redissonConfig = new RedissonConfig();
 
@@ -231,202 +234,353 @@ public class RedisDriver implements Persistence {
      */
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addWeId(String domain, String weId, String documentSchema) {
+    public ResponseData<Integer> addWeId(String domain, String weId, String documentSchema) {
+        if (StringUtils.isEmpty(weId)) {
+            logger.error("[redis->addWeId] the weId is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+        }
+        try {
+            RedisDomain redisDomain = new RedisDomain(domain);
+            Date now = redisDomain.getNow();
+            Object[] datas = {weId, now, now, 1, 0, documentSchema};
+            addIndexForMsg(weId,redisDomain.getTableDomain()+DataDriverConstant.REDIS_INDEX_WEID);
+            return new RedisExecutor(redisDomain).execute(client, WeIdDocumentValue.class,weId, datas);
+        } catch (WeIdBaseException e) {
+            logger.error("[redis->addWeId] add the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+        }
+    }
+
+    @Override
+    public ResponseData<Integer> updateWeId(String domain, String weId, String documentSchema) {
+        if (StringUtils.isEmpty(weId)) {
+            logger.error("[redis->updateWeId] the weId is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+        }
+        Date date = new Date();
+        try {
+            RedisDomain redisDomain = new RedisDomain(domain);
+            ResponseData<String> response = new RedisExecutor(redisDomain)
+                    .executeQuery(redisDomain.getTableDomain(), weId, client);
+            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
+                    && response.getResult() != null) {
+                WeIdDocumentValue tableData = DataToolUtils.deserialize(
+                        response.getResult(), WeIdDocumentValue.class);
+                if(tableData.getDeactivated() == 1){
+                    logger.error("[redis->updateWeId] the weid is deactivated.");
+                    return new ResponseData<>(FAILED_STATUS,
+                            ErrorCode.WEID_HAS_BEEN_DEACTIVATED);
+                }
+                if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
+                    int version = tableData.getVersion();
+                    version++;
+                    Object[] datas = {weId,tableData.getCreated(),date, version, tableData.getDeactivated(), documentSchema};
+                    return new RedisExecutor(redisDomain).execute(client,WeIdDocumentValue.class, weId, datas);
+                }
+            }
+            return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
+        } catch (WeIdBaseException e) {
+            logger.error("[redis->updateWeId] update the weid error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+        }
+    }
+
+    @Override
+    public ResponseData<WeIdDocument> getWeIdDocument(String domain, String weId) {
+        if (StringUtils.isEmpty(weId)) {
+            logger.error("[redis->getWeIdDocument] the weId is empty.");
+            return new ResponseData<>(null, KEY_INVALID);
+        }
+        try {
+            RedisDomain redisDomain = new RedisDomain(domain);
+            ResponseData<String> response = new RedisExecutor(redisDomain)
+                    .executeQuery(redisDomain.getTableDomain(), weId, client);
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
+                    && response.getResult() != null) {
+                WeIdDocumentValue tableData = DataToolUtils.deserialize(
+                        response.getResult(), WeIdDocumentValue.class);
+                if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
+                    return new ResponseData<>(WeIdDocument.fromJson(tableData.getDocument_schema()), ErrorCode.SUCCESS);
+                }
+                return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
+            }
+            return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
+        } catch (WeIdBaseException e) {
+            logger.error("[redis->getWeIdDocument] get the weIdDocument error.", e);
+            return new ResponseData<>(null, e.getErrorCode());
+        }
+    }
+
+    @Override
+    public ResponseData<WeIdDocumentMetadata> getMeta(String domain, String weId) {
+        if (StringUtils.isEmpty(weId)) {
+            logger.error("[redis->getMeta] the weId is empty.");
+            return new ResponseData<>(null, KEY_INVALID);
+        }
+        try {
+            RedisDomain redisDomain = new RedisDomain(domain);
+            /////
+            ResponseData<String> response = new RedisExecutor(redisDomain)
+                    .executeQuery(redisDomain.getTableDomain(), weId, client);
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
+                    && response.getResult() != null) {
+                WeIdDocumentValue tableData = DataToolUtils.deserialize(
+                        response.getResult(), WeIdDocumentValue.class);
+                if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
+                    WeIdDocumentMetadata weIdDocumentMetadata = new WeIdDocumentMetadata();
+                    weIdDocumentMetadata.setCreated(tableData.getCreated().getTime());
+                    weIdDocumentMetadata.setUpdated(tableData.getUpdated().getTime());
+                    weIdDocumentMetadata.setVersionId(tableData.getVersion());
+                    weIdDocumentMetadata.setDeactivated(tableData.getDeactivated() == 1);
+                    return new ResponseData<>(weIdDocumentMetadata, ErrorCode.SUCCESS);
+                }
+                return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
+            }
+            return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
+        } catch (WeIdBaseException e) {
+            logger.error("[redis->getMeta] getMeta error.", e);
+            return new ResponseData<>(null, e.getErrorCode());
+        }
+    }
+
+    @Override
+    public ResponseData<Integer> deactivateWeId(String domain, String weId, Boolean state) {
+
+        if (StringUtils.isEmpty(weId)) {
+            logger.error("[redis->deactivateWeId] the weId is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+        }
+        String dataKey = DataToolUtils.hash(weId);
+        Date date = new Date();
+        try {
+            RedisDomain redisDomain = new RedisDomain(domain);
+            ResponseData<String> response = new RedisExecutor(redisDomain)
+                    .executeQuery(redisDomain.getTableDomain(), weId, client);
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
+                    && response.getResult() != null) {
+                WeIdDocumentValue tableData = DataToolUtils.deserialize(
+                        response.getResult(), WeIdDocumentValue.class);
+                if(tableData.getDeactivated() == 1){
+                    logger.error("[mysql->deactivateWeId] the weid is deactivated.");
+                    return new ResponseData<>(FAILED_STATUS,
+                            ErrorCode.WEID_HAS_BEEN_DEACTIVATED);
+                }
+                if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
+                    Object[] datas = {date, tableData.getVersion(), state ? 1:0, tableData.getDocument_schema(), weId};
+                    return new RedisExecutor(redisDomain).execute(client, weId, datas);
+                }
+            }
+            return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
+        } catch (WeIdBaseException e) {
+            logger.error("[redis->deactivateWeId] deactivate the weId error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+        }
+    }
+
+    @Override
+    public ResponseData<List<String>> getWeIdList(String domain, Integer first, Integer last) {
+        try {
+            RedisDomain redisDomain = new RedisDomain(domain);
+            int[] datas = {first, last - first + 1};
+            ResponseData<List<String>> response = new RedisExecutor(redisDomain).executeQueryLines(
+                    redisDomain.getTableDomain(),redisDomain.getTableDomain()+DataDriverConstant.REDIS_INDEX_WEID,datas, client);
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
+                    && response.getResult() != null) {
+                return new ResponseData<>(response.getResult(), ErrorCode.SUCCESS);
+            }
+            return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
+        } catch (WeIdBaseException e) {
+            logger.error("[redis->getWeIdList] get the data error.", e);
+            return new ResponseData<>(null, e.getErrorCode());
+        }
+    }
+
+    @Override
+    public ResponseData<Integer> getWeIdCount(String domain) {
+        try {
+            RedisDomain redisDomain = new RedisDomain(domain);
+            ResponseData<Integer> response = new RedisExecutor(redisDomain)
+                    .executeQueryCount(redisDomain.getTableDomain()+DataDriverConstant.REDIS_INDEX_WEID, client);
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
+                    && response.getResult() != null) {
+                return new ResponseData<>(response.getResult(), ErrorCode.SUCCESS);
+            }
+            return new ResponseData<>(0, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
+        } catch (WeIdBaseException e) {
+            logger.error("[redis->getWeIdCount] get the data error.", e);
+            return new ResponseData<>(0, e.getErrorCode());
+        }
+    }
+    //**
+    //目前只实现了WeId相关接口
+    @Override
+    public ResponseData<CptValue> getCpt(String domain, int cptId) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateWeId(String domain, String weId, String documentSchema) {
+    public ResponseData<CptBaseInfo> addCpt(String domain, int cptId, String publisher, String description, String cptSchema, String cptSignature) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<WeIdDocument> getWeIdDocument(String domain, String weId) {
+    public ResponseData<PolicyValue> getPolicy(String domain, int policyId) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<WeIdDocumentMetadata> getMeta(String domain, String weId) {
+    public ResponseData<Integer> addPolicy(String domain, int policyId, String publisher, String description, String cptSchema, String cptSignature) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> deactivateWeId(String domain, String weId, Boolean state) {
+    public ResponseData<PresentationValue> getPresentation(String domain, int presentationId) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<List<String>> getWeIdList(String domain, Integer first, Integer last) {
+    public ResponseData<Integer> addPresentation(String domain, int presentationId, String creator, String policies) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getWeIdCount(String domain) {
+    public ResponseData<Integer> updateCpt(String domain, int cptId, int cptVersion, String publisher, String description, String cptSchema, String cptSignature) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<CptValue> getCpt(String domain, int cptId) {
+    public ResponseData<Integer> updateCredentialTemplate(String domain, int cptId, String credentialPublicKey, String credentialProof) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<CptBaseInfo> addCpt(String domain, int cptId, String publisher, String description, String cptSchema, String cptSignature) {
+    public ResponseData<Integer> updateCptClaimPolicies(String domain, int cptId, String policies) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<PolicyValue> getPolicy(String domain, int policyId) {
+    public ResponseData<List<Integer>> getCptIdList(String domain, Integer first, Integer last) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addPolicy(String domain, int policyId, String publisher, String description, String cptSchema, String cptSignature) {
+    public ResponseData<Integer> getCptCount(String domain) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<PresentationValue> getPresentation(String domain, int presentationId) {
+    public ResponseData<List<Integer>> getPolicyIdList(String domain, Integer first, Integer last) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addPresentation(String domain, int presentationId, String creator, String policies) {
+    public ResponseData<Integer> getPolicyCount(String domain) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateCpt(String domain, int cptId, int cptVersion, String publisher, String description, String cptSchema, String cptSignature) {
+    public ResponseData<Integer> addAuthorityIssuer(String domain, String weId, String name, String desc, String accValue, String extraStr, String extraInt) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateCredentialTemplate(String domain, int cptId, String credentialPublicKey, String credentialProof) {
+    public ResponseData<Integer> removeAuthorityIssuer(String domain, String weId) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateCptClaimPolicies(String domain, int cptId, String policies) {
+    public ResponseData<AuthorityIssuerInfo> getAuthorityIssuerByWeId(String domain, String weId) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<List<Integer>> getCptIdList(String domain, Integer first, Integer last) {
+    public ResponseData<AuthorityIssuerInfo> getAuthorityIssuerByName(String domain, String name) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getCptCount(String domain) {
+    public ResponseData<Integer> updateAuthorityIssuer(String domain, String weId, Integer recognize) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<List<Integer>> getPolicyIdList(String domain, Integer first, Integer last) {
+    public ResponseData<Integer> getAuthorityIssuerCount(String domain) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getPolicyCount(String domain) {
+    public ResponseData<Integer> getRecognizedIssuerCount(String domain) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addAuthorityIssuer(String domain, String weId, String name, String desc, String accValue, String extraStr, String extraInt) {
+    public ResponseData<Integer> addRole(String domain, String weId, Integer roleValue) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> removeAuthorityIssuer(String domain, String weId) {
+    public ResponseData<RoleValue> getRole(String domain, String weId) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<AuthorityIssuerInfo> getAuthorityIssuerByWeId(String domain, String weId) {
+    public ResponseData<Integer> updateRole(String domain, String weId, Integer roleValue) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<AuthorityIssuerInfo> getAuthorityIssuerByName(String domain, String name) {
+    public ResponseData<Integer> addSpecificType(String domain, String typeName, String owner) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateAuthorityIssuer(String domain, String weId, Integer recognize) {
+    public ResponseData<SpecificTypeValue> getSpecificType(String domain, String typeName) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getAuthorityIssuerCount(String domain) {
+    public ResponseData<Integer> removeSpecificType(String domain, String typeName) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getRecognizedIssuerCount(String domain) {
+    public ResponseData<Integer> updateSpecificTypeFellow(String domain, String typeName, String fellow) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addRole(String domain, String weId, Integer roleValue) {
+    public ResponseData<Integer> getIssuerTypeCount(String domain) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<RoleValue> getRole(String domain, String weId) {
+    public ResponseData<List<String>> getIssuerTypeList(String domain, Integer first, Integer last) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateRole(String domain, String weId, Integer roleValue) {
+    public ResponseData<Integer> addEvidenceByHash(String domain, String hashValue, String signer, String signature, String log, String updated, String revoked, String extraKey, String group_id) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addSpecificType(String domain, String typeName, String owner) {
+    public ResponseData<EvidenceValue> getEvidenceByHash(String domain, String hash) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<SpecificTypeValue> getSpecificType(String domain, String typeName) {
+    public ResponseData<Integer> addSignatureAndLogs(String domain, String hashValue, String signer, String signature, String log, String updated, String revoked, String extraKey) {
         return null;
     }
 
     @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> removeSpecificType(String domain, String typeName) {
+    public ResponseData<EvidenceValue> getEvidenceByExtraKey(String domain, String extraKey) {
         return null;
     }
 
-    @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> updateSpecificTypeFellow(String domain, String typeName, String fellow) {
-        return null;
-    }
 
-    @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> getIssuerTypeCount(String domain) {
-        return null;
+    public void addIndexForMsg(String msg,String domain){
+        RScoredSortedSet<Object> set = client.getScoredSortedSet(domain);
+        set.add(set.size(),msg);
     }
-
-    @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<List<String>> getIssuerTypeList(String domain, Integer first, Integer last) {
-        return null;
-    }
-
-    @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addEvidenceByHash(String domain, String hashValue, String signer, String signature, String log, String updated, String revoked, String extraKey, String group_id) {
-        return null;
-    }
-
-    @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<EvidenceValue> getEvidenceByHash(String domain, String hash) {
-        return null;
-    }
-
-    @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<Integer> addSignatureAndLogs(String domain, String hashValue, String signer, String signature, String log, String updated, String revoked, String extraKey) {
-        return null;
-    }
-
-    @Override
-    public com.webank.weid.blockchain.protocol.response.ResponseData<EvidenceValue> getEvidenceByExtraKey(String domain, String extraKey) {
-        return null;
-    }
-}
+  }
