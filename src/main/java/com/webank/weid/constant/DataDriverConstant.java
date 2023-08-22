@@ -38,12 +38,12 @@ public final class DataDriverConstant {
     /**
      * redis user password properties.
      */
-    public static final String PASSWORD = "redis.password";
+    public static final String REDIS_PASSWORD = "redis.password";
 
     /**
      * redis single database properties.
      */
-    public static final String DATABASE = "database";
+    public static final String REDIS_DATABASE = "database";
 
     /**
      * redis cluster idle_connection_timeout properties.
@@ -109,7 +109,7 @@ public final class DataDriverConstant {
      * jdbc url properties.
      */
     public static final String JDBC_URL = "jdbc.url";
-    
+
     /**
      * jdbc driver properties.
      */
@@ -159,7 +159,7 @@ public final class DataDriverConstant {
      * jdbc minEvictableIdleTimeMillis properties.
      */
     public static final String JDBC_MIN_EITM = "jdbc.minEvictableIdleTimeMillis";
-    
+
     /**
      * jdbc initialSize properties.
      */
@@ -300,5 +300,27 @@ public final class DataDriverConstant {
     public static final String LOCAL_SPECIFIC_ISSUER = "local.specificIssuer";
 
     public static final String LOCAL_EVIDENCE = "local.evidence";
+    /**
+     * redis本地运行所需记录索引.
+     */
+
+    public static final String REDIS_INDEX_WEID = "weId";
+
+    public static final String REDIS_INDEX_WEID_DOCUMENT = "weIdDocument";
+
+    public static final String REDIS_INDEX_CPT = "cpt";
+
+    public static final String REDIS_INDEX_POLICY = "policy";
+
+    public static final String REDIS_INDEX_PRESENTATION = "presentation";
+
+    public static final String REDIS_INDEX_ROLE = "role";
+
+    public static final String REDIS_INDEX_AUTHORITY_ISSUER = "authorityIssuer";
+
+    public static final String REDIS_INDEX_SPECIFIC_ISSUER = "specificIssuer";
+
+    public static final String REDIS_INDEX_EVIDENCE = "evidence";
+
 
 }

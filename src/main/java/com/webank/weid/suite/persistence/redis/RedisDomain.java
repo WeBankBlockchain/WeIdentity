@@ -2,16 +2,15 @@
 
 package com.webank.weid.suite.persistence.redis;
 
+import com.webank.weid.blockchain.constant.ErrorCode;
+import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.exception.WeIdBaseException;
+import com.webank.weid.suite.persistence.BaseDomain;
+import com.webank.weid.util.PropertyUtils;
 import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.blockchain.constant.ErrorCode;
-import com.webank.weid.exception.WeIdBaseException;
-import com.webank.weid.suite.persistence.BaseDomain;
-import com.webank.weid.util.PropertyUtils;
 
 @Getter
 public class RedisDomain extends BaseDomain {
