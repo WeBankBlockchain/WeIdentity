@@ -2,25 +2,24 @@
 
 package com.webank.weid.suite.persistence.redis;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.webank.weid.blockchain.constant.ErrorCode;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
+import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.protocol.request.TransactionArgs;
+import com.webank.weid.suite.persistence.DefaultValue;
+import com.webank.weid.util.DataToolUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.redisson.api.BatchResult;
-import org.redisson.api.RBatch;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.redisson.client.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.blockchain.constant.ErrorCode;
-import com.webank.weid.protocol.request.TransactionArgs;
-import com.webank.weid.blockchain.protocol.response.ResponseData;
-import com.webank.weid.suite.persistence.DefaultValue;
-import com.webank.weid.util.DataToolUtils;
+import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * redis操作辅助类.
@@ -81,6 +80,69 @@ public class RedisExecutor {
         return result;
     }
 
+    public ResponseData<List<String>> executeQueryLines(String tableDomain,String dataDomain, int[] datas, RedissonClient client) {
+        ResponseData<List<String>> result = new ResponseData<List<String>>();
+        ArrayList<String> list = new ArrayList<>();
+        try {
+            if (client == null) {
+                return new ResponseData<>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+
+            }
+            RScoredSortedSet<Object> scoredSortedSet = client.getScoredSortedSet(dataDomain);
+            Collection<Object> objects = scoredSortedSet.valueRange(datas[0], datas[1]);
+            for (Object object : objects) {
+                RBucket<String> rbucket = client.getBucket(tableDomain + VALUE_SPLIT_CHAR + object);
+                list.add(rbucket.get());
+            }
+          result.setErrorCode(ErrorCode.SUCCESS);
+          result.setResult(list);
+        } catch (Exception e) {
+            logger.error("Query data from {{}} with exception", redisDomain.getTableDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+        }
+        return result;
+    }
+
+    public ResponseData<List<Integer>> executeQueryIdLines(String dataDomain, int[] datas, RedissonClient client) {
+        ResponseData<List<Integer>> result = new ResponseData<List<Integer>>();
+        ArrayList<Integer> list = new ArrayList<>();
+        try {
+            if (client == null) {
+                return new ResponseData<>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+
+            }
+            RScoredSortedSet<Object> scoredSortedSet = client.getScoredSortedSet(dataDomain);
+            Collection<Object> objects = scoredSortedSet.valueRange(datas[0], datas[1]);
+            for (Object object : objects) {
+                list.add((Integer) object);
+            }
+            result.setErrorCode(ErrorCode.SUCCESS);
+            result.setResult(list);
+        } catch (Exception e) {
+            logger.error("Query data from {{}} with exception", redisDomain.getTableDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+        }
+        return result;
+    }
+
+    public ResponseData<Integer> executeQueryCount(String tableDomain, RedissonClient client) {
+       client.getScoredSortedSet(tableDomain);
+        ResponseData<Integer> result = new ResponseData<Integer>();
+        try {
+            if (client == null) {
+                return new ResponseData<>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+            }
+            RScoredSortedSet<Object> scoredSortedSet = client.getScoredSortedSet(tableDomain);
+            result.setErrorCode(ErrorCode.SUCCESS);
+            result.setResult(scoredSortedSet.size());
+        } catch (Exception e) {
+            logger.error("Query data from {{}} with exception", redisDomain.getTableDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+        }
+        return result;
+    }
+
+
     /**
      * 增加的执行方法.
      *
@@ -100,27 +162,28 @@ public class RedisExecutor {
             TransactionArgs transactionArgs = new TransactionArgs();
             DefaultValue value = new DefaultValue();
             if (datas.length == 6) {
-                transactionArgs.setRequestId((String) datas[0]);
-                transactionArgs.setMethod((String) datas[1]);
-                transactionArgs.setArgs((String) datas[2]);
-                transactionArgs.setTimeStamp((Long) datas[3]);
-                transactionArgs.setExtra((String)datas[4]);
-                transactionArgs.setBatch((String)datas[5]);
+                transactionArgs.setRequestId(datas[0].toString());
+                transactionArgs.setMethod(datas[1].toString());
+                transactionArgs.setArgs(datas[2].toString());
+                transactionArgs.setTimeStamp(Long.valueOf(datas[3].toString()));
+                transactionArgs.setExtra(datas[4].toString());
+                transactionArgs.setBatch(datas[5].toString());
 
                 String valueString = DataToolUtils.serialize(transactionArgs);
                 RBucket<String> rbucket = client.getBucket(
                         redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
                 rbucket.set(valueString);
             } else {
+                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
                 value.setData((String) datas[0]);
                 value.setId(dataKey);
                 value.setExpire(redisDomain.getExpire());
                 if (datas.length == 3) {
-                    value.setCreated((Date)datas[1]);
-                    value.setUpdated((Date)datas[2]);
+                    value.setCreated(fmt.parse(datas[1].toString()));
+                    value.setUpdated(fmt.parse(datas[2].toString()));
                     //datas.lenth==2时为UpDate
                 } else if (datas.length == 2) {
-                    value.setUpdated((Date)datas[1]);
+                    value.setUpdated(fmt.parse(datas[1].toString()));
                 }
                 String valueString = DataToolUtils.serialize(value);
                 RBucket<String> rbucket = client.getBucket(
@@ -135,6 +198,83 @@ public class RedisExecutor {
                 }
                 rbucket.set(valueString);
             }
+            result.setErrorCode(ErrorCode.SUCCESS);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_SUCESS_STATUS);
+
+        } catch (Exception e) {
+            logger.error("Update data into {{}} with exception", redisDomain.getBaseDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
+        }
+        return result;
+    }
+    /**
+     * 专用于本地部署增加的执行方法.
+     *
+     * @param client redisson连接入口
+     * @param dataKey Hash(id)
+     * @param datas 所需要的数据
+     * @return 返回执行成功或失败
+     */
+    public ResponseData<Integer> execute(RedissonClient client,Class<?> tClass ,String dataKey, Object... datas) {
+
+        ResponseData<Integer> result = new ResponseData<Integer>();
+        try {
+            if (client == null) {
+                return
+                        new ResponseData<Integer>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+            }
+            Object obj = tClass.newInstance();
+            Field[] fields = tClass.getDeclaredFields();
+            for (int i = 0; i < fields.length; i++) {
+                Field field = fields[i];
+                field.setAccessible(true);
+                field.set(obj, datas[i]);
+            }
+            String valueString = DataToolUtils.serialize(obj);
+            RBucket<String> rbucket = client.getBucket(
+                    redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
+            rbucket.set(valueString);
+//            TransactionArgs transactionArgs = new TransactionArgs();
+//
+//            DefaultValue value = new DefaultValue();
+//            if (datas.length == 6) {
+//                transactionArgs.setRequestId(datas[0].toString());
+//                transactionArgs.setMethod(datas[1].toString());
+//                transactionArgs.setArgs(datas[2].toString());
+//                transactionArgs.setTimeStamp(Long.valueOf(datas[3].toString()));
+//                transactionArgs.setExtra(datas[4].toString());
+//                transactionArgs.setBatch(datas[5].toString());
+//
+//                String valueString = DataToolUtils.serialize(transactionArgs);
+//                RBucket<String> rbucket = client.getBucket(
+//                        redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
+//                rbucket.set(valueString);
+//            } else {
+//                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+//                value.setData((String) datas[0]);
+//                value.setId(dataKey);
+//                value.setExpire(redisDomain.getExpire());
+//                if (datas.length == 3) {
+//                    value.setCreated(fmt.parse(datas[1].toString()));
+//                    value.setUpdated(fmt.parse(datas[2].toString()));
+//                    //datas.lenth==2时为UpDate
+//                } else if (datas.length == 2) {
+//                    value.setUpdated(fmt.parse(datas[1].toString()));
+//                }
+//                String valueString = DataToolUtils.serialize(value);
+//                RBucket<String> rbucket = client.getBucket(
+//                        redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
+//                //解决重复写问题
+//                if (datas.length == 3 &&  rbucket.get() != null) {
+//                    return
+//                            new ResponseData<Integer>(
+//                                    DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
+//                                    ErrorCode.PERSISTENCE_EXECUTE_FAILED
+//                            );
+//                }
+//                rbucket.set(valueString);
+//            }
             result.setErrorCode(ErrorCode.SUCCESS);
             result.setResult(DataDriverConstant.REDISSON_EXECUTE_SUCESS_STATUS);
 
@@ -232,4 +372,7 @@ public class RedisExecutor {
         }
         return result;
     }
+
+
+
 }
