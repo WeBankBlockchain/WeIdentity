@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -42,7 +43,6 @@ import java.io.*;
 import java.math.BigInteger;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -208,7 +208,7 @@ public final class DataToolUtils {
      */
     public static boolean isValidHash(String hashValue) {
         return !StringUtils.isEmpty(hashValue)
-            && Pattern.compile(WeIdConstant.HASH_VALUE_PATTERN).matcher(hashValue).matches();
+                && Pattern.compile(WeIdConstant.HASH_VALUE_PATTERN).matcher(hashValue).matches();
     }
 
     /**
@@ -224,7 +224,7 @@ public final class DataToolUtils {
         try {
             if (isValidFromToJson(json)) {
                 logger.error("this jsonString is converted by toJson(), "
-                    + "please use fromJson() to deserialize it");
+                        + "please use fromJson() to deserialize it");
                 throw new DataTypeCastException("deserialize json to Object error");
             }
             object = OBJECT_MAPPER.readValue(json, TypeFactory.rawClass(clazz));
@@ -253,8 +253,8 @@ public final class DataToolUtils {
         List<T> object = null;
         try {
             JavaType javaType =
-                OBJECT_MAPPER.getTypeFactory()
-                    .constructParametricType(ArrayList.class, TypeFactory.rawClass(clazz));
+                    OBJECT_MAPPER.getTypeFactory()
+                            .constructParametricType(ArrayList.class, TypeFactory.rawClass(clazz));
             object = OBJECT_MAPPER.readValue(json, javaType);
         } catch (JsonParseException e) {
             logger.error("JsonParseException when serialize object to json", e);
@@ -281,6 +281,33 @@ public final class DataToolUtils {
         } catch (JsonProcessingException e) {
             throw new DataTypeCastException(e);
         }
+    }
+
+    /**
+     * readLocalJson
+     * @return {@link Object}
+     * @throws IOException ioexception
+     */
+    public static  Map<String, String> readFromLocal(String path) throws IOException {
+        File jsonFile = new File(path);
+        return OBJECT_MAPPER.readValue(jsonFile, new TypeReference<Map<String,String>>() {
+        });
+    }
+
+    /**
+     * @param path 路径
+     * @param obj  obj
+     * @return int
+     * @throws IOException ioexception
+     */
+    public static int writeInLocal(String path,Object obj) throws IOException {
+        File jsonFile = new File(path);
+        OBJECT_MAPPER.writeValue(jsonFile, obj);
+        return 0;
+    }
+
+    public static String bytesToStr(byte[] bytes) throws IOException {
+        return OBJECT_MAPPER.readTree(bytes).toPrettyString();
     }
 
     /**
@@ -411,7 +438,7 @@ public final class DataToolUtils {
      * @throws Exception the exception
      */
     public static Set<ValidationMessage> checkJsonVersusSchema(String jsonData, String jsonSchema)
-        throws Exception {
+            throws Exception {
         JsonNode jsonDataNode = loadJsonObject(jsonData);
         JsonNode jsonSchemaNode = loadJsonObject(jsonSchema);
         // use new validator
@@ -468,7 +495,7 @@ public final class DataToolUtils {
     public static boolean isCptJsonSchemaValid(String cptJsonSchema) throws IOException {
         return StringUtils.isNotEmpty(cptJsonSchema)
 //            && isValidJsonSchema(cptJsonSchema)
-            && cptJsonSchema.length() <= WeIdConstant.JSON_SCHEMA_MAX_LENGTH;
+                && cptJsonSchema.length() <= WeIdConstant.JSON_SCHEMA_MAX_LENGTH;
     }
 
     /**
@@ -589,9 +616,9 @@ public final class DataToolUtils {
      * @return return boolean result, true is success and false is fail
      */
     public static boolean verifySignature(
-        String rawData,
-        String signatureBase64,
-        BigInteger publicKey
+            String rawData,
+            String signatureBase64,
+            BigInteger publicKey
     ) {
         if (deployStyle.equals("blockchain")) {
             return com.webank.weid.blockchain.util.DataToolUtils.verifySignature(rawData, signatureBase64, publicKey);
@@ -795,10 +822,10 @@ public final class DataToolUtils {
      * @return true if yes, false otherwise with exact error codes
      */
     public static ErrorCode verifySignatureFromWeId(
-        String rawData,
-        String signature,
-        WeIdDocument weIdDocument,
-        String methodId) {
+            String rawData,
+            String signature,
+            WeIdDocument weIdDocument,
+            String methodId) {
 
         String foundMatchingMethodId = StringUtils.EMPTY;
         try {
@@ -806,7 +833,7 @@ public final class DataToolUtils {
             for (AuthenticationProperty authenticationProperty : weIdDocument.getAuthentication()) {
                 if (StringUtils.isNotEmpty(authenticationProperty.getPublicKey())) {
                     boolean currentResult = verifySignature(
-                        rawData, signature, new BigInteger(authenticationProperty.getPublicKey()));
+                            rawData, signature, new BigInteger(authenticationProperty.getPublicKey()));
                     result = currentResult || result;
                     if (currentResult) {
                         foundMatchingMethodId = authenticationProperty.getId();
@@ -822,7 +849,7 @@ public final class DataToolUtils {
             return ErrorCode.CREDENTIAL_EXCEPTION_VERIFYSIGNATURE;
         }
         if (!StringUtils.isEmpty(methodId)
-            && !foundMatchingMethodId.equalsIgnoreCase(methodId)) {
+                && !foundMatchingMethodId.equalsIgnoreCase(methodId)) {
             return ErrorCode.CREDENTIAL_VERIFY_SUCCEEDED_WITH_WRONG_PUBLIC_KEY_ID;
         }
         return ErrorCode.SUCCESS;
@@ -885,7 +912,7 @@ public final class DataToolUtils {
     private static synchronized List<byte[]> splitBytes(byte[] bytes, int size) {
         List<byte[]> byteList = new ArrayList<>();
         double splitLength =
-            Double.parseDouble(WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH + "");
+                Double.parseDouble(WeIdConstant.MAX_AUTHORITY_ISSUER_NAME_LENGTH + "");
         int arrayLength = (int) Math.ceil(bytes.length / splitLength);
         byte[] result = new byte[arrayLength];
 
@@ -914,7 +941,7 @@ public final class DataToolUtils {
 
 
     /**
-//     * Generate Default CPT Json Schema based on a given CPT ID.
+     //     * Generate Default CPT Json Schema based on a given CPT ID.
      * get Default CPT Json Schema from default constant class by given CPT ID
      * @param cptId the CPT ID
      * @return CPT Schema in Json String
@@ -993,9 +1020,9 @@ public final class DataToolUtils {
         String timestampToUtcString;
         try {
             timestampToUtcString = dealNodeOfConvertUtcAndLong(
-                loadJsonObject(jsonString),
-                CONVERT_UTC_LONG_KEYLIST,
-                TO_JSON
+                    loadJsonObject(jsonString),
+                    CONVERT_UTC_LONG_KEYLIST,
+                    TO_JSON
             ).toString();
         } catch (IOException e) {
             logger.error("replaceJsonObj exception.", e);
@@ -1014,9 +1041,9 @@ public final class DataToolUtils {
         String utcToTimestampString;
         try {
             utcToTimestampString = dealNodeOfConvertUtcAndLong(
-                loadJsonObject(jsonString),
-                CONVERT_UTC_LONG_KEYLIST,
-                FROM_JSON
+                    loadJsonObject(jsonString),
+                    CONVERT_UTC_LONG_KEYLIST,
+                    FROM_JSON
             ).toString();
         } catch (IOException e) {
             logger.error("replaceJsonObj exception.", e);
@@ -1026,9 +1053,9 @@ public final class DataToolUtils {
     }
 
     private static JsonNode dealNodeOfConvertUtcAndLong(
-        JsonNode jsonObj,
-        List<String> list,
-        String type) {
+            JsonNode jsonObj,
+            List<String> list,
+            String type) {
         if (jsonObj.isObject()) {
             return dealObjectOfConvertUtcAndLong((ObjectNode) jsonObj, list, type);
         } else if (jsonObj.isArray()) {
@@ -1039,9 +1066,9 @@ public final class DataToolUtils {
     }
 
     private static JsonNode dealObjectOfConvertUtcAndLong(
-        ObjectNode jsonObj,
-        List<String> list,
-        String type) {
+            ObjectNode jsonObj,
+            List<String> list,
+            String type) {
         ObjectNode resJson = OBJECT_MAPPER.createObjectNode();
         jsonObj.fields().forEachRemaining(entry -> {
             String key = entry.getKey();
@@ -1061,17 +1088,17 @@ public final class DataToolUtils {
                     if (TO_JSON.equals(type)) {
                         if (isValidLongString(obj.asText())) {
                             resJson.put(
-                                key,
-                                DateUtils.convertNoMillisecondTimestampToUtc(
-                                    Long.parseLong(obj.asText())));
+                                    key,
+                                    DateUtils.convertNoMillisecondTimestampToUtc(
+                                            Long.parseLong(obj.asText())));
                         } else {
                             resJson.set(key, obj);
                         }
                     } else {
                         if (DateUtils.isValidDateString(obj.asText())) {
                             resJson.put(
-                                key,
-                                DateUtils.convertUtcDateToNoMillisecondTime(obj.asText()));
+                                    key,
+                                    DateUtils.convertUtcDateToNoMillisecondTime(obj.asText()));
                         } else {
                             resJson.set(key, obj);
                         }
@@ -1085,9 +1112,9 @@ public final class DataToolUtils {
     }
 
     private static JsonNode dealArrayOfConvertUtcAndLong(
-        ArrayNode jsonArr,
-        List<String> list,
-        String type) {
+            ArrayNode jsonArr,
+            List<String> list,
+            String type) {
         ArrayNode resJson = OBJECT_MAPPER.createArrayNode();
         for (int i = 0; i < jsonArr.size(); i++) {
             JsonNode jsonObj = jsonArr.get(i);
@@ -1269,7 +1296,7 @@ public final class DataToolUtils {
         }
         // Check if the address is a valid special local or loop back
         if (addr.isSiteLocalAddress() || addr.isAnyLocalAddress() || addr.isLoopbackAddress()
-            || addr.isLinkLocalAddress()) {
+                || addr.isLinkLocalAddress()) {
             return true;
         }
         // Check if the address is defined on any interface
@@ -1295,7 +1322,7 @@ public final class DataToolUtils {
         byte[] result = new byte[WeIdConstant.BYTES32_FIXED_LENGTH];
         for (int i = 0; i < WeIdConstant.BYTES32_FIXED_LENGTH; i++) {
             String hex = new String(
-                new byte[]{originHashByte[2 + i * 2], originHashByte[3 + i * 2]});
+                    new byte[]{originHashByte[2 + i * 2], originHashByte[3 + i * 2]});
             int val = Integer.parseInt(hex, 16);
             result[i] = (byte) val;
         }
@@ -1313,7 +1340,7 @@ public final class DataToolUtils {
         StringBuilder convertedBackStr = new StringBuilder().append(WeIdConstant.HEX_PREFIX);
         for (int i = 0; i < WeIdConstant.BYTES32_FIXED_LENGTH; i++) {
             String hex = Integer
-                .toHexString(((int) hash[i]) >= 0 ? ((int) hash[i]) : ((int) hash[i]) + 256);
+                    .toHexString(((int) hash[i]) >= 0 ? ((int) hash[i]) : ((int) hash[i]) + 256);
             if (hex.length() == 1) {
                 hex = "0" + hex;
             }
@@ -1329,13 +1356,13 @@ public final class DataToolUtils {
      * @return hash String list
      */
     public static List<String> convertBytes32ObjectListToStringHashList(
-        List<Bytes32> byteList) {
+            List<Bytes32> byteList) {
         List<String> strList = new ArrayList<>();
         for (int i = 0; i < byteList.size(); i++) {
             strList.add(DataToolUtils.convertHashByte32ArrayIntoHashStr(
-                //((org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32) (byteList.toArray()[i]))
+                    //((org.fisco.bcos.web3j.abi.datatypes.generated.Bytes32) (byteList.toArray()[i]))
                     ((Bytes32) (byteList.toArray()[i]))
-                    .getValue()));
+                            .getValue()));
         }
         return strList;
     }

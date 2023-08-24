@@ -1,19 +1,18 @@
 package com.webank.weid.service.local;
 
 import com.webank.weid.blockchain.constant.ErrorCode;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
+import com.webank.weid.blockchain.rpc.WeIdService;
+import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.protocol.base.AuthenticationProperty;
 import com.webank.weid.protocol.base.ServiceProperty;
 import com.webank.weid.protocol.base.WeIdDocument;
-import com.webank.weid.protocol.base.WeIdDocumentMetadata;
-import com.webank.weid.blockchain.protocol.response.ResponseData;
-import com.webank.weid.blockchain.rpc.WeIdService;
-import com.webank.weid.util.WeIdUtils;
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.exception.DatabaseException;
 import com.webank.weid.suite.persistence.Persistence;
 import com.webank.weid.suite.persistence.PersistenceFactory;
 import com.webank.weid.suite.persistence.PersistenceType;
 import com.webank.weid.util.PropertyUtils;
+import com.webank.weid.util.WeIdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -21,8 +20,10 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Component("weIdServiceLocal")
 public class WeIdServiceLocal implements WeIdService {
+
 
     /**
      * log4j object, for recording log.
@@ -31,12 +32,16 @@ public class WeIdServiceLocal implements WeIdService {
     private static Persistence dataDriver;
     private static PersistenceType persistenceType;
 
+
+
     private static Persistence getDataDriver() {
         String type = PropertyUtils.getProperty("persistence_type");
         if (type.equals("mysql")) {
             persistenceType = PersistenceType.Mysql;
         } else if (type.equals("redis")) {
             persistenceType = PersistenceType.Redis;
+        } else if (type.equals("ipfs")) {
+            persistenceType = PersistenceType.Ipfs;
         }
         if (dataDriver == null) {
             dataDriver = PersistenceFactory.build(persistenceType);

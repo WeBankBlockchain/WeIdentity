@@ -8,8 +8,8 @@ buildscript {
 }
 
 plugins {
-  id 'com.github.spotbugs' version '4.7.0'
-  id "com.github.hierynomus.license-report" version "0.15.0"
+    id 'com.github.spotbugs' version '4.7.0'
+    id "com.github.hierynomus.license-report" version "0.15.0"
 }
 import com.github.spotbugs.snom.SpotBugsTask
 
@@ -57,6 +57,7 @@ targetCompatibility = 1.8
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 // In this section you declare where to find the dependencies of your project
 repositories {
+
     if (!gradle.startParameter.isOffline()) {
         mavenLocal()
         if ("cn" == repo) {
@@ -69,6 +70,7 @@ repositories {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url "https://oss.sonatype.org/content/groups/public/" }
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        maven { url 'https://jitpack.io' }
     } else {
         maven {
             url 'dependencies'
@@ -165,6 +167,14 @@ List spring = [
         "org.springframework:spring-context:5.3.25"
 ]
 
+List ipfs = [
+        'com.github.ipfs:java-ipfs-api:v1.3.3'
+]
+
+List mongo = [
+        'org.mongodb:mongodb-driver-sync:4.3.1'
+]
+
 configurations {
     localDeps
     all*.exclude group: "io.netty", module: "netty-tcnative"
@@ -177,7 +187,7 @@ configurations.all {
 dependencies {
     localDeps 'org.projectlombok:lombok:1.18.10'
     if (!gradle.startParameter.isOffline()) {
-        compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval, gson, spring, xstream
+        compile logger, lombok, apache_commons, json, mysql_driver, redisson,mongo, zxing, rpc, pdfbox, protobuf, caffeine, oval, gson, spring, xstream,ipfs
         compile("com.webank:weid-blockchain:3.1.1-rc.1")
 
         compile fileTree(dir: 'lib', include: '*.jar')
@@ -187,7 +197,9 @@ dependencies {
         implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.15'
         annotationProcessor lombok
 
-        testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval, spring, gson, xstream
+        testCompile logger,ipfs, lombok, apache_commons, json, rpc, pdfbox, protobuf, caffeine, oval, spring, gson, xstream
+        testImplementation 'junit:junit:4.13'
+        testImplementation 'org.jmockit:jmockit:1.47'
         testAnnotationProcessor lombok
     }
     if (gradleVer.startsWith("4")) {
@@ -252,13 +264,7 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 test {
     systemProperty "jdk.tls.namedGroups", "${jdkTlsNamedGroups}"
-    jvmArgs "-javaagent:${classpath.find { it.name.contains("jmockit") }.absolutePath}"
-    doFirst {
-        copy {
-            from file('src/main/resources/WeDPR_dynamic_lib')
-            into 'src/test/resources/WeDPR_dynamic_lib'
-        }
-    }
+    jvmArgs '-javaagent:D:\\WeIdentity\\jmockit-1.47.jar'
 }
 
 artifacts {
@@ -348,7 +354,7 @@ if (!gradle.startParameter.isOffline()) {
         }
     }
 
-       uploadArchives {
+    uploadArchives {
         repositories {
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
