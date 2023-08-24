@@ -18,6 +18,7 @@ public final class DataDriverConstant {
     public static final Charset STANDARDCHARSETS_ISO = StandardCharsets.ISO_8859_1;
     public static final Charset STANDARDCHARSETS_UTF_8 = StandardCharsets.UTF_8;
 
+
     /**
      * redis execute status.
      */
@@ -322,5 +323,19 @@ public final class DataDriverConstant {
 
     public static final String REDIS_INDEX_EVIDENCE = "evidence";
 
+    /**
+     * ipfs所需常量.
+     */
+    public static final int IPFS_EXECUTE_FAILED_STATUS = 0;
+
+    public static final String IPFS_API ="ipfs.api";
+
+    public static final String IPFS_WEID_PATH ="src/main/resources/weId.json";
+
+    public static final int IPFS_WRITE_SUCCESS = 0;
+
+    public static final int IPFS_ONLY_ID_LINES = 1;
+
+    public static final int IPFS_READ_CID_LINES = 2;
 
 }
