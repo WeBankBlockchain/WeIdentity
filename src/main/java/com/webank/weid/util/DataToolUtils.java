@@ -284,7 +284,7 @@ public final class DataToolUtils {
     }
 
     /**
-     * readLocalJson
+     * Read JSON files locally in map format
      * @return {@link Object}
      * @throws IOException ioexception
      */
@@ -295,6 +295,7 @@ public final class DataToolUtils {
     }
 
     /**
+     * Write objects to a local JSON file
      * @param path 路径
      * @param obj  obj
      * @return int
@@ -306,7 +307,13 @@ public final class DataToolUtils {
         return 0;
     }
 
-    public static String bytesToStr(byte[] bytes) throws IOException {
+    /**
+     * Convert bytes downloaded from ipfs into JSON strings
+     * @param bytes 字节
+     * @return {@link String}
+     * @throws IOException ioexception
+     */
+    public static String bytesToJsonStr(byte[] bytes) throws IOException {
         return OBJECT_MAPPER.readTree(bytes).toPrettyString();
     }
 

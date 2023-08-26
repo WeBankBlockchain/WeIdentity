@@ -14,6 +14,7 @@ import com.webank.weid.suite.persistence.*;
 import com.webank.weid.suite.persistence.redis.RedisDomain;
 import com.webank.weid.suite.persistence.redis.RedisExecutor;
 import com.webank.weid.suite.persistence.redis.RedissonConfig;
+import com.webank.weid.util.DataDriverUtils;
 import com.webank.weid.util.DataToolUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RScoredSortedSet;
@@ -242,9 +243,15 @@ public class RedisDriver implements Persistence {
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             Date now = redisDomain.getNow();
-            Object[] datas = {weId, now, now, 1, 0, documentSchema};
+            WeIdDocumentValue value = new WeIdDocumentValue();
+            value.setWeid(weId);
+            value.setUpdated(now);
+            value.setCreated(now);
+            value.setDeactivated(0);
+            value.setDocument_schema(documentSchema);
+            String data = DataToolUtils.serialize(value);
             addIndexForMsg(weId,redisDomain.getTableDomain()+DataDriverConstant.REDIS_INDEX_WEID);
-            return new RedisExecutor(redisDomain).execute(client, WeIdDocumentValue.class,weId, datas);
+            return add(domain,weId,data);
         } catch (WeIdBaseException e) {
             logger.error("[redis->addWeId] add the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -274,8 +281,15 @@ public class RedisDriver implements Persistence {
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     int version = tableData.getVersion();
                     version++;
-                    Object[] datas = {weId,tableData.getCreated(),date, version, tableData.getDeactivated(), documentSchema};
-                    return new RedisExecutor(redisDomain).execute(client,WeIdDocumentValue.class, weId, datas);
+                    WeIdDocumentValue value = new WeIdDocumentValue();
+                    value.setWeid(weId);
+                    value.setUpdated(date);
+                    value.setCreated(tableData.getCreated());
+                    value.setDeactivated(tableData.getDeactivated());
+                    value.setDocument_schema(documentSchema);
+                    value.setVersion(version);
+                    String data = com.webank.weid.blockchain.util.DataToolUtils.serialize(value);
+                    return update(domain,weId,data);
                 }
             }
             return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
@@ -297,8 +311,7 @@ public class RedisDriver implements Persistence {
                     .executeQuery(redisDomain.getTableDomain(), weId, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataToolUtils.deserialize(
-                        response.getResult(), WeIdDocumentValue.class);
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(response.getResult(), WeIdDocumentValue.class);
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     return new ResponseData<>(WeIdDocument.fromJson(tableData.getDocument_schema()), ErrorCode.SUCCESS);
                 }
@@ -324,8 +337,7 @@ public class RedisDriver implements Persistence {
                     .executeQuery(redisDomain.getTableDomain(), weId, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataToolUtils.deserialize(
-                        response.getResult(), WeIdDocumentValue.class);
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(response.getResult(), WeIdDocumentValue.class);
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     WeIdDocumentMetadata weIdDocumentMetadata = new WeIdDocumentMetadata();
                     weIdDocumentMetadata.setCreated(tableData.getCreated().getTime());
@@ -358,7 +370,7 @@ public class RedisDriver implements Persistence {
                     .executeQuery(redisDomain.getTableDomain(), weId, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataToolUtils.deserialize(
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(
                         response.getResult(), WeIdDocumentValue.class);
                 if(tableData.getDeactivated() == 1){
                     logger.error("[mysql->deactivateWeId] the weid is deactivated.");
@@ -386,7 +398,7 @@ public class RedisDriver implements Persistence {
                     redisDomain.getTableDomain(),redisDomain.getTableDomain()+DataDriverConstant.REDIS_INDEX_WEID,datas, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                return new ResponseData<>(response.getResult(), ErrorCode.SUCCESS);
+                return new ResponseData<>(DataDriverUtils.decodeValueToNeedListJson(response.getResult()), ErrorCode.SUCCESS);
             }
             return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
@@ -583,4 +595,4 @@ public class RedisDriver implements Persistence {
         RScoredSortedSet<Object> set = client.getScoredSortedSet(domain);
         set.add(set.size(),msg);
     }
-  }
+}

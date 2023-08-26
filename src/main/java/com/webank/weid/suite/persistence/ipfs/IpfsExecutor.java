@@ -44,6 +44,14 @@ public class IpfsExecutor {
         }
     }
 
+    /**
+     * 执行查询
+     *
+     * @param path    路径
+     * @param datakey datakey
+     * @param client  客户端
+     * @return {@link ResponseData}<{@link String}>
+     */
     public ResponseData<String> executeQuery(String path, String datakey,
                                              IPFS client) {
         ResponseData<String> result = new ResponseData<String>();
@@ -66,6 +74,14 @@ public class IpfsExecutor {
         return result;
     }
 
+    /**
+     * 执行查询行
+     *
+     * @param path   路径
+     * @param datas  数据
+     * @param client 客户端
+     * @return {@link ResponseData}<{@link List}<{@link String}>>
+     */
     public ResponseData<List<String>> executeQueryLines(String path, int[] datas, IPFS client) {
         ResponseData<List<String>> result = new ResponseData<List<String>>();
         ArrayList<String> list = new ArrayList<>();
@@ -87,7 +103,7 @@ public class IpfsExecutor {
                 case DataDriverConstant.IPFS_READ_CID_LINES:
                     for (Map.Entry<String, String> entry : jsons.entrySet()) {
                         if (entry.getKey().compareTo(String.valueOf(datas[0])) >= 0 && entry.getKey().compareTo(String.valueOf(datas[1])) < 0) {
-                            list.add(jsons.get(entry.getValue()));
+                            list.add(downloadIpfs(client,jsons.get(entry.getValue())));
                         }
                     }
                     break;
@@ -102,6 +118,13 @@ public class IpfsExecutor {
         return result;
     }
 
+    /**
+     * 执行查询数
+     *
+     * @param path   路径
+     * @param client 客户端
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     public ResponseData<Integer> executeQueryCount(String path, IPFS client) {
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
@@ -121,6 +144,16 @@ public class IpfsExecutor {
     }
 
 
+    /**
+     * 执行插入更新操作
+     *
+     * @param client     客户端
+     * @param path       路径
+     * @param dataKey    数据关键
+     * @param valueClass 值类
+     * @param datas      数据
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     public ResponseData<Integer> execute(IPFS client,String path,String dataKey,Class<?> valueClass,Object... datas) {
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
@@ -153,7 +186,13 @@ public class IpfsExecutor {
     }
 
 
-
+    /**
+     * 上传至ipfs
+     *
+     * @param ipfs ipf
+     * @param data 数据
+     * @return {@link String}
+     */
     public static String uploadIpfs(IPFS ipfs,byte[] data)  {
         NamedStreamable.ByteArrayWrapper file = new NamedStreamable.ByteArrayWrapper(data);
         MerkleNode addResult = null;
@@ -165,6 +204,14 @@ public class IpfsExecutor {
         return addResult.hash.toString();
     }
 
+    /**
+     * 下载到ipfs
+     *
+     * @param ipfs ipf
+     * @param hash 哈希
+     * @return {@link String}
+     * @throws IOException ioexception
+     */
     public static String downloadIpfs(IPFS ipfs,String hash) throws IOException {
         byte[] data = null;
         try {
@@ -172,7 +219,7 @@ public class IpfsExecutor {
         } catch (IOException e) {
             logger.error("下载文件失败", e);
         }
-        return DataToolUtils.bytesToStr(data);
+        return DataToolUtils.bytesToJsonStr(data);
     }
 
 
