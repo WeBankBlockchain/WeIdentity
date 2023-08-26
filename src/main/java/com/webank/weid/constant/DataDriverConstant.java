@@ -330,12 +330,9 @@ public final class DataDriverConstant {
 
     public static final String IPFS_API ="ipfs.api";
 
-    public static final String IPFS_WEID_PATH ="src/main/resources/weId.json";
-
+    public static final String IPFS_BASE_PATH ="src/main/resources/ipfsRepo/local/";
+    public static final String IPFS_WEID_JSON = "weId.json";
     public static final int IPFS_WRITE_SUCCESS = 0;
-
     public static final int IPFS_ONLY_ID_LINES = 1;
-
     public static final int IPFS_READ_CID_LINES = 2;
-
 }

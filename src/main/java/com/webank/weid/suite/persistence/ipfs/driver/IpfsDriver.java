@@ -12,8 +12,7 @@ import com.webank.weid.suite.persistence.*;
 import com.webank.weid.suite.persistence.ipfs.IpfsConfig;
 import com.webank.weid.suite.persistence.ipfs.IpfsDomain;
 import com.webank.weid.suite.persistence.ipfs.IpfsExecutor;
-import com.webank.weid.suite.persistence.redis.RedisDomain;
-import com.webank.weid.suite.persistence.redis.RedisExecutor;
+import com.webank.weid.util.DataDriverUtils;
 import com.webank.weid.util.DataToolUtils;
 import io.ipfs.api.IPFS;
 import org.apache.commons.lang3.StringUtils;
@@ -35,9 +34,8 @@ public class IpfsDriver implements Persistence {
 
     private static final ErrorCode KEY_INVALID = ErrorCode.PRESISTENCE_DATA_KEY_INVALID;
 
-     public IpfsConfig config =new IpfsConfig();
-     IPFS client =config.ipfsClient();
-
+    public IpfsConfig config =new IpfsConfig();
+    IPFS client =config.ipfsClient();
 
     @Override
     public ResponseData<Integer> add(String domain, String id, String data) {
@@ -48,12 +46,12 @@ public class IpfsDriver implements Persistence {
         }
         String dataKey = DataToolUtils.hash(id);
         try {
-            RedisDomain redisDomain = new IpfsDomain(domain);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
             Date date = new Date();
             Object[] datas = {data, date, date};
-            return new RedisExecutor(redisDomain).execute(client, dataKey, datas);
+            return new IpfsExecutor(ipfsDomain).execute(client, dataKey, datas);
         } catch (WeIdBaseException e) {
-            logger.error("[redis->add] add the data error.", e);
+            logger.error("[ipfs->add] add the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
@@ -75,17 +73,17 @@ public class IpfsDriver implements Persistence {
                 idHashList.add(DataToolUtils.hash(id));
                 dataList.add(data);
             }
-            RedisDomain redisDomain = new RedisDomain(domain);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
             List<List<Object>> dataLists = new ArrayList<List<Object>>();
             dataLists.add(idHashList);
             dataLists.add(Arrays.asList(dataList.toArray()));
             //处理失效时间
-            dataLists.add(fixedListWithDefault(idHashList.size(), redisDomain.getExpire()));
+            dataLists.add(fixedListWithDefault(idHashList.size(), ipfsDomain.getExpire()));
             //处理创建时间和更新时间
-            List<Object> nowList = fixedListWithDefault(idHashList.size(), redisDomain.getNow());
+            List<Object> nowList = fixedListWithDefault(idHashList.size(), ipfsDomain.getNow());
             dataLists.add(nowList);
             dataLists.add(nowList);
-            return new RedisExecutor(redisDomain).batchAdd(dataLists, client);
+            return new IpfsExecutor(ipfsDomain).batchAdd(dataLists, client);
         } catch (WeIdBaseException e) {
             logger.error("[ipfs->batchAdd] batchAdd the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -114,10 +112,9 @@ public class IpfsDriver implements Persistence {
             ResponseData<String> result = new ResponseData<String>();
             //设置result初始值为空字符串
             result.setResult(StringUtils.EMPTY);
-            RedisDomain redisDomain = new RedisDomain(domain);
-            ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
-
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            ResponseData<String> response = new IpfsExecutor(ipfsDomain)
+                    .executeQuery(dataKey, client);
             if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 DefaultValue data = DataToolUtils.deserialize(
@@ -159,8 +156,8 @@ public class IpfsDriver implements Persistence {
         }
         String dataKey = DataToolUtils.hash(id);
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
-            return new RedisExecutor(redisDomain).executeDelete(dataKey, client);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            return new IpfsExecutor(ipfsDomain).executeDelete(dataKey, client);
         } catch (WeIdBaseException e) {
             logger.error("[ipfs->delete] delete the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -177,9 +174,9 @@ public class IpfsDriver implements Persistence {
         String dataKey = DataToolUtils.hash(id);
         Date date = new Date();
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
             Object[] datas = {data, date};
-            return new RedisExecutor(redisDomain).execute(client, dataKey, datas);
+            return new IpfsExecutor(ipfsDomain).execute(client, dataKey,datas);
         } catch (WeIdBaseException e) {
             logger.error("[ipfs->update] update the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -208,7 +205,7 @@ public class IpfsDriver implements Persistence {
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         try {
-            RedisDomain redisDomain = new RedisDomain(
+            IpfsDomain ipfsDomain = new IpfsDomain(
                     DataDriverConstant.DOMAIN_OFFLINE_TRANSACTION_INFO);
             String datakey = transactionArgs.getRequestId();
             Object[] datas = {
@@ -219,7 +216,7 @@ public class IpfsDriver implements Persistence {
                     transactionArgs.getExtra(),
                     transactionArgs.getBatch()
             };
-            return new RedisExecutor(redisDomain).execute(client, datakey, datas);
+            return new IpfsExecutor(ipfsDomain).execute(client, datakey, datas);
         } catch (WeIdBaseException e) {
             logger.error("[ipfs->add] add the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -228,6 +225,7 @@ public class IpfsDriver implements Persistence {
 
     @Override
     public ResponseData<Integer> addWeId(String domain, String weId, String documentSchema) {
+
         if (StringUtils.isEmpty(weId)) {
             logger.error("[ipfs->addWeId] the weId is empty.");
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
@@ -235,8 +233,14 @@ public class IpfsDriver implements Persistence {
         try {
             IpfsDomain ipfsDomain = new IpfsDomain(domain);
             Date now = ipfsDomain.getNow();
-            Object[] datas = {weId, now, now, 1, 0, documentSchema};
-            return new IpfsExecutor(ipfsDomain).execute(client,DataDriverConstant.IPFS_WEID_PATH,weId,WeIdDocumentValue.class,datas);
+            WeIdDocumentValue value = new WeIdDocumentValue();
+            value.setWeid(weId);
+            value.setUpdated(now);
+            value.setCreated(now);
+            value.setDeactivated(0);
+            value.setDocument_schema(documentSchema);
+            String data = DataToolUtils.serialize(value);
+            return add(domain,weId,data);
         } catch (WeIdBaseException e) {
             logger.error("[ipfs->addWeId] add the data error.", e);
             return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
@@ -250,13 +254,14 @@ public class IpfsDriver implements Persistence {
             return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         Date date = new Date();
+        String dataKey = DataToolUtils.hash(weId);
         try {
             IpfsDomain ipfsDomain = new IpfsDomain(domain);
             ResponseData<String> response = new IpfsExecutor(ipfsDomain)
-                    .executeQuery(DataDriverConstant.IPFS_WEID_PATH, weId, client);
+                    .executeQuery(dataKey, client);
             if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataToolUtils.deserialize(
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(
                         response.getResult(), WeIdDocumentValue.class);
                 if(tableData.getDeactivated() == 1){
                     logger.error("[ipfs->updateWeId] the weid is deactivated.");
@@ -266,8 +271,15 @@ public class IpfsDriver implements Persistence {
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     int version = tableData.getVersion();
                     version++;
-                    Object[] datas = {weId,tableData.getCreated(),date, version, tableData.getDeactivated(), documentSchema};
-                    return new IpfsExecutor(ipfsDomain).execute(client,DataDriverConstant.IPFS_WEID_PATH,weId,WeIdDocumentValue.class,datas);
+                    WeIdDocumentValue value = new WeIdDocumentValue();
+                    value.setWeid(weId);
+                    value.setUpdated(date);
+                    value.setCreated(tableData.getCreated());
+                    value.setDeactivated(tableData.getDeactivated());
+                    value.setDocument_schema(documentSchema);
+                    value.setVersion(version);
+                    String data = com.webank.weid.blockchain.util.DataToolUtils.serialize(value);
+                    return update(domain,weId,data);
                 }
             }
             return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
@@ -284,13 +296,13 @@ public class IpfsDriver implements Persistence {
             return new ResponseData<>(null, KEY_INVALID);
         }
         try {
+            String dataKey = DataToolUtils.hash(weId);
             IpfsDomain ipfsDomain = new IpfsDomain(domain);
             ResponseData<String> response = new IpfsExecutor(ipfsDomain)
-                    .executeQuery(DataDriverConstant.IPFS_WEID_PATH, weId, client);
+                    .executeQuery(dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataToolUtils.deserialize(
-                        response.getResult(), WeIdDocumentValue.class);
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(response.getResult(), WeIdDocumentValue.class);
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     return new ResponseData<>(WeIdDocument.fromJson(tableData.getDocument_schema()), ErrorCode.SUCCESS);
                 }
@@ -310,14 +322,13 @@ public class IpfsDriver implements Persistence {
             return new ResponseData<>(null, KEY_INVALID);
         }
         try {
+            String dataKey = DataToolUtils.hash(weId);
             IpfsDomain ipfsDomain = new IpfsDomain(domain);
-            /////
             ResponseData<String> response = new IpfsExecutor(ipfsDomain)
-                    .executeQuery(DataDriverConstant.IPFS_WEID_PATH, weId, client);
+                    .executeQuery( dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataToolUtils.deserialize(
-                        response.getResult(), WeIdDocumentValue.class);
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(response.getResult(), WeIdDocumentValue.class);
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     WeIdDocumentMetadata weIdDocumentMetadata = new WeIdDocumentMetadata();
                     weIdDocumentMetadata.setCreated(tableData.getCreated().getTime());
@@ -347,19 +358,26 @@ public class IpfsDriver implements Persistence {
         try {
             IpfsDomain ipfsDomain = new IpfsDomain(domain);
             ResponseData<String> response = new IpfsExecutor(ipfsDomain)
-                    .executeQuery(DataDriverConstant.IPFS_WEID_PATH, weId, client);
+                    .executeQuery( dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataToolUtils.deserialize(
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(
                         response.getResult(), WeIdDocumentValue.class);
                 if(tableData.getDeactivated() == 1){
-                    logger.error("[mysql->deactivateWeId] the weid is deactivated.");
+                    logger.error("[ipfs->deactivateWeId] the weid is deactivated.");
                     return new ResponseData<>(FAILED_STATUS,
                             ErrorCode.WEID_HAS_BEEN_DEACTIVATED);
                 }
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
-                    Object[] datas = {date, tableData.getVersion(), state ? 1:0, tableData.getDocument_schema(), weId};
-                    return   new IpfsExecutor(ipfsDomain).execute(client,DataDriverConstant.IPFS_WEID_PATH,weId,WeIdDocumentValue.class,datas);
+                    WeIdDocumentValue value = new WeIdDocumentValue();
+                    value.setWeid(weId);
+                    value.setDocument_schema(tableData.getDocument_schema());
+                    value.setCreated(tableData.getCreated());
+                    value.setUpdated(date);
+                    value.setVersion(tableData.getVersion());
+                    value.setDeactivated(state?1:0);
+                    String data = DataToolUtils.serialize(value);
+                    return update(domain,weId,data);
                 }
             }
             return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
@@ -374,11 +392,10 @@ public class IpfsDriver implements Persistence {
         try {
             IpfsDomain ipfsDomain = new IpfsDomain(domain);
             int[] datas = {first, last - first + 1,DataDriverConstant.IPFS_ONLY_ID_LINES};
-            ResponseData<List<String>> response = new IpfsExecutor(ipfsDomain).executeQueryLines(
-                    DataDriverConstant.IPFS_WEID_PATH,datas, client);
+            ResponseData<List<String>> response = new IpfsExecutor(ipfsDomain).executeQueryLines(datas, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                return new ResponseData<>(response.getResult(), ErrorCode.SUCCESS);
+                return new ResponseData<>(DataDriverUtils.decodeValueToNeedListJson(response.getResult()), ErrorCode.SUCCESS);
             }
             return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
@@ -392,7 +409,7 @@ public class IpfsDriver implements Persistence {
         try {
             IpfsDomain ipfsDomain = new IpfsDomain(domain);
             ResponseData<Integer> response = new IpfsExecutor(ipfsDomain)
-                    .executeQueryCount(DataDriverConstant.IPFS_WEID_PATH, client);
+                    .executeQueryCount( client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 return new ResponseData<>(response.getResult(), ErrorCode.SUCCESS);
