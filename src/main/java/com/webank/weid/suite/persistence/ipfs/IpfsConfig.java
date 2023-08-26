@@ -12,17 +12,9 @@ import io.ipfs.api.IPFS;
  */
 public class IpfsConfig {
 
-    /**
-     * ipfs的api
-     */
     private static final String IPFS_API = PropertyUtils.getProperty(
             DataDriverConstant.IPFS_API);
 
-    /**
-     * 获得ipfs客户端 可重用
-     *
-     * @return {@link IPFS}
-     */
     public  IPFS ipfsClient(){
         return new IPFS(IPFS_API);
     }

@@ -3,17 +3,19 @@ package com.webank.weid.suite.persistence.ipfs;
 import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.blockchain.protocol.response.ResponseData;
 import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.protocol.request.TransactionArgs;
+import com.webank.weid.suite.persistence.DefaultValue;
+import com.webank.weid.util.DataDriverUtils;
 import com.webank.weid.util.DataToolUtils;
 import io.ipfs.api.IPFS;
-import io.ipfs.api.MerkleNode;
-import io.ipfs.api.NamedStreamable;
-import io.ipfs.multihash.Multihash;
+import org.apache.commons.collections4.CollectionUtils;
+import org.redisson.client.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +30,7 @@ public class IpfsExecutor {
             IpfsExecutor.class);
 
     private IpfsDomain ipfsDomain;
+    private String path;
 
 
 
@@ -39,21 +42,15 @@ public class IpfsExecutor {
     public IpfsExecutor(IpfsDomain ipfsDomain) {
         if (ipfsDomain != null) {
             this.ipfsDomain = ipfsDomain;
+            path=DataDriverConstant.IPFS_BASE_PATH+ipfsDomain.getTableDomain()+".json";
         } else {
             this.ipfsDomain = new IpfsDomain();
         }
     }
 
-    /**
-     * 执行查询
-     *
-     * @param path    路径
-     * @param datakey datakey
-     * @param client  客户端
-     * @return {@link ResponseData}<{@link String}>
-     */
-    public ResponseData<String> executeQuery(String path, String datakey,
+    public ResponseData<String> executeQuery(String datakey,
                                              IPFS client) {
+        
         ResponseData<String> result = new ResponseData<String>();
         try {
             if (client == null) {
@@ -63,7 +60,7 @@ public class IpfsExecutor {
             Map<String, String> jsons = DataToolUtils.readFromLocal(path);
             String cid = jsons.get(datakey);
             if(cid!=null){
-                String str = downloadIpfs(client, jsons.get(datakey));
+                String str = DataDriverUtils.downloadIpfs(client, jsons.get(datakey));
                 result.setResult(str);
             }
             result.setErrorCode(ErrorCode.SUCCESS);
@@ -74,15 +71,8 @@ public class IpfsExecutor {
         return result;
     }
 
-    /**
-     * 执行查询行
-     *
-     * @param path   路径
-     * @param datas  数据
-     * @param client 客户端
-     * @return {@link ResponseData}<{@link List}<{@link String}>>
-     */
-    public ResponseData<List<String>> executeQueryLines(String path, int[] datas, IPFS client) {
+    public ResponseData<List<String>> executeQueryLines(int[] datas, IPFS client) {
+        
         ResponseData<List<String>> result = new ResponseData<List<String>>();
         ArrayList<String> list = new ArrayList<>();
         try {
@@ -103,7 +93,7 @@ public class IpfsExecutor {
                 case DataDriverConstant.IPFS_READ_CID_LINES:
                     for (Map.Entry<String, String> entry : jsons.entrySet()) {
                         if (entry.getKey().compareTo(String.valueOf(datas[0])) >= 0 && entry.getKey().compareTo(String.valueOf(datas[1])) < 0) {
-                            list.add(downloadIpfs(client,jsons.get(entry.getValue())));
+                            list.add(DataDriverUtils.uploadIpfs(client,jsons.get(entry.getValue()).getBytes()));
                         }
                     }
                     break;
@@ -118,14 +108,7 @@ public class IpfsExecutor {
         return result;
     }
 
-    /**
-     * 执行查询数
-     *
-     * @param path   路径
-     * @param client 客户端
-     * @return {@link ResponseData}<{@link Integer}>
-     */
-    public ResponseData<Integer> executeQueryCount(String path, IPFS client) {
+    public ResponseData<Integer> executeQueryCount(IPFS client) {
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
             if (client == null) {
@@ -144,83 +127,144 @@ public class IpfsExecutor {
     }
 
 
-    /**
-     * 执行插入更新操作
-     *
-     * @param client     客户端
-     * @param path       路径
-     * @param dataKey    数据关键
-     * @param valueClass 值类
-     * @param datas      数据
-     * @return {@link ResponseData}<{@link Integer}>
-     */
-    public ResponseData<Integer> execute(IPFS client,String path,String dataKey,Class<?> valueClass,Object... datas) {
+    public ResponseData<Integer> execute(IPFS client,String dataKey,Object... datas) {
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
             if (client == null) {
                 return
                         new ResponseData<Integer>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
             }
-            Object obj = valueClass.newInstance();
-            Field[] fields = valueClass.getDeclaredFields();
-            for (int i = 0; i < fields.length; i++) {
-                Field field = fields[i];
-                field.setAccessible(true);
-                field.set(obj, datas[i]);
-            }
-            String valueString = DataToolUtils.serialize(obj);
-            String cid = uploadIpfs(client, valueString.getBytes());
+            TransactionArgs transactionArgs = new TransactionArgs();
+            DefaultValue value = new DefaultValue();
             Map<String, String> jsons = DataToolUtils.readFromLocal(path);
-            jsons.put(dataKey,cid);
-            jsons.put(String.valueOf((jsons.size()+1)/2),dataKey);
-            if(DataToolUtils.writeInLocal(path,jsons)!=DataDriverConstant.IPFS_WRITE_SUCCESS){
-                throw new IOException();
+            if (datas.length == 6) {
+                transactionArgs.setRequestId((String) datas[0]);
+                transactionArgs.setMethod((String) datas[1]);
+                transactionArgs.setArgs((String) datas[2]);
+                transactionArgs.setTimeStamp((Long) datas[3]);
+                transactionArgs.setExtra((String)datas[4]);
+                transactionArgs.setBatch((String)datas[5]);
+                String valueString = DataToolUtils.serialize(transactionArgs);
+                jsons.put(dataKey,DataDriverUtils.uploadIpfs(client,valueString.getBytes()));
+                jsons.put(String.valueOf((jsons.size())/2),dataKey);
+                DataToolUtils.writeInLocal(path,jsons);
+            } else {
+                value.setData((String) datas[0]);
+                value.setId(dataKey);
+                value.setExpire(ipfsDomain.getExpire());
+                if (datas.length == 3) {
+                    value.setCreated((Date)datas[1]);
+                    value.setUpdated((Date)datas[2]);
+                    //datas.lenth==2时为UpDate
+                } else if (datas.length == 2) {
+                    value.setUpdated((Date)datas[1]);
+                }
+                //解决重复写问题
+                if (datas.length == 3 &&  jsons.get(dataKey) != null) {
+                    return
+                            new ResponseData<>(
+                                    DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
+                                    ErrorCode.PERSISTENCE_EXECUTE_FAILED
+                            );
+                }
+                value.setExt1((jsons.size()+1)/2);
+                String valueString = DataToolUtils.serialize(value);
+                jsons.put(dataKey,DataDriverUtils.uploadIpfs(client, valueString.getBytes()));
+                jsons.put(String.valueOf((jsons.size())/2),dataKey);
+                DataToolUtils.writeInLocal(path,jsons);
             }
             result.setErrorCode(ErrorCode.SUCCESS);
-            result.setResult(DataDriverConstant.IPFS_EXECUTE_FAILED_STATUS);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_SUCESS_STATUS);
+
         } catch (Exception e) {
             logger.error("Update data into {{}} with exception", ipfsDomain.getBaseDomain(), e);
             result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         }
         return result;
     }
 
 
-    /**
-     * 上传至ipfs
-     *
-     * @param ipfs ipf
-     * @param data 数据
-     * @return {@link String}
-     */
-    public static String uploadIpfs(IPFS ipfs,byte[] data)  {
-        NamedStreamable.ByteArrayWrapper file = new NamedStreamable.ByteArrayWrapper(data);
-        MerkleNode addResult = null;
-        try {
-            addResult = ipfs.add(file).get(0);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public ResponseData<Integer> batchAdd(List<List<Object>> dataList, IPFS client) {
+        
+            ResponseData<Integer> result = new ResponseData<Integer>();
+            List<DefaultValue> value = new ArrayList<>();
+            try {
+                if (client == null) {
+                    return
+                            new ResponseData<Integer>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+                }
+                Map<String, String> jsons = DataToolUtils.readFromLocal(path);
+                List<Object> values = dataList.get(dataList.size() - 1);
+                int size = values.size();
+                for (List<Object> list : dataList) {
+                    if (CollectionUtils.isEmpty(list) || list.size() != size) {
+                        return
+                                new ResponseData<Integer>(
+                                        DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS,
+                                        ErrorCode.PERSISTENCE_BATCH_ADD_DATA_MISMATCH
+                                );
+                    }
+                }
+
+                for (int i = 0; i < size; i++) {
+                    DefaultValue val = new DefaultValue();
+                    val.setId((String) dataList.get(0).get(i));
+                    val.setData((String)dataList.get(1).get(i));
+                    val.setExpire((Date)dataList.get(2).get(i));
+                    val.setCreated((Date)dataList.get(3).get(i));
+                    val.setUpdated((Date)dataList.get(4).get(i));
+                    value.add(val);
+                }
+
+                for (DefaultValue val : value) {
+                    val.setExt1((jsons.size()+1)/2);
+                    String valueString = DataToolUtils.serialize(val);
+                    String cid = DataDriverUtils.uploadIpfs(client, valueString.getBytes());
+                    jsons.put(val.getId(),cid);
+                    jsons.put(String.valueOf((jsons.size())/2),val.getId());
+                }
+                DataToolUtils.writeInLocal(path,jsons);
+                result.setResult(size);
+            } catch (RedisException e) {
+                logger.error("Batch add data to {{}} with exception", ipfsDomain.getBaseDomain(), e);
+                result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+                result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
+            } catch (IOException e) {
+                logger.error("read data form local to {{}} with exception", ipfsDomain.getBaseDomain(), e);
+                result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+                result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
+            }
+        return result;
         }
-        return addResult.hash.toString();
-    }
 
-    /**
-     * 下载到ipfs
-     *
-     * @param ipfs ipf
-     * @param hash 哈希
-     * @return {@link String}
-     * @throws IOException ioexception
-     */
-    public static String downloadIpfs(IPFS ipfs,String hash) throws IOException {
-        byte[] data = null;
+    public ResponseData<Integer> executeDelete(String dataKey, IPFS client) {
+        ResponseData<Integer> result = new ResponseData<Integer>();
         try {
-            data = ipfs.cat(Multihash.fromBase58(hash));
-        } catch (IOException e) {
-            logger.error("下载文件失败", e);
+            if (client == null) {
+                return
+                        new ResponseData<Integer>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+            }
+            Map<String, String> jsons = DataToolUtils.readFromLocal(path);
+            if (jsons.get(dataKey)== null) {
+                result.setErrorCode(ErrorCode.SUCCESS);
+                result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
+            } else {
+                String cid = jsons.get(dataKey);
+                String value = DataDriverUtils.downloadIpfs(client, cid);
+                DefaultValue deserialize = DataToolUtils.deserialize(value, DefaultValue.class);
+                jsons.put(dataKey,null);
+                jsons.put(String.valueOf(deserialize.getExt1()),null);
+                DataToolUtils.writeInLocal(path,jsons);
+                result.setErrorCode(ErrorCode.SUCCESS);
+                result.setResult(DataDriverConstant.REDISSON_EXECUTE_SUCESS_STATUS);
+            }
+        } catch (Exception e) {
+            logger.error("Delete data into {{}} with exception", ipfsDomain.getBaseDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+            result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         }
-        return DataToolUtils.bytesToJsonStr(data);
+        return result;
     }
-
-
 }
+
