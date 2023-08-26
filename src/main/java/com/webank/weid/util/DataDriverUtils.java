@@ -1,7 +1,12 @@
 package com.webank.weid.util;
 
 import com.webank.weid.suite.persistence.DefaultValue;
+import io.ipfs.api.IPFS;
+import io.ipfs.api.MerkleNode;
+import io.ipfs.api.NamedStreamable;
+import io.ipfs.multihash.Multihash;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,5 +36,18 @@ public class DataDriverUtils {
                     value, DefaultValue.class).getData());
         }
         return list;
+    }
+
+    public static String uploadIpfs(IPFS ipfs, byte[] data) throws IOException {
+        NamedStreamable.ByteArrayWrapper file = new NamedStreamable.ByteArrayWrapper(data);
+        MerkleNode addResult = null;
+        addResult = ipfs.add(file).get(0);
+        return addResult.hash.toString();
+    }
+
+    public static String downloadIpfs(IPFS ipfs,String hash) throws IOException {
+        byte[] data;
+        data = ipfs.cat(Multihash.fromBase58(hash));
+        return DataToolUtils.bytesToStr(data);
     }
 }

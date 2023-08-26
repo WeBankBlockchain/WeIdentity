@@ -284,18 +284,27 @@ public final class DataToolUtils {
     }
 
     /**
-     * Read JSON files locally in map format
+     * readLocalJson
      * @return {@link Object}
      * @throws IOException ioexception
      */
     public static  Map<String, String> readFromLocal(String path) throws IOException {
-        File jsonFile = new File(path);
-        return OBJECT_MAPPER.readValue(jsonFile, new TypeReference<Map<String,String>>() {
-        });
+        try {
+            File jsonFile = new File(path);
+            return OBJECT_MAPPER.readValue(jsonFile, new TypeReference<Map<String,String>>() {
+            });
+        }catch (FileNotFoundException e){
+            Map<String,String> map = new HashMap<>();
+            String[] parts = path.split("/");
+            map.put("tableName",parts[5]);
+            writeInLocal(path,map);
+            readFromLocal(path);
+        }
+        return null;
+
     }
 
     /**
-     * Write objects to a local JSON file
      * @param path 路径
      * @param obj  obj
      * @return int
@@ -303,17 +312,11 @@ public final class DataToolUtils {
      */
     public static int writeInLocal(String path,Object obj) throws IOException {
         File jsonFile = new File(path);
-        OBJECT_MAPPER.writeValue(jsonFile, obj);
+        OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValue(jsonFile, obj);
         return 0;
     }
 
-    /**
-     * Convert bytes downloaded from ipfs into JSON strings
-     * @param bytes 字节
-     * @return {@link String}
-     * @throws IOException ioexception
-     */
-    public static String bytesToJsonStr(byte[] bytes) throws IOException {
+    public static String bytesToStr(byte[] bytes) throws IOException {
         return OBJECT_MAPPER.readTree(bytes).toPrettyString();
     }
 
@@ -1088,7 +1091,7 @@ public final class DataToolUtils {
                     resJson.set(key, dealObjectOfConvertUtcAndLong((ObjectNode) obj, list, type));
                 }
             } else if (obj.isArray()) {
-                //JSONArray 
+                //JSONArray
                 resJson.set(key, dealArrayOfConvertUtcAndLong((ArrayNode) obj, list, type));
             } else {
                 if (list.contains(key)) {
