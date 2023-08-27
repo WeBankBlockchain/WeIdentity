@@ -305,6 +305,7 @@ public final class DataToolUtils {
     }
 
     /**
+     * write json in local
      * @param path 路径
      * @param obj  obj
      * @return int
@@ -316,6 +317,13 @@ public final class DataToolUtils {
         return 0;
     }
 
+    /**
+     * turn bytes to obj
+     *
+     * @param bytes 字节
+     * @return {@link String}
+     * @throws IOException ioexception
+     */
     public static String bytesToStr(byte[] bytes) throws IOException {
         return OBJECT_MAPPER.readTree(bytes).toPrettyString();
     }
