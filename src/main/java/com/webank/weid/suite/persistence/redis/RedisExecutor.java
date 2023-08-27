@@ -185,29 +185,27 @@ public class RedisExecutor {
             TransactionArgs transactionArgs = new TransactionArgs();
             DefaultValue value = new DefaultValue();
             if (datas.length == 6) {
-                transactionArgs.setRequestId(datas[0].toString());
-                transactionArgs.setMethod(datas[1].toString());
-                transactionArgs.setArgs(datas[2].toString());
-                transactionArgs.setTimeStamp(Long.valueOf(datas[3].toString()));
-                transactionArgs.setExtra(datas[4].toString());
-                transactionArgs.setBatch(datas[5].toString());
-
+                transactionArgs.setRequestId((String) datas[0]);
+                transactionArgs.setMethod((String) datas[1]);
+                transactionArgs.setArgs((String) datas[2]);
+                transactionArgs.setTimeStamp((Long) datas[3]);
+                transactionArgs.setExtra((String)datas[4]);
+                transactionArgs.setBatch((String)datas[5]);
                 String valueString = DataToolUtils.serialize(transactionArgs);
                 RBucket<String> rbucket = client.getBucket(
                         redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
                 addIndexForDataKey(client,dataKey,redisDomain.getTableDomain());
                 rbucket.set(valueString);
             } else {
-                SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
                 value.setData((String) datas[0]);
                 value.setId(dataKey);
                 value.setExpire(redisDomain.getExpire());
                 if (datas.length == 3) {
-                    value.setCreated(fmt.parse(datas[1].toString()));
-                    value.setUpdated(fmt.parse(datas[2].toString()));
+                    value.setCreated((Date)datas[1]);
+                    value.setUpdated((Date)datas[2]);
                     //datas.lenth==2时为UpDate
                 } else if (datas.length == 2) {
-                    value.setUpdated(fmt.parse(datas[1].toString()));
+                    value.setUpdated((Date)datas[1]);
                 }
                 String valueString = DataToolUtils.serialize(value);
                 RBucket<String> rbucket = client.getBucket(
