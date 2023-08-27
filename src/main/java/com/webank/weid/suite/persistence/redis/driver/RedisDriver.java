@@ -401,7 +401,7 @@ public class RedisDriver implements Persistence {
             RedisDomain redisDomain = new RedisDomain(domain);
             int[] datas = {first, last - first + 1};
             ResponseData<List<String>> response = new RedisExecutor(redisDomain).executeQueryLines(
-                    redisDomain.getTableDomain(),redisDomain.getTableDomain()+DataDriverConstant.REDIS_INDEX_WEID,datas, client);
+                    redisDomain.getTableDomain(),redisDomain.getTableDomain(),datas, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 return new ResponseData<>(DataDriverUtils.decodeValueToNeedListJson(response.getResult()), ErrorCode.SUCCESS);
@@ -418,7 +418,7 @@ public class RedisDriver implements Persistence {
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             ResponseData<Integer> response = new RedisExecutor(redisDomain)
-                    .executeQueryCount(redisDomain.getTableDomain()+DataDriverConstant.REDIS_INDEX_WEID, client);
+                    .executeQueryCount(redisDomain.getTableDomain(), client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 return new ResponseData<>(response.getResult(), ErrorCode.SUCCESS);
