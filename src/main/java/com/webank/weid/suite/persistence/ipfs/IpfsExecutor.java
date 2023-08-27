@@ -42,6 +42,7 @@ public class IpfsExecutor {
     public IpfsExecutor(IpfsDomain ipfsDomain) {
         if (ipfsDomain != null) {
             this.ipfsDomain = ipfsDomain;
+            //通过domain自动获得写入的path
             path=DataDriverConstant.IPFS_BASE_PATH+ipfsDomain.getTableDomain()+".json";
         } else {
             this.ipfsDomain = new IpfsDomain();
@@ -129,6 +130,7 @@ public class IpfsExecutor {
      * @return 返回数据
      */
     public ResponseData<Integer> executeQueryCount(IPFS client) {
+
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
             if (client == null) {
@@ -156,6 +158,7 @@ public class IpfsExecutor {
      * @return 返回是否执行成功
      */
     public ResponseData<Integer> execute(IPFS client,String dataKey,Object... datas) {
+
         ResponseData<Integer> result = new ResponseData<>();
         try {
             if (client == null) {
