@@ -301,27 +301,6 @@ public final class DataDriverConstant {
     public static final String LOCAL_SPECIFIC_ISSUER = "local.specificIssuer";
 
     public static final String LOCAL_EVIDENCE = "local.evidence";
-    /**
-     * redis本地运行所需记录索引.
-     */
-
-    public static final String REDIS_INDEX_WEID = "weId";
-
-    public static final String REDIS_INDEX_WEID_DOCUMENT = "weIdDocument";
-
-    public static final String REDIS_INDEX_CPT = "cpt";
-
-    public static final String REDIS_INDEX_POLICY = "policy";
-
-    public static final String REDIS_INDEX_PRESENTATION = "presentation";
-
-    public static final String REDIS_INDEX_ROLE = "role";
-
-    public static final String REDIS_INDEX_AUTHORITY_ISSUER = "authorityIssuer";
-
-    public static final String REDIS_INDEX_SPECIFIC_ISSUER = "specificIssuer";
-
-    public static final String REDIS_INDEX_EVIDENCE = "evidence";
 
     /**
      * ipfs所需常量.
@@ -331,8 +310,11 @@ public final class DataDriverConstant {
     public static final String IPFS_API ="ipfs.api";
 
     public static final String IPFS_BASE_PATH ="src/main/resources/ipfsRepo/local/";
-    public static final String IPFS_WEID_JSON = "weId.json";
+
     public static final int IPFS_WRITE_SUCCESS = 0;
+
     public static final int IPFS_ONLY_ID_LINES = 1;
+
     public static final int IPFS_READ_CID_LINES = 2;
+
 }
