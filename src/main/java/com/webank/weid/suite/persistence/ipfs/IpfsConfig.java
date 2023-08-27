@@ -5,7 +5,7 @@ import com.webank.weid.util.PropertyUtils;
 import io.ipfs.api.IPFS;
 
 /**
- * ipf配置
+ * ipfs配置类
  *
  * @author 刘家辉
  * @date 2023/08/24
