@@ -238,6 +238,7 @@ public class IpfsDriver implements Persistence {
             value.setDeactivated(0);
             value.setDocument_schema(documentSchema);
             String data = DataToolUtils.serialize(value);
+            //将要存入的对象封装为data
             return add(domain,weId,data);
         } catch (WeIdBaseException e) {
             logger.error("[ipfs->addWeId] add the data error.", e);
