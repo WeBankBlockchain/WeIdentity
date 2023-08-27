@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * ipf执行人
+ * ipfs操作辅助类
  *
  * @author 刘家辉
  * @date 2023/08/24
@@ -37,7 +37,7 @@ public class IpfsExecutor {
     /**
      * 根据domain创建ipfs执行器.
      *
-     * @param ipfsDomain the redisDomain
+     * @param ipfsDomain 域
      */
     public IpfsExecutor(IpfsDomain ipfsDomain) {
         if (ipfsDomain != null) {
@@ -48,6 +48,13 @@ public class IpfsExecutor {
         }
     }
 
+    /**
+     * 执行查询单个的方法
+     *
+     * @param datakey key
+     * @param client  客户端
+     * @return 返回查询到的数据
+     */
     public ResponseData<String> executeQuery(String datakey,
                                              IPFS client) {
         
@@ -71,6 +78,13 @@ public class IpfsExecutor {
         return result;
     }
 
+    /**
+     * 执行分页查询的方法
+     *
+     * @param datas  数据
+     * @param client 客户端
+     * @return 返回查询到的list集合
+     */
     public ResponseData<List<String>> executeQueryLines(int[] datas, IPFS client) {
         
         ResponseData<List<String>> result = new ResponseData<List<String>>();
@@ -108,6 +122,12 @@ public class IpfsExecutor {
         return result;
     }
 
+    /**
+     * 统计数据总数
+     *
+     * @param client 客户端
+     * @return 返回数据
+     */
     public ResponseData<Integer> executeQueryCount(IPFS client) {
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {
@@ -127,12 +147,20 @@ public class IpfsExecutor {
     }
 
 
+    /**
+     * 增加更新的执行方法
+     *
+     * @param client  客户端
+     * @param dataKey key
+     * @param datas   数据
+     * @return 返回是否执行成功
+     */
     public ResponseData<Integer> execute(IPFS client,String dataKey,Object... datas) {
-        ResponseData<Integer> result = new ResponseData<Integer>();
+        ResponseData<Integer> result = new ResponseData<>();
         try {
             if (client == null) {
                 return
-                        new ResponseData<Integer>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+                        new ResponseData<>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
             }
             TransactionArgs transactionArgs = new TransactionArgs();
             DefaultValue value = new DefaultValue();
@@ -185,6 +213,13 @@ public class IpfsExecutor {
     }
 
 
+    /**
+     * 批量添加
+     *
+     * @param dataList 数据列表
+     * @param client   客户端
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     public ResponseData<Integer> batchAdd(List<List<Object>> dataList, IPFS client) {
         
             ResponseData<Integer> result = new ResponseData<Integer>();
@@ -238,6 +273,13 @@ public class IpfsExecutor {
         return result;
         }
 
+    /**
+     * 执行删除方法
+     *
+     * @param dataKey key
+     * @param client  客户端
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     public ResponseData<Integer> executeDelete(String dataKey, IPFS client) {
         ResponseData<Integer> result = new ResponseData<Integer>();
         try {

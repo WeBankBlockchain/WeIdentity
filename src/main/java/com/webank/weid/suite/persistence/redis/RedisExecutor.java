@@ -14,7 +14,6 @@ import org.redisson.client.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -80,6 +79,15 @@ public class RedisExecutor {
         return result;
     }
 
+    /**
+     * 执行分页查询
+     *
+     * @param tableDomain 表域
+     * @param dataDomain  数据域
+     * @param datas       数据
+     * @param client      客户端
+     * @return {@link ResponseData}<{@link List}<{@link String}>>
+     */
     public ResponseData<List<String>> executeQueryLines(String tableDomain,String dataDomain, int[] datas, RedissonClient client) {
         ResponseData<List<String>> result = new ResponseData<List<String>>();
         ArrayList<String> list = new ArrayList<>();
@@ -103,6 +111,14 @@ public class RedisExecutor {
         return result;
     }
 
+    /**
+     * 执行分页查询id
+     *
+     * @param dataDomain 数据域
+     * @param datas      数据
+     * @param client     客户端
+     * @return {@link ResponseData}<{@link List}<{@link Integer}>>
+     */
     public ResponseData<List<Integer>> executeQueryIdLines(String dataDomain, int[] datas, RedissonClient client) {
         ResponseData<List<Integer>> result = new ResponseData<List<Integer>>();
         ArrayList<Integer> list = new ArrayList<>();
@@ -125,6 +141,13 @@ public class RedisExecutor {
         return result;
     }
 
+    /**
+     * 执行查询总数
+     *
+     * @param tableDomain 表域
+     * @param client      客户端
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     public ResponseData<Integer> executeQueryCount(String tableDomain, RedissonClient client) {
        client.getScoredSortedSet(tableDomain);
         ResponseData<Integer> result = new ResponseData<Integer>();
@@ -172,6 +195,7 @@ public class RedisExecutor {
                 String valueString = DataToolUtils.serialize(transactionArgs);
                 RBucket<String> rbucket = client.getBucket(
                         redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
+                addIndexForDataKey(client,dataKey,redisDomain.getTableDomain());
                 rbucket.set(valueString);
             } else {
                 SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
@@ -196,6 +220,7 @@ public class RedisExecutor {
                                     ErrorCode.PERSISTENCE_EXECUTE_FAILED
                             );
                 }
+                addIndexForDataKey(client,dataKey,redisDomain.getTableDomain());
                 rbucket.set(valueString);
             }
             result.setErrorCode(ErrorCode.SUCCESS);
@@ -284,6 +309,7 @@ public class RedisExecutor {
             for (DefaultValue val : value) {
                 rbatch.getBucket(redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + val.getId())
                         .setAsync(DataToolUtils.serialize(val));
+                addIndexForDataKey(client,val.getId(),redisDomain.getTableDomain());
             }
             BatchResult<?> batchResult = rbatch.execute();
 
@@ -294,6 +320,17 @@ public class RedisExecutor {
             result.setResult(DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS);
         }
         return result;
+    }
+
+    /**
+     * 为key添加索引方便分页查询
+     *
+     * @param dataKey 数据关键
+     * @param domain  域
+     */
+    public void addIndexForDataKey(RedissonClient client, String dataKey, String domain){
+        RScoredSortedSet<Object> set = client.getScoredSortedSet(domain);
+        set.add(set.size(),dataKey);
     }
 
 

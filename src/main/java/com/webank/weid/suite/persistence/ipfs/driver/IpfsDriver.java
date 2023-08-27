@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 
 /**
- *
+ *因与redis存储方式类似 所以在实现方面借鉴了redis实现类
  * @author uwepppp
  * @date 2023/08/21
  */
@@ -62,9 +62,7 @@ public class IpfsDriver implements Persistence {
         try {
             List<Object> idHashList = new ArrayList<>();
             List<Object> dataList = new ArrayList<>();
-            Iterator<String> iterator = keyValueList.keySet().iterator();
-            while (iterator.hasNext()) {
-                String id = iterator.next();
+            for (String id : keyValueList.keySet()) {
                 String data = keyValueList.get(id);
                 if (StringUtils.isEmpty(id)) {
                     logger.error("[ipfs->batchAdd] the id of the data is empty.");
@@ -261,7 +259,7 @@ public class IpfsDriver implements Persistence {
                     .executeQuery(dataKey, client);
             if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(
                         response.getResult(), WeIdDocumentValue.class);
                 if(tableData.getDeactivated() == 1){
                     logger.error("[ipfs->updateWeId] the weid is deactivated.");
@@ -302,7 +300,7 @@ public class IpfsDriver implements Persistence {
                     .executeQuery(dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(response.getResult(), WeIdDocumentValue.class);
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(response.getResult(), WeIdDocumentValue.class);
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     return new ResponseData<>(WeIdDocument.fromJson(tableData.getDocument_schema()), ErrorCode.SUCCESS);
                 }
@@ -328,7 +326,7 @@ public class IpfsDriver implements Persistence {
                     .executeQuery( dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(response.getResult(), WeIdDocumentValue.class);
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(response.getResult(), WeIdDocumentValue.class);
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     WeIdDocumentMetadata weIdDocumentMetadata = new WeIdDocumentMetadata();
                     weIdDocumentMetadata.setCreated(tableData.getCreated().getTime());
@@ -361,7 +359,7 @@ public class IpfsDriver implements Persistence {
                     .executeQuery( dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(
                         response.getResult(), WeIdDocumentValue.class);
                 if(tableData.getDeactivated() == 1){
                     logger.error("[ipfs->deactivateWeId] the weid is deactivated.");
@@ -421,6 +419,10 @@ public class IpfsDriver implements Persistence {
         }
     }
 
+
+    /**
+     * 暂未完成
+     */
     @Override
     public ResponseData<CptValue> getCpt(String domain, int cptId) {
         return null;

@@ -58,7 +58,7 @@ public class RedisDriver implements Persistence {
             return new RedisExecutor(redisDomain).execute(client, dataKey, datas);
         } catch (WeIdBaseException e) {
             logger.error("[redis->add] add the data error.", e);
-            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -68,19 +68,17 @@ public class RedisDriver implements Persistence {
         try {
             List<Object> idHashList = new ArrayList<>();
             List<Object> dataList = new ArrayList<>();
-            Iterator<String> iterator = keyValueList.keySet().iterator();
-            while (iterator.hasNext()) {
-                String id = iterator.next();
+            for (String id : keyValueList.keySet()) {
                 String data = keyValueList.get(id);
                 if (StringUtils.isEmpty(id)) {
                     logger.error("[redis->batchAdd] the id of the data is empty.");
-                    return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+                    return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
                 }
                 idHashList.add(DataToolUtils.hash(id));
                 dataList.add(data);
             }
             RedisDomain redisDomain = new RedisDomain(domain);
-            List<List<Object>> dataLists = new ArrayList<List<Object>>();
+            List<List<Object>> dataLists = new ArrayList<>();
             dataLists.add(idHashList);
             dataLists.add(Arrays.asList(dataList.toArray()));
             //处理失效时间
@@ -92,7 +90,7 @@ public class RedisDriver implements Persistence {
             return new RedisExecutor(redisDomain).batchAdd(dataLists, client);
         } catch (WeIdBaseException e) {
             logger.error("[redis->batchAdd] batchAdd the data error.", e);
-            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -110,19 +108,19 @@ public class RedisDriver implements Persistence {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[redis->get] the id of the data is empty.");
-            return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
+            return new ResponseData<>(StringUtils.EMPTY, KEY_INVALID);
         }
         //dataKey:id的hash值
         String dataKey = DataToolUtils.hash(id);
         try {
-            ResponseData<String> result = new ResponseData<String>();
+            ResponseData<String> result = new ResponseData<>();
             //设置result初始值为空字符串
             result.setResult(StringUtils.EMPTY);
             RedisDomain redisDomain = new RedisDomain(domain);
             ResponseData<String> response = new RedisExecutor(redisDomain)
                     .executeQuery(redisDomain.getTableDomain(), dataKey, client);
 
-            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 DefaultValue data = DataToolUtils.deserialize(
                         response.getResult(), DefaultValue.class);
@@ -131,7 +129,7 @@ public class RedisDriver implements Persistence {
                         && data.getExpire().before(new Date())) {
                     logger.error("[redis->get] the data is expire.");
                     //输出empty以及超过超时时间错误代码
-                    return new ResponseData<String>(StringUtils.EMPTY,
+                    return new ResponseData<>(StringUtils.EMPTY,
                             ErrorCode.PERSISTENCE_DATA_EXPIRE);
                 }
                 if (data != null && StringUtils.isNotBlank(data.getData())) {
@@ -150,7 +148,7 @@ public class RedisDriver implements Persistence {
             return result;
         } catch (WeIdBaseException e) {
             logger.error("[redis->get] get the data error.", e);
-            return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
+            return new ResponseData<>(StringUtils.EMPTY, e.getErrorCode());
         }
     }
 
@@ -159,7 +157,7 @@ public class RedisDriver implements Persistence {
 
         if (StringUtils.isEmpty(id)) {
             logger.error("[redis->delete] the id of the data is empty.");
-            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.hash(id);
         try {
@@ -167,7 +165,7 @@ public class RedisDriver implements Persistence {
             return new RedisExecutor(redisDomain).executeDelete(dataKey, client);
         } catch (WeIdBaseException e) {
             logger.error("[redis->delete] delete the data error.", e);
-            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -176,7 +174,7 @@ public class RedisDriver implements Persistence {
 
         if (StringUtils.isEmpty(id) || StringUtils.isBlank(this.get(domain, id).getResult())) {
             logger.error("[redis->update] the id of the data is empty.");
-            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.hash(id);
         Date date = new Date();
@@ -186,7 +184,7 @@ public class RedisDriver implements Persistence {
             return new RedisExecutor(redisDomain).execute(client, dataKey, datas);
         } catch (WeIdBaseException e) {
             logger.error("[redis->update] update the data error.", e);
-            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -196,9 +194,9 @@ public class RedisDriver implements Persistence {
         ResponseData<String> getRes = this.get(domain, id);
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
         if ((StringUtils.isNotBlank(getRes.getResult())
-                && getRes.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode())
+                && getRes.getErrorCode() == ErrorCode.SUCCESS.getCode())
                 ||
-                getRes.getErrorCode().intValue() == ErrorCode.PERSISTENCE_DATA_EXPIRE.getCode()) {
+                getRes.getErrorCode() == ErrorCode.PERSISTENCE_DATA_EXPIRE.getCode()) {
             return this.update(domain, id, data);
         }
         return this.add(domain, id, data);
@@ -209,7 +207,7 @@ public class RedisDriver implements Persistence {
 
         if (StringUtils.isEmpty(transactionArgs.getRequestId())) {
             logger.error("[redis->add] the id of the data is empty.");
-            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
         try {
             RedisDomain redisDomain = new RedisDomain(
@@ -226,10 +224,9 @@ public class RedisDriver implements Persistence {
             return new RedisExecutor(redisDomain).execute(client, datakey, datas);
         } catch (WeIdBaseException e) {
             logger.error("[redis->add] add the data error.", e);
-            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
         }
     }
-
     /*
     以下方法暂不需要，本地部署不需要使用redis方式，默认使用Mysql
      */
@@ -238,7 +235,7 @@ public class RedisDriver implements Persistence {
     public ResponseData<Integer> addWeId(String domain, String weId, String documentSchema) {
         if (StringUtils.isEmpty(weId)) {
             logger.error("[redis->addWeId] the weId is empty.");
-            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
@@ -250,11 +247,11 @@ public class RedisDriver implements Persistence {
             value.setDeactivated(0);
             value.setDocument_schema(documentSchema);
             String data = DataToolUtils.serialize(value);
-            addIndexForMsg(weId,redisDomain.getTableDomain()+DataDriverConstant.REDIS_INDEX_WEID);
+
             return add(domain,weId,data);
         } catch (WeIdBaseException e) {
             logger.error("[redis->addWeId] add the data error.", e);
-            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -262,16 +259,17 @@ public class RedisDriver implements Persistence {
     public ResponseData<Integer> updateWeId(String domain, String weId, String documentSchema) {
         if (StringUtils.isEmpty(weId)) {
             logger.error("[redis->updateWeId] the weId is empty.");
-            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
+        String dataKey = DataToolUtils.hash(weId);
         Date date = new Date();
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), weId, client);
-            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
+                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
+            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataToolUtils.deserialize(
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(
                         response.getResult(), WeIdDocumentValue.class);
                 if(tableData.getDeactivated() == 1){
                     logger.error("[redis->updateWeId] the weid is deactivated.");
@@ -295,7 +293,7 @@ public class RedisDriver implements Persistence {
             return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
             logger.error("[redis->updateWeId] update the weid error.", e);
-            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -306,12 +304,13 @@ public class RedisDriver implements Persistence {
             return new ResponseData<>(null, KEY_INVALID);
         }
         try {
+            String dataKey = DataToolUtils.hash(weId);
             RedisDomain redisDomain = new RedisDomain(domain);
             ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), weId, client);
+                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(response.getResult(), WeIdDocumentValue.class);
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(response.getResult(), WeIdDocumentValue.class);
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     return new ResponseData<>(WeIdDocument.fromJson(tableData.getDocument_schema()), ErrorCode.SUCCESS);
                 }
@@ -331,13 +330,13 @@ public class RedisDriver implements Persistence {
             return new ResponseData<>(null, KEY_INVALID);
         }
         try {
+            String dataKey = DataToolUtils.hash(weId);
             RedisDomain redisDomain = new RedisDomain(domain);
-            /////
             ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), weId, client);
+                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(response.getResult(), WeIdDocumentValue.class);
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(response.getResult(), WeIdDocumentValue.class);
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
                     WeIdDocumentMetadata weIdDocumentMetadata = new WeIdDocumentMetadata();
                     weIdDocumentMetadata.setCreated(tableData.getCreated().getTime());
@@ -360,32 +359,39 @@ public class RedisDriver implements Persistence {
 
         if (StringUtils.isEmpty(weId)) {
             logger.error("[redis->deactivateWeId] the weId is empty.");
-            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
+            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.hash(weId);
         Date date = new Date();
         try {
             RedisDomain redisDomain = new RedisDomain(domain);
             ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), weId, client);
+                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
-                WeIdDocumentValue tableData = DataDriverUtils.decodeValueToNeedObj(
+                WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(
                         response.getResult(), WeIdDocumentValue.class);
                 if(tableData.getDeactivated() == 1){
-                    logger.error("[mysql->deactivateWeId] the weid is deactivated.");
+                    logger.error("[ipfs->deactivateWeId] the weid is deactivated.");
                     return new ResponseData<>(FAILED_STATUS,
                             ErrorCode.WEID_HAS_BEEN_DEACTIVATED);
                 }
                 if (StringUtils.isNotBlank(tableData.getDocument_schema())) {
-                    Object[] datas = {date, tableData.getVersion(), state ? 1:0, tableData.getDocument_schema(), weId};
-                    return new RedisExecutor(redisDomain).execute(client, weId, datas);
+                    WeIdDocumentValue value = new WeIdDocumentValue();
+                    value.setWeid(weId);
+                    value.setDocument_schema(tableData.getDocument_schema());
+                    value.setCreated(tableData.getCreated());
+                    value.setUpdated(date);
+                    value.setVersion(tableData.getVersion());
+                    value.setDeactivated(state?1:0);
+                    String data = DataToolUtils.serialize(value);
+                    return update(domain,data,dataKey);
                 }
             }
             return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
             logger.error("[redis->deactivateWeId] deactivate the weId error.", e);
-            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
+            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -591,8 +597,5 @@ public class RedisDriver implements Persistence {
     }
 
 
-    public void addIndexForMsg(String msg,String domain){
-        RScoredSortedSet<Object> set = client.getScoredSortedSet(domain);
-        set.add(set.size(),msg);
-    }
+
 }
