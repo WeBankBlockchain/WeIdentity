@@ -57,7 +57,6 @@ targetCompatibility = 1.8
 [compileJava, compileTestJava, javadoc]*.options*.encoding = 'UTF-8'
 // In this section you declare where to find the dependencies of your project
 repositories {
-
     if (!gradle.startParameter.isOffline()) {
         mavenLocal()
         if ("cn" == repo) {
@@ -197,9 +196,7 @@ dependencies {
         implementation group: 'org.apache.httpcomponents', name: 'httpcore', version: '4.4.15'
         annotationProcessor lombok
 
-        testCompile logger,ipfs, lombok, apache_commons, json, rpc, pdfbox, protobuf, caffeine, oval, spring, gson, xstream
-        testImplementation 'junit:junit:4.13'
-        testImplementation 'org.jmockit:jmockit:1.47'
+        testCompile logger, lombok, apache_commons, json, junit, jmockit, rpc, pdfbox, protobuf, caffeine, oval, spring, gson, xstream
         testAnnotationProcessor lombok
     }
     if (gradleVer.startsWith("4")) {
@@ -264,7 +261,13 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 
 test {
     systemProperty "jdk.tls.namedGroups", "${jdkTlsNamedGroups}"
-    jvmArgs '-javaagent:D:\\WeIdentity\\jmockit-1.47.jar'
+    jvmArgs "-javaagent:${classpath.find { it.name.contains("jmockit") }.absolutePath}"
+    doFirst {
+        copy {
+            from file('src/main/resources/WeDPR_dynamic_lib')
+            into 'src/test/resources/WeDPR_dynamic_lib'
+        }
+    }
 }
 
 artifacts {
