@@ -37,6 +37,13 @@ public class IpfsDriver implements Persistence {
     public IpfsConfig config =new IpfsConfig();
     IPFS client =config.ipfsClient();
 
+    /**
+     * 添加方法
+     * @param domain 数据域
+     * @param id  存储id
+     * @param data 数据
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     @Override
     public ResponseData<Integer> add(String domain, String id, String data) {
 
@@ -56,6 +63,12 @@ public class IpfsDriver implements Persistence {
         }
     }
 
+    /**
+     * 批量添加
+     * @param domain
+     * @param keyValueList
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     @Override
     public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList) {
 
@@ -97,6 +110,12 @@ public class IpfsDriver implements Persistence {
         return list;
     }
 
+    /**
+     * 获取方法
+     * @param domain
+     * @param id
+     * @return {@link ResponseData}<{@link String}>
+     */
     @Override
     public ResponseData<String> get(String domain, String id) {
 
@@ -136,8 +155,6 @@ public class IpfsDriver implements Persistence {
                 }
             }
             result.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
-            System.out.println("result=" + result.getResult());
-            System.out.println(result.getResult() == null);
             return result;
         } catch (WeIdBaseException e) {
             logger.error("[ipfs->get] get the data error.", e);
@@ -145,6 +162,12 @@ public class IpfsDriver implements Persistence {
         }
     }
 
+    /**
+     * 删除方法
+     * @param domain
+     * @param id
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     @Override
     public ResponseData<Integer> delete(String domain, String id) {
 
