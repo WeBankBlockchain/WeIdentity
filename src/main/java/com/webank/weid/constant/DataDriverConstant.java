@@ -309,7 +309,7 @@ public final class DataDriverConstant {
 
     public static final String IPFS_API ="ipfs.api";
 
-    public static final String IPFS_BASE_PATH ="src/main/resources/ipfsRepo/local/";
+    public static final String IPFS_BASE_PATH ="output/local/";
 
     public static final int IPFS_WRITE_SUCCESS = 0;
 

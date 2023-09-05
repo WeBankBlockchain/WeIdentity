@@ -296,7 +296,7 @@ public final class DataToolUtils {
         }catch (FileNotFoundException e){
             Map<String,String> map = new HashMap<>();
             String[] parts = path.split("/");
-            map.put("tableName",parts[5]);
+            map.put("tableName",parts[2]);
             writeInLocal(path,map);
             readFromLocal(path);
         }
