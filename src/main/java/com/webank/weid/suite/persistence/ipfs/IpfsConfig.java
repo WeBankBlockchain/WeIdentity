@@ -12,6 +12,9 @@ import io.ipfs.api.IPFS;
  */
 public class IpfsConfig {
 
+    /**
+     *API地址
+     */
     private static final String IPFS_API = PropertyUtils.getProperty(
             DataDriverConstant.IPFS_API);
 

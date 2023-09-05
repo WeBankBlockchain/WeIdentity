@@ -96,6 +96,7 @@ public class IpfsExecutor {
 
             }
             Map<String, String> jsons = DataToolUtils.readFromLocal(path);
+            //分页查询id或分页查询完整数据
             switch (datas[2]){
                 case DataDriverConstant.IPFS_ONLY_ID_LINES:
                     for (Map.Entry<String, String> entry : jsons.entrySet()) {
@@ -108,7 +109,7 @@ public class IpfsExecutor {
                 case DataDriverConstant.IPFS_READ_CID_LINES:
                     for (Map.Entry<String, String> entry : jsons.entrySet()) {
                         if (entry.getKey().compareTo(String.valueOf(datas[0])) >= 0 && entry.getKey().compareTo(String.valueOf(datas[1])) < 0) {
-                            list.add(DataDriverUtils.uploadIpfs(client,jsons.get(entry.getValue()).getBytes()));
+                            list.add(DataDriverUtils.downloadIpfs(client,jsons.get(entry.getValue())));
                         }
                     }
                     break;
@@ -167,7 +168,9 @@ public class IpfsExecutor {
             }
             TransactionArgs transactionArgs = new TransactionArgs();
             DefaultValue value = new DefaultValue();
+            //本地取json文件
             Map<String, String> jsons = DataToolUtils.readFromLocal(path);
+            //分transaction update insert 三种情况
             if (datas.length == 6) {
                 transactionArgs.setRequestId((String) datas[0]);
                 transactionArgs.setMethod((String) datas[1]);
@@ -199,8 +202,11 @@ public class IpfsExecutor {
                             );
                 }
                 value.setExt1((jsons.size()+1)/2);
+                //转化为json文件以便上传至ipfs
                 String valueString = DataToolUtils.serialize(value);
+                //本地存储cid码
                 jsons.put(dataKey,DataDriverUtils.uploadIpfs(client, valueString.getBytes()));
+                //存储index 方便分页查询
                 jsons.put(String.valueOf((jsons.size())/2),dataKey);
                 DataToolUtils.writeInLocal(path,jsons);
             }
@@ -298,6 +304,7 @@ public class IpfsExecutor {
                 String cid = jsons.get(dataKey);
                 String value = DataDriverUtils.downloadIpfs(client, cid);
                 DefaultValue deserialize = DataToolUtils.deserialize(value, DefaultValue.class);
+                //以null作为删除标记
                 jsons.put(dataKey,null);
                 jsons.put(String.valueOf(deserialize.getExt1()),null);
                 DataToolUtils.writeInLocal(path,jsons);
