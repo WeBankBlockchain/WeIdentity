@@ -63,7 +63,7 @@ function modify_config()
     export GROUP_ID=${GROUP_ID}
     export SDK_SM_CRYPTO=${SDK_SM_CRYPTO}
 
-    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}'
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${GROUP_ID}:${SDK_SM_CRYPTO}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${app_xml_config_dir}
     export ORG_ID=${ORG_ID}
