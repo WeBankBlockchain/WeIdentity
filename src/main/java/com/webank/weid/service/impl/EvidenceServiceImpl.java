@@ -740,7 +740,7 @@ public class EvidenceServiceImpl implements EvidenceService {
         WeIdPrivateKey weIdPrivateKey,
         String log,
         String customKey) {
-        if (StringUtils.isEmpty(customKey) || DataToolUtils.isValidHash(customKey)) {
+        if (StringUtils.isEmpty(customKey) || !DataToolUtils.isUtf8String(customKey)) {
             logger.error("Custom key must be non-empty and must not be of hash format.");
             return new ResponseData<>(StringUtils.EMPTY, ErrorCode.ILLEGAL_INPUT);
         }
