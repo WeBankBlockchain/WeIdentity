@@ -200,3 +200,4 @@ secring.gpg
 *.address
 logs/
 gradle.properties
+resources/
