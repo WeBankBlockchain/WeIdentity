@@ -1,0 +1,664 @@
+{
+  "info": {
+    "_postman_id": "ece24ef5-e5ed-41eb-99ce-9b9f23145f72",
+    "name": "invoke",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "createWeId",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "type": "text",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {},\n    \"transactionArg\": {},\n    \"v\": \"1.0.0\",\n    \"functionName\": \"createWeId\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getWeIdDocument",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n    },\n    \"transactionArg\": {},\n    \"v\": \"1.0.0\",\n    \"functionName\": \"getWeIdDocument\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "registerCpt",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n        \"cptJsonSchema\": {\n        \t\"weid\" : \"Delegator WeID\",\n        \t\"receiver\": \"Receiver WeID\",\n        \t\"content\": \"Authorized content\"\n        }\n    },\n    \"transactionArg\": {\n    \t\"invokerWeId\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"registerCpt\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "queryCpt",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"cptId\": 2000156\n    },\n    \"transactionArg\": {},\n    \"v\": \"1.0.0\",\n    \"functionName\": \"queryCpt\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "registerAuthorityIssuer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:0x5774e89d8e7fc8ffc1b7fff4b1019a22ac7140fb\",\n        \"name\": \"Administration Office\"\n    },\n    \"transactionArg\": {\n    \t\"invokerWeId\": \"private_key\"\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"registerAuthorityIssuer\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "queryAuthorityIssuerInfo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:0x5774e89d8e7fc8ffc1b7fff4b1019a22ac7140fb\"\n    },\n    \"transactionArg\": {\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"queryAuthorityIssuer\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "createCredential",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n        \"cptId\": \"2000156\",\n        \"expirationDate\": \"2100-04-18T21:12:33Z\",\n        \"claim\": {\n            \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n            \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\"\n        }\n    },\n    \"transactionArg\": {\n    \t\"invokerWeId\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"createCredential\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "verifyCredential",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"@context\": \"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1\",\n        \"claim\": {\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n            \"receiver\": \"did:weid:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n            \"weid\": \"did:weid:0x5774e89d8e7fc8ffc1b7fff4b1019a22ac7140fb\"\n        },\n        \"cptId\": 1278,\n        \"expirationDate\": \"2500-04-18T21:12:33Z\",\n        \"id\": \"340cb28b-46e2-480a-abdf-b76959df00f1\",\n        \"issuanceDate\": \"2019-09-27T18:12:31Z\",\n        \"issuer\": \"did:weid:0x5774e89d8e7fc8ffc1b7fff4b1019a22ac7140fb\",\n        \"proof\": {\n            \"created\": \"1569579151000\",\n            \"creator\": \"did:weid:0x5774e89d8e7fc8ffc1b7fff4b1019a22ac7140fb\",\n            \"signature\": \"HNTDfc0S1V5GyGKa7+HGSq56sWsVjr8QTa5c80DsoZcdSi3SGv3gc4JtAnC3fRmDmi6OTqINwykzSwBWzrVcsFU=\",\n            \"type\": \"EcdsaSignature\"\n        }\n    },\n    \"transactionArg\": {\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"verifyCredential\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get all endpoint",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": ""
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/endpoint",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "endpoint"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Call Endpoint",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"body\": \"abcabc\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/endpoint/duplicate-input",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "endpoint",
+            "duplicate-input"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Request DataAuth Nonce",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"authToken\": {\n\t    \"claim\": {\n\t        \"duration\": 360000,\n\t        \"fromWeId\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168\",\n\t        \"resourceId\": \"4b077c17-9612-42ee-9e36-3a3d46b27e81\",\n\t        \"serviceUrl\": \"http://127.0.0.1:6010/fetch-data\",\n\t        \"toWeId\": \"did:weid:101:0x68bedb2cbe55b4c8e3473faa63f121c278f6dba9\"\n\t    },\n\t    \"context\": \"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1\",\n\t    \"cptId\": 101,\n\t    \"expirationDate\": 1581347039,\n\t    \"id\": \"48b75424-9411-4d22-b925-4e730b445a31\",\n\t    \"issuanceDate\": 1580987039,\n\t    \"issuer\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168\",\n\t    \"proof\": {\n\t        \"created\": 1580987039,\n\t        \"creator\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168#keys-0\",\n\t        \"salt\": {\n\t            \"duration\": \"fmk5A\",\n\t            \"fromWeId\": \"DEvFy\",\n\t            \"resourceId\": \"ugVeN\",\n\t            \"serviceUrl\": \"nVdeE\",\n\t            \"toWeId\": \"93Z1E\"\n\t        },\n\t        \"signatureValue\": \"HCZwyTzGst87cjCDaUEzPrO8QRlsPvCYXvRTUVBUTDKRSoGDgu4h4HLrMZ+emDacRnmQ/yke38u1jBnilNnCh6c=\",\n\t        \"type\": \"Secp256k1\"\n\t    },\n\t    \"type\": [\"VerifiableCredential\", \"hashTree\"]\n\t}\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/authorize/request-nonce",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "authorize",
+            "request-nonce"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Fetch Authorized Data",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "type": "text",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n\t\"authToken\": {\n\t    \"claim\": {\n\t        \"duration\": 360000,\n\t        \"fromWeId\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168\",\n\t        \"resourceId\": \"4b077c17-9612-42ee-9e36-3a3d46b27e81\",\n\t        \"serviceUrl\": \"http://127.0.0.1:6010/fetch-data\",\n\t        \"toWeId\": \"did:weid:101:0x68bedb2cbe55b4c8e3473faa63f121c278f6dba9\"\n\t    },\n\t    \"context\": \"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1\",\n\t    \"cptId\": 101,\n\t    \"expirationDate\": 1581347039,\n\t    \"id\": \"48b75424-9411-4d22-b925-4e730b445a31\",\n\t    \"issuanceDate\": 1580987039,\n\t    \"issuer\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168\",\n\t    \"proof\": {\n\t        \"created\": 1580987039,\n\t        \"creator\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168#keys-0\",\n\t        \"salt\": {\n\t            \"duration\": \"fmk5A\",\n\t            \"fromWeId\": \"DEvFy\",\n\t            \"resourceId\": \"ugVeN\",\n\t            \"serviceUrl\": \"nVdeE\",\n\t            \"toWeId\": \"93Z1E\"\n\t        },\n\t        \"signatureValue\": \"HCZwyTzGst87cjCDaUEzPrO8QRlsPvCYXvRTUVBUTDKRSoGDgu4h4HLrMZ+emDacRnmQ/yke38u1jBnilNnCh6c=\",\n\t        \"type\": \"Secp256k1\"\n\t    },\n\t    \"type\": [\"VerifiableCredential\", \"hashTree\"]\n\t},\n\t\"signedNonce\": \"123123\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/authorize/fetch-data",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "authorize",
+            "fetch-data"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "createCredentialPojo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n        \"cptId\": \"2000156\",\n        \"expirationDate\": \"2100-04-18T21:12:33Z\",\n        \"claim\": {\n            \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n            \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\"\n        }\n    },\n    \"transactionArg\": {\n    \t\"invokerWeId\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"createCredentialPojo\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "verifyCredentialPojo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"cptId\": 2000156,\n        \"issuanceDate\": 1580996777,\n        \"context\": \"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1\",\n        \"claim\": {\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n            \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n            \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n        },\n        \"id\": \"21d10ab1-75fe-4733-9f1d-f0bad71b5922\",\n        \"proof\": {\n            \"created\": 1580996777,\n            \"creator\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa#keys-0\",\n            \"salt\": {\n                \"content\": \"ncZ5F\",\n                \"receiver\": \"L0c40\",\n                \"weid\": \"I4aop\"\n            },\n            \"signatureValue\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\",\n            \"type\": \"Secp256k1\"\n        },\n        \"type\": [\n            \"VerifiableCredential\",\n            \"hashTree\"\n        ],\n        \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n        \"expirationDate\": 4111737153\n    },\n    \"transactionArg\": {\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"verifyCredentialPojo\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Encode - CreateWeID",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"functionArg\": {\r\n    \t\"publicKey\": \"978870416416889679983076739357652892137097344406525666434767708431155392475239591496567952035640408566264627235143888271471053444960378198893918361888848\"\r\n    },\r\n    \"functionName\": \"createWeId\",\r\n    \"transactionArg\": {\r\n    \t\"nonce\": \"14616548136584\"\r\n    },\r\n    \"v\": \"1.0.0\"\r\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/encode",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "encode"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Encode - RegisterAuthorityIssuer",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"functionArg\": {\r\n        \"weId\": \"did:weid:0x5774e89d8e7fc8ffc1b7fff4b1019a22ac7140fb\",\r\n        \"name\": \"BV-College\"\r\n    },\r\n    \"functionName\": \"registerAuthorityIssuer\",\r\n    \"transactionArg\": {\r\n    \t\"nonce\": \"14616548136584\"\r\n    },\r\n    \"v\": \"1.0.0\"\r\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/encode",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "encode"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Encode - RegisterCpt",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"functionArg\": {\r\n        \"weId\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\r\n        \"cptSignature\": \"HJPbDmoi39xgZBGi/aj1zB6VQL5QLyt4qTV6GOvQwzfgUJEZTazKZXe1dRg5aCt8Q44GwNF2k+l1rfhpY1hc/ls=\",\r\n        \"cptJsonSchema\": {\r\n        \t\"weid\" : \"Delegator WeID\",\r\n        \t\"receiver\": \"Receiver WeID\",\r\n        \t\"content\": \"Authorized content\"\r\n        }\r\n    },\r\n    \"functionName\": \"registerCpt\",\r\n    \"transactionArg\": {\r\n    \t\"nonce\": \"14616548136584\"\r\n    },\r\n    \"v\": \"1.0.0\"\r\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/encode",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "encode"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Encode - CreateCredentialPojo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"functionArg\": {\r\n        \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\r\n        \"cptId\": \"2000156\",\r\n        \"expirationDate\": \"2100-04-18T21:12:33Z\",\r\n        \"claim\": {\r\n            \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\r\n            \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\r\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\"\r\n        }\r\n    },\r\n    \"functionName\": \"createCredentialPojo\",\r\n    \"transactionArg\": {\r\n    },\r\n    \"v\": \"1.0.0\"\r\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/encode",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "encode"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Transact - Any",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "name": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"functionArg\": {},\r\n    \"functionName\": \"createWeId\", \r\n    \"transactionArg\": {\r\n    \t\"nonce\": \"2678903918699407695\",\r\n    \t\"data\": \"0x6bf30a0d000000000000000000000000dc99f92911dd8f81b0c24ae018a8d7df41eb098400000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000005e45380c00000000000000000000000000000000000000000000000000000000000000c5373439373239383339363337343235343130323237353034373732303838313239393936303834323533313730393338363534353032383431303235343437343433303739373039393430393030303736393631393438343638393832393635323134363034353734343434393731303734373130383236313031303937383337323736353737303537393539373337373836393235303137342f307864633939663932393131646438663831623063323461653031386138643764663431656230393834000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a3135383135393436333600000000000000000000000000000000000000000000\",\r\n    \t\"signedMessage\": \"drS4u7MOge9eWfDOWWdTHAZlKoHuSdxg9pqvu80agAQMB2KZBl6c/rV84m2r+4VXKACV02xC1WfcjWeLIJ92EwA=\"\r\n    },\r\n    \"v\": \"1.0.0\"\r\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/transact",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "transact"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "createEvidence",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"id\": \"31c38f4c-4d12-40fd-92c4-4d9f1dce0135\",\n        \"hash\": \"0x6726391a7fa259470c26a2e9c9467ddbb1f1e7108eeb6f279248b70bb91f8205\",\n        \"proof\": \"3divzA7mgEv3774UtZRIxjUeQP0IEzMv/FfnRE6RgMjN1lMuyRJNvHF+N8NJjVydRmC9cWffKJjE30W8Vbk+MwA=\",\n        \"log\": \"temp\"\n    },\n    \"transactionArg\": {\n    \t\"groupId\": 1\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"createEvidence\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "getEvidence",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"functionArg\": {\n        \"hashValue\": \"0x6726391a7fa259470c26a2e9c9467ddbb1f1e7108eeb6f279248b70bb91f8205\"\n    },\n    \"transactionArg\": {\n    \t\"groupId\": 1\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"getEvidence\"\n}"
+        },
+        "url": {
+          "raw": "http://{{host}}:{{httpport}}/weid/api/invoke",
+          "protocol": "http",
+          "host": [
+            "{{host}}"
+          ],
+          "port": "{{httpport}}",
+          "path": [
+            "weid",
+            "api",
+            "invoke"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
