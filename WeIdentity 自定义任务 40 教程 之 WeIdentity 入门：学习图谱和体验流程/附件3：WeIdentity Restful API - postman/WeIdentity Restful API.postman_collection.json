@@ -1,0 +1,869 @@
+{
+	"info": {
+		"_postman_id": "03db829f-b094-428f-9ef5-856294f0829e",
+		"name": "WeIdentity Restful API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15126157"
+	},
+	"item": [
+		{
+			"name": "WeIdentity RestService API",
+			"item": [
+				{
+					"name": "1、私钥托管模式",
+					"item": [
+						{
+							"name": "createWeId  创建 WeIdentity DID（ 无参创建方式 ）",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionName\":\"createWeId\",\n    \"functionArg\":{},\n    \"transactionArg\":{},\n    \"v\":\"1.0.0\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "基于托管模式的 RestService 不允许通过传入公钥参数的方式创建 WeID，这是因为：这样生成的 WeID 私钥不存在于 RestService 本地，因此无法在后续过程中被调用\n\n如果需要通过传入公钥的方式创建 WeID，请使用基于轻客户方式的接口创建\n\n— 入参：application/json\n\n``` json\n{\n    \"functionName\":\"createWeId\",  // required\n    \"functionArg\":{},  // required\n    \"transactionArg\":{},  // required\n    \"v\":\"1.0.0\"  // 版本号，required\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\",  // 错误信息\n    \"respBody\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"  // WeIdentity DID\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "getWeIdDocument  获取 WeIdentity DID Document",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\"\n    },\n    \"transactionArg\": {},\n    \"v\": \"1.0.0\",\n    \"functionName\": \"getWeIdDocument\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：application/json\n\n``` json\n{\n    \"functionName\":\"getWeIdDocument\",  // required\n    \"functionArg\":{\n        \"weId\":\"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\"  // WeIdentity DID，与 SDK 直接调用的方式入参要求一致，required\n    },  // required\n    \"transactionArg\":{},  // no-required，传空\n    \"v\":\"1.0.0\"  // 版本号\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"respBody\": {  // WeIdentity DID Document\n        \"@context\" : \"https://w3id.org/did/v1\",\n        \"id\" : \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n        \"created\" : 1553224394993,\n        \"updated\" : 1553224394993,\n        \"publicKey\" : [ ],\n        \"authentication\" : [ ],\n        \"service\" : [ ]\n    },\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\"  // 错误信息\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "registerAuthorityIssuer  创建 AuthorityIssuer",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n        \"name\": \"Administration Office\"\n    },\n    \"transactionArg\": {\n    \t\"invokerWeId\": \"private_key\"\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"registerAuthorityIssuer\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {\n        \"weid\": \"did:weid:0x1Ae5b88d37327830307ab8da0ec5D8E8692A35D3\",  // required，WeIdentity DID，与 SDK 直接调用的方式入参一致\n        \"name\": \"Sample College\"  // required,机构名\n    },\n    \"transactionArg\": {\n        \"invokerWeId\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"  // required，用于索引私钥的 WeIdentity DID，服务器端会凭此找到所托管的私钥\n        // 注意，如果在这里填入了预先定义在 application.properties 里的暗语，则可确保有足够的权限\n    },\n    \"functionName\": \"registerAuthorityIssuer\",  // required\n    \"v\": \"1.0.0\"  // 版本号，required\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\",  // 错误信息\n    \"respBody\": True  // True/False\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "queryAuthorityIssuer  查询 AuthorityIssuer",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\"\n    },\n    \"transactionArg\": {\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"queryAuthorityIssuer\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：\n\n``` json\n{\n    \"functionArg\": {  // required\n        \"weId\": \"did:weid:0x1ae5b88d37327830307ab8da0ec5d8e8692a35d3\"  // required，WeIdentity DID，与 SDK 直接调用的方式入参一致\n    },\n    \"transactionArg\": {  // no-required，传空\n    },\n    \"functionName\": \"queryAuthorityIssuer\",  // required\n    \"v\": \"1.0.0\"  // required\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"respBody\": {  // 完整的 Authority Issuer 信息\n        \"accValue\": ,\n        \"created\": 16845611984115,\n        \"name\": \"Sample College\",\n        \"weid\": \"did:weid:0x1ae5b88d37327830307ab8da0ec5d8e8692a35d3\"\n    },\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\"  // 错误信息\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "registerCpt  创建 CPT",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n        \"cptJsonSchema\": {\n        \t\"weid\" : \"Delegator WeID\",\n        \t\"receiver\": \"Receiver WeID\",\n        \t\"content\": \"Authorized content\"\n        }\n    },\n    \"transactionArg\": {\n    \t\"invokerWeId\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\"\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"registerCpt\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：appliation/json\n\n``` json\n{\n  \"functionArg\": {\n      \"weId\": \"did:weid:0x1ae5b88d37327830307ab8da0ec5d8e8692a35d3\",  // required，CPT 创建者\n      \"cptJsonSchema\":{  // required，CPT Json Schema，与 SDK 直接调用的方式入参一致\n      // 说明：CPT Json Schema是什么？应该满足什么格式？\n      // 答：Json Schema是一种用来定义Json字符串格式的Json字符串，它定义了CPT应包括的字段、属性及规则。\n      // WeIdentity 可以接受 http://json-schema.org/draft-04/schema# 所定义第四版及之前版本作为入参。\n          \"title\": \"cpt\",\n          \"description\": \"this is cpt\",\n          \"properties\": {\n              \"name\": {\n                  \"type\": \"string\",\n                  \"description\": \"the name of certificate owner\"\n              },\n              \"gender\": {\n                  \"enum\": [\n                      \"F\",\n                      \"M\"\n                  ],\n                  \"type\": \"string\",\n                  \"description\": \"the gender of certificate owner\"\n              },\n              \"age\": {\n                  \"type\": \"number\",\n                  \"description\": \"the age of certificate owner\"\n              }\n          },\n          \"required\": [\n              \"name\",\n              \"age\"\n          ]\n      }\n  },\n  \"transactionArg\": {\n      \"invokerWeId\": \"did:weid:0x1ae5b88d37327830307ab8da0ec5d8e8692a35d3\"  // required，用于索引私钥的 WeIdentity DID，服务器端会凭此找到所托管的私钥\n  },\n  \"functionName\": \"registerCpt\",  // required\n  \"v\": \"1.0.0\"  // 版本号，required\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"respBody\": {  // cptBaseInfo\n        \"cptId\": 2000001,\n        \"cptVersion\": 1\n    },\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\"  // 错误信息\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "queryCpt  查询 CPT",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"cptId\": 2000000\n    },\n    \"transactionArg\": {},\n    \"v\": \"1.0.0\",\n    \"functionName\": \"queryCpt\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {  // required\n        \"cptId\": 10  // required，CPT ID，与 SDK 直接调用的方式入参一致\n    },\n    \"transactionArg\": {  // no-required，传空\n    },\n    \"functionName\": \"queryCpt\",  // required\n    \"v\": \"1.0.0\"  // 版本号，required\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"respBody\": {  // 完整的 CPT 信息\n        \"cptBaseInfo\" : {\n            \"cptId\" : 10,\n            \"cptVersion\" : 1\n        },\n        \"cptId\" : 10,\n        \"cptJsonSchema\" : {\n            \"$schema\" : \"http://json-schema.org/draft-04/schema#\",\n            \"title\" : \"a CPT schema\",\n            \"type\" : \"object\"\n        },\n        \"cptPublisher\" : \"did:weid:0x104a58c272e8ebde0c29083552ebe78581322908\",\n        \"cptSignature\" : \"HJPbDmoi39xgZBGi/aj1zB6VQL5QLyt4qTV6GOvQwzfgUJEZTazKZXe1dRg5aCt8Q44GwNF2k+l1rfhpY1hc/ls=\",\n        \"cptVersion\" : 1,\n        \"created\" : 1553503354555,\n        \"metaData\" : {\n            \"cptPublisher\" : \"did:weid:0x104a58c272e8ebde0c29083552ebe78581322908\",\n            \"cptSignature\" : \"HJPbDmoi39xgZBGi/aj1zB6VQL5QLyt4qTV6GOvQwzfgUJEZTazKZXe1dRg5aCt8Q44GwNF2k+l1rfhpY1hc/ls=\",\n            \"created\" : 1553503354555,\n            \"updated\" : 0\n        },\n        \"updated\" : 0\n    },\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\"  // 错误信息\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "createCredential  创建 Credential",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"issuer\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n        \"cptId\": \"2000000\",\n        \"expirationDate\": \"2100-04-18T21:12:33Z\",\n        \"claim\": {\n            \"weid\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n            \"receiver\": \"did:weid:1:0x49eaf51c60ffc8a42a3deb4c32d69b33e37c6f2f\",\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\"\n        }\n    },\n    \"transactionArg\": {\n    \t\"invokerWeId\": \"private_key\"\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"createCredential\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：application/json\n\n``` json\n// ?，以 signature 代替私钥\n\n{\n    \"functionArg\": {  // required\n        \"cptId\": 10,  // required，CPT ID\n        \"issuer\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",  // required，issuer WeIdentity DID\n        \"expirationDate\": \"2019-04-18T21:12:33Z\",   // required，过期时间（使用UTC格式）\n        \"claim\": {  // required，claim Json 结构体，与 SDK 直接调用的方式入参一致\n            \"name\": \"zhang san\",\n            \"gender\": \"F\",\n            \"age\": 18\n        }\n    },\n    \"transactionArg\": {  // required\n        \"invokerWeId\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"  // required，用于索引私钥的 WeIdentity DID，服务器端户凭此找到所托管的私钥\n    },\n    \"functionName\": \"createCredential\",  // required\n    \"v\": \"1.0.0\"  // 版本号，required\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n  \"respBody\": {  // 完整的 Credential 信息\n      \"@context\": \"https://github.com/WeBankBlockchain/WeIdentity/blob/master/context/v1\",\n      \"claim\": {\n          \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n          \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n          \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n      },\n      \"cptId\": 2000156,\n      \"expirationDate\": \"2100-04-18T21:12:33Z\",\n      \"id\": \"da6fbdbb-b5fa-4fbe-8b0c-8659da2d181b\",\n      \"issuanceDate\": \"2020-02-06T22:24:00Z\",\n      \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n      \"proof\": {\n          \"created\": \"1580999040000\",\n          \"creator\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n          \"signature\": \"G0XzzLY+MqUAo3xXkS3lxVsgFLnTtvdXM24p+G5hSNNMSIa5vAXYXXKl+Y79CO2ho5DIGPPvSs2hvAixmfIJGbw=\",\n          \"type\": \"Secp256k1\"\n      }\n  },\n  \"errorCode\": 0,  // 错误码，0 表示成功\n  \"errorMessage\": \"success\"  // 错误信息\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "verifyCredential  验证 Credential",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"@context\": \"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1\",\n        \"claim\": {\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n            \"receiver\": \"did:weid:1:0x49eaf51c60ffc8a42a3deb4c32d69b33e37c6f2f\",\n            \"weid\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\"\n        },\n        \"cptId\": 2000000,\n        \"expirationDate\": \"2100-04-18T21:12:33Z\",\n        \"id\": \"e4c149d2-c52c-42ac-a8f5-adc8c2f58406\",\n        \"issuanceDate\": \"2023-10-11T15:17:29Z\",\n        \"issuer\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n        \"proof\": {\n            \"created\": \"1697008649000\",\n            \"creator\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n            \"signature\": \"dgnJQXIpMlFyOTUyonSJ+gLMpQxFVPFNSIBCJB1ESvkQxkZYbz/2qF7Njf0ahRFt/Cf0ZLe2jlOvZsJ/6Su1vQE=\",\n            \"type\": \"Secp256k1\"\n        }\n    },\n    \"transactionArg\": {\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"verifyCredential\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {\n      \"@context\": \"https://github.com/WeBankBlockchain/WeIdentity/blob/master/context/v1\",  // context 值\n      \"claim\": {  // required，claim Json 结构体，与 SDK 直接调用的方式入参一致\n          \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n          \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n          \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n      },\n      \"cptId\": 2000156,  // required，CPT ID\n      \"expirationDate\": \"2100-04-18T21:12:33Z\",  // required，过期时间\n      \"id\": \"da6fbdbb-b5fa-4fbe-8b0c-8659da2d181b\", // REQUIRED，？uuid，Credential 的 UUID\n      \"issuanceDate\": \"2020-02-06T22:24:00Z\",  // required，颁发时间\n      \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\", // required，issuer WeIdentity DID\n      \"proof\": {  // Credential 签名结构体\n          \"created\": \"1580999040000\",\n          \"creator\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n          \"signature\": \"G0XzzLY+MqUAo3xXkS3lxVsgFLnTtvdXM24p+G5hSNNMSIa5vAXYXXKl+Y79CO2ho5DIGPPvSs2hvAixmfIJGbw=\",\n          \"type\": \"Secp256k1\"\n      }\n    },\n    \"transactionArg\": {  // no-required，传空\n    },\n    \"functionName\": \"verifyCredential\",  // required\n    \"v\": \"1.0.0\"  // 版本号，required\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"respBody\": true,  // True/False\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\"  // 错误信息\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "createCredentialPojo  创建 CredentialPojo",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"issuer\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n        \"cptId\": \"2000000\",\n        \"expirationDate\": \"2100-04-18T21:12:33Z\",\n        \"claim\": {\n            \"weid\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n            \"receiver\": \"did:weid:1:0x49eaf51c60ffc8a42a3deb4c32d69b33e37c6f2f\",\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\"\n        }\n    },\n    \"transactionArg\": {\n    \t\"invokerWeId\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\"\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"createCredentialPojo\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {  // required\n        \"cptId\": 10,  // required，CPT ID\n        \"issuer\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",  // required，issuer WeIdentity DID\n        \"expirationDate\": \"2019-04-18T21:12:33Z\",  // 过期时间（使用UTC格式）\n        \"claim\": {  // claim Json 结构体，与 SDK 直接调用的方式入参一致\n            \"name\": \"zhang san\",\n            \"gender\": \"F\",\n            \"age\": 18\n        }\n    },\n    \"transactionArg\": {  // required\n        \"invokerWeId\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"  // required，用于索引私钥的 WeIdentity DID，服务器端会凭此找到所托管的私钥\n    },\n    \"functionName\": \"createCredentialPojo\",  // required\n    \"v\": \"1.0.0\"  // required，版本号\n}\n\n// 说明：以 signature 代替私钥\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n  \"respBody\": {  // 完整的 CredentialPojo 信息\n      \"cptId\": 2000156,\n      \"issuanceDate\": 1580996777,\n      \"context\": \"https://github.com/WeBankBlockchain/WeIdentity/blob/master/context/v1\",\n      \"claim\": {\n          \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n          \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n          \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n      },\n      \"id\": \"21d10ab1-75fe-4733-9f1d-f0bad71b5922\",\n      \"proof\": {\n          \"created\": 1580996777,\n          \"creator\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa#keys-0\",\n          \"salt\": {\n              \"content\": \"ncZ5F\",\n              \"receiver\": \"L0c40\",\n              \"weid\": \"I4aop\"\n          },\n          \"signatureValue\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\",\n          \"type\": \"Secp256k1\"\n      },\n      \"type\": [\n          \"VerifiableCredential\",\n          \"hashTree\"\n      ],\n      \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n      \"expirationDate\": 4111737153\n  },\n  \"errorCode\": 0, // 错误码，0 表示成功\n  \"errorMessage\": \"success\"  // 错误信息\n}\n\n```"
+							},
+							"response": []
+						},
+						{
+							"name": "verifyCredentialPojo  验证 CredentailPojo",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"cptId\": 2000000,\n        \"issuanceDate\": 1697008425,\n        \"context\": \"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1\",\n        \"claim\": {\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n            \"receiver\": \"did:weid:1:0x49eaf51c60ffc8a42a3deb4c32d69b33e37c6f2f\",\n            \"weid\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\"\n        },\n        \"id\": \"9e5f407a-5b05-41e2-bc73-a63d32d1a40d\",\n        \"proof\": {\n            \"created\": 1697008425,\n            \"creator\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n            \"salt\": {\n                \"content\": \"MFAvW\",\n                \"receiver\": \"tOxfs\",\n                \"weid\": \"Kfnju\"\n            },\n            \"signatureValue\": \"zb1l9gAQ1T7b5K7Fh3DPkiZcBDjO/lqp8KaYC6lGMBBoZhDgrktmPPW7NowWJXN8Le+7BEm96YctW0ZrMEgUxgA=\",\n            \"type\": \"Secp256k1\"\n        },\n        \"type\": [\n            \"VerifiableCredential\",\n            \"original\"\n        ],\n        \"issuer\": \"did:weid:1:0x4b750f447c310232ce37f2d5ace6140ef93ff423\",\n        \"expirationDate\": 4111737153\n    },\n    \"transactionArg\": {\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"verifyCredentialPojo\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/invoke",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"invoke"
+									]
+								},
+								"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": { \n      \"cptId\": 2000156,  // required，CPT ID\n      \"issuanceDate\": 1580996777,  // required，颁发时间\n      \"context\": \"https://github.com/WeBankBlockchain/WeIdentity/blob/master/context/v1\",  // required，context 值\n      \"claim\": {  // required，claim Json 结构体，与 SDK 直接调用的方式入参要求一致\n          \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n          \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n          \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n      },\n      \"id\": \"21d10ab1-75fe-4733-9f1d-f0bad71b5922\",  // ? uuid，CredentialPojo 的 UUID\n      \"proof\": {  // required，Credential 签名值\n          \"created\": 1580996777,\n          \"creator\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa#keys-0\",\n          \"salt\": {\n              \"content\": \"ncZ5F\",\n              \"receiver\": \"L0c40\",\n              \"weid\": \"I4aop\"\n          },\n          \"signatureValue\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\",\n          \"type\": \"Secp256k1\"\n      },\n      \"type\": [\n          \"VerifiableCredential\",\n          \"hashTree\"\n      ],\n      \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",  // required，issuer WeIdentity DID\n      \"expirationDate\": 4111737153  // required，过期时间\n    },\n    \"transactionArg\": {  // no-required，传空\n    },\n    \"functionName\": \"verifyCredentialPojo\",  // required\n    \"v\": \"1.0.0\"  // 版本号，required\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"respBody\": true,  // True/False\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\"  // 错误信息\n}\n\n```"
+							},
+							"response": []
+						}
+					],
+					"description": "总体介绍：\n\n调用接口：POST weid/api/invoke Content-Type: application/json\n\n1.  入参说明\n    \n\n每个 API 的入参，都是满足以下格式的 JSON 字符串：\n\n``` json\n{\n    \"functionArg\": { // 随调用SDK方法而变的入参 JSON 字符串，具体参数可以查看 SDK 接口文档\n        ...\n    },\n    \"transactionArg\": { // 交易参数 JSON 字符串，仅包括一个变量 InvokerWeId，由传入方决定使用在服务器端托管的具体哪个 WeIdentity DID 所对应的私钥\n        \"invokerWeId\"：// 用于索引私钥的 WeIdentity DID，服务器端会凭此找到所托管的私钥（非必须，只有在那些需要使用不同身份进行写交易签名的方法（ 如，CreateAuthorityIsser ）才会需要 ）\n    },\n    \"functionName\":\"\", // 调用的 SDK 方法名，用于决定具体调用 WeIdentity JAVA SDK 的什么功能\n    \"v\": \"\" // API 版本号，即调用 API 方法版本\n}\n\n```\n\n2\\. 响应说明\n\n每个 API 的接口返回，都是满足以下格式的 JSON 字符串：\n\n``` json\n{\n    \"respBody\":, // 随调用 SDK 方法而变出值 JSON 字符串，即，具体结果随不同的 SDK 调用方法而变 { ... },\n    \"ErrorCode\":, // 错误码\n    \"ErrorMessage\": // 错误消息，成功时为 \"success\"\n}\n\n```"
+				},
+				{
+					"name": "2、轻客户端模式",
+					"item": [
+						{
+							"name": "Encode - CreateWeID  创建 WeIdentity DID（ 有参创建方式 ）",
+							"item": [
+								{
+									"name": "第一次交互",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"functionArg\": {\n    \t\"publicKey\": \"978870416416889679983076739357652892137097344406525666434767708431155392475239591496567952035640408566264627235143888271471053444960378198893918361888848\"\n    },\n    \"functionName\": \"createWeId\",\n    \"transactionArg\": {\n    \t\"nonce\": \"14616548136584\"\n    },\n    \"v\": \"1.0.0\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://192.168.0.93:7001/weid/api/encode",
+											"protocol": "http",
+											"host": [
+												"192",
+												"168",
+												"0",
+												"93"
+											],
+											"port": "7001",
+											"path": [
+												"weid",
+												"api",
+												"encode"
+											]
+										},
+										"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {\n        \"publicKey\": \"712679236821355231513532168231727831978932132185632517152735621683128\"  // required，ECDSA 公钥，需要为10进制的整型数字，以字符串形式传入\n    },\n    \"transactionArg\": {\n        \"nonce\": \"1474800601011307365506121304576347479508653499989424346408343855615822146039\"  // required，交易随机数\n    },\n    \"functionName\": \"createWeId\",  // required\n    \"v\": \"1.0.0\"  // required\n}\n\n```"
+									},
+									"response": []
+								},
+								{
+									"name": "第二次交互",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"functionArg\": {},\n    \"transactionArg\": {\n        \"nonce\": \"14616548136584\",\n        \"data\": \"0x635ef5a500000000000000000000000084d01b18b47c036e422580ca4043b7beaac8744c000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000c000000000000000000000000000000000000000000000000000000000000002a0000000000000000000000000000000000000000000000000000000000000000d313639373030393935313430380000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000016c6469643a776569643a313a307838346430316231386234376330333665343232353830636134303433623762656161633837343463236b6579732d33613131636663372c45643235353139566572696669636174696f6e4b6579323032302c6469643a776569643a313a3078383464303162313862343763303336653432323538306361343034336237626561616338373434632c7a3236726d52453945634d5856584236777a5a5138727a77344e5268566468356744354e6942695651676b467159396335744e63614c633550765271476359436e4774646444557672735a74597548335067796e4c6743415870554e4859766e7742704d51487a7363566a704a68487a6d6247766a55663743715172586a374c323678584b797172597266665934536d785942684b436e6548456842684d5a616a553538394c35576e6a44616d36666136385a72453850694176596e756b375a7434454d7338624451533851673551364a6a73436b4c3700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000786469643a776569643a313a3078383464303162313862343763303336653432323538306361343034336237626561616338373434632330346238643861652c57654964656e746974792c68747470733a2f2f6769746875622e636f6d2f576542616e6b426c6f636b636861696e2f57654964656e746974790000000000000000\",\n        \"signedMessage\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\"\n    },\n    \"functionName\": \"createWeId\",\n    \"v\": \"1.0.0\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "http://192.168.0.93:7001/weid/api/transact",
+											"protocol": "http",
+											"host": [
+												"192",
+												"168",
+												"0",
+												"93"
+											],
+											"port": "7001",
+											"path": [
+												"weid",
+												"api",
+												"transact"
+											]
+										},
+										"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {},\n    \"transactionArg\": {\n        \"nonce\": \"1474800601011307365506121304576347479508653499989424346408343855615822146039\",\n        \"data\": \"809812638256c1235b1231000e000000001231287bacf213c\",\n        \"signedMessage\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\"\n    },\n    \"functionName\": \"createWeId\",\n    \"v\": \"1.0.0\"\n}\n\n```\n\n— 第二次交互，接口返回：application/json\n\n``` json\n{\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\",  // 错误信息\n    \"respBody\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"  // WeIdentity DID\n}\n\n```"
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Encode - RegisterAuthorityIssuer  创建（注册）Authority Issuer",
+							"item": [
+								{
+									"name": "第一次交互",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:0x5774e89d8e7fc8ffc1b7fff4b1019a22ac7140fb\",\n        \"name\": \"BV-College\"\n    },\n    \"functionName\": \"registerAuthorityIssuer\",\n    \"transactionArg\": {\n    \t\"nonce\": \"14616548136584\"\n    },\n    \"v\": \"1.0.0\"\n}"
+										},
+										"url": {
+											"raw": "http://192.168.0.93:7001/weid/api/encode",
+											"protocol": "http",
+											"host": [
+												"192",
+												"168",
+												"0",
+												"93"
+											],
+											"port": "7001",
+											"path": [
+												"weid",
+												"api",
+												"encode"
+											]
+										},
+										"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {\n        \"name\": \"BV-College\",  // required，机构名\n        \"weId\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"  // WeIdentity DID，与 SDK 直接调用的方式入参要求一致\n    },\n    \"transactionArg\": {\n        \"nonce\": \"1474800601011307365506121304576347479508653499989424346408343855615822146039\"  // required，交易随机数\n    },\n    \"functionName\": \"registerAuthorityIssuer\",  // required\n    \"v\": \"1.0.0\"  // required，版本号\n}\n\n```"
+									},
+									"response": []
+								},
+								{
+									"name": "第二次交互",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"functionArg\": {},\n    \"transactionArg\": {\n        \"nonce\": \"1474800601011307365506121304576347479508653499989424346408343855615822146039\",\n        \"data\": \"809812638256c1235b1231000e000000001231287bacf213c\",\n        \"signedMessage\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\"\n    },\n    \"functionName\": \"registerAuthorityIssuer\",\n    \"v\": \"1.0.0\"\n}"
+										},
+										"url": {
+											"raw": "http://192.168.0.93:7001/weid/api/transact",
+											"protocol": "http",
+											"host": [
+												"192",
+												"168",
+												"0",
+												"93"
+											],
+											"port": "7001",
+											"path": [
+												"weid",
+												"api",
+												"transact"
+											]
+										},
+										"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {},\n    \"transactionArg\": {\n        \"nonce\": \"1474800601011307365506121304576347479508653499989424346408343855615822146039\",\n        \"data\": \"809812638256c1235b1231000e000000001231287bacf213c\",\n        \"signedMessage\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\"\n    },\n    \"functionName\": \"registerAuthorityIssuer\",\n    \"v\": \"1.0.0\"\n}\n\n```\n\n第二次交互，接口返回：application/json\n\n``` json\n{\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\",  // 错误信息\n    \"respBody\": {  // Authority Isser 信息\n        \"accValue\": ,\n        \"created\": \"1581420650\",\n        \"name\": \"BV-College\",\n        \"weId\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n    }\n}\n\n```"
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Encode - RegisterCpt  创建 CPT",
+							"item": [
+								{
+									"name": "第一次交互",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"functionArg\": {\n        \"weId\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n        \"cptSignature\": \"HJPbDmoi39xgZBGi/aj1zB6VQL5QLyt4qTV6GOvQwzfgUJEZTazKZXe1dRg5aCt8Q44GwNF2k+l1rfhpY1hc/ls=\",\n        \"cptJsonSchema\": {\n        \t\"weid\" : \"Delegator WeID\",\n        \t\"receiver\": \"Receiver WeID\",\n        \t\"content\": \"Authorized content\"\n        }\n    },\n    \"functionName\": \"registerCpt\",\n    \"transactionArg\": {\n    \t\"nonce\": \"14616548136584\"\n    },\n    \"v\": \"1.0.0\"\n}"
+										},
+										"url": {
+											"raw": "http://192.168.0.93:7001/weid/api/encode",
+											"protocol": "http",
+											"host": [
+												"192",
+												"168",
+												"0",
+												"93"
+											],
+											"port": "7001",
+											"path": [
+												"weid",
+												"api",
+												"encode"
+											]
+										},
+										"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {\n        \"weId\": \"did:weid:0x1ae5b88d37327830307ab8da0ec5d8e8692a35d3\",  // CPT 创建者\n        \"cptJsonSchema\": {  // CPT Json Schema，与 SDK 直接调用的方式入参要求一致\n            \"title\": \"cpt\",\n            \"description\": \"this is cpt\",\n            \"properties\": {\n                \"name\": {\n                    \"type\": \"string\",\n                    \"description\": \"the name of certificate owner\"\n                },\n                \"gender\": {\n                    \"enum\": [\n                        \"F\",\n                        \"M\"\n                    ],\n                    \"type\": \"string\",\n                    \"description\": \"the gender of certificate owner\"\n                },\n                \"age\": {\n                    \"type\": \"number\",\n                    \"description\": \"the age of certificate owner\"\n                }\n            },\n            \"required\": [\n                \"name\",\n                \"age\"\n            ]\n        },\n        \"cptSignature\": \"BaUeP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\"  // 创建者使用自己的私钥对 cptJsonSchema 的签名（与私钥托管方式不同，本方式特有）\n    },\n    \"transactionArg\": {\n        \"nonce\": \"1474800601011307365506121304576347479508653499989424346408343855615822146039\"  // 交易随机数\n    },\n    \"functionName\": \"registerCpt\",  // required\n    \"v\": \"1.0.0\"  // 版本号，required\n}\n\n```"
+									},
+									"response": []
+								},
+								{
+									"name": "第二次交互",
+									"request": {
+										"method": "POST",
+										"header": [
+											{
+												"key": "Content-Type",
+												"value": "application/json",
+												"type": "text"
+											}
+										],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"functionArg\": {},\n    \"transactionArg\": {\n        \"nonce\": \"1474800601011307365506121304576347479508653499989424346408343855615822146039\",\n        \"data\": \"809812638256c1235b1231000e000000001231287bacf213c\",\n        \"signedMessage\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\"\n    },\n    \"functionName\": \"registerAuthorityIssuer\",\n    \"v\": \"1.0.0\"\n}"
+										},
+										"url": {
+											"raw": "http://192.168.0.93:7001/weid/api/transact",
+											"protocol": "http",
+											"host": [
+												"192",
+												"168",
+												"0",
+												"93"
+											],
+											"port": "7001",
+											"path": [
+												"weid",
+												"api",
+												"transact"
+											]
+										},
+										"description": "— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {},\n    \"transactionArg\": {\n        \"nonce\": \"1474800601011307365506121304576347479508653499989424346408343855615822146039\",\n        \"data\": \"809812638256c1235b1231000e000000001231287bacf213c\",\n        \"signedMessage\": \"HEugP13uDVBg2G0kmmwbTkQXobsrWNqtGQJW6BoHU2Q2VQpwVhK382dArRMFN6BDq7ogozYBRC15QR8ueX5G3t8=\"\n    },\n    \"functionName\": \"registerAuthorityIssuer\",\n    \"v\": \"1.0.0\"\n}\n\n```\n\n— 第二次交互，接口返回：application/json\n\n``` json\n{\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\",  // 错误信息\n    \"respBody\": {  // Authority Isser 信息\n        \"cptId\": 2000001,\n        \"cptVersion\": 1\n    }\n}\n\n```"
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Encode - CreateCredentialPojo  创建 CredentialPojo",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"functionArg\": {\n        \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n        \"cptId\": \"2000156\",\n        \"expirationDate\": \"2100-04-18T21:12:33Z\",\n        \"claim\": {\n            \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n            \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n            \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\"\n        }\n    },\n    \"functionName\": \"createCredentialPojo\",\n    \"transactionArg\": {\n    },\n    \"v\": \"1.0.0\"\n}"
+								},
+								"url": {
+									"raw": "http://192.168.0.93:7001/weid/api/encode",
+									"protocol": "http",
+									"host": [
+										"192",
+										"168",
+										"0",
+										"93"
+									],
+									"port": "7001",
+									"path": [
+										"weid",
+										"api",
+										"encode"
+									]
+								},
+								"description": "说明：创建 CredentialPojo，不需要进行区块链交互，因此，只需要进行一次 POST weid/api/encode，然后，对返回的结果进行签名即可\n\n— 入参：application/json\n\n``` json\n{\n    \"functionArg\": {\n        \"cptId\": 10,  // CPT ID\n        \"issuer\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",  // issuer WeIdentity DID\n        \"expirationDate\": \"2019-04-18T21:12:33Z\",  // 过期时间（使用UTC格式）\n        \"claim\": {  // claim Json 结构体，与 SDK 直接调用的方式入参一致\n            \"name\": \"zhang san\",\n            \"gender\": \"F\",\n            \"age\": 18\n        }\n    },\n    \"transactionArg\": {  // no-required，传空\n    },\n    \"functionName\": \"createCredentialPojo\",  // required\n    \"v\": \"1.0.0\"  // required，版本号\n}\n\n// 说明，以 signature 代替私钥\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n  \"respBody\": {  // 完整的 CredentialPojo 信息\n      \"cptId\": 2000156,\n      \"issuanceDate\": 1580996777,\n      \"context\": \"https://github.com/WeBankBlockchain/WeIdentity/blob/master/context/v1\",\n      \"claim\": {\n          \"content\": \"b1016358-cf72-42be-9f4b-a18fca610fca\",\n          \"receiver\": \"did:weid:101:0x7ed16eca3b0737227bc986dd0f2851f644cf4754\",\n          \"weid\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\"\n      },\n      \"id\": \"21d10ab1-75fe-4733-9f1d-f0bad71b5922\",\n      \"proof\": {\n          \"created\": 1580996777,\n          \"creator\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa#keys-0\",\n          \"salt\": {\n              \"content\": \"ncZ5F\",\n              \"receiver\": \"L0c40\",\n              \"weid\": \"I4aop\"\n          },\n          \"signatureValue\": \"HJPbDmoi39xgZBGi/aj1zB6VQL5QLyt4qTV6GOvQwzfgUJEZTazKZXe1dRg5aCt8Q44GwNF2k+l1rfhpY1hc/ls=\",\n          \"type\": \"Secp256k1\"\n      },\n      \"type\": [\n          \"VerifiableCredential\",\n          \"hashTree\"\n      ],\n      \"issuer\": \"did:weid:101:0xfd28ad212a2de77fee518b4914b8579a40c601fa\",\n      \"expirationDate\": 4111737153\n  },\n  \"errorCode\": 0,  // 错误码，0 表示成功\n  \"errorMessage\": \"success\"  // 错误信息\n}\n\n```\n\n**// 需说明的是：**\n\n> 这个生成的CredentialPojo的签名值（proof中的signatureValue项）并没有经过私钥签名。  \n> 正确的签名方式包括下面几步：  \n> \\- base64解码，生成一个二进制字节数组  \n> \\- 对解码的byte\\[\\]做一次secp256k1或sm3的hash  \n> \\- 对完成hash过byte\\[\\]，再做一次hash（如果您使用的是Java web3sdk的SignMessage()，这一步它替您完成了）  \n> \\- 传入私钥，进行签名，得到r，s，v - 对进行序列化  \n> \\- 把序列化的byte进行base64编码发回RestService\n\n> 使用ECDSA或SM2私钥进行签名和Base64编码的范例代码见下（Java和Go）：\n\n``` java\nRsvSignature signature = DataToolUtils.signToRsvSignature(new String(DataToolUtils.base64Decode(signatureValue)), privateKey);\n\n```\n\n``` go\nbase64SignatureValue := credentialEncodeResponse.RespBody.Proof.SignatureValue\nsignatureValue, err3 := base64.StdEncoding.DecodeString(base64SignatureValue)\nhashedMsg := Hash(signatureValue)\ndoubleHashedMsg := Hash(hashedMsg)\nprivateKeyBytes := ConvertPrivateKeyBigIntToPrivateKeyBytes(privateKeyBigInt)\nsignatureBytes, err4 := SignSignature(doubleHashedMsg, privateKeyBytes)\nsignatureBase64String := base64.StdEncoding.EncodeToString(signatureBytes)\n\n```"
+							},
+							"response": []
+						}
+					],
+					"description": "总体介绍：\n\n基于轻客户端模式的 API 的入参方式，与基于私钥托管模式的 API 相同，也是满足以下格式的 JSON 字符串\n\n最大的区别在于，流程包括两次交互：\n\n**「 第一次交互 」**调用接口：POST weid/api/encode Content-Type: application\n\n轻客户端提供接口参数，发送给 RestService 服务端，后者进行组装、编码区块链原始交易串，并返回\n\n1.  接口入参（Body）\n    \n\n``` json\n{\n    \"functionArg\": { // 随不同的 SDK 方法调用而变的入参json字符串，具体参数可查看 SDK 接口文档\n        ...\n    },\n    \"transactionArg\": { // 交易参数json字符串，required，仅包括一个变量 nonce，用于防止重放攻击的交易随机数\n        \"nonce\": // required，用于防止重放攻击的交易随机数，可以使用 RestService Jar 的 getNonce()，或其他类似方法生成此随机数\n         // 需说明的是，必须妥善保存，这个 nonce 在第二次交互中还会用到\n    }\n    \"functionName\":\"\",   // 调用的 SDK 方法名，用于决定具体调用 WeIdentity Java SDK 的什么功能\n    \"v\": \"\" // 调用的 API 方法版本\n}\n\n```\n\n2\\. 接口返回：application/json\n\n``` json\n{\n    \"respBody\": {\n        \"blockLimit\": ,  // 建议使用的交易处理期限,\n        \"encodedTransaction\": ,  // 基于Base64编码的原始交易串信息\n        \"data\":   // 交易特征值\n    }\n    \"ErrorCode\": ,  // 错误码\n    \"ErrorMessage\":   // 错误信息，成功时为\"success\"\n}\n\n```\n\n→ 返回结构体，包含 encodedTransaction\n\n调用者随后需要使用自己的私钥对 encodeTransaction 进行交易签名，然后，使用 Base64 对其进行编码\n\n→ Then，和 data、nonce 一起待用，进行第二次交互\n\n// 请注意使用的 ECDSA 签名算法的编码格式 - ！important\n\n> WeID Java SDK所使用的是椭圆曲线Secp256k1算法，这也是WeID Go轻客户端的默认算法。\n\n> 一般来说，ECDSA的签名算法会生成R，S，V三个值，其中R和S是32个字节的二进制字节数组，而V，以太坊原生的Secp256k1算法的结果一般是0或1；当生成签名的R，S，V之后，需要将R，S，V存入一个65个字节长的二进制字节数组，再进行Base64编码方可正确由RestService解析。\n\n> RestService只接受两种组成方式： 1. 按照R, S, V的顺序拼接成一个65个字节长的数组并使用Base64编码（这是WeID Go轻客户端默认方式） 2. 按照V, R, S的顺序拼接成一个65个字节长的数组并使用Base64编码（这是WeID Java SDK默认序列化方式）\n\n> 可以使用WeID Java SDK代码，使用默认Secp256k1私钥进行签名和Base64编码的范例代码见下（可以在WeID Java SDK的[签名测试用例](https://github.com/WeBankBlockchain/WeIdentity/blob/feature/reconstruction/src/test/java/com/webank/weid/util/TestSignatureUtils.java)里编写和执行下面代码）\n\n``` java\n// 依赖weid-java-sdk 3.1.1-rc.1\nbyte[] decodeTransaction = DataToolUtils.base64Decode(\"\".getBytes());\nString decodeTransactionStr = new String(decodeTransaction);\nRsvSignature signatureResult = DataToolUtils.signToRsvSignature(decodeTransactionStr, privateKey);\nString base64SignedMsg = DataToolUtils.SigBase64Serialization(signatureResult);\n\n```\n\n**「 第二次交互 」**调用接口：POST weid/api/transact Content-Type: application/json\n\n轻客户端在本地使用自己的私钥，对原始交易串进行符合 ECDSA 的 sha3 签名，发给 RestService 服务端，后者打包，并直接执行交易；简单来说就是，将已签名交易的参数发给 RestService，并由后者将交易打包上链\n\n1.  接口入参\n    \n\n``` json\n{\n    \"functionArg\": {  // 传空\n    },\n    \"transactionArg\": {  // 交易参数json字符串\n        \"nonce\": , // 用于防止重放攻击的交易随机数，第一次交互起始阶段生成的 nonce\n        \"blockLimit\": ,// 用于限制交易处理期限，需和第一步中返回值一致\n        \"signType\": ,  // 签名类型，\"1\"表示RSV，\"2\"表示VRS，如果使用上面WeID Java SDK示例代码来签名，则填\"2\"\n        \"data\": ,  // 交易特征值，需和第一步中返回值一致，即，第一次交互收到的 data\n        \"signedMessage\": // 基于Base64编码的、使用私钥签名之后的encodedTransaction签名值，即，第一次交互后，使用者使用本地私钥签名，并通过 base64 编码的 encodedTransaction 的签名值\n    },\n    \"functionName\": \"\",  // 调用的 SDK 方法名，用于决定具体调用 WeIdentity Java SDK 的什么功能\n    \"v\": \"\" // 调用的 API 方法版本号\n}\n\n```\n\n2\\. 接口返回：application/json\n\n``` json\n{\n    \"respBody\": {  // 随调用SDK方法而变的输出值json字符串\n    }\n    \"ErrorCode\": ,  // 错误码\n    \"ErrorMessage\": ,  // 错误信息，成功时为\"success\"\n}\n\n```\n\n**// 说明：！important**\n\n基于轻客户端的交易方式，本质上是因为签名操作必须在本地完成，因此，将原始交易串分成了两次交互完成\n\n基于轻客户端的每个 API 的入参，也仅仅在第一次交互中不同，\n\n因此，**该模块的下列 API，会忽略第二次交互的入参，只提供第一次交互的入口和第二次交互的返回值**"
+				}
+			]
+		},
+		{
+			"name": "WeIdentity Endpoint Service API",
+			"item": [
+				{
+					"name": "get all endpoint 获取所有已注册的 Endpoint 信息",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.0.93:7001/weid/api/endpoint",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"93"
+							],
+							"port": "7001",
+							"path": [
+								"weid",
+								"api",
+								"endpoint"
+							]
+						},
+						"description": "1.  接口入参：无\n2.  接口返回：application/json\n    \n\n``` json\n{\n    \"ErrorCode\": 0,\n    \"ErrorMessage\": \"success\",\n    \"respBody\": [\n        {\n            \"requestName\": \"create-passphrase\",\n            \"inAddr\": [\n                \"127.0.0.1:6010\",\n                \"127.0.0.1:6011\"\n            ],\n            \"description\": \"Create a valid random passphrase\"\n        },\n        {\n            \"requestName\": \"verify-passphrase\",\n            \"inAddr\": [\n                \"127.0.0.1:6012\",\n                \"127.0.0.1:6013\"\n            ],\n            \"description\": \"Verify a passphrase\"\n        }\n    ]\n}\n```"
+					},
+					"response": []
+				},
+				{
+					"name": "进行 Endpoint 调用",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"body\": \"abcabc\"\n}"
+						},
+						"url": {
+							"raw": "http://192.168.0.93:7001/weid/api/endpoint/duplicate-input",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"93"
+							],
+							"port": "7001",
+							"path": [
+								"weid",
+								"api",
+								"endpoint",
+								"duplicate-input"
+							]
+						},
+						"description": "1.  接口入参\n    \n\n/{endpont} required，在 API 路径中标明的 API 名，String\n\nbody required，以\\`\\`\\`分隔的多个传入服务端用于执行API的参数\n\n``` json\n{\n    \"body\": \"did:weid:0xfd28ad212a2de77fee518b4914b8579a40c601fa```25\"  // required，以```分隔的多个传入服务端用于执行API的参数\n}\n\n```\n\n2\\. 接口返回：application/json\n\n``` json\n{\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\",  // 错误信息\n    \"respBody\": \"did:weid:0x1Ae5b88d37327830307ab8da0ec5D8E8692A35D3\"  // SDK 侧的返回值，String\n}\n\n```"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "WeIdentity 数据授权 API",
+			"item": [
+				{
+					"name": "Fetch Authorized Data  数据授权 API",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"authToken\": {\n\t    \"claim\": {\n\t        \"duration\": 360000,\n\t        \"fromWeId\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168\",\n\t        \"resourceId\": \"4b077c17-9612-42ee-9e36-3a3d46b27e81\",\n\t        \"serviceUrl\": \"http://127.0.0.1:6010/fetch-data\",\n\t        \"toWeId\": \"did:weid:101:0x68bedb2cbe55b4c8e3473faa63f121c278f6dba9\"\n\t    },\n\t    \"context\": \"https://github.com/WeBankFinTech/WeIdentity/blob/master/context/v1\",\n\t    \"cptId\": 101,\n\t    \"expirationDate\": 1581347039,\n\t    \"id\": \"48b75424-9411-4d22-b925-4e730b445a31\",\n\t    \"issuanceDate\": 1580987039,\n\t    \"issuer\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168\",\n\t    \"proof\": {\n\t        \"created\": 1580987039,\n\t        \"creator\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168#keys-0\",\n\t        \"salt\": {\n\t            \"duration\": \"fmk5A\",\n\t            \"fromWeId\": \"DEvFy\",\n\t            \"resourceId\": \"ugVeN\",\n\t            \"serviceUrl\": \"nVdeE\",\n\t            \"toWeId\": \"93Z1E\"\n\t        },\n\t        \"signatureValue\": \"HCZwyTzGst87cjCDaUEzPrO8QRlsPvCYXvRTUVBUTDKRSoGDgu4h4HLrMZ+emDacRnmQ/yke38u1jBnilNnCh6c=\",\n\t        \"type\": \"Secp256k1\"\n\t    },\n\t    \"type\": [\"VerifiableCredential\", \"hashTree\"]\n\t},\n\t\"signedNonce\": \"123123\"\n}"
+						},
+						"url": {
+							"raw": "http://192.168.0.93:7001/weid/api/authorize/fetch-data",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"93"
+							],
+							"port": "7001",
+							"path": [
+								"weid",
+								"api",
+								"authorize",
+								"fetch-data"
+							]
+						},
+						"description": "— 入参：application/json\n\n``` json\n{\n  \"authToken\": {  // required，CPT101数据授权凭证，需通过DataToolUtils.serialize()方式生成\n      \"claim\": {\n          \"duration\": 360000,\n          \"fromWeId\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168\",\n          \"resourceId\": \"4b077c17-9612-42ee-9e36-3a3d46b27e81\",\n          \"serviceUrl\": \"http://127.0.0.1:6010/fetch-data\",\n          \"toWeId\": \"did:weid:101:0x68bedb2cbe55b4c8e3473faa63f121c278f6dba9\"\n      },\n      \"context\": \"https://github.com/WeBankBlockchain/WeIdentity/blob/master/context/v1\",\n      \"cptId\": 101,\n      \"expirationDate\": 1581347039,\n      \"id\": \"48b75424-9411-4d22-b925-4e730b445a31\",\n      \"issuanceDate\": 1580987039,\n      \"issuer\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168\",\n      \"proof\": {\n          \"created\": 1580987039,\n          \"creator\": \"did:weid:101:0x69cd071e4be5fd878e1519ff476563dc2f4c6168#keys-0\",\n          \"salt\": {\n              \"duration\": \"fmk5A\",\n              \"fromWeId\": \"DEvFy\",\n              \"resourceId\": \"ugVeN\",\n              \"serviceUrl\": \"nVdeE\",\n              \"toWeId\": \"93Z1E\"\n          },\n          \"signatureValue\": \"HCZwyTzGst87cjCDaUEzPrO8QRlsPvCYXvRTUVBUTDKRSoGDgu4h4HLrMZ+emDacRnmQ/yke38u1jBnilNnCh6c=\",\n          \"type\": \"Secp256k1\"\n      },\n      \"type\": [\"VerifiableCredential\", \"hashTree\"]\n  },\n  \"signedNonce\": \"123123\"  // required，签名的Nonce值（当前暂不校验，可任意填入）\n}\n\n```\n\n— 接口返回：application/json\n\n``` json\n{\n    \"ErrorCode\": 0,  // 错误码，0 表示成功\n    \"ErrorMessage\": \"success\",  // 错误信息\n    \"respBody\": \"sample data\",  // SDK 侧的返回值，String\n}\n\n```"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "其他",
+			"item": [
+				{
+					"name": "Transact - Any",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"functionArg\": {},\r\n    \"functionName\": \"createWeId\", \r\n    \"transactionArg\": {\r\n    \t\"nonce\": \"2678903918699407695\",\r\n    \t\"blockLimit\": \"44872\",\r\n   \t\"signType\": \"2\",\r\n   \t\"data\": \"0x6bf30a0d000000000000000000000000dc99f92911dd8f81b0c24ae018a8d7df41eb098400000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000005e45380c00000000000000000000000000000000000000000000000000000000000000c5373439373239383339363337343235343130323237353034373732303838313239393936303834323533313730393338363534353032383431303235343437343433303739373039393430393030303736393631393438343638393832393635323134363034353734343434393731303734373130383236313031303937383337323736353737303537393539373337373836393235303137342f307864633939663932393131646438663831623063323461653031386138643764663431656230393834000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a3135383135393436333600000000000000000000000000000000000000000000\",\r\n    \t\"signedMessage\": \"drS4u7MOge9eWfDOWWdTHAZlKoHuSdxg9pqvu80agAQMB2KZBl6c/rV84m2r+4VXKACV02xC1WfcjWeLIJ92EwA=\"\r\n    },\r\n    \"v\": \"1.0.0\"\r\n}"
+						},
+						"url": {
+							"raw": "http://192.168.0.93:7001//weid/api/transact",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"93"
+							],
+							"port": "7001",
+							"path": [
+								"",
+								"weid",
+								"api",
+								"transact"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createEvidence",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"functionArg\": {\n        \"id\": \"31c38f4c-4d12-40fd-92c4-4d9f1dce0135\",\n        \"hash\": \"0x6726391a7fa259470c26a2e9c9467ddbb1f1e7108eeb6f279248b70bb91f8205\",\n        \"proof\": \"3divzA7mgEv3774UtZRIxjUeQP0IEzMv/FfnRE6RgMjN1lMuyRJNvHF+N8NJjVydRmC9cWffKJjE30W8Vbk+MwA=\",\n        \"log\": \"temp\"\n    },\n    \"transactionArg\": {\n    \t\"groupId\": 1\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"createEvidence\"\n}"
+						},
+						"url": {
+							"raw": "http://192.168.0.93:7001/weid/api/invoke",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"93"
+							],
+							"port": "7001",
+							"path": [
+								"weid",
+								"api",
+								"invoke"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEvidence",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"functionArg\": {\n        \"hashValue\": \"0x6726391a7fa259470c26a2e9c9467ddbb1f1e7108eeb6f279248b70bb91f8205\"\n    },\n    \"transactionArg\": {\n    \t\"groupId\": 1\n    },\n    \"v\": \"1.0.0\",\n    \"functionName\": \"getEvidence\"\n}"
+						},
+						"url": {
+							"raw": "http://192.168.0.93:7001/weid/api/invoke",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"93"
+							],
+							"port": "7001",
+							"path": [
+								"weid",
+								"api",
+								"invoke"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
