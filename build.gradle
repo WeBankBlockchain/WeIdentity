@@ -8,8 +8,8 @@ buildscript {
 }
 
 plugins {
-  id 'com.github.spotbugs' version '4.7.0'
-  id "com.github.hierynomus.license-report" version "0.15.0"
+    id 'com.github.spotbugs' version '4.7.0'
+    id "com.github.hierynomus.license-report" version "0.15.0"
 }
 import com.github.spotbugs.snom.SpotBugsTask
 
@@ -69,6 +69,7 @@ repositories {
         maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
         maven { url "https://oss.sonatype.org/content/groups/public/" }
         maven { url "http://maven.aliyun.com/nexus/content/groups/public/" }
+        maven { url 'https://jitpack.io' }
     } else {
         maven {
             url 'dependencies'
@@ -165,6 +166,11 @@ List spring = [
         "org.springframework:spring-context:5.3.25"
 ]
 
+List ipfs = [
+        'com.github.ipfs:java-ipfs-api:v1.3.3'
+]
+
+
 configurations {
     localDeps
     all*.exclude group: "io.netty", module: "netty-tcnative"
@@ -177,7 +183,7 @@ configurations.all {
 dependencies {
     localDeps 'org.projectlombok:lombok:1.18.10'
     if (!gradle.startParameter.isOffline()) {
-        compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval, gson, spring, xstream
+        compile logger, lombok, apache_commons, json, mysql_driver, redisson, zxing, rpc, pdfbox, protobuf, caffeine, oval, gson, spring, xstream,ipfs
         compile("com.webank:weid-blockchain:3.1.1-rc.1")
 
         compile fileTree(dir: 'lib', include: '*.jar')
@@ -348,7 +354,7 @@ if (!gradle.startParameter.isOffline()) {
         }
     }
 
-       uploadArchives {
+    uploadArchives {
         repositories {
             mavenDeployer {
                 beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }

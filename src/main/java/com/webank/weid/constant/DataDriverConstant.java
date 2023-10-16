@@ -18,6 +18,7 @@ public final class DataDriverConstant {
     public static final Charset STANDARDCHARSETS_ISO = StandardCharsets.ISO_8859_1;
     public static final Charset STANDARDCHARSETS_UTF_8 = StandardCharsets.UTF_8;
 
+
     /**
      * redis execute status.
      */
@@ -38,12 +39,12 @@ public final class DataDriverConstant {
     /**
      * redis user password properties.
      */
-    public static final String PASSWORD = "redis.password";
+    public static final String REDIS_PASSWORD = "redis.password";
 
     /**
      * redis single database properties.
      */
-    public static final String DATABASE = "database";
+    public static final String REDIS_DATABASE = "database";
 
     /**
      * redis cluster idle_connection_timeout properties.
@@ -109,7 +110,7 @@ public final class DataDriverConstant {
      * jdbc url properties.
      */
     public static final String JDBC_URL = "jdbc.url";
-    
+
     /**
      * jdbc driver properties.
      */
@@ -159,7 +160,7 @@ public final class DataDriverConstant {
      * jdbc minEvictableIdleTimeMillis properties.
      */
     public static final String JDBC_MIN_EITM = "jdbc.minEvictableIdleTimeMillis";
-    
+
     /**
      * jdbc initialSize properties.
      */
@@ -300,5 +301,20 @@ public final class DataDriverConstant {
     public static final String LOCAL_SPECIFIC_ISSUER = "local.specificIssuer";
 
     public static final String LOCAL_EVIDENCE = "local.evidence";
+
+    /**
+     * ipfs所需常量.
+     */
+    public static final int IPFS_EXECUTE_FAILED_STATUS = 0;
+
+    public static final String IPFS_API ="ipfs.api";
+
+    public static final String IPFS_BASE_PATH ="output/local/";
+
+    public static final int IPFS_WRITE_SUCCESS = 0;
+
+    public static final int IPFS_ONLY_ID_LINES = 1;
+
+    public static final int IPFS_READ_CID_LINES = 2;
 
 }
