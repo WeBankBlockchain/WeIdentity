@@ -1,6 +1,5 @@
+package com.webank.weid.suite.persistence.ipfs;
 
-
-package com.webank.weid.suite.persistence.redis;
 
 import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.constant.DataDriverConstant;
@@ -12,16 +11,20 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author 刘家辉
+ * @date 2023/08/23
+ */
 @Getter
-public class RedisDomain extends BaseDomain {
+public class IpfsDomain extends BaseDomain {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisDomain.class);
+    private static final Logger logger = LoggerFactory.getLogger(com.webank.weid.suite.persistence.redis.RedisDomain.class);
 
-    public RedisDomain() {
+    public IpfsDomain() {
         resolveDomain();
     }
 
-    public RedisDomain(String domainkey) {
+    public IpfsDomain(String domainkey) {
         this.key = domainkey;
         resolveDomain();
     }

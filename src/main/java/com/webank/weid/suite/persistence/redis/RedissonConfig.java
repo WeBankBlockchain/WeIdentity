@@ -2,17 +2,16 @@
 
 package com.webank.weid.suite.persistence.redis;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
+import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.util.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.util.PropertyUtils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * redisson配置类.
@@ -29,7 +28,7 @@ public class RedissonConfig {
     private static final List<String> redisNodes = Arrays.asList(redisUrl.split(","));
 
     private static final String password = PropertyUtils.getProperty(
-            DataDriverConstant.PASSWORD);
+            DataDriverConstant.REDIS_PASSWORD);
 
     /**
      * 单节点模式.
@@ -40,7 +39,7 @@ public class RedissonConfig {
 
         String redisPrefix = DataDriverConstant.REDIS_SINGLE;
         //数据库选择，默认为db0
-        String databaseKey = redisPrefix + DataDriverConstant.DATABASE;
+        String databaseKey = redisPrefix + DataDriverConstant.REDIS_DATABASE;
         String passwd = null;
         if (StringUtils.isNoneBlank(password)) {
             passwd = password;

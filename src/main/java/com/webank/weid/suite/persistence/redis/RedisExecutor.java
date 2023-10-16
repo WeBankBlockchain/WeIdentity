@@ -2,25 +2,23 @@
 
 package com.webank.weid.suite.persistence.redis;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
+import com.webank.weid.blockchain.constant.ErrorCode;
+import com.webank.weid.blockchain.protocol.response.ResponseData;
+import com.webank.weid.constant.DataDriverConstant;
+import com.webank.weid.protocol.request.TransactionArgs;
+import com.webank.weid.suite.persistence.DefaultValue;
+import com.webank.weid.util.DataToolUtils;
 import org.apache.commons.collections4.CollectionUtils;
-import org.redisson.api.BatchResult;
-import org.redisson.api.RBatch;
-import org.redisson.api.RBucket;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.redisson.client.RedisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.webank.weid.constant.DataDriverConstant;
-import com.webank.weid.blockchain.constant.ErrorCode;
-import com.webank.weid.protocol.request.TransactionArgs;
-import com.webank.weid.blockchain.protocol.response.ResponseData;
-import com.webank.weid.suite.persistence.DefaultValue;
-import com.webank.weid.util.DataToolUtils;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * redis操作辅助类.
@@ -82,6 +80,93 @@ public class RedisExecutor {
     }
 
     /**
+     * 执行分页查询
+     *
+     * @param tableDomain 表域
+     * @param dataDomain  数据域
+     * @param datas       数据
+     * @param client      客户端
+     * @return {@link ResponseData}<{@link List}<{@link String}>>
+     */
+    public ResponseData<List<String>> executeQueryLines(String tableDomain,String dataDomain, int[] datas, RedissonClient client) {
+        ResponseData<List<String>> result = new ResponseData<List<String>>();
+        ArrayList<String> list = new ArrayList<>();
+        try {
+            if (client == null) {
+                return new ResponseData<>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+
+            }
+            RScoredSortedSet<Object> scoredSortedSet = client.getScoredSortedSet(dataDomain);
+            Collection<Object> objects = scoredSortedSet.valueRange(datas[0], datas[1]);
+            for (Object object : objects) {
+                RBucket<String> rbucket = client.getBucket(tableDomain + VALUE_SPLIT_CHAR + object);
+                list.add(rbucket.get());
+            }
+          result.setErrorCode(ErrorCode.SUCCESS);
+          result.setResult(list);
+        } catch (Exception e) {
+            logger.error("Query data from {{}} with exception", redisDomain.getTableDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+        }
+        return result;
+    }
+
+    /**
+     * 执行分页查询id
+     *
+     * @param dataDomain 数据域
+     * @param datas      数据
+     * @param client     客户端
+     * @return {@link ResponseData}<{@link List}<{@link Integer}>>
+     */
+    public ResponseData<List<Integer>> executeQueryIdLines(String dataDomain, int[] datas, RedissonClient client) {
+        ResponseData<List<Integer>> result = new ResponseData<List<Integer>>();
+        ArrayList<Integer> list = new ArrayList<>();
+        try {
+            if (client == null) {
+                return new ResponseData<>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+
+            }
+            RScoredSortedSet<Object> scoredSortedSet = client.getScoredSortedSet(dataDomain);
+            Collection<Object> objects = scoredSortedSet.valueRange(datas[0], datas[1]);
+            for (Object object : objects) {
+                list.add((Integer) object);
+            }
+            result.setErrorCode(ErrorCode.SUCCESS);
+            result.setResult(list);
+        } catch (Exception e) {
+            logger.error("Query data from {{}} with exception", redisDomain.getTableDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+        }
+        return result;
+    }
+
+    /**
+     * 执行查询总数
+     *
+     * @param tableDomain 表域
+     * @param client      客户端
+     * @return {@link ResponseData}<{@link Integer}>
+     */
+    public ResponseData<Integer> executeQueryCount(String tableDomain, RedissonClient client) {
+       client.getScoredSortedSet(tableDomain);
+        ResponseData<Integer> result = new ResponseData<Integer>();
+        try {
+            if (client == null) {
+                return new ResponseData<>(null, ErrorCode.PERSISTENCE_GET_CONNECTION_ERROR);
+            }
+            RScoredSortedSet<Object> scoredSortedSet = client.getScoredSortedSet(tableDomain);
+            result.setErrorCode(ErrorCode.SUCCESS);
+            result.setResult(scoredSortedSet.size());
+        } catch (Exception e) {
+            logger.error("Query data from {{}} with exception", redisDomain.getTableDomain(), e);
+            result.setErrorCode(ErrorCode.PERSISTENCE_EXECUTE_FAILED);
+        }
+        return result;
+    }
+
+
+    /**
      * 增加的执行方法.
      *
      * @param client redisson连接入口
@@ -106,10 +191,10 @@ public class RedisExecutor {
                 transactionArgs.setTimeStamp((Long) datas[3]);
                 transactionArgs.setExtra((String)datas[4]);
                 transactionArgs.setBatch((String)datas[5]);
-
                 String valueString = DataToolUtils.serialize(transactionArgs);
                 RBucket<String> rbucket = client.getBucket(
                         redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + dataKey);
+                addIndexForDataKey(client,dataKey,redisDomain.getTableDomain());
                 rbucket.set(valueString);
             } else {
                 value.setData((String) datas[0]);
@@ -133,6 +218,7 @@ public class RedisExecutor {
                                     ErrorCode.PERSISTENCE_EXECUTE_FAILED
                             );
                 }
+                addIndexForDataKey(client,dataKey,redisDomain.getTableDomain());
                 rbucket.set(valueString);
             }
             result.setErrorCode(ErrorCode.SUCCESS);
@@ -221,6 +307,7 @@ public class RedisExecutor {
             for (DefaultValue val : value) {
                 rbatch.getBucket(redisDomain.getTableDomain() + VALUE_SPLIT_CHAR + val.getId())
                         .setAsync(DataToolUtils.serialize(val));
+                addIndexForDataKey(client,val.getId(),redisDomain.getTableDomain());
             }
             BatchResult<?> batchResult = rbatch.execute();
 
@@ -232,4 +319,18 @@ public class RedisExecutor {
         }
         return result;
     }
+
+    /**
+     * 为key添加索引方便分页查询
+     *
+     * @param dataKey 数据关键
+     * @param domain  域
+     */
+    public void addIndexForDataKey(RedissonClient client, String dataKey, String domain){
+        RScoredSortedSet<Object> set = client.getScoredSortedSet(domain);
+        set.add(set.size(),dataKey);
+    }
+
+
+
 }

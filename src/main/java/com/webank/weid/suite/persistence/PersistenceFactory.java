@@ -2,6 +2,7 @@
 
 package com.webank.weid.suite.persistence;
 
+import com.webank.weid.suite.persistence.ipfs.driver.IpfsDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,9 @@ public class PersistenceFactory {
     private static Persistence newRedisDriver() {
         return new RedisDriver();
     }
+    private static Persistence newIpfsDriver() {
+        return new IpfsDriver();
+    }
 
     /**
      * 根据封装类型实例化对应的实例对象, 此方法目前支持Mysql, Redis.
@@ -38,9 +42,13 @@ public class PersistenceFactory {
                 return newMysqlDriver();
             case Redis:
                 return newRedisDriver();
+            case Ipfs:
+                return newIpfsDriver();
             default:
                 logger.error("the type = {} unsupported.", persistenceType.name());
                 throw new WeIdBaseException(ErrorCode.THIS_IS_UNSUPPORTED);
         }
     }
+
+
 }

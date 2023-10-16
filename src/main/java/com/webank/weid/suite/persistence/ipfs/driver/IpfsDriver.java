@@ -1,6 +1,4 @@
-
-
-package com.webank.weid.suite.persistence.redis.driver;
+package com.webank.weid.suite.persistence.ipfs.driver;
 
 import com.webank.weid.blockchain.constant.ErrorCode;
 import com.webank.weid.blockchain.protocol.base.CptBaseInfo;
@@ -11,57 +9,66 @@ import com.webank.weid.constant.DataDriverConstant;
 import com.webank.weid.exception.WeIdBaseException;
 import com.webank.weid.protocol.request.TransactionArgs;
 import com.webank.weid.suite.persistence.*;
-import com.webank.weid.suite.persistence.redis.RedisDomain;
-import com.webank.weid.suite.persistence.redis.RedisExecutor;
-import com.webank.weid.suite.persistence.redis.RedissonConfig;
+import com.webank.weid.suite.persistence.ipfs.IpfsConfig;
+import com.webank.weid.suite.persistence.ipfs.IpfsDomain;
+import com.webank.weid.suite.persistence.ipfs.IpfsExecutor;
 import com.webank.weid.util.DataDriverUtils;
 import com.webank.weid.util.DataToolUtils;
+import io.ipfs.api.IPFS;
 import org.apache.commons.lang3.StringUtils;
-import org.redisson.api.RScoredSortedSet;
-import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 /**
- * redis Driver.
- *
- * @author karenli
+ *因与redis存储方式类似 所以在实现方面借鉴了redis实现类
+ * @author uwepppp
+ * @date 2023/08/21
  */
-public class RedisDriver implements Persistence {
+public class IpfsDriver implements Persistence {
+    private static final Logger logger = LoggerFactory.getLogger(
+            IpfsDriver.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisDriver.class);
-
-    private static final Integer FAILED_STATUS = DataDriverConstant.REDISSON_EXECUTE_FAILED_STATUS;
+    private static final Integer FAILED_STATUS = DataDriverConstant.IPFS_EXECUTE_FAILED_STATUS;
 
     private static final ErrorCode KEY_INVALID = ErrorCode.PRESISTENCE_DATA_KEY_INVALID;
 
-    private static int CPT_DEFAULT_VERSION = 1;
+    public IpfsConfig config =new IpfsConfig();
+    IPFS client =config.ipfsClient();
 
-    RedissonConfig redissonConfig = new RedissonConfig();
-
-    RedissonClient client = redissonConfig.redismodelRecognition();
-
+    /**
+     * 添加方法
+     * @param domain 数据域
+     * @param id  存储id
+     * @param data 数据
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     @Override
     public ResponseData<Integer> add(String domain, String id, String data) {
 
         if (StringUtils.isEmpty(id)) {
-            logger.error("[redis->add] the id of the data is empty.");
+            logger.error("[ipfs->add] the id of the data is empty.");
             return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.hash(id);
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
             Date date = new Date();
             Object[] datas = {data, date, date};
-            return new RedisExecutor(redisDomain).execute(client, dataKey, datas);
+            return new IpfsExecutor(ipfsDomain).execute(client, dataKey, datas);
         } catch (WeIdBaseException e) {
-            logger.error("[redis->add] add the data error.", e);
-            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
+            logger.error("[ipfs->add] add the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
+    /**
+     * 批量添加
+     * @param domain
+     * @param keyValueList
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     @Override
     public ResponseData<Integer> batchAdd(String domain, Map<String, String> keyValueList) {
 
@@ -71,26 +78,26 @@ public class RedisDriver implements Persistence {
             for (String id : keyValueList.keySet()) {
                 String data = keyValueList.get(id);
                 if (StringUtils.isEmpty(id)) {
-                    logger.error("[redis->batchAdd] the id of the data is empty.");
-                    return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
+                    logger.error("[ipfs->batchAdd] the id of the data is empty.");
+                    return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
                 }
                 idHashList.add(DataToolUtils.hash(id));
                 dataList.add(data);
             }
-            RedisDomain redisDomain = new RedisDomain(domain);
-            List<List<Object>> dataLists = new ArrayList<>();
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            List<List<Object>> dataLists = new ArrayList<List<Object>>();
             dataLists.add(idHashList);
             dataLists.add(Arrays.asList(dataList.toArray()));
             //处理失效时间
-            dataLists.add(fixedListWithDefault(idHashList.size(), redisDomain.getExpire()));
+            dataLists.add(fixedListWithDefault(idHashList.size(), ipfsDomain.getExpire()));
             //处理创建时间和更新时间
-            List<Object> nowList = fixedListWithDefault(idHashList.size(), redisDomain.getNow());
+            List<Object> nowList = fixedListWithDefault(idHashList.size(), ipfsDomain.getNow());
             dataLists.add(nowList);
             dataLists.add(nowList);
-            return new RedisExecutor(redisDomain).batchAdd(dataLists, client);
+            return new IpfsExecutor(ipfsDomain).batchAdd(dataLists, client);
         } catch (WeIdBaseException e) {
-            logger.error("[redis->batchAdd] batchAdd the data error.", e);
-            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
+            logger.error("[ipfs->batchAdd] batchAdd the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -103,33 +110,38 @@ public class RedisDriver implements Persistence {
         return list;
     }
 
+    /**
+     * 获取方法
+     * @param domain
+     * @param id
+     * @return {@link ResponseData}<{@link String}>
+     */
     @Override
     public ResponseData<String> get(String domain, String id) {
 
         if (StringUtils.isEmpty(id)) {
-            logger.error("[redis->get] the id of the data is empty.");
-            return new ResponseData<>(StringUtils.EMPTY, KEY_INVALID);
+            logger.error("[ipfs->get] the id of the data is empty.");
+            return new ResponseData<String>(StringUtils.EMPTY, KEY_INVALID);
         }
         //dataKey:id的hash值
         String dataKey = DataToolUtils.hash(id);
         try {
-            ResponseData<String> result = new ResponseData<>();
+            ResponseData<String> result = new ResponseData<String>();
             //设置result初始值为空字符串
             result.setResult(StringUtils.EMPTY);
-            RedisDomain redisDomain = new RedisDomain(domain);
-            ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
-
-            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            ResponseData<String> response = new IpfsExecutor(ipfsDomain)
+                    .executeQuery(dataKey, client);
+            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 DefaultValue data = DataToolUtils.deserialize(
                         response.getResult(), DefaultValue.class);
                 //超过超时时间，log输出data超时
                 if (data != null && data.getExpire() != null
                         && data.getExpire().before(new Date())) {
-                    logger.error("[redis->get] the data is expire.");
+                    logger.error("[ipfs->get] the data is expire.");
                     //输出empty以及超过超时时间错误代码
-                    return new ResponseData<>(StringUtils.EMPTY,
+                    return new ResponseData<String>(StringUtils.EMPTY,
                             ErrorCode.PERSISTENCE_DATA_EXPIRE);
                 }
                 if (data != null && StringUtils.isNotBlank(data.getData())) {
@@ -143,29 +155,33 @@ public class RedisDriver implements Persistence {
                 }
             }
             result.setErrorCode(ErrorCode.getTypeByErrorCode(response.getErrorCode()));
-            System.out.println("result=" + result.getResult());
-            System.out.println(result.getResult() == null);
             return result;
         } catch (WeIdBaseException e) {
-            logger.error("[redis->get] get the data error.", e);
-            return new ResponseData<>(StringUtils.EMPTY, e.getErrorCode());
+            logger.error("[ipfs->get] get the data error.", e);
+            return new ResponseData<String>(StringUtils.EMPTY, e.getErrorCode());
         }
     }
 
+    /**
+     * 删除方法
+     * @param domain
+     * @param id
+     * @return {@link ResponseData}<{@link Integer}>
+     */
     @Override
     public ResponseData<Integer> delete(String domain, String id) {
 
         if (StringUtils.isEmpty(id)) {
-            logger.error("[redis->delete] the id of the data is empty.");
-            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
+            logger.error("[ipfs->delete] the id of the data is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.hash(id);
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
-            return new RedisExecutor(redisDomain).executeDelete(dataKey, client);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            return new IpfsExecutor(ipfsDomain).executeDelete(dataKey, client);
         } catch (WeIdBaseException e) {
-            logger.error("[redis->delete] delete the data error.", e);
-            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
+            logger.error("[ipfs->delete] delete the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -173,18 +189,18 @@ public class RedisDriver implements Persistence {
     public ResponseData<Integer> update(String domain, String id, String data) {
 
         if (StringUtils.isEmpty(id) || StringUtils.isBlank(this.get(domain, id).getResult())) {
-            logger.error("[redis->update] the id of the data is empty.");
-            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
+            logger.error("[ipfs->update] the id of the data is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.hash(id);
         Date date = new Date();
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
             Object[] datas = {data, date};
-            return new RedisExecutor(redisDomain).execute(client, dataKey, datas);
+            return new IpfsExecutor(ipfsDomain).execute(client, dataKey,datas);
         } catch (WeIdBaseException e) {
-            logger.error("[redis->update] update the data error.", e);
-            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
+            logger.error("[ipfs->update] update the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
@@ -194,9 +210,9 @@ public class RedisDriver implements Persistence {
         ResponseData<String> getRes = this.get(domain, id);
         //如果查询数据存在，或者失效 则进行更新 否则进行新增
         if ((StringUtils.isNotBlank(getRes.getResult())
-                && getRes.getErrorCode() == ErrorCode.SUCCESS.getCode())
+                && getRes.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode())
                 ||
-                getRes.getErrorCode() == ErrorCode.PERSISTENCE_DATA_EXPIRE.getCode()) {
+                getRes.getErrorCode().intValue() == ErrorCode.PERSISTENCE_DATA_EXPIRE.getCode()) {
             return this.update(domain, id, data);
         }
         return this.add(domain, id, data);
@@ -206,11 +222,11 @@ public class RedisDriver implements Persistence {
     public ResponseData<Integer> addTransaction(TransactionArgs transactionArgs) {
 
         if (StringUtils.isEmpty(transactionArgs.getRequestId())) {
-            logger.error("[redis->add] the id of the data is empty.");
-            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
+            logger.error("[ipfs->add] the id of the data is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         try {
-            RedisDomain redisDomain = new RedisDomain(
+            IpfsDomain ipfsDomain = new IpfsDomain(
                     DataDriverConstant.DOMAIN_OFFLINE_TRANSACTION_INFO);
             String datakey = transactionArgs.getRequestId();
             Object[] datas = {
@@ -221,25 +237,23 @@ public class RedisDriver implements Persistence {
                     transactionArgs.getExtra(),
                     transactionArgs.getBatch()
             };
-            return new RedisExecutor(redisDomain).execute(client, datakey, datas);
+            return new IpfsExecutor(ipfsDomain).execute(client, datakey, datas);
         } catch (WeIdBaseException e) {
-            logger.error("[redis->add] add the data error.", e);
-            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
+            logger.error("[ipfs->add] add the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
-    /*
-    以下方法暂不需要，本地部署不需要使用redis方式，默认使用Mysql
-     */
 
     @Override
     public ResponseData<Integer> addWeId(String domain, String weId, String documentSchema) {
+
         if (StringUtils.isEmpty(weId)) {
-            logger.error("[redis->addWeId] the weId is empty.");
-            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
+            logger.error("[ipfs->addWeId] the weId is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
-            Date now = redisDomain.getNow();
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            Date now = ipfsDomain.getNow();
             WeIdDocumentValue value = new WeIdDocumentValue();
             value.setWeid(weId);
             value.setUpdated(now);
@@ -247,32 +261,32 @@ public class RedisDriver implements Persistence {
             value.setDeactivated(0);
             value.setDocument_schema(documentSchema);
             String data = DataToolUtils.serialize(value);
-
+            //将要存入的对象封装为data
             return add(domain,weId,data);
         } catch (WeIdBaseException e) {
-            logger.error("[redis->addWeId] add the data error.", e);
-            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
+            logger.error("[ipfs->addWeId] add the data error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
     @Override
     public ResponseData<Integer> updateWeId(String domain, String weId, String documentSchema) {
         if (StringUtils.isEmpty(weId)) {
-            logger.error("[redis->updateWeId] the weId is empty.");
-            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
+            logger.error("[ipfs->updateWeId] the weId is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
-        String dataKey = DataToolUtils.hash(weId);
         Date date = new Date();
+        String dataKey = DataToolUtils.hash(weId);
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
-            ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
-            if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            ResponseData<String> response = new IpfsExecutor(ipfsDomain)
+                    .executeQuery(dataKey, client);
+            if (response.getErrorCode().intValue() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(
                         response.getResult(), WeIdDocumentValue.class);
                 if(tableData.getDeactivated() == 1){
-                    logger.error("[redis->updateWeId] the weid is deactivated.");
+                    logger.error("[ipfs->updateWeId] the weid is deactivated.");
                     return new ResponseData<>(FAILED_STATUS,
                             ErrorCode.WEID_HAS_BEEN_DEACTIVATED);
                 }
@@ -292,22 +306,22 @@ public class RedisDriver implements Persistence {
             }
             return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
-            logger.error("[redis->updateWeId] update the weid error.", e);
-            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
+            logger.error("[ipfs->updateWeId] update the weid error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
     @Override
     public ResponseData<WeIdDocument> getWeIdDocument(String domain, String weId) {
         if (StringUtils.isEmpty(weId)) {
-            logger.error("[redis->getWeIdDocument] the weId is empty.");
+            logger.error("[ipfs->getWeIdDocument] the weId is empty.");
             return new ResponseData<>(null, KEY_INVALID);
         }
         try {
             String dataKey = DataToolUtils.hash(weId);
-            RedisDomain redisDomain = new RedisDomain(domain);
-            ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            ResponseData<String> response = new IpfsExecutor(ipfsDomain)
+                    .executeQuery(dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(response.getResult(), WeIdDocumentValue.class);
@@ -318,7 +332,7 @@ public class RedisDriver implements Persistence {
             }
             return new ResponseData<>(null, ErrorCode.WEID_DOES_NOT_EXIST);
         } catch (WeIdBaseException e) {
-            logger.error("[redis->getWeIdDocument] get the weIdDocument error.", e);
+            logger.error("[ipfs->getWeIdDocument] get the weIdDocument error.", e);
             return new ResponseData<>(null, e.getErrorCode());
         }
     }
@@ -326,14 +340,14 @@ public class RedisDriver implements Persistence {
     @Override
     public ResponseData<WeIdDocumentMetadata> getMeta(String domain, String weId) {
         if (StringUtils.isEmpty(weId)) {
-            logger.error("[redis->getMeta] the weId is empty.");
+            logger.error("[ipfs->getMeta] the weId is empty.");
             return new ResponseData<>(null, KEY_INVALID);
         }
         try {
             String dataKey = DataToolUtils.hash(weId);
-            RedisDomain redisDomain = new RedisDomain(domain);
-            ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            ResponseData<String> response = new IpfsExecutor(ipfsDomain)
+                    .executeQuery( dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(response.getResult(), WeIdDocumentValue.class);
@@ -349,7 +363,7 @@ public class RedisDriver implements Persistence {
             }
             return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
-            logger.error("[redis->getMeta] getMeta error.", e);
+            logger.error("[ipfs->getMeta] getMeta error.", e);
             return new ResponseData<>(null, e.getErrorCode());
         }
     }
@@ -358,15 +372,15 @@ public class RedisDriver implements Persistence {
     public ResponseData<Integer> deactivateWeId(String domain, String weId, Boolean state) {
 
         if (StringUtils.isEmpty(weId)) {
-            logger.error("[redis->deactivateWeId] the weId is empty.");
-            return new ResponseData<>(FAILED_STATUS, KEY_INVALID);
+            logger.error("[ipfs->deactivateWeId] the weId is empty.");
+            return new ResponseData<Integer>(FAILED_STATUS, KEY_INVALID);
         }
         String dataKey = DataToolUtils.hash(weId);
         Date date = new Date();
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
-            ResponseData<String> response = new RedisExecutor(redisDomain)
-                    .executeQuery(redisDomain.getTableDomain(), dataKey, client);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            ResponseData<String> response = new IpfsExecutor(ipfsDomain)
+                    .executeQuery( dataKey, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 WeIdDocumentValue tableData = DataDriverUtils.decodeValueForNeedObj(
@@ -385,30 +399,29 @@ public class RedisDriver implements Persistence {
                     value.setVersion(tableData.getVersion());
                     value.setDeactivated(state?1:0);
                     String data = DataToolUtils.serialize(value);
-                    return update(domain,data,dataKey);
+                    return update(domain,weId,data);
                 }
             }
             return new ResponseData<>(FAILED_STATUS, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
-            logger.error("[redis->deactivateWeId] deactivate the weId error.", e);
-            return new ResponseData<>(FAILED_STATUS, e.getErrorCode());
+            logger.error("[ipfs->deactivateWeId] deactivate the weId error.", e);
+            return new ResponseData<Integer>(FAILED_STATUS, e.getErrorCode());
         }
     }
 
     @Override
     public ResponseData<List<String>> getWeIdList(String domain, Integer first, Integer last) {
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
-            int[] datas = {first, last - first + 1};
-            ResponseData<List<String>> response = new RedisExecutor(redisDomain).executeQueryLines(
-                    redisDomain.getTableDomain(),redisDomain.getTableDomain(),datas, client);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            int[] datas = {first, last - first + 1,DataDriverConstant.IPFS_ONLY_ID_LINES};
+            ResponseData<List<String>> response = new IpfsExecutor(ipfsDomain).executeQueryLines(datas, client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 return new ResponseData<>(DataDriverUtils.decodeValueToNeedListJson(response.getResult()), ErrorCode.SUCCESS);
             }
             return new ResponseData<>(null, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
-            logger.error("[redis->getWeIdList] get the data error.", e);
+            logger.error("[ipfs->getWeIdList] get the data error.", e);
             return new ResponseData<>(null, e.getErrorCode());
         }
     }
@@ -416,21 +429,24 @@ public class RedisDriver implements Persistence {
     @Override
     public ResponseData<Integer> getWeIdCount(String domain) {
         try {
-            RedisDomain redisDomain = new RedisDomain(domain);
-            ResponseData<Integer> response = new RedisExecutor(redisDomain)
-                    .executeQueryCount(redisDomain.getTableDomain(), client);
+            IpfsDomain ipfsDomain = new IpfsDomain(domain);
+            ResponseData<Integer> response = new IpfsExecutor(ipfsDomain)
+                    .executeQueryCount( client);
             if (response.getErrorCode() == ErrorCode.SUCCESS.getCode()
                     && response.getResult() != null) {
                 return new ResponseData<>(response.getResult(), ErrorCode.SUCCESS);
             }
             return new ResponseData<>(0, ErrorCode.getTypeByErrorCode(response.getErrorCode()));
         } catch (WeIdBaseException e) {
-            logger.error("[redis->getWeIdCount] get the data error.", e);
+            logger.error("[ipfs->getWeIdCount] get the data error.", e);
             return new ResponseData<>(0, e.getErrorCode());
         }
     }
-    //**
-    //目前只实现了WeId相关接口
+
+
+    /**
+     * 暂未完成
+     */
     @Override
     public ResponseData<CptValue> getCpt(String domain, int cptId) {
         return null;
@@ -595,7 +611,4 @@ public class RedisDriver implements Persistence {
     public ResponseData<EvidenceValue> getEvidenceByExtraKey(String domain, String extraKey) {
         return null;
     }
-
-
-
 }
