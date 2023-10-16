@@ -60,11 +60,12 @@ function modify_config()
     hash=$(cat hash)
     export FISCO_BCOS_VERSION=${FISCO_BCOS_VERSION}
     export CNS_PROFILE_ACTIVE=${CNS_PROFILE_ACTIVE}
-    
-    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}'
+    export GROUP_ID=${GROUP_ID}
+    export SDK_SM_CRYPTO=${SDK_SM_CRYPTO}
+
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${GROUP_ID}:${SDK_SM_CRYPTO}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     cp ${app_xml_config} ${app_xml_config_dir}
-    
     export ORG_ID=${ORG_ID}
     export AMOP_ID=${AMOP_ID}
     export PERSISTENCE_TYPE=${persistence_type}
@@ -73,7 +74,7 @@ function modify_config()
     export MYSQL_USERNAME=${MYSQL_USERNAME}
     export MYSQL_PASSWORD=${MYSQL_PASSWORD}
     export BLOCKCHIAN_NODE_INFO=${BLOCKCHIAN_NODE_INFO}
-    
+
     NODEVAR='${ORG_ID}:${AMOP_ID}:${PERSISTENCE_TYPE}:${MYSQL_ADDRESS}:${MYSQL_DATABASE}:${MYSQL_USERNAME}:${MYSQL_PASSWORD}:${BLOCKCHIAN_NODE_INFO}'
     envsubst ${NODEVAR} < ${weid_config_tpl} >${weid_config}
     cp ${weid_config} ${app_xml_config_dir}
@@ -109,7 +110,7 @@ function gradle_build_sdk()
 {
     #run gradle build
     echo "Begin to compile java code......"
-	
+
 	node_addr=$(grep "blockchain_address" $config_file |awk -F"=" '{print $2}')
 	bcos_version=$(grep "blockchain_fiscobcos_version" $config_file |awk -F"=" '{print $2}')
     OLD_IFS="$IFS"
@@ -125,14 +126,16 @@ function gradle_build_sdk()
 	    else
 	    	content="${content}$var,"
 	    fi
-      
+
     done
 
-	export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
+	  export BLOCKCHIAN_NODE_INFO=$(echo -e ${content})
     export FISCO_BCOS_VERSION=${bcos_version}
     export CNS_PROFILE_ACTIVE=${cns_profile_active}
-    
-    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:'
+    export GROUP_ID=${group_id}
+    export SDK_SM_CRYPTO=${sdk_sm_crypto}
+
+    MYVARS='${FISCO_BCOS_VERSION}:${CNS_PROFILE_ACTIVE}:${GROUP_ID}:${SDK_SM_CRYPTO}'
     envsubst ${MYVARS} < ${app_xml_config_tpl} >${app_xml_config}
     
     export ORG_ID=${org_id}
