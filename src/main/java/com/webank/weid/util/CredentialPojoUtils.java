@@ -968,7 +968,7 @@ public final class CredentialPojoUtils {
             }
         }
         // If the Proof type is ECDSA or other signature based scheme, check signature
-        if (type.equalsIgnoreCase(CredentialProofType.ECDSA.getTypeName())) {
+        if (type.equalsIgnoreCase(CredentialProofType.ECDSA.getTypeName()) || type.equalsIgnoreCase(CredentialProofType.SM2.getTypeName())) {
             if (proof.get(ParamKeyConstant.PROOF_SIGNATURE) == null) {
                 return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
             } else {

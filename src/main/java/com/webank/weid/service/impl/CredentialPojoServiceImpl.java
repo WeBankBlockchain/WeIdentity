@@ -25,6 +25,7 @@ import com.webank.weid.suite.persistence.PersistenceType;
 import com.webank.weid.util.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.fisco.bcos.sdk.model.CryptoType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1047,7 +1048,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
             String creator = args.getWeIdAuthentication().getWeId();
             result.putProofValue(ParamKeyConstant.PROOF_CREATOR, creator);
             //TODO：目前CredentialProofType只有ECDSA类型，需要添加SM2
-            String proofType = CredentialProofType.ECDSA.getTypeName();
+            String proofType = DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? CredentialProofType.ECDSA.getTypeName():CredentialProofType.SM2.getTypeName();
             result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
             result.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
             result.setSalt(saltMap);
@@ -1074,7 +1075,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         String signature = DataToolUtils.SigBase64Serialization(
                 DataToolUtils.signToRsvSignature(rawData, privateKey)
         );
-        String proofType = CredentialProofType.ECDSA.getTypeName();
+        String proofType = DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? CredentialProofType.ECDSA.getTypeName():CredentialProofType.SM2.getTypeName();
         credentialPojo.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
         credentialPojo.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
         ResponseData<CredentialPojo> responseData = new ResponseData<>(
@@ -1158,7 +1159,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         String creator = callerAuth.getWeId();
         result.putProofValue(ParamKeyConstant.PROOF_CREATOR, creator);
 
-        String proofType = CredentialProofType.ECDSA.getTypeName();
+        String proofType = DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? CredentialProofType.ECDSA.getTypeName():CredentialProofType.SM2.getTypeName();
         result.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
         result.putProofValue(ParamKeyConstant.PROOF_SIGNATURE, signature);
         result.setSalt(saltMap);
@@ -1896,7 +1897,7 @@ public class CredentialPojoServiceImpl implements CredentialPojoService {
         WeIdAuthentication weIdAuthentication,
         PresentationE presentation) {
 
-        String proofType = CredentialProofType.ECDSA.getTypeName();
+        String proofType = DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? CredentialProofType.ECDSA.getTypeName():CredentialProofType.SM2.getTypeName();
         presentation.putProofValue(ParamKeyConstant.PROOF_TYPE, proofType);
 
         Long proofCreated = DateUtils.getNoMillisecondTimeStamp();

@@ -94,7 +94,6 @@ public class CredentialServiceImpl implements CredentialService {
             credentialWrapper.setDisclosure(disclosureMap);
 
             // Construct Credential Proof
-            //替换国密
             Map<String, String> credentialProof = CredentialUtils.buildCredentialProof(
                     result,
                     args.getWeIdPrivateKey().getPrivateKey(),

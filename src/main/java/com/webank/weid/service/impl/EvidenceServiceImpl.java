@@ -411,7 +411,7 @@ public class EvidenceServiceImpl implements EvidenceService {
                     weIdPrivateKey.getPrivateKey()
             );
             if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-                return new ResponseData<>(true, ErrorCode.SUCCESS);
+                return new ResponseData<>(true, ErrorCode.SUCCESS, resp.getTransactionInfo());
             } else {
                 return new ResponseData<>(false, resp.getErrorCode(), resp.getErrorMessage());
             }
@@ -425,7 +425,7 @@ public class EvidenceServiceImpl implements EvidenceService {
                     weIdPrivateKey.getPrivateKey()
             );
             if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-                return new ResponseData<>(true, ErrorCode.SUCCESS);
+                return new ResponseData<>(true, ErrorCode.SUCCESS, resp.getTransactionInfo());
             } else {
                 return new ResponseData<>(false, resp.getErrorCode(), resp.getErrorMessage());
             }
@@ -554,7 +554,7 @@ public class EvidenceServiceImpl implements EvidenceService {
                     privateKey
             );
             if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-                return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS);
+                return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS, resp.getTransactionInfo());
             } else {
                 return new ResponseData<>(StringUtils.EMPTY, resp.getErrorCode(), resp.getErrorMessage());
             }
@@ -812,7 +812,7 @@ public class EvidenceServiceImpl implements EvidenceService {
                     privateKey
             );
             if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-                return new ResponseData<>(hashValue, ErrorCode.SUCCESS);
+                return new ResponseData<>(hashValue, ErrorCode.SUCCESS, resp.getTransactionInfo());
             } else {
                 return new ResponseData<>(StringUtils.EMPTY, resp.getErrorCode(), resp.getErrorMessage());
             }
@@ -869,7 +869,7 @@ public class EvidenceServiceImpl implements EvidenceService {
                 weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
         );
         if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-            return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS);
+            return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS, resp.getTransactionInfo());
         } else {
             return new ResponseData<>(false, resp.getErrorCode(), resp.getErrorMessage());
         }
@@ -901,7 +901,7 @@ public class EvidenceServiceImpl implements EvidenceService {
                 weIdAuthentication.getWeIdPrivateKey().getPrivateKey()
         );
         if (resp.getErrorCode() == ErrorCode.SUCCESS.getCode()) {
-            return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS);
+            return new ResponseData<>(resp.getResult(), ErrorCode.SUCCESS, resp.getTransactionInfo());
         } else {
             return new ResponseData<>(false, resp.getErrorCode(), resp.getErrorMessage());
         }
