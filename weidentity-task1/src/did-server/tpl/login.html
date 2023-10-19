@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <title>Sign In With DID</title>
+  </head>
+  <body>
+    <!-- Image and text -->
+    <nav class="navbar navbar-light bg-light">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <!-- <img src="/static/icon/feather.svg" width="30" height="30" class="d-inline-block align-top" alt=""> -->
+          Sign In With DID
+        </a>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="row row-cols-1 row-cols-md-2">
+        <div class="col align-self-center mt-4 border-right">
+          <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <!-- <li class="nav-item">
+              <a class="nav-link active" id="password-tab" data-toggle="tab" href="#tabPassword" role="tab" aria-controls="password" aria-selected="true">密码登录</a>
+            </li> -->
+            <!-- <li class="nav-item">
+              <a class="nav-link disabled" id="mobile-tab" data-toggle="tab" href="#tabMobile" role="tab" aria-controls="mobile" aria-selected="false">手机验证码(待开发...)</a>
+            </li> -->
+          </ul>
+          <div class="tab-content" id="myTabContent" style="margin-top:30px">
+            <div class="tab-pane fade show active" id="tabPassword" role="tabpanel" aria-labelledby="home-tab">
+              {{if .Error}}
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{.Error}}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              {{end}}
+              <form action="/login" method="POST">
+                <input type="hidden" name="type" value="password">
+                <div class="form-group">
+                  <label class="sr-only" for="username">DID</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text" id="inputGroupPrepend2"><i data-feather="user"></i></span>
+                    </div>
+                    <input type="text" placeholder="DID" class="form-control" id="username" name="username" aria-describedby="inputGroupPrepend2" required>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="sr-only" for="password">签名信息</label>
+                  <div class="input-group">
+                    <div class="input-group-prepend">
+                      <span class="input-group-text" id="inputGroupPrepend3"><i data-feather="lock"></i></span>
+                    </div>
+                    <input type="password" placeholder="signature" class="form-control" id="password" name="password" aria-describedby="inputGroupPrepend3" required>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary">授权登录</button>
+              </form>
+            </div>
+            <div class="tab-pane fade" id="tabMobile" role="tabpanel" aria-labelledby="contact-tab">...</div>
+          </div>
+        </div>
+        <div class="col align-self-center mt-4">
+          <ul class="list-unstyled">
+            <li><strong>{{.Client.Name}}</strong> 将获得访问您以下资源的权限：
+              <ul style="font-size: 13px;margin-top: 10px;">
+                {{range .Scope}} 
+                  <li>{{.Title}}</li>
+                {{end}}
+              </ul>
+            </li>
+          </ul>
+          <div>{{.SignMsg}}</div>
+        </div>
+      </div>
+    </div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script>feather.replace()</script>
+  </body>
+</html>
