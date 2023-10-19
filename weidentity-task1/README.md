@@ -35,11 +35,11 @@ sign-in with Ethereum是一种使用以太坊区块链技术进行身份验证�
 - 授权服务器：颁发访问令牌（access token）给客户端，以便客户端能够访问受保护的资源；
 - 资源服务器：存储受保护的资源，并对客户端发出的访问令牌进行验证。
 
-在该项目中，资源所有者即拥有did的用户，客户端则是指不同的业务系统，授权服务器则是指did认证中心服务系统，为了尽量引入少的系统，我们授权服务器和资源服务器使用同一系统实现，都在did认证中心服务系统中实现。
+在该项目中，资源所有者即拥有did的用户，客户端则是指不同的业务系统，授权服务器则是指did认证服务系统，为了尽量引入少的系统，我们授权服务器和资源服务器使用同一系统实现，都在did认证服务系统中实现。
 
 ### 2.4 WeIdentity-Rest-Service
 
-我们通过搭建并调用`WeIdentity-Rest-Service`([code github地址](https://github.com/WeBankBlockchain/WeIdentity-Rest-Service/tree/develop))服务完成weid相关的功能。主要接口如下：
+我们通过搭建并调用`WeIdentity-Rest-Service`([code github地址](https://github.com/WeBankBlockchain/WeIdentity-Rest-Service/tree/develop))服务完成did相关的功能。主要接口如下：
 
 - encode:
   - 请求地址：http://{{host}}:{{httpport}}/weid/api/encode
@@ -130,7 +130,7 @@ sign-in with Ethereum是一种使用以太坊区块链技术进行身份验证�
     }
     ```
 
-上述接口中，encode和transcat主要是为了通过用户的公钥和私钥创建weid，供`did-tool`工具调用，invoke接口则是为了通过did获取公钥信息使用，供did中心认证系统使用。
+上述接口中，encode和transcat主要是为了通过用户的公钥和私钥创建did，供`did-wallet`工具调用，invoke接口则是为了通过did获取公钥信息使用，供did认证系统使用。
 
 ## 3.系统设计
 
@@ -147,7 +147,7 @@ sign-in with Ethereum是一种使用以太坊区块链技术进行身份验证�
 did钱包，用于管理私钥和did信息的客户端，功能类似于MetaMask，其与业务系完全独立，主要功能如下：
 
 1. 公私钥生成和存储功能；
-2. 生成weid功能；
+2. 生成did功能；
 3. 使用私钥进行签名功能。
 
 #### 时序图
@@ -155,116 +155,97 @@ did钱包，用于管理私钥和did信息的客户端，功能类似于MetaMask
 ```mermaid
 sequenceDiagram
 did钱包 ->> did钱包 : 生成公私钥
-did钱包 ->> weidentity-rest-service : create
-weidentity-rest-service -->> did钱包 : return 
+did钱包 ->> weidentity-rest-service : create did
+weidentity-rest-service -->> did钱包 : return did info
 ```
 
-1. did钱包，用于管理私钥和did信息的客户端，该部分功能应在用户手中，其与业务系完全独立；
-2. 身份认证中心系统，该系统负责验证用户weid身份信息，并能够基于oatuh2.0协议对访问的客户端进行授权；
-3. 业务系统，业务系统相当于oauth2.0中的客户端，需要通过did进行登录；
-
-### 3.2 功能流程
+### 3.2 业务系统
 
 为了体现sso单点登录的效果，这里我们分别实现两个业务系统，当通过一个业务系统登录成功后，同一did用户在登录另外一个业务系统时，可以根据token信息直接实现登录。
 
 根据login.xyz和oauth2.0协议，系统主要实现流程设计如下：
 
-1. 用户通过did钱包生成公私钥对;
-2. 通过公私钥信息，调用weidentity-rest-service，生成weid信息；
-3. 及weid信息；业务系统跳转登录，即Sign-In With Weldentity，这里会将页面跳转到did认证系统的界面上；
-4. 通过code获取access_token，当用户在上述step1中登录成功后，did认证系统会返回一个code，业务系统通过在did认证系统clientId、secret以及code一同提交至did认证系统；
+1. 用户通过did钱包生成公私钥和did信息，此时用户did和对应的did doc已经成功上链；
+2. 通过业务系统点击did跳转登录，即Sign-In With WeIdentity，这里会将页面跳转到did认证系统的界面上，认证系统通过用户输入的did和签名信息；
+3. 认证系统验证成功后，返回code给业务系统；
+4. 业务系统通过code获取access_token，当用户在上述step1中登录成功后，did认证系统会返回一个code，业务系统通过在did认证系统clientId、secret以及code一同提交至did认证系统；
 5. 认证成功后，did认证系统会将access_token返回给业务系统，业务系统可以基于该access_token对资源服务器进行访问。
 
 #### 时序图
 
 ```mermaid
 sequenceDiagram
-did钱包 ->> did钱包 : 生成公私钥
-did钱包 ->> weidentity-rest-service : 
-业务系统 ->> did中心认证系统 : loginWithDid
-did中心认证系统 ->> weidentity-rest-service : 根据did获取did doc信息
-weidentity-rest-service -->> did中心认证系统 : did doc信息
-did中心认证系统 ->> did中心认证系统 : 校验did及签名信息
-did中心认证系统 -->> 业务系统 : 校验成功，返回code授权码
-业务系统 ->> did中心认证系统 : clientId+secret+code
-did中心认证系统 ->> did中心认证系统 : 校验信息
-did中心认证系统 -->> 业务系统 : 校验成功，返回access_token
-
+业务系统 ->> did认证系统 : loginWithDid
+did认证系统 ->> weidentity-rest-service : 根据did获取did doc信息
+weidentity-rest-service -->> did认证系统 : did doc信息
+did认证系统 ->> did认证系统 : 校验did及签名信息
+did认证系统 -->> 业务系统 : 校验成功，返回code授权码
+业务系统 ->> did认证系统 : clientId+secret+code
+did认证系统 ->> did认证系统 : 校验信息
+did认证系统 -->> 业务系统 : 校验成功，返回access_token
 ```
 
-### 3.3 did钱包
+### 3.3 认证系统
 
-主要提供用户公私钥生成和管理的功能，并且其与weidentity的接口交互，生成did，其需要实现如下功能：
+did认证系统是整个项目的核心，其需要实现基于oauth2.0协议的主要功能，能够对访问资源服务器进行认证、授权以及三方客户端的管理等功能。这里我们基于oatuh2.0中`authorization_code`授权模式实现了认证通过http协议对外提供的功能如下：
 
-### 3.4 did认证系统
-
-did认证系统是整个项目的核心，其需要实现基于oauth2.0协议的主要功能，能够对访问资源服务器进行认证、授权以及三方客户端的管理等功能。这里我们基于oatuh2.0中`authorization_code`授权模式实现了认证中心的基本功能：
-
-1. authorize: 获取授权code，根据客户端注册在认证中心的clientId为客户端办法code码；
+1. authorize: 获取授权code，根据客户端注册在认证系统的clientId为客户端生成code码；
 2. token：通过code获取token，客户端通过clientId+secret的认证方式，并将code码传送过来，生成token后，返回给客户端；
 3. login：该功能是通过did+signature验证用户的身份信息，验证通过则代表用户登录成功；
+4. verify：校验第三方客户端即（章节3.2 业务系统）access_token是否合法。
 
-## 4.系统开发
+## 4.系统实现
 
-> 这部分完成主要功能模块的开发工作，介绍该系统主要使用的技术和
+> 这部分完成主要功能模块的开发工作，介绍该系统主要使用的技术和部分代码实现，所有的核心代码都是通过go语言实现。
 
-### 3.1 did wallet
+系统开发的详细实现和介绍在各个代码仓库下的`README.md`中进行讲解，功能模块和代码对应关系如下：
 
-- 生成公私钥；
-- 生成weid和weid doc；
-- 签名功能；
+- did钱包 --> did-wallet
+- 业务系统 --> did-client1、did-client2，两个业务系统代码一致
+- 认证系统 --> did-server
+- 前端 --> web1、web2，对应两个业务系统的前端
 
-#### 3.1.1 生成公私钥
+项目的目录结构如下图所示。
 
-> 目前，weidentity 通过传公钥和签名信息生成weid的方法暂时不可用，所以这里采用的方案是，使用无参生成weid，并写一个能获取私钥文件的go功能程序
-
-要求：ecdsa的签名算法编码格式、椭圆曲线Secp256k1算法，此部分可以参考如下代码：
-
-```go
-func GenerateKeyPair() (publicKeyBytes []byte, privateKeyBytes []byte, publicKeyBigInt *big.Int, privateKeyBigInt *big.Int) {
-	// 生成密钥
-	key, err := ecdsa.GenerateKey(secp256k1.S256(), rand.Reader)
-	if err != nil {
-		panic(err)
-	}
-    // 生成公钥结构
-	publicKeyBytes = elliptic.MarshalCompressed(secp256k1.S256(), key.X, key.Y)
-	publicKeyBigInt = new(big.Int).SetBytes(publicKeyBytes[1:])
-	privateKeyBytes = ConvertPrivateKeyBigIntToPrivateKeyBytes(key.D)
-	return publicKeyBytes, privateKeyBytes, publicKeyBigInt, key.D
-}
+```shell
+src
+├── did-client
+├── did-client2 
+├── did-server
+├── did-wallet
+├── web1
+└── web2
 ```
 
-#### 3.1.2 获取私钥文件内容
 
-### 3.2 业务系统
+**注意**：
+  1. 该系统运行前提条件是，你已经通过官方文档将 `WeIdentity-Rest-Service`和 `fisco-bcos链` 部署并运行，项目运行依赖于did接口，并且会将did上到链上;
+  2. 安装go环境，version >= 1.20.x；
 
-- 用户用户名密码登录；
-- 提供did登录功能（该功能支持单点登录）；
-- 提供生成待签名内容；
-- 验证数字签名内容是否正确；
+## 5.web前端服务启动
 
-#### 3.2.1 sign-in with weidentity
+### 5.1 前端启动
 
-基本流程1：
+1. 安装node v14.18.x
+2. 修改 /web1/vue.config.js文件中的ip和port信息，修改为你需要运行的地址；
 
-验证方式：
+![web conf](./assets/web_config.jpg)
 
-1. web端输入did，业务系统验证did是否存在；
-2. 若did存在，则返回待签名的信息，待签名信息应该是随机的，例如随机串str1 = `02da354a-aa8f-42f1-b77e-6a3a262f7f14`；
-3. 登录用户复制随机串str1，然后使用hash算法对str1进行hash，并使用私钥进行签名；
-4. 将签名信息填入web端，然后业务系统通过weid+singInfo进行校验；
-5. 校验通过后，则用户登入系统成功；
+3. 运行服务
+```shell
+# 进入web1目录
+cd web1
+# 首次运行需要先安装依赖
+npm install
+npm start
+```
+4. 运行成功后，截图如下：
 
-登录方式：
+![web conf](./assets/web_front.png)
 
-1. 不同业务系统提供`sign-in with weidentity`的功能，当在不同系统进行登录时，假设未处于登录状态，则需要首先登录did认证系统；
-2. 登录的认证方式，就是通过上述方式进行认证；
-3. 认证通过后，中心化did系统会记录用户的登录状态等信息；
+## 6.主要参考
 
-#### 3.2.2 基于DID的中心认证系统
-
-即`Authorization server`认证服务中心的实现，该系统能够通过did进行认证登录，并且要维护did的相关状态；
-
-- 实现oauth2系统的主要流程：
-  - authorize方法，
+1. [WeIdentity-Rest-Service Doc](https://weidentity.readthedocs.io/zh_CN/latest/docs/weidentity-rest.html)
+2. [oauth 2.0协议](https://oauth.net/2/)
+3. [oauth 2.0协议使用](https://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html)
+4. [oauth 2.0 golang](https://github.com/golang/oauth2)
