@@ -11,6 +11,7 @@ import com.webank.weid.protocol.base.CredentialWrapper;
 import com.webank.weid.protocol.request.CreateCredentialArgs;
 import org.apache.commons.lang3.StringUtils;
 import org.fisco.bcos.sdk.abi.datatypes.generated.Bytes32;
+import org.fisco.bcos.sdk.model.CryptoType;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -453,7 +454,7 @@ public final class CredentialUtils {
             return ErrorCode.CREDENTIAL_ISSUER_INVALID;
         }
         // If the Proof type is ECDSA or other signature based scheme, check signature
-        if (type.equalsIgnoreCase(CredentialProofType.ECDSA.getTypeName())) {
+        if (type.equalsIgnoreCase(CredentialProofType.ECDSA.getTypeName()) || type.equalsIgnoreCase(CredentialProofType.SM2.getTypeName())) {
             String signature = proof.get(ParamKeyConstant.CREDENTIAL_SIGNATURE);
             if (StringUtils.isEmpty(signature) || !DataToolUtils.isValidBase64String(signature)) {
                 return ErrorCode.CREDENTIAL_SIGNATURE_BROKEN;
@@ -468,7 +469,7 @@ public final class CredentialUtils {
      * @return Context value in String.
      */
     public static String getDefaultCredentialProofType() {
-        return CredentialConstant.CredentialProofType.ECDSA.getTypeName();
+        return DataToolUtils.cryptoType == CryptoType.ECDSA_TYPE? CredentialProofType.ECDSA.getTypeName():CredentialProofType.SM2.getTypeName();
     }
 
     private static boolean isCredentialProofTypeValid(String type) {
