@@ -4,7 +4,6 @@ import (
 	"did-wallet/logic"
 	"encoding/base64"
 	"fmt"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -59,13 +58,8 @@ var signCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		privateKeyECDSA, err := crypto.ToECDSA(privateKeyBytes)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		messageHash := crypto.Keccak256Hash([]byte(message))
-		signatureBytes, err := crypto.Sign(messageHash.Bytes(), privateKeyECDSA)
+		messageHash := logic.Hash([]byte(message))
+		signatureBytes, err := logic.SignSignature(messageHash, privateKeyBytes)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

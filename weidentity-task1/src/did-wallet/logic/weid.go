@@ -5,9 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	"github.com/pkg/errors"
-	"golang.org/x/crypto/sha3"
 	"hash/maphash"
 	"io"
 	"math/big"
@@ -102,7 +100,7 @@ func processEncodeResponse(encodeResponseStr string, restServerIp string, restSe
 		return "", err
 	}
 	hashedMsg := Hash(transaction)
-	signatureBytes, err := signSignature(hashedMsg, privateKeyBytes)
+	signatureBytes, err := SignSignature(hashedMsg, privateKeyBytes)
 	if err != nil {
 		return "", err
 	}
@@ -159,17 +157,6 @@ func convertJsonToTransactResponseStruct(jsonStr string) (TransactResponse, erro
 		return response, err
 	}
 	return response, nil
-}
-
-func Hash(msg []byte) []byte {
-	h := sha3.NewLegacyKeccak256()
-	h.Write(msg)
-	return h.Sum(nil)
-}
-
-func signSignature(hashedMsg []byte, privateKeyBytes []byte) ([]byte, error) {
-	signature, err := secp256k1.Sign(hashedMsg, privateKeyBytes)
-	return signature, err
 }
 
 func generateNonce() string {

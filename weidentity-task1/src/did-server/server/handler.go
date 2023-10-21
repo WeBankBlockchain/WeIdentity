@@ -133,6 +133,7 @@ func genMsg() string {
 func Authentication(username string, signedMsg string) (string, error) {
 	pubBytes, err := getPublicKeyBytesByDid(username)
 	if err != nil {
+		fmt.Printf("get public key by did has some err %v\n", err)
 		return "", err
 	}
 
@@ -144,7 +145,7 @@ func Authentication(username string, signedMsg string) (string, error) {
 
 	success := key.VerifySignature(key.Hash([]byte(msgInfo)), signedMsgBytes, pubBytes)
 	if !success {
-		return "", errors.New("user sign info has some err")
+		return "", errors.New("verify signature has some err")
 	}
 
 	return username, nil
@@ -176,6 +177,8 @@ func getPublicKeyBytesByDid(weid string) ([]byte, error) {
 	if len(weidDocJson.Authentication) != 1 {
 		return nil, errors.New("user pub amount is not correct.")
 	}
+
+	fmt.Println(weidDocJson.Authentication[0].PublicKey)
 
 	pubBytes := key.ConvertPublicKeyBigIntToPublicBytes(weidDocJson.Authentication[0].PublicKey)
 
