@@ -7,6 +7,89 @@ did-server是对业务系统进行认证、授权的系统，其核心工作原�
 
 ## 项目说明
 
+### api接口：
+
+#### 1. login登录
+
+登录功能，服务端生成随机待签名信息（uuid），用户复制该uuid使用私钥签名，将did同签名后信息传到后端，然后根据用户did获取的公钥对签名后的信息进行验签，验签成功则代表登录成功；
+
+![img.png](assets/img.png)
+
+**请求方式**
+
+`POST` `login`
+
+**参数说明**
+
+| 参数           |类型| 说明                                                                                                            |
+|--------------|-|---------------------------------------------------------------------------------------------------------------|
+| username     |string| 用户did                                                                                                         |
+| password     |string| 用户使用私钥签名后的值                                                                                                   |
+
+#### 2. 获取授权code
+
+授权三方业务系统，成功后会将code返回；
+
+**请求方式**
+
+`GET` `/authorize`
+
+**参数说明**
+
+|参数|类型| 说明                                                                                                           |
+|-|-|--------------------------------------------------------------------------------------------------------------|
+|client_id|string| 在oauth2 server注册的client_id,详见配置文件                                                                            |
+|response_type|string| 固定值:`code`                                                                                                   |
+|scope|string| 权限范围,如:`str1,str2,str3`,str为配置文件的值 |
+|state|string| 表示客户端的当前状态,可以指定任意值,认证服务器会原封不动地返回这个值                                                                          |
+|redirect_uri|string| 回调uri,会在后面添加query参数`?code=xxx&state=xxx`,发放的code就在其中                                                         |
+
+**请求示例**
+
+```shell
+# 业务系统请求
+http://server_ip:server_port/authorize?client_id=clientId&response_type=code&scope=all&state=xyz&redirect_uri=http://client_ip:client_port/callback
+# 302跳转,返回code
+http://client_ip:client_port/callback?code=XUNKO4OPPROWAPFKEWNZWA&state=xyz
+```
+
+#### 3. 使用`code`交换`token`
+
+根据请求者的信息，验证成功后，返回token等相关信息；
+
+**请求方式**
+
+`POST` `/token`
+
+**请求头 Authorization**
+
+- basic auth
+- username: `client_id`
+- password: `client_secret`
+
+**Header**  
+`Content-Type: application/x-www-form-urlencoded`
+
+**Body参数说明**
+
+|参数|类型| 说明                      |
+|-|-|-------------------------|
+|grant_type|string| 固定值`authorization_code` |
+|code|string| 2 发放的code               |
+|redirect_uri|string| 2 填写的redirect_uri       |
+
+**Response返回示例**
+
+```json
+{
+    "access_token": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIyMjIyMjIiLCJleHAiOjE1ODU3MTU1NTksInN1YiI6InRlc3QifQ.ZMgIDQMW7FGxbF1V8zWOmEkmB7aLH1suGYjhDdrT7aCYMEudWUoiCkWHSvBmJahGm0RDXa3IyDoGFxeMfzlDNQ",
+    "expires_in": 7200,
+    "refresh_token": "JG7_WGLWXUOW2KV2VLJKSG",
+    "scope": "all",
+    "token_type": "Bearer"
+}
+```
+
 ### 目录结构
 
 代码目录结构如下：
@@ -58,8 +141,7 @@ did-server是对业务系统进行认证、授权的系统，其核心工作原�
 
 1. oatuh2.0协议的封装，基于 `github.com/go-oauth2/oauth2/v4` 包进行封装，完成oauth协议的主要功能；
 2. http服务，基于 `github.com/gin-gonic/gin` 包进行封装，完成http服务的提供；
-3. 密钥，基于 `github.com/ethereum/go-ethereum` 包进行封装；
-
+3. 密钥，基于 `crypto`、`go-ethereum/crypto` 等包进行封装。
 
 ### 如何运行？
 
@@ -127,3 +209,4 @@ export GO111MODULE="on"
 export CONF_PATH=./conf_file
 go run main.go
 ```
+

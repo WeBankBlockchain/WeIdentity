@@ -249,3 +249,10 @@ npm start
 2. [oauth 2.0协议](https://oauth.net/2/)
 3. [oauth 2.0协议使用](https://www.ruanyifeng.com/blog/2014/05/oauth_2_0.html)
 4. [oauth 2.0 golang](https://github.com/golang/oauth2)
+
+
+## 7.不足和改进
+
+本系统目前只实现了赛题要求的最基本功能，包括对于用户的管理、登录状态等都没有实现，其中did认证系统也没有对client进行进一步的管理，只实现了简单的授权和认证功能。
+
+为了保证系统简单和便于理解，除了使用 `fisco-bcos`链存储did必要信息外，没有引入其他存储中间件。另外，本系统没有经过专业测试进行详细的测试，只对必要功能进行了单元测试，运行过程中如果存在任何问题或者有不理解的地方，欢迎联系我：liwh1227@foxmail.com。
