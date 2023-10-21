@@ -5,6 +5,7 @@ import (
 	"crypto/elliptic"
 	"crypto/rand"
 	"github.com/ethereum/go-ethereum/crypto/secp256k1"
+	"golang.org/x/crypto/sha3"
 	"math/big"
 )
 
@@ -25,4 +26,16 @@ func convertPrivateKeyBigIntToPrivateKeyBytes(privateKeyBigInt *big.Int) []byte 
 	blob := privateKeyBigInt.Bytes()
 	copy(privateKeyBytes[32-len(blob):], blob)
 	return privateKeyBytes
+}
+
+func SignSignature(hashedMsg []byte, privateKeyBytes []byte) ([]byte, error) {
+	signature, err := secp256k1.Sign(hashedMsg, privateKeyBytes)
+	return signature, err
+}
+
+// hash待签名信息
+func Hash(msg []byte) []byte {
+	h := sha3.NewLegacyKeccak256()
+	h.Write(msg)
+	return h.Sum(nil)
 }
