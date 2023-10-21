@@ -5,6 +5,7 @@ did-wallet即用户钱包功能，用户可以通过该钱包申请公私钥和w
 ## 功能简介
 
 - 目录
+
 ```shell
 ├── README.md
 ├── go.mod
@@ -17,7 +18,7 @@ did-wallet即用户钱包功能，用户可以通过该钱包申请公私钥和w
 ```
 
 - 核心代码
-did-wallet目前核心功能在logic包下面进行实现，`crypto.go`、`weid.go`包实现了关于密钥和weid的核心功能，主要代码如下：
+  did-wallet目前核心功能在logic包下面进行实现，`crypto.go`、`weid.go`包实现了关于密钥和weid的核心功能，主要代码如下：
 
 crypto.go
 
@@ -108,6 +109,4 @@ Signature: Msuym6gIWXTHxU+bJYkb9u8XqhvNAVcC1LNaKAselF1LViCazW5bZeYnX7Ax1ksfGddu4
 
 命令详情可以通过: 【命令名称】--help 查看，示例如图：
 
-![gendid命令说明](./assets/gendid-help.png)
-
-
+![gendid命令说明](./assets/img.png)

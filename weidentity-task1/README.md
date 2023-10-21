@@ -229,7 +229,7 @@ src
 1. 安装node v14.18.x
 2. 修改 /web1/vue.config.js文件中的ip和port信息，修改为你需要运行的地址；
 
-![web conf](./assets/web_config.jpg)
+![web conf](assets/config.jpg)
 
 3. 运行服务
 ```shell
@@ -239,9 +239,6 @@ cd web1
 npm install
 npm start
 ```
-4. 运行成功后，截图如下：
-
-![web conf](./assets/web_front.png)
 
 ## 6.主要参考
 
