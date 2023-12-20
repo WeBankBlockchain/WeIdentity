@@ -1,0 +1,17 @@
+# http服务端口
+httpPort: 20001
+# 认证系统信息
+didServerInfo:
+  ip: "127.0.0.1"
+  port: 10003
+# did client信息，即在认证系统注册的client信息
+didClientInfo:
+  ip: "127.0.0.1"
+  port: 20001
+  # 在did中心认证系统注册的clientId和secret
+  clientId: "did_client_2"
+  secret: "did_1c3903b3-32f4-4703-85b0-bbca56ea0883"
+# 后端获取code成功后，跳转的前端页面地址
+redirectFront:
+  ip: "127.0.0.1"
+  port: 10001
